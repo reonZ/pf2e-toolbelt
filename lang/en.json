@@ -1,0 +1,51 @@
+{
+    "pf2e-toolbelt": {
+        "settings": {
+            "nobulk": {
+                "name": "No Dropped Bulk",
+                "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation"
+            },
+            "arp": {
+                "name": "Automatic Rune Progression",
+                "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment"
+            },
+            "unided": {
+                "name": "Set Un-Identified Image",
+                "hint": "Automatically set the un-identifed image of items to be the same as the regular image",
+                "choices": {
+                    "disabled": "Disabled",
+                    "create": "On Creation Only",
+                    "all": "On Creation & Update"
+                }
+            },
+            "knowledges": {
+                "name": "Npc Lore Knowledges",
+                "hint": "Adds the option to set custom lores for NPCs"
+            },
+            "effect-remove": {
+                "name": "Remove Effect Shortcut",
+                "hint": "Using [Shift + Right Click] on effect icons in the effects panel will instantly remove all its charges/counters/badges"
+            },
+            "condition-sheet": {
+                "name": "Condition Sheet Icon",
+                "hint": "Adds a new icon to condition in the effects panel to open their sheet just like you would with non-condition effects"
+            }
+        },
+        "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
+        "arp": {
+            "forceVariant": "The module <strong>PF2e ToolBelt</strong> disabled the pf2e system variant ABP rule to work properly"
+        },
+        "knowledges": {
+            "editLore": {
+                "save": "Save",
+                "cancel": "Cancel",
+                "unspecified": "Unspecific Lores",
+                "specific": "Specific Lores",
+                "hint": "Enter comma separated lores which will replace the generic ones in the sheet"
+            }
+        },
+        "effects": {
+            "remove": "[Shift + Right Click] Remove effect"
+        }
+    }
+}

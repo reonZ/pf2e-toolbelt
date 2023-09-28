@@ -1,0 +1,1 @@
+[id^=npc-edit-lores-] .hint{font-size:.9em;text-align:center;width:80%;margin:auto}[id^=npc-edit-lores-] .lores{display:grid;grid-template-columns:auto 1fr;gap:.5em;align-items:center}[id^=npc-edit-lores-] .lores label{text-align:end}[id^=npc-edit-lores-] .buttons{display:flex;margin-top:.6em}

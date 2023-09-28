@@ -1,0 +1,56 @@
+{
+    "id": "pf2e-toolbelt",
+    "title": "PF2e ToolBelt",
+    "author": "Idle",
+    "description": "Collection of tricks and doodads for the PF2e system",
+    "authors": [
+        {
+            "name": "Idle",
+            "discord": "Idle#3251"
+        }
+    ],
+    "esmodules": [
+        "scripts/main.js"
+    ],
+    "compatibility": {
+        "minimum": "11.309",
+        "verified": "11"
+    },
+    "version": "1.0.0",
+    "manifestPlusVersion": "1.2.0",
+    "url": "https://github.com/reonZ/pf2e-toolbelt",
+    "readme": "https://github.com/reonZ/pf2e-toolbelt/blob/master/README.md",
+    "manifest": "https://raw.githubusercontent.com/reonZ/pf2e-toolbelt/master/module.json",
+    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.0.0/module.zip",
+    "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
+    "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
+    "styles": [
+        "styles/knowledges.css"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json"
+        }
+    ],
+    "relationships": {
+        "systems": [
+            {
+                "id": "pf2e",
+                "type": "system",
+                "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.json",
+                "compatibility": {
+                    "minimum": "5.6.0"
+                }
+            }
+        ],
+        "requires": [
+            {
+                "id": "lib-wrapper",
+                "type": "module",
+                "manifest": "https://raw.githubusercontent.com/ruipin/fvtt-lib-wrapper/master/module.json"
+            }
+        ]
+    }
+}
