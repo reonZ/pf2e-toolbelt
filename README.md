@@ -16,7 +16,7 @@ Meant to be used in stead of the ABP variant rule to automatically give potency/
 
 ## No Dropped Bulk (Requires Reload)
 
-When enabled, dropped equipment in an actor's inventory won't be accounted for bulk value calculation
+Dropped equipment in an actor's inventory won't be accounted for bulk value calculation
 
 ## Npc Lore Knowledges
 
