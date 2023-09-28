@@ -1,8 +1,10 @@
 # 1.0.0
 
-this module adds some utilities that are not big enough to warrant standalone modules
+this module adds some utilities that are not big enough to warrant standalone modules:
 
-it will overlap with some other modules:
+-   `No Dropped Bulk`: Dropped equipment in an actor's inventory won't be accounted for bulk value calculation
+
+it will also overlap with some other modules (it is meant to replace them):
 
 -   PF2e Unided
 -   PF2e Automatic Rune Progression
