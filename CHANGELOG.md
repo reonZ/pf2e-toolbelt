@@ -1,3 +1,8 @@
+# 1.1.0
+
+-   module conflict warnings are only shown to the GM
+-   Remove Effect Shortcut: no longer accepts `Ctrl + Right Click`
+
 # 1.0.0
 
 this module adds some utilities that are not big enough to warrant standalone modules:

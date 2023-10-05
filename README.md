@@ -4,38 +4,48 @@
 
 ### This module adds some utilities that are not big enough to warrant standalone modules
 
-Some features in this module may conflict with other modules with identical features, in that case, a warning will be given to the GM and the features will be skipped until the other modules are disabled
+# Automatic Rune Progression (Requires Reload)
 
-Due to the nature of some features implemented in this module which require to be ran at the earliest and the unnecessary need for constant checks when said features are disabled, a reload may be required when settings are changed and a prompt will notify you if need be
+This feature is made to replace the `Automatic Bonus Progression` variant rule, instead it will automatically give the `potency`, `striking` and `resilient` runes on character's equipment when appropriate. Nothing else from the regular `Automatic Bonus Progression` will be replicated.
 
-# Settings
+Alchemical bombs, `Specific Magic` items, the `Shield Bash` weapon/maneuver and all the items that have been flagged by the `PF2e Companion Compedia` module are exceptions to this feature.
 
-## Automatic Rune Progression (Requires Reload)
+The module will automatically disable the system `Automatic Bonus Progression` variant rule to function properly when this feature is enabled.
 
-Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment ; This replaces the `PF2e Automatic Rune Progression` module
-
-## No Dropped Bulk (Requires Reload)
+# No Dropped Bulk (Requires Reload)
 
 Dropped equipment in an actor's inventory won't be accounted for bulk value calculation
 
-## Npc Lore Knowledges
+# Npc Lore Knowledges
 
-Adds the option to set custom lores for NPCs ; This replaces the `PF2e Npc Knowledges` module
+This feature adds the ability to set custom lores for NPCs.
 
-## Set Un-Identified Image
+![](./readme/knowledges/edit.webp)
 
-Automatically set the un-identifed image of items to be the same as the regular image ; This replaces the `PF2e Unided` module
+A new `Edit` button is added to the `Recall Knowledge` section of the NPC sheet which opens a new window where both the `Unspecified` and `Specific` lores can be set.
+
+More than one of each can be set, simply by separating them with commas.
+
+![](./readme/knowledges/result.webp)
+
+Once saved, the custom Lores will replace the generic ones on the sheet.
+
+# Set Un-Identified Image
+
+Automatically set the un-identifed image of items to be the same as the regular image
 
 -   `On Creation Only:` Should the un-identified image be set for newly created or imported items
 -   `On Creation & Update:` Should the un-identified image also be set when the image of an item is updated
 
-## Remove Effect Shortcut
+# Remove Effect Shortcut
 
-Using `[Shift + Right Click]` on effect icons in the effects panel will instantly remove all its charges/counters/badges ; This replaces the `Remove Effect` feature of the `PF2e Effect Description` module
+![](./readme/effects/remove.webp)
 
-## Condition Sheet Icon
+Using `[Shift + Right Click]` on effect icons in the effects panel will instantly remove all its charges/counters/badges
 
-Adds a new icon to condition in the effects panel to open their sheet just like you would with non-condition effects
+# Condition Sheet Icon
+
+Adds the `open sheet` icon to conditions in the effects panel just like it would for non-condition effects
 
 # CHANGELOG
 
