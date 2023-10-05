@@ -64,7 +64,7 @@ function onConditionSheet(event, panel) {
 }
 
 function onRemoveEffect(event, panel) {
-    if (!event.shiftKey && !event.ctrlKey) return
+    if (!event.shiftKey) return
 
     const effect = getEffect(event, panel)
     if (!effect || effect.isLocked || !effect.badge || effect.badge.type !== 'counter') return
