@@ -34,21 +34,17 @@ Hooks.once('init', () => {
             })
         }
 
-        let conflicting = false
-        for (const id of conflicts) {
-            const conflictingModule = game.modules.get(id)
-            if (conflictingModule?.active) {
-                conflicting = true
-                CONFLICTS.add(conflictingModule.title)
+        if (isGM) {
+            for (const id of conflicts) {
+                const conflictingModule = game.modules.get(id)
+                if (conflictingModule?.active) {
+                    module.conflicting = true
+                    CONFLICTS.add(conflictingModule.title)
+                }
             }
         }
 
-        if (conflicting) {
-            module.conflicting = true
-            continue
-        }
-
-        init?.(isGM)
+        if (!module.conflicting && init) init(isGM)
     }
 })
 
@@ -59,8 +55,10 @@ Hooks.once('ready', () => {
         if (!conflicting && ready) ready(isGM)
     }
 
-    for (const conflict of CONFLICTS) {
-        warn('module-conflict', { name: conflict }, true)
+    if (isGM) {
+        for (const conflict of CONFLICTS) {
+            warn('module-conflict', { name: conflict }, true)
+        }
     }
 })
 
