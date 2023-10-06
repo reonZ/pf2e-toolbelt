@@ -9,9 +9,7 @@
             "discord": "Idle#3251"
         }
     ],
-    "esmodules": [
-        "scripts/main.js"
-    ],
+    "esmodules": ["scripts/main.js"],
     "compatibility": {
         "minimum": "11.309",
         "verified": "11"
@@ -24,9 +22,7 @@
     "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.1.0/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
-    "styles": [
-        "styles/knowledges.css"
-    ],
+    "styles": ["styles/knowledges.css", "styles/merge.css"],
     "languages": [
         {
             "lang": "en",

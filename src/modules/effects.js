@@ -23,8 +23,7 @@ export function registerEffectsPanelHelper() {
         ],
         conflicts: ['pf2e-effect-description'],
         init: () => {
-            if (!getSetting('effect-remove') && !getSetting('condition-sheet')) return
-            setHook(true)
+            setHook(false, ['effect-remove', 'condition-sheet'])
         },
     }
 }

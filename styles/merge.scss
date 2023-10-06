@@ -1,0 +1,20 @@
+.multi-cast-dialog {
+    .hint {
+        display: grid;
+        align-items: center;
+        column-gap: 0.5em;
+        grid-template-columns: 30px auto;
+        padding-inline: 0.5em 0.7em;
+        font-size: 1.05em;
+        white-space: nowrap;
+
+        input {
+            text-align: center;
+        }
+    }
+
+    .buttons {
+        display: flex;
+        margin-top: 0.6em;
+    }
+}

@@ -1,26 +1,31 @@
 import { getFlag, setFlag, subLocalize, templatePath } from '../../module'
 
+const localize = subLocalize('knowledges.editLore')
+
 export class EditLores extends FormApplication {
-    constructor(actor, options = {}) {
-        const id = `npc-edit-lores-${actor.id}`
-        super(actor, { ...options, id })
+    get actor() {
+        return this.object
     }
 
-    static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
-            title: 'Edit Lores',
-            template: templatePath('knowledges/lores.hbs'),
-            width: 400,
-        })
+    get id() {
+        return `npc-edit-lores-${this.actor.id}`
+    }
+
+    get title() {
+        return localize('title', this.actor)
+    }
+
+    get template() {
+        return templatePath('knowledges/lores')
     }
 
     getData(options) {
-        const actor = this.object
+        const actor = this.actor
 
         return mergeObject(super.getData(options), {
             unspecified: getFlag(actor, 'unspecified') ?? '',
             specific: getFlag(actor, 'specific') ?? '',
-            i18n: subLocalize('knowledges.editLore'),
+            i18n: localize,
         })
     }
 

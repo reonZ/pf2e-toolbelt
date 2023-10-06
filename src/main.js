@@ -2,10 +2,18 @@ import { MODULE_ID, warn } from './module'
 import { registerArp } from './modules/arp'
 import { registerEffectsPanelHelper } from './modules/effects'
 import { registerKnowledges } from './modules/knowledges'
+import { registerMerge } from './modules/merge'
 import { registerNobulk } from './modules/nobulk'
 import { registerUnided } from './modules/unided'
 
-const MODULES = [registerArp(), registerNobulk(), registerKnowledges(), registerUnided(), registerEffectsPanelHelper()]
+const MODULES = [
+    registerArp(),
+    registerNobulk(),
+    registerKnowledges(),
+    registerUnided(),
+    registerMerge(),
+    registerEffectsPanelHelper(),
+]
 const CONFLICTS = new Set()
 
 Hooks.once('init', () => {

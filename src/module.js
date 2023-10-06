@@ -95,5 +95,5 @@ export function setFlag(doc, key, value) {
 
 export function templatePath(...path) {
     path = path.filter(x => typeof x === 'string')
-    return `modules/${MODULE_ID}/templates/${path.join('/')}`
+    return `modules/${MODULE_ID}/templates/${path.join('/')}.hbs`
 }
