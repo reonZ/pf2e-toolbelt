@@ -1,7 +1,8 @@
 import { EditLores } from '../apps/knowledges/lores'
 import { getFlag, getSetting } from '../module'
+import { createHook } from './shared/hook'
 
-let HOOK = null
+const setHook = createHook('renderNPCSheetPF2e', renderNPCSheetPF2e)
 
 export function registerKnowledges() {
     return {
@@ -10,22 +11,13 @@ export function registerKnowledges() {
                 name: 'knowledges',
                 type: Boolean,
                 default: false,
-                onChange: setHooks,
+                onChange: setHook,
             },
         ],
         conflicts: ['pf2e-npc-knowledges'],
         ready: isGM => {
-            if (isGM && getSetting('knowledges')) setHooks(true)
+            if (isGM && getSetting('knowledges')) setHook(true)
         },
-    }
-}
-
-function setHooks(value) {
-    if (value && !HOOK) {
-        HOOK = Hooks.on('renderNPCSheetPF2e', renderNPCSheetPF2e)
-    } else if (!value && HOOK) {
-        Hooks.off('renderNPCSheetPF2e', HOOK)
-        HOOK = null
     }
 }
 

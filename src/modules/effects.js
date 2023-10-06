@@ -1,4 +1,7 @@
 import { getSetting, localize } from '../module'
+import { createHook } from './shared/hook'
+
+const setHook = createHook('renderEffectsPanel', renderEffectsPanel, refreshEffectsPanel)
 
 export function registerEffectsPanelHelper() {
     return {
@@ -8,19 +11,20 @@ export function registerEffectsPanelHelper() {
                 type: Boolean,
                 default: false,
                 scope: 'client',
-                onChange: refreshEffectsPanel,
+                onChange: value => setHook(value, 'condition-sheet'),
             },
             {
                 name: 'condition-sheet',
                 type: Boolean,
                 default: false,
                 scope: 'client',
-                onChange: refreshEffectsPanel,
+                onChange: value => setHook(value, 'effect-remove'),
             },
         ],
         conflicts: ['pf2e-effect-description'],
         init: () => {
-            Hooks.on('renderEffectsPanel', renderEffectsPanel)
+            if (!getSetting('effect-remove') && !getSetting('condition-sheet')) return
+            setHook(true)
         },
     }
 }
@@ -30,10 +34,6 @@ function refreshEffectsPanel() {
 }
 
 function renderEffectsPanel(panel, html) {
-    const effectRemove = getSetting('effect-remove')
-    const conditionSheet = getSetting('condition-sheet')
-    if (!effectRemove && !conditionSheet) return
-
     const removeRow = `<div>${localize('effects.remove')}</div>`
     const editIcon = `<a data-action="edit" data-tooltip="Edit Item"><i class="fa-solid fa-fw fa-pencil"></i></a>`
 
@@ -43,12 +43,12 @@ function renderEffectsPanel(panel, html) {
         const effect = panel.actor?.items.get(id)
         if (!effect) continue
 
-        if (effectRemove && !effect.isLocked && effect.badge && effect.badge.type === 'counter') {
+        if (getSetting('effect-remove') && !effect.isLocked && effect.badge && effect.badge.type === 'counter') {
             effectPanel.querySelector('.effect-info .instructions').insertAdjacentHTML('beforeend', removeRow)
             effectPanel.querySelector('.icon').addEventListener('contextmenu', event => onRemoveEffect(event, panel), true)
         }
 
-        if (conditionSheet && effect.isOfType('condition')) {
+        if (getSetting('condition-sheet') && effect.isOfType('condition')) {
             const h1 = effectPanel.querySelector('.effect-info > h1')
             h1.insertAdjacentHTML('beforeend', editIcon)
             h1.querySelector('[data-action="edit"]').addEventListener('click', event => onConditionSheet(event, panel))
