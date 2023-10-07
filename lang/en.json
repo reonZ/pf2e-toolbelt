@@ -31,8 +31,12 @@
                 "hint": "Adds a new icon to condition in the effects panel to open their sheet just like you would with non-condition effects."
             },
             "multi-cast": {
-                "name": "Allow Multi-Cast",
+                "name": "Multi-Cast",
                 "hint": "A new 'Multi' button will appear next to spells `Damage` button allowing the cast of multiple instances of the spell at once, Changing this setting will only update the last 10 messages in chat."
+            },
+            "merge-damage": {
+                "name": "Merge Damage",
+                "hint": "A new small icon is added to damage roll messages allow them to be merged with another damage roll message of the same type preceding it."
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
@@ -62,6 +66,13 @@
                 "cast": "Cast",
                 "cancel": "Cancel",
                 "zero": "You cannot cast 0 instance of a spell."
+            },
+            "damage": {
+                "tooltip": "Merge with previous damage",
+                "none": "No other damage message of this type was found"
+            },
+            "merged": {
+                "header": "Merged Damage Roll: {name}"
             }
         }
     }

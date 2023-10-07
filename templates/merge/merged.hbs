@@ -1,0 +1,15 @@
+<h4 class="action"><strong>{{header}}</strong></h4>
+{{{tags}}}
+<hr />
+<div class="tags">
+    {{#each modifiers as |modifier|}}
+    <span class="tag tag_transparent">{{modifier}}</span>
+    {{/each}}
+</div>
+{{#if notes.length}}
+<ul class="notes">
+    {{#each notes as |note|}}
+    <li class="roll-note">{{{note}}}</li>
+    {{/each}}
+</ul>
+{{/if}}
