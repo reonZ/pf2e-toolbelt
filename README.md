@@ -37,6 +37,22 @@ Automatically set the un-identifed image of items to be the same as the regular 
 -   `On Creation Only:` Should the un-identified image be set for newly created or imported items
 -   `On Creation & Update:` Should the un-identified image also be set when the image of an item is updated
 
+# Merge Damage
+
+A new icon will appear in damage roll messages allowing the merging of the message with another one of the same type preceding it
+
+-   the module will look at the 5 messages above it to find a matching message
+-   the other message needs to have been initiated from the same `Item` (and therefore `Actor`)
+-   the other message needs to have the same target (or both no target)
+
+You can keep merging messages as long as the module find one appropriate
+
+# Multi-Cast
+
+A new `Multi` button will appear next to spells `Damage` button allowing the cast of multiple instances of the spell at once with only one chat message displayed
+
+When this setting is enabled/disabled, the last 10 messages will be modified to add/remove the `Multi` button
+
 # Remove Effect Shortcut
 
 ![](./readme/effects/remove.webp)
