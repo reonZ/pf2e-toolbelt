@@ -17,7 +17,7 @@ export function registerSpellsSummary() {
         ],
         conflicts: ['pf2e-spells-summary'],
         init: isGm => {
-            if (getSetting('summary')) setHook(true)
+            if (getSetting('summary') !== 'disabled') setHook(true)
         },
     }
 }
