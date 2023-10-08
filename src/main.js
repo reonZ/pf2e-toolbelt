@@ -1,6 +1,7 @@
 import { MODULE_ID, warn } from './module'
 import { registerArp } from './modules/arp'
 import { registerEffectsPanelHelper } from './modules/effects'
+import { registerGiveth } from './modules/giveth'
 import { registerKnowledges } from './modules/knowledges'
 import { registerMerge } from './modules/merge'
 import { registerNobulk } from './modules/nobulk'
@@ -10,6 +11,7 @@ import { registerUnided } from './modules/unided'
 const MODULES = [
     registerArp(),
     registerNobulk(),
+    registerGiveth(),
     registerKnowledges(),
     registerUnided(),
     registerMerge(),

@@ -46,6 +46,15 @@
                     "enabled": "Enabled",
                     "sort": "Sort by Types"
                 }
+            },
+            "giveth": {
+                "name": "Giveth",
+                "hint": "Allow players to give items to other player-owned actors. They can also add conditions and effect to other player-owned actors if it originated from them.",
+                "choices": {
+                    "disabled": "Disabled",
+                    "enabled": "Enabled",
+                    "no-message": "No Chat Message"
+                }
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
@@ -87,6 +96,14 @@
         "summary": {
             "staff": "Staff",
             "charges": "Charges"
+        },
+        "giveth": {
+            "giveth": "Giveth to {target}",
+            "notification": {
+                "zero": "You cannot give an item you don't have yourself.",
+                "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
+                "withoutQty": "Giveth {item} to <strong>{target}</strong>."
+            }
         }
     }
 }
