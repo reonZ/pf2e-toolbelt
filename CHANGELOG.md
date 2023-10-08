@@ -1,6 +1,6 @@
 # 1.3.0
 
--   added `Spell Summary` setting, this feature replaces the `PF2e Spells Summary` module
+-   added `Spells Summary` setting, this feature replaces the `PF2e Spells Summary` module
 
 # 1.2.1
 
