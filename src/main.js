@@ -4,6 +4,7 @@ import { registerEffectsPanelHelper } from './modules/effects'
 import { registerKnowledges } from './modules/knowledges'
 import { registerMerge } from './modules/merge'
 import { registerNobulk } from './modules/nobulk'
+import { registerSpellsSummary } from './modules/summary'
 import { registerUnided } from './modules/unided'
 
 const MODULES = [
@@ -13,6 +14,7 @@ const MODULES = [
     registerUnided(),
     registerMerge(),
     registerEffectsPanelHelper(),
+    registerSpellsSummary(),
 ]
 const CONFLICTS = new Set()
 

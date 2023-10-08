@@ -1,0 +1,134 @@
+<ol class="directory-list spell-list summary">
+    {{#if spells.length}}
+    {{#each spells as |entry|}}
+    {{#if entry includeZero=true}}
+
+    <li class="spell-level-header spellbook-header item">
+        <div class="item-name flexrow">
+            <h3>
+                {{#if (eq @index 0)}}
+                {{localize 'PF2E.SpellCantripLabel'}}
+                {{else if (eq @index 12)}}
+                {{localize 'PF2E.Focus.Spells'}}
+                {{else}}
+                {{localize (concat 'PF2E.SpellLevel' @index)}}
+                {{/if}}
+            </h3>
+
+            {{#if (or (eq @index 12) (and (eq @index 0) @root.hasFocusCantrips))}}
+            <span class="pips focus-pips">
+                {{#times @root.focusPool.max}}
+                <i class="{{#if (gt @root.focusPool.value this)}}fas fa-dot-circle{{else}}far fa-circle{{/if}}"></i>
+                {{/times}}
+            </span>
+            {{/if}}
+        </div>
+        <div class="spell-type">{{localize 'PF2E.SpellCategoryLabel'}}</div>
+        <div class="spell-range">{{localize 'PF2E.SpellRangeLabel'}}</div>
+    </li>
+
+    {{#each entry as |spell|}}
+    <li class="item spell{{#if spell.expended}} expended{{/if}}{{#if spell.isVirtual}} virtual{{/if}}{{#if spell.noHover}} no-hover{{/if}}{{#if spell.isBroken}} broken{{/if}}"
+        data-entry-id="{{spell.entryId}}" data-slot-id="{{spell.slotId}}" data-expended="{{spell.expended}}"
+        data-slot-level="{{spell.slotLevel}}" data-item-id="{{spell.itemId}}" data-cast-level="{{spell.castLevel}}">
+
+        <div class="item-name">
+            <div class="item-image framed">
+                <img class="item-icon" src="{{spell.img}}" alt="{{spell.name}}" />
+                {{#if @root.isOwner}}
+                <i class="fa-solid fa-message"></i>
+                {{/if}}
+            </div>
+            <h4>{{spell.name}} {{{actionGlyph spell.action}}}</h4>
+        </div>
+
+        <div class="spell-type">
+            <span class="uses-label">
+                {{localize spell.type}}
+                {{#if spell.isBroken}}
+                <i class="fa-solid fa-link-slash broken"></i>
+                {{/if}}
+            </span>
+            {{#unless spell.isCantrip}}
+
+            {{#if (or spell.isSpontaneous spell.isInnate spell.isActiveCharge)}}
+            <div class="uses">
+                <span class="spell-slots-input">
+                    <input type="number" value="{{spell.uses.value}}" data-input-path="{{spell.inputPath}}"
+                        data-entry-id="{{#if spell.isInnate}}{{spell.itemId}}{{else}}{{spell.entryId}}{{/if}}" placeholder="0" min="0"
+                        max="{{spell.uses.max}}" {{disabled (not @root.isOwner)}}>
+                </span>
+                {{#if spell.uses.max}}
+                <span class="slash"> / </span>
+                <span class="spell-max-input">
+                    <input type="number" value="{{spell.uses.max}}" placeholder="0" disabled />
+                </span>
+                {{/if}}
+                {{#if @root.isOwner}}
+                <a class="spell-slots-increment-reset" data-item-id="{{#if spell.isInnate}}{{spell.itemId}}{{else}}{{spell.entryId}}{{/if}}"
+                    data-level="{{spell.slotLevel}}" data-is-charge="{{spell.isCharge}}">
+                    <i class="fas fa-redo"></i>
+                </a>
+                {{/if}}
+            </div>
+
+            {{else if (and spell.isPrepared @root.isOwner)}}
+            <a class="item-control item-toggle-prepare">
+                <i class="fas fa-fw {{#if spell.expended}}fa-plus-square{{else}}fa-minus-square{{/if}}"></i>
+            </a>
+
+            {{/if}}
+
+
+            {{/unless}}
+        </div>
+
+        {{#if @root.isOwner}}
+        <button type="button" class="cast-spell" {{disabled (or spell.isBroken spell.expended)}}>{{localize "PF2E.CastLabel"}}</button>
+        {{/if}}
+
+        <div class="spell-range" data-tooltip="{{spell.entryName}}: DC {{spell.entryDc}}">{{spell.range}}</div>
+    </li>
+
+    {{/each}}
+
+    {{/if}}
+    {{/each}}
+    {{/if}}
+
+    {{#if rituals.length}}
+    <li class="spell-level-header spellbook-header item ritual">
+        <div class="item-name flexrow">
+            <h3>{{localize 'PF2E.SpellRitualLabel'}}</h3>
+        </div>
+
+        <div class="spell-type">{{localize 'PF2E.SpellTimeLabel'}}</div>
+
+        <div class="spell-range">{{localize 'PF2E.LevelLabel'}}</div>
+    </li>
+
+    {{#each rituals as |ritual|}}
+    <li class="item spell ritual" data-slot-level="{{ritual.level}}" data-slot-id="{{ritual.slotId}}" data-entry-id="rituals"
+        data-item-id="{{ritual.itemId}}">
+
+        <div class="item-name">
+            <div class="item-image">
+                <img class="item-icon" src="{{ritual.img}}" alt="{{ritual.name}}" />
+                {{#if @root.isOwner}}
+                <i class="fa-solid fa-message"></i>
+                {{/if}}
+            </div>
+            <h4>{{ritual.name}}</h4>
+        </div>
+
+        <div class="spell-type">{{ritual.time}}</div>
+
+        {{#if @root.isOwner}}
+        <button type="button" class="cast-spell">{{localize "PF2E.CastLabel"}}</button>
+        {{/if}}
+
+        <div class="spell-range">{{ritual.level}}</div>
+    </li>
+    {{/each}}
+    {{/if}}
+</ol>

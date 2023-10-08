@@ -97,3 +97,7 @@ export function templatePath(...path) {
     path = path.filter(x => typeof x === 'string')
     return `modules/${MODULE_ID}/templates/${path.join('/')}.hbs`
 }
+
+export function localeCompare(a, b) {
+    return a.localeCompare(b, game.i18n.lang)
+}

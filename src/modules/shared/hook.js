@@ -18,3 +18,18 @@ export function createHook(event, listener, callback = () => {}) {
         callback(value)
     }
 }
+
+export function createChoicesHook(event, listener, callback = () => {}) {
+    let HOOK = null
+
+    return function (value) {
+        if (value === 'disabled' && HOOK) {
+            Hooks.off(event, HOOK)
+            HOOK = null
+        } else if (value !== 'disabled' && !HOOK) {
+            HOOK = Hooks.on(event, listener)
+        }
+
+        callback(value)
+    }
+}

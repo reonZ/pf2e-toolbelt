@@ -37,6 +37,15 @@
             "merge-damage": {
                 "name": "Merge Damage",
                 "hint": "A new small icon is added to damage roll messages allow them to be merged with another damage roll message of the same type preceding it."
+            },
+            "summary": {
+                "name": "Spells Summary",
+                "hint": "Offers the ability to toggle between the regular and an alternate version of the character sheet's `Spellcasting` tab at any moment by clicking once more on the tab icon.",
+                "choices": {
+                    "disabled": "Disabled",
+                    "enabled": "Enabled",
+                    "sort": "Sort by Types"
+                }
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
@@ -74,6 +83,10 @@
             "merged": {
                 "header": "Merged Damage Roll: {name}"
             }
+        },
+        "summary": {
+            "staff": "Staff",
+            "charges": "Charges"
         }
     }
 }
