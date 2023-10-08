@@ -1,3 +1,7 @@
+# 1.3.0
+
+-   added `Spell Summary` setting, this feature replaces the `PF2e Spells Summary` module
+
 # 1.2.1
 
 -   `Multi-Cast` button and `Merge Damage` icon will only be shown if you are the author of the message (or the GM)
