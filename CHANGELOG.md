@@ -1,8 +1,12 @@
+# 1.2.1
+
+-   `Multi-Cast` button and `Merge Damage` icon will only be shown if you are the author of the message (or the GM)
+
 # 1.2.0
 
 -   completely remove event hook when both `Remove Effect Shortcut` & `Condition Sheet Icon` are disabled
 -   added `Multi-Cast` setting, it adds a new damage button for spells to directly roll multiple instances of the spell in one roll
--   added `Merge Damage` setting which allows you to merge multiple damage roll message into a single one, useful for actions that requires you to add the damage before applying `weakness` and `resistance`
+-   added `Merge Damage` setting which allows you to merge multiple damage roll messages into a single one, useful for actions that require you to add the damage before applying `weakness` and `resistance`
     -   the module will look at the 5 messages above it to find a matching message
     -   the other message needs to have been initiated from the same `Item` (and therefore `Actor`)
     -   the other message needs to have the same target (or both no target)
