@@ -48,6 +48,7 @@ function updateMessages() {
 }
 
 function renderChatMessage(message, html) {
+    if (!game.user.isGM && !message.isAuthor) return
     if (getSetting('merge-damage') && isDamageRoll(message)) renderDamage(message, html)
     else if (getSetting('multi-cast') && message.getFlag('pf2e', 'origin.type') === 'spell') renderSpell(message, html)
 }
@@ -69,8 +70,8 @@ function renderSpell(message, html) {
 }
 
 function renderDamage(message, html) {
-    const origin = getMessageUuid(message)
-    if (!origin) return
+    const uuid = getMessageUuid(message)
+    if (!uuid) return
 
     const tooltip = localize('merge.damage.tooltip')
     const button = `<span style="position: absolute; right: 0px; bottom: 1px;">
@@ -87,7 +88,7 @@ function renderDamage(message, html) {
 
         for (const otherMessage of chatMessages(5, message)) {
             if (
-                getMessageUuid(otherMessage) !== origin ||
+                getMessageUuid(otherMessage) !== uuid ||
                 getMessageTarget(otherMessage) !== originTarget ||
                 !isDamageRoll(otherMessage)
             )
@@ -149,13 +150,7 @@ async function mergeDamages(event, origin, other) {
 
     for (const group of grouped) {
         group.formula = `(${group.formulas.join(' + ')})[${group.options.flavor}]`
-
-        if (group.terms.length < 2) {
-            group.term = group.terms[0]
-            continue
-        }
-
-        group.term = createTermGroup(group.terms)
+        group.term = group.terms.length < 2 ? group.terms[0] : createTermGroup(group.terms)
     }
 
     const roll = {
