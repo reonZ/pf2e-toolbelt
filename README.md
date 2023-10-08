@@ -16,6 +16,14 @@ The module will automatically disable the system `Automatic Bonus Progression` v
 
 Dropped equipment in an actor's inventory won't be accounted for bulk value calculation
 
+# Giveth
+
+**IMPORTANT: A GM needs to be logged into your world to allow players to giveth their hard earned belongings.**
+
+This module will allow players to give items to actors owned by the other players without any fuss, a simple drag & drop on a token and voila.
+
+Players can also drag & drop effects/conditions that originated from them onto another actor that is owned by a player (the effect will lose its `unidentified` status and will have its `showIcon` set to `true` to avoid any possible weirdness), though this can sometimes result in some weirdness when effects rely on actor levels and such.
+
 # Npc Lore Knowledges
 
 This feature adds the ability to set custom lores for NPCs.

@@ -1,3 +1,7 @@
+# 1.4.0
+
+-   added `Giveth` setting, this feature replaces the `PF2e Giveth` module
+
 # 1.3.0
 
 -   added `Spells Summary` setting, this feature replaces the `PF2e Spells Summary` module
