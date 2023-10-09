@@ -56,6 +56,14 @@
                     "enabled": "Enabled",
                     "no-message": "No Chat Message"
                 }
+            },
+            "stances": {
+                "name": "Stances",
+                "hint": "Add stances buttons in the character sheet to toggle them faster, it will also remove stances at the end of the encounter and more."
+            },
+            "custom-stances": {
+                "name": "Custom Stances",
+                "hint": "Comma separated list of compendium pack id containing custom stance feats/features, can also list directly world feats/features uuid ; Custom feats/features must have the 'stance' trait and have a self-applied effect."
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
@@ -104,6 +112,16 @@
                 "zero": "You cannot give an item you don't have yourself.",
                 "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
                 "withoutQty": "Giveth {item} to <strong>{target}</strong>."
+            }
+        },
+        "stances": {
+            "noCombat": "You can enter or be in a stance only in encounter mode",
+            "useStance": "Automatically entering the stance '{stance}'",
+            "menu": {
+                "title": "Stance Savant",
+                "select": "Please select a stance",
+                "accept": "Accept",
+                "cancel": "Cancel"
             }
         }
     }

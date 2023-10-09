@@ -1,0 +1,11 @@
+<div class="pf2e-stances{{#if canUseStances}} can-use-stances{{/if}}" {{#unless @root.canUseStances}}
+    data-tooltip="{{@root.i18n 'noCombat'}}" {{/unless}}>
+    {{#each stances}}
+    <div class="pf2e-stances__stance{{#if this.effectID}} active{{/if}}" data-effect-uuid="{{this.effectUUID}}">
+        <div class="pf2e-stances__img" style="background-image: url({{this.img}});"></div>
+        <div class="pf2e-stances__name">
+            {{this.name}}
+        </div>
+    </div>
+    {{/each}}
+</div>

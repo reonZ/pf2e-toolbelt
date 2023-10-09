@@ -5,6 +5,7 @@ import { registerGiveth } from './features/giveth'
 import { registerKnowledges } from './features/knowledges'
 import { registerMerge } from './features/merge'
 import { registerNobulk } from './features/nobulk'
+import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
 
@@ -17,6 +18,7 @@ const FEATURES = [
     registerMerge(),
     registerEffectsPanelHelper(),
     registerSpellsSummary(),
+    registerStances(),
 ]
 
 const CONFLICTS = new Set()
