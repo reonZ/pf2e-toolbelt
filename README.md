@@ -2,9 +2,9 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K6M2V13)
 
-### This module adds some utilities that are not big enough to warrant standalone modules
+A collection of utilities and features that are not big enough to warrant standalone modules, when disabled, the features will have no impact into your world/client whatsoever.
 
-# World Features
+# WORLD FEATURES
 
 ## Automatic Rune Progression (Requires Reload)
 
@@ -119,7 +119,7 @@ The owner of the character traded with will receive a request popup and can acce
 
 When enabled, the message generated when drawing hero actions will be private instead of public.
 
-# Client Features
+# CLIENT FEATURES
 
 ## Merge Damage
 
