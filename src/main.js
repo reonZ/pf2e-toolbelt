@@ -1,14 +1,14 @@
 import { MODULE_ID, localize, warn } from './module'
-import { registerArp } from './modules/arp'
-import { registerEffectsPanelHelper } from './modules/effects'
-import { registerGiveth } from './modules/giveth'
-import { registerKnowledges } from './modules/knowledges'
-import { registerMerge } from './modules/merge'
-import { registerNobulk } from './modules/nobulk'
-import { registerSpellsSummary } from './modules/summary'
-import { registerUnided } from './modules/unided'
+import { registerArp } from './features/arp'
+import { registerEffectsPanelHelper } from './features/effects'
+import { registerGiveth } from './features/giveth'
+import { registerKnowledges } from './features/knowledges'
+import { registerMerge } from './features/merge'
+import { registerNobulk } from './features/nobulk'
+import { registerSpellsSummary } from './features/summary'
+import { registerUnided } from './features/unided'
 
-const MODULES = [
+const FEATURES = [
     registerArp(),
     registerNobulk(),
     registerGiveth(),
@@ -27,7 +27,7 @@ Hooks.once('init', () => {
     const user = game.data.users.find(x => x._id === game.data.userId)
     const isGM = user && user.role >= CONST.USER_ROLES.GAMEMASTER
 
-    const settings = MODULES.flatMap(({ settings = [] }) =>
+    const settings = FEATURES.flatMap(({ settings = [] }) =>
         settings.map(setting => {
             const key = setting.name
 
@@ -61,25 +61,34 @@ Hooks.once('init', () => {
         Hooks.on('renderSettingsConfig', renderSettingsConfig)
     }
 
-    MODULES.forEach(({ init, conflicts = [] }) => {
+    const module = game.modules.get(MODULE_ID)
+    module.api = {}
+
+    FEATURES.forEach(feature => {
+        const { init, conflicts = [], api = [] } = feature
+
         if (isGM) {
             for (const id of conflicts) {
                 const conflictingModule = game.modules.get(id)
                 if (conflictingModule?.active) {
-                    module.conflicting = true
+                    feature.conflicting = true
                     CONFLICTS.add(conflictingModule.title)
                 }
             }
         }
 
-        if (!module.conflicting && init) init(isGM)
+        for (const apiFn of api) {
+            module.api[apiFn.name] = apiFn
+        }
+
+        if (!feature.conflicting && init) init(isGM)
     })
 })
 
 Hooks.once('ready', () => {
     const isGM = game.user.isGM
 
-    for (const { conflicting, ready } of MODULES) {
+    for (const { conflicting, ready } of FEATURES) {
         if (!conflicting && ready) ready(isGM)
     }
 
@@ -99,21 +108,4 @@ function renderSettingsConfig(_, html) {
 
     const group = html.find(`.tab[data-tab=${MODULE_ID}] [data-setting-id="${MODULE_ID}.${firstClientSetting}"]`)
     group.before(`<h3>${localize('settings.client')}</h3>`)
-
-    // function beforeGroup(name, key, dom = 'h3') {
-    //     const localized = localize(`menu.${key}`)
-    //     tab.find(`[name="${MODULE_ID}.${name}"]`).closest('.form-group').before(`<${dom}>${localized}</${dom}>`)
-    // }
-
-    // if (game.user.isGM) {
-    //     beforeGroup('enabled', 'client.header', 'h2')
-    // }
-
-    // beforeGroup('saves', 'client.tooltip')
-    // beforeGroup('distance', 'client.distance')
-    // beforeGroup('height', 'client.sidebar')
-    // beforeGroup('actions', 'client.actions')
-    // beforeGroup('containers', 'client.items')
-    // beforeGroup('spells', 'client.spells')
-    // beforeGroup('untrained', 'client.skills')
 }
