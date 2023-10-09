@@ -79,7 +79,7 @@
             },
             "hero-private": {
                 "name": "Hero Actions - Private Draw",
-                "hint": "When enabled, the message from drawing hero actions will be private instead of public."
+                "hint": "When enabled, the message generated when drawing hero actions will be private instead of public."
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
