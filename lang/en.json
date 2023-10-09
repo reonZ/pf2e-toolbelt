@@ -1,6 +1,7 @@
 {
     "pf2e-toolbelt": {
         "settings": {
+            "client": "Client Settings",
             "nobulk": {
                 "name": "No Dropped Bulk",
                 "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
