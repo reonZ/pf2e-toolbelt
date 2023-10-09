@@ -1,3 +1,16 @@
+# 1.5.0
+
+-   added `Hero Actions` setting, this feature replaces the `PF2e Hero Actions`
+    -   it uses the same data as the standalone module, therefore, nothing will be lost when switching
+    -   you will need to provide the UUID of your table in the settings if you had one in the standalone module
+    -   the module doesn't have any compendium pack for the macros, they are still exposed in the API and are easy to setup
+-   added `Stances` setting, this feature replaces the `PF2e Stances` module but works a bit differently now that the system has changed
+    -   stance feats/features are no longer hardcoded into the module, it now looks at the system's compendium
+    -   you can now add custom compendiums and world feat/features as long as they respect the following
+        -   the feats/features must have the `Stance` trait
+        -   the feats/features must have a self-applied effect
+-   now order settings by scope for the GM (`world` then `client`) and added a `Client Settings` header in the module settings tab
+
 # 1.4.0
 
 -   added `Giveth` setting, this feature replaces the `PF2e Giveth` module
