@@ -55,7 +55,7 @@ export function registerStances() {
             },
         ],
         conflicts: ['pf2e-stances'],
-        api: [getPackStances, getStances],
+        api: [getPackStances, getStances, toggleStance, isValidStance, addStance],
         init: isGm => {},
         ready: isGm => {
             if (getSetting('stances')) setup(true)
@@ -108,10 +108,13 @@ async function loadStances() {
             if (!stance) return
 
             const usableUuid = stance.sourceId ?? stance.uuid
-            const selfEffect = stance.system.selfEffect?.uuid
-            if (!usableUuid || !selfEffect || STANCES.has(usableUuid)) return
+            if (!usableUuid || !isValidStance(stance) || STANCES.has(usableUuid)) return
 
-            STANCES.set(usableUuid, { uuid: usableUuid, name: stance.name, effect: selfEffect })
+            STANCES.set(usableUuid, {
+                uuid: usableUuid,
+                name: stance.name,
+                effect: stance.system.selfEffect.uuid,
+            })
         })
     )
 
@@ -121,15 +124,17 @@ async function loadStances() {
     refreshSheets()
 }
 
+function isValidStance(stance) {
+    return stance && stance.system.traits.value.includes('stance') && stance.system.selfEffect?.uuid
+}
+
 async function getPackStances(pack) {
     const index = await pack.getIndex({ fields: ['system.traits', 'system.selfEffect'] })
-    return index
-        .filter(feat => feat.system.traits.value.includes('stance') && feat.system.selfEffect?.uuid)
-        .map(feat => ({
-            name: feat.name,
-            uuid: feat.uuid,
-            effect: feat.system.selfEffect.uuid,
-        }))
+    return index.filter(isValidStance).map(feat => ({
+        name: feat.name,
+        uuid: feat.uuid,
+        effect: feat.system.selfEffect.uuid,
+    }))
 }
 
 function refreshSheets(actor) {
