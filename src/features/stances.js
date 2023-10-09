@@ -1,4 +1,4 @@
-import { getSetting, hasItemWithSourceId, info, subLocalize, templatePath } from '../module'
+import { getSetting, hasItemWithSourceId, info, refreshCharacterSheets, subLocalize, templatePath } from '../module'
 import { createHook } from './shared/hook'
 
 const setSheetHook = createHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e)
@@ -39,6 +39,7 @@ const EXTRAS = [
 
 export function registerStances() {
     return {
+        name: 'stances',
         settings: [
             {
                 name: 'stances',
@@ -55,7 +56,7 @@ export function registerStances() {
             },
         ],
         conflicts: ['pf2e-stances'],
-        api: [getPackStances, getStances, toggleStance, isValidStance, addStance],
+        api: { getPackStances, getStances, toggleStance, isValidStance },
         init: isGm => {},
         ready: isGm => {
             if (getSetting('stances')) setup(true)
@@ -121,7 +122,7 @@ async function loadStances() {
     STANCES.forEach(stance => EFFECTS.add(stance.effect))
     REPLACERS.forEach(replacer => EFFECTS.add(replacer.effect))
 
-    refreshSheets()
+    refreshCharacterSheets()
 }
 
 function isValidStance(stance) {
@@ -135,13 +136,6 @@ async function getPackStances(pack) {
         uuid: feat.uuid,
         effect: feat.system.selfEffect.uuid,
     }))
-}
-
-function refreshSheets(actor) {
-    for (const win of Object.values(ui.windows)) {
-        if (!(win instanceof ActorSheet)) continue
-        if (!actor || actor === win.actor) win.render()
-    }
 }
 
 async function getStances(actor) {
@@ -285,7 +279,7 @@ function deleteCombatant(combatant) {
         if (effects.length) actor.deleteEmbeddedDocuments('Item', effects)
     }
 
-    refreshSheets(actor)
+    refreshCharacterSheets(actor)
 }
 
 function createCombatant(combatant) {
@@ -294,7 +288,7 @@ function createCombatant(combatant) {
 
     if (!game.user.isGM && actor.isOwner) checkForSavant(actor)
 
-    refreshSheets(actor)
+    refreshCharacterSheets(actor)
 }
 
 function getActorFromCombatant(combatant) {

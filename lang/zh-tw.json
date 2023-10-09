@@ -97,7 +97,7 @@
             }
         },
         "effects": {
-            "remove": "[Shift + Right Click] Remove effect"
+            "remove": "[Shift + 右键] 移除效果"
         },
         "merge": {
             "spell": {
@@ -123,11 +123,11 @@
             "charges": "Charges"
         },
         "giveth": {
-            "giveth": "Giveth to {target}",
+            "giveth": "給予 {target}",
             "notification": {
-                "zero": "You cannot give an item you don't have yourself.",
-                "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
-                "withoutQty": "Giveth {item} to <strong>{target}</strong>."
+                "zero": "你不能給予一項你沒有的東西。",
+                "withQty": "將 {qty} {item} 給予 <strong>{target}</strong>.",
+                "withoutQty": "將 {item} 給予 <strong>{target}</strong>."
             }
         },
         "stances": {

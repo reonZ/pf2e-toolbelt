@@ -1,7 +1,7 @@
-import { MODULE_ID, getSetting, localeCompare, templatePath } from '../module'
+import { MODULE_ID, getSetting, localeCompare, refreshCharacterSheets, templatePath } from '../module'
 import { createChoicesHook } from './shared/hook'
 
-const setHook = createChoicesHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e, refreshSheets)
+const setHook = createChoicesHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e, () => refreshCharacterSheets())
 
 export function registerSpellsSummary() {
     return {
@@ -12,7 +12,7 @@ export function registerSpellsSummary() {
                 default: 'disabled',
                 scope: 'client',
                 choices: ['disabled', 'enabled', 'sort'],
-                onChange: setHook,
+                onChange: value => setHook(value),
             },
         ],
         conflicts: ['pf2e-spells-summary'],
@@ -22,13 +22,9 @@ export function registerSpellsSummary() {
     }
 }
 
-function refreshSheets() {
-    Object.values(ui.windows).forEach(win => win instanceof ActorSheet && win.actor.type === 'character' && win.render())
-}
-
 async function renderCharacterSheetPF2e(sheet, html) {
     const actor = sheet.actor
-    if (!actor || actor.pack || !actor.id || !actor.isOfType('character')) return
+    if (!actor || actor.pack || !actor.id || !game.actors.has(actor.id)) return
 
     const tab = getSpellcastingTab(html)
 

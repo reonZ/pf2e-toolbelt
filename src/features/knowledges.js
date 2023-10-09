@@ -11,7 +11,7 @@ export function registerKnowledges() {
                 name: 'knowledges',
                 type: Boolean,
                 default: false,
-                onChange: setHook,
+                onChange: value => setHook(value),
             },
         ],
         conflicts: ['pf2e-npc-knowledges'],

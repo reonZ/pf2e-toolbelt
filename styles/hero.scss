@@ -1,0 +1,166 @@
+.sheet.actor.character .sheet-body .sheet-content {
+    [data-tab='actions'] .tab-content .actions-panels [data-tab='encounter'] ol.actions-list.heroActions-list {
+        .action {
+            grid:
+                'icon-name controls' auto
+                'summary summary' auto;
+
+            .item-image {
+                height: 20px;
+                width: 20px;
+                background-position: center;
+            }
+
+            .item-controls {
+                > button {
+                    text-rendering: optimizeLegibility;
+                    border: none;
+                    border-radius: 2px;
+                    box-shadow: inset 0 0 0 2px #bfbebe;
+                    color: var(--text-dark);
+                    flex: 0;
+                    font-family: var(--sans-serif);
+                    font-size: var(--font-size-10);
+                    font-weight: 500;
+                    letter-spacing: 0.05em;
+                    line-height: 14px;
+                    margin: 0;
+                    padding: 3px 8px;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    background: var(--bg-dark);
+
+                    &:hover {
+                        text-shadow: 0 0 1px var(--text-dark);
+                    }
+                }
+            }
+
+            &:not(.expanded) {
+                .item-summary {
+                    display: none;
+                }
+            }
+
+            &.discarded {
+                background-color: #00000021;
+
+                .item-name {
+                    h4 {
+                        text-decoration: line-through;
+                    }
+                }
+            }
+        }
+
+        .error {
+            margin: auto;
+            color: #990404;
+            font-weight: 900;
+            padding-block: 8px;
+        }
+
+        &:not(.discardable) {
+            [data-action='discard-selected'] {
+                display: none;
+            }
+        }
+
+        &.discardable {
+            .error {
+                display: none;
+            }
+        }
+    }
+}
+
+[id^='pf2e-hero-actions-trade-'] {
+    --action-height: 24px;
+
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5em;
+    }
+
+    .actions {
+        --padding: 6px;
+
+        display: grid;
+        grid-template-columns: 1fr 40px 1fr;
+        flex-basis: 93px;
+        gap: 6px;
+        border-top: 1px solid var(--color-border-light-primary);
+        border-bottom: 1px solid var(--color-border-light-highlight);
+        padding-block: var(--padding);
+        margin-block: 0.5em;
+    }
+
+    .action {
+        display: flex;
+        align-items: baseline;
+        padding-block: 4px;
+
+        label {
+            cursor: pointer;
+        }
+
+        input {
+            margin-inline: 0.3em;
+        }
+    }
+
+    .right .action {
+        justify-content: end;
+    }
+
+    .exchange {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+        border-left: 1px solid var(--color-border-light-primary);
+        border-right: 1px solid var(--color-border-light-highlight);
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1em;
+    }
+
+    button {
+        flex: 0 0 180px;
+    }
+
+    hr {
+        width: 100%;
+        flex: 0;
+    }
+}
+
+#pf2e-hero-actions-create-table {
+    .window-content {
+        .dialog-buttons {
+            margin-top: 0.8em;
+        }
+    }
+}
+
+#pf2e-hero-actions-remove-actions {
+    .window-content {
+        .actor {
+            margin-left: 1em;
+        }
+
+        .dialog-buttons {
+            margin-top: 0.8em;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+        }
+    }
+}

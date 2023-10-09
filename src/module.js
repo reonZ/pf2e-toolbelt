@@ -4,6 +4,10 @@ export function getSetting(setting) {
     return game.settings.get(MODULE_ID, setting)
 }
 
+export function setSetting(key, value) {
+    return game.settings.set(MODULE_ID, key, value)
+}
+
 export function localize(...args) {
     let [key, data] = args
     key = `${MODULE_ID}.${key}`
@@ -139,7 +143,8 @@ export function chatUUID(uuid, label, fake = false) {
         return `<span style="background: #DDD; padding: 1px 4px; border: 1px solid var(--color-border-dark-tertiary);
 border-radius: 2px; white-space: nowrap; word-break: break-all;">${label}</span>`
     } else {
-        return `@UUID[${uuid}]{${label}}`
+        if (label) return `@UUID[${uuid}]{${label}}`
+        return `@UUID[${uuid}]`
     }
 }
 
@@ -163,4 +168,29 @@ export function hasItemWithSourceId(actor, sourceId, itemTypes) {
 export function getItems(actor, itemTypes) {
     itemTypes = typeof itemTypes === 'string' ? [itemTypes] : itemTypes
     return itemTypes ? itemTypes.flatMap(type => actor.itemTypes[type]) : actor.items
+}
+
+export function refreshCharacterSheets(actor) {
+    for (const win of Object.values(ui.windows)) {
+        const winActor = win.actor
+        if (!(win instanceof ActorSheet) || !winActor.isOfType('character')) continue
+        if (!actor || actor === winActor) win.render()
+    }
+}
+
+export function documentUuidFromTableResult(result) {
+    if (result.type === CONST.TABLE_RESULT_TYPES.TEXT) return /@UUID\[([\w\.]+)\]/.exec(result.text)?.[1]
+    if (result.type === CONST.TABLE_RESULT_TYPES.DOCUMENT) return `${result.documentCollection}.${result.documentId}`
+    if (result.type === CONST.TABLE_RESULT_TYPES.COMPENDIUM) return `Compendium.${result.documentCollection}.${result.documentId}`
+    return undefined
+}
+
+export function getCharacterOwner(actor, connected = false) {
+    if (connected) return game.users.find(x => x.active && x.character === actor)
+    return game.users.find(x => x.character === actor)
+}
+
+export function getOwner(doc, connected = false) {
+    if (connected) return game.users.find(x => x.active && doc.testUserPermission(x, 'OWNER'))
+    return game.users.find(x => doc.testUserPermission(x, 'OWNER'))
 }

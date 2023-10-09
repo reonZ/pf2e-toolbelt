@@ -70,12 +70,12 @@
                 "hint": "Adds a section in the PF2e character sheet to manage the 'Hero Point Deck' actions alternate rule."
             },
             "hero-table": {
-                "name": "Hero Actions - Table UUID",
-                "hint": "Unique ID of the Deck Table. To get the UUID of a table (in a compendium or in the Rollable Tables directory), simply open the table and Right-Click on 📔 next to its name. If left empty, the first Hero Deck table found in your world will be used, if none, then the default compendium table will be used instead."
+                "name": "Hero Actions - UUID de la table",
+                "hint": "ID unique de la table du paquet. Pour obtenir l'UUID d'une table (dans un compendium ou dans le répertoire des tables aléatoires), ouvrez simplement la table et faites un clic droit sur 📔 à côté de son nom. Si elle est laissée vide, la première table de Paquet d'actions Héroïques trouvée dans votre monde sera utilisée, s'il n'y en a pas, alors la table par défaut du compendium sera utilisée à la place."
             },
             "hero-trade": {
-                "name": "Hero Actions - Allow Trade",
-                "hint": "When enabled, players will be able to trade action with each others."
+                "name": "Hero Actions - Permettre l'échange",
+                "hint": "Lorsqu'elle sera activée, les joueurs pourront échanger des actions entre eux."
             },
             "hero-private": {
                 "name": "Hero Actions - Private Draw",
@@ -87,17 +87,18 @@
             "forceVariant": "The module <strong>PF2e ToolBelt</strong> disabled the pf2e system variant ABP rule to work properly"
         },
         "knowledges": {
-            "editLore": {
-                "title": "{name} - Edit Lores",
-                "save": "Save",
-                "cancel": "Cancel",
-                "unspecified": "Unspecific Lores",
-                "specific": "Specific Lores",
-                "hint": "Enter comma separated lores which will replace the generic ones in the sheet"
+            "templates": {
+                "editLore": {
+                    "hint": "Entrez les connaissances séparées par des virgules qui remplaceront les connaissances génériques sur la feuille",
+                    "save": "sauvegarder",
+                    "cancel": "Effacer",
+                    "unspecified": "Connaissances non spécifiques",
+                    "specific": "Connaissances spécifiques"
+                }
             }
         },
         "effects": {
-            "remove": "[Shift + Right Click] Remove effect"
+            "remove": "[Shift + Clic droit] Retirer l'effet"
         },
         "merge": {
             "spell": {
@@ -119,15 +120,15 @@
             }
         },
         "summary": {
-            "staff": "Staff",
+            "staff": "Bâton",
             "charges": "Charges"
         },
         "giveth": {
-            "giveth": "Giveth to {target}",
+            "giveth": "Donné à {target}",
             "notification": {
-                "zero": "You cannot give an item you don't have yourself.",
-                "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
-                "withoutQty": "Giveth {item} to <strong>{target}</strong>."
+                "withQty": "donne {qty} {item}(s) à <strong>{target}</strong>.",
+                "withoutQty": "donne {item} à <strong>{target}</strong>.",
+                "zero": "Vous ne pouvez pas donner un objet que vous ne possédez pas."
             }
         },
         "stances": {
@@ -142,96 +143,96 @@
         },
         "hero": {
             "use": {
-                "noPoints": "You need at least 1 Hero Point to use a Hero Action.",
-                "noAction": "Could not find this action.",
-                "noDetails": "Could not find the details for this Hero Action."
+                "noPoints": "Vous avez besoin d'au moins 1 Point héroïque pour utiliser une Action de Héros.",
+                "noAction": "Impossible de trouver cette action.",
+                "noDetails": "Impossible de trouver les détails de cette action héroïque."
             },
             "trade-request": {
-                "title": "Trade Request",
-                "header": "The character {sender} wants to trade with {receiver}",
-                "give": "Offers: {give}",
-                "want": "Wants: {want}",
-                "accept": "Would you like to accept the deal?"
+                "title": "Demande d'échange",
+                "accept": "Voulez-vous accepter l'accord ?",
+                "header": "Le personnage {sender} veut faire un échange avec {receiver}",
+                "give": "Offre : {give}",
+                "want": "Souhaite : {want}"
             },
             "trade-success": {
-                "header": "Traded with {name}",
-                "offer": "Offered: {offer}",
-                "receive": "Received: {receive}"
+                "header": "Échangé avec {name}",
+                "offer": "A offert : {offer}",
+                "receive": "A reçu : {receive}"
             },
             "actions-discard": {
-                "header": "Has Discarded ({nb}) Hero Action"
+                "header": "A écarté ({nb}) action(s) héroïque(s)"
             },
             "actions-draw": {
-                "header": "Has Drawn ({nb}) Hero Action"
+                "header": "A tiré ({nb}) Action(s) héroïque(s)"
             },
             "actions-use": {
-                "header": "Spends a Hero Point to use"
+                "header": "Dépense un point d'héroïsme pour utiliser"
             },
-            "trade-rejected": "Your trade for Hero Action has been rejected by {name}.",
-            "trade-error": "An error occured during the Hero Action trade.",
-            "no-points": "You need to discard ({nb}) Hero Action before you can engage in a trade.",
-            "no-action": "You don't have any Hero Action to trade.",
+            "trade-rejected": "Votre échange contre une action héroïque a été rejeté par {name}.",
+            "trade-error": "Une erreur s'est produite pendant l'échange de l'action héroïque.",
+            "no-points": "Vous devez défausser ({nb}) Action(s) héroïque(s) avant de pouvoir entamer un échange.",
+            "no-action": "Vous n'avez pas d'action(s) héroïque(s) à échanger.",
             "templates": {
                 "trade": {
-                    "title": "Trade Hero Action",
-                    "select": "Select the character to trade with",
-                    "no-target": "Target could not be found",
-                    "no-select": "Please select one Hero Action to give and one to receive.",
-                    "no-user": "The target has no owner or their are not online.",
-                    "error": "An error occured during the trade. Most likely a Hero Action was missing.",
-                    "send": "Send",
-                    "cancel": "Cancel"
+                    "no-select": "Veuillez sélectionner une Action héroïque à donner et une à recevoir.",
+                    "error": "Une erreur s'est produite pendant l'échange. Il manquait probablement une Action héroïque.",
+                    "title": "Échange d'action(s) héroïque(s)",
+                    "select": "Sélectionnez le personnage avec lequel vous souhaitez échanger",
+                    "no-target": "La cible n'a pas pu être trouvée",
+                    "no-user": "La cible n'a pas de propriétaire ou il n'est pas en ligne.",
+                    "send": "Envoi",
+                    "cancel": "Effacer"
                 },
                 "createTable": {
                     "choice": {
-                        "title": "Table creation options",
-                        "create": "Create",
-                        "cancel": "Cancel",
-                        "types": {
-                            "group": "Type of table:",
-                            "default": "Default",
-                            "custom": "Custom"
-                        },
                         "draw": {
-                            "group": "Draw Options:",
-                            "random": "Random",
+                            "group": "Options de tirage au sort :",
+                            "random": "Aléatoire",
                             "unique": "Unique"
+                        },
+                        "title": "Options de création de table",
+                        "create": "Créer",
+                        "cancel": "Effacer",
+                        "types": {
+                            "group": "Type de table :",
+                            "default": "Par défaut",
+                            "custom": "Personnalisée"
                         }
                     },
                     "default": {
                         "confirm": {
-                            "title": "Default Table Confirm?",
-                            "content": "<p>A default table already exists in this world, would you like to override it or create a new one ?</p>"
+                            "content": "<p>Une table par défaut existe déjà dans ce monde, voulez-vous la remplacer ou en créer une nouvelle ?</p>",
+                            "title": "Confirmer la table par défaut ?"
                         }
                     }
                 },
-                "removeActions": {
-                    "title": "Remove Hero Actions from Characters",
-                    "remove": "Remove",
-                    "cancel": "Cancel",
-                    "all": "All",
-                    "noSelection": "No Character were selected.",
-                    "removed": "Hero Actions were removed on selected Character(s)."
-                },
                 "heroActions": {
+                    "draw": "Tirer ({nb}) Action(s) héroïque(s)",
                     "action": {
-                        "use": "Use",
-                        "discard": "Discard"
+                        "use": "Utiliser",
+                        "discard": "Défausser"
                     },
-                    "discard": "Discard Selected ({nb}) Hero Action",
-                    "draw": "Draw ({nb}) Hero Action",
-                    "error": "You must discard ({nb}) Hero Action",
-                    "label": "Hero Actions",
-                    "tbd": "To be determined",
-                    "trade": "Trade"
+                    "discard": "Défausser ({nb}) action(s) héroïque(s) sélectionnée(s)",
+                    "error": "Vous devez défausser ({nb}) Action(s) héroïque(s)",
+                    "label": "Actions héroïques",
+                    "tbd": "À déterminer",
+                    "trade": "Échange"
+                },
+                "removeActions": {
+                    "title": "Supprimer les actions héroïques des personnages",
+                    "remove": "Retirer",
+                    "cancel": "Effacer",
+                    "all": "Tout",
+                    "noSelection": "Aucun personnage n'a été sélectionné.",
+                    "removed": "Les actions héroïques ont été supprimées sur le(s) personnage(s) sélectionné(s)."
                 }
             },
             "table": {
-                "name": "Hero Actions Deck (do not delete)",
-                "description": "Table for Hero Actions used in consort with the Hero Points.",
-                "noFormula": "The Hero Deck table has no formula, tell your GM he messed up.",
-                "noFormulaCompendium": "The Hero Deck table has no formula and is a compendium table.",
-                "drawError": "An error occurred during the draw, most likely the table contains non-conform results."
+                "description": "Table pour les actions héroïques utilisées en conjonction avec les points d'héroïsme.",
+                "drawError": "Une erreur s'est produite lors du tirage au sort, il est fort probable que la table contienne des résultats non conformes.",
+                "name": "Paquet d'Actions héroïques (ne pas supprimer)",
+                "noFormula": "La table de paquet d'actions héroïques n'a pas de formule, dites à votre MJ qu'il s'est trompé.",
+                "noFormulaCompendium": "La table de paquet d'Actions héroïques n'a pas de formule et est une table compendium."
             }
         }
     }

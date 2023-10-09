@@ -87,17 +87,18 @@
             "forceVariant": "The module <strong>PF2e ToolBelt</strong> disabled the pf2e system variant ABP rule to work properly"
         },
         "knowledges": {
-            "editLore": {
-                "title": "{name} - Edit Lores",
-                "save": "Save",
-                "cancel": "Cancel",
-                "unspecified": "Unspecific Lores",
-                "specific": "Specific Lores",
-                "hint": "Enter comma separated lores which will replace the generic ones in the sheet"
+            "templates": {
+                "editLore": {
+                    "save": "保存",
+                    "cancel": "取消",
+                    "specific": "特定学识",
+                    "unspecified": "非特定学识",
+                    "hint": "用英文逗号分割学识，这会替换角色卡中的一般学识"
+                }
             }
         },
         "effects": {
-            "remove": "[Shift + Right Click] Remove effect"
+            "remove": "[Shift + 右键] 移除效果"
         },
         "merge": {
             "spell": {
@@ -123,21 +124,21 @@
             "charges": "Charges"
         },
         "giveth": {
-            "giveth": "Giveth to {target}",
+            "giveth": "给予 {target}",
             "notification": {
-                "zero": "You cannot give an item you don't have yourself.",
-                "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
-                "withoutQty": "Giveth {item} to <strong>{target}</strong>."
+                "zero": "你不能给予一项你没有的东西。",
+                "withQty": "将 {qty} {item} 给予 <strong>{target}</strong>.",
+                "withoutQty": "将 {item} 给予 <strong>{target}</strong>."
             }
         },
         "stances": {
-            "noCombat": "You can enter or be in a stance only in encounter mode",
-            "useStance": "Automatically entering the stance '{stance}'",
+            "noCombat": "只有在遭遇模式，你才能进入为保持一个架势",
+            "useStance": "自动进入架势：A '{stance}'",
             "menu": {
-                "title": "Stance Savant",
-                "select": "Please select a stance",
-                "accept": "Accept",
-                "cancel": "Cancel"
+                "title": "架势贯通",
+                "select": "请选择一个架势",
+                "accept": "确定",
+                "cancel": "取消"
             }
         },
         "hero": {

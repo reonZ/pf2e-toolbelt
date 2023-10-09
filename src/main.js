@@ -8,6 +8,7 @@ import { registerNobulk } from './features/nobulk'
 import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
+import { registerHeroActions } from './features/hero'
 
 const FEATURES = [
     registerArp(),
@@ -19,6 +20,7 @@ const FEATURES = [
     registerEffectsPanelHelper(),
     registerSpellsSummary(),
     registerStances(),
+    registerHeroActions(),
 ]
 
 const CONFLICTS = new Set()
@@ -67,7 +69,7 @@ Hooks.once('init', () => {
     module.api = {}
 
     FEATURES.forEach(feature => {
-        const { init, conflicts = [], api = [] } = feature
+        const { init, conflicts = [], api, name } = feature
 
         if (isGM) {
             for (const id of conflicts) {
@@ -79,9 +81,7 @@ Hooks.once('init', () => {
             }
         }
 
-        for (const apiFn of api) {
-            module.api[apiFn.name] = apiFn
-        }
+        if (api && name) module.api[name] = api
 
         if (!feature.conflicting && init) init(isGM)
     })
