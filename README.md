@@ -2,7 +2,9 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K6M2V13)
 
-A collection of utilities and features that are not big enough to warrant standalone modules, when disabled, the features will have no impact into your world/client whatsoever.
+A collection of utilities and features that are not big enough to warrant standalone modules.
+
+When disabled, the features will have no impact on your world/client whatsoever.
 
 # WORLD FEATURES
 
