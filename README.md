@@ -280,6 +280,10 @@ stances: {
      * @returns { Promise<void> }
      */
     toggleStance,
+    /**
+     * @returns { Set<string> } list of all the stances actions uuids
+     */
+    getActionsUUIDS,
 }
 ```
 
