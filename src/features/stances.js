@@ -34,6 +34,7 @@ const EXTRAS = [
     {
         uuid: 'Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt', // arcane cascade
         effect: 'Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl',
+        action: 'Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM',
     },
 ]
 
@@ -56,7 +57,7 @@ export function registerStances() {
             },
         ],
         conflicts: ['pf2e-stances'],
-        api: { getPackStances, getStances, toggleStance, isValidStance },
+        api: { getPackStances, getStances, toggleStance, isValidStance, getActionsUUIDS },
         init: isGm => {},
         ready: isGm => {
             if (getSetting('stances')) setup(true)
@@ -329,4 +330,12 @@ async function openStancesMenu(actor, stances) {
             },
         },
     }).render(true)
+}
+
+function getActionsUUIDS() {
+    return new Set([
+        ...Array.from(STANCES.keys()),
+        ...EXTRAS.flatMap(({ uuid, action }) => [uuid, action]),
+        ...Array.from(REPLACERS.keys()),
+    ])
 }
