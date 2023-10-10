@@ -1,3 +1,7 @@
+# 1.5.3
+
+-   added missing french localization (thanks to [rectulo](https://github.com/rectulo))
+
 # 1.5.2
 
 -   added missing api functions
