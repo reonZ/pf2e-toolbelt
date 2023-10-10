@@ -1,3 +1,7 @@
+# 1.5.1
+
+-   fixed cn localization file error
+
 # 1.5.0
 
 -   added `Hero Actions` setting, this feature replaces the `PF2e Hero Actions`
