@@ -1,90 +1,90 @@
 {
     "pf2e-toolbelt": {
         "settings": {
-            "client": "Client Settings",
+            "client": "Réglages du client",
             "nobulk": {
-                "name": "No Dropped Bulk",
-                "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
+                "name": "Pas d'Encombrement laché",
+                "hint": "(Nécessite le rechargement) L'équipement laché dans l'inventaire de l'acteur ne sera plus pris en compte dans le calcul de la valeur d'Encombrement."
             },
             "arp": {
-                "name": "Automatic Rune Progression",
-                "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment."
+                "name": "Progression automatique des runes",
+                "hint": "(Nécessite le rechargement) Sera utilisée à la place de la variant de règle PBA pour donner automatiquement les runes de puissance/frappe/résilience à l'équipement."
             },
             "unided": {
-                "name": "Set Un-Identified Image",
-                "hint": "Automatically set the un-identifed image of items to be the same as the regular image.",
+                "name": "Fixe l'image Non-Identifiée",
+                "hint": "Choisit automatiquement l'image non-identifiée des objets pour qu'elle soit la même que l'image standard.",
                 "choices": {
-                    "disabled": "Disabled",
-                    "create": "On Creation Only",
-                    "all": "On Creation & Update"
+                    "disabled": "Désactivé",
+                    "create": "Seulement à la création",
+                    "all": "Lors de la création & Mise à jour"
                 }
             },
             "knowledges": {
-                "name": "Npc Lore Knowledges",
-                "hint": "Adds the option to set custom lores for NPCs."
+                "name": "Compétences de connaissance des Pnj",
+                "hint": "Ajoute l'option de fixer des connaissances personnalisées pour les Pnj."
             },
             "effect-remove": {
-                "name": "Remove Effect Shortcut",
-                "hint": "Using [Shift + Right Click] on effect icons in the effects panel will instantly remove all its charges/counters/badges."
+                "name": "Raccourci pour retirer les effets",
+                "hint": "Utiliser [Shift + Clic droit] sur les icones des effets dans le panneau des effets retirera instantanément toutes ses charges/compteurs/symboles."
             },
             "condition-sheet": {
-                "name": "Condition Sheet Icon",
-                "hint": "Adds a new icon to condition in the effects panel to open their sheet just like you would with non-condition effects."
+                "name": "Icone d'état sur la feuille",
+                "hint": "Ajoute une nouvelle icone d'état dans le panneau des effets pour ouvrir leur feuille juste comme avec les effets qui ne sont pas des états."
             },
             "multi-cast": {
-                "name": "Multi-Cast",
-                "hint": "A new 'Multi' button will appear next to spells `Damage` button allowing the cast of multiple instances of the spell at once, Changing this setting will only update the last 10 messages in chat."
+                "name": "Incantation-multiple",
+                "hint": "Un nouveau bouton 'Multi' apparaîtra à côté du bouton de dégâts du sort permettant de lancer de multiples instances du sort en même temps. Changer ce réglage ne mettra à jour que les 10 derniers messages dans la conversation."
             },
             "merge-damage": {
-                "name": "Merge Damage",
-                "hint": "A new small icon is added to damage roll messages allow them to be merged with another damage roll message of the same type preceding it."
+                "name": "Fusion des dégâts",
+                "hint": "Une nouvelle petite icone est ajoutée aux messages contenant des jets de dégâts leur permettant d'être fusionnés avec un autre message de jet de dégâts du même type qui le précède."
             },
             "summary": {
-                "name": "Spells Summary",
-                "hint": "Offers the ability to toggle between the regular and an alternate version of the character sheet's `Spellcasting` tab at any moment by clicking once more on the tab icon.",
+                "name": "Résumé des sorts",
+                "hint": "Offre la capacité de choisir entre la version standard et la version alternative de l'onglet d'incantation de la feuille de personnage à tout moment en cliquant une fois de plus sur l'icone de l'onglet.",
                 "choices": {
-                    "disabled": "Disabled",
-                    "enabled": "Enabled",
-                    "sort": "Sort by Types"
+                    "disabled": "Désactivé",
+                    "enabled": "Activé",
+                    "sort": "Trier par types"
                 }
             },
             "giveth": {
                 "name": "Giveth",
-                "hint": "Allow players to give items to other player-owned actors. They can also add conditions and effect to other player-owned actors if it originated from them.",
+                "hint": "Permet au joueur de donner des objets aux autres acteurs possédés par des joueurs. Ils peuvent aussi ajouter des états et des effets aux autres acteurs possédés par les joueurs s'ils en sont à l'origine.",
                 "choices": {
-                    "disabled": "Disabled",
-                    "enabled": "Enabled",
-                    "no-message": "No Chat Message"
+                    "disabled": "Désactive",
+                    "enabled": "Activé",
+                    "no-message": "Pas de message de conversation"
                 }
             },
             "stances": {
-                "name": "Stances",
-                "hint": "Add stances buttons in the character sheet to toggle them faster, it will also remove stances at the end of the encounter and more."
+                "name": "Postures",
+                "hint": "Ajoute les boutons de postures sur la feuille de personnage pour les activer plus vite, cela retire également les postures à la fin de la rencontre et davantage encore."
             },
             "custom-stances": {
-                "name": "Custom Stances",
-                "hint": "Comma separated list of compendium pack id containing custom stance feats/features, can also list directly world feats/features uuid ; Custom feats/features must have the 'stance' trait and have a self-applied effect."
+                "name": "Postures personnalisées",
+                "hint": "liste des id des packs de compendium contenant des dons ou capacités de posture personnalisées séparés par des virgules. Peut aussi lister directement les UUID des dons/capacités du monde qui doivent avoir le trait 'posture' et un effet appliqué automatiquement."
             },
             "hero": {
-                "name": "Hero Actions",
-                "hint": "Adds a section in the PF2e character sheet to manage the 'Hero Point Deck' actions alternate rule."
+                "name": "Actions héroïques",
+                "hint": "Ajoute un paragraphe sur la feuille de personnage PF2e pour organiser les actions des règles alternatives des 'Cartes de points d'héroïsme' ."
             },
             "hero-table": {
-                "name": "Hero Actions - UUID de la table",
+                "name": "Actions héroïques - UUID de la table",
                 "hint": "ID unique de la table du paquet. Pour obtenir l'UUID d'une table (dans un compendium ou dans le répertoire des tables aléatoires), ouvrez simplement la table et faites un clic droit sur 📔 à côté de son nom. Si elle est laissée vide, la première table de Paquet d'actions Héroïques trouvée dans votre monde sera utilisée, s'il n'y en a pas, alors la table par défaut du compendium sera utilisée à la place."
             },
             "hero-trade": {
-                "name": "Hero Actions - Permettre l'échange",
-                "hint": "Lorsqu'elle sera activée, les joueurs pourront échanger des actions entre eux."
+                "name": "Actions héroïques - Permettre l'échange",
+                "hint": "Lorsqu'il est activé, les joueurs pourront échanger des actions entre eux."
             },
             "hero-private": {
-                "name": "Hero Actions - Private Draw",
-                "hint": "When enabled, the message from drawing hero actions will be private instead of public."
+                "name": "Actions héroïques - Tirage privé",
+                "hint": "Lorsqu'il est activé, le message lors du tirage des actions héroïques sera privé et non public."
             }
         },
-        "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
+        "module-conflict": "Le module <strong>{name}</strong> n'est pas requis en utilisant <strong>PF2e ToolBelt</strong>. Vous pouvez le désactiver en toute sécurité",
         "arp": {
-            "forceVariant": "The module <strong>PF2e ToolBelt</strong> disabled the pf2e system variant ABP rule to work properly"
+            "forceVariant": "Le module <strong>PF2e ToolBelt</strong> a désactivé la variante du système pf2e de PBA pour fonctionner proprement"
         },
         "knowledges": {
             "templates": {
@@ -105,18 +105,18 @@
                 "button": "Multi"
             },
             "multi": {
-                "title": "{name} - Multi Cast",
-                "hint": "Number of instances to be cast at once",
-                "cast": "Cast",
-                "cancel": "Cancel",
-                "zero": "You cannot cast 0 instance of a spell."
+                "title": "{name} - Lancement multiple",
+                "hint": "Nombre d'instances lancées en même temps",
+                "cast": "Lancer",
+                "cancel": "Annuler",
+                "zero": "Vous ne pouvez lancer 0 instance d'un sort."
             },
             "damage": {
-                "tooltip": "Merge with previous damage",
-                "none": "No other damage message of this type was found"
+                "tooltip": "Fusionné avec les dégâts précédents",
+                "none": "Aucun autre message de ce type n'a été trouvé"
             },
             "merged": {
-                "header": "Merged Damage Roll: {name}"
+                "header": "Jet de dégât fusionné : {name}"
             }
         },
         "summary": {
@@ -132,18 +132,18 @@
             }
         },
         "stances": {
-            "noCombat": "You can enter or be in a stance only in encounter mode",
-            "useStance": "Automatically entering the stance '{stance}'",
+            "noCombat": "Vous ne pouvez entrer ou être dans une posture qu'en mode rencontre",
+            "useStance": "Entrer automatiquement dans la posture '{stance}'",
             "menu": {
-                "title": "Stance Savant",
-                "select": "Please select a stance",
-                "accept": "Accept",
-                "cancel": "Cancel"
+                "title": "Maître des postures",
+                "select": "Choisissez une posture",
+                "accept": "Accepter",
+                "cancel": "Annuler"
             }
         },
         "hero": {
             "use": {
-                "noPoints": "Vous avez besoin d'au moins 1 Point héroïque pour utiliser une Action de Héros.",
+                "noPoints": "Vous avez besoin d'au moins 1 Point héroïque pour utiliser une Action d'héroïque.",
                 "noAction": "Impossible de trouver cette action.",
                 "noDetails": "Impossible de trouver les détails de cette action héroïque."
             },
@@ -160,22 +160,22 @@
                 "receive": "A reçu : {receive}"
             },
             "actions-discard": {
-                "header": "A écarté ({nb}) action(s) héroïque(s)"
+                "header": "A défaussé ({nb}) action(s) héroïque(s)"
             },
             "actions-draw": {
-                "header": "A tiré ({nb}) Action(s) héroïque(s)"
+                "header": "A tiré ({nb}) action(s) héroïque(s)"
             },
             "actions-use": {
                 "header": "Dépense un point d'héroïsme pour utiliser"
             },
             "trade-rejected": "Votre échange contre une action héroïque a été rejeté par {name}.",
             "trade-error": "Une erreur s'est produite pendant l'échange de l'action héroïque.",
-            "no-points": "Vous devez défausser ({nb}) Action(s) héroïque(s) avant de pouvoir entamer un échange.",
+            "no-points": "Vous devez défausser ({nb}) action(s) héroïque(s) avant de pouvoir entamer un échange.",
             "no-action": "Vous n'avez pas d'action(s) héroïque(s) à échanger.",
             "templates": {
                 "trade": {
-                    "no-select": "Veuillez sélectionner une Action héroïque à donner et une à recevoir.",
-                    "error": "Une erreur s'est produite pendant l'échange. Il manquait probablement une Action héroïque.",
+                    "no-select": "Veuillez sélectionner une action héroïque à donner et une à recevoir.",
+                    "error": "Une erreur s'est produite pendant l'échange. Il manquait probablement une action héroïque.",
                     "title": "Échange d'action(s) héroïque(s)",
                     "select": "Sélectionnez le personnage avec lequel vous souhaitez échanger",
                     "no-target": "La cible n'a pas pu être trouvée",
@@ -207,7 +207,7 @@
                     }
                 },
                 "heroActions": {
-                    "draw": "Tirer ({nb}) Action(s) héroïque(s)",
+                    "draw": "Tirer ({nb}) action(s) héroïque(s)",
                     "action": {
                         "use": "Utiliser",
                         "discard": "Défausser"
@@ -230,7 +230,7 @@
             "table": {
                 "description": "Table pour les actions héroïques utilisées en conjonction avec les points d'héroïsme.",
                 "drawError": "Une erreur s'est produite lors du tirage au sort, il est fort probable que la table contienne des résultats non conformes.",
-                "name": "Paquet d'Actions héroïques (ne pas supprimer)",
+                "name": "Paquet d'actions héroïques (ne pas supprimer)",
                 "noFormula": "La table de paquet d'actions héroïques n'a pas de formule, dites à votre MJ qu'il s'est trompé.",
                 "noFormulaCompendium": "La table de paquet d'Actions héroïques n'a pas de formule et est une table compendium."
             }
