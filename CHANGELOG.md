@@ -1,3 +1,7 @@
+# 1.5.2
+
+-   added missing api functions
+
 # 1.5.1
 
 -   fixed cn localization file error
@@ -13,7 +17,7 @@
     -   you can now add custom compendiums and world feat/features as long as they respect the following
         -   the feats/features must have the `Stance` trait
         -   the feats/features must have a self-applied effect
--   now order settings by scope for the GM (`world` then `client`) and added a `Client Settings` header in the module settings tab
+-   now sort settings by scope for the GM (`world` then `client`) and added a `Client Settings` header in the module settings tab
 
 # 1.4.0
 
