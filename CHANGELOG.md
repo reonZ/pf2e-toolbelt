@@ -1,3 +1,8 @@
+# 1.5.4
+
+-   fixed `Cobra Envenom` stance (which has a limited use of once per minute) always replacing `Cobra Stance`
+-   fixed missing `actionID` in returned data preventing third party from displaying the right description in chat
+
 # 1.5.3
 
 -   added missing french localization (thanks to [rectulo](https://github.com/rectulo))
