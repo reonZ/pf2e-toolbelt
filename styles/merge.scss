@@ -18,3 +18,29 @@
         margin-top: 0.6em;
     }
 }
+
+.chat-message {
+    .message-content {
+        .dice-result {
+            .dice-total {
+                .pf2e-toolbelt-merge {
+                    position: absolute;
+                    right: 0px;
+                    bottom: 1px;
+
+                    button {
+                        width: 22px;
+                        height: 22px;
+                        font-size: 10px;
+                        line-height: 1px;
+                    }
+                }
+
+                .pf2e-td.hide-button + .pf2e-toolbelt-merge,
+                .pf2e-toolbelt-merge:has(+ .pf2e-td.hide-button) {
+                    right: 22px;
+                }
+            }
+        }
+    }
+}

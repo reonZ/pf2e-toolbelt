@@ -74,8 +74,8 @@ function renderDamage(message, html) {
     if (!uuid) return
 
     const tooltip = localize('merge.damage.tooltip')
-    const button = `<span style="position: absolute; right: 0px; bottom: 1px;">
-    <button data-action="merge-damage" title="${tooltip}" style="width: 22px; height: 22px; font-size: 10px; line-height: 1px;">
+    const button = `<span class="pf2e-toolbelt-merge">
+    <button data-action="merge-damage" title="${tooltip}" >
         <i class="fa-duotone fa-merge"></i>
     </button>
 </span>`
