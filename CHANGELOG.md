@@ -1,3 +1,8 @@
+# 1.5.5
+
+-   the `Merge Damage` icon will now move itself next to the `PF2e Target Damage` collapse/expand button when present
+    -   firefox users will have to enable the `:has` feature for it to work because firefox still hasn't made it core
+
 # 1.5.4
 
 -   fixed `Cobra Envenom` stance (which has a limited use of once per minute) always replacing `Cobra Stance`
