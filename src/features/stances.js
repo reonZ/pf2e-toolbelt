@@ -8,18 +8,11 @@ const setCreateCombatantHook = createHook('createCombatant', createCombatant)
 
 const STANCES = new Map()
 const EFFECTS = new Set()
+const ACTIONS = new Set()
 
 const STANCE_SAVANT = ['Compendium.pf2e.feats-srd.Item.yeSyGnYDkl2GUNmu', 'Compendium.pf2e.feats-srd.Item.LI9VtCaL5ZRk0Wo8']
 
 const REPLACERS = new Map([
-    [
-        'Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28', // cobra envenom
-
-        {
-            replace: 'Compendium.pf2e.feats-srd.Item.AkV4Jyllo6nlK2Sl', // cobra stance
-            effect: 'Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN',
-        },
-    ],
     [
         'Compendium.pf2e.feats-srd.Item.nRjyyDulHnP5OewA', // gorilla pound
 
@@ -35,6 +28,10 @@ const EXTRAS = [
         uuid: 'Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt', // arcane cascade
         effect: 'Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl',
         action: 'Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM',
+    },
+    {
+        uuid: 'Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28', // cobra envenom
+        effect: 'Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN',
     },
 ]
 
@@ -78,21 +75,24 @@ async function loadStances() {
 
     STANCES.clear()
     EFFECTS.clear()
+    ACTIONS.clear()
 
     async function addStances(pack) {
         const stances = await getPackStances(pack)
         stances.forEach(stance => {
             if (STANCES.has(stance.uuid)) return
             STANCES.set(stance.uuid, stance)
+            ACTIONS.add(stance.uuid)
         })
     }
 
     const pack = game.packs.get('pf2e.feats-srd')
     await addStances(pack)
 
-    EXTRAS.forEach(({ uuid, effect }) => {
+    EXTRAS.forEach(({ uuid, effect, action }) => {
         const { name } = fromUuidSync(uuid)
-        STANCES.set(uuid, { uuid, name, effect })
+        STANCES.set(uuid, { uuid, name, effect, action })
+        ACTIONS.add(action ?? uuid)
     })
 
     const customStances = getSetting('custom-stances').split(',')
@@ -117,6 +117,8 @@ async function loadStances() {
                 name: stance.name,
                 effect: stance.system.selfEffect.uuid,
             })
+
+            ACTIONS.add(usableUuid)
         })
     )
 
@@ -143,6 +145,7 @@ async function getStances(actor) {
     const stances = []
     const replaced = []
     const effects = new Map()
+    const actions = new Map()
 
     for (const feat of actor.itemTypes.feat) {
         const sourceId = feat.sourceId
@@ -154,10 +157,17 @@ async function getStances(actor) {
         stances.push({
             name: stance.name,
             uuid: sourceId,
+            action: stance.action,
             effectUUID: replacer?.effect ?? stance.effect,
         })
 
         if (replacer) replaced.push(replacer.replace)
+        if (!actions.has(sourceId)) actions.set(sourceId, feat.id)
+    }
+
+    for (const action of actor.itemTypes.action) {
+        const sourceId = action.sourceId
+        if (ACTIONS.has(sourceId)) actions.set(sourceId, action.id)
     }
 
     for (const effect of actor.itemTypes.effect) {
@@ -168,7 +178,7 @@ async function getStances(actor) {
     return Promise.all(
         stances
             .filter(({ uuid }) => !replaced.includes(uuid))
-            .map(async ({ effectUUID, name }) => {
+            .map(async ({ effectUUID, name, action, uuid }) => {
                 const effect = await fromUuid(effectUUID)
                 if (!effect) return
 
@@ -176,6 +186,7 @@ async function getStances(actor) {
                     name,
                     img: effect.img,
                     effectUUID,
+                    actionID: actions.get(action ?? uuid),
                     effectID: effects.get(effectUUID),
                 }
             })
@@ -333,9 +344,5 @@ async function openStancesMenu(actor, stances) {
 }
 
 function getActionsUUIDS() {
-    return new Set([
-        ...Array.from(STANCES.keys()),
-        ...EXTRAS.flatMap(({ uuid, action }) => [uuid, action]),
-        ...Array.from(REPLACERS.keys()),
-    ])
+    return new Set([...ACTIONS, ...Array.from(REPLACERS.keys())])
 }
