@@ -88,16 +88,20 @@ function getStances(actor) {
     const stances = []
     const replaced = new Set()
 
-    for (const { replace, sourceId, effectUUID, effect, img, name, actionUUID } of actorStances(actor)) {
+    for (const { replace, sourceId, effectUUID, effect, img, name, itemName, action } of actorStances(actor)) {
         if (replace) replaced.add(replace)
+
+        const foundAction = action ? getItemWithSourceId(actor, action, 'action') : getItemWithSourceId(actor, sourceId, 'feat')
 
         stances.push({
             name,
+            itemName,
             uuid: sourceId,
             img,
-            actionUUID,
             effectUUID,
             effectID: effect?.id,
+            actionUUID: foundAction.sourceId,
+            actionID: foundAction.id,
         })
     }
 
@@ -149,12 +153,13 @@ function* actorStances(actor) {
 
         yield {
             name: (replacer && fromUuidSync(replacer.replace)?.name) ?? feat.name,
+            itemName: feat.name,
             replace: replacer?.replace,
             extra,
             sourceId,
             effectUUID,
             effect: getItemWithSourceId(actor, effectUUID, 'effect'),
-            actionUUID: extra?.action ?? sourceId,
+            action: extra?.action,
             img: effect.img,
         }
     }
