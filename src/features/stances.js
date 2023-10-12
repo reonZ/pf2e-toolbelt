@@ -1,14 +1,20 @@
-import { getSetting, hasItemWithSourceId, info, refreshCharacterSheets, subLocalize, templatePath } from '../module'
+import {
+    getItemWithSourceId,
+    getSetting,
+    hasItemWithSourceId,
+    info,
+    isActiveGM,
+    isActiveOwner,
+    refreshCharacterSheets,
+    subLocalize,
+    templatePath,
+} from '../module'
 import { createHook } from './shared/hook'
 
 const setSheetHook = createHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e)
 const setDeleteCombatHook = createHook('deleteCombat', deleteCombat)
 const setDeleteCombatantHook = createHook('deleteCombatant', deleteCombatant)
 const setCreateCombatantHook = createHook('createCombatant', createCombatant)
-
-const STANCES = new Map()
-const EFFECTS = new Set()
-const ACTIONS = new Set()
 
 const STANCE_SAVANT = ['Compendium.pf2e.feats-srd.Item.yeSyGnYDkl2GUNmu', 'Compendium.pf2e.feats-srd.Item.LI9VtCaL5ZRk0Wo8']
 
@@ -23,17 +29,21 @@ const REPLACERS = new Map([
     ],
 ])
 
-const EXTRAS = [
-    {
-        uuid: 'Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt', // arcane cascade
-        effect: 'Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl',
-        action: 'Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM',
-    },
-    {
-        uuid: 'Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28', // cobra envenom
-        effect: 'Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN',
-    },
-]
+const EXTRAS = new Map([
+    [
+        'Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt', // arcane cascade
+        {
+            effect: 'Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl',
+            action: 'Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM',
+        },
+    ],
+    [
+        'Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28', // cobra envenom
+        {
+            effect: 'Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN',
+        },
+    ],
+])
 
 export function registerStances() {
     return {
@@ -50,12 +60,14 @@ export function registerStances() {
                 name: 'custom-stances',
                 type: String,
                 default: '',
-                onChange: loadStances,
             },
         ],
         conflicts: ['pf2e-stances'],
-        api: { getPackStances, getStances, toggleStance, isValidStance, getActionsUUIDS },
-        init: isGm => {},
+        api: {
+            getStances,
+            toggleStance,
+            isValidStance,
+        },
         ready: isGm => {
             if (getSetting('stances')) setup(true)
         },
@@ -67,130 +79,30 @@ function setup(value) {
     setDeleteCombatHook(value)
     setDeleteCombatantHook(value)
     setCreateCombatantHook(value)
-    loadStances()
-}
-
-async function loadStances() {
-    if (!getSetting('stances')) return
-
-    STANCES.clear()
-    EFFECTS.clear()
-    ACTIONS.clear()
-
-    async function addStances(pack) {
-        const stances = await getPackStances(pack)
-        stances.forEach(stance => {
-            if (STANCES.has(stance.uuid)) return
-            STANCES.set(stance.uuid, stance)
-            ACTIONS.add(stance.uuid)
-        })
-    }
-
-    const pack = game.packs.get('pf2e.feats-srd')
-    await addStances(pack)
-
-    EXTRAS.forEach(({ uuid, effect, action }) => {
-        const { name } = fromUuidSync(uuid)
-        STANCES.set(uuid, { uuid, name, effect, action })
-        ACTIONS.add(action ?? uuid)
-    })
-
-    const customStances = getSetting('custom-stances').split(',')
-    await Promise.all(
-        customStances.map(async custom => {
-            const trimmed = custom.trim()
-
-            const pack = game.packs.get(trimmed)
-            if (pack) {
-                await addStances(pack)
-                return
-            }
-
-            const stance = fromUuidSync(trimmed)
-            if (!stance) return
-
-            const usableUuid = stance.sourceId ?? stance.uuid
-            if (!usableUuid || !isValidStance(stance) || STANCES.has(usableUuid)) return
-
-            STANCES.set(usableUuid, {
-                uuid: usableUuid,
-                name: stance.name,
-                effect: stance.system.selfEffect.uuid,
-            })
-
-            ACTIONS.add(usableUuid)
-        })
-    )
-
-    STANCES.forEach(stance => EFFECTS.add(stance.effect))
-    REPLACERS.forEach(replacer => EFFECTS.add(replacer.effect))
-
-    refreshCharacterSheets()
 }
 
 function isValidStance(stance) {
     return stance && stance.system.traits.value.includes('stance') && stance.system.selfEffect?.uuid
 }
 
-async function getPackStances(pack) {
-    const index = await pack.getIndex({ fields: ['system.traits', 'system.selfEffect'] })
-    return index.filter(isValidStance).map(feat => ({
-        name: feat.name,
-        uuid: feat.uuid,
-        effect: feat.system.selfEffect.uuid,
-    }))
-}
-
-async function getStances(actor) {
+function getStances(actor) {
     const stances = []
-    const replaced = []
-    const effects = new Map()
-    const actions = new Map()
+    const replaced = new Set()
 
-    for (const feat of actor.itemTypes.feat) {
-        const sourceId = feat.sourceId
-
-        const replacer = REPLACERS.get(sourceId)
-        const stance = STANCES.get(replacer?.replace ?? sourceId)
-        if (!stance) continue
+    for (const { replace, sourceId, effectUUID, effect, img, name, actionUUID } of actorStances(actor)) {
+        if (replace) replaced.add(replace)
 
         stances.push({
-            name: stance.name,
+            name,
             uuid: sourceId,
-            action: stance.action,
-            effectUUID: replacer?.effect ?? stance.effect,
+            img,
+            actionUUID,
+            effectUUID,
+            effectID: effect?.id,
         })
-
-        if (replacer) replaced.push(replacer.replace)
-        if (!actions.has(sourceId)) actions.set(sourceId, feat.id)
     }
 
-    for (const action of actor.itemTypes.action) {
-        const sourceId = action.sourceId
-        if (ACTIONS.has(sourceId)) actions.set(sourceId, action.id)
-    }
-
-    for (const effect of actor.itemTypes.effect) {
-        const sourceId = effect.sourceId
-        if (EFFECTS.has(sourceId)) effects.set(sourceId, effect.id)
-    }
-
-    return Promise.all(
-        stances
-            .filter(({ uuid }) => !replaced.includes(uuid))
-            .map(async ({ effectUUID, name, action, uuid }) => {
-                const effect = await fromUuid(effectUUID)
-                if (!effect) return
-
-                return {
-                    name,
-                    img: effect.img,
-                    effectUUID,
-                    actionID: actions.get(action ?? uuid),
-                    effectID: effects.get(effectUUID),
-                }
-            })
-    ).then(stances => stances.filter(Boolean))
+    return stances.filter(({ uuid }) => !replaced.has(uuid))
 }
 
 async function renderCharacterSheetPF2e(sheet, html) {
@@ -215,7 +127,7 @@ async function renderCharacterSheetPF2e(sheet, html) {
     ).on('click', event => onToggleStance(event, actor))
 }
 
-async function onToggleStance(event, actor) {
+function onToggleStance(event, actor) {
     const target = event.currentTarget
     const canUseStances = target.closest('.pf2e-stances')?.classList.contains('can-use-stances')
     if (!event.ctrlKey && !canUseStances) return
@@ -224,15 +136,54 @@ async function onToggleStance(event, actor) {
     toggleStance(actor, effectUUID)
 }
 
+function* actorStances(actor) {
+    for (const feat of actor.itemTypes.feat) {
+        const sourceId = feat.sourceId
+
+        const replacer = REPLACERS.get(sourceId)
+        const extra = EXTRAS.get(sourceId)
+        if (!replacer && !extra && !isValidStance(feat)) continue
+
+        const effectUUID = replacer?.effect ?? extra?.effect ?? feat.system.selfEffect.uuid
+        const effect = fromUuidSync(effectUUID)
+        if (!effect) continue
+
+        yield {
+            name: (replacer && fromUuidSync(replacer.replace)?.name) ?? feat.name,
+            replace: replacer?.replace,
+            extra,
+            sourceId,
+            effectUUID,
+            effect: getItemWithSourceId(actor, effectUUID, 'effect'),
+            actionUUID: extra?.action ?? sourceId,
+            img: effect.img,
+        }
+    }
+}
+
+function getStancesEffects(actor) {
+    const effects = []
+
+    for (const { effect } of actorStances(actor)) {
+        if (!effect) continue
+        effects.push({
+            uuid: effect.sourceId,
+            id: effect.id,
+        })
+    }
+
+    return effects
+}
+
 async function toggleStance(actor, effectUUID) {
-    const effects = getEffects(actor)
+    const effects = getStancesEffects(actor)
     const already = effects.findIndex(effect => effect.uuid === effectUUID)
 
     let create = false
 
-    if (already < 0) {
+    if (already === -1) {
         create = true
-    } else if (effects.length) {
+    } else {
         const other = effects.filter(effect => effect.uuid !== effectUUID).length
         const more = effects.filter(effect => effect.uuid === effectUUID).length > 1
         if (other || more) effects.splice(already, 1)
@@ -264,18 +215,6 @@ async function addStance(actor, uuid) {
     return false
 }
 
-function getEffects(actor) {
-    const effects = []
-
-    for (const effect of actor.itemTypes.effect) {
-        const sourceId = effect.sourceId
-        if (!sourceId || !EFFECTS.has(sourceId)) continue
-        effects.push({ uuid: sourceId, id: effect.id })
-    }
-
-    return effects
-}
-
 function deleteCombat(combat) {
     for (const combatant of combat.combatants) {
         deleteCombatant(combatant)
@@ -286,8 +225,8 @@ function deleteCombatant(combatant) {
     const actor = getActorFromCombatant(combatant)
     if (!actor) return
 
-    if (game.user.isGM) {
-        const effects = getEffects(actor).map(effect => effect.id)
+    if (!game.user.isGM && isActiveOwner(actor)) {
+        const effects = getStancesEffects(actor).map(effect => effect.id)
         if (effects.length) actor.deleteEmbeddedDocuments('Item', effects)
     }
 
@@ -298,7 +237,7 @@ function createCombatant(combatant) {
     const actor = getActorFromCombatant(combatant)
     if (!actor) return
 
-    if (!game.user.isGM && actor.isOwner) checkForSavant(actor)
+    if (!game.user.isGM && isActiveOwner(actor)) checkForSavant(actor)
 
     refreshCharacterSheets(actor)
 }
@@ -309,11 +248,14 @@ function getActorFromCombatant(combatant) {
 }
 
 async function checkForSavant(actor) {
-    if (getEffects(actor).length) return
-    if (!hasItemWithSourceId(actor, STANCE_SAVANT, ['feat'])) return
-
-    const stances = await getStances(actor)
+    const stances = getStances(actor)
     if (!stances.length) return
+
+    const hasStancesEffects = stances.filter(({ effectID }) => effectID).length
+    if (hasStancesEffects) return
+
+    const hasSavantFeat = hasItemWithSourceId(actor, STANCE_SAVANT, ['feat'])
+    if (!hasSavantFeat) return
 
     if (stances.length === 1) {
         const stance = stances[0]
@@ -341,8 +283,4 @@ async function openStancesMenu(actor, stances) {
             },
         },
     }).render(true)
-}
-
-function getActionsUUIDS() {
-    return new Set([...ACTIONS, ...Array.from(REPLACERS.keys())])
 }

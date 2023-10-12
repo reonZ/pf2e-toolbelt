@@ -165,6 +165,10 @@ export function hasItemWithSourceId(actor, sourceId, itemTypes) {
     return getItems(actor, itemTypes).some(getItemSourceIdCondition(sourceId))
 }
 
+export function getItemWithSourceId(actor, sourceId, itemTypes) {
+    return getItems(actor, itemTypes).find(getItemSourceIdCondition(sourceId))
+}
+
 export function getItems(actor, itemTypes) {
     itemTypes = typeof itemTypes === 'string' ? [itemTypes] : itemTypes
     return itemTypes ? itemTypes.flatMap(type => actor.itemTypes[type]) : actor.items
@@ -193,4 +197,14 @@ export function getCharacterOwner(actor, connected = false) {
 export function getOwner(doc, connected = false) {
     if (connected) return game.users.find(x => x.active && doc.testUserPermission(x, 'OWNER'))
     return game.users.find(x => doc.testUserPermission(x, 'OWNER'))
+}
+
+export function getActiveOwner(doc) {
+    const activeOwners = game.users.filter(user => user.active && !user.isGM && doc.testUserPermission(user, 'OWNER'))
+    activeOwners.sort((a, b) => (a.id > b.id ? 1 : -1))
+    return activeOwners[0] || null
+}
+
+export function isActiveOwner(doc) {
+    return getActiveOwner(doc) === game.user
 }

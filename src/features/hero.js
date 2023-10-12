@@ -67,7 +67,7 @@ export function registerHeroActions() {
             discardHeroActions,
             tradeHeroAction,
         },
-        ready: isGM => {
+        ready: () => {
             setHook(false, 'hero')
         },
     }
