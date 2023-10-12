@@ -80,6 +80,15 @@
             "hero-private": {
                 "name": "Hero Actions - Private Draw",
                 "hint": "When enabled, the message generated when drawing hero actions will be private instead of public."
+            },
+            "modifiers": {
+                "name": "Hide Modifiers",
+                "hint": "Will hide the modifiers (from players) of non-player owned creatures in the different chat messages. Can also hide traits tags.",
+                "choices": {
+                    "disabled": "Disabled",
+                    "enabled": "Enabled",
+                    "traits": "Also Hide Traits"
+                }
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",

@@ -3,7 +3,6 @@ import {
     getSetting,
     hasItemWithSourceId,
     info,
-    isActiveGM,
     isActiveOwner,
     refreshCharacterSheets,
     subLocalize,

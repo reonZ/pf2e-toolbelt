@@ -9,6 +9,7 @@ import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
 import { registerHeroActions } from './features/hero'
+import { registerHideModifiers } from './features/modifiers'
 
 const FEATURES = [
     registerArp(),
@@ -21,6 +22,7 @@ const FEATURES = [
     registerSpellsSummary(),
     registerStances(),
     registerHeroActions(),
+    registerHideModifiers(),
 ]
 
 const CONFLICTS = new Set()

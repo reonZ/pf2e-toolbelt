@@ -1,5 +1,5 @@
 import { MultiCast } from '../apps/merge/multi'
-import { MODULE_ID, getFlag, getSetting, localize, templatePath, warn } from '../module'
+import { MODULE_ID, getFlag, getSetting, latestChatMessages, localize, templatePath, warn } from '../module'
 import { createHook } from './shared/hook'
 
 const FLAVOR_TAGS = /<div class="tags"><span class="tag".+?<\/div>/gm
@@ -27,7 +27,7 @@ export function registerMerge() {
             },
         ],
         init: isGm => {
-            setHook(false, ['multi-cast', 'merge-damage'])
+            setHook(false, ['multi-cast', 'merge-damage'], true)
         },
     }
 }
@@ -36,7 +36,7 @@ function updateMessages() {
     const chat = ui.chat?.element
     if (!chat) return
 
-    for (const message of chatMessages(10)) {
+    for (const message of latestChatMessages(10)) {
         const html = chat.find(`[data-message-id=${message.id}]`)
         if (!html.length) continue
 
@@ -86,7 +86,7 @@ function renderDamage(message, html) {
     html.find('[data-action=merge-damage]').on('click', event => {
         event.stopPropagation()
 
-        for (const otherMessage of chatMessages(5, message)) {
+        for (const otherMessage of latestChatMessages(5, message)) {
             if (
                 getMessageUuid(otherMessage) !== uuid ||
                 getMessageTarget(otherMessage) !== originTarget ||
@@ -226,17 +226,6 @@ function createTermGroup(terms) {
             operator: '+',
             operands: [terms.shift(), terms.length > 1 ? createTermGroup(terms) : terms[0]],
         },
-    }
-}
-
-function* chatMessages(nb, fromMessage) {
-    const messages = game.messages.contents
-    const start = (fromMessage ? messages.findLastIndex(m => m === fromMessage) : messages.length) - 1
-
-    for (let i = start; i >= start - nb; i--) {
-        const message = messages[i]
-        if (!message) return
-        yield message
     }
 }
 

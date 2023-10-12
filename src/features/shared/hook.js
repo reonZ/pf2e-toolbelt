@@ -3,7 +3,7 @@ import { getSetting } from '../../module'
 export function createHook(event, listener, callback = () => {}) {
     let HOOK = null
 
-    return function (value, otherSettings = []) {
+    return function (value, otherSettings = [], skipCallback = false) {
         if (typeof otherSettings === 'string') otherSettings = [otherSettings]
 
         value ||= otherSettings.some(s => getSetting(s))
@@ -15,14 +15,14 @@ export function createHook(event, listener, callback = () => {}) {
             HOOK = null
         }
 
-        callback(value)
+        if (!skipCallback) callback(value)
     }
 }
 
 export function createChoicesHook(event, listener, callback = () => {}) {
     let HOOK = null
 
-    return function (value) {
+    return function (value, skipCallback = false) {
         if (value === 'disabled' && HOOK) {
             Hooks.off(event, HOOK)
             HOOK = null
@@ -30,6 +30,6 @@ export function createChoicesHook(event, listener, callback = () => {}) {
             HOOK = Hooks.on(event, listener)
         }
 
-        callback(value)
+        if (!skipCallback) callback(value)
     }
 }

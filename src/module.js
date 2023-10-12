@@ -208,3 +208,14 @@ export function getActiveOwner(doc) {
 export function isActiveOwner(doc) {
     return getActiveOwner(doc) === game.user
 }
+
+export function* latestChatMessages(nb, fromMessage) {
+    const messages = game.messages.contents
+    const start = (fromMessage ? messages.findLastIndex(m => m === fromMessage) : messages.length) - 1
+
+    for (let i = start; i >= start - nb; i--) {
+        const message = messages[i]
+        if (!message) return
+        yield message
+    }
+}

@@ -1,0 +1,14 @@
+.chat-message {
+    .message-header.pf2e-toolbelt-modifiers {
+        .action + .tags + hr + .tags {
+            display: none;
+        }
+
+        &.pf2e-toolbelt-modifiers-traits {
+            .action + .tags,
+            .action + .tags + hr {
+                display: none;
+            }
+        }
+    }
+}
