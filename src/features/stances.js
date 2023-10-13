@@ -42,6 +42,12 @@ const EXTRAS = new Map([
             effect: 'Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN',
         },
     ],
+    [
+        'Compendium.pf2e.feats-srd.Item.R7c4PyTNkZb0yvoT', // dread marshal
+        {
+            effect: 'Compendium.pf2e.feat-effects.Item.qX62wJzDYtNxDbFv', // the stance aura
+        },
+    ],
 ])
 
 export function registerStances() {
