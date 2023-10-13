@@ -1,6 +1,6 @@
-#
+# 1.6.1
 
-TODO allow direct drag from compendium into prepared spellcasting entry when access to all spells
+-   added exception for `Dread Marshal Stance`
 
 # 1.6.0
 
