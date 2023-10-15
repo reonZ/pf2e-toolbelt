@@ -20,13 +20,26 @@
 }
 
 .chat-message {
+    .pf2e-toolbelt-merged-group {
+        padding-inline: 3px;
+        margin-bottom: 4px;
+        box-shadow: 0 0 4px 0px black;
+        border-radius: 2px;
+
+        .notes {
+            min-height: 2px;
+        }
+    }
+
     .message-content {
         .dice-result {
             .dice-total {
                 .pf2e-toolbelt-merge {
                     position: absolute;
                     right: 0px;
-                    bottom: 1px;
+                    top: 1px;
+                    display: flex;
+                    gap: 1px;
 
                     button {
                         width: 22px;

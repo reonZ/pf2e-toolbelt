@@ -121,10 +121,12 @@
             },
             "damage": {
                 "tooltip": "Merge with previous damage",
+                "split-tooltip": "Split back to original messages",
                 "none": "No other damage message of this type was found"
             },
             "merged": {
-                "header": "Merged Damage Roll: {name}"
+                "header": "Merged Damage Roll: {name}",
+                "outcome": "Outcome: {outcome}"
             }
         },
         "summary": {

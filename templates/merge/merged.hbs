@@ -1,15 +1,19 @@
-<h4 class="action"><strong>{{header}}</strong></h4>
-{{{tags}}}
-<hr />
-<div class="tags">
-    {{#each modifiers as |modifier|}}
-    <span class="tag tag_transparent">{{modifier}}</span>
+{{#each groups as |group|}}
+<div class="pf2e-toolbelt-merged-group">
+    <h4 class="action"><strong>{{group.label}}</strong></h4>
+    {{{group.tags}}}
+    {{#each group.results as |result|}}
+    <h4 class="action"><strong>{{result.label}}</strong></h4>
+    <div class="tags">
+        {{#each result.modifiers as |modifier|}}
+        <span class="tag tag_transparent">{{modifier}}</span>
+        {{/each}}
+    </div>
     {{/each}}
+    <ul class="notes">
+        {{#each group.notes as |note|}}
+        <li class="roll-note">{{{note}}}</li>
+        {{/each}}
+    </ul>
 </div>
-{{#if notes.length}}
-<ul class="notes">
-    {{#each notes as |note|}}
-    <li class="roll-note">{{{note}}}</li>
-    {{/each}}
-</ul>
-{{/if}}
+{{/each}}
