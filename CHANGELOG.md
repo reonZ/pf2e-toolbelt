@@ -1,3 +1,12 @@
+# 1.7.0
+
+-   this is a `5.7.0` release
+-   reworked the `Merge Damage` feature
+    -   you can now merge damages from any source as long the messages have the same originating actor and the same target
+    -   improved the newly created merged damage chat message, showing all the different damage sources and their outcomes
+    -   added a new `Split back to original messages` icon on merged damage messages which reverts the merging process
+-   fixed the `No Dropped Bulk` error that was introduced in this system version
+
 # 1.6.1
 
 -   added exception for `Dread Marshal Stance`
