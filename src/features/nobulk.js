@@ -25,14 +25,16 @@ function actorPrepareEmbeddedDocuments(wrapped, ...args) {
     const actor = this
     const InventoryBulk = actor.inventory.bulk.constructor
 
-    Object.defineProperty(actor.inventory, 'bulk', {
+    let _value = null
+
+    Object.defineProperty(actor.inventory.bulk, 'value', {
         get() {
-            const inventoryBulk = new InventoryBulk(actor)
-            inventoryBulk.value = InventoryBulk.computeTotalBulk(
-                actor.inventory.filter(i => !i.isInContainer && i.system.equipped.carryType !== 'dropped'),
-                actor.size
+            if (_value) return _value
+            _value = InventoryBulk.computeTotalBulk(
+                this.actor.inventory.filter(item => !item.isInContainer && item.system.equipped.carryType !== 'dropped'),
+                this.actor.size
             )
-            return inventoryBulk
+            return _value
         },
     })
 }
