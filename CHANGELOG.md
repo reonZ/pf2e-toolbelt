@@ -1,3 +1,7 @@
+# 1.7.1
+
+-   added exception for `Inspiring Marshal Stance`
+
 # 1.7.0
 
 -   this is a `5.7.0` release
