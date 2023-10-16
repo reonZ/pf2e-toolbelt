@@ -85,8 +85,8 @@ export function error(...args) {
     notify(str, 'error', arg1, arg2)
 }
 
-export function registerWrapper(path, callback) {
-    libWrapper.register(MODULE_ID, path, callback)
+export function registerWrapper(path, callback, type) {
+    libWrapper.register(MODULE_ID, path, callback, type)
 }
 
 export function getFlag(doc, key, fallback) {
