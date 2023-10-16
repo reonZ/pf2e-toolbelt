@@ -48,6 +48,12 @@ const EXTRAS = new Map([
             effect: 'Compendium.pf2e.feat-effects.Item.qX62wJzDYtNxDbFv', // the stance aura
         },
     ],
+    [
+        'Compendium.pf2e.feats-srd.Item.bvOsJNeI0ewvQsFa', // inspiring marshal
+        {
+            effect: 'Compendium.pf2e.feat-effects.Item.er5tvDNvpbcnlbHQ', // the stance aura
+        },
+    ],
 ])
 
 export function registerStances() {
