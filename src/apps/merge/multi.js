@@ -1,4 +1,5 @@
-import { subLocalize, templatePath } from '../../module'
+import { subLocalize } from '../../shared/localize'
+import { templatePath } from '../../shared/path'
 
 const localize = subLocalize('merge.multi')
 

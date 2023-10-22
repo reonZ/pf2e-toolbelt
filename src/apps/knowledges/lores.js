@@ -1,4 +1,6 @@
-import { getFlag, setFlag, subLocalize, templatePath } from '../../module'
+import { getFlag, setFlag } from '../../shared/flags'
+import { subLocalize } from '../../shared/localize'
+import { templatePath } from '../../shared/path'
 
 const localize = subLocalize('knowledges.editLore')
 

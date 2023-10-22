@@ -1,5 +1,8 @@
-import { MODULE_ID, getSetting, localeCompare, refreshCharacterSheets, templatePath } from '../module'
-import { createChoicesHook } from './shared/hook'
+import { MODULE_ID } from '../module'
+import { createChoicesHook } from '../shared/hook'
+import { localeCompare, refreshCharacterSheets } from '../shared/misc'
+import { templatePath } from '../shared/path'
+import { getSetting } from '../shared/settings'
 
 const setHook = createChoicesHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e, () => refreshCharacterSheets())
 

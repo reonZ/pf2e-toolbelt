@@ -1,4 +1,6 @@
-import { getSetting, info, registerWrapper } from '../module'
+import { registerWrapper } from '../shared/libwrapper'
+import { info } from '../shared/notification'
+import { getSetting } from '../shared/settings'
 
 const PREPARE_WEAPON_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData'
 const PREPARE_WEAPON_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData'

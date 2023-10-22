@@ -1,21 +1,13 @@
 import { Trade } from '../apps/hero/trade'
-import {
-    chatUUID,
-    documentUuidFromTableResult,
-    error,
-    getSetting,
-    isActiveGM,
-    localize,
-    refreshCharacterSheets,
-    setSetting,
-    socketEmit,
-    socketOff,
-    socketOn,
-    subLocalize,
-    templatePath,
-    warn,
-} from '../module'
-import { createHook } from './shared/hook'
+import { chatUUID } from '../shared/chat'
+import { createHook } from '../shared/hook'
+import { localize, subLocalize } from '../shared/localize'
+import { refreshCharacterSheets } from '../shared/misc'
+import { error, warn } from '../shared/notification'
+import { templatePath } from '../shared/path'
+import { getSetting, setSetting } from '../shared/settings'
+import { socketOff, socketOn, socketEmit } from '../shared/socket'
+import { isActiveGM } from '../shared/user'
 
 const MODULE_ID = 'pf2e-hero-actions'
 
@@ -466,8 +458,6 @@ async function onTradeAccepted(trade) {
     let content = `<div style="line-height: 1.6">${localize('offer', { offer: sentLink })}</div>`
     content += `<div style="line-height: 1.6">${localize('receive', { receive: receivedLink })}</div>`
 
-    console.log('content')
-
     ChatMessage.create({
         flavor: `<h4 class="action">${localize('header', { name: receiverActor.name })}</h4>`,
         content,
@@ -703,4 +693,11 @@ function removeActionsToggleActor(html) {
     } else {
         all.prop('checked', false).prop('indeterminate', true)
     }
+}
+
+function documentUuidFromTableResult(result) {
+    if (result.type === CONST.TABLE_RESULT_TYPES.TEXT) return /@UUID\[([\w\.]+)\]/.exec(result.text)?.[1]
+    if (result.type === CONST.TABLE_RESULT_TYPES.DOCUMENT) return `${result.documentCollection}.${result.documentId}`
+    if (result.type === CONST.TABLE_RESULT_TYPES.COMPENDIUM) return `Compendium.${result.documentCollection}.${result.documentId}`
+    return undefined
 }

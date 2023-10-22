@@ -1,16 +1,11 @@
 import { MoveLootPopup } from '../apps/giveth/popup'
-import {
-    chatUUID,
-    getSetting,
-    isActiveGM,
-    isGMOnline,
-    localize,
-    registerUpstreamHook,
-    socketEmit,
-    socketOff,
-    socketOn,
-    warn,
-} from '../module'
+import { chatUUID } from '../shared/chat'
+import { registerUpstreamHook } from '../shared/hook'
+import { localize } from '../shared/localize'
+import { warn } from '../shared/notification'
+import { getSetting } from '../shared/settings'
+import { socketOff, socketOn, socketEmit } from '../shared/socket'
+import { isActiveGM, isGMOnline } from '../shared/user'
 
 let enabled = false
 let CANVAS_HOOK = null

@@ -1,14 +1,11 @@
-import {
-    getItemWithSourceId,
-    getSetting,
-    hasItemWithSourceId,
-    info,
-    isActiveOwner,
-    refreshCharacterSheets,
-    subLocalize,
-    templatePath,
-} from '../module'
-import { createHook } from './shared/hook'
+import { createHook } from '../shared/hook'
+import { getItemWithSourceId, hasItemWithSourceId } from '../shared/item'
+import { subLocalize } from '../shared/localize'
+import { refreshCharacterSheets } from '../shared/misc'
+import { info } from '../shared/notification'
+import { templatePath } from '../shared/path'
+import { getSetting } from '../shared/settings'
+import { isActiveOwner } from '../shared/user'
 
 const setSheetHook = createHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e)
 const setDeleteCombatHook = createHook('deleteCombat', deleteCombat)

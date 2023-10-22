@@ -1,17 +1,12 @@
 import { MultiCast } from '../apps/merge/multi'
-import {
-    MODULE_ID,
-    compareArrays,
-    getChatMessageClass,
-    getFlag,
-    getSetting,
-    latestChatMessages,
-    localize,
-    subLocalize,
-    templatePath,
-    warn,
-} from '../module'
-import { createHook } from './shared/hook'
+import { MODULE_ID } from '../module'
+import { getChatMessageClass, latestChatMessages } from '../shared/chat'
+import { getFlag } from '../shared/flags'
+import { createHook } from '../shared/hook'
+import { compareArrays } from '../shared/misc'
+import { warn } from '../shared/notification'
+import { templatePath } from '../shared/path'
+import { getSetting } from '../shared/settings'
 
 const FLAVOR_TAGS = /<div class="tags"><span class="tag".+?<\/div>/gm
 const FLAVOR_MODIFIERS = /<span class="tag tag_transparent">(.+?)<\/span>/gm

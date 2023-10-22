@@ -1,5 +1,6 @@
-import { getSetting, latestChatMessages } from '../module'
-import { createChoicesHook } from './shared/hook'
+import { latestChatMessages } from '../shared/chat'
+import { createChoicesHook } from '../shared/hook'
+import { getSetting } from '../shared/settings'
 
 const setHook = createChoicesHook('renderChatMessage', renderChatMessage, updateMessages)
 

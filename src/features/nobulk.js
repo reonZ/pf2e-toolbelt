@@ -1,4 +1,5 @@
-import { getSetting, registerWrapper } from '../module'
+import { registerWrapper } from '../shared/libwrapper'
+import { getSetting } from '../shared/settings'
 
 const ACTOR_PREPARE_EMBEDDED_DOCUMENTS = 'CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments'
 

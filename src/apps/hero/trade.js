@@ -1,5 +1,7 @@
 import { getHeroActions, sendTradeRequest } from '../../features/hero'
-import { getCharacterOwner, getOwner, subLocalize, templatePath } from '../../module'
+import { subLocalize } from '../../shared/localize'
+import { templatePath } from '../../shared/path'
+import { getCharacterOwner, getOwner } from '../../shared/user'
 
 const localize = subLocalize('hero.templates.trade')
 
@@ -82,7 +84,6 @@ export class Trade extends Application {
             return
         }
 
-        console.log(getCharacterOwner(this.target, true), getOwner(this.target, true))
         let user = getCharacterOwner(this.target, true) ?? getOwner(this.target, true) ?? game.users.activeGM
         if (!user) {
             localize.warn('no-user')

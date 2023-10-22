@@ -1,4 +1,4 @@
-import { getSetting } from '../module'
+import { getSetting } from '../shared/settings'
 
 let CREATE_HOOK = null
 let UPDATE_HOOK = null

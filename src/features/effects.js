@@ -1,5 +1,6 @@
-import { getSetting, localize } from '../module'
-import { createHook } from './shared/hook'
+import { createHook } from '../shared/hook'
+import { localize } from '../shared/localize'
+import { getSetting } from '../shared/settings'
 
 const setHook = createHook('renderEffectsPanel', renderEffectsPanel, refreshEffectsPanel)
 

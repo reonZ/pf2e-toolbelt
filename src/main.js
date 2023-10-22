@@ -1,4 +1,4 @@
-import { MODULE_ID, localize, warn } from './module'
+import { MODULE_ID } from './module'
 import { registerArp } from './features/arp'
 import { registerEffectsPanelHelper } from './features/effects'
 import { registerGiveth } from './features/giveth'
@@ -10,6 +10,8 @@ import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
 import { registerHeroActions } from './features/hero'
 import { registerHideModifiers } from './features/modifiers'
+import { localize } from './shared/localize'
+import { warn } from './shared/notification'
 
 const FEATURES = [
     registerArp(),
