@@ -6,6 +6,10 @@
                 "name": "No Dropped Bulk",
                 "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
             },
+            "nobulk-coins": {
+                "name": "Weightless Coins",
+                "hint": "(Requires Reload) Coins are weightless when enabled."
+            },
             "arp": {
                 "name": "Automatic Rune Progression",
                 "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment."
