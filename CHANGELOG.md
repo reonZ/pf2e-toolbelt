@@ -1,3 +1,7 @@
+# 1.8.1
+
+-   fixed error with `Merge Damage`
+
 # 1.8.0
 
 -   added `Weightless Coins` setting/feature
