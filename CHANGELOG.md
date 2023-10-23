@@ -1,3 +1,7 @@
+# 1.8.0
+
+-   added `Weightless Coins` setting/feature
+
 # 1.7.1
 
 -   added exception for `Inspiring Marshal Stance`

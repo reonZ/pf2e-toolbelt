@@ -20,6 +20,10 @@ The module will automatically disable the system `Automatic Bonus Progression` v
 
 Dropped equipment in an actor's inventory won't be accounted for bulk value calculation
 
+## Weightless Coins (Requires Reload)
+
+Coins are weightless when enabled
+
 ## Giveth
 
 **IMPORTANT: A GM needs to be logged into your world to allow players to giveth their hard earned belongings.**
