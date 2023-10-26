@@ -1,3 +1,7 @@
+# 1.8.2
+
+-   added missing chinese localization (thanks to [LiyuNodream](https://github.com/LiyuNodream))
+
 # 1.8.1
 
 -   fixed error with `Merge Damage`
