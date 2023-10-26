@@ -130,7 +130,7 @@ Can also hide the traits tags on those same messages.
 A new icon will appear in damage roll messages allowing the merging of the message with another one of the same type preceding it
 
 -   the module will look at the 5 messages above it to find a matching message
--   the other message needs to have been initiated from the same `Item` (and therefore `Actor`)
+-   the other message needs to have been initiated by the same `Actor`
 -   the other message needs to have the same target (or both no target)
 
 You can keep merging messages as long as the module find one appropriate
@@ -266,7 +266,7 @@ stances: {
     isValidStance,
     /**
      * @param { ChatacterPF2e } actor
-     * @returns { { name: string; uuid: string; img: string; actionUUID: string;, effectUUID: string; effectID: string; }[] }
+     * @returns { { name: string; uuid: string; img: string; actionUUID: string; effectUUID: string; effectID: string; }[] }
      * the stances available on the actor, effectID is only provided if the effect of the stance is currently present on the actor
      */
     getStances,
