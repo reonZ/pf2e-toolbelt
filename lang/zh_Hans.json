@@ -1,90 +1,90 @@
 {
     "pf2e-toolbelt": {
         "settings": {
-            "client": "Client Settings",
+            "client": "客户端设置",
             "nobulk": {
-                "name": "No Dropped Bulk",
-                "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
+                "name": "掉落物不计重",
+                "hint": "（需要重新载入）角色物品库中的掉落装备将不再计入负重上限"
             },
             "arp": {
-                "name": "Automatic Rune Progression",
-                "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment."
+                "name": "自动符文进程",
+                "hint": "（需要重新载入）用于替代原本的 [自动成长加值] 变体规则，启用后将根据等级进度自动为装备赋予潜能(效力)/强击/抗力符文。"
             },
             "unided": {
-                "name": "Set Un-Identified Image",
-                "hint": "Automatically set the un-identifed image of items to be the same as the regular image.",
+                "name": "未鉴定物品图标",
+                "hint": "自动将物品的未鉴定状态退保替换成与常规图标相同（注：经测试似乎无效）",
                 "choices": {
-                    "disabled": "Disabled",
-                    "create": "On Creation Only",
-                    "all": "On Creation & Update"
+                    "disabled": "禁用",
+                    "create": "仅限新建物品",
+                    "all": "新建或更新的物品"
                 }
             },
             "knowledges": {
-                "name": "Npc Lore Knowledges",
-                "hint": "Adds the option to set custom lores for NPCs."
+                "name": "Npc 回忆知识学识",
+                "hint": "添加了额外选项，可以借此为NPC设置自定义的默认回忆知识学识。"
             },
             "effect-remove": {
-                "name": "Remove Effect Shortcut",
-                "hint": "Using [Shift + Right Click] on effect icons in the effects panel will instantly remove all its charges/counters/badges."
+                "name": "移除效果快捷键",
+                "hint": "对准效果栏上的效果图标使用 [Shift + 右键] 来立即移除效果拥有的全部充能/计数/标记"
             },
             "condition-sheet": {
-                "name": "Condition Sheet Icon",
-                "hint": "Adds a new icon to condition in the effects panel to open their sheet just like you would with non-condition effects."
+                "name": "常见状态展开",
+                "hint": "在右上角效果栏的悬浮框中，为常规状态列表中的那些常见状态（如倒地、流失等）添加一个编辑按钮，你可以如同编辑其它效果一样编辑它们。"
             },
             "multi-cast": {
-                "name": "Multi-Cast",
-                "hint": "A new 'Multi' button will appear next to spells `Damage` button allowing the cast of multiple instances of the spell at once, Changing this setting will only update the last 10 messages in chat."
+                "name": "多重施法",
+                "hint": "在法术的‘伤害’按钮旁边添加一个新的‘多重’按钮，点击它便可以同时多次施展法术实例，启用此设置后只会有最新的10条消息会同步更新。（注：经测试，对法术飞弹无效）"
             },
             "merge-damage": {
-                "name": "Merge Damage",
-                "hint": "A new small icon is added to damage roll messages allow them to be merged with another damage roll message of the same type preceding it."
+                "name": "合并伤害",
+                "hint": "在伤害掷骰消息中添加一个新的小图标，点击便能让该消息与前面的同类型伤害掷骰消息合并。"
             },
             "summary": {
-                "name": "Spells Summary",
-                "hint": "Offers the ability to toggle between the regular and an alternate version of the character sheet's `Spellcasting` tab at any moment by clicking once more on the tab icon.",
+                "name": "法术汇总",
+                "hint": "再次点击角色卡中的法术按钮，便能够切换法术列表的展示模式，一种是默认法表，另一种是汇总型法表。",
                 "choices": {
-                    "disabled": "Disabled",
-                    "enabled": "Enabled",
-                    "sort": "Sort by Types"
+                    "disabled": "禁用",
+                    "enabled": "允许",
+                    "sort": "按类型分类"
                 }
             },
             "giveth": {
-                "name": "Giveth",
-                "hint": "Allow players to give items to other player-owned actors. They can also add conditions and effect to other player-owned actors if it originated from them.",
+                "name": "给予",
+                "hint": "允许玩家向其它玩家所拥有的角色赠送物品。允许玩家向其它玩家所拥有的角色添加状态和效果，只要这些状态和效果的源头是他们自己。",
                 "choices": {
-                    "disabled": "Disabled",
-                    "enabled": "Enabled",
-                    "no-message": "No Chat Message"
+                    "disabled": "禁用",
+                    "enabled": "允许",
+                    "no-message": "不弹出提示消息"
                 }
             },
             "stances": {
-                "name": "Stances",
-                "hint": "Add stances buttons in the character sheet to toggle them faster, it will also remove stances at the end of the encounter and more."
+                "name": "架势",
+                "hint": "在角色表中添加架势按钮，以便玩家可以更快速地切换架势。该功能还有一些别的帮助，比如架势会在遭遇战结束后快速移除，等等。"
             },
             "custom-stances": {
-                "name": "Custom Stances",
-                "hint": "Comma separated list of compendium pack id containing custom stance feats/features, can also list directly world feats/features uuid ; Custom feats/features must have the 'stance' trait and have a self-applied effect."
+                "name": "自定义架势",
+                "hint": "用逗号分隔那些包含自定义架势专长/特征的合集包id。也可以直接列出其在本世界中的专长/特征uuid。注意，自定义专长/特征必须拥有'架势'特征标签，并且应当能够应用于自身。"
             },
             "hero": {
-                "name": "Hero Actions",
-                "hint": "Adds a section in the PF2e character sheet to manage the 'Hero Point Deck' actions alternate rule."
+                "name": "英雄点动作",
+                "hint": "在PF2e角色表中添加管理‘英雄点卡牌’可用规则的相关内容"
             },
             "hero-table": {
-                "name": "Hero Actions - Table UUID",
-                "hint": "Unique ID of the Deck Table. To get the UUID of a table (in a compendium or in the Rollable Tables directory), simply open the table and Right-Click on 📔 next to its name. If left empty, the first Hero Deck table found in your world will be used, if none, then the default compendium table will be used instead."
+                "name": "英雄点动作 - 表 UUID",
+                "hint": "要获取某份表（合集包或随机掷骰表目录中）的UUID，只需要打开该表并右键单击其名称旁边的 📔 。如果留空，则将使用你的世界中所能找到的第一份英雄点卡牌表，如果一份也没有，那么将使用默认表。"
             },
             "hero-trade": {
-                "name": "Hero Actions - Allow Trade",
-                "hint": "When enabled, players will be able to trade action with each others."
+                "name": "英雄点动作 - 允许交换",
+                "hint": "启用后，玩家们将可以互相交换自己所拥有的动作。"
             },
             "hero-private": {
-                "name": "Hero Actions - Private Draw",
-                "hint": "When enabled, the message from drawing hero actions will be private instead of public."
+                "name": "英雄点动作 - 私下抽取",
+                "hint": "启用后，抽取英雄点动作的信息将会是个人信息而不再公开。"
             }
         },
-        "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
+        "module-conflict": " 该 <strong>{name}</strong> mod 不再被需要，因为其功能已被 <strong>PF2e ToolBelt</strong> 替代，你可以安全地禁用它。",
         "arp": {
-            "forceVariant": "The module <strong>PF2e ToolBelt</strong> disabled the pf2e system variant ABP rule to work properly"
+            "forceVariant": "<strong>PF2e ToolBelt</strong> 已禁用 pf2e 系统自带的 自动成长加值 变体规则以保证运行顺利。"
         },
         "knowledges": {
             "templates": {
@@ -102,26 +102,26 @@
         },
         "merge": {
             "spell": {
-                "button": "Multi"
+                "button": "多重"
             },
             "multi": {
-                "title": "{name} - Multi Cast",
-                "hint": "Number of instances to be cast at once",
-                "cast": "Cast",
-                "cancel": "Cancel",
-                "zero": "You cannot cast 0 instance of a spell."
+                "title": "{name} - 多重施法",
+                "hint": "一次性要施放的法术实例数量",
+                "cast": "施放",
+                "cancel": "取消",
+                "zero": "你不能所施法的法术实例数量不能为 0"
             },
             "damage": {
-                "tooltip": "Merge with previous damage",
-                "none": "No other damage message of this type was found"
+                "tooltip": "与过往消息合并",
+                "none": "未找到其它该类型的伤害消息"
             },
             "merged": {
-                "header": "Merged Damage Roll: {name}"
+                "header": "合并的伤害掷骰: {name}"
             }
         },
         "summary": {
-            "staff": "Staff",
-            "charges": "Charges"
+            "staff": "法杖",
+            "charges": "充能"
         },
         "giveth": {
             "giveth": "给予 {target}",
@@ -143,96 +143,96 @@
         },
         "hero": {
             "use": {
-                "noPoints": "You need at least 1 Hero Point to use a Hero Action.",
-                "noAction": "Could not find this action.",
-                "noDetails": "Could not find the details for this Hero Action."
+                "noPoints": "你需要至少 1 点英雄点来执行英雄点动作",
+                "noAction": "无法找到该动作。",
+                "noDetails": "无法找到该英雄点动作的具体内容。"
             },
             "trade-request": {
-                "title": "Trade Request",
-                "header": "The character {sender} wants to trade with {receiver}",
-                "give": "Offers: {give}",
-                "want": "Wants: {want}",
-                "accept": "Would you like to accept the deal?"
+                "title": "交换请求",
+                "header": "剧角色 {sender} 想要与 {receiver} 进行交换",
+                "give": "提供: {give}",
+                "want": "需求: {want}",
+                "accept": "你是否接受该提议？"
             },
             "trade-success": {
-                "header": "Traded with {name}",
-                "offer": "Offered: {offer}",
-                "receive": "Received: {receive}"
+                "header": "与 {name} 交换",
+                "offer": "提供: {offer}",
+                "receive": "得到: {receive}"
             },
             "actions-discard": {
-                "header": "Has Discarded ({nb}) Hero Action"
+                "header": "已丢弃 ({nb}) 英雄点动作"
             },
             "actions-draw": {
-                "header": "Has Drawn ({nb}) Hero Action"
+                "header": "已抽取 ({nb}) 英雄点动作"
             },
             "actions-use": {
-                "header": "Spends a Hero Point to use"
+                "header": "消耗一点英雄点以使用"
             },
-            "trade-rejected": "Your trade for Hero Action has been rejected by {name}.",
-            "trade-error": "An error occured during the Hero Action trade.",
-            "no-points": "You need to discard ({nb}) Hero Action before you can engage in a trade.",
-            "no-action": "You don't have any Hero Action to trade.",
+            "trade-rejected": "你的英雄点交换请求已被 {name} 拒绝。",
+            "trade-error": "英雄点交换过程中发生了错误。",
+            "no-points": "在进行交换之前，你需要先丢弃 ({nb}) 英雄点动作。",
+            "no-action": "你没有任何能用来交换的英雄点动作。",
             "templates": {
                 "trade": {
-                    "title": "Trade Hero Action",
-                    "select": "Select the character to trade with",
-                    "no-target": "Target could not be found",
-                    "no-select": "Please select one Hero Action to give and one to receive.",
-                    "no-user": "The target has no owner or their are not online.",
-                    "error": "An error occured during the trade. Most likely a Hero Action was missing.",
-                    "send": "Send",
-                    "cancel": "Cancel"
+                    "title": "交换英雄点动作",
+                    "select": "选择交换的目标角色",
+                    "no-target": "未找到目标",
+                    "no-select": "请选择一个你要提供的英雄点动作以及一个你想要得到的英雄点动作。",
+                    "no-user": "目标不被任何人控制亦或者其控制者不在线。",
+                    "error": "交换过程中出现错误，大概率是缺少了一个英雄点动作。",
+                    "send": "发送",
+                    "cancel": "取消"
                 },
                 "createTable": {
                     "choice": {
-                        "title": "Table creation options",
-                        "create": "Create",
-                        "cancel": "Cancel",
+                        "title": "创建列表选项",
+                        "create": "创建",
+                        "cancel": "取消",
                         "types": {
-                            "group": "Type of table:",
-                            "default": "Default",
-                            "custom": "Custom"
+                            "group": "列表类型:",
+                            "default": "默认",
+                            "custom": "自定义"
                         },
                         "draw": {
-                            "group": "Draw Options:",
-                            "random": "Random",
-                            "unique": "Unique"
+                            "group": "抽取选项:",
+                            "random": "随机",
+                            "unique": "特定"
                         }
                     },
                     "default": {
                         "confirm": {
-                            "title": "Default Table Confirm?",
-                            "content": "<p>A default table already exists in this world, would you like to override it or create a new one ?</p>"
+                            "title": "确定默认列表？",
+                            "content": "<p>当前世界中已存在一个默认列表，你想要将其覆盖还是创建一个新的列表？</p>"
                         }
                     }
                 },
                 "removeActions": {
-                    "title": "Remove Hero Actions from Characters",
-                    "remove": "Remove",
-                    "cancel": "Cancel",
-                    "all": "All",
-                    "noSelection": "No Character were selected.",
-                    "removed": "Hero Actions were removed on selected Character(s)."
+                    "title": "移除角色的英雄点动作",
+                    "remove": "移除",
+                    "cancel": "取消",
+                    "all": "全部",
+                    "noSelection": "未选中任何角色。",
+                    "removed": "已移除所选角色的英雄点动作。"
                 },
                 "heroActions": {
                     "action": {
-                        "use": "Use",
-                        "discard": "Discard"
+                        "use": "使用",
+                        "discard": "丢弃"
                     },
-                    "discard": "Discard Selected ({nb}) Hero Action",
-                    "draw": "Draw ({nb}) Hero Action",
-                    "error": "You must discard ({nb}) Hero Action",
-                    "label": "Hero Actions",
-                    "tbd": "To be determined",
-                    "trade": "Trade"
+                    "discard": "丢弃被选中的 ({nb}) 英雄点动作",
+                    "draw": "抽取 ({nb}) 英雄点动作",
+                    "error": "你必须丢弃 ({nb}) 英雄点动作",
+                    "label": "英雄点动作",
+                    "tbd": "待定",
+                    "trade": "交换"
                 }
             },
             "table": {
-                "name": "Hero Actions Deck (do not delete)",
-                "description": "Table for Hero Actions used in consort with the Hero Points.",
-                "noFormula": "The Hero Deck table has no formula, tell your GM he messed up.",
-                "noFormulaCompendium": "The Hero Deck table has no formula and is a compendium table.",
-                "drawError": "An error occurred during the draw, most likely the table contains non-conform results."
+                "name": "英雄点动作卡牌 (不要删除)",
+                "description": "与英雄点搭配使用的英雄点动作列表。",
+                "noFormula": "英雄点卡牌列表没有任何公式，通知你的GM，Ta搞砸了。",
+                "noFormulaCompendium": "英雄点卡牌列表没有任何公式，其是一个合集表。",
+                "drawError": "抽取过程中出现了错误，大概率是因为列表中包含有不符合前置要求的结果。"
             }
         }
     }
