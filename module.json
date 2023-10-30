@@ -17,12 +17,12 @@
         "verified": "11"
     },
     "socket": true,
-    "version": "1.0.0",
+    "version": "1.9.0",
     "manifestPlusVersion": "1.2.0",
     "url": "https://github.com/reonZ/pf2e-toolbelt",
     "readme": "https://github.com/reonZ/pf2e-toolbelt/blob/master/README.md",
     "manifest": "https://raw.githubusercontent.com/reonZ/pf2e-toolbelt/master/module.json",
-    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.0.0/module.zip",
+    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.9.0/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
     "styles": [
