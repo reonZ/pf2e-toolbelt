@@ -1,3 +1,16 @@
+# 1.9.0
+
+-   added "only character" warnings to `heroActions` API functions
+-   added "only GM" warnings to `heroActions` API functions
+-   added new `heroActions` API functions
+    -   `getDeckTable` which returns the table used by the feature, looking for the table in that order
+        -   a table in your world with the UUID specified in the settings
+        -   a default `Hero Point Deck` table in your world
+        -   the default `Hero Point Deck` from the compendium
+    -   `giveHeroActions` which opens a menu allowing you to manually grant hero actions to a character
+    -   `createChatMessage` generates a chat message with a label and a list of actions
+-   moved the API doc to the github [wiki](https://github.com/reonZ/pf2e-toolbelt/wiki#api) instead of the `README`
+
 # 1.8.2
 
 -   added missing chinese localization (thanks to [LiyuNodream](https://github.com/LiyuNodream))
