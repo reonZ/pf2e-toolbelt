@@ -182,6 +182,9 @@
             "actions-use": {
                 "header": "Spends a Hero Point to use"
             },
+            "actions-give": {
+                "header": "Was Given ({nb}) Hero Action"
+            },
             "trade-rejected": "Your trade for Hero Action has been rejected by {name}.",
             "trade-error": "An error occured during the Hero Action trade.",
             "no-points": "You need to discard ({nb}) Hero Action before you can engage in a trade.",
@@ -239,6 +242,15 @@
                     "label": "Hero Actions",
                     "tbd": "To be determined",
                     "trade": "Trade"
+                },
+                "giveAction": {
+                    "noCharacter": "You must provide a character that will receive the Hero Action",
+                    "title": "Give Hero Action to Character",
+                    "drawn": "Already Drawn",
+                    "give": "Give Action",
+                    "cancel": "Cancel",
+                    "asDrawn": "Set as drawn when given",
+                    "withMessage": "Generate chat message"
                 }
             },
             "table": {
@@ -247,7 +259,9 @@
                 "noFormula": "The Hero Deck table has no formula, tell your GM he messed up.",
                 "noFormulaCompendium": "The Hero Deck table has no formula and is a compendium table.",
                 "drawError": "An error occurred during the draw, most likely the table contains non-conform results."
-            }
+            },
+            "notGM": "Only a GM can use this feature",
+            "onlyCharacter": "Hero Actions is only compatible with Character actors"
         }
     }
 }

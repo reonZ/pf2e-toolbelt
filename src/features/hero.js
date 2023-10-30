@@ -6,7 +6,7 @@ import { refreshCharacterSheets } from '../shared/misc'
 import { error, warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { getSetting, setSetting } from '../shared/settings'
-import { socketOff, socketOn, socketEmit } from '../shared/socket'
+import { socketEmit, socketOff, socketOn } from '../shared/socket'
 import { isActiveGM } from '../shared/user'
 
 const MODULE_ID = 'pf2e-hero-actions'
@@ -58,6 +58,9 @@ export function registerHeroActions() {
             sendActionToChat,
             discardHeroActions,
             tradeHeroAction,
+            getDeckTable,
+            giveHeroActions,
+            createChatMessage,
         },
         ready: () => {
             setHook(false, 'hero')
@@ -175,7 +178,7 @@ export function getHeroActions(actor) {
     return getProperty(actor, `flags.${MODULE_ID}.heroActions`) ?? []
 }
 
-function setHeroActions(actor, actions) {
+async function setHeroActions(actor, actions) {
     return actor.update({ [`flags.${MODULE_ID}.heroActions`]: actions })
 }
 
@@ -214,6 +217,11 @@ async function getHeroActionDetails(uuid) {
 }
 
 export async function drawHeroActions(actor) {
+    if (!actor?.isOfType('character')) {
+        warn('hero.onlyCharacter')
+        return
+    }
+
     const actions = getHeroActions(actor)
     const nb = actor.heroPoints.value - actions.length
 
@@ -231,15 +239,21 @@ export async function drawHeroActions(actor) {
     if (!drawn.length) return
 
     setHeroActions(actor, actions)
+    createChatMessage({ actor, actions: drawn, label: nb => localize('hero.actions-draw.header', { nb }), secret: true })
+}
 
-    const { content, size } = chatActions(drawn)
+function createChatMessage({ actor, actions, label, secret = false }) {
+    const { content, size } = chatActions(actions)
+
+    label = typeof label === 'function' ? label(size) : label
+
     const data = {
-        flavor: `<h4 class="action">${localize('hero.actions-draw.header', { nb: size })}</h4>`,
+        flavor: `<h4 class="action">${label}</h4>`,
         content,
         speaker: ChatMessage.getSpeaker({ actor: actor }),
     }
 
-    if (getSetting('hero-private')) {
+    if (secret && getSetting('hero-private')) {
         data.type = CONST.CHAT_MESSAGE_TYPES.ROLL
         data.rollMode = CONST.DICE_ROLL_MODES.PRIVATE
     }
@@ -256,6 +270,11 @@ function chatActions(actions) {
 }
 
 function tradeHeroAction(actor) {
+    if (!actor?.isOfType('character')) {
+        warn('hero.onlyCharacter')
+        return
+    }
+
     const actions = getHeroActions(actor)
     if (!actions || !actions.length) {
         warn('hero.no-action')
@@ -306,6 +325,11 @@ async function drawHeroAction() {
 }
 
 async function useHeroAction(actor, uuid) {
+    if (!actor?.isOfType('character')) {
+        warn('hero.onlyCharacter')
+        return
+    }
+
     const points = actor.heroPoints.value
     if (points < 1) return warn('hero.use.noPoints')
 
@@ -336,6 +360,11 @@ async function useHeroAction(actor, uuid) {
 }
 
 async function discardHeroActions(actor, uuids) {
+    if (!actor?.isOfType('character')) {
+        warn('hero.onlyCharacter')
+        return
+    }
+
     uuids = typeof uuids === 'string' ? [uuids] : uuids
 
     const actions = getHeroActions(actor)
@@ -349,13 +378,7 @@ async function discardHeroActions(actor, uuids) {
     }
 
     setHeroActions(actor, actions)
-
-    const { content, size } = chatActions(removed)
-    ChatMessage.create({
-        flavor: `<h4 class="action">${localize('hero.actions-discard.header', { nb: size })}</h4>`,
-        content,
-        speaker: ChatMessage.getSpeaker({ actor: actor }),
-    })
+    createChatMessage({ actor, actions: removed, label: nb => localize('hero.actions-discard.header', { nb }) })
 }
 
 async function getLabelfromTableResult(result, uuid) {
@@ -530,6 +553,11 @@ async function onTradeRejected({ receiver }) {
 }
 
 async function createTable() {
+    if (!game.user.isGM) {
+        warn('hero.notGM')
+        return
+    }
+
     const localize = subLocalize('hero.templates.createTable.choice')
     const template = templatePath('hero/dialogs/create-table')
 
@@ -625,6 +653,11 @@ function getTableSource(unique = true, table) {
 }
 
 async function removeHeroActions() {
+    if (!game.user.isGM) {
+        warn('hero.notGM')
+        return
+    }
+
     const localize = subLocalize('hero.templates.removeActions')
     const template = templatePath('hero/dialogs/remove-actions')
 
@@ -700,4 +733,108 @@ function documentUuidFromTableResult(result) {
     if (result.type === CONST.TABLE_RESULT_TYPES.DOCUMENT) return `${result.documentCollection}.${result.documentId}`
     if (result.type === CONST.TABLE_RESULT_TYPES.COMPENDIUM) return `Compendium.${result.documentCollection}.${result.documentId}`
     return undefined
+}
+
+async function giveHeroActions(actor) {
+    if (!game.user.isGM) {
+        warn('hero.notGM')
+        return
+    }
+
+    const templateLocalize = subLocalize('hero.templates.giveAction')
+
+    if (!actor?.isOfType('character')) {
+        templateLocalize.warn('noCharacter')
+        return null
+    }
+
+    const table = await getDeckTable()
+    if (!table) {
+        error('hero.table.drawError', true)
+        return null
+    }
+
+    const isUnique = table.replacement === false
+
+    const actionsList = (
+        await Promise.all(
+            table.results.map(async result => {
+                const uuid = documentUuidFromTableResult(result)
+                if (!uuid) return
+
+                return {
+                    key: result.id,
+                    uuid,
+                    name: await getLabelfromTableResult(result, uuid),
+                    drawn: result.drawn,
+                }
+            })
+        )
+    ).filter(Boolean)
+
+    const template = templatePath('hero/dialogs/give-action')
+    const content = await renderTemplate(template, {
+        actions: actionsList,
+        isUnique,
+        i18n: templateLocalize,
+    })
+
+    const buttons = {
+        yes: {
+            label: templateLocalize('give'),
+            icon: '<i class="fa-solid fa-gift"></i>',
+            callback: html => ({
+                selected: html
+                    .find('[name=action]:checked')
+                    .closest('.action')
+                    .toArray()
+                    .map(el => el.dataset),
+                asDrawn: html.find('[name=drawn]').prop('checked') ?? false,
+                withMessage: html.find('[name=message]').prop('checked'),
+            }),
+        },
+        no: {
+            label: templateLocalize('cancel'),
+            icon: '<i class="fas fa-times"></i>',
+            callback: () => null,
+        },
+    }
+
+    const data = {
+        title: templateLocalize('title'),
+        content,
+        buttons,
+        render: html => {
+            html.find('[data-action=expand]').on('click', onClickHeroActionExpand)
+        },
+        close: () => null,
+    }
+
+    const result = await Dialog.wait(data, undefined, { id: 'pf2e-hero-actions-give-action' })
+    if (!result) return
+
+    const { selected, asDrawn, withMessage } = result
+    const actions = getHeroActions(actor)
+    const tableUpdates = []
+
+    for (const { uuid, name, key } of selected) {
+        actions.push({ uuid, name })
+        if (!asDrawn) continue
+
+        const result = table.results.get(key)
+        if (result && !result.drawn) tableUpdates.push(key)
+    }
+
+    if (tableUpdates.length) {
+        await table.updateEmbeddedDocuments(
+            'TableResult',
+            tableUpdates.map(key => ({ _id: key, drawn: true }))
+        )
+    }
+
+    setHeroActions(actor, actions)
+
+    if (withMessage) {
+        createChatMessage({ actor, actions: selected, label: nb => localize('hero.actions-give.header', { nb }), secret: true })
+    }
 }
