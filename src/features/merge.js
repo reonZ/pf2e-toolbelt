@@ -9,8 +9,6 @@ import { warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { getSetting } from '../shared/settings'
 
-const FLAVOR_TAGS = /<div class="tags"><span class="tag".+?<\/div>/gm
-const FLAVOR_MODIFIERS = /<span class="tag tag_transparent">(.+?)<\/span>/gm
 const FORMULA_STRIP = /(\[[\w,]+\])/
 
 const setHook = createHook('renderChatMessage', renderChatMessage, updateMessages)
@@ -252,16 +250,26 @@ function getMessageData(message) {
     delete source._id
     delete source.timestamp
 
+    const html = $(`<div>${message.flavor}</div>`)
+    const tags = html.find('h4.action + .tags').prop('outerHTML')
+
+    const modifiers = []
+    html.find('.tag.tag_transparent').each(function () {
+        modifiers.push(this.innerHTML)
+    })
+
+    const notes = source.flags.pf2e.context.notes.map(
+        ({ title, text }) => `<strong>${game.i18n.localize(title)}</strong> ${game.i18n.localize(text)}`
+    )
+
     return [
         {
             source,
             name: source.flags.pf2e.strike?.name ?? message.item.name,
             outcome: source.flags.pf2e.context.outcome,
-            modifiers: getMessageModifiers(message),
-            tags: message.flavor.match(FLAVOR_TAGS)?.[0] ?? '',
-            notes: source.flags.pf2e.context.notes.map(
-                ({ title, text }) => `<strong>${game.i18n.localize(title)}</strong> ${game.i18n.localize(text)}`
-            ),
+            modifiers,
+            tags,
+            notes,
         },
     ]
 }
@@ -304,15 +312,4 @@ function getTargetUUID(message) {
 
 function isDamageRoll(message) {
     return getFlag(message, 'type') === 'damage-roll' || message.getFlag('pf2e', 'context.type') === 'damage-roll'
-}
-
-function getMessageModifiers(message) {
-    const modifiers = []
-
-    let match
-    while ((match = FLAVOR_MODIFIERS.exec(message.flavor))) {
-        modifiers.push(match[1])
-    }
-
-    return modifiers
 }
