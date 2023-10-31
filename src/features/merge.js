@@ -164,17 +164,13 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
     const otherRolls = getMessageRolls(other)
     const groupedRolls = []
 
-    function findGroup(options) {
-        return groupedRolls.find(
-            ({ options: { flavor, critRule } }) => flavor === options.flavor && critRule === options.critRule
-        )
-    }
-
     for (const roll of [].concat(otherRolls, originRolls)) {
         const { options, total, terms } = roll
         const term = terms[0]
         const formula = roll.formula.replace(FORMULA_STRIP, '')
-        const group = findGroup(options)
+        const group = groupedRolls.find(
+            ({ options: { flavor, critRule } }) => flavor === options.flavor && critRule === options.critRule
+        )
 
         if (group) {
             group.terms.push(term)
