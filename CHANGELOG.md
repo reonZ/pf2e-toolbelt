@@ -1,3 +1,7 @@
+# 1.9.1
+
+-   fixed traits not showing up in `Merge Damage` chat message
+
 # 1.9.0
 
 -   added "only character" warnings to `heroActions` API functions
