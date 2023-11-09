@@ -119,7 +119,7 @@ function getStances(actor) {
 
 async function renderCharacterSheetPF2e(sheet, html) {
     const actor = sheet.actor
-    const stances = await getStances(actor)
+    const stances = getStances(actor)
     if (!stances.length) return
 
     const inCombat = actor.getActiveTokens(true, true).some(token => token.inCombat)
