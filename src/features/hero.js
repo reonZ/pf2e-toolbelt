@@ -1,4 +1,5 @@
 import { Trade } from '../apps/hero/trade'
+import { isPlayedActor } from '../shared/actor'
 import { chatUUID } from '../shared/chat'
 import { createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
@@ -96,7 +97,7 @@ function onSocket(packet) {
 
 async function renderCharacterSheetPF2e(sheet, html) {
     const actor = sheet.actor
-    if (!actor || actor.pack || !actor.id || !game.actors.has(actor.id)) return
+    if (!isPlayedActor(actor)) return
 
     await addActionsToSheet(html, actor)
     addSheetEvents(html, actor)

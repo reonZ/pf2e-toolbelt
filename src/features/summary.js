@@ -1,4 +1,5 @@
 import { MODULE_ID } from '../module'
+import { isPlayedActor } from '../shared/actor'
 import { createChoicesHook } from '../shared/hook'
 import { localeCompare, refreshCharacterSheets } from '../shared/misc'
 import { templatePath } from '../shared/path'
@@ -27,7 +28,7 @@ export function registerSpellsSummary() {
 
 async function renderCharacterSheetPF2e(sheet, html) {
     const actor = sheet.actor
-    if (!actor || actor.pack || !actor.id || !game.actors.has(actor.id)) return
+    if (!isPlayedActor(actor)) return
 
     const tab = getSpellcastingTab(html)
 

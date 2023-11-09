@@ -1,4 +1,5 @@
 import { MoveLootPopup } from '../apps/giveth/popup'
+import { isPlayedActor } from '../shared/actor'
 import { chatUUID } from '../shared/chat'
 import { registerUpstreamHook } from '../shared/hook'
 import { localize } from '../shared/localize'
@@ -122,7 +123,7 @@ function sendPhysicalRequest(ownerId, targetId, itemId, qty, stack) {
 }
 
 function isValidActor(actor, id) {
-    if (!actor || (id && actor.id === id)) return false
+    if (!isPlayedActor(actor) || (id && actor.id === id)) return false
     return actor.hasPlayerOwner && !actor.isToken && actor.isOfType('character', 'npc', 'vehicle')
 }
 

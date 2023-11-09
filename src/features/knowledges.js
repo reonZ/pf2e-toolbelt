@@ -1,4 +1,5 @@
 import { EditLores } from '../apps/knowledges/lores'
+import { isPlayedActor } from '../shared/actor'
 import { getFlag } from '../shared/flags'
 import { createHook } from '../shared/hook'
 import { getSetting } from '../shared/settings'
@@ -24,6 +25,7 @@ export function registerKnowledges() {
 
 function renderNPCSheetPF2e(sheet, $html) {
     const actor = sheet.actor
+    if (!isPlayedActor(actor)) return
 
     replaceLores(actor, $html)
     addEditButton($html)

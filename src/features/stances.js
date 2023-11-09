@@ -1,3 +1,4 @@
+import { isPlayedActor } from '../shared/actor'
 import { createHook } from '../shared/hook'
 import { getItemWithSourceId, hasItemWithSourceId } from '../shared/item'
 import { subLocalize } from '../shared/localize'
@@ -119,6 +120,8 @@ function getStances(actor) {
 
 async function renderCharacterSheetPF2e(sheet, html) {
     const actor = sheet.actor
+    if (!isPlayedActor(actor)) return
+
     const stances = getStances(actor)
     if (!stances.length) return
 
