@@ -7,11 +7,11 @@
         <div class="item-name flexrow">
             <h3>
                 {{#if (eq @index 0)}}
-                {{localize 'PF2E.SpellCantripLabel'}}
+                {{localize 'PF2E.Actor.Creature.Spellcasting.Cantrips'}}
                 {{else if (eq @index 12)}}
                 {{localize 'PF2E.Focus.Spells'}}
                 {{else}}
-                {{localize (concat 'PF2E.SpellLevel' @index)}}
+                {{@root.entryRank @index}}
                 {{/if}}
             </h3>
 

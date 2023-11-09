@@ -1,7 +1,7 @@
 import { MODULE_ID } from '../module'
 import { isPlayedActor } from '../shared/actor'
 import { createChoicesHook } from '../shared/hook'
-import { localeCompare, refreshCharacterSheets } from '../shared/misc'
+import { localeCompare, ordinalString, refreshCharacterSheets } from '../shared/misc'
 import { templatePath } from '../shared/path'
 import { getSetting } from '../shared/settings'
 
@@ -315,5 +315,6 @@ async function getData(actor) {
         stavesActive,
         hasFocusCantrips,
         isOwner: actor.isOwner,
+        entryRank: rank => game.i18n.format('PF2E.Item.Spell.Rank.Ordinal', { rank: ordinalString(rank) }),
     }
 }

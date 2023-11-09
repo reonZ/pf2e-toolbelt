@@ -23,3 +23,9 @@ export function compareArrays(arr1, arr2) {
 
     return true
 }
+
+export function ordinalString(value) {
+    const pluralRules = new Intl.PluralRules(game.i18n.lang, { type: 'ordinal' })
+    const suffix = game.i18n.localize(`PF2E.OrdinalSuffixes.${pluralRules.select(value)}`)
+    return game.i18n.format('PF2E.OrdinalNumber', { value, suffix })
+}
