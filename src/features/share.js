@@ -1,6 +1,6 @@
 import { MODULE_ID } from '../module'
 import { isPlayedActor } from '../shared/actor'
-import { getFlag, setFlag } from '../shared/flags'
+import { getFlag, setFlag, unsetFlag } from '../shared/flags'
 import { registerWrapper } from '../shared/libwrapper'
 import { subLocalize } from '../shared/localize'
 import { isInstanceOf } from '../shared/misc'
@@ -68,18 +68,7 @@ function deleteActor(actor) {
     Promise.all(
         slaves.map(async slave => {
             unsetMaster(slave)
-
-            const updates = {}
-
-            const originalHp = getOriginalHp(slave)
-            if (originalHp) {
-                updates['system.attributes.hp'] = originalHp
-                deleteOriginalHp(slave)
-            }
-
-            updates[`flags.${MODULE_ID}.share.-=master`] = true
-
-            await slave.update(updates)
+            await unsetFlag(slave, 'share.master')
         })
     )
 }
@@ -160,36 +149,25 @@ function prepareData(wrapped) {
         addSlaveToMaster(master, this)
     }
 
-    if (!getOriginalHp(this)) {
-        setModuleProperty(this, 'originalHp', this.system.attributes.hp)
-    }
-
     const hp = this.system.attributes.hp
-
     Object.defineProperty(actor.system.attributes, 'hp', {
         get() {
             const masterHp = master.system.attributes.hp
-
-            hp.breakdown = masterHp.breakdown
-            hp.max = masterHp.max
-            hp.sp = deepClone(masterHp.sp)
-            hp.temp = masterHp.temp
-            hp.totalModifier = masterHp.totalModifier
-            hp.value = masterHp.value
-            hp._modifiers = masterHp._modifiers.slice()
-
+            transfertHpData(masterHp, hp)
             return hp
         },
         enumerable: true,
     })
 }
 
-function getOriginalHp(actor) {
-    return getModuleProperty(actor, 'originalHp')
-}
-
-function deleteOriginalHp(actor) {
-    deleteModuleProperty(actor, 'originalHp')
+function transfertHpData(from, to) {
+    to.breakdown = from.breakdown
+    to.max = from.max
+    to.sp = deepClone(from.sp)
+    to.temp = from.temp
+    to.totalModifier = from.totalModifier
+    to.value = from.value
+    to._modifiers = from._modifiers.slice()
 }
 
 function getShareFlag(doc) {
