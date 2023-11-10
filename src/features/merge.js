@@ -219,6 +219,18 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
         ],
     }
 
+    if (game.modules.get('dice-so-nice')?.active) {
+        function setHidden(term) {
+            if ('results' in term) {
+                term.results.forEach(result => (result.hidden = true))
+            } else {
+                ;(term.term ?? term).operands?.forEach(operand => setHidden(operand))
+            }
+        }
+
+        roll.terms[0].rolls.forEach(roll => roll.terms.forEach(term => setHidden(term)))
+    }
+
     await removeChatMessages(origin.id, other.id)
 
     await getChatMessageClass().create({
