@@ -1,6 +1,6 @@
 import { MODULE_ID } from '../module'
 import { isPlayedActor } from '../shared/actor'
-import { getFlag } from '../shared/flags'
+import { getFlag, setFlag } from '../shared/flags'
 import { registerWrapper } from '../shared/libwrapper'
 import { subLocalize } from '../shared/localize'
 import { isInstanceOf } from '../shared/misc'
@@ -131,14 +131,19 @@ function updateActor(actor, updates, options, userId) {
             const data = { system: { attributes: { hp: hpUpdate } } }
             Promise.all(slaves.map(async slave => await slave.update(data, { noHook: true })))
         } else {
-            slaves.forEach(slave => refreshActor(slave, updates))
+            Promise.all(slaves.map(async slave => await refreshActor(slave, updates)))
         }
     }
 }
 
-function refreshActor(actor, data) {
-    actor.render(false, { action: 'update' })
-    actor._updateDependentTokens(data)
+async function refreshActor(actor, data) {
+    const share = getSetting('share')
+    if (share === 'force') {
+        await setFlag(actor, 'toggle', !getFlag(actor, 'toggle'))
+    } else {
+        actor.render(false, { action: 'update' })
+        actor._updateDependentTokens(data)
+    }
 }
 
 function prepareData(wrapped) {
