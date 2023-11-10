@@ -1,16 +1,3 @@
-# 1.10.0
-
--   this is a `5.8.3` release
--   added `Share Health Pool`feature/setting
-    -   this feature let you link 2 actors together in a "master" and "slave" relationship to share their HP/SP
-    -   you can find the option to select a "master" for a creature in the `Configure` menu of the actor sheet
-        -   a "master" cannot also have a "master"
-        -   a "master" can have multiple "slave"
-        -   a "slave" cannot also be a "master"
-    -   the `Force Refresh` option should only be used if you notice some modules getting out of sync with the "slave" creatures
-    -   due to circumstances out of my control, you cannot "undo" the damage done to a "slave" creature (but you can on a "master")
--   fixed localization for spells headers that were changed in the last system update
-
 # 1.9.1
 
 -   fixed traits not showing up in `Merge Damage` chat message
