@@ -8,7 +8,7 @@ import { error } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { getSetting } from '../shared/settings'
 
-const PREPARE_ACTOR_DATA = 'CONFIG.Actor.documentClass.prototype.prepareData'
+const ACTOR_PREPARE_DATA = 'CONFIG.Actor.documentClass.prototype.prepareData'
 const ACTOR_UNDO_DAMAGE = 'CONFIG.Actor.documentClass.prototype.undoDamage'
 
 const DOCUMENT_SHEET_RENDER_INNER = 'DocumentSheet.prototype._renderInner'
@@ -28,7 +28,7 @@ export function registerShare() {
             const share = getSetting('share')
             if (share === 'disabled') return
 
-            registerWrapper(PREPARE_ACTOR_DATA, prepareData, 'WRAPPER')
+            registerWrapper(ACTOR_PREPARE_DATA, prepareData, 'WRAPPER')
             registerWrapper(ACTOR_UNDO_DAMAGE, undoDamage, 'MIXED')
 
             registerWrapper(DOCUMENT_SHEET_RENDER_INNER, documentSheetRenderInner, 'WRAPPER')
@@ -107,7 +107,7 @@ function preUpdateActor(actor, updates) {
 
         const master = getMaster(actor)
         if (master) {
-            master.update({ system: { attributes: { hp: hpUpdate } } })
+            master.update({ system: { attributes: { hp: hpUpdate } } }, { noHook: true })
             delete updates.system.attributes.hp
         }
     }

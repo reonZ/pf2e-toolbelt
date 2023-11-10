@@ -96,7 +96,7 @@
             },
             "share": {
                 "name": "Share Health Pool",
-                "hint": "Allow 2 actors to share their HP and SP in a \"master\" and \"slave\" relationship. The option to select a \"master\" can be found in the `Configure` menu of a creature sheet. The `Force Refresh` should only be used if you are using modules that are getting desynced with the \"slave\" creatures.",
+                "hint": "Allow 2 actors to share their HP and SP in a \"master\" and \"slave\" relationship. The option to select a \"master\" can be found in the `Configure` menu of a creature sheet. The `Force Refresh` should only be used if you notice some modules getting out of sync with the \"slave\" creatures.",
                 "choices": {
                     "disabled": "Disabled",
                     "enabled": "Enabled",
