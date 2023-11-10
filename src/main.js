@@ -12,6 +12,7 @@ import { registerHeroActions } from './features/hero'
 import { registerHideModifiers } from './features/modifiers'
 import { localize } from './shared/localize'
 import { warn } from './shared/notification'
+import { registerShare } from './features/share'
 
 const FEATURES = [
     registerArp(),
@@ -25,6 +26,7 @@ const FEATURES = [
     registerStances(),
     registerHeroActions(),
     registerHideModifiers(),
+    registerShare(),
 ]
 
 const CONFLICTS = new Set()

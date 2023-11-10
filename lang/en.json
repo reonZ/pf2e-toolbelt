@@ -93,6 +93,15 @@
                     "enabled": "Enabled",
                     "traits": "Also Hide Traits"
                 }
+            },
+            "share": {
+                "name": "Share Health Pool",
+                "hint": "Allow 2 actors to share their HP and SP in a \"master\" and \"slave\" relationship. The option to select a \"master\" can be found in the `Configure` menu of a creature sheet. The `Force Refresh` should only be used if you are using modules that are getting desynced with the \"slave\" creatures.",
+                "choices": {
+                    "disabled": "Disabled",
+                    "enabled": "Enabled",
+                    "force": "Force Refresh"
+                }
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
@@ -154,6 +163,16 @@
                 "accept": "Accept",
                 "cancel": "Cancel"
             }
+        },
+        "share": {
+            "templates": {
+                "master": {
+                    "label": "Share HP",
+                    "hint": "When selecting a master, this actor will share the other character's HP (and stamina).",
+                    "select": "Select Master"
+                }
+            },
+            "noUndo": "You cannot undo damage on a creature \"slaved\" to another."
         },
         "hero": {
             "use": {

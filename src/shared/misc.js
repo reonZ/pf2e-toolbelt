@@ -29,3 +29,13 @@ export function ordinalString(value) {
     const suffix = game.i18n.localize(`PF2E.OrdinalSuffixes.${pluralRules.select(value)}`)
     return game.i18n.format('PF2E.OrdinalNumber', { value, suffix })
 }
+
+export function isInstanceOf(obj, name) {
+    if (typeof obj !== 'object') return false
+
+    while ((obj = Reflect.getPrototypeOf(obj))) {
+        if (obj.constructor.name === name) return true
+    }
+
+    return false
+}
