@@ -1,3 +1,8 @@
+# 1.10.0
+
+-   this is a `5.8.3` release
+-   fixed localization for spells headers that were changed in the last system update
+
 # 1.9.1
 
 -   fixed traits not showing up in `Merge Damage` chat message
