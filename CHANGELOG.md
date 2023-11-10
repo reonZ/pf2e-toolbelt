@@ -1,3 +1,7 @@
+# 1.10.1
+
+-   prevent `Dice so Nice` from rolling the dice on `Merge Damage`
+
 # 1.10.0
 
 -   this is a `5.8.3` release
