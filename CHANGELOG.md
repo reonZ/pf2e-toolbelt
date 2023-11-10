@@ -1,3 +1,13 @@
+# 1.11.0
+
+-   added `Share Health Pool`feature/setting
+    -   this feature let you link 2 actors together in a "master" and "slave" relationship to share their HP/SP
+    -   you can find the option to select a "master" for a creature in the `Configure` menu of the actor sheet
+        -   a "master" cannot also have a "master"
+        -   a "master" can have multiple "slave"
+        -   a "slave" cannot also be a "master"
+    -   the `Force Refresh` option should only be used if you notice some modules getting out of sync with the "slave" creatures
+
 # 1.10.1
 
 -   prevent `Dice so Nice` from rolling the dice on `Merge Damage`

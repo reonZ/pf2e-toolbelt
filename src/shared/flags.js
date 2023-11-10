@@ -7,3 +7,7 @@ export function getFlag(doc, key, fallback) {
 export function setFlag(doc, key, value) {
     return doc.setFlag(MODULE_ID, key, value)
 }
+
+export function unsetFlag(doc, key) {
+    return doc.unsetFlag(MODULE_ID, key)
+}

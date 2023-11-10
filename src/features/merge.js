@@ -220,7 +220,7 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
     }
 
     if (game.modules.get('dice-so-nice')?.active) {
-        function setHidden(term) {
+        const setHidden = term => {
             if ('results' in term) {
                 term.results.forEach(result => (result.hidden = true))
             } else {
