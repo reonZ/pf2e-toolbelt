@@ -1,18 +1,17 @@
-import { MODULE_ID } from './module'
 import { registerArp } from './features/arp'
 import { registerEffectsPanelHelper } from './features/effects'
 import { registerGiveth } from './features/giveth'
+import { registerHeroActions } from './features/hero'
 import { registerKnowledges } from './features/knowledges'
 import { registerMerge } from './features/merge'
+import { registerHideModifiers } from './features/modifiers'
 import { registerNobulk } from './features/nobulk'
 import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
-import { registerHeroActions } from './features/hero'
-import { registerHideModifiers } from './features/modifiers'
+import { MODULE_ID } from './module'
 import { localize } from './shared/localize'
 import { warn } from './shared/notification'
-import { registerShare } from './features/share'
 
 const FEATURES = [
     registerArp(),
@@ -26,7 +25,7 @@ const FEATURES = [
     registerStances(),
     registerHeroActions(),
     registerHideModifiers(),
-    registerShare(),
+    // registerShare(),
 ]
 
 const CONFLICTS = new Set()
