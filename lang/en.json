@@ -171,8 +171,7 @@
                     "hint": "When selecting a master, this actor will share the other character's HP (and stamina).",
                     "select": "Select Master"
                 }
-            },
-            "noUndo": "You cannot undo damage on a creature \"slaved\" to another."
+            }
         },
         "hero": {
             "use": {

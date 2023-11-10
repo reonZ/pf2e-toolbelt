@@ -6,6 +6,7 @@ import { registerKnowledges } from './features/knowledges'
 import { registerMerge } from './features/merge'
 import { registerHideModifiers } from './features/modifiers'
 import { registerNobulk } from './features/nobulk'
+import { registerShare } from './features/share'
 import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
@@ -25,7 +26,7 @@ const FEATURES = [
     registerStances(),
     registerHeroActions(),
     registerHideModifiers(),
-    // registerShare(),
+    registerShare(),
 ]
 
 const CONFLICTS = new Set()

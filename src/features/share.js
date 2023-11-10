@@ -4,13 +4,10 @@ import { getFlag } from '../shared/flags'
 import { registerWrapper } from '../shared/libwrapper'
 import { subLocalize } from '../shared/localize'
 import { isInstanceOf } from '../shared/misc'
-import { error } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { getSetting } from '../shared/settings'
 
 const ACTOR_PREPARE_DATA = 'CONFIG.Actor.documentClass.prototype.prepareData'
-const ACTOR_UNDO_DAMAGE = 'CONFIG.Actor.documentClass.prototype.undoDamage'
-
 const DOCUMENT_SHEET_RENDER_INNER = 'DocumentSheet.prototype._renderInner'
 
 export function registerShare() {
@@ -29,13 +26,11 @@ export function registerShare() {
             if (share === 'disabled') return
 
             registerWrapper(ACTOR_PREPARE_DATA, prepareData, 'WRAPPER')
-            registerWrapper(ACTOR_UNDO_DAMAGE, undoDamage, 'MIXED')
-
             registerWrapper(DOCUMENT_SHEET_RENDER_INNER, documentSheetRenderInner, 'WRAPPER')
 
             Hooks.on('preUpdateActor', preUpdateActor)
             Hooks.on('deleteActor', deleteActor)
-            if (share !== 'force') Hooks.on('updateActor', updateActor)
+            Hooks.on('updateActor', updateActor)
         },
     }
 }
@@ -48,7 +43,7 @@ async function documentSheetRenderInner(wrapped, ...args) {
     if (!isPlayedActor(actor) || !actor.isOfType('character', 'npc') || getSlaves(actor).size) return inner
 
     const masters = game.actors
-        .filter(a => a.id !== actor.id && a.type === 'character' && a.isOwner && !getMaster(a))
+        .filter(a => a.id !== actor.id && a.isOwner && isValidMaster(a))
         .map(actor => ({
             key: actor.id,
             label: actor.name,
@@ -66,64 +61,84 @@ async function documentSheetRenderInner(wrapped, ...args) {
     return inner
 }
 
-async function undoDamage(wrapped, ...args) {
-    const master = getMaster(this)
-    if (master) error('share.noUndo')
-    else wrapped(...args)
-}
-
 function deleteActor(actor) {
     removeSlaveFromMaster(actor)
+
+    const slaves = getSlaves(actor)
+    Promise.all(
+        slaves.map(async slave => {
+            unsetMaster(slave)
+
+            const updates = {}
+
+            const originalHp = getOriginalHp(slave)
+            if (originalHp) {
+                updates['system.attributes.hp'] = originalHp
+                deleteOriginalHp(slave)
+            }
+
+            updates[`flags.${MODULE_ID}.share.-=master`] = true
+
+            await slave.update(updates)
+        })
+    )
 }
 
 function preUpdateActor(actor, updates) {
     const shareFlag = getProperty(updates, `flags.${MODULE_ID}.share`)
-    if (shareFlag?.master !== undefined) {
-        removeSlaveFromMaster(actor)
-
-        if (shareFlag.master) {
-            const master = game.actors.get(shareFlag.master)
-            if (master?.isOfType('character') && !getMaster(master)) {
-                setModuleProperty(actor, 'master', master)
-                addSlaveToMaster(master, actor)
-            }
-        } else {
-            deleteModuleProperty(actor, 'master')
+    if (shareFlag?.master) {
+        const master = game.actors.get(shareFlag.master)
+        if (isValidMaster(master)) {
+            const hpSource = deepClone(master._source.system.attributes.hp)
+            setProperty(updates, 'system.attributes.hp', hpSource)
         }
-    }
-
-    const hpUpdate = getProperty(updates, 'system.attributes.hp')
-    if (hpUpdate) {
-        if (getSetting('share') === 'force') {
-            const slaves = getSlaves(actor)
-            Promise.all(
-                slaves.map(async slave => {
-                    await slave.update({
-                        [`flags.${MODULE_ID}.toggle`]: !getFlag(slave, 'toggle'),
-                    })
-                })
-            )
-        }
-
+    } else {
         const master = getMaster(actor)
-        if (master) {
+        const hpUpdate = getProperty(updates, 'system.attributes.hp')
+        if (master && hpUpdate) {
             master.update({ system: { attributes: { hp: hpUpdate } } }, { noHook: true })
             delete updates.system.attributes.hp
         }
     }
 }
 
-function updateActor(actor, updates) {
-    const hpUpdate = getProperty(updates, 'system.attributes.hp')
-    if (hpUpdate) {
-        const slaves = getSlaves(actor)
-        const data = { system: { attributes: { hp: hpUpdate } } }
+function updateActor(actor, updates, options, userId) {
+    const isOriginalUser = game.user.id === userId
 
-        for (const slave of slaves) {
-            slave.render(false, { action: 'update', data })
-            slave._updateDependentTokens(data)
+    const shareFlag = getShareFlag(updates)
+    if (shareFlag?.master !== undefined) {
+        const slave = actor
+
+        removeSlaveFromMaster(slave)
+
+        if (shareFlag.master) {
+            const master = game.actors.get(shareFlag.master)
+            if (isValidMaster(master)) {
+                setMaster(slave, master)
+                addSlaveToMaster(master, slave)
+            }
+        } else {
+            unsetMaster(slave)
         }
     }
+
+    if (!isOriginalUser) return
+
+    const slaves = getSlaves(actor)
+    if (slaves.size) {
+        const hpUpdate = getProperty(updates, 'system.attributes.hp')
+        if (hpUpdate) {
+            const data = { system: { attributes: { hp: hpUpdate } } }
+            Promise.all(slaves.map(async slave => await slave.update(data, { noHook: true })))
+        } else {
+            slaves.forEach(slave => refreshActor(slave, updates))
+        }
+    }
+}
+
+function refreshActor(actor, data) {
+    actor.render(false, { action: 'update' })
+    actor._updateDependentTokens(data)
 }
 
 function prepareData(wrapped) {
@@ -132,10 +147,17 @@ function prepareData(wrapped) {
     const actor = this
     const masterId = getFlag(actor, 'share.master')
     const master = masterId ? game.actors.get(masterId) : undefined
-    if (!master?.isOfType('character') || getMaster(master)) return
 
-    setModuleProperty(this, 'master', master)
-    addSlaveToMaster(master, this)
+    if (!isValidMaster(master)) return
+
+    if (!getMaster(this)) {
+        setMaster(this, master)
+        addSlaveToMaster(master, this)
+    }
+
+    if (!getOriginalHp(this)) {
+        setModuleProperty(this, 'originalHp', this.system.attributes.hp)
+    }
 
     const hp = this.system.attributes.hp
 
@@ -157,12 +179,36 @@ function prepareData(wrapped) {
     })
 }
 
+function getOriginalHp(actor) {
+    return getModuleProperty(actor, 'originalHp')
+}
+
+function deleteOriginalHp(actor) {
+    deleteModuleProperty(actor, 'originalHp')
+}
+
+function getShareFlag(doc) {
+    return getProperty(doc, `flags.${MODULE_ID}.share`)
+}
+
 function getSlaves(actor) {
     return getModuleProperty(actor, 'slaves') ?? new Collection()
 }
 
+function setMaster(actor, master) {
+    setModuleProperty(actor, 'master', master)
+}
+
+function unsetMaster(actor) {
+    deleteModuleProperty(actor, 'master')
+}
+
 function getMaster(actor) {
     return getModuleProperty(actor, 'master')
+}
+
+function isValidMaster(actor) {
+    return actor && actor.type === 'character' && !getMaster(actor)
 }
 
 function getModuleProperty(doc, path) {
