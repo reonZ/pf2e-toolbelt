@@ -191,13 +191,13 @@ When using that macro, the table will be created into your world with an obvious
 
 You will be prompted with the list of the `Characters` from whom you want the actions to be removed.
 
-## Permenent Condition Effect
+## Permanent Condition Effect
 
 ![](./readme/macros/condition.webp)
 
 Helps you generate (or directly add to an actor) an effect setting a permanent condition, you can select the condition, its badge value and if the effect is `unidentified` (making it impossible for the players to remove the condition)
 
-The macro will automatically set the name of effect (if none is provided) and its image
+The macro will automatically set the name of the effect (if none is provided) and its image
 
 # API
 
