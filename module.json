@@ -64,5 +64,14 @@
             "name": "正體中文",
             "path": "lang/zh-tw.json"
         }
+    ],
+    "packs": [
+        {
+            "name": "macros",
+            "label": "Pf2e Toolbelt (macros)",
+            "path": "packs/macros",
+            "type": "Macro",
+            "system": "pf2e"
+        }
     ]
 }
