@@ -1,3 +1,7 @@
+# 1.12.1
+
+-   fixed `Permanent Condition Effect` maxro issue with badge-less conditions
+
 # 1.12.0
 
 -   renamed the module to `PF2e Toolbelt`
@@ -8,7 +12,7 @@
         -   helps you generate (or directly add to an actor) an effect setting a permanent condition
         -   it automatically sets the name and image of the effect
         -   you can select the badge value for the condition
-        -   you can select if the permenant effect is unidentified, making it impossible for the players to remove the condition
+        -   you can select if the permanent effect is unidentified, making it impossible for the players to remove the condition
 
 # 1.11.0
 
