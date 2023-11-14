@@ -676,7 +676,7 @@ async function removeHeroActions() {
         no: {
             label: localize('cancel'),
             icon: '<i class="fas fa-times"></i>',
-            callback: () => [],
+            callback: () => null,
         },
     }
 
@@ -692,10 +692,13 @@ async function removeHeroActions() {
             html.on('change', 'input[name="all"]', () => removeActionsToggleAll(html))
             html.on('change', 'input[name="actor"]', () => removeActionsToggleActor(html))
         },
-        close: () => [],
+        close: () => null,
     }
 
     const actors = await Dialog.wait(data, undefined, { id: 'pf2e-hero-actions-remove-actions' })
+
+    if (!actors) return
+
     if (!actors.length) {
         localize.warn('noSelection')
         return
