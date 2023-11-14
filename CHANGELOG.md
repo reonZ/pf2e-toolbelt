@@ -1,6 +1,6 @@
 # 1.12.1
 
--   fixed `Permanent Condition Effect` maxro issue with badge-less conditions
+-   fixed `Permanent Condition Effect` macro issue with badge-less conditions
 
 # 1.12.0
 
