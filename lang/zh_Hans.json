@@ -82,9 +82,9 @@
                 "hint": "启用后，抽取英雄点动作的信息将会是个人信息而不再公开。"
             }
         },
-        "module-conflict": " 该 <strong>{name}</strong> mod 不再被需要，因为其功能已被 <strong>PF2e ToolBelt</strong> 替代，你可以安全地禁用它。",
+        "module-conflict": " 该 <strong>{name}</strong> mod 不再被需要，因为其功能已被 <strong>PF2e Toolbelt</strong> 替代，你可以安全地禁用它。",
         "arp": {
-            "forceVariant": "<strong>PF2e ToolBelt</strong> 已禁用 pf2e 系统自带的 自动成长加值 变体规则以保证运行顺利。"
+            "forceVariant": "<strong>PF2e Toolbelt</strong> 已禁用 pf2e 系统自带的 自动成长加值 变体规则以保证运行顺利。"
         },
         "knowledges": {
             "templates": {

@@ -82,9 +82,9 @@
                 "hint": "When enabled, the message from drawing hero actions will be private instead of public."
             }
         },
-        "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e ToolBelt</strong>, you can disable it safely",
+        "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e Toolbelt</strong>, you can disable it safely",
         "arp": {
-            "forceVariant": "The module <strong>PF2e ToolBelt</strong> disabled the pf2e system variant ABP rule to work properly"
+            "forceVariant": "The module <strong>PF2e Toolbelt</strong> disabled the pf2e system variant ABP rule to work properly"
         },
         "knowledges": {
             "editLore": {

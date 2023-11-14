@@ -82,9 +82,9 @@
                 "hint": "Lorsqu'il est activé, le message lors du tirage des actions héroïques sera privé et non public."
             }
         },
-        "module-conflict": "Le module <strong>{name}</strong> n'est pas requis en utilisant <strong>PF2e ToolBelt</strong>. Vous pouvez le désactiver en toute sécurité",
+        "module-conflict": "Le module <strong>{name}</strong> n'est pas requis en utilisant <strong>PF2e Toolbelt</strong>. Vous pouvez le désactiver en toute sécurité",
         "arp": {
-            "forceVariant": "Le module <strong>PF2e ToolBelt</strong> a désactivé la variante du système pf2e de PBA pour fonctionner proprement"
+            "forceVariant": "Le module <strong>PF2e Toolbelt</strong> a désactivé la variante du système pf2e de PBA pour fonctionner proprement"
         },
         "knowledges": {
             "templates": {

@@ -1,4 +1,4 @@
-# FoundryVTT PF2e ToolBelt
+# FoundryVTT PF2e Toolbelt
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K6M2V13)
 

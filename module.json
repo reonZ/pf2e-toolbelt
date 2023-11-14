@@ -1,6 +1,6 @@
 {
     "id": "pf2e-toolbelt",
-    "title": "PF2e ToolBelt",
+    "title": "PF2e Toolbelt",
     "author": "Idle",
     "description": "Collection of tricks and doodads for the PF2e system",
     "authors": [
@@ -9,9 +9,7 @@
             "discord": "Idle#3251"
         }
     ],
-    "esmodules": [
-        "scripts/main.js"
-    ],
+    "esmodules": ["scripts/main.js"],
     "compatibility": {
         "minimum": "11.315",
         "verified": "11"
@@ -25,9 +23,26 @@
     "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.11.0/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
-    "styles": [
-        "styles/style.css"
-    ],
+    "styles": ["styles/style.css"],
+    "relationships": {
+        "systems": [
+            {
+                "id": "pf2e",
+                "type": "system",
+                "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.json",
+                "compatibility": {
+                    "minimum": "5.8.3"
+                }
+            }
+        ],
+        "requires": [
+            {
+                "id": "lib-wrapper",
+                "type": "module",
+                "manifest": "https://raw.githubusercontent.com/ruipin/fvtt-lib-wrapper/master/module.json"
+            }
+        ]
+    },
     "languages": [
         {
             "lang": "en",
@@ -49,24 +64,5 @@
             "name": "正體中文",
             "path": "lang/zh-tw.json"
         }
-    ],
-    "relationships": {
-        "systems": [
-            {
-                "id": "pf2e",
-                "type": "system",
-                "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.json",
-                "compatibility": {
-                    "minimum": "5.8.3"
-                }
-            }
-        ],
-        "requires": [
-            {
-                "id": "lib-wrapper",
-                "type": "module",
-                "manifest": "https://raw.githubusercontent.com/ruipin/fvtt-lib-wrapper/master/module.json"
-            }
-        ]
-    }
+    ]
 }
