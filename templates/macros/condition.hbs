@@ -3,7 +3,7 @@
 <span>{{localize 'TYPES.Item.condition'}}</span>
 <select name="condition">
     {{#each conditions as |condition|}}
-    <option value="{{condition.uuid}}" data-img="{{condition.img}}" data-name="{{condition.name}}">
+    <option value="{{condition.uuid}}" data-slug="{{condition.slug}}" data-img="{{condition.img}}" data-name="{{condition.name}}">
         {{condition.name}}
     </option>
     {{/each}}
