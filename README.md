@@ -75,24 +75,6 @@ If you want to have an unique action pool from which the actions are "removed" o
 
 Simply import the table from the compendium and uncheck the `Draw With Replacement?` option.
 
-### Create Table Macro
-
-You can create a script macro containing `game.modules.get("pf2e-toolbelt")?.api.heroActions.createTable()` to help you create a world Hero Action table
-
-![](./readme/hero/create.webp)
-
-You will be prompted with the option to create a `Default` or `Custom` table and if this table should or not use the `Unique Draw` feature.
-
-When using that macro, the table will be created into your world with an obvious name and its UUID will also automatically be added to the settings.
-
-### Remove Hero Actions Macro
-
-You can create a script macro containing `game.modules.get("pf2e-toolbelt")?.api.heroActions.removeHeroActions()` to help you remove all the actions present on the `Characters` of your world
-
-![](./readme/hero/remove.webp)
-
-You will be prompted with the list of the `Characters` from whom you want the actions to be removed.
-
 ## Hero Actions - Table UUID
 
 You can also have your own `Hero Actions` and table to draw them, to do so, you will need valid journal entries (in your world or in a compendium) and a table used to draw them.
@@ -190,6 +172,32 @@ When enabled, new stances buttons will be added to you character sheets allowing
 The module automatically "upgrade" you stances if need be (e.g. `Cobra Envenom` instead of `Cobra Stance`), will remove the stances at the end of the encounter
 
 The Module automatically add/ask for a stance when a character with the `Stance Savant` feat joins an encounter
+
+# Macros
+
+A compendium pack containing macros has been added to the module for convenience
+
+## Hero Actions - Create Table
+
+![](./readme/hero/create.webp)
+
+You will be prompted with the option to create a `Default` or `Custom` table and if this table should or not use the `Unique Draw` feature.
+
+When using that macro, the table will be created into your world with an obvious name and its UUID will also automatically be added to the settings.
+
+## Hero Actions - Remove Hero Actions
+
+![](./readme/hero/remove.webp)
+
+You will be prompted with the list of the `Characters` from whom you want the actions to be removed.
+
+## Permenent Condition Effect
+
+![](./readme/macros/condition.webp)
+
+Helps you generate (or directly add to an actor) an effect setting a permanent condition, you can select the condition, its badge value and if the effect is `unidentified` (making it impossible for the players to remove the condition)
+
+The macro will automatically set the name of effect (if none is provided) and its image
 
 # API
 

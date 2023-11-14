@@ -1,6 +1,18 @@
+# 1.12.0
+
+-   renamed the module to `PF2e Toolbelt`
+-   added a compendium pack for macros containing the following
+    -   `Hero Action - Create Table`
+    -   `Hero Actions - Remove Hero Actions`
+    -   `Permanent Condition Effect`
+        -   helps you generate (or directly add to an actor) an effect setting a permanent condition
+        -   it automatically sets the name and image of the effect
+        -   you can select the badge value for the condition
+        -   you can select if the permenant effect is unidentified, making it impossible for the players to remove the condition
+
 # 1.11.0
 
--   added `Share Health Pool`feature/setting
+-   added `Share Health Pool` feature/setting
     -   this feature let you link 2 actors together in a "master" and "slave" relationship to share their HP/SP
     -   you can find the option to select a "master" for a creature in the `Configure` menu of the actor sheet
         -   a "master" cannot also have a "master"
