@@ -1,0 +1,38 @@
+#pf2e-toolbelt-macros-condition {
+    .window-content {
+        .dialog-content {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            column-gap: 1em;
+            row-gap: 0.1em;
+            align-items: center;
+            margin-bottom: 0.5em;
+            padding-left: 0.2em;
+
+            select {
+                margin-right: 2px;
+            }
+
+            input[type='number'] {
+                width: 4ch;
+                text-align: end;
+                justify-self: end;
+                margin-right: 2px;
+            }
+
+            div {
+                display: flex;
+                align-items: center;
+
+                span {
+                    flex: 1;
+                    text-align: end;
+                }
+
+                input[type='checkbox'] {
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+}

@@ -280,6 +280,16 @@
             },
             "notGM": "Only a GM can use this feature",
             "onlyCharacter": "Hero Actions is only compatible with Character actors"
+        },
+        "macros": {
+            "condition": {
+                "title": "Permanent Condition Effect",
+                "generate": "Generate",
+                "add": "Add",
+                "effect-name": "Effect: Permanent {condition}",
+                "name-label": "Effect Name",
+                "badge-label": "Badge Value"
+            }
         }
     }
 }

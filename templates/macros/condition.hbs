@@ -1,0 +1,16 @@
+<span>{{i18n 'name-label'}}</span>
+<input type="text" name="name">
+<span>{{localize 'TYPES.Item.condition'}}</span>
+<select name="condition">
+    {{#each conditions as |condition|}}
+    <option value="{{condition.uuid}}" data-img="{{condition.img}}" data-name="{{condition.name}}">
+        {{condition.name}}
+    </option>
+    {{/each}}
+</select>
+<span>{{i18n 'badge-label'}}</span>
+<div>
+    <input type="number" name="badge" value="1" min="1" step="1">
+    <span>{{localize 'PF2E.Item.Effect.Unidentified'}}</span>
+    <input type="checkbox" name="unidentified" checked>
+</div>

@@ -10,6 +10,7 @@ import { registerShare } from './features/share'
 import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerUnided } from './features/unided'
+import { permaConditionEffect } from './macros/condition'
 import { MODULE_ID } from './module'
 import { localize } from './shared/localize'
 import { warn } from './shared/notification'
@@ -72,7 +73,11 @@ Hooks.once('init', () => {
     }
 
     const module = game.modules.get(MODULE_ID)
-    module.api = {}
+    module.api = {
+        macros: {
+            permaConditionEffect,
+        },
+    }
 
     FEATURES.forEach(feature => {
         const { init, conflicts = [], api, name } = feature
