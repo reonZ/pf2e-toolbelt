@@ -37,6 +37,7 @@
         }
 
         .item {
+            display: grid;
             grid:
                 'name type cast-spell range' auto
                 'content content content content' auto/10fr 6fr 2fr 4fr;
