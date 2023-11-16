@@ -84,7 +84,9 @@
         </div>
 
         {{#if @root.isOwner}}
-        <button type="button" class="cast-spell" {{disabled (or spell.isBroken spell.expended)}}>{{localize "PF2E.CastLabel"}}</button>
+        <div class="cast-spell">
+            <button type="button" class="cast-spell" {{disabled (or spell.isBroken spell.expended)}}>{{localize "PF2E.CastLabel"}}</button>
+        </div>
         {{/if}}
 
         <div class="spell-range" data-tooltip="{{spell.entryName}}: DC {{spell.entryDc}}">{{spell.range}}</div>
@@ -124,7 +126,9 @@
         <div class="spell-type">{{ritual.time}}</div>
 
         {{#if @root.isOwner}}
-        <button type="button" class="cast-spell">{{localize "PF2E.CastLabel"}}</button>
+        <div class="cast-spell">
+            <button type="button" class="cast-spell">{{localize "PF2E.CastLabel"}}</button>
+        </div>
         {{/if}}
 
         <div class="spell-range">{{ritual.level}}</div>
