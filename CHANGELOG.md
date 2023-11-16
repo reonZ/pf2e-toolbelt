@@ -1,3 +1,11 @@
+# 1.13.0
+
+-   this is a `5.9.1` release
+-   fixed `Automatic Rune Progression` price manipulation for items that cost less than 1 gold
+-   fixed `Spells Summary` spell row styling
+-   fixed `Spells Summary` cast button styling
+-   fixed `Spells Summary` spell category label
+
 # 1.12.1
 
 -   fixed `Permanent Condition Effect` macro issue with badge-less conditions

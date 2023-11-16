@@ -17,16 +17,16 @@
         "verified": "11"
     },
     "socket": true,
-    "version": "1.12.1",
+    "version": "1.13.0",
     "manifestPlusVersion": "1.2.0",
     "url": "https://github.com/reonZ/pf2e-toolbelt",
     "readme": "https://github.com/reonZ/pf2e-toolbelt/blob/master/README.md",
     "manifest": "https://raw.githubusercontent.com/reonZ/pf2e-toolbelt/master/module.json",
-    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.12.1/module.zip",
+    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.13.0/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
     "styles": [
-        "styles/style.css"
+        "styles/toolbelt.css"
     ],
     "relationships": {
         "systems": [
@@ -35,7 +35,7 @@
                 "type": "system",
                 "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.json",
                 "compatibility": {
-                    "minimum": "5.8.3"
+                    "minimum": "5.9.1"
                 }
             }
         ],
@@ -72,10 +72,23 @@
     "packs": [
         {
             "name": "macros",
-            "label": "Pf2e Toolbelt (macros)",
+            "label": "Macros",
             "path": "packs/macros",
             "type": "Macro",
-            "system": "pf2e"
+            "system": "pf2e",
+            "ownership": {
+                "PLAYER": "NONE",
+                "ASSISTANT": "OWNER"
+            }
+        }
+    ],
+    "packFolders": [
+        {
+            "name": "PF2e Toolbelt",
+            "sorting": "m",
+            "packs": [
+                "macros"
+            ]
         }
     ]
 }
