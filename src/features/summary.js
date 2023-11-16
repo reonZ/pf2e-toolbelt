@@ -60,7 +60,7 @@ function addSummaryEvents(html, sheet, actor) {
     inputs.on('focus', onUsesInputFocus)
     inputs.on('blur', onUsesInputBlur)
 
-    summary.find('.cast-spell').on('click', event => onCastSpell(event, actor))
+    summary.find('[data-action=cast-spell]').on('click', event => onCastSpell(event, actor))
     summary.find('.item-toggle-prepare').on('click', event => onTogglePrepare(event, actor))
     summary.find('.focus-pips').on('click contextmenu', event => onToggleFocusPool(event, actor))
     summary.find('.spell-slots-increment-reset').on('click', event => onSlotsReset(event, sheet, actor))

@@ -85,7 +85,8 @@
 
         {{#if @root.isOwner}}
         <div class="cast-spell">
-            <button type="button" class="cast-spell" {{disabled (or spell.isBroken spell.expended)}}>{{localize "PF2E.CastLabel"}}</button>
+            <button type="button" data-action="cast-spell" {{disabled (or spell.isBroken spell.expended)}}>{{localize
+                "PF2E.CastLabel"}}</button>
         </div>
         {{/if}}
 
@@ -127,7 +128,7 @@
 
         {{#if @root.isOwner}}
         <div class="cast-spell">
-            <button type="button" class="cast-spell">{{localize "PF2E.CastLabel"}}</button>
+            <button type="button" data-action="cast-spell">{{localize "PF2E.CastLabel"}}</button>
         </div>
         {{/if}}
 
