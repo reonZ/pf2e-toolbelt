@@ -84,10 +84,13 @@ function onPrepareWeaponDerivedData(wrapped) {
     const striking = this.system.strikingRune.value
     if (striking) gp -= WEAPON_STRIKING_PRICE[striking]
 
-    if ((potency || striking) && !this.system.runes.property.length)
-        gp += new game.pf2e.Coins(this._source.system.price.value).goldValue
+    let coins = new game.pf2e.Coins({ gp })
 
-    this.system.price.value = new game.pf2e.Coins({ gp })
+    if ((potency || striking) && !this.system.runes.property.length) {
+        coins = coins.add(this._source.system.price.value)
+    }
+
+    this.system.price.value = new game.pf2e.Coins(coins)
 }
 
 function isValidArmor(armor) {
@@ -131,8 +134,11 @@ function onPrepareArmorDerivedData(wrapped) {
     const resiliency = this.system.resiliencyRune.value
     if (resiliency) gp -= ARMOR_RESILIENCY_PRICE[resiliency]
 
-    if ((potency || resiliency) && !this.system.runes.property.length)
-        gp += new game.pf2e.Coins(this._source.system.price.value).goldValue
+    let coins = new game.pf2e.Coins({ gp })
 
-    this.system.price.value = new game.pf2e.Coins({ gp })
+    if ((potency || resiliency) && !this.system.runes.property.length) {
+        coins = coins.add(this._source.system.price.value)
+    }
+
+    this.system.price.value = new game.pf2e.Coins(coins)
 }
