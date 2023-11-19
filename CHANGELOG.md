@@ -1,3 +1,9 @@
+# 1.13.1
+
+-   fixed not being able to use `Multi Cast`
+-   fixed `Multi Cast` not properly using heightened damages
+-   fixed item traits not being provided to the `Merge Damage` chat message, sadly, the only way of doing it is to merge the traits of all the original chat messages, which could result in occasional false positives when using different weapons
+
 # 1.13.0
 
 -   this is a `5.9.1` release
