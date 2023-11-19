@@ -245,6 +245,11 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
                 type: 'damage-roll',
                 data,
             },
+            pf2e: {
+                context: {
+                    options: Array.from(new Set(data.flatMap(entry => entry.itemTraits))),
+                },
+            },
         },
         rolls: [roll],
     })
@@ -275,6 +280,7 @@ function getMessageData(message) {
             source,
             name: source.flags.pf2e.strike?.name ?? message.item.name,
             outcome: source.flags.pf2e.context.outcome,
+            itemTraits: source.flags.pf2e.context.options.filter(option => option.startsWith('item:')),
             modifiers,
             tags,
             notes,
