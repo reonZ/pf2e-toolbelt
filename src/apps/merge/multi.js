@@ -4,8 +4,9 @@ import { templatePath } from '../../shared/path'
 const localize = subLocalize('merge.multi')
 
 export class MultiCast extends Application {
-    constructor(spell, options) {
+    constructor(event, spell, options) {
         super(options)
+        this._event = event
         this._spell = spell
     }
 
@@ -43,7 +44,7 @@ export class MultiCast extends Application {
         }
 
         const spell = this.spell
-        const damages = deepClone(spell._source.system.damage.value)
+        const damages = deepClone(spell._source.system.damage)
         const heightening = deepClone(spell._source.system.heightening) ?? {}
 
         for (const [id, damage] of Object.entries(damages)) {
@@ -64,8 +65,8 @@ export class MultiCast extends Application {
             }
         }
 
-        const newSpell = spell.clone({ 'system.damage.value': damages, 'system.heightening': heightening })
-        newSpell.rollDamage(event)
+        const newSpell = spell.clone({ 'system.damage': damages, 'system.heightening': heightening })
+        newSpell.rollDamage(this._event)
 
         this.close()
     }

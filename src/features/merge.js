@@ -70,7 +70,7 @@ function renderSpell(message, html) {
 
     spellBtn.find('[data-action=multi-cast]').on('click', async event => {
         const spell = await fromUuid(originUUID)
-        if (spell) new MultiCast(spell).render(true)
+        if (spell) new MultiCast(event, spell).render(true)
     })
 }
 
