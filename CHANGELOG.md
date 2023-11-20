@@ -1,3 +1,9 @@
+# 1.14.0
+
+-   added `Target Token Helper`, GM only feature where damage chat messages will have extra application damage rows for each token that was targeted during the roll
+-   fixed `Spells Summary` spell description broken styling
+-   fixed an issue with module flags, this will only really affect the `Npc Lore Knowledges` feature, you will have to redo them (sorry)
+
 # 1.13.1
 
 -   fixed not being able to use `Multi Cast`

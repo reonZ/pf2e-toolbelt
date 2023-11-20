@@ -115,6 +115,10 @@ Allow 2 actors to share their HP and SP in a "master" and "slave" relationship. 
 
 NOTE: The `Force Refresh` should only be used if you notice some modules getting out of sync with the "slave" creatures.
 
+## Target Token Helper
+
+GM only feature where damage chat messages will have extra application damage rows for each token that was targeted during the roll.
+
 # CLIENT FEATURES
 
 ## Merge Damage
