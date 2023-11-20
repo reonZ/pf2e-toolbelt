@@ -1,0 +1,47 @@
+.chat-message {
+    .message-content + .target-helper {
+        hr {
+            width: 100%;
+        }
+
+        .target-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-inline: 0.3em 0.5em;
+            font-size: 0.9em;
+
+            .name {
+                font-weight: bold;
+            }
+
+            .controls {
+                display: flex;
+                align-items: center;
+                gap: 0.5em;
+            }
+        }
+
+        .target-damage-application {
+            display: flex;
+            justify-content: center;
+            margin-top: 3px;
+
+            button {
+                font-size: var(--font-size-18);
+                line-height: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding-inline: 0;
+                padding-block: 0.3em calc(0.3em - 2px);
+
+                span {
+                    font-size: 0.5em;
+                    font-weight: 500;
+                    text-transform: uppercase;
+                }
+            }
+        }
+    }
+}

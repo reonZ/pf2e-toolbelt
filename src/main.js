@@ -9,11 +9,13 @@ import { registerNobulk } from './features/nobulk'
 import { registerShare } from './features/share'
 import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
+import { registerTargetTokenHelper } from './features/target'
 import { registerUnided } from './features/unided'
 import { permaConditionEffect } from './macros/condition'
 import { MODULE_ID } from './module'
 import { localize } from './shared/localize'
 import { warn } from './shared/notification'
+import { isUserGM } from './shared/user'
 
 const FEATURES = [
     registerArp(),
@@ -28,6 +30,7 @@ const FEATURES = [
     registerHeroActions(),
     registerHideModifiers(),
     registerShare(),
+    registerTargetTokenHelper(),
 ]
 
 const CONFLICTS = new Set()
@@ -35,8 +38,7 @@ const CONFLICTS = new Set()
 let firstClientSetting = null
 
 Hooks.once('init', () => {
-    const user = game.data.users.find(x => x._id === game.data.userId)
-    const isGM = user && user.role >= CONST.USER_ROLES.GAMEMASTER
+    const isGM = isUserGM()
 
     const settings = FEATURES.flatMap(({ settings = [] }) =>
         settings.map(setting => {

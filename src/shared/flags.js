@@ -11,3 +11,9 @@ export function setFlag(doc, key, value) {
 export function unsetFlag(doc, key) {
     return doc.unsetFlag(MODULE_ID, key)
 }
+
+export function updateSourceFlag(doc, key, value) {
+    return doc.updateSource({
+        [`flags.${MODULE_ID}.${key}`]: value,
+    })
+}

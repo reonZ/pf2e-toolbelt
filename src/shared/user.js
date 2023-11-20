@@ -2,6 +2,11 @@ export function isActiveGM() {
     return game.user === game.users.activeGM
 }
 
+export function isUserGM() {
+    const user = game.data.users.find(x => x._id === game.data.userId)
+    return user && user.role >= CONST.USER_ROLES.GAMEMASTER
+}
+
 export function isGMOnline() {
     return game.users.some(user => user.active && user.isGM)
 }
