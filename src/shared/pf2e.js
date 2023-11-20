@@ -44,11 +44,49 @@ function extractDamageDice(deferredDice, selectors, options) {
     return selectors.flatMap(s => deferredDice[s] ?? []).flatMap(d => d(options) ?? [])
 }
 
+async function shiftAdjustDamage(token, { message, multiplier, rollIndex }) {
+    const content = await renderTemplate('systems/pf2e/templates/chat/damage/adjustment-dialog.hbs')
+    const AdjustmentDialog = class extends Dialog {
+        activateListeners($html) {
+            super.activateListeners($html)
+            $html[0].querySelector('input')?.focus()
+        }
+    }
+    new AdjustmentDialog({
+        title: game.i18n.localize('PF2E.UI.shiftModifyDamageTitle'),
+        content,
+        buttons: {
+            ok: {
+                label: game.i18n.localize('PF2E.OK'),
+                callback: async $dialog => {
+                    // In case of healing, multipler will have negative sign. The user will expect that positive
+                    // modifier would increase healing value, while negative would decrease.
+                    const adjustment = (Number($dialog[0].querySelector('input')?.value) || 0) * Math.sign(multiplier)
+                    applyDamageFromMessage(token, {
+                        message,
+                        multiplier,
+                        addend: adjustment,
+                        promptModifier: false,
+                        rollIndex,
+                    })
+                },
+            },
+            cancel: {
+                label: 'Cancel',
+            },
+        },
+        default: 'ok',
+        close: () => {
+            toggleOffShieldBlock(message.id)
+        },
+    }).render(true)
+}
+
 export async function applyDamageFromMessage(
     token,
     { message, multiplier = 1, addend = 0, promptModifier = false, rollIndex = 0 }
 ) {
-    // if (promptModifier) return shiftAdjustDamage(message, multiplier, rollIndex)
+    if (promptModifier) return shiftAdjustDamage(token, { message, multiplier, rollIndex })
 
     const shieldBlockRequest = CONFIG.PF2E.chatDamageButtonShieldToggle
     const roll = message.rolls.at(rollIndex)
