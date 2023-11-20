@@ -77,7 +77,7 @@ function renderSpell(message, html) {
 function renderDamage(message, html) {
     let buttons = '<span class="pf2e-toolbelt-merge">'
 
-    if (getFlag(message, 'merged')) {
+    if (getFlag(message, 'merge.merged')) {
         const tooltip = localize('merge.damage.split-tooltip')
         buttons += `<button data-action="split-damage" title="${tooltip}">`
         buttons += '<i class="fa-duotone fa-split"></i>'
@@ -97,6 +97,14 @@ function renderDamage(message, html) {
         event.stopPropagation()
 
         for (const otherMessage of latestChatMessages(5, message)) {
+            console.log({
+                actorUUID,
+                targetUUID,
+                isDamageRoll: isDamageRoll(otherMessage),
+                otherActorUUID: getActorUUID(otherMessage),
+                otherTargetUUID: getTargetUUID(otherMessage),
+            })
+
             if (
                 !isDamageRoll(otherMessage) ||
                 getActorUUID(otherMessage) !== actorUUID ||
@@ -118,7 +126,7 @@ function renderDamage(message, html) {
 }
 
 async function splitDamages(event, message) {
-    const sources = getFlag(message, 'data').flatMap(data => data.source)
+    const sources = getFlag(message, 'merge.data').flatMap(data => data.source)
     await removeChatMessages(message.id)
     await getChatMessageClass().createDocuments(sources)
 }
@@ -239,11 +247,13 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
         speaker: origin.speaker,
         flags: {
             [MODULE_ID]: {
-                actor: actorUUID,
-                target: targetUUID,
-                merged: true,
-                type: 'damage-roll',
-                data,
+                merge: {
+                    actor: actorUUID,
+                    target: targetUUID,
+                    merged: true,
+                    type: 'damage-roll',
+                    data,
+                },
             },
             pf2e: {
                 context: {
@@ -256,7 +266,7 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
 }
 
 function getMessageData(message) {
-    const flags = getFlag(message, 'data')
+    const flags = getFlag(message, 'merge.data')
     if (flags) return flags
 
     const source = message.toObject()
@@ -313,17 +323,17 @@ function createTermGroup(terms) {
 }
 
 function getMessageRolls(message) {
-    return getFlag(message, 'rolls') ?? JSON.parse(message._source.rolls[0]).terms[0].rolls
+    return getFlag(message, 'merge.rolls') ?? JSON.parse(message._source.rolls[0]).terms[0].rolls
 }
 
 function getActorUUID(message) {
-    return getFlag(message, 'actor') ?? message.actor?.uuid
+    return getFlag(message, 'merge.actor') ?? message.actor?.uuid
 }
 
 function getTargetUUID(message) {
-    return getFlag(message, 'target') ?? message.target?.actor.uuid
+    return getFlag(message, 'merge.target') ?? message.target?.actor.uuid
 }
 
 function isDamageRoll(message) {
-    return getFlag(message, 'type') === 'damage-roll' || message.getFlag('pf2e', 'context.type') === 'damage-roll'
+    return getFlag(message, 'merge.type') === 'damage-roll' || message.getFlag('pf2e', 'context.type') === 'damage-roll'
 }

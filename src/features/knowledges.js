@@ -43,8 +43,8 @@ function editLores(actor) {
 }
 
 function replaceLores(actor, html) {
-    const unspecifics = getFlag(actor, 'unspecified')
-    const specifics = getFlag(actor, 'specific')
+    const unspecifics = getFlag(actor, 'knowledges.unspecified')
+    const specifics = getFlag(actor, 'knowledges.specific')
     if (!unspecifics && !specifics) return
 
     const lores = actor.identificationDCs.lore

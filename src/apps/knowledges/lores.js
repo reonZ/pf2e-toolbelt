@@ -25,16 +25,16 @@ export class EditLores extends FormApplication {
         const actor = this.actor
 
         return mergeObject(super.getData(options), {
-            unspecified: getFlag(actor, 'unspecified') ?? '',
-            specific: getFlag(actor, 'specific') ?? '',
+            unspecified: getFlag(actor, 'knowledges.unspecified') ?? '',
+            specific: getFlag(actor, 'knowledges.specific') ?? '',
             i18n: localize,
         })
     }
 
     async _updateObject(event, { unspecified, specific }) {
         const actor = this.object
-        setFlag(actor, 'unspecified', unspecified.trim())
-        setFlag(actor, 'specific', specific.trim())
+        setFlag(actor, 'knowledges.unspecified', unspecified.trim())
+        setFlag(actor, 'knowledges.specific', specific.trim())
     }
 
     activateListeners(html) {
