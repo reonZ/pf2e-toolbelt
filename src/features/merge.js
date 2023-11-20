@@ -90,29 +90,21 @@ function renderDamage(message, html) {
     buttons += '</span>'
 
     const actorUUID = getActorUUID(message)
-    const targetUUID = getTargetUUID(message)
+    const targetUUIDs = getTargetUUIDs(message)
 
     html.find('.dice-result .dice-total').append(buttons)
     html.find('.pf2e-toolbelt-merge [data-action=merge-damage]').on('click', event => {
         event.stopPropagation()
 
         for (const otherMessage of latestChatMessages(5, message)) {
-            console.log({
-                actorUUID,
-                targetUUID,
-                isDamageRoll: isDamageRoll(otherMessage),
-                otherActorUUID: getActorUUID(otherMessage),
-                otherTargetUUID: getTargetUUID(otherMessage),
-            })
-
             if (
                 !isDamageRoll(otherMessage) ||
                 getActorUUID(otherMessage) !== actorUUID ||
-                getTargetUUID(otherMessage) !== targetUUID
+                !compareArrays(targetUUIDs, getTargetUUIDs(otherMessage))
             )
                 continue
 
-            mergeDamages(event, message, otherMessage, { actorUUID, targetUUID })
+            mergeDamages(event, message, otherMessage, { actorUUID, targetUUID: targetUUIDs })
             return
         }
 
@@ -330,8 +322,12 @@ function getActorUUID(message) {
     return getFlag(message, 'merge.actor') ?? message.actor?.uuid
 }
 
-function getTargetUUID(message) {
-    return getFlag(message, 'merge.target') ?? message.target?.actor.uuid
+function getTargetUUIDs(message) {
+    const targetTargets = getFlag(message, 'target.targets')
+    if (targetTargets) return targetTargets.map(({ actor }) => actor).filter(Boolean)
+
+    const singleTarget = getFlag(message, 'merge.target') ?? message.target?.actor.uuid
+    return singleTarget ? [singleTarget] : []
 }
 
 function isDamageRoll(message) {
