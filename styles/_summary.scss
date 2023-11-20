@@ -42,6 +42,10 @@
                 'name type cast-spell range' auto
                 'content content content content' auto/10fr 6fr 2fr 4fr;
 
+            .item-name {
+                grid-area: name;
+            }
+
             .spell-type {
                 grid-area: type;
             }
@@ -53,6 +57,10 @@
             .spell-range {
                 grid-area: range;
                 text-align: end;
+            }
+
+            .item-summary {
+                grid-area: content;
             }
 
             .item-controls {
