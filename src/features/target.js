@@ -26,9 +26,8 @@ export function registerTargetTokenHelper() {
 }
 
 function setup(value) {
-    if (!isUserGM()) return
     setPrecreateMessageHook(value)
-    setRenderMessageHook(value)
+    if (isUserGM()) setRenderMessageHook(value)
 }
 
 function preCreateChatMessage(message) {
