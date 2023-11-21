@@ -17,6 +17,13 @@ export function registerTargetTokenHelper() {
                 default: false,
                 onChange: setup,
             },
+            {
+                name: 'target-chat',
+                type: Boolean,
+                default: false,
+                scope: 'client',
+                onChange: value => setRenderMessageHook(value && getSetting('target')),
+            },
         ],
         conflicts: [],
         init: () => {
@@ -27,7 +34,7 @@ export function registerTargetTokenHelper() {
 
 function setup(value) {
     setPrecreateMessageHook(value)
-    if (isUserGM()) setRenderMessageHook(value)
+    setRenderMessageHook(value && getSetting('target-chat'))
 }
 
 function preCreateChatMessage(message) {
@@ -53,18 +60,34 @@ async function renderChatMessage(message, html) {
 
     damageRow.removeClass('damage-application').addClass('target-damage-application')
     damageRow.find('button > *:not(.label)').remove()
+    damageRow.find('[data-action]').each(function () {
+        const action = this.dataset.action
+        this.dataset.action = `target-${action}`
+    })
 
-    const extraRows = $('<div class="target-helper"></div>')
+    const extraRows = []
 
     await Promise.all(
         targets.map(async ({ token }) => {
             const target = await fromUuid(token)
-            if (!target) return
+            if (!target || !target.isOwner) return
 
-            extraRows.append('<hr>')
+            extraRows.push({
+                uuid: token,
+                name: target.name,
+            })
+        })
+    )
 
-            extraRows.append(`<div class="target-header" data-target-uuid="${token}">
-    <span class="name">${target.name}</span>
+    if (!extraRows.length) return
+
+    const template = $('<div class="target-helper"></div>')
+
+    extraRows.forEach(({ name, uuid }) => {
+        template.append('<hr>')
+
+        template.append(`<div class="target-header" data-target-uuid="${uuid}">
+    <span class="name">${name}</span>
     <span class="controls">
         <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
             <i class="fa-solid fa-fw fa-signal-stream"></i>
@@ -75,26 +98,21 @@ async function renderChatMessage(message, html) {
     </span>
 </div>`)
 
-            const clone = damageRow.clone()
-            clone.find('[data-action]').each(function () {
-                const action = this.dataset.action
-                this.dataset.action = `target-${action}`
-            })
+        const clone = damageRow.clone()
 
-            clone.each((index, el) => {
-                el.dataset.rollIndex = index
-                el.dataset.targetUuid = token
-            })
-
-            extraRows.append(clone)
+        clone.each((index, el) => {
+            el.dataset.rollIndex = index
+            el.dataset.targetUuid = uuid
         })
-    )
 
-    msgContent.after(extraRows)
+        template.append(clone)
+    })
 
-    extraRows.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
-    extraRows.find('[data-action=ping-target]').on('click', pingTarget)
-    extraRows.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
+    msgContent.after(template)
+
+    template.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
+    template.find('[data-action=ping-target]').on('click', pingTarget)
+    template.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
 }
 
 async function getTargetFromEvent(event) {

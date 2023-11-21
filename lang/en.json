@@ -105,7 +105,11 @@
             },
             "target": {
                 "name": "Target Token Helper",
-                "hint": "(GM only feature) Damage chat messages will have extra application damage rows for each token that was targeted during the roll."
+                "hint": "Allow the use of Target Token Helper in your world, the settings are client based and can be found below."
+            },
+            "target-chat": {
+                "name": "Target Token Helper - Chat",
+                "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll"
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e Toolbelt</strong>, you can disable it safely",
