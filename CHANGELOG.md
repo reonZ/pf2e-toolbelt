@@ -1,3 +1,10 @@
+# 1.16.0
+
+-   added a `fortitude`/`reflex`/`will` icon to the damage chat messages extra rows from `Target Token Helper` for spells that have a save check
+    -   clicking on the icon will automatically roll the save check against the original spell
+    -   once rolled, the result will be displayed next to the icon using the regular system's color coding for the degree of success
+-   added `Target Token Helper - Saves` world setting (enabled by default): when a damage chat message with multiple targets is created from a spell, should the inline save rolls also generate the regular chat messages
+
 # 1.15.0
 
 -   changed `Target Token Helper`, this is no longer a GM only feature, it now enables the global feature to your world but requires client settings to enable its different parts
