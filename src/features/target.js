@@ -1,10 +1,18 @@
-import { getFlag, updateSourceFlag } from '../shared/flags'
+import { getFlag, setFlag, updateSourceFlag } from '../shared/flags'
 import { createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
 import { getTemplateTokens } from '../shared/template'
+
+const SAVES = {
+    fortitude: { icon: 'fa-solid fa-chess-rook', label: 'PF2E.SavesFortitude' },
+    reflex: { icon: 'fa-solid fa-person-running', label: 'PF2E.SavesReflex' },
+    will: { icon: 'fa-solid fa-brain', label: 'PF2E.SavesWill' },
+}
+
+const DEGREE_OF_SUCCESS = ['criticalFailure', 'failure', 'success', 'criticalSuccess']
 
 const setPrecreateMessageHook = createHook('preCreateChatMessage', preCreateChatMessage)
 const setRenderMessageHook = createHook('renderChatMessage', renderChatMessage)
@@ -18,6 +26,11 @@ export function registerTargetTokenHelper() {
                 type: Boolean,
                 default: false,
                 onChange: setHooks,
+            },
+            {
+                name: 'target-save',
+                type: Boolean,
+                default: true,
             },
             {
                 name: 'target-chat',
@@ -105,21 +118,52 @@ function preCreateChatMessage(message) {
         'target.targets',
         Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
     )
+
+    const item = message.item
+    if (!item?.type === 'spell') return
+
+    const statistic = item.system.defense?.save.statistic
+    if (!statistic) return
+
+    const spellcasting = item.spellcasting
+    if (!spellcasting) return
+
+    updateSourceFlag(message, 'target.save', {
+        statistic,
+        dc: spellcasting.statistic.dc.value,
+    })
 }
 
 async function renderChatMessage(message, html) {
     const targetsFlag = getFlag(message, 'target.targets') ?? []
     if (!targetsFlag.length) return
 
+    const save = (() => {
+        const flag = getFlag(message, 'target.save')
+        if (!flag) return
+        return {
+            ...flag,
+            ...SAVES[flag.statistic],
+        }
+    })()
+
     const targets = (
         await Promise.all(
             targetsFlag.map(async ({ token }) => {
                 const target = await fromUuid(token)
                 if (!target?.isOwner) return
+
                 return {
                     uuid: token,
                     target: target,
-                    template: await renderTemplate(templatePath('target/row-header'), { name: target.name, uuid: token }),
+                    template: await renderTemplate(templatePath('target/row-header'), {
+                        name: target.name,
+                        uuid: token,
+                        save: {
+                            ...save,
+                            result: getFlag(message, `target.saves.${target.id}`),
+                        },
+                    }),
                 }
             })
         )
@@ -159,6 +203,7 @@ async function renderChatMessage(message, html) {
     rowsTemplate.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
     rowsTemplate.find('[data-action=ping-target]').on('click', pingTarget)
     rowsTemplate.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
+    rowsTemplate.find('[data-action=roll-save]').on('click', event => rollSave(event, message, save))
 
     if (targets.length <= 1) return
 
@@ -173,16 +218,32 @@ async function renderChatMessage(message, html) {
     html.find('.dice-result .dice-total').append(selectButton)
 }
 
+async function getTargetFromEvent(event) {
+    const { targetUuid } = event.currentTarget.closest('[data-target-uuid]').dataset
+    return fromUuid(targetUuid)
+}
+
+async function rollSave(event, message, { dc, statistic }) {
+    const target = await getTargetFromEvent(event)
+    const actor = target?.actor
+    if (!actor) return
+
+    const options = { dc: { value: dc } }
+    if (!getSetting('target-save')) options.createMessage = false
+
+    const roll = await actor.saves[statistic].roll(options)
+
+    setFlag(message, `target.saves.${target.id}`, {
+        value: roll.total,
+        success: DEGREE_OF_SUCCESS[roll.degreeOfSuccess],
+    })
+}
+
 function selectTargets(event, targets) {
     event.stopPropagation()
     canvas.tokens.releaseAll()
     const options = { releaseOthers: false }
     targets.forEach(({ target }) => target.object.control(options))
-}
-
-async function getTargetFromEvent(event) {
-    const { targetUuid } = event.currentTarget.closest('[data-target-uuid]').dataset
-    return fromUuid(targetUuid)
 }
 
 async function openTargetSheet(event) {

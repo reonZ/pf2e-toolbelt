@@ -85,6 +85,30 @@
                 .controls {
                     display: flex;
                     gap: 0.5em;
+
+                    hr {
+                        width: 0;
+                        border: none;
+                        border-left: 1px solid var(--color-border-light-primary);
+                        border-right: 1px solid var(--color-border-light-highlight);
+                        margin: 2px 0;
+                    }
+
+                    .criticalSuccess {
+                        color: rgb(0, 128, 0);
+                    }
+
+                    .success {
+                        color: rgb(0, 0, 255);
+                    }
+
+                    .failure {
+                        color: rgb(255, 69, 0);
+                    }
+
+                    .criticalFailure {
+                        color: rgb(255, 0, 0);
+                    }
                 }
             }
 

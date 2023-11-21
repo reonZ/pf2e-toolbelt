@@ -114,6 +114,10 @@
             "target-template": {
                 "name": "Target Token Helper - Template",
                 "hint": "When placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template (with various criterias)."
+            },
+            "target-save": {
+                "name": "Target Token Helper - Saves",
+                "hint": "When a damage chat message with multiple targets is created from a spell, should the inline save rolls also generate the regular chat messages."
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e Toolbelt</strong>, you can disable it safely",
