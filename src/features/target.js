@@ -228,7 +228,12 @@ async function rollSave(event, message, { dc, statistic }) {
     const actor = target?.actor
     if (!actor) return
 
-    const options = { dc: { value: dc } }
+    const skipDefault = !game.user.settings.showCheckDialogs
+    const options = {
+        dc: { value: dc },
+        skipDialog: event.shiftKey ? !skipDefault : skipDefault,
+    }
+
     if (!getSetting('target-save')) options.createMessage = false
 
     const roll = await actor.saves[statistic].roll(options)

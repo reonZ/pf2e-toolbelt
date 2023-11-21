@@ -1,3 +1,7 @@
+# 1.16.2
+
+-   allow the use of `shift + click` on the inline save checks in the extra rows from `Target Token Helper`
+
 # 1.16.1
 
 -   console spam is bad
