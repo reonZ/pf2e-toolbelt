@@ -1,6 +1,6 @@
 import { getFlag, updateSourceFlag } from '../shared/flags'
 import { createHook } from '../shared/hook'
-import { subLocalize } from '../shared/localize'
+import { localize, subLocalize } from '../shared/localize'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
@@ -78,11 +78,11 @@ async function createMeasuredTemplate(template) {
     const opposition = alliance === 'party' ? 'opposition' : alliance === 'opposition' ? 'party' : null
 
     const targets = getTemplateTokens(template).filter(token => {
-        if (!result.self && self && token === self) return false
+        if (self && token === self) return result.self
 
         const targetAlliance = token.actor ? token.actor.alliance : token.alliance
 
-        if (!result.neutral && targetAlliance === null) return false
+        if (targetAlliance === null) return result.neutral
 
         return (
             result.targets === 'all' ||
@@ -108,7 +108,22 @@ function preCreateChatMessage(message) {
 }
 
 async function renderChatMessage(message, html) {
-    const targets = getFlag(message, 'target.targets') ?? []
+    const targetsFlag = getFlag(message, 'target.targets') ?? []
+    if (!targetsFlag.length) return
+
+    const targets = (
+        await Promise.all(
+            targetsFlag.map(async ({ token }) => {
+                const target = await fromUuid(token)
+                if (!target?.isOwner) return
+                return {
+                    uuid: token,
+                    target: target,
+                    template: await renderTemplate(templatePath('target/row-header'), { name: target.name, uuid: token }),
+                }
+            })
+        )
+    ).filter(Boolean)
     if (!targets.length) return
 
     const msgContent = html.find('.message-content')
@@ -122,43 +137,47 @@ async function renderChatMessage(message, html) {
         this.dataset.action = `target-${action}`
     })
 
-    const extraRows = []
+    const rowsTemplate = $('<div class="pf2e-toolbelt-target-helper"></div>')
 
-    await Promise.all(
-        targets.map(async ({ token }) => {
-            const target = await fromUuid(token)
-            if (!target || !target.isOwner) return
+    targets.forEach(({ uuid, template }) => {
+        rowsTemplate.append('<hr>')
 
-            extraRows.push({
-                uuid: token,
-                template: await renderTemplate(templatePath('target/row-header'), { name: target.name, uuid: token }),
-            })
-        })
-    )
-
-    if (!extraRows.length) return
-
-    const template = $('<div class="target-helper"></div>')
-
-    extraRows.forEach(row => {
-        template.append('<hr>')
-        template.append(row.template)
+        rowsTemplate.append(template)
 
         const clone = damageRow.clone()
 
         clone.each((index, el) => {
             el.dataset.rollIndex = index
-            el.dataset.targetUuid = row.uuid
+            el.dataset.targetUuid = uuid
         })
 
-        template.append(clone)
+        rowsTemplate.append(clone)
     })
 
-    msgContent.after(template)
+    msgContent.after(rowsTemplate)
 
-    template.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
-    template.find('[data-action=ping-target]').on('click', pingTarget)
-    template.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
+    rowsTemplate.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
+    rowsTemplate.find('[data-action=ping-target]').on('click', pingTarget)
+    rowsTemplate.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
+
+    if (targets.length <= 1) return
+
+    const selectTooltip = localize('target.chat.select.tooltip')
+    const selectButton = $(`<button class="pf2e-toolbelt-target-select" 
+        data-action="target-select" title="${selectTooltip}">
+    <i class="fa-solid fa-street-view"></i>
+</button>`)
+
+    selectButton.on('click', event => selectTargets(event, targets))
+
+    html.find('.dice-result .dice-total').append(selectButton)
+}
+
+function selectTargets(event, targets) {
+    event.stopPropagation()
+    canvas.tokens.releaseAll()
+    const options = { releaseOthers: false }
+    targets.forEach(({ target }) => target.object.control(options))
 }
 
 async function getTargetFromEvent(event) {

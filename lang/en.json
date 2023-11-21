@@ -294,6 +294,11 @@
             "onlyCharacter": "Hero Actions is only compatible with Character actors"
         },
         "target": {
+            "chat": {
+                "select": {
+                    "tooltip": "Select All Targeted Tokens"
+                }
+            },
             "menu": {
                 "title": "Template",
                 "target": "Target",
