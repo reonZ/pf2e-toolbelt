@@ -109,6 +109,12 @@
                     .criticalFailure {
                         color: rgb(255, 0, 0);
                     }
+
+                    i {
+                        &.small {
+                            font-size: 0.95em;
+                        }
+                    }
                 }
             }
 

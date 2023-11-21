@@ -1,6 +1,7 @@
 <div class="target-header" data-target-uuid="{{uuid}}">
     <span class="name">{{name}}</span>
     <span class="controls">
+        {{log save}}
         {{#if save}}
         {{#if save.result}}
         <span
@@ -8,12 +9,14 @@
             <i class="{{save.icon}}"></i>
             <span class="{{save.result.success}}">{{save.result.value}}</span>
         </span>
+        <hr>
         {{else if save}}
         <a data-action="roll-save" data-statistic="{{save.statistic}}" data-tooltip="{{localize save.label}} DC {{save.dc}}">
             <i class="{{save.icon}}"></i>
+            <i class="fa-solid fa-dice-d20 small"></i>
         </a>
-        {{/if}}
         <hr>
+        {{/if}}
         {{/if}}
         <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
             <i class="fa-solid fa-fw fa-signal-stream"></i>

@@ -159,7 +159,7 @@ async function renderChatMessage(message, html) {
                     template: await renderTemplate(templatePath('target/row-header'), {
                         name: target.name,
                         uuid: token,
-                        save: {
+                        save: save && {
                             ...save,
                             result: getFlag(message, `target.saves.${target.id}`),
                         },
