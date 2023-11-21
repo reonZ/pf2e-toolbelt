@@ -1,3 +1,7 @@
+# 1.16.1
+
+-   console spam is bad
+
 # 1.16.0
 
 -   added a `fortitude`/`reflex`/`will` icon to the damage chat messages extra rows from `Target Token Helper` for spells that have a save check
