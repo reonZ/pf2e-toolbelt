@@ -1,12 +1,14 @@
-import { MODULE_ID } from '../module'
 import { getFlag, updateSourceFlag } from '../shared/flags'
 import { createHook } from '../shared/hook'
+import { subLocalize } from '../shared/localize'
+import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
-import { isUserGM } from '../shared/user'
+import { getTemplateTokens } from '../shared/template'
 
 const setPrecreateMessageHook = createHook('preCreateChatMessage', preCreateChatMessage)
 const setRenderMessageHook = createHook('renderChatMessage', renderChatMessage)
+const setCreateTemplateHook = createHook('createMeasuredTemplate', createMeasuredTemplate)
 
 export function registerTargetTokenHelper() {
     return {
@@ -15,7 +17,7 @@ export function registerTargetTokenHelper() {
                 name: 'target',
                 type: Boolean,
                 default: false,
-                onChange: setup,
+                onChange: setHooks,
             },
             {
                 name: 'target-chat',
@@ -24,17 +26,72 @@ export function registerTargetTokenHelper() {
                 scope: 'client',
                 onChange: value => setRenderMessageHook(value && getSetting('target')),
             },
+            {
+                name: 'target-template',
+                type: Boolean,
+                default: false,
+                scope: 'client',
+                onChange: value => setCreateTemplateHook(value && getSetting('target')),
+            },
         ],
         conflicts: [],
         init: () => {
-            if (getSetting('target')) setup(true)
+            if (getSetting('target')) setHooks(true)
         },
     }
 }
 
-function setup(value) {
+function setHooks(value) {
     setPrecreateMessageHook(value)
     setRenderMessageHook(value && getSetting('target-chat'))
+    setCreateTemplateHook(value && getSetting('target-template'))
+}
+
+async function createMeasuredTemplate(template) {
+    const localize = subLocalize('target.menu')
+    const item = template.item
+    const actor = item?.actor
+    const self = !actor ? undefined : actor.token ?? actor.getActiveTokens()[0]
+
+    const data = {
+        title: item?.name || localize('title'),
+        content: await renderTemplate(templatePath('target/template-menu'), { i18n: localize, noSelf: !self }),
+        buttons: {
+            select: {
+                icon: '<i class="fa-solid fa-bullseye-arrow"></i>',
+                label: localize('target'),
+                callback: html => ({
+                    targets: html.find('[name=targets]:checked').val(),
+                    self: html.find('[name=self]').prop('checked'),
+                    neutral: html.find('[name=neutral]').prop('checked'),
+                }),
+            },
+        },
+        close: () => null,
+    }
+
+    const result = await Dialog.wait(data, undefined, { id: `pf2e-toolbelt-target-template`, width: 260 })
+    if (!result) return
+
+    const user = game.user
+    const alliance = actor ? actor.alliance : user.isGM ? 'opposition' : 'party'
+    const opposition = alliance === 'party' ? 'opposition' : alliance === 'opposition' ? 'party' : null
+
+    const targets = getTemplateTokens(template).filter(token => {
+        if (!result.self && self && token === self) return false
+
+        const targetAlliance = token.actor ? token.actor.alliance : token.alliance
+
+        if (!result.neutral && targetAlliance === null) return false
+
+        return (
+            result.targets === 'all' ||
+            (result.targets === 'allies' && targetAlliance === alliance) ||
+            (result.targets === 'enemies' && targetAlliance === opposition)
+        )
+    })
+
+    user.updateTokenTargets(targets.map(token => token.id))
 }
 
 function preCreateChatMessage(message) {
@@ -74,7 +131,7 @@ async function renderChatMessage(message, html) {
 
             extraRows.push({
                 uuid: token,
-                name: target.name,
+                template: await renderTemplate(templatePath('target/row-header'), { name: target.name, uuid: token }),
             })
         })
     )
@@ -83,26 +140,15 @@ async function renderChatMessage(message, html) {
 
     const template = $('<div class="target-helper"></div>')
 
-    extraRows.forEach(({ name, uuid }) => {
+    extraRows.forEach(row => {
         template.append('<hr>')
-
-        template.append(`<div class="target-header" data-target-uuid="${uuid}">
-    <span class="name">${name}</span>
-    <span class="controls">
-        <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
-            <i class="fa-solid fa-fw fa-signal-stream"></i>
-        </a>
-        <a data-action="open-target-sheet" data-tooltip="PF2E.Actor.Party.Sidebar.OpenSheet">
-            <i class="icon fa-solid fa-file"></i>
-        </a>
-    </span>
-</div>`)
+        template.append(row.template)
 
         const clone = damageRow.clone()
 
         clone.each((index, el) => {
             el.dataset.rollIndex = index
-            el.dataset.targetUuid = uuid
+            el.dataset.targetUuid = row.uuid
         })
 
         template.append(clone)
@@ -124,7 +170,7 @@ async function openTargetSheet(event) {
     const target = await getTargetFromEvent(event)
     if (!target) return
 
-    target.actor.sheet.render(true)
+    target.actor?.sheet.render(true)
 }
 
 async function pingTarget(event) {

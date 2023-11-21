@@ -109,7 +109,11 @@
             },
             "target-chat": {
                 "name": "Target Token Helper - Chat",
-                "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll"
+                "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll."
+            },
+            "target-template": {
+                "name": "Target Token Helper - Template",
+                "hint": "When placing a template"
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e Toolbelt</strong>, you can disable it safely",
@@ -288,6 +292,17 @@
             },
             "notGM": "Only a GM can use this feature",
             "onlyCharacter": "Hero Actions is only compatible with Character actors"
+        },
+        "target": {
+            "menu": {
+                "title": "Template",
+                "target": "Target",
+                "self": "Include Self",
+                "neutral": "Include Neutral",
+                "enemies": "Enemies",
+                "allies": "Allies",
+                "all": "Both"
+            }
         },
         "macros": {
             "condition": {
