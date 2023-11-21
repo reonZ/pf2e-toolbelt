@@ -1,3 +1,10 @@
+# 1.15.0
+
+-   changed `Target Token Helper`, this is no longer a GM only feature, it now enables the global feature to your world but requires client settings to enable its different parts
+-   added `Target Token Helper - Chat` client setting: damage chat messages will have extra application damage rows for each owned token that was targeted during the roll
+-   added a new `Select All Targeted Tokens` button to damage chat messages that have more than one owned targeted token
+-   added `Target Token Helper - Template` client setting: when placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template (with various criterias)
+
 # 1.14.0
 
 -   added `Target Token Helper`, GM only feature where damage chat messages will have extra application damage rows for each token that was targeted during the roll

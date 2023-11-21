@@ -105,7 +105,7 @@
             },
             "target": {
                 "name": "Target Token Helper",
-                "hint": "Allow the use of Target Token Helper in your world, the settings are client based and can be found below."
+                "hint": "Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below."
             },
             "target-chat": {
                 "name": "Target Token Helper - Chat",
@@ -113,7 +113,7 @@
             },
             "target-template": {
                 "name": "Target Token Helper - Template",
-                "hint": "When placing a template"
+                "hint": "When placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template (with various criterias)."
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e Toolbelt</strong>, you can disable it safely",

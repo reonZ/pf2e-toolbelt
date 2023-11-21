@@ -117,7 +117,7 @@ NOTE: The `Force Refresh` should only be used if you notice some modules getting
 
 ## Target Token Helper
 
-GM only feature where damage chat messages will have extra application damage rows for each token that was targeted during the roll.
+Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below.
 
 # CLIENT FEATURES
 
@@ -202,6 +202,18 @@ You will be prompted with the list of the `Characters` from whom you want the ac
 Helps you generate (or directly add to an actor) an effect setting a permanent condition, you can select the condition, its badge value and if the effect is `unidentified` (making it impossible for the players to remove the condition)
 
 The macro will automatically set the name of the effect (if none is provided) and its image
+
+## Target Token Helper - Chat
+
+![](./readme/target/rows.webp)
+
+Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll.
+
+## Target Token Helper - Template
+
+![](./readme/target/template.webp)
+
+When placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template.
 
 # API
 
