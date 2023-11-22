@@ -1,7 +1,7 @@
 # 1.16.6
 
 -   fixed template dialog from `Target Token Helper` showing up on all users
--   fixed template targetting from `Target Token Helper` not being broadcasted to all users
+-   fixed template targeting from `Target Token Helper` not being broadcasted to all users
 
 # 1.16.5
 
