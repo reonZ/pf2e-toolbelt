@@ -120,7 +120,7 @@ function preCreateChatMessage(message) {
     )
 
     const item = message.item
-    if (!item?.type === 'spell') return
+    if (item?.type !== 'spell') return
 
     const statistic = item.system.defense?.save.statistic
     if (!statistic) return
