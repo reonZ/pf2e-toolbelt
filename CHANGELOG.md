@@ -1,3 +1,7 @@
+# 1.16.5
+
+-   fixed `Automated Rune Progression` pricing of items that have yet to gain any rune
+
 # 1.16.4
 
 -   fixed error with item-less messages when using `Target Token Helper`
