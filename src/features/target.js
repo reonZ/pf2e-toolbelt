@@ -60,7 +60,10 @@ function setHooks(value) {
     setCreateTemplateHook(value && getSetting('target-template'))
 }
 
-async function createMeasuredTemplate(template) {
+async function createMeasuredTemplate(template, _, userId) {
+    const user = game.user
+    if (user.id !== userId) return
+
     const localize = subLocalize('target.menu')
     const item = template.item
     const actor = item?.actor
@@ -86,7 +89,6 @@ async function createMeasuredTemplate(template) {
     const result = await Dialog.wait(data, undefined, { id: `pf2e-toolbelt-target-template`, width: 260 })
     if (!result) return
 
-    const user = game.user
     const alliance = actor ? actor.alliance : user.isGM ? 'opposition' : 'party'
     const opposition = alliance === 'party' ? 'opposition' : alliance === 'opposition' ? 'party' : null
 
