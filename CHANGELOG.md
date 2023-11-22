@@ -1,3 +1,7 @@
+# 1.16.3
+
+-   changed the default options of the template dialog from `Target Token Helper - Template`
+
 # 1.16.2
 
 -   allow the use of `shift + click` on the inline save checks in the extra rows from `Target Token Helper`
