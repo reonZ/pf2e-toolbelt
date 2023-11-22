@@ -1,6 +1,10 @@
+# 1.16.4
+
+-   fixed error with item-less messages when using `Target Token Helper`
+
 # 1.16.3
 
--   changed the default options of the template dialog from `Target Token Helper - Template`
+-   changed the default options of the template dialog from `Target Token Helper`
 
 # 1.16.2
 
