@@ -63,6 +63,7 @@ function setHooks(value) {
 async function createMeasuredTemplate(template, _, userId) {
     const user = game.user
     if (user.id !== userId) return
+    //  token.setTarget(!targeted, { releaseOthers: !event.shiftKey })
 
     const localize = subLocalize('target.menu')
     const item = template.item
@@ -106,7 +107,9 @@ async function createMeasuredTemplate(template, _, userId) {
         )
     })
 
-    user.updateTokenTargets(targets.map(token => token.id))
+    const targetsIds = targets.map(token => token.id)
+    user.updateTokenTargets(targetsIds)
+    user.broadcastActivity({ targets: targetsIds })
 }
 
 function preCreateChatMessage(message) {
