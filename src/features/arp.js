@@ -86,7 +86,7 @@ function onPrepareWeaponDerivedData(wrapped) {
 
     let coins = new game.pf2e.Coins({ gp })
 
-    if ((potency || striking) && !this.system.runes.property.length) {
+    if (!this.system.runes.property.length) {
         coins = coins.add(this._source.system.price.value)
     }
 
@@ -136,7 +136,7 @@ function onPrepareArmorDerivedData(wrapped) {
 
     let coins = new game.pf2e.Coins({ gp })
 
-    if ((potency || resiliency) && !this.system.runes.property.length) {
+    if (!this.system.runes.property.length) {
         coins = coins.add(this._source.system.price.value)
     }
 
