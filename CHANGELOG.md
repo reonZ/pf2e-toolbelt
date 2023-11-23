@@ -1,3 +1,10 @@
+# 1.17.0
+
+-   damage buttons are now highlighted depending on the result of the inline save check for spells in damage chat messages when using `Target Token Helper`
+-   added a `Add targets to message` button to spell cards for spells that have a save and don't deal damage when `Target Token Helper` is enabled
+    -   adding targets to the message will show the list of owned targets in said message and allow inline save check rolls
+-   fixed pricing of runeless items when using `Automated Rune Progression` (again!)
+
 # 1.16.6
 
 -   fixed template dialog from `Target Token Helper` showing up on all users
