@@ -141,11 +141,11 @@ function preCreateChatMessage(message) {
 function renderChatMessage(message, html) {
     if (message.isDamageRoll) return renderDamageChatMessage(message, html)
 
-    const origin = message.getFlag('pf2e', 'origin')
-    if (origin?.type === 'spell') return renderSpellChatMessage(message, html, origin.uuid)
+    const item = message.item
+    if (item && item.type === 'spell' && !item.damageKinds.size) return renderSpellChatMessage(message, html, item)
 }
 
-async function renderSpellChatMessage(message, html, uuid) {
+async function renderSpellChatMessage(message, html, spell) {
     const data = await getMessageData(message)
     if (!data) return
 
@@ -169,7 +169,6 @@ async function renderSpellChatMessage(message, html, uuid) {
         cardBtns.prepend(wrapper)
     }
 
-    const spell = message.item
     if (spell && spell.area && !spell.traits.has('aura')) {
         const template = canvas.scene?.templates.some(template => template.message === message && template.isOwner)
         if (template) cardBtns.find('.owner-buttons .hidden.small').removeClass('hidden')
