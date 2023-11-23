@@ -76,21 +76,22 @@ function onPrepareWeaponDerivedData(wrapped) {
 
     if (!isValidActor(this.actor) || this.isSpecific || !isValidWeapon(this)) return
 
-    let gp = this.price.value.goldValue
+    let coins = this.price.value.toObject()
+    if (!coins.gp) return
 
     const potency = this.system.potencyRune.value
-    if (potency) gp -= WEAPON_POTENCY_PRICE[potency]
+    if (potency) coins.gp -= WEAPON_POTENCY_PRICE[potency]
 
     const striking = this.system.strikingRune.value
-    if (striking) gp -= WEAPON_STRIKING_PRICE[striking]
+    if (striking) coins.gp -= WEAPON_STRIKING_PRICE[striking]
 
-    let coins = new game.pf2e.Coins({ gp })
+    coins = new game.pf2e.Coins(coins)
 
-    if (!this.system.runes.property.length) {
+    if ((potency || striking) && !this.system.runes.property.length) {
         coins = coins.add(this._source.system.price.value)
     }
 
-    this.system.price.value = new game.pf2e.Coins(coins)
+    this.system.price.value = coins
 }
 
 function isValidArmor(armor) {
@@ -126,19 +127,20 @@ function onPrepareArmorDerivedData(wrapped) {
 
     if (!isValidActor(this.actor) || this.isSpecific || !isValidArmor(this)) return
 
-    let gp = this.price.value.goldValue
+    let coins = this.price.value.toObject()
+    if (!coins.gp) return
 
     const potency = this.system.potencyRune.value
-    if (potency) gp -= ARMOR_POTENCY_PRICE[potency]
+    if (potency) coins.gp -= ARMOR_POTENCY_PRICE[potency]
 
     const resiliency = this.system.resiliencyRune.value
-    if (resiliency) gp -= ARMOR_RESILIENCY_PRICE[resiliency]
+    if (resiliency) coins.gp -= ARMOR_RESILIENCY_PRICE[resiliency]
 
-    let coins = new game.pf2e.Coins({ gp })
+    coins = new game.pf2e.Coins(coins)
 
-    if (!this.system.runes.property.length) {
+    if ((potency || resiliency) && !this.system.runes.property.length) {
         coins = coins.add(this._source.system.price.value)
     }
 
-    this.system.price.value = new game.pf2e.Coins(coins)
+    this.system.price.value = coins
 }
