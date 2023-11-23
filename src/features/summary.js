@@ -1,7 +1,7 @@
 import { MODULE_ID } from '../module'
 import { isPlayedActor } from '../shared/actor'
 import { createChoicesHook } from '../shared/hook'
-import { localeCompare, ordinalString, refreshCharacterSheets } from '../shared/misc'
+import { setInMemory, localeCompare, ordinalString, refreshCharacterSheets, getInMemory } from '../shared/misc'
 import { templatePath } from '../shared/path'
 import { getSetting } from '../shared/settings'
 
@@ -32,7 +32,7 @@ async function renderCharacterSheetPF2e(sheet, html) {
 
     const tab = getSpellcastingTab(html)
 
-    if (getProperty(sheet, `modules.${MODULE_ID}.toggled`)) tab.addClass('toggled')
+    if (getInMemory(sheet, 'toggled')) tab.addClass('toggled')
 
     getSpellcastingNav(html).on('click', event => onSpellcastingBtnToggle(event, html, sheet))
     await addSummaryTab(html, sheet, actor)
@@ -167,7 +167,7 @@ function onSpellcastingBtnToggle(event, html, sheet) {
     if (tab.hasClass('active')) {
         tab.toggleClass('toggled')
         tab.scrollTop(0)
-        setProperty(sheet, `modules.${MODULE_ID}.toggled`, tab.hasClass('toggled'))
+        setInMemory(sheet, 'toggled', tab.hasClass('toggled'))
     }
 }
 

@@ -1,3 +1,5 @@
+import { MODULE_ID } from '../module'
+
 export function localeCompare(a, b) {
     return a.localeCompare(b, game.i18n.lang)
 }
@@ -38,4 +40,23 @@ export function isInstanceOf(obj, name) {
     }
 
     return false
+}
+
+export function setInMemory(doc, key, value) {
+    return setProperty(doc, `modules.${MODULE_ID}.${key}`, value)
+}
+
+export function getInMemory(doc, key) {
+    return getProperty(doc, `modules.${MODULE_ID}.${key}`)
+}
+
+export function deleteInMemory(doc, key) {
+    const split = `modules.${MODULE_ID}.${key}`.split('.')
+    const last = split.pop()
+    let cursor = doc
+    for (const key of split) {
+        cursor = cursor[key]
+        if (!cursor) return true
+    }
+    return delete cursor[last]
 }
