@@ -41,6 +41,23 @@
 
 .chat-message {
     .message-content {
+        .card-buttons {
+            .pf2e-toolbelt-target-wrapper {
+                display: flex;
+
+                .pf2e-toolbelt-target-targets {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex: 0;
+
+                    i {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+
         .dice-result {
             .dice-total {
                 .pf2e-toolbelt-target-select {
@@ -62,7 +79,8 @@
             }
         }
 
-        + .pf2e-toolbelt-target-helper {
+        + .pf2e-toolbelt-target-damage,
+        + .pf2e-toolbelt-target-spell {
             hr {
                 width: 100%;
             }
@@ -117,7 +135,9 @@
                     }
                 }
             }
+        }
 
+        + .pf2e-toolbelt-target-damage {
             .target-damage-application {
                 display: flex;
                 justify-content: center;

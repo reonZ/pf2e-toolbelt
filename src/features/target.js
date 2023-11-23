@@ -63,7 +63,6 @@ function setHooks(value) {
 async function createMeasuredTemplate(template, _, userId) {
     const user = game.user
     if (user.id !== userId) return
-    //  token.setTarget(!targeted, { releaseOthers: !event.shiftKey })
 
     const localize = subLocalize('target.menu')
     const item = template.item
@@ -113,16 +112,16 @@ async function createMeasuredTemplate(template, _, userId) {
 }
 
 function preCreateChatMessage(message) {
-    if (!message.isDamageRoll) return
+    if (message.isDamageRoll) {
+        const targets = game.user.targets
+        if (targets.size < 1) return
 
-    const targets = game.user.targets
-    if (targets.size < 1) return
-
-    updateSourceFlag(
-        message,
-        'target.targets',
-        Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
-    )
+        updateSourceFlag(
+            message,
+            'target.targets',
+            Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
+        )
+    }
 
     const item = message.item
     if (item?.type !== 'spell') return
@@ -139,9 +138,125 @@ function preCreateChatMessage(message) {
     })
 }
 
-async function renderChatMessage(message, html) {
+function renderChatMessage(message, html) {
+    if (message.isDamageRoll) return renderDamageChatMessage(message, html)
+
+    const origin = message.getFlag('pf2e', 'origin')
+    if (origin?.type === 'spell') return renderSpellChatMessage(message, html, origin.uuid)
+}
+
+async function renderSpellChatMessage(message, html, uuid) {
+    const data = await getMessageData(message)
+    if (!data) return
+
+    const { targets, save } = data
+    const msgContent = html.find('.message-content')
+    const cardBtns = msgContent.find('.card-buttons')
+
+    if (game.user.isGM || message.isAuthor) {
+        const saveBtn = cardBtns.find('button[data-action=spell-save]')
+        const wrapper = $('<div class="pf2e-toolbelt-target-wrapper"></div>')
+        const targetsTooltip = localize('target.chat.targets.tooltip')
+
+        const targetsBtn = $(`<button class="pf2e-toolbelt-target-targets" title="${targetsTooltip}">
+        <i class="fa-solid fa-bullseye-arrow"></i>
+        </button>`)
+
+        targetsBtn.on('click', event => addTargets(event, message))
+
+        wrapper.append(targetsBtn)
+        wrapper.append(saveBtn)
+        cardBtns.prepend(wrapper)
+    }
+
+    const spell = message.item
+    if (spell && spell.area && !spell.traits.has('aura')) {
+        const template = canvas.scene?.templates.some(template => template.message === message && template.isOwner)
+        if (template) cardBtns.find('.owner-buttons .hidden.small').removeClass('hidden')
+    }
+
+    if (!targets.length) return
+
+    const rowsTemplate = $('<div class="pf2e-toolbelt-target-spell"></div>')
+
+    targets.forEach(({ template }) => {
+        rowsTemplate.append('<hr>')
+        rowsTemplate.append(template)
+    })
+
+    addHeaderListeners(message, rowsTemplate, save)
+
+    msgContent.after(rowsTemplate)
+}
+
+function addTargets(event, message) {
+    const targets = game.user.targets
+
+    setFlag(
+        message,
+        'target.targets',
+        Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
+    )
+}
+
+async function renderDamageChatMessage(message, html) {
+    const data = await getMessageData(message)
+    if (!data || !data.targets.length) return
+
+    const { targets, save } = data
+    const msgContent = html.find('.message-content')
+    const damageRow = msgContent.find('.damage-application').clone()
+    if (!damageRow.length) return
+
+    damageRow.removeClass('damage-application').addClass('target-damage-application')
+    damageRow.find('button > *:not(.label)').remove()
+    damageRow.find('[data-action]').each(function () {
+        const action = this.dataset.action
+        this.dataset.action = `target-${action}`
+    })
+
+    const rowsTemplate = $('<div class="pf2e-toolbelt-target-damage"></div>')
+
+    targets.forEach(({ uuid, template }) => {
+        rowsTemplate.append('<hr>')
+
+        rowsTemplate.append(template)
+
+        const clone = damageRow.clone()
+
+        clone.each((index, el) => {
+            el.dataset.rollIndex = index
+            el.dataset.targetUuid = uuid
+        })
+
+        rowsTemplate.append(clone)
+    })
+
+    msgContent.after(rowsTemplate)
+
+    addHeaderListeners(message, rowsTemplate, save)
+    rowsTemplate.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
+
+    if (targets.length <= 1) return
+
+    const selectTooltip = localize('target.chat.select.tooltip')
+    const selectBtn = $(`<button class="pf2e-toolbelt-target-select" title="${selectTooltip}">
+    <i class="fa-solid fa-street-view"></i>
+</button>`)
+
+    selectBtn.on('click', event => selectTargets(event, targets))
+
+    html.find('.dice-result .dice-total').append(selectBtn)
+}
+
+function addHeaderListeners(message, html, save) {
+    html.find('[data-action=ping-target]').on('click', pingTarget)
+    html.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
+    html.find('[data-action=roll-save]').on('click', event => rollSave(event, message, save))
+}
+
+async function getMessageData(message) {
     const targetsFlag = getFlag(message, 'target.targets') ?? []
-    if (!targetsFlag.length) return
 
     const save = (() => {
         const flag = getFlag(message, 'target.save')
@@ -151,6 +266,8 @@ async function renderChatMessage(message, html) {
             ...SAVES[flag.statistic],
         }
     })()
+
+    if (!targetsFlag.length && !save) return
 
     const targets = (
         await Promise.all(
@@ -173,54 +290,8 @@ async function renderChatMessage(message, html) {
             })
         )
     ).filter(Boolean)
-    if (!targets.length) return
 
-    const msgContent = html.find('.message-content')
-    const damageRow = msgContent.find('.damage-application').clone()
-    if (!damageRow.length) return
-
-    damageRow.removeClass('damage-application').addClass('target-damage-application')
-    damageRow.find('button > *:not(.label)').remove()
-    damageRow.find('[data-action]').each(function () {
-        const action = this.dataset.action
-        this.dataset.action = `target-${action}`
-    })
-
-    const rowsTemplate = $('<div class="pf2e-toolbelt-target-helper"></div>')
-
-    targets.forEach(({ uuid, template }) => {
-        rowsTemplate.append('<hr>')
-
-        rowsTemplate.append(template)
-
-        const clone = damageRow.clone()
-
-        clone.each((index, el) => {
-            el.dataset.rollIndex = index
-            el.dataset.targetUuid = uuid
-        })
-
-        rowsTemplate.append(clone)
-    })
-
-    msgContent.after(rowsTemplate)
-
-    rowsTemplate.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
-    rowsTemplate.find('[data-action=ping-target]').on('click', pingTarget)
-    rowsTemplate.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
-    rowsTemplate.find('[data-action=roll-save]').on('click', event => rollSave(event, message, save))
-
-    if (targets.length <= 1) return
-
-    const selectTooltip = localize('target.chat.select.tooltip')
-    const selectButton = $(`<button class="pf2e-toolbelt-target-select" 
-        data-action="target-select" title="${selectTooltip}">
-    <i class="fa-solid fa-street-view"></i>
-</button>`)
-
-    selectButton.on('click', event => selectTargets(event, targets))
-
-    html.find('.dice-result .dice-total').append(selectButton)
+    return { targets, save }
 }
 
 async function getTargetFromEvent(event) {

@@ -301,6 +301,9 @@
             "chat": {
                 "select": {
                     "tooltip": "Select All Targeted Tokens"
+                },
+                "targets": {
+                    "tooltip": "Add targets to message"
                 }
             },
             "menu": {
