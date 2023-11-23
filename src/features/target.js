@@ -126,14 +126,14 @@ function preCreateChatMessage(message) {
     const item = message.item
     if (item?.type !== 'spell') return
 
-    const statistic = item.system.defense?.save.statistic
-    if (!statistic) return
+    const save = item.system.defense?.save
+    if (!save) return
 
     const spellcasting = item.spellcasting
     if (!spellcasting) return
 
     updateSourceFlag(message, 'target.save', {
-        statistic,
+        ...save,
         dc: spellcasting.statistic.dc.value,
     })
 }
@@ -216,7 +216,7 @@ async function renderDamageChatMessage(message, html) {
 
     const rowsTemplate = $('<div class="pf2e-toolbelt-target-damage"></div>')
 
-    targets.forEach(({ uuid, template }) => {
+    targets.forEach(({ uuid, template, save }) => {
         rowsTemplate.append('<hr>')
 
         rowsTemplate.append(template)
@@ -226,6 +226,7 @@ async function renderDamageChatMessage(message, html) {
         clone.each((index, el) => {
             el.dataset.rollIndex = index
             el.dataset.targetUuid = uuid
+            if (save && save.result && save.basic) el.classList.add(save.result.success)
         })
 
         rowsTemplate.append(clone)
@@ -274,16 +275,19 @@ async function getMessageData(message) {
                 const target = await fromUuid(token)
                 if (!target?.isOwner) return
 
+                const targetSave = save && {
+                    ...save,
+                    result: getFlag(message, `target.saves.${target.id}`),
+                }
+
                 return {
                     uuid: token,
                     target: target,
+                    save: targetSave,
                     template: await renderTemplate(templatePath('target/row-header'), {
                         name: target.name,
                         uuid: token,
-                        save: save && {
-                            ...save,
-                            result: getFlag(message, `target.saves.${target.id}`),
-                        },
+                        save: targetSave,
                     }),
                 }
             })
