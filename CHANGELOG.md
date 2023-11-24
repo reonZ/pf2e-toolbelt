@@ -1,6 +1,6 @@
 # 1.17.2
 
--   fixed chat log not scrolling properly on extended messages modified by `Target Token Helper`
+-   fixed chat log not scrolling properly on extended damage messages modified by `Target Token Helper` (though i couldn't make it work for the spell card)
 
 # 1.17.1
 
