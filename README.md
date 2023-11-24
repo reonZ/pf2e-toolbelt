@@ -119,6 +119,10 @@ NOTE: The `Force Refresh` should only be used if you notice some modules getting
 
 Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below.
 
+## Target Token Helper - Saves
+
+When a damage chat message with multiple targets is created from a spell, should the inline save rolls also generate the regular chat messages.
+
 # CLIENT FEATURES
 
 ## Merge Damage
