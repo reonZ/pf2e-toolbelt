@@ -12,13 +12,14 @@ import { isActiveGM } from '../shared/user'
 
 const MODULE_ID = 'pf2e-hero-actions'
 
-const SOCKET = null
 const setHook = createHook('renderCharacterSheetPF2e', renderCharacterSheetPF2e, setupSocket)
 
 const JOURNAL_UUID = 'Compendium.pf2e.journals.JournalEntry.BSp4LUSaOmUyjBko'
 const TABLE_UUID = 'Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK'
 
 const TABLE_ICON = 'systems/pf2e/icons/features/feats/heroic-recovery.webp'
+
+let SOCKET = false
 
 export function registerHeroActions() {
     return {
@@ -70,25 +71,30 @@ export function registerHeroActions() {
 }
 
 function setupSocket(value) {
-    if (value && !SOCKET) socketOn(onSocket)
-    else if (!value && SOCKET) socketOff(onSocket)
+    if (value && !SOCKET) {
+        socketOn(onSocket)
+        SOCKET = true
+    } else if (!value && SOCKET) {
+        socketOff(onSocket)
+        SOCKET = false
+    }
 }
 
 function onSocket(packet) {
     switch (packet.type) {
-        case 'trade-reject':
+        case 'hero.trade-reject':
             if (packet.sender.id !== game.user.id) return
             onTradeRejected(packet)
             break
-        case 'trade-accept':
+        case 'hero.trade-accept':
             if (!isActiveGM()) return
             onTradeAccepted(packet)
             break
-        case 'trade-request':
+        case 'hero.trade-request':
             if (packet.receiver.id !== game.user.id) return
             onTradeRequest(packet)
             break
-        case 'trade-error':
+        case 'hero.trade-error':
             if (!packet.users.includes(game.user.id)) return
             onTradeError(packet.error)
             break
@@ -428,7 +434,7 @@ export function sendTradeRequest(trade) {
 
     socketEmit({
         ...trade,
-        type: 'trade-request',
+        type: 'hero.trade-request',
     })
 }
 
@@ -440,7 +446,7 @@ function acceptRequest(trade) {
 
     socketEmit({
         ...trade,
-        type: 'trade-accept',
+        type: 'hero.trade-accept',
     })
 }
 
@@ -500,7 +506,7 @@ function sendTradeError({ sender, receiver }, error = 'trade-error') {
     if (!users.size) return
 
     socketEmit({
-        type: 'trade-error',
+        type: 'hero.trade-error',
         users: Array.from(users),
         error,
     })
@@ -544,7 +550,7 @@ function rejectRequest(trade) {
 
     socketEmit({
         ...trade,
-        type: 'trade-reject',
+        type: 'hero.trade-reject',
     })
 }
 
