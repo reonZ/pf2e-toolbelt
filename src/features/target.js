@@ -164,11 +164,17 @@ function preCreateChatMessage(message) {
 async function renderChatMessage(message, html) {
     if (message.isDamageRoll) {
         await renderDamageChatMessage(message, html)
+        scrollToBottom(message)
     } else {
         const item = message.item
-        if (item && item.type === 'spell' && !item.damageKinds.size) await renderSpellChatMessage(message, html, item)
+        if (item && item.type === 'spell' && !item.damageKinds.size) {
+            await renderSpellChatMessage(message, html, item)
+            scrollToBottom(message)
+        }
     }
+}
 
+function scrollToBottom(message) {
     const chat = ui.chat
     if (chat.isAtBottom || message.user._id === game.user._id) chat.scrollBottom({ waitImages: true })
 }
@@ -211,9 +217,9 @@ async function renderSpellChatMessage(message, html, spell) {
         rowsTemplate.append(template)
     })
 
-    addHeaderListeners(message, rowsTemplate, save)
-
     msgContent.after(rowsTemplate)
+
+    addHeaderListeners(message, rowsTemplate, save)
 }
 
 function addTargets(event, message) {
