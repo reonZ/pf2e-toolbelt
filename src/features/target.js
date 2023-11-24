@@ -4,7 +4,9 @@ import { localize, subLocalize } from '../shared/localize'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
+import { socketEmit, socketOff, socketOn } from '../shared/socket'
 import { getTemplateTokens } from '../shared/template'
+import { isActiveGM, isUserGM } from '../shared/user'
 
 const SAVES = {
     fortitude: { icon: 'fa-solid fa-chess-rook', label: 'PF2E.SavesFortitude' },
@@ -17,6 +19,8 @@ const DEGREE_OF_SUCCESS = ['criticalFailure', 'failure', 'success', 'criticalSuc
 const setPrecreateMessageHook = createHook('preCreateChatMessage', preCreateChatMessage)
 const setRenderMessageHook = createHook('renderChatMessage', renderChatMessage)
 const setCreateTemplateHook = createHook('createMeasuredTemplate', createMeasuredTemplate)
+
+let SOCKET = false
 
 export function registerTargetTokenHelper() {
     return {
@@ -58,6 +62,25 @@ function setHooks(value) {
     setPrecreateMessageHook(value)
     setRenderMessageHook(value && getSetting('target-chat'))
     setCreateTemplateHook(value && getSetting('target-template'))
+
+    if (isUserGM()) {
+        if (value && !SOCKET) {
+            socketOn(onSocket)
+            SOCKET = true
+        } else if (!value && SOCKET) {
+            socketOff(onSocket)
+            SOCKET = false
+        }
+    }
+}
+
+function onSocket(packet) {
+    if (!isActiveGM()) return
+    switch (packet.type) {
+        case 'target.update-save':
+            updateMessageSave(packet)
+            break
+    }
 }
 
 async function createMeasuredTemplate(template, _, userId) {
@@ -304,23 +327,55 @@ async function getTargetFromEvent(event) {
 
 async function rollSave(event, message, { dc, statistic }) {
     const target = await getTargetFromEvent(event)
+
+    const item = message.item
+    if (!item) return
+
     const actor = target?.actor
     if (!actor) return
+
+    const save = actor.saves[statistic]
+    if (!save) return
 
     const skipDefault = !game.user.settings.showCheckDialogs
     const options = {
         dc: { value: dc },
+        item,
+        origin: actor,
         skipDialog: event.shiftKey ? !skipDefault : skipDefault,
     }
 
     if (!getSetting('target-save')) options.createMessage = false
 
-    const roll = await actor.saves[statistic].roll(options)
+    const roll = await save.check.roll(options)
 
-    setFlag(message, `target.saves.${target.id}`, {
-        value: roll.total,
-        success: DEGREE_OF_SUCCESS[roll.degreeOfSuccess],
-    })
+    if (game.user.isGM || message.isAuthor) {
+        updateMessageSave({
+            message,
+            target: target.id,
+            value: roll.total,
+            success: roll.degreeOfSuccess,
+        })
+    } else {
+        socketEmit({
+            type: 'target.update-save',
+            message: message.id,
+            target: target.id,
+            value: roll.total,
+            success: roll.degreeOfSuccess,
+        })
+    }
+}
+
+function updateMessageSave({ message, target, value, success }) {
+    if (typeof message === 'string') {
+        message = game.messages.get(message)
+        if (!message) return
+    }
+
+    if (typeof success === 'number') success = DEGREE_OF_SUCCESS[success]
+
+    setFlag(message, `target.saves.${target}`, { value, success })
 }
 
 function selectTargets(event, targets) {
