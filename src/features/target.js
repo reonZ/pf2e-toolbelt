@@ -161,11 +161,16 @@ function preCreateChatMessage(message) {
     })
 }
 
-function renderChatMessage(message, html) {
-    if (message.isDamageRoll) return renderDamageChatMessage(message, html)
+async function renderChatMessage(message, html) {
+    if (message.isDamageRoll) {
+        await renderDamageChatMessage(message, html)
+    } else {
+        const item = message.item
+        if (item && item.type === 'spell' && !item.damageKinds.size) await renderSpellChatMessage(message, html, item)
+    }
 
-    const item = message.item
-    if (item && item.type === 'spell' && !item.damageKinds.size) return renderSpellChatMessage(message, html, item)
+    const chat = ui.chat
+    if (chat.isAtBottom || message.user._id === game.user._id) chat.scrollBottom({ waitImages: true })
 }
 
 async function renderSpellChatMessage(message, html, spell) {
