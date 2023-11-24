@@ -1,3 +1,8 @@
+# 1.17.1
+
+-   fixed players not being able to use inline save rolls on messages they were not the author of when using `Target Token Helper`
+-   fixed missing roll options on inline save rolls when using `Target Token Helper`
+
 # 1.17.0
 
 -   damage buttons are now highlighted depending on the result of the inline save check for spells in damage chat messages when using `Target Token Helper`
