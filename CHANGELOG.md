@@ -1,3 +1,7 @@
+# 1.17.2
+
+-   fixed chat log not scrolling properly on extended messages modified by `Target Token Helper`
+
 # 1.17.1
 
 -   fixed players not being able to use inline save rolls on messages they were not the author of when using `Target Token Helper`
