@@ -1,3 +1,4 @@
+import { bindOnPreCreateSpellDamageChatMessage } from '../shared/chat'
 import { getFlag, setFlag, updateSourceFlag } from '../shared/flags'
 import { createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
@@ -152,12 +153,15 @@ function preCreateChatMessage(message) {
     const save = item.system.defense?.save
     if (!save) return
 
-    const spellcasting = item.spellcasting
-    if (!spellcasting) return
+    const dc = (() => {
+        if (!item.trickMagicEntry) return item.spellcasting?.statistic.dc.value
+        return $(message.content).find('[data-action=spell-save]').data()?.dc
+    })()
+    if (typeof dc !== 'number') return
 
     updateSourceFlag(message, 'target.save', {
         ...save,
-        dc: spellcasting.statistic.dc.value,
+        dc,
     })
 }
 
@@ -165,12 +169,19 @@ async function renderChatMessage(message, html) {
     if (message.isDamageRoll) {
         await renderDamageChatMessage(message, html)
         scrollToBottom(message)
-    } else {
-        const item = message.item
-        if (item && item.type === 'spell' && !item.damageKinds.size) {
-            await renderSpellChatMessage(message, html, item)
-            scrollToBottom(message)
-        }
+        return
+    }
+
+    const item = message.item
+    if (!item || item.type !== 'spell') return
+
+    if (!item.damageKinds.size) {
+        await renderSpellChatMessage(message, html, item)
+        scrollToBottom(message)
+    } else if (item.trickMagicEntry && item.system.defense?.save) {
+        html.find('[data-action=spell-damage]').on('click', () => {
+            bindOnPreCreateSpellDamageChatMessage(message)
+        })
     }
 }
 
@@ -188,7 +199,7 @@ async function renderSpellChatMessage(message, html, spell) {
     const cardBtns = msgContent.find('.card-buttons')
 
     if (game.user.isGM || message.isAuthor) {
-        const saveBtn = cardBtns.find('button[data-action=spell-save]')
+        const saveBtn = cardBtns.find('[data-action=spell-save]')
         const wrapper = $('<div class="pf2e-toolbelt-target-wrapper"></div>')
         const targetsTooltip = localize('target.chat.targets.tooltip')
 
@@ -339,8 +350,18 @@ async function getTargetFromEvent(event) {
 async function rollSave(event, message, { dc, statistic }) {
     const target = await getTargetFromEvent(event)
 
-    const item = message.item
-    if (!item) return
+    const item = (() => {
+        const item = message.item
+        if (item) return item
+
+        const messageId = getFlag(message, 'target.messageId')
+        if (!messageId) return
+
+        const otherMessage = game.messages.get(messageId)
+        if (!otherMessage) return
+
+        return otherMessage.item
+    })()
 
     const actor = target?.actor
     if (!actor) return
@@ -360,25 +381,24 @@ async function rollSave(event, message, { dc, statistic }) {
 
     const roll = await save.check.roll(options)
 
+    const packet = {
+        type: 'target.update-save',
+        target: target.id,
+        value: roll.total,
+        die: roll.dice[0].total,
+        success: roll.degreeOfSuccess,
+    }
+
     if (game.user.isGM || message.isAuthor) {
-        updateMessageSave({
-            message,
-            target: target.id,
-            value: roll.total,
-            success: roll.degreeOfSuccess,
-        })
+        packet.message = message
+        updateMessageSave(packet)
     } else {
-        socketEmit({
-            type: 'target.update-save',
-            message: message.id,
-            target: target.id,
-            value: roll.total,
-            success: roll.degreeOfSuccess,
-        })
+        packet.message = message.id
+        socketEmit(packet)
     }
 }
 
-function updateMessageSave({ message, target, value, success }) {
+function updateMessageSave({ message, target, value, success, die }) {
     if (typeof message === 'string') {
         message = game.messages.get(message)
         if (!message) return
@@ -386,7 +406,7 @@ function updateMessageSave({ message, target, value, success }) {
 
     if (typeof success === 'number') success = DEGREE_OF_SUCCESS[success]
 
-    setFlag(message, `target.saves.${target}`, { value, success })
+    setFlag(message, `target.saves.${target}`, { value, success, die })
 }
 
 function selectTargets(event, targets) {
