@@ -4,7 +4,7 @@
         {{#if save}}
         {{#if save.result}}
         <span
-            data-tooltip="{{localize save.label}} DC {{save.dc}}: {{localize (concat 'PF2E.Check.Result.Degree.Check.' save.result.success)}}">
+            data-tooltip="{{localize save.label}} DC {{save.dc}}: {{localize (concat 'PF2E.Check.Result.Degree.Check.' save.result.success)}} (<i class='fa-solid fa-dice-d20 pf2e-toolbelt-die'></i> {{save.result.die}})">
             <i class="{{save.icon}}"></i>
             <span class="{{save.result.success}}">{{save.result.value}}</span>
         </span>

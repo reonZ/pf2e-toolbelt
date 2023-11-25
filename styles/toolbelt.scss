@@ -7,3 +7,9 @@
 @import './stances';
 @import './summary';
 @import './target';
+
+[role='tooltip'] {
+    i.pf2e-toolbelt-die {
+        font-size: 0.9em;
+    }
+}
