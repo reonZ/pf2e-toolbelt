@@ -21,11 +21,14 @@ export function getTemplateTokens(template, { collisionOrigin, collisionType = '
         // Collect the position of all grid squares that this token occupies as "x.y"
         const tokenPositions = []
         for (let h = 0; h < tokenDoc.height; h++) {
-            const y = token.y + h * grid.size
-            tokenPositions.push(`${token.x}.${y}`)
+            const tokenX = Math.floor(token.x / 100) * 100
+            const tokenY = Math.floor(token.y / 100) * 100
+
+            const y = tokenY + h * grid.size
+            tokenPositions.push(`${tokenX}.${y}`)
             if (tokenDoc.width > 1) {
                 for (let w = 1; w < tokenDoc.width; w++) {
-                    tokenPositions.push(`${token.x + w * grid.size}.${y}`)
+                    tokenPositions.push(`${tokenX + w * grid.size}.${y}`)
                 }
             }
         }
