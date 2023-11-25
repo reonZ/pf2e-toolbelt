@@ -1,3 +1,4 @@
+import { bindOnPreCreateSpellDamageChatMessage } from '../../shared/chat'
 import { subLocalize } from '../../shared/localize'
 import { templatePath } from '../../shared/path'
 
@@ -94,6 +95,10 @@ export class MultiCast extends Application {
             updateSource(damages, heightening)
             const newSpell = spell.clone({ 'system.damage': damages, 'system.heightening': heightening })
             newSpell.rollDamage(this.#event)
+        }
+
+        if (spell.damageKinds.size) {
+            bindOnPreCreateSpellDamageChatMessage(message)
         }
 
         this.close()

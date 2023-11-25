@@ -1,3 +1,5 @@
+import { getFlag, updateSourceFlag } from './flags'
+
 export function getChatMessageClass() {
     return CONFIG.ChatMessage.documentClass
 }
@@ -21,4 +23,15 @@ border-radius: 2px; white-space: nowrap; word-break: break-all;">${label}</span>
         if (label) return `@UUID[${uuid}]{${label}}`
         return `@UUID[${uuid}]`
     }
+}
+
+export function bindOnPreCreateSpellDamageChatMessage(originalMessage) {
+    const messageId = originalMessage.id
+    const save = getFlag(originalMessage, 'target.save')
+    if (!save) return
+
+    Hooks.once('preCreateChatMessage', message => {
+        updateSourceFlag(message, 'target.messageId', messageId)
+        updateSourceFlag(message, 'target.save', save)
+    })
 }
