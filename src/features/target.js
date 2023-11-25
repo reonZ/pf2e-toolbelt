@@ -117,6 +117,10 @@ async function createMeasuredTemplate(template, _, userId) {
     const opposition = alliance === 'party' ? 'opposition' : alliance === 'opposition' ? 'party' : null
 
     const targets = getTemplateTokens(template).filter(token => {
+        if (!token.actor?.isOfType('creature', 'hazard', 'vehicle')) return false
+
+        if (token.document.hidden) return false
+
         if (self && token === self) return result.self
 
         const targetAlliance = token.actor ? token.actor.alliance : token.alliance
@@ -314,25 +318,44 @@ async function getMessageData(message) {
 
     if (!targetsFlag.length && !save) return
 
+    const tooltip = `${game.i18n.localize(save.label)} DC ${save.dc}`
+    save.tooltip = tooltip
+
     const targets = (
         await Promise.all(
             targetsFlag.map(async ({ token }) => {
                 const target = await fromUuid(token)
                 if (!target?.isOwner) return
 
-                const targetSave = save && {
+                const hasSave = !!target.actor.saves[save.statistic]
+
+                const targetSave = (() => {
+                    if (!hasSave) return
+
+                    const flag = getFlag(message, `target.saves.${target.id}`)
+                    if (!flag) return
+
+                    const successLabel = game.i18n.localize(`PF2E.Check.Result.Degree.Check.${flag.success}`)
+
+                    return {
+                        ...flag,
+                        tooltip: `${tooltip}: ${successLabel} (<i class='fa-solid fa-dice-d20 pf2e-toolbelt-die'></i> ${flag.die})`,
+                    }
+                })()
+
+                const templateSave = save && {
                     ...save,
-                    result: getFlag(message, `target.saves.${target.id}`),
+                    result: targetSave,
                 }
 
                 return {
                     uuid: token,
                     target: target,
-                    save: targetSave,
+                    save: templateSave,
                     template: await renderTemplate(templatePath('target/row-header'), {
                         name: target.name,
                         uuid: token,
-                        save: targetSave,
+                        save: hasSave && templateSave,
                     }),
                 }
             })
