@@ -59,8 +59,8 @@ function renderChatMessage(message, html) {
 }
 
 function renderSpell(message, html) {
-    const originUUID = message.getFlag('pf2e', 'origin.uuid')
-    if (!originUUID) return
+    const item = message.item
+    if (!item) return
 
     const spellBtn = html.find('.message-content .chat-card .owner-buttons .spell-button')
 
@@ -68,9 +68,8 @@ function renderSpell(message, html) {
         .find('[data-action=spell-damage]')
         .after(`<button data-action="multi-cast">${localize('merge.spell.button')}</button>`)
 
-    spellBtn.find('[data-action=multi-cast]').on('click', async event => {
-        const spell = await fromUuid(originUUID)
-        if (spell) new MultiCast(event, spell).render(true)
+    spellBtn.find('[data-action=multi-cast]').on('click', event => {
+        new MultiCast(event, message).render(true)
     })
 }
 

@@ -4,14 +4,13 @@ import { templatePath } from '../../shared/path'
 const localize = subLocalize('merge.multi')
 
 export class MultiCast extends Application {
-    constructor(event, spell, options) {
-        super(options)
-        this._event = event
-        this._spell = spell
-    }
+    #message
+    #event
 
-    get spell() {
-        return this._spell
+    constructor(event, message, options) {
+        super(options)
+        this.#event = event
+        this.#message = message
     }
 
     get title() {
@@ -43,30 +42,59 @@ export class MultiCast extends Application {
             return
         }
 
-        const spell = this.spell
-        const damages = deepClone(spell._source.system.damage)
-        const heightening = deepClone(spell._source.system.heightening) ?? {}
+        const message = this.#message
+        if (!message) return
 
-        for (const [id, damage] of Object.entries(damages)) {
-            for (let i = 0; i < nb - 1; i++) {
-                const newId = randomID()
+        const spell = message.item
+        const actor = message.actor
+        if (!actor || !spell) return
 
-                damages[newId] = damage
+        const updateSource = (damages, heightening) => {
+            for (const [id, damage] of Object.entries(damages)) {
+                for (let i = 0; i < nb - 1; i++) {
+                    const newId = randomID()
 
-                if (heightening.type === 'interval') {
-                    const damage = heightening.damage[id]
-                    if (damage) heightening.damage[newId] = damage
-                } else if (heightening.type === 'fixed') {
-                    for (const [level, data] of Object.entries(heightening.levels)) {
-                        const damage = data.damage.value[id]
-                        if (damage) heightening.levels[level].damage.value[newId] = damage
+                    damages[newId] = damage
+
+                    if (heightening.type === 'interval') {
+                        const damage = heightening.damage[id]
+                        if (damage) heightening.damage[newId] = damage
+                    } else if (heightening.type === 'fixed') {
+                        for (const [level, data] of Object.entries(heightening.levels)) {
+                            const damage = data.damage.value[id]
+                            if (damage) heightening.levels[level].damage.value[newId] = damage
+                        }
                     }
                 }
             }
         }
 
-        const newSpell = spell.clone({ 'system.damage': damages, 'system.heightening': heightening })
-        newSpell.rollDamage(this._event)
+        const embeddedSource = deepClone(message.flags.pf2e.casting?.embeddedSpell)
+
+        if (embeddedSource) {
+            const damages = embeddedSource.system.damage
+            const heightening = (embeddedSource.system.heightening ??= {})
+
+            updateSource(damages, heightening)
+
+            const newSpell = new CONFIG.Item.documentClass(embeddedSource, { parent: actor })
+            newSpell.trickMagicEntry = spell.trickMagicEntry
+
+            const overlayIds = message.getFlag('pf2e', 'origin.variant.overlays')
+            const castLevel = message.getFlag('pf2e', 'origin.castLevel') ?? spell.rank
+            const modifiedSpell = newSpell.loadVariant({ overlayIds, castLevel })
+            const castSpell = modifiedSpell ?? newSpell
+
+            castSpell.rollDamage(this.#event)
+        } else {
+            const spellSource = spell.toObject()
+            const damages = spellSource.system.damage
+            const heightening = spellSource.system.heightening ?? {}
+
+            updateSource(damages, heightening)
+            const newSpell = spell.clone({ 'system.damage': damages, 'system.heightening': heightening })
+            newSpell.rollDamage(this.#event)
+        }
 
         this.close()
     }
