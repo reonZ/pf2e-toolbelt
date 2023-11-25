@@ -1,5 +1,6 @@
 # 1.18.0
 
+-   this is a `5.9.5` release
 -   added the die result (in the tooltip) for inline save checks when using `Target Token Helper`
 -   only show an inline save check if the actor actually has one when using `Target Token Helper`
 -   template targeting of `Target Token Helper` no longer targets tokens that are hidden (not the condition but foundry visibility state)
