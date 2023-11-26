@@ -14,6 +14,8 @@ export function getTemplateTokens(template, { collisionOrigin, collisionType = '
     // Get all the tokens that are inside the highlight bounds
     const tokens = canvas.tokens.quadtree.getObjects(gridHighlight.getLocalBounds(undefined, true))
 
+    const gridSize = grid.size
+
     const containedTokens = []
     for (const token of tokens) {
         const tokenDoc = token.document
@@ -21,14 +23,14 @@ export function getTemplateTokens(template, { collisionOrigin, collisionType = '
         // Collect the position of all grid squares that this token occupies as "x.y"
         const tokenPositions = []
         for (let h = 0; h < tokenDoc.height; h++) {
-            const tokenX = Math.floor(token.x / 100) * 100
-            const tokenY = Math.floor(token.y / 100) * 100
+            const tokenX = Math.floor(token.x / gridSize) * gridSize
+            const tokenY = Math.floor(token.y / gridSize) * gridSize
 
-            const y = tokenY + h * grid.size
+            const y = tokenY + h * gridSize
             tokenPositions.push(`${tokenX}.${y}`)
             if (tokenDoc.width > 1) {
                 for (let w = 1; w < tokenDoc.width; w++) {
-                    tokenPositions.push(`${tokenX + w * grid.size}.${y}`)
+                    tokenPositions.push(`${tokenX + w * gridSize}.${y}`)
                 }
             }
         }

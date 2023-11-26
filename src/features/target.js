@@ -117,30 +117,16 @@ async function createMeasuredTemplate(template, _, userId) {
     const opposition = alliance === 'party' ? 'opposition' : alliance === 'opposition' ? 'party' : null
 
     const tokens = getTemplateTokens(template)
-    if (window.toolbeltDebug) {
-        console.log(
-            'pre filter tokens:',
-            tokens,
-            tokens.map(t => t.name)
-        )
-        console.log('alliance:', alliance)
-        console.log('opposition:', opposition)
-    }
-
     const targets = tokens.filter(token => {
         const validActor = token.actor?.isOfType('creature', 'hazard', 'vehicle')
-        if (window.toolbeltDebug) console.log('is valid actor?', token.name, validActor)
         if (!validActor) return false
 
-        if (window.toolbeltDebug) console.log('is token hidden?', token.name, token.document.hidden)
         if (token.document.hidden) return false
 
-        if (window.toolbeltDebug) console.log('is self?', token.name, self && token === self)
         if (self && token === self) return result.self
 
         const targetAlliance = token.actor ? token.actor.alliance : token.alliance
 
-        if (window.toolbeltDebug) console.log('target alliance?', token.name, targetAlliance)
         if (targetAlliance === null) return result.neutral
 
         return (
@@ -149,13 +135,6 @@ async function createMeasuredTemplate(template, _, userId) {
             (result.targets === 'enemies' && targetAlliance === opposition)
         )
     })
-
-    if (window.toolbeltDebug)
-        console.log(
-            'post filter tokens',
-            tokens,
-            tokens.map(t => t.name)
-        )
 
     const targetsIds = targets.map(token => token.id)
     user.updateTokenTargets(targetsIds)
