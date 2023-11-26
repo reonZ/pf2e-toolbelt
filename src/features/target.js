@@ -318,8 +318,10 @@ async function getMessageData(message) {
 
     if (!targetsFlag.length && !save) return
 
-    const tooltip = `${game.i18n.localize(save.label)} DC ${save.dc}`
-    save.tooltip = tooltip
+    if (save) {
+        const tooltip = `${game.i18n.localize(save.label)} DC ${save.dc}`
+        save.tooltip = tooltip
+    }
 
     const targets = (
         await Promise.all(
@@ -327,7 +329,7 @@ async function getMessageData(message) {
                 const target = await fromUuid(token)
                 if (!target?.isOwner) return
 
-                const hasSave = !!target.actor.saves[save.statistic]
+                const hasSave = save && !!target.actor.saves[save.statistic]
 
                 const targetSave = (() => {
                     if (!hasSave) return
