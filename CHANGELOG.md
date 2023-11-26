@@ -1,3 +1,7 @@
+# 1.19.1
+
+-   fixed template targeting not working on all grid sizes when using `Target Token Helper`
+
 # 1.19.0
 
 -   `Target Token Helper` updates:
