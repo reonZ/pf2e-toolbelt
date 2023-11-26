@@ -1,3 +1,12 @@
+# 1.19.0
+
+-   `Target Token Helper` updates:
+    -   renamed the `Add targets to message` button to `Set targets for message`
+    -   removed the `Select All Targeted Tokens` button from damage chat messages
+    -   added a `Set targets for message` button to damage chat messages (works the same as the one in the spell message)
+    -   fixed error with save-less damage messages
+    -   fixed inline saves not showing up for anyone if the actor using wands/scrolls didn't have the `Target Token Helper - Chat` enabled
+
 # 1.18.0
 
 -   this is a `5.9.5` release
