@@ -116,15 +116,31 @@ async function createMeasuredTemplate(template, _, userId) {
     const alliance = actor ? actor.alliance : user.isGM ? 'opposition' : 'party'
     const opposition = alliance === 'party' ? 'opposition' : alliance === 'opposition' ? 'party' : null
 
-    const targets = getTemplateTokens(template).filter(token => {
-        if (!token.actor?.isOfType('creature', 'hazard', 'vehicle')) return false
+    const tokens = getTemplateTokens(template)
+    if (window.toolbeltDebug) {
+        console.log(
+            'pre filter tokens:',
+            tokens,
+            tokens.map(t => t.name)
+        )
+        console.log('alliance:', alliance)
+        console.log('opposition:', opposition)
+    }
 
+    const targets = tokens.filter(token => {
+        const validActor = token.actor?.isOfType('creature', 'hazard', 'vehicle')
+        if (window.toolbeltDebug) console.log('is valid actor?', token.name, validActor)
+        if (!validActor) return false
+
+        if (window.toolbeltDebug) console.log('is token hidden?', token.name, token.document.hidden)
         if (token.document.hidden) return false
 
+        if (window.toolbeltDebug) console.log('is self?', token.name, self && token === self)
         if (self && token === self) return result.self
 
         const targetAlliance = token.actor ? token.actor.alliance : token.alliance
 
+        if (window.toolbeltDebug) console.log('target alliance?', token.name, targetAlliance)
         if (targetAlliance === null) return result.neutral
 
         return (
@@ -133,6 +149,13 @@ async function createMeasuredTemplate(template, _, userId) {
             (result.targets === 'enemies' && targetAlliance === opposition)
         )
     })
+
+    if (window.toolbeltDebug)
+        console.log(
+            'post filter tokens',
+            tokens,
+            tokens.map(t => t.name)
+        )
 
     const targetsIds = targets.map(token => token.id)
     user.updateTokenTargets(targetsIds)
@@ -213,8 +236,8 @@ async function renderSpellChatMessage(message, html, spell) {
         const targetsTooltip = localize('target.chat.targets.tooltip')
 
         const targetsBtn = $(`<button class="pf2e-toolbelt-target-targets" title="${targetsTooltip}">
-        <i class="fa-solid fa-bullseye-arrow"></i>
-        </button>`)
+    <i class="fa-solid fa-bullseye-arrow"></i>
+</button>`)
 
         targetsBtn.on('click', event => addTargets(event, message))
 
@@ -254,6 +277,18 @@ function addTargets(event, message) {
 
 async function renderDamageChatMessage(message, html) {
     const data = await getMessageData(message)
+
+    if (game.user.isGM || message.isAuthor) {
+        const targetsTooltip = localize('target.chat.targets.tooltip')
+        const targetsBtn = $(`<button class="pf2e-toolbelt-target-targets" title="${targetsTooltip}">
+        <i class="fa-solid fa-bullseye-arrow"></i>
+        </button>`)
+
+        targetsBtn.on('click', event => addTargets(event, message))
+
+        html.find('.dice-result .dice-total').append(targetsBtn)
+    }
+
     if (!data || !data.targets.length) return
 
     const { targets, save } = data
@@ -290,17 +325,6 @@ async function renderDamageChatMessage(message, html) {
 
     addHeaderListeners(message, rowsTemplate, save)
     rowsTemplate.find('button[data-action^=target-]').on('click', event => onTargetButton(event, message))
-
-    if (targets.length <= 1) return
-
-    const selectTooltip = localize('target.chat.select.tooltip')
-    const selectBtn = $(`<button class="pf2e-toolbelt-target-select" title="${selectTooltip}">
-    <i class="fa-solid fa-street-view"></i>
-</button>`)
-
-    selectBtn.on('click', event => selectTargets(event, targets))
-
-    html.find('.dice-result .dice-total').append(selectBtn)
 }
 
 function addHeaderListeners(message, html, save) {
@@ -437,13 +461,6 @@ function updateMessageSave({ message, target, value, success, die }) {
     if (typeof success === 'number') success = DEGREE_OF_SUCCESS[success]
 
     setFlag(message, `target.saves.${target}`, { value, success, die })
-}
-
-function selectTargets(event, targets) {
-    event.stopPropagation()
-    canvas.tokens.releaseAll()
-    const options = { releaseOthers: false }
-    targets.forEach(({ target }) => target.object.control(options))
 }
 
 async function openTargetSheet(event) {

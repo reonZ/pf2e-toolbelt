@@ -299,11 +299,8 @@
         },
         "target": {
             "chat": {
-                "select": {
-                    "tooltip": "Select All Targeted Tokens"
-                },
                 "targets": {
-                    "tooltip": "Add targets to message"
+                    "tooltip": "Set targets for message"
                 }
             },
             "menu": {
