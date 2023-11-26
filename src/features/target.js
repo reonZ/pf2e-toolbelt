@@ -61,7 +61,7 @@ export function registerTargetTokenHelper() {
 
 function setHooks(value) {
     setPrecreateMessageHook(value)
-    setRenderMessageHook(value && getSetting('target-chat'))
+    setRenderMessageHook(value)
     setCreateTemplateHook(value && getSetting('target-template'))
 
     if (isUserGM()) {
@@ -170,7 +170,9 @@ function preCreateChatMessage(message) {
 }
 
 async function renderChatMessage(message, html) {
-    if (message.isDamageRoll) {
+    const clientEnabled = getSetting('target-chat')
+
+    if (clientEnabled && message.isDamageRoll) {
         await renderDamageChatMessage(message, html)
         scrollToBottom(message)
         return
@@ -179,10 +181,13 @@ async function renderChatMessage(message, html) {
     const item = message.item
     if (!item || item.type !== 'spell') return
 
-    if (!item.damageKinds.size) {
+    if (clientEnabled && !item.damageKinds.size) {
         await renderSpellChatMessage(message, html, item)
         scrollToBottom(message)
-    } else if (item.trickMagicEntry && item.system.defense?.save) {
+        return
+    }
+
+    if (item.trickMagicEntry && item.system.defense?.save) {
         html.find('[data-action=spell-damage]').on('click', () => {
             bindOnPreCreateSpellDamageChatMessage(message)
         })
