@@ -5,6 +5,12 @@
                 'icon-name controls' auto
                 'summary summary' auto;
 
+            .item-name {
+                h4 {
+                    white-space: nowrap;
+                }
+            }
+
             .item-image {
                 height: 20px;
                 width: 20px;
