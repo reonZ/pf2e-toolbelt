@@ -9,8 +9,6 @@ import { warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { getSetting } from '../shared/settings'
 
-const FORMULA_STRIP = /(\[[\w,]+\])/
-
 const setHook = createHook('renderChatMessage', renderChatMessage, updateMessages)
 
 export function registerMerge() {
@@ -171,7 +169,10 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
     for (const roll of [].concat(otherRolls, originRolls)) {
         const { options, total, terms } = roll
         const term = terms[0]
-        const formula = roll.formula.replace(FORMULA_STRIP, '')
+        const formula = roll.formula
+            .replaceAll(/(\[[\w,]+\])/g, '')
+            .replace(/^\(/, '')
+            .replace(/\)$/, '')
         const group = groupedRolls.find(
             ({ options: { flavor, critRule } }) => flavor === options.flavor && critRule === options.critRule
         )
@@ -191,6 +192,20 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
     }
 
     for (const group of groupedRolls) {
+        if (group.options.flavor.includes('persistent')) {
+            const { index } = group.formulas.reduce(
+                (acc, formula, index) => {
+                    const value = new Roll(formula).evaluate({ maximize: true }).total
+                    if (value > acc.value) acc = { value, index }
+                    return acc
+                },
+                { value: 0, index: -1 }
+            )
+
+            group.formulas = [group.formulas[index]]
+            group.terms = [group.terms[index]]
+        }
+
         group.formula = `(${group.formulas.join(' + ')})[${group.options.flavor}]`
         group.term = group.terms.length < 2 ? group.terms[0] : createTermGroup(group.terms)
     }
