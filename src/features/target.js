@@ -142,7 +142,7 @@ async function createMeasuredTemplate(template, _, userId) {
 }
 
 function preCreateChatMessage(message) {
-    if (message.isDamageRoll) {
+    if (message.isDamageRoll && !getFlag(message, 'target.targets')) {
         const targets = game.user.targets
         if (targets.size < 1) return
 

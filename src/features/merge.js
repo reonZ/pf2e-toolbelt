@@ -96,14 +96,19 @@ function renderDamage(message, html) {
         event.stopPropagation()
 
         for (const otherMessage of latestChatMessages(5, message)) {
+            const otherTargetsUUIDS = getTargetUUIDs(otherMessage)
+
             if (
                 !isDamageRoll(otherMessage) ||
                 getActorUUID(otherMessage) !== actorUUID ||
-                !compareArrays(targetUUIDs, getTargetUUIDs(otherMessage))
+                !compareArrays(
+                    targetUUIDs?.map(t => t.actor).filter(Boolean),
+                    otherTargetsUUIDS?.map(t => t.actor).filter(Boolean)
+                )
             )
                 continue
 
-            mergeDamages(event, message, otherMessage, { actorUUID, targetUUID: targetUUIDs })
+            mergeDamages(event, message, otherMessage, { actorUUID, targetUUIDs })
             return
         }
 
@@ -122,7 +127,7 @@ async function splitDamages(event, message) {
     await getChatMessageClass().createDocuments(sources)
 }
 
-async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
+async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
     const dataGroups = {}
 
     const data = getMessageData(other).concat(getMessageData(origin))
@@ -240,10 +245,13 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUID }) {
             [MODULE_ID]: {
                 merge: {
                     actor: actorUUID,
-                    target: targetUUID,
+                    targets: targetUUIDs,
                     merged: true,
                     type: 'damage-roll',
                     data,
+                },
+                target: {
+                    targets: targetUUIDs,
                 },
             },
             pf2e: {
@@ -323,10 +331,11 @@ function getActorUUID(message) {
 
 function getTargetUUIDs(message) {
     const targetTargets = getFlag(message, 'target.targets')
-    if (targetTargets) return targetTargets.map(({ actor }) => actor).filter(Boolean)
+    if (targetTargets) return targetTargets
 
-    const singleTarget = getFlag(message, 'merge.target') ?? message.target?.actor.uuid
-    return singleTarget ? [singleTarget] : []
+    const mergeTargets = getFlag(message, 'merge.targets') ?? message.getFlag('pf2e', 'target')
+    if (Array.isArray(mergeTargets)) return mergeTargets
+    return mergeTargets ? [mergeTargets] : []
 }
 
 function isDamageRoll(message) {
