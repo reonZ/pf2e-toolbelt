@@ -1,3 +1,18 @@
+# 1.20.0
+
+-   `Target Token Helper` updates:
+    -   removed the `Target Token Helper - Saves` world setting
+    -   changed the `Target Token Helper - Chat` into a multi-choices setting
+        -   you can now select to use small or big (regular) sized buttons in the damage chat message
+    -   now hide the original damage buttons when there is at least one target damage row visible
+    -   added a new button to expand/collapse the original damage buttons
+    -   remade the tooltip showing when hovering over a save, it now gives a lot more information
+    -   characters can now reroll save checks using hero points
+        -   if you have `PF2e Workbench` active and its setting `Keeley's Hero Point Rule` enabled, the same implementation of the rule will be used
+-   `Merge Damage` updates:
+    -   persistent damages will no longer stack with each other, the one with the highest mean will be chosen
+    -   fixed targets being re-created for the purpose of displaying them in the damage chat message of `Target Token Helper`
+
 # 1.19.1
 
 -   fixed template targeting not working on all grid sizes when using `Target Token Helper`

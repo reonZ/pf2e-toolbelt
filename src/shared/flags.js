@@ -12,6 +12,10 @@ export function unsetFlag(doc, key) {
     return doc.unsetFlag(MODULE_ID, key)
 }
 
+export function containsFlag(doc, key) {
+    return getProperty(doc, `flags.${MODULE_ID}.${key}`) !== undefined
+}
+
 export function updateSourceFlag(doc, key, value) {
     return doc.updateSource({
         [`flags.${MODULE_ID}.${key}`]: value,
