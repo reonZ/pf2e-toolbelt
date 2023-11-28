@@ -194,8 +194,10 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
     for (const group of groupedRolls) {
         if (group.options.flavor.includes('persistent')) {
             const { index } = group.formulas.reduce(
-                (acc, formula, index) => {
-                    const value = new Roll(formula).evaluate({ maximize: true }).total
+                (acc, curr, index) => {
+                    const roll = new Roll(curr)
+                    const formula = meansFormula(roll)
+                    const value = new Roll(formula).evaluate({ async: false }).total
                     if (value > acc.value) acc = { value, index }
                     return acc
                 },
@@ -277,6 +279,27 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
         },
         rolls: [roll],
     })
+}
+
+function meansFormula(roll) {
+    const formulaTerms = roll.terms.reduce((acc, curr) => {
+        if (curr instanceof Die) {
+            const mean = (curr.number * (curr.faces + 1)) / 2
+            acc.push(mean)
+        } else if (curr instanceof OperatorTerm) {
+            acc.push(curr.operator)
+        } else if (curr instanceof NumericTerm) {
+            acc.push(curr.number)
+        } else if (curr instanceof ParentheticalTerm) {
+            const deepRoll = new Roll(curr.term)
+            const formula = meansFormula(deepRoll)
+            acc.push(`(${formula})`)
+        }
+
+        return acc
+    }, [])
+
+    return formulaTerms.join(' ')
 }
 
 function getMessageData(message) {
