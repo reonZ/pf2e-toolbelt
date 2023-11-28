@@ -142,7 +142,9 @@ async function createMeasuredTemplate(template, _, userId) {
 }
 
 function preCreateChatMessage(message) {
-    if (message.isDamageRoll && !getFlag(message, 'target.targets')) {
+    const isDamageRoll = message.isDamageRoll
+
+    if (isDamageRoll && !getFlag(message, 'target.targets')) {
         const targets = game.user.targets
         if (targets.size < 1) return
 
@@ -152,6 +154,8 @@ function preCreateChatMessage(message) {
             Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
         )
     }
+
+    if (!isDamageRoll && message.getFlag('pf2e', 'context.type') !== 'spell-cast') return
 
     const item = message.item
     if (item?.type !== 'spell') return
