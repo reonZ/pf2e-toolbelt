@@ -161,8 +161,17 @@
                     }
 
                     i {
-                        &.small {
+                        &.die {
                             font-size: 0.95em;
+                        }
+
+                        &.rotate {
+                            font-size: 0.9em;
+                            margin-left: 1px;
+
+                            &.disabled {
+                                opacity: 0.3;
+                            }
                         }
                     }
                 }
@@ -261,6 +270,36 @@
                         margin-top: 0.5em;
                     }
                 }
+            }
+        }
+    }
+}
+
+[role='tooltip'] {
+    .pf2e-toolbelt-target-save {
+        font-size: 0.9em;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        gap: 0.2em;
+
+        .result {
+            i {
+                font-size: 0.8em;
+            }
+        }
+
+        .note {
+            font-style: italic;
+            font-size: 0.8em;
+            align-self: flex-end;
+
+            i {
+                font-size: 0.9em;
+            }
+
+            .disabled {
+                opacity: 0.2;
             }
         }
     }

@@ -2,15 +2,26 @@
     <span class="name">{{name}}</span>
     <span class="controls">
         {{#if save.result}}
+        {{#if canReroll}}
+        <a data-action="reroll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.result.tooltip}}">
+            <i class="{{save.icon}}"></i>
+            <span class="{{save.result.success}}">{{save.result.value}}</span>
+            <i class="fa-solid fa-rotate rotate"></i>
+        </a>
+        {{else}}
         <span data-tooltip="{{save.result.tooltip}}">
             <i class="{{save.icon}}"></i>
             <span class="{{save.result.success}}">{{save.result.value}}</span>
+            {{#if rerolled}}
+            <i class="fa-solid fa-rotate rotate disabled"></i>
+            {{/if}}
         </span>
+        {{/if}}
         <hr>
         {{else if save}}
         <a data-action="roll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.tooltip}}">
             <i class="{{save.icon}}"></i>
-            <i class="fa-solid fa-dice-d20 small"></i>
+            <i class="fa-solid fa-dice-d20 die"></i>
         </a>
         <hr>
         {{/if}}

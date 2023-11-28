@@ -3,6 +3,7 @@ import { getFlag, setFlag, updateSourceFlag } from '../shared/flags'
 import { createChoicesHook, createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
 import { getInMemory, setInMemory } from '../shared/misc'
+import { warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
@@ -32,11 +33,6 @@ export function registerTargetTokenHelper() {
                 type: Boolean,
                 default: false,
                 onChange: setHooks,
-            },
-            {
-                name: 'target-save',
-                type: Boolean,
-                default: true,
             },
             {
                 name: 'target-chat',
@@ -277,8 +273,8 @@ async function renderDamageChatMessage(message, html) {
 
         const toggleTooltip = localize('target.chat.toggle.tooltip')
         const toggleBtn = $(`<button class="toggle" title="${toggleTooltip}">
-    <i class="fa-solid fa-square-plus expand"></i>
-    <i class="fa-solid fa-square-minus collapse"></i>
+    <i class="fa-solid fa-plus expand"></i>
+    <i class="fa-solid fa-minus collapse"></i>
 </button>`)
 
         toggleDamageRow()
@@ -348,6 +344,7 @@ function addHeaderListeners(message, html, save) {
     html.find('[data-action=ping-target]').on('click', pingTarget)
     html.find('[data-action=open-target-sheet]').on('click', openTargetSheet)
     html.find('[data-action=roll-save]').on('click', event => rollSave(event, message, save))
+    html.find('[data-action=reroll-save]').on('click', event => rerollSave(event, message, save))
 }
 
 async function getMessageData(message) {
@@ -365,8 +362,12 @@ async function getMessageData(message) {
     if (!targetsFlag.length && !save) return
 
     if (save) {
-        const tooltip = `${game.i18n.localize(save.label)} DC ${save.dc}`
-        save.tooltip = tooltip
+        const saveLabel = game.i18n.format('PF2E.SavingThrowWithName', { saveName: game.i18n.localize(save.label) })
+        const saveDC = game.i18n.format('PF2E.DCWithValue', { dc: save.dc, text: '' })
+        save.tooltipLabel = `${saveLabel} ${saveDC}`
+        save.tooltip = await renderTemplate(templatePath('target/save-tooltip'), {
+            check: save.tooltipLabel,
+        })
     }
 
     const targets = (
@@ -375,19 +376,35 @@ async function getMessageData(message) {
                 const target = await fromUuid(token)
                 if (!target?.isOwner) return
 
-                const hasSave = save && !!target.actor.saves[save.statistic]
+                const actor = target.actor
+                const hasSave = save && !!actor?.saves[save.statistic]
 
-                const targetSave = (() => {
+                const targetSave = await (async () => {
                     if (!hasSave) return
 
                     const flag = getFlag(message, `target.saves.${target.id}`)
                     if (!flag) return
 
+                    const rerolled = flag.rerolled
+                    const canReroll = hasSave && !rerolled && actor?.isOfType('character') && flag.success !== 'criticalSuccess'
                     const successLabel = game.i18n.localize(`PF2E.Check.Result.Degree.Check.${flag.success}`)
+                    const offset = flag.value - save.dc
 
                     return {
                         ...flag,
-                        tooltip: `${tooltip}: ${successLabel} (<i class='fa-solid fa-dice-d20 pf2e-toolbelt-die'></i> ${flag.die})`,
+                        canReroll,
+                        tooltip: await renderTemplate(templatePath('target/save-tooltip'), {
+                            i18n: subLocalize('target.chat.save'),
+                            check: save.tooltipLabel,
+                            result: localize('target.chat.save.result', {
+                                success: successLabel,
+                                offset: offset >= 0 ? `+${offset}` : offset,
+                                die: `<i class="fa-solid fa-dice-d20"></i> ${flag.die}`,
+                            }),
+                            modifiers: flag.modifiers,
+                            canReroll,
+                            rerolled,
+                        }),
                     }
                 })()
 
@@ -404,6 +421,8 @@ async function getMessageData(message) {
                         name: target.name,
                         uuid: token,
                         save: hasSave && templateSave,
+                        canReroll: targetSave?.canReroll,
+                        rerolled: targetSave?.rerolled,
                     }),
                 }
             })
@@ -418,8 +437,39 @@ async function getTargetFromEvent(event) {
     return fromUuid(targetUuid)
 }
 
-async function rollSave(event, message, { dc, statistic }) {
+async function rerollSave(event, message, { dc, statistic }) {
     const target = await getTargetFromEvent(event)
+    const actor = target?.actor
+    if (!actor?.isOfType('character')) return
+
+    const { value, max } = actor.heroPoints
+    if (value < 1) {
+        warn('target.chat.save.reroll.noPoints')
+        return
+    }
+
+    const localize = subLocalize('target.chat.save.reroll.confirm')
+
+    const result = await Dialog.confirm({
+        title: localize('title'),
+        content: localize('content'),
+    })
+    if (!result) return
+
+    await actor.update({
+        'system.resources.heroPoints.value': Math.clamped(value - 1, 0, max),
+    })
+
+    rollSave(event, message, { dc, statistic }, true)
+}
+
+async function rollSave(event, message, { dc, statistic }, reroll = false) {
+    const target = await getTargetFromEvent(event)
+    const actor = target?.actor
+    if (!actor) return
+
+    const save = actor.saves[statistic]
+    if (!save) return
 
     const item = (() => {
         const item = message.item
@@ -434,42 +484,66 @@ async function rollSave(event, message, { dc, statistic }) {
         return otherMessage.item
     })()
 
-    const actor = target?.actor
-    if (!actor) return
-
-    const save = actor.saves[statistic]
-    if (!save) return
-
     const skipDefault = !game.user.settings.showCheckDialogs
-    const options = {
-        dc: { value: dc },
-        item,
-        origin: actor,
-        skipDialog: event.shiftKey ? !skipDefault : skipDefault,
-    }
-
-    if (!getSetting('target-save')) options.createMessage = false
-
-    const roll = await save.check.roll(options)
 
     const packet = {
         type: 'target.update-save',
         target: target.id,
-        value: roll.total,
-        die: roll.dice[0].total,
-        success: roll.degreeOfSuccess,
+        rerolled: reroll,
     }
 
-    if (game.user.isGM || message.isAuthor) {
-        packet.message = message
-        updateMessageSave(packet)
-    } else {
-        packet.message = message.id
-        socketEmit(packet)
-    }
+    save.check.roll({
+        dc: { value: dc },
+        item,
+        origin: actor,
+        skipDialog: event.shiftKey ? !skipDefault : skipDefault,
+        createMessage: false,
+        callback: (roll, __, msg) => {
+            if (
+                reroll &&
+                game.modules.get('xdy-pf2e-workbench')?.active &&
+                game.settings.get('xdy-pf2e-workbench', 'keeleysHeroPointRule')
+            ) {
+                const die = roll.dice.find(die => die instanceof Die && die.number === 1 && die.faces === 20)
+                const result = die?.results.find(result => result.active && result.result <= 10)
+                if (die && result) {
+                    roll.terms.push(
+                        OperatorTerm.fromData({ class: 'OperatorTerm', operator: '+', evaluated: true }),
+                        NumericTerm.fromData({ class: 'NumericTerm', number: 10, evaluated: true })
+                    )
+                    roll._total += 10
+                    roll.options.keeleyAdd10 = true
+                }
+            }
+
+            packet.value = roll.total
+            packet.die = roll.dice[0].total
+            packet.success = roll.degreeOfSuccess
+
+            packet.modifiers = msg
+                .getFlag('pf2e', 'modifiers')
+                .filter(modifier => modifier.enabled)
+                .map(({ label, modifier }) => ({ label, modifier }))
+
+            if (roll.options.keeleyAdd10) {
+                packet.modifiers.push({
+                    label: localize('target.chat.save.reroll.keeley'),
+                    modifier: 10,
+                })
+            }
+
+            if (game.user.isGM || message.isAuthor) {
+                packet.message = message
+                updateMessageSave(packet)
+            } else {
+                packet.message = message.id
+                socketEmit(packet)
+            }
+        },
+    })
 }
 
-function updateMessageSave({ message, target, value, success, die }) {
+function updateMessageSave({ message, target, value, success, die, modifiers, rerolled }) {
     if (typeof message === 'string') {
         message = game.messages.get(message)
         if (!message) return
@@ -477,7 +551,7 @@ function updateMessageSave({ message, target, value, success, die }) {
 
     if (typeof success === 'number') success = DEGREE_OF_SUCCESS[success]
 
-    setFlag(message, `target.saves.${target}`, { value, success, die })
+    setFlag(message, `target.saves.${target}`, { value, success, die, modifiers, rerolled })
 }
 
 async function openTargetSheet(event) {
