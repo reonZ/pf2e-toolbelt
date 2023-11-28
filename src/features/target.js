@@ -2,6 +2,7 @@ import { bindOnPreCreateSpellDamageChatMessage } from '../shared/chat'
 import { getFlag, setFlag, updateSourceFlag } from '../shared/flags'
 import { createChoicesHook, createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
+import { getInMemory, setInMemory } from '../shared/misc'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
@@ -250,6 +251,7 @@ async function renderSpellChatMessage(message, html, spell) {
 }
 
 function addTargets(event, message) {
+    event.stopPropagation()
     const targets = game.user.targets
 
     setFlag(
@@ -261,30 +263,59 @@ function addTargets(event, message) {
 
 async function renderDamageChatMessage(message, html) {
     const data = await getMessageData(message)
+    const msgContent = html.find('.message-content')
+    const damageRow = msgContent.find('.damage-application')
+
+    const buttons = $('<div class="pf2e-toolbelt-target-buttons"></div>')
+
+    if (data?.targets.length && damageRow.length) {
+        const toggleDamageRow = () => {
+            const expanded = !!getInMemory(message, 'target.expanded')
+            toggleBtn.toggleClass('collapse', expanded)
+            damageRow.toggleClass('hidden', !expanded)
+        }
+
+        const toggleTooltip = localize('target.chat.toggle.tooltip')
+        const toggleBtn = $(`<button class="toggle" title="${toggleTooltip}">
+    <i class="fa-solid fa-square-plus expand"></i>
+    <i class="fa-solid fa-square-minus collapse"></i>
+</button>`)
+
+        toggleDamageRow()
+
+        toggleBtn.on('click', event => {
+            event.stopPropagation()
+            setInMemory(message, 'target.expanded', !getInMemory(message, 'target.expanded'))
+            toggleDamageRow()
+        })
+
+        buttons.append(toggleBtn)
+    }
 
     if (game.user.isGM || message.isAuthor) {
         const targetsTooltip = localize('target.chat.targets.tooltip')
-        const targetsBtn = $(`<button class="pf2e-toolbelt-target-targets" title="${targetsTooltip}">
-        <i class="fa-solid fa-bullseye-arrow"></i>
-        </button>`)
+        const targetsBtn = $(`<button class="targets" title="${targetsTooltip}">
+    <i class="fa-solid fa-bullseye-arrow"></i>
+</button>`)
 
         targetsBtn.on('click', event => addTargets(event, message))
 
-        html.find('.dice-result .dice-total').append(targetsBtn)
+        buttons.append(targetsBtn)
     }
 
-    if (!data || !data.targets.length) return
+    html.find('.dice-result .dice-total').append(buttons)
+
+    if (!data?.targets.length) return
 
     const { targets, save } = data
-    const msgContent = html.find('.message-content')
-    const damageRow = msgContent.find('.damage-application').clone()
-    if (!damageRow.length) return
+    const clonedRow = damageRow.clone()
+    if (!clonedRow.length) return
 
-    damageRow.removeClass('damage-application').addClass('target-damage-application')
+    clonedRow.removeClass('damage-application').addClass('target-damage-application')
 
-    if (getSetting('target-chat') !== 'big') damageRow.find('button').addClass('small')
+    if (getSetting('target-chat') !== 'big') clonedRow.find('button').addClass('small')
 
-    damageRow.find('[data-action]').each(function () {
+    clonedRow.find('[data-action]').each(function () {
         const action = this.dataset.action
         this.dataset.action = `target-${action}`
     })
@@ -296,7 +327,7 @@ async function renderDamageChatMessage(message, html) {
 
         rowsTemplate.append(template)
 
-        const clone = damageRow.clone()
+        const clone = clonedRow.clone()
 
         clone.each((index, el) => {
             el.dataset.rollIndex = index

@@ -41,6 +41,12 @@
 
 .chat-message {
     .message-content {
+        > .damage-application {
+            &.hidden {
+                display: none;
+            }
+        }
+
         .card-buttons {
             .pf2e-toolbelt-target-wrapper {
                 display: flex;
@@ -60,20 +66,41 @@
 
         .dice-result {
             .dice-total {
-                .pf2e-toolbelt-target-targets {
-                    width: 22px;
-                    height: 22px;
-                    font-size: 13px;
-                    line-height: 1px;
+                .pf2e-toolbelt-target-buttons {
                     position: absolute;
                     left: 0px;
                     top: 1px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
 
-                    i {
-                        margin: 0;
+                    display: flex;
+
+                    .targets,
+                    .toggle {
+                        width: 22px;
+                        height: 22px;
+                        line-height: 1px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        i {
+                            margin: 0;
+                        }
+                    }
+
+                    .toggle {
+                        font-size: 0.8em;
+
+                        &.collapse {
+                            .expand {
+                                display: none;
+                            }
+                        }
+
+                        &:not(.collapse) {
+                            .collapse {
+                                display: none;
+                            }
+                        }
                     }
                 }
             }
@@ -220,6 +247,18 @@
                         &::after {
                             box-shadow: inset 0 0 6px var(--criticalFailure);
                         }
+                    }
+                }
+            }
+        }
+
+        &:has(> .damage-application.hidden) {
+            + .pf2e-toolbelt-target-damage {
+                hr:first-child {
+                    display: none;
+
+                    + .target-header {
+                        margin-top: 0.5em;
                     }
                 }
             }

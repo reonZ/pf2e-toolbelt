@@ -306,6 +306,9 @@
             "chat": {
                 "targets": {
                     "tooltip": "Set targets for message"
+                },
+                "toggle": {
+                    "tooltip": "Toggle original damage buttons"
                 }
             },
             "menu": {
