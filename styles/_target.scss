@@ -150,18 +150,45 @@
 
                 button {
                     position: relative;
-                    font-size: var(--font-size-18);
-                    line-height: 1;
-                    display: flex;
-                    justify-content: center;
                     align-items: center;
-                    padding-inline: 0;
-                    padding-block: 0.3em calc(0.3em - 2px);
+                    display: flex;
+                    flex-direction: column;
+                    font-size: var(--font-size-18);
+                    height: 2em;
+                    justify-content: space-around;
+                    line-height: unset;
+                    padding: 0;
+
+                    img {
+                        border: none;
+                        height: var(--font-size-18);
+                    }
 
                     span {
                         font-size: 0.5em;
                         font-weight: 500;
                         text-transform: uppercase;
+                    }
+
+                    &.half-damage {
+                        i {
+                            -moz-background-clip: text;
+                            -moz-text-fill-color: transparent;
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            background-image: linear-gradient(to right, var(--text-dark) 50%, var(--color-text-light-6) 50%);
+                        }
+                    }
+
+                    &.small {
+                        padding-block: 0.3em calc(0.3em - 2px);
+                        height: 1em;
+
+                        img,
+                        i {
+                            display: none;
+                        }
                     }
 
                     &::after {

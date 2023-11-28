@@ -1,6 +1,6 @@
 import { bindOnPreCreateSpellDamageChatMessage } from '../shared/chat'
 import { getFlag, setFlag, updateSourceFlag } from '../shared/flags'
-import { createHook } from '../shared/hook'
+import { createChoicesHook, createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
@@ -18,7 +18,7 @@ const SAVES = {
 const DEGREE_OF_SUCCESS = ['criticalFailure', 'failure', 'success', 'criticalSuccess']
 
 const setPrecreateMessageHook = createHook('preCreateChatMessage', preCreateChatMessage)
-const setRenderMessageHook = createHook('renderChatMessage', renderChatMessage)
+const setRenderMessageHook = createChoicesHook('renderChatMessage', renderChatMessage)
 const setCreateTemplateHook = createHook('createMeasuredTemplate', createMeasuredTemplate)
 
 let SOCKET = false
@@ -39,8 +39,9 @@ export function registerTargetTokenHelper() {
             },
             {
                 name: 'target-chat',
-                type: Boolean,
-                default: false,
+                type: String,
+                default: 'disabled',
+                choices: ['disabled', 'small', 'big'],
                 scope: 'client',
                 onChange: value => setRenderMessageHook(value && getSetting('target')),
             },
@@ -176,7 +177,7 @@ function preCreateChatMessage(message) {
 }
 
 async function renderChatMessage(message, html) {
-    const clientEnabled = getSetting('target-chat')
+    const clientEnabled = getSetting('target-chat') !== 'disabled'
 
     if (clientEnabled && message.isDamageRoll) {
         await renderDamageChatMessage(message, html)
@@ -280,7 +281,9 @@ async function renderDamageChatMessage(message, html) {
     if (!damageRow.length) return
 
     damageRow.removeClass('damage-application').addClass('target-damage-application')
-    damageRow.find('button > *:not(.label)').remove()
+
+    if (getSetting('target-chat') !== 'big') damageRow.find('button').addClass('small')
+
     damageRow.find('[data-action]').each(function () {
         const action = this.dataset.action
         this.dataset.action = `target-${action}`

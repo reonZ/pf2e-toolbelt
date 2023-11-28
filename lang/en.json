@@ -109,7 +109,12 @@
             },
             "target-chat": {
                 "name": "Target Token Helper - Chat",
-                "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll."
+                "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll.",
+                "choices": {
+                    "disabled": "Disabled",
+                    "small": "Small Buttons",
+                    "big": "Big Buttons"
+                }
             },
             "target-template": {
                 "name": "Target Token Helper - Template",
