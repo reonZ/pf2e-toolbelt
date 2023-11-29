@@ -1,3 +1,10 @@
+# 1.21.0
+
+-   `Target Token Helper` updates:
+    -   save reroll is no longer limited to using hero points, the dialog now offers a selection of reroll types to choose from
+    -   now respects the system metagame setting `Show DCs on Attacks and Saves` when generating the tooltip for players
+    -   fixed? chat not properly scrolling to bottom when updating chat messages
+
 # 1.20.0
 
 -   `Target Token Helper` updates:
