@@ -317,7 +317,11 @@
                         },
                         "keeley": "Low Reroll"
                     },
-                    "result": "Result: ({die}) {success} by {offset}"
+                    "result": {
+                        "withOffset": "Result: ({die}) {success} by {offset}",
+                        "withoutOffset": "Result: ({die}) {success}"
+                    },
+                    "dcWithValue": "DC {dc}"
                 }
             },
             "menu": {

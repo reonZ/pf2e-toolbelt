@@ -372,6 +372,7 @@ function addHeaderListeners(message, html, save) {
 
 async function getMessageData(message) {
     const targetsFlag = getFlag(message, 'target.targets') ?? []
+    const showDC = game.user.isGM || game.settings.get('pf2e', 'metagame_showDC')
 
     const save = (() => {
         const flag = getFlag(message, 'target.save')
@@ -386,7 +387,7 @@ async function getMessageData(message) {
 
     if (save) {
         const saveLabel = game.i18n.format('PF2E.SavingThrowWithName', { saveName: game.i18n.localize(save.label) })
-        const saveDC = game.i18n.format('PF2E.DCWithValue', { dc: save.dc, text: '' })
+        const saveDC = showDC ? localize('target.chat.save.dcWithValue', { dc: save.dc }) : ''
         save.tooltipLabel = `${saveLabel} ${saveDC}`
         save.tooltip = await renderTemplate(templatePath('target/save-tooltip'), {
             check: save.tooltipLabel,
@@ -419,7 +420,7 @@ async function getMessageData(message) {
                         tooltip: await renderTemplate(templatePath('target/save-tooltip'), {
                             i18n: subLocalize('target.chat.save'),
                             check: save.tooltipLabel,
-                            result: localize('target.chat.save.result', {
+                            result: localize(`target.chat.save.result.${showDC ? 'withOffset' : 'withoutOffset'}`, {
                                 success: successLabel,
                                 offset: offset >= 0 ? `+${offset}` : offset,
                                 die: `<i class="fa-solid fa-dice-d20"></i> ${flag.die}`,
