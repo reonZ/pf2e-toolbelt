@@ -168,10 +168,11 @@
                         &.rotate {
                             font-size: 0.9em;
                             margin-left: 1px;
+                        }
 
-                            &.disabled {
-                                opacity: 0.3;
-                            }
+                        &.small {
+                            font-size: 0.9em;
+                            opacity: 0.8;
                         }
                     }
                 }
@@ -275,6 +276,29 @@
     }
 }
 
+[id^='pf2e-toolbelt-target-save-reroll-dialog-'] {
+    .dialog-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+
+        label {
+            input {
+                margin-right: 0.3em;
+            }
+
+            i {
+                width: 20px;
+                text-align: center;
+            }
+        }
+    }
+
+    .dialog-buttons {
+        margin-top: 0.5em;
+    }
+}
+
 [role='tooltip'] {
     .pf2e-toolbelt-target-save {
         font-size: 0.9em;
@@ -295,11 +319,11 @@
             align-self: flex-end;
 
             i {
-                font-size: 0.9em;
-            }
+                font-size: 0.95em;
 
-            .disabled {
-                opacity: 0.2;
+                &:not(.rotate) {
+                    opacity: 0.8;
+                }
             }
         }
     }

@@ -5,7 +5,7 @@ import { localize, subLocalize } from '../shared/localize'
 import { getInMemory, setInMemory } from '../shared/misc'
 import { warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
-import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
+import { DegreeOfSuccess, applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e'
 import { getSetting } from '../shared/settings'
 import { socketEmit, socketOff, socketOn } from '../shared/socket'
 import { getTemplateTokens } from '../shared/template'
@@ -15,6 +15,29 @@ const SAVES = {
     fortitude: { icon: 'fa-solid fa-chess-rook', label: 'PF2E.SavesFortitude' },
     reflex: { icon: 'fa-solid fa-person-running', label: 'PF2E.SavesReflex' },
     will: { icon: 'fa-solid fa-brain', label: 'PF2E.SavesWill' },
+}
+
+const REROLL = {
+    hero: {
+        icon: 'fa-solid fa-hospital-symbol',
+        reroll: 'PF2E.RerollMenu.HeroPoint',
+        rerolled: 'PF2E.RerollMenu.MessageHeroPoint',
+    },
+    new: {
+        icon: 'fa-solid fa-dice',
+        reroll: 'PF2E.RerollMenu.KeepNew',
+        rerolled: 'PF2E.RerollMenu.MessageKeep.new',
+    },
+    lower: {
+        icon: 'fa-solid fa-dice-one',
+        reroll: 'PF2E.RerollMenu.KeepLower',
+        rerolled: 'PF2E.RerollMenu.MessageKeep.lower',
+    },
+    higher: {
+        icon: 'fa-solid fa-dice-six',
+        reroll: 'PF2E.RerollMenu.KeepHigher',
+        rerolled: 'PF2E.RerollMenu.MessageKeep.higher',
+    },
 }
 
 const DEGREE_OF_SUCCESS = ['criticalFailure', 'failure', 'success', 'criticalSuccess']
@@ -386,7 +409,7 @@ async function getMessageData(message) {
                     if (!flag) return
 
                     const rerolled = flag.rerolled
-                    const canReroll = hasSave && !rerolled && actor?.isOfType('character') && flag.success !== 'criticalSuccess'
+                    const canReroll = hasSave && !rerolled
                     const successLabel = game.i18n.localize(`PF2E.Check.Result.Degree.Check.${flag.success}`)
                     const offset = flag.value - save.dc
 
@@ -403,7 +426,7 @@ async function getMessageData(message) {
                             }),
                             modifiers: flag.modifiers,
                             canReroll,
-                            rerolled,
+                            rerolled: REROLL[rerolled],
                         }),
                     }
                 })()
@@ -422,7 +445,7 @@ async function getMessageData(message) {
                         uuid: token,
                         save: hasSave && templateSave,
                         canReroll: targetSave?.canReroll,
-                        rerolled: targetSave?.rerolled,
+                        rerolled: REROLL[targetSave?.rerolled],
                     }),
                 }
             })
@@ -437,33 +460,117 @@ async function getTargetFromEvent(event) {
     return fromUuid(targetUuid)
 }
 
-async function rerollSave(event, message, { dc, statistic }) {
+async function rerollSave(event, message, { dc }) {
     const target = await getTargetFromEvent(event)
     const actor = target?.actor
-    if (!actor?.isOfType('character')) return
+    if (!actor) return
 
-    const { value, max } = actor.heroPoints
-    if (value < 1) {
-        warn('target.chat.save.reroll.noPoints')
-        return
+    const flag = getFlag(message, `target.saves.${target.id}`)
+    if (!flag?.roll || flag.rerolled) return
+
+    const heroPoints = actor.isOfType('character') ? actor.heroPoints.value : 0
+
+    const template = Object.entries(REROLL)
+        .map(([type, { icon, reroll }]) => {
+            if (type === 'hero' && !heroPoints) return
+            const label = game.i18n.localize(reroll)
+            return `<label><input type="radio" name="reroll" value="${type}"><i class="${icon}"></i> ${label}</label>`
+        })
+        .filter(Boolean)
+        .join('')
+
+    const buttons = {
+        yes: {
+            icon: '<i class="fa-solid fa-rotate rotate"></i>',
+            label: 'reroll',
+            callback: html => html.find('[name=reroll]:checked').val() ?? null,
+        },
+        no: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: 'cancel',
+            callback: () => null,
+        },
     }
 
-    const localize = subLocalize('target.chat.save.reroll.confirm')
+    const reroll = await Dialog.wait(
+        {
+            title: `${target.name} - ${localize('target.chat.save.reroll.confirm.title')}`,
+            content: template,
+            buttons,
+            close: () => null,
+        },
+        {
+            id: `pf2e-toolbelt-target-save-reroll-dialog-${target.id}`,
+        }
+    )
 
-    const result = await Dialog.confirm({
-        title: localize('title'),
-        content: localize('content'),
-    })
-    if (!result) return
+    if (!reroll) return
 
-    await actor.update({
-        'system.resources.heroPoints.value': Math.clamped(value - 1, 0, max),
-    })
+    const isHeroReroll = reroll === 'hero'
+    const keep = isHeroReroll ? 'new' : reroll
 
-    rollSave(event, message, { dc, statistic }, true)
+    if (isHeroReroll) {
+        const { value, max } = actor.heroPoints
+
+        if (value < 1) {
+            warn('target.chat.save.reroll.noPoints')
+            return
+        }
+
+        await actor.update({
+            'system.resources.heroPoints.value': Math.clamped(value - 1, 0, max),
+        })
+    }
+
+    const oldRoll = Roll.fromJSON(flag.roll)
+    const unevaluatedNewRoll = oldRoll.clone()
+    unevaluatedNewRoll.options.isReroll = true
+    Hooks.callAll('pf2e.preReroll', Roll.fromJSON(flag.roll), unevaluatedNewRoll, isHeroReroll, keep)
+
+    const newRoll = await unevaluatedNewRoll.evaluate({ async: true })
+    Hooks.callAll('pf2e.reroll', Roll.fromJSON(flag.roll), newRoll, isHeroReroll, keep)
+
+    const keptRoll =
+        (keep === 'higher' && oldRoll.total > newRoll.total) || (keep === 'lower' && oldRoll.total < newRoll.total)
+            ? oldRoll
+            : newRoll
+
+    if (keptRoll === newRoll) {
+        const success = new DegreeOfSuccess(newRoll, dc, flag.dosAdjustments)
+        keptRoll.options.degreeOfSuccess = success.value
+    }
+
+    const packet = {
+        type: 'target.update-save',
+        target: target.id,
+        data: {
+            value: keptRoll.total,
+            die: keptRoll.dice[0].total,
+            success: keptRoll.degreeOfSuccess,
+            roll: JSON.stringify(keptRoll.toJSON()),
+            dosAdjustments: deepClone(flag.dosAdjustments),
+            modifiers: deepClone(flag.modifiers),
+            rerolled: reroll,
+        },
+    }
+
+    if (keptRoll.options.keeleyAdd10) {
+        packet.data.modifiers.push({
+            label: localize('target.chat.save.reroll.keeley'),
+            modifier: 10,
+        })
+    }
+
+    if (game.user.isGM || message.isAuthor) {
+        packet.message = message
+        updateMessageSave(packet)
+    } else {
+        packet.message = message.id
+        socketEmit(packet)
+    }
 }
 
-async function rollSave(event, message, { dc, statistic }, reroll = false) {
+async function rollSave(event, message, { dc, statistic }) {
     const target = await getTargetFromEvent(event)
     const actor = target?.actor
     if (!actor) return
@@ -489,7 +596,6 @@ async function rollSave(event, message, { dc, statistic }, reroll = false) {
     const packet = {
         type: 'target.update-save',
         target: target.id,
-        rerolled: reroll,
     }
 
     save.check.roll({
@@ -499,37 +605,16 @@ async function rollSave(event, message, { dc, statistic }, reroll = false) {
         skipDialog: event.shiftKey ? !skipDefault : skipDefault,
         createMessage: false,
         callback: (roll, __, msg) => {
-            if (
-                reroll &&
-                game.modules.get('xdy-pf2e-workbench')?.active &&
-                game.settings.get('xdy-pf2e-workbench', 'keeleysHeroPointRule')
-            ) {
-                const die = roll.dice.find(die => die instanceof Die && die.number === 1 && die.faces === 20)
-                const result = die?.results.find(result => result.active && result.result <= 10)
-                if (die && result) {
-                    roll.terms.push(
-                        OperatorTerm.fromData({ class: 'OperatorTerm', operator: '+', evaluated: true }),
-                        NumericTerm.fromData({ class: 'NumericTerm', number: 10, evaluated: true })
-                    )
-                    roll._total += 10
-                    roll.options.keeleyAdd10 = true
-                }
-            }
-
-            packet.value = roll.total
-            packet.die = roll.dice[0].total
-            packet.success = roll.degreeOfSuccess
-
-            packet.modifiers = msg
-                .getFlag('pf2e', 'modifiers')
-                .filter(modifier => modifier.enabled)
-                .map(({ label, modifier }) => ({ label, modifier }))
-
-            if (roll.options.keeleyAdd10) {
-                packet.modifiers.push({
-                    label: localize('target.chat.save.reroll.keeley'),
-                    modifier: 10,
-                })
+            packet.data = {
+                value: roll.total,
+                die: roll.dice[0].total,
+                success: roll.degreeOfSuccess,
+                roll: JSON.stringify(roll.toJSON()),
+                dosAdjustments: msg.getFlag('pf2e', 'context.dosAdjustments'),
+                modifiers: msg
+                    .getFlag('pf2e', 'modifiers')
+                    .filter(modifier => modifier.enabled)
+                    .map(({ label, modifier }) => ({ label, modifier })),
             }
 
             if (game.user.isGM || message.isAuthor) {
@@ -543,15 +628,15 @@ async function rollSave(event, message, { dc, statistic }, reroll = false) {
     })
 }
 
-function updateMessageSave({ message, target, value, success, die, modifiers, rerolled }) {
+function updateMessageSave({ message, target, data }) {
     if (typeof message === 'string') {
         message = game.messages.get(message)
         if (!message) return
     }
 
-    if (typeof success === 'number') success = DEGREE_OF_SUCCESS[success]
+    if (typeof data.success === 'number') data.success = DEGREE_OF_SUCCESS[data.success]
 
-    setFlag(message, `target.saves.${target}`, { value, success, die, modifiers, rerolled })
+    setFlag(message, `target.saves.${target}`, deepClone(data))
 }
 
 async function openTargetSheet(event) {

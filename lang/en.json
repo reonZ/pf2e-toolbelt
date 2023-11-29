@@ -308,14 +308,12 @@
                 },
                 "save": {
                     "reroll": {
-                        "tooltip": {
-                            "enabled": "Can reroll using hero point",
-                            "disabled": "Hero point already used"
-                        },
+                        "tooltip": "Can reroll the save check",
                         "noPoints": "You need at least 1 Hero Point to Reroll.",
                         "confirm": {
                             "title": "Save Check Reroll",
-                            "content": "Are you sure you want to use a hero point to reroll?"
+                            "reroll": "Reroll",
+                            "cancel": "Cancel"
                         },
                         "keeley": "Low Reroll"
                     },

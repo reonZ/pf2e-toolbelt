@@ -6,9 +6,9 @@
     <div>{{modifier.label}} {{numberFormat modifier.modifier decimals=0 sign=true}}</div>
     {{/each}}
     {{#if canReroll}}
-    <div class="note"><i class="fa-solid fa-rotate"></i> {{i18n 'reroll.tooltip.enabled'}}</div>
-    {{else if rerolled}}
-    <div class="note"><i class="fa-solid fa-rotate disabled"></i> {{i18n 'reroll.tooltip.disabled'}}</div>
+    <div class="note"><i class="fa-solid fa-rotate rotate"></i> {{i18n 'reroll.tooltip'}}</div>
+    {{else}}
+    <div class="note"><i class="{{rerolled.icon}}"></i> {{localize rerolled.rerolled}}</div>
     {{/if}}
     {{/if}}
 </div>

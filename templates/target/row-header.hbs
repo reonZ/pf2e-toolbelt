@@ -12,9 +12,7 @@
         <span data-tooltip="{{save.result.tooltip}}">
             <i class="{{save.icon}}"></i>
             <span class="{{save.result.success}}">{{save.result.value}}</span>
-            {{#if rerolled}}
-            <i class="fa-solid fa-rotate rotate disabled"></i>
-            {{/if}}
+            <i class="{{rerolled.icon}} small"></i>
         </span>
         {{/if}}
         <hr>
