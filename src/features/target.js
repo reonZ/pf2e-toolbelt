@@ -223,7 +223,10 @@ async function renderChatMessage(message, html) {
 
 function scrollToBottom(message) {
     const chat = ui.chat
-    if (chat.isAtBottom || message.user._id === game.user._id) chat.scrollBottom({ waitImages: true })
+    if (chat.isAtBottom || message.user._id === game.user._id) {
+        const el = chat.element[0].querySelector('#chat-log')
+        el.scrollTop = el.clientHeight
+    }
 }
 
 async function renderSpellChatMessage(message, html, spell) {
