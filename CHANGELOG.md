@@ -1,3 +1,8 @@
+# 1.22.1
+
+-   `Target Token Helper` updates:
+    -   removed highlights for non-save damage rolls (this was nonsensical)
+
 # 1.22.0
 
 -   `Target Token Helper` updates:
