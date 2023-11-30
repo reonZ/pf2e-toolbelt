@@ -1,3 +1,9 @@
+# 1.22.0
+
+-   `Target Token Helper` updates:
+    -   damage buttons rows will now be blurred out when damage has been applied to the target (or when the basic save was a critical success)
+    -   now highlight the `Damage` and `Double` buttons for non-save damage rolls based on their outcome (`Hit` or `Critical Hit`)
+
 # 1.21.0
 
 -   `Target Token Helper` updates:
