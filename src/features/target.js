@@ -287,6 +287,7 @@ async function renderDamageChatMessage(message, html) {
     const data = await getMessageData(message)
     const msgContent = html.find('.message-content')
     const damageRow = msgContent.find('.damage-application')
+    const clonedRow = damageRow.clone()
 
     const buttons = $('<div class="pf2e-toolbelt-target-buttons"></div>')
 
@@ -330,7 +331,6 @@ async function renderDamageChatMessage(message, html) {
     if (!data?.targets.length) return
 
     const { targets, save } = data
-    const clonedRow = damageRow.clone()
     if (!clonedRow.length) return
 
     clonedRow.removeClass('damage-application').addClass('target-damage-application')
@@ -344,17 +344,19 @@ async function renderDamageChatMessage(message, html) {
 
     const rowsTemplate = $('<div class="pf2e-toolbelt-target-damage"></div>')
 
-    targets.forEach(({ uuid, template, save }) => {
-        rowsTemplate.append('<hr>')
-
-        rowsTemplate.append(template)
-
+    targets.forEach(({ uuid, template, save, applied = {} }) => {
+        const isBasicSave = !!(save && save.result && save.basic)
         const clone = clonedRow.clone()
+
+        rowsTemplate.append('<hr>')
+        rowsTemplate.append(template)
 
         clone.each((index, el) => {
             el.dataset.rollIndex = index
             el.dataset.targetUuid = uuid
-            if (save && save.result && save.basic) el.classList.add(save.result.success)
+
+            el.classList.toggle('applied', !!applied[index] || (isBasicSave && save.result.success === 'criticalSuccess'))
+            if (isBasicSave) el.classList.add(save.result.success)
         })
 
         rowsTemplate.append(clone)
@@ -403,13 +405,14 @@ async function getMessageData(message) {
                 const target = await fromUuid(token)
                 if (!target?.isOwner) return
 
+                const targetId = target.id
                 const actor = target.actor
                 const hasSave = save && !!actor?.saves[save.statistic]
 
                 const targetSave = await (async () => {
                     if (!hasSave) return
 
-                    const flag = getFlag(message, `target.saves.${target.id}`)
+                    const flag = getFlag(message, `target.saves.${targetId}`)
                     if (!flag) return
 
                     const rerolled = flag.rerolled
@@ -444,6 +447,7 @@ async function getMessageData(message) {
                     uuid: token,
                     target: target,
                     save: templateSave,
+                    applied: getFlag(message, `target.applied.${targetId}`),
                     template: await renderTemplate(templatePath('target/row-header'), {
                         name: target.name,
                         uuid: token,

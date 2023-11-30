@@ -219,7 +219,7 @@
                     }
 
                     &.small {
-                        padding-block: 0.3em calc(0.3em - 2px);
+                        padding-block: 0.3em calc(0.3em - 1px);
                         height: 1em;
 
                         img,
@@ -257,6 +257,12 @@
                         &::after {
                             box-shadow: inset 0 0 6px var(--criticalFailure);
                         }
+                    }
+                }
+
+                &.applied {
+                    button {
+                        filter: blur(1px);
                     }
                 }
             }

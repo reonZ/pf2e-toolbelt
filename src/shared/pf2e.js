@@ -1,3 +1,4 @@
+import { setFlag } from './flags'
 import { isInstanceOf } from './misc'
 
 export function ErrorPF2e(message) {
@@ -304,6 +305,8 @@ export async function applyDamageFromMessage(
     })
 
     toggleOffShieldBlock(message.id)
+
+    setFlag(message, `target.applied.${token.id}.${rollIndex}`, true)
 }
 
 function applyStacking(best, modifier, isBetter) {
