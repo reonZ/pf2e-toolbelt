@@ -221,12 +221,16 @@ async function renderChatMessage(message, html) {
     }
 }
 
-function scrollToBottom(message) {
-    const chat = ui.chat
-    if (chat.isAtBottom || message.user._id === game.user._id) {
-        const el = chat.element[0].querySelector('#chat-log')
-        el.scrollTop = el.clientHeight
-    }
+async function scrollToBottom(message) {
+    Promise.all(
+        [ui.chat, ui.chat._popout].map(async chat => {
+            const el = chat?.element[0]?.querySelector('#chat-log')
+            if (!el || (!chat.isAtBottom && message.user._id !== game.user._id)) return
+
+            await chat._waitForImages()
+            el.scrollTop = el.scrollHeight
+        })
+    )
 }
 
 async function renderSpellChatMessage(message, html, spell) {
