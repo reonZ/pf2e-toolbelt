@@ -174,6 +174,15 @@ function preCreateChatMessage(message) {
             'target.targets',
             Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
         )
+
+        if (message.rolls.length === 2) {
+            const splashRollIndex = message.rolls.findIndex(roll => roll.options?.splashOnly)
+            const regularRollIndex = message.rolls.findIndex(roll => !roll.options?.splashOnly)
+
+            if (splashRollIndex !== -1 && regularRollIndex !== -1) {
+                updateSourceFlag(message, 'target.splashIndex', splashRollIndex)
+            }
+        }
     }
 
     if (!isDamageRoll && message.getFlag('pf2e', 'context.type') !== 'spell-cast') return
@@ -297,16 +306,16 @@ function addTargets(event, message) {
 async function renderDamageChatMessage(message, html) {
     const data = await getMessageData(message)
     const msgContent = html.find('.message-content')
-    const damageRow = msgContent.find('.damage-application')
-    const clonedRow = damageRow.clone()
+    const damageRows = msgContent.find('.damage-application')
+    const clonedRows = damageRows.clone()
 
     const buttons = $('<div class="pf2e-toolbelt-target-buttons"></div>')
 
-    if (data?.targets.length && damageRow.length) {
+    if (data?.targets.length && damageRows.length) {
         const toggleDamageRow = () => {
             const expanded = !!getInMemory(message, 'target.expanded')
             toggleBtn.toggleClass('collapse', expanded)
-            damageRow.toggleClass('hidden', !expanded)
+            damageRows.toggleClass('hidden', !expanded)
         }
 
         const toggleTooltip = localize('target.chat.toggle.tooltip')
@@ -342,13 +351,13 @@ async function renderDamageChatMessage(message, html) {
     if (!data?.targets.length) return
 
     const { targets, save } = data
-    if (!clonedRow.length) return
+    if (!clonedRows.length) return
 
-    clonedRow.removeClass('damage-application').addClass('target-damage-application')
+    clonedRows.removeClass('damage-application').addClass('target-damage-application')
 
-    if (getSetting('target-chat') !== 'big') clonedRow.find('button').addClass('small')
+    if (getSetting('target-chat') !== 'big') clonedRows.find('button').addClass('small')
 
-    clonedRow.find('[data-action]').each(function () {
+    clonedRows.find('[data-action]').each(function () {
         const action = this.dataset.action
         this.dataset.action = `target-${action}`
     })
@@ -357,12 +366,12 @@ async function renderDamageChatMessage(message, html) {
 
     targets.forEach(({ uuid, template, save, applied = {} }) => {
         const isBasicSave = !!(save && save.result && save.basic)
-        const clone = clonedRow.clone()
+        const clones = clonedRows.clone()
 
         rowsTemplate.append('<hr>')
         rowsTemplate.append(template)
 
-        clone.each((index, el) => {
+        clones.each((index, el) => {
             el.dataset.rollIndex = index
             el.dataset.targetUuid = uuid
 
@@ -370,7 +379,7 @@ async function renderDamageChatMessage(message, html) {
             if (isBasicSave) el.classList.add(save.result.success)
         })
 
-        rowsTemplate.append(clone)
+        rowsTemplate.append(clones)
     })
 
     msgContent.after(rowsTemplate)
@@ -703,6 +712,6 @@ async function onTargetButton(event, message) {
         multiplier,
         addend: 0,
         promptModifier: event.shiftKey,
-        rollIndex,
+        rollIndex: Number(rollIndex),
     })
 }

@@ -21,3 +21,7 @@ export function updateSourceFlag(doc, key, value) {
         [`flags.${MODULE_ID}.${key}`]: value,
     })
 }
+
+export function moduleFlagUpdate(update, key, value) {
+    update[`flags.${MODULE_ID}.${key}`] = value
+}

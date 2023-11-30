@@ -1,4 +1,4 @@
-import { setFlag } from './flags'
+import { getFlag, moduleFlagUpdate, setFlag } from './flags'
 import { isInstanceOf } from './misc'
 
 export function ErrorPF2e(message) {
@@ -306,7 +306,34 @@ export async function applyDamageFromMessage(
 
     toggleOffShieldBlock(message.id)
 
-    setFlag(message, `target.applied.${token.id}.${rollIndex}`, true)
+    /**
+     * added stuff HERE
+     */
+    const tokenId = token.id
+
+    let update = {}
+    moduleFlagUpdate(update, `target.applied.${tokenId}.${rollIndex}`, true)
+
+    const splashIndex = getFlag(message, 'target.splashIndex')
+    if (splashIndex !== undefined) {
+        const regularIndex = splashIndex === 0 ? 1 : 0
+
+        if (rollIndex === splashIndex) {
+            moduleFlagUpdate(update, `target.applied.${tokenId}.${regularIndex}`, true)
+        } else {
+            moduleFlagUpdate(update, `target.applied.${tokenId}.${splashIndex}`, true)
+
+            const targetsFlag = getFlag(message, 'target.targets') ?? []
+            for (const target of targetsFlag) {
+                const targetId = target.token?.split('.').at(-1)
+                if (targetId === tokenId) continue
+
+                moduleFlagUpdate(update, `target.applied.${targetId}.${regularIndex}`, true)
+            }
+        }
+    }
+
+    message.update(update)
 }
 
 function applyStacking(best, modifier, isBetter) {
