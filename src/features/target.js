@@ -201,7 +201,7 @@ async function renderChatMessage(message, html) {
 
     if (clientEnabled && message.isDamageRoll) {
         await renderDamageChatMessage(message, html)
-        scrollToBottom(message)
+        refreshMessage(message)
         return
     }
 
@@ -210,7 +210,7 @@ async function renderChatMessage(message, html) {
 
     if (clientEnabled && !item.damageKinds.size) {
         await renderSpellChatMessage(message, html, item)
-        scrollToBottom(message)
+        refreshMessage(message)
         return
     }
 
@@ -221,7 +221,7 @@ async function renderChatMessage(message, html) {
     }
 }
 
-async function scrollToBottom(message) {
+function refreshMessage(message) {
     Promise.all(
         [ui.chat, ui.chat._popout].map(async chat => {
             const el = chat?.element[0]?.querySelector('#chat-log')
@@ -231,6 +231,13 @@ async function scrollToBottom(message) {
             el.scrollTop = el.scrollHeight
         })
     )
+
+    for (const app of Object.values(message.apps)) {
+        if (!(app instanceof ChatPopout)) continue
+        if (!app.rendered) continue
+
+        app.setPosition()
+    }
 }
 
 async function renderSpellChatMessage(message, html, spell) {
