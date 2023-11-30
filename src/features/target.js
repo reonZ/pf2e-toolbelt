@@ -342,6 +342,11 @@ async function renderDamageChatMessage(message, html) {
         this.dataset.action = `target-${action}`
     })
 
+    const outcome = (() => {
+        const outcome = message.getFlag('pf2e', 'context.outcome')
+        return outcome === 'success' ? 'failure' : outcome === 'criticalSuccess' ? 'criticalFailure' : undefined
+    })()
+
     const rowsTemplate = $('<div class="pf2e-toolbelt-target-damage"></div>')
 
     targets.forEach(({ uuid, template, save, applied = {} }) => {
@@ -357,6 +362,7 @@ async function renderDamageChatMessage(message, html) {
 
             el.classList.toggle('applied', !!applied[index] || (isBasicSave && save.result.success === 'criticalSuccess'))
             if (isBasicSave) el.classList.add(save.result.success)
+            else if (!save && outcome) el.classList.add(outcome)
         })
 
         rowsTemplate.append(clone)
