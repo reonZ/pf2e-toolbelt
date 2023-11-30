@@ -1,5 +1,5 @@
 import { bindOnPreCreateSpellDamageChatMessage } from '../shared/chat'
-import { getFlag, setFlag, updateSourceFlag } from '../shared/flags'
+import { getFlag, moduleFlagUpdate, setFlag, updateSourceFlag } from '../shared/flags'
 import { createChoicesHook, createHook } from '../shared/hook'
 import { localize, subLocalize } from '../shared/localize'
 import { getInMemory, setInMemory } from '../shared/misc'
@@ -101,6 +101,9 @@ function onSocket(packet) {
     switch (packet.type) {
         case 'target.update-save':
             updateMessageSave(packet)
+            break
+        case 'target.update-applied':
+            updateMessageApplied(packet)
             break
     }
 }
@@ -714,4 +717,46 @@ async function onTargetButton(event, message) {
         promptModifier: event.shiftKey,
         rollIndex: Number(rollIndex),
     })
+}
+
+export function onDamageApplied(message, tokenId, rollIndex) {
+    let updates = {}
+    moduleFlagUpdate(updates, `target.applied.${tokenId}.${rollIndex}`, true)
+
+    const splashIndex = getFlag(message, 'target.splashIndex')
+    if (splashIndex !== undefined) {
+        const regularIndex = splashIndex === 0 ? 1 : 0
+
+        if (rollIndex === splashIndex) {
+            moduleFlagUpdate(updates, `target.applied.${tokenId}.${regularIndex}`, true)
+        } else {
+            moduleFlagUpdate(updates, `target.applied.${tokenId}.${splashIndex}`, true)
+
+            const targetsFlag = getFlag(message, 'target.targets') ?? []
+            for (const target of targetsFlag) {
+                const targetId = target.token?.split('.').at(-1)
+                if (targetId === tokenId) continue
+
+                moduleFlagUpdate(updates, `target.applied.${targetId}.${regularIndex}`, true)
+            }
+        }
+    }
+
+    if (game.user.isGM || message.isAuthor) {
+        updateMessageApplied({ message, updates })
+    } else {
+        socketEmit({
+            type: 'target.update-applied',
+            message: message.id,
+            updates,
+        })
+    }
+}
+
+function updateMessageApplied({ message, updates }) {
+    if (typeof message === 'string') {
+        message = game.messages.get(message)
+        if (!message) return
+    }
+    message.update(updates)
 }
