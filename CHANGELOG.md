@@ -1,3 +1,12 @@
+# 1.23.0
+
+-   `Target Token Helper` updates:
+    -   will now be opinionated when it comes to damage messages with splash damage
+        -   applying splash damage to a target will blur out both rows for that target
+        -   applying combined damage to a target will blur out both rows for that target
+        -   applying combined damage to a target will blur out the combined damage row for all the other targets as well
+        -   fixed blurring of damage rows not working when initiated by players
+
 # 1.22.2
 
 -   `Target Token Helper` updates:
