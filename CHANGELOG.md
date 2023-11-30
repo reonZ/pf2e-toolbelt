@@ -1,3 +1,10 @@
+# 1.22.2
+
+-   `Target Token Helper` updates:
+    -   fixed chat log not properly scrolling to bottom (again)
+    -   now also handle scroll-to-bottom for chat-log popouts
+    -   now properly refresh message popouts that have extras elements injected from this feature
+
 # 1.22.1
 
 -   `Target Token Helper` updates:
