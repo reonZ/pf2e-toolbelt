@@ -168,19 +168,25 @@ async function createMeasuredTemplate(template, _, userId) {
 function preCreateChatMessage(message) {
     const isDamageRoll = message.isDamageRoll
 
-    if (isDamageRoll && !getFlag(message, 'target.targets')) {
-        const targets = game.user.targets
-        if (targets.size < 1) return
-
-        updateSourceFlag(
-            message,
-            'target.targets',
-            Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
-        )
+    if (isDamageRoll) {
+        if (!getFlag(message, 'target.targets')) {
+            const targets = game.user.targets
+            if (targets.size) {
+                updateSourceFlag(
+                    message,
+                    'target.targets',
+                    Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
+                )
+            }
+        }
 
         if (message.rolls.length === 2) {
             const splashRollIndex = message.rolls.findIndex(roll => roll.options?.splashOnly)
-            const regularRollIndex = message.rolls.findIndex(roll => !roll.options?.splashOnly)
+            const regularRollIndex = message.rolls.findIndex(
+                roll =>
+                    !roll.options?.splashOnly &&
+                    roll.options?.damage?.modifiers.some(modifier => modifier.damageCategory === 'splash')
+            )
 
             if (splashRollIndex !== -1 && regularRollIndex !== -1) {
                 updateSourceFlag(message, 'target.splashIndex', splashRollIndex)
@@ -723,21 +729,21 @@ export function onDamageApplied(message, tokenId, rollIndex) {
     let updates = {}
     moduleFlagUpdate(updates, `target.applied.${tokenId}.${rollIndex}`, true)
 
-    const splashIndex = getFlag(message, 'target.splashIndex')
-    if (splashIndex !== undefined) {
-        const regularIndex = splashIndex === 0 ? 1 : 0
+    const splashRollIndex = getFlag(message, 'target.splashIndex')
+    if (splashRollIndex !== undefined) {
+        const regularRollIndex = splashRollIndex === 0 ? 1 : 0
 
-        if (rollIndex === splashIndex) {
-            moduleFlagUpdate(updates, `target.applied.${tokenId}.${regularIndex}`, true)
+        if (rollIndex === splashRollIndex) {
+            moduleFlagUpdate(updates, `target.applied.${tokenId}.${regularRollIndex}`, true)
         } else {
-            moduleFlagUpdate(updates, `target.applied.${tokenId}.${splashIndex}`, true)
+            moduleFlagUpdate(updates, `target.applied.${tokenId}.${splashRollIndex}`, true)
 
             const targetsFlag = getFlag(message, 'target.targets') ?? []
             for (const target of targetsFlag) {
                 const targetId = target.token?.split('.').at(-1)
                 if (targetId === tokenId) continue
 
-                moduleFlagUpdate(updates, `target.applied.${targetId}.${regularIndex}`, true)
+                moduleFlagUpdate(updates, `target.applied.${targetId}.${regularRollIndex}`, true)
             }
         }
     }
