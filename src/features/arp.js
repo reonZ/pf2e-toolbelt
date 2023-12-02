@@ -18,20 +18,13 @@ export function registerArp() {
                 name: 'arp',
                 type: Boolean,
                 default: false,
-                // type: String,
-                // default: 'disabled',
-                // choices: ['disabled', 'no-shield', 'with-shield'],
                 requiresReload: true,
-                // migrate: {
-                //     1: value => (value === 'true' ? 'no-shield' : value === 'false' ? 'disabled' : undefined),
-                // },
             },
         ],
         conflicts: ['pf2e-arp'],
         init: () => {
             const setting = getSetting('arp')
             if (!setting) return
-            // if (setting === 'disabled') return
 
             registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, 'WRAPPER')
             registerWrapper(PREPARE_WEAPON_DERIVED_DATA, onPrepareWeaponDerivedData, 'WRAPPER')
@@ -45,7 +38,7 @@ export function registerArp() {
             // }
         },
         ready: isGM => {
-            if (isGM && getSetting('arp') !== 'disabled' && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
+            if (isGM && getSetting('arp') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
                 game.settings.set('pf2e', 'automaticBonusVariant', 'noABP')
                 info('arp.forceVariant')
             }
