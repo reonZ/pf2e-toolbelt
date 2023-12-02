@@ -78,7 +78,13 @@ function isValidWeapon(weapon) {
     const traits = weapon._source.system.traits.value
     const group = weapon._source.system.group
     const category = weapon._source.system.category
-    return group !== 'shield' && category !== 'unarmed' && !traits.includes('alchemical') && !traits.includes('bomb')
+    const slug = weapon._source.system.slug
+    return (
+        group !== 'shield' &&
+        (slug === 'handwraps-of-mighty-blows' || category !== 'unarmed') &&
+        !traits.includes('alchemical') &&
+        !traits.includes('bomb')
+    )
 }
 
 function onPrepareWeaponData(wrapped) {
