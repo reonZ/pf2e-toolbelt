@@ -1,3 +1,7 @@
+# 1.24.1
+
+-   fixed the module always disabling the system's `Automatic Bonus Progression` variant rule even when the `Automatic Rune Progression` setting was disabled
+
 # 1.24.0
 
 -   this is a `5.10.0` release
