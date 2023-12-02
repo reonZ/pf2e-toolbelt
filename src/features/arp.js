@@ -7,8 +7,6 @@ const PREPARE_WEAPON_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.pro
 const PREPARE_ARMOR_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData'
 const PREPARE_ARMOR_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData'
 
-const WEAPON_EXCLUDES = ['Compendium.pf2e.equipment-srd.Item.ZhxxqYpVdVx0jSMm']
-
 export function registerArp() {
     return {
         settings: [
@@ -42,7 +40,9 @@ function isValidActor(actor, isCharacter = false) {
 
 function isValidWeapon(weapon) {
     const traits = weapon._source.system.traits.value
-    return !traits.includes('alchemical') && !traits.includes('bomb') && !WEAPON_EXCLUDES.includes(weapon.sourceId)
+    const group = weapon._source.system.group
+    const category = weapon._source.system.category
+    return group !== 'shield' && category !== 'unarmed' && !traits.includes('alchemical') && !traits.includes('bomb')
 }
 
 function onPrepareWeaponData(wrapped) {
@@ -95,7 +95,7 @@ function onPrepareWeaponDerivedData(wrapped) {
 }
 
 function isValidArmor(armor) {
-    return !armor.isShield
+    return true
 }
 
 function onPrepareArmorData(wrapped) {
