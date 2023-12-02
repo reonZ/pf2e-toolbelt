@@ -64,6 +64,9 @@ export function registerTargetTokenHelper() {
                 choices: ['disabled', 'small', 'big'],
                 scope: 'client',
                 onChange: value => setRenderMessageHook(value && getSetting('target')),
+                migrate: {
+                    1: value => (value === 'true' ? 'small' : value === 'false' ? 'disabled' : undefined),
+                },
             },
             {
                 name: 'target-template',

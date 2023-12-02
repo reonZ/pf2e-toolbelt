@@ -15,6 +15,7 @@ import { permaConditionEffect } from './macros/condition'
 import { MODULE_ID } from './module'
 import { localize } from './shared/localize'
 import { warn } from './shared/notification'
+import { getSetting, setSetting } from './shared/settings'
 import { isUserGM } from './shared/user'
 
 const FEATURES = [
@@ -35,10 +36,20 @@ const FEATURES = [
 
 const CONFLICTS = new Set()
 
+const SETTINGS_MIGRATION_VERSION = 1
+
 let firstClientSetting = null
 
 Hooks.once('init', () => {
     const isGM = isUserGM()
+
+    game.settings.register(MODULE_ID, 'settings-min-migration-version', {
+        scope: 'world',
+        config: false,
+        key: 'settings-min-migration-version',
+        type: Number,
+        default: 0,
+    })
 
     const settings = FEATURES.flatMap(({ settings = [] }) =>
         settings.map(setting => {
@@ -107,10 +118,33 @@ Hooks.once('ready', () => {
         if (!conflicting && ready) ready(isGM)
     }
 
-    if (isGM) {
-        for (const conflict of CONFLICTS) {
-            warn('module-conflict', { name: conflict }, true)
-        }
+    if (!isGM) return
+
+    for (const conflict of CONFLICTS) {
+        warn('module-conflict', { name: conflict }, true)
+    }
+
+    const settingsMinMigrationVersion = getSetting('settings-min-migration-version')
+    if (settingsMinMigrationVersion < SETTINGS_MIGRATION_VERSION) {
+        FEATURES.forEach(({ settings }) => {
+            settings.forEach(({ migrate, key }) => {
+                if (!migrate) return
+
+                const originalValue = getSetting(key)
+                let migratedValue = originalValue
+
+                for (let version = settingsMinMigrationVersion + 1; version <= SETTINGS_MIGRATION_VERSION; version++) {
+                    const migration = migrate[version]
+                    if (typeof migration !== 'function') continue
+
+                    migratedValue = migration(migratedValue)
+                }
+
+                if (migratedValue != null && migratedValue !== originalValue) setSetting(key, migratedValue)
+            })
+        })
+
+        setSetting('settings-min-migration-version', SETTINGS_MIGRATION_VERSION)
     }
 })
 
