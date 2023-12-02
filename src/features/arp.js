@@ -4,6 +4,10 @@ import { getSetting } from '../shared/settings'
 
 const PREPARE_WEAPON_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData'
 const PREPARE_WEAPON_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData'
+
+const PREPARE_SHIELD_DATA = 'CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData'
+const PREPARE_SHIELD_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData'
+
 const PREPARE_ARMOR_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData'
 const PREPARE_ARMOR_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData'
 
@@ -14,19 +18,34 @@ export function registerArp() {
                 name: 'arp',
                 type: Boolean,
                 default: false,
+                // type: String,
+                // default: 'disabled',
+                // choices: ['disabled', 'no-shield', 'with-shield'],
                 requiresReload: true,
+                // migrate: {
+                //     1: value => (value === 'true' ? 'no-shield' : value === 'false' ? 'disabled' : undefined),
+                // },
             },
         ],
         conflicts: ['pf2e-arp'],
         init: () => {
-            if (!getSetting('arp')) return
+            const setting = getSetting('arp')
+            if (!setting) return
+            // if (setting === 'disabled') return
+
             registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, 'WRAPPER')
             registerWrapper(PREPARE_WEAPON_DERIVED_DATA, onPrepareWeaponDerivedData, 'WRAPPER')
+
             registerWrapper(PREPARE_ARMOR_DATA, onPrepareArmorData, 'WRAPPER')
             registerWrapper(PREPARE_ARMOR_DERIVED_DATA, onPrepareArmorDerivedData, 'WRAPPER')
+
+            // if (setting === 'with-shield') {
+            //     registerWrapper(PREPARE_SHIELD_DATA, onPrepareShieldData, 'WRAPPER')
+            //     registerWrapper(PREPARE_SHIELD_DERIVED_DATA, onPrepareShieldDerivedData, 'WRAPPER')
+            // }
         },
         ready: isGM => {
-            if (isGM && getSetting('arp') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
+            if (isGM && getSetting('arp') !== 'disabled' && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
                 game.settings.set('pf2e', 'automaticBonusVariant', 'noABP')
                 info('arp.forceVariant')
             }
@@ -36,6 +55,23 @@ export function registerArp() {
 
 function isValidActor(actor, isCharacter = false) {
     return actor && !actor.getFlag('pf2e', 'disableABP') && (!isCharacter || actor.isOfType('character'))
+}
+
+/**
+ * weapon
+ */
+
+const WEAPON_POTENCY_PRICE = {
+    1: 35,
+    2: 935,
+    3: 8935,
+    4: 8935,
+}
+
+const WEAPON_STRIKING_PRICE = {
+    striking: 65,
+    greaterStriking: 1065,
+    majorStriking: 31065,
 }
 
 function isValidWeapon(weapon) {
@@ -60,17 +96,6 @@ function onPrepareWeaponData(wrapped) {
     wrapped()
 }
 
-const WEAPON_POTENCY_PRICE = {
-    1: 35,
-    2: 935,
-    3: 8935,
-    4: 8935,
-}
-const WEAPON_STRIKING_PRICE = {
-    striking: 65,
-    greaterStriking: 1065,
-    majorStriking: 31065,
-}
 function onPrepareWeaponDerivedData(wrapped) {
     wrapped()
 
@@ -94,6 +119,68 @@ function onPrepareWeaponDerivedData(wrapped) {
     this.system.price.value = coins
 }
 
+/**
+ * shield
+ */
+
+const SHIELD_REINFORCING = {
+    1: { price: 75, increase: 44 }, // level 4
+    2: { price: 300, increase: 52 }, // level 7
+    3: { price: 900, increase: 64 }, // level 10
+    4: { price: 2500, increase: 80 }, // level 13
+    5: { price: 8000, increase: 84 }, // level 16
+    6: { price: 32000, increase: 108 }, // level 19
+}
+
+function isValidShield(shield) {
+    return true
+}
+
+function onPrepareShieldData(wrapped) {
+    const actor = this.actor
+    if (!isValidActor(actor, true) || !isValidShield(this)) return wrapped()
+
+    const level = actor.level
+
+    this.system.runes.reinforcing =
+        level < 4 ? null : level < 7 ? 1 : level < 10 ? 2 : level < 13 ? 3 : level < 16 ? 4 : level < 19 ? 5 : 6
+
+    wrapped()
+}
+
+function onPrepareShieldDerivedData(wrapped) {
+    wrapped()
+
+    if (!isValidActor(this.actor) || this.isSpecific || !isValidShield(this)) return
+
+    let coins = this.price.value.toObject()
+    if (!coins.gp) return
+
+    const reinforcing = this.system.runes.reinforcing
+    if (reinforcing) coins.gp -= SHIELD_REINFORCING[reinforcing].price
+
+    coins = new game.pf2e.Coins(coins)
+
+    this.system.price.value = coins
+}
+
+/**
+ * amor
+ */
+
+const ARMOR_POTENCY_PRICE = {
+    1: 160,
+    2: 1060,
+    3: 20560,
+    4: 20560,
+}
+
+const ARMOR_RESILIENCY_PRICE = {
+    resilient: 340,
+    greaterResilient: 3440,
+    majorResilient: 49440,
+}
+
 function isValidArmor(armor) {
     return true
 }
@@ -111,17 +198,6 @@ function onPrepareArmorData(wrapped) {
     wrapped()
 }
 
-const ARMOR_POTENCY_PRICE = {
-    1: 160,
-    2: 1060,
-    3: 20560,
-    4: 20560,
-}
-const ARMOR_RESILIENCY_PRICE = {
-    resilient: 340,
-    greaterResilient: 3440,
-    majorResilient: 49440,
-}
 function onPrepareArmorDerivedData(wrapped) {
     wrapped()
 

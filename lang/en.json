@@ -12,7 +12,12 @@
             },
             "arp": {
                 "name": "Automatic Rune Progression",
-                "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment."
+                "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment.",
+                "choices": {
+                    "disabled": "Disabled",
+                    "no-shield": "Without Shield Rune",
+                    "with-shield": "With Shield Rune"
+                }
             },
             "unided": {
                 "name": "Set Un-Identified Image",
