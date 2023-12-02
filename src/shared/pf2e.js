@@ -398,9 +398,8 @@ export function onClickShieldBlock(target, shieldButton, messageEl) {
     }
 
     const getNonBrokenShields = tokens => {
-        const actor = tokens[0].actor
-        const heldShields = actor.itemTypes.armor.filter(armor => armor.isEquipped && armor.isShield)
-        return heldShields.filter(shield => !shield.isBroken)
+        const actor = tokens[0]?.actor
+        return actor?.itemTypes.shield.filter(s => s.isEquipped && !s.isBroken && !s.isDestroyed) ?? []
     }
 
     // Add a tooltipster instance to the shield button if needed.
