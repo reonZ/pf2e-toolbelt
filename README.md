@@ -12,9 +12,11 @@ When disabled, the features will have no impact on your world/client whatsoever.
 
 This feature is made to replace the `Automatic Bonus Progression` variant rule, instead it will automatically give the `potency`, `striking` and `resilient` runes on character's equipment when appropriate. Nothing else from the regular `Automatic Bonus Progression` will be replicated.
 
-Alchemical bombs, `Specific Magic` items, the `Shield Bash` weapon/maneuver and all the items that have been flagged by the `PF2e Companion Compedia` module are exceptions to this feature.
+-   Weapons/Strikes with the `alchemical` & `bomb` traits will not receive any weapon potency/striking runes
+-   Weapons/Strikes belonging to the `shield` group will not receive any weapon potency/striking runes
+-   Weapons/Strikes belonging to the `unarmed` category will not receive any weapon potency/striking runes, those will come from the invested `Handwraps of Mighty Blows`
 
-The module will automatically disable the system `Automatic Bonus Progression` variant rule to function properly when this feature is enabled.
+NOTE: The module will automatically disable the system `Automatic Bonus Progression` variant rule to function properly when this feature is enabled.
 
 ## No Dropped Bulk (Requires Reload)
 

@@ -1,3 +1,11 @@
+# 1.24.0
+
+-   this is a `5.10.0` release
+-   migrated the `Target Token Helper - Chat` setting that was changed in the `1.20.0` update to avoid it showing as `disabled` even though it is enabled with the `small` default option selected
+-   `Automatic Rune Progression` updates:
+    -   weapons/strikes belonging to the `shield` group will not receive any weapon potency/striking runes
+    -   weapons/strikes belonging to the `unarmed` category will not receive any weapon potency/striking runes, those will come from the invested `Handwraps of Mighty Blows`
+
 # 1.23.0
 
 -   `Target Token Helper` updates:
