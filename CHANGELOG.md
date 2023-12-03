@@ -1,3 +1,7 @@
+# 1.24.2
+
+-   fixed `Target Token Helper` adding targets to persistent damage, fast-healing and regeneration messages
+
 # 1.24.1
 
 -   fixed the module always disabling the system's `Automatic Bonus Progression` variant rule even when the `Automatic Rune Progression` setting was disabled
