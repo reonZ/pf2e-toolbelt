@@ -168,10 +168,27 @@ async function createMeasuredTemplate(template, _, userId) {
     user.broadcastActivity({ targets: targetsIds })
 }
 
+let HEALINGS_REGEX
+function isValidDamageMessage(message) {
+    if (message.rolls[0].options.evaluatePersistent) return false
+
+    const healingsRegex = (HEALINGS_REGEX ??= (() => {
+        const healings = [
+            game.i18n.localize('PF2E.Encounter.Broadcast.FastHealing.fast-healing.ReceivedMessage'),
+            game.i18n.localize('PF2E.Encounter.Broadcast.FastHealing.regeneration.ReceivedMessage'),
+        ]
+        return new RegExp(`^<div>(${healings.join('|')})</div>`)
+    })())
+
+    return !healingsRegex.test(message.flavor)
+}
+
 function preCreateChatMessage(message) {
     const isDamageRoll = message.isDamageRoll
 
     if (isDamageRoll) {
+        if (!isValidDamageMessage(message)) return
+
         if (!getFlag(message, 'target.targets')) {
             const targets = game.user.targets
             if (targets.size) {
@@ -221,6 +238,7 @@ async function renderChatMessage(message, html) {
     const clientEnabled = getSetting('target-chat') !== 'disabled'
 
     if (clientEnabled && message.isDamageRoll) {
+        if (!isValidDamageMessage(message)) return
         await renderDamageChatMessage(message, html)
         refreshMessage(message)
         return
