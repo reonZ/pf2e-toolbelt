@@ -1,3 +1,7 @@
+# 1.24.4
+
+-   fixed settings migration only working for the GM
+
 # 1.24.3
 
 -   `Target Token Helper` updates:
