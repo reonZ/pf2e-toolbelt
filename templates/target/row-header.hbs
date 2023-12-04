@@ -5,13 +5,13 @@
         {{#if canReroll}}
         <a data-action="reroll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.result.tooltip}}">
             <i class="{{save.icon}}"></i>
-            <span class="{{save.result.success}}">{{save.result.value}}</span>
+            <span class="degree {{save.result.success}}">{{save.result.value}}</span>
             <i class="fa-solid fa-rotate rotate"></i>
         </a>
         {{else}}
         <span data-tooltip="{{save.result.tooltip}}">
             <i class="{{save.icon}}"></i>
-            <span class="{{save.result.success}}">{{save.result.value}}</span>
+            <span class="degree {{save.result.success}}">{{save.result.value}}</span>
             <i class="{{rerolled.icon}} small"></i>
         </span>
         {{/if}}

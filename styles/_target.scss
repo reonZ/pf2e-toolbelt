@@ -110,7 +110,7 @@
         + .pf2e-toolbelt-target-spell {
             --criticalSuccess: rgb(0, 128, 0);
             --success: rgb(0, 0, 255);
-            --failure: rgb(255, 69, 0);
+            --failure: rgb(255 106 0);
             --criticalFailure: rgb(255, 0, 0);
 
             hr {
@@ -144,20 +144,23 @@
                         margin: 2px 0;
                     }
 
-                    .criticalSuccess {
-                        color: var(--criticalSuccess);
-                    }
+                    .degree {
+                        &.criticalSuccess {
+                            color: var(--criticalSuccess);
+                        }
 
-                    .success {
-                        color: var(--success);
-                    }
+                        &.success {
+                            color: var(--success);
+                        }
 
-                    .failure {
-                        color: var(--failure);
-                    }
+                        &.failure {
+                            color: var(--failure);
+                        }
 
-                    .criticalFailure {
-                        color: var(--criticalFailure);
+                        &.criticalFailure {
+                            text-shadow: 0 0 black;
+                            color: var(--criticalFailure);
+                        }
                     }
 
                     i {
