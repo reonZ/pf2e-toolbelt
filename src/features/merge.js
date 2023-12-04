@@ -7,6 +7,7 @@ import { localize } from '../shared/localize'
 import { compareArrays } from '../shared/misc'
 import { warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
+import { getDamageRollClass } from '../shared/pf2e/classes'
 import { getSetting } from '../shared/settings'
 
 const setHook = createHook('renderChatMessage', renderChatMessage, updateMessages)
@@ -191,12 +192,12 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
         }
     }
 
+    const DamageRoll = getDamageRollClass()
     for (const group of groupedRolls) {
         if (group.options.flavor.includes('persistent')) {
             const { index } = group.formulas.reduce(
                 (acc, curr, index) => {
-                    const formula = getMeansFormula(curr)
-                    const value = new Roll(formula).evaluate({ async: false }).total
+                    const value = new DamageRoll(curr).expectedValue
                     if (value > acc.value) acc = { value, index }
                     return acc
                 },
@@ -278,28 +279,6 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
         },
         rolls: [roll],
     })
-}
-
-function getMeansFormula(formula) {
-    const roll = new Roll(formula)
-
-    const formulaTerms = roll.terms.reduce((acc, curr) => {
-        if (curr instanceof Die) {
-            const mean = (curr.number * (curr.faces + 1)) / 2
-            acc.push(mean)
-        } else if (curr instanceof OperatorTerm) {
-            acc.push(curr.operator)
-        } else if (curr instanceof NumericTerm) {
-            acc.push(curr.number)
-        } else if (curr instanceof ParentheticalTerm) {
-            const deepFormula = getMeansFormula(curr.term)
-            acc.push(`(${deepFormula})`)
-        }
-
-        return acc
-    }, [])
-
-    return formulaTerms.join(' ')
 }
 
 function getMessageData(message) {
