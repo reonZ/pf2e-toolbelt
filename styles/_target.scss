@@ -145,6 +145,8 @@
                     }
 
                     .degree {
+                        font-size: 1.1em;
+
                         &.criticalSuccess {
                             color: var(--criticalSuccess);
                         }

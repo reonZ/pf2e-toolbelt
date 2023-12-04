@@ -1,3 +1,9 @@
+# 1.24.3
+
+-   `Target Token Helper` updates:
+    -   increased the font size of the save result
+    -   increased contrast between failure and critical failure colors for the save result
+
 # 1.24.2
 
 -   fixed `Target Token Helper` adding targets to persistent damage, fast-healing and regeneration messages
