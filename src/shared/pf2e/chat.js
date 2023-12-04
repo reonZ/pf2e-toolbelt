@@ -1,181 +1,9 @@
-import { onDamageApplied } from '../features/target'
-import { isInstanceOf } from './misc'
-
-export function ErrorPF2e(message) {
-    return Error(`PF2e System | ${message}`)
-}
-
-/**
- * DegreeOfSuccess
- */
-
-const DEGREE_ADJUSTMENT_AMOUNTS = {
-    LOWER_BY_TWO: -2,
-    LOWER: -1,
-    INCREASE: 1,
-    INCREASE_BY_TWO: 2,
-    TO_CRITICAL_FAILURE: 'criticalFailure',
-    TO_FAILURE: 'failure',
-    TO_SUCCESS: 'success',
-    TO_CRITICAL_SUCCESS: 'criticalSuccess',
-}
-
-const DEGREE_OF_SUCCESS_STRINGS = ['criticalFailure', 'failure', 'success', 'criticalSuccess']
-
-export class DegreeOfSuccess {
-    constructor(roll, dc, dosAdjustments = null) {
-        if (roll instanceof Roll) {
-            this.dieResult =
-                (roll.isDeterministic
-                    ? roll.terms.find(t => t instanceof NumericTerm)
-                    : roll.dice.find(d => d instanceof Die && d.faces === 20)
-                )?.total ?? 1
-            this.rollTotal = roll.total
-        } else {
-            this.dieResult = roll.dieValue
-            this.rollTotal = roll.dieValue + roll.modifier
-        }
-
-        this.dc = typeof dc === 'number' ? { value: dc } : dc
-
-        this.unadjusted = this.#calculateDegreeOfSuccess()
-        this.adjustment = this.#getDegreeAdjustment(this.unadjusted, dosAdjustments)
-        this.value = this.adjustment ? this.#adjustDegreeOfSuccess(this.adjustment.amount, this.unadjusted) : this.unadjusted
-    }
-
-    static CRITICAL_FAILURE = 0
-    static FAILURE = 1
-    static SUCCESS = 2
-    static CRITICAL_SUCCESS = 3
-
-    #getDegreeAdjustment(degree, adjustments) {
-        if (!adjustments) return null
-
-        for (const outcome of ['all', ...DEGREE_OF_SUCCESS_STRINGS]) {
-            const { label, amount } = adjustments[outcome] ?? {}
-            if (
-                amount &&
-                label &&
-                !(degree === DegreeOfSuccess.CRITICAL_SUCCESS && amount === DEGREE_ADJUSTMENT_AMOUNTS.INCREASE) &&
-                !(degree === DegreeOfSuccess.CRITICAL_FAILURE && amount === DEGREE_ADJUSTMENT_AMOUNTS.LOWER) &&
-                (outcome === 'all' || DEGREE_OF_SUCCESS_STRINGS.indexOf(outcome) === degree)
-            ) {
-                return { label, amount }
-            }
-        }
-
-        return null
-    }
-
-    #adjustDegreeOfSuccess(amount, degreeOfSuccess) {
-        switch (amount) {
-            case 'criticalFailure':
-                return 0
-            case 'failure':
-                return 1
-            case 'success':
-                return 2
-            case 'criticalSuccess':
-                return 3
-            default:
-                return Math.clamped(degreeOfSuccess + amount, 0, 3)
-        }
-    }
-
-    /**
-     * @param degree The current success value
-     * @return The new success value
-     */
-    #adjustDegreeByDieValue(degree) {
-        if (this.dieResult === 20) {
-            return this.#adjustDegreeOfSuccess(DEGREE_ADJUSTMENT_AMOUNTS.INCREASE, degree)
-        } else if (this.dieResult === 1) {
-            return this.#adjustDegreeOfSuccess(DEGREE_ADJUSTMENT_AMOUNTS.LOWER, degree)
-        }
-
-        return degree
-    }
-
-    #calculateDegreeOfSuccess() {
-        const dc = this.dc.value
-
-        if (this.rollTotal - dc >= 10) {
-            return this.#adjustDegreeByDieValue(DegreeOfSuccess.CRITICAL_SUCCESS)
-        } else if (dc - this.rollTotal >= 10) {
-            return this.#adjustDegreeByDieValue(DegreeOfSuccess.CRITICAL_FAILURE)
-        } else if (this.rollTotal >= dc) {
-            return this.#adjustDegreeByDieValue(DegreeOfSuccess.SUCCESS)
-        }
-
-        return this.#adjustDegreeByDieValue(DegreeOfSuccess.FAILURE)
-    }
-}
-
-/**
- * applyDamageFromMessage
- */
-
-async function extractEphemeralEffects({ affects, origin, target, item, domains, options }) {
-    if (!(origin && target)) return []
-
-    const [effectsFrom, effectsTo] = affects === 'target' ? [origin, target] : [target, origin]
-    const fullOptions = [...options, effectsFrom.getRollOptions(domains), effectsTo.getSelfRollOptions(affects)].flat()
-    const resolvables = item ? (item.isOfType('spell') ? { spell: item } : { weapon: item }) : {}
-    return (
-        await Promise.all(
-            domains
-                .flatMap(s => effectsFrom.synthetics.ephemeralEffects[s]?.[affects] ?? [])
-                .map(d => d({ test: fullOptions, resolvables }))
-        )
-    ).flatMap(e => e ?? [])
-}
-
-function extractNotes(rollNotes, selectors) {
-    return selectors.flatMap(s => (rollNotes[s] ?? []).map(n => n.clone()))
-}
-
-function extractDamageDice(deferredDice, selectors, options) {
-    return selectors.flatMap(s => deferredDice[s] ?? []).flatMap(d => d(options) ?? [])
-}
-
-async function shiftAdjustDamage(token, { message, multiplier, rollIndex }) {
-    const content = await renderTemplate('systems/pf2e/templates/chat/damage/adjustment-dialog.hbs')
-    const AdjustmentDialog = class extends Dialog {
-        activateListeners($html) {
-            super.activateListeners($html)
-            $html[0].querySelector('input')?.focus()
-        }
-    }
-    const isHealing = multiplier < 0
-    new AdjustmentDialog({
-        title: game.i18n.localize(isHealing ? 'PF2E.UI.shiftModifyHealingTitle' : 'PF2E.UI.shiftModifyDamageTitle'),
-        content,
-        buttons: {
-            ok: {
-                label: game.i18n.localize('PF2E.OK'),
-                callback: async $dialog => {
-                    // In case of healing, multipler will have negative sign. The user will expect that positive
-                    // modifier would increase healing value, while negative would decrease.
-                    const adjustment = (Number($dialog[0].querySelector('input')?.value) || 0) * Math.sign(multiplier)
-                    applyDamageFromMessage(token, {
-                        message,
-                        multiplier,
-                        addend: adjustment,
-                        promptModifier: false,
-                        rollIndex,
-                    })
-                },
-            },
-            cancel: {
-                label: 'Cancel',
-            },
-        },
-        default: 'ok',
-        close: () => {
-            toggleOffShieldBlock(message.id)
-        },
-    }).render(true)
-}
+import { onDamageApplied } from '../../features/target'
+import { isInstanceOf } from '../misc'
+import { applyStackingRules } from './actor'
+import { htmlQuery } from './dom'
+import { ErrorPF2e } from './misc'
+import { extractDamageDice, extractEphemeralEffects, extractModifiers, extractNotes } from './rules'
 
 export async function applyDamageFromMessage(
     token,
@@ -296,102 +124,6 @@ export async function applyDamageFromMessage(
     onDamageApplied(message, token.id, rollIndex)
 }
 
-function applyStacking(best, modifier, isBetter) {
-    // If there is no existing bonus of this type, then add ourselves.
-    const existing = best[modifier.type]
-    if (existing === undefined) {
-        modifier.enabled = true
-        best[modifier.type] = modifier
-        return modifier.modifier
-    }
-
-    if (isBetter(modifier, existing)) {
-        // If we are a better modifier according to the comparison, then we become the new 'best'.
-        existing.enabled = false
-        modifier.enabled = true
-        best[modifier.type] = modifier
-        return modifier.modifier - existing.modifier
-    } else {
-        // Otherwise, the existing modifier is better, so do nothing.
-        modifier.enabled = false
-        return 0
-    }
-}
-
-function applyStackingRules(modifiers) {
-    let total = 0
-    const highestBonus = {}
-    const lowestPenalty = {}
-
-    // There are no ability bonuses or penalties, so always take the highest ability modifier.
-    const abilityModifiers = modifiers.filter(m => m.type === 'ability' && !m.ignored)
-    const bestAbility = abilityModifiers.reduce((best, modifier) => {
-        if (best === null) {
-            return modifier
-        } else {
-            return modifier.force ? modifier : best.force ? best : modifier.modifier > best.modifier ? modifier : best
-        }
-    }, null)
-    for (const modifier of abilityModifiers) {
-        modifier.ignored = modifier !== bestAbility
-    }
-
-    for (const modifier of modifiers) {
-        // Always disable ignored modifiers and don't do anything further with them.
-        if (modifier.ignored) {
-            modifier.enabled = false
-            continue
-        }
-
-        // Untyped modifiers always stack, so enable them and add their modifier.
-        if (modifier.type === 'untyped') {
-            modifier.enabled = true
-            total += modifier.modifier
-            continue
-        }
-
-        // Otherwise, apply stacking rules to positive modifiers and negative modifiers separately.
-        if (modifier.modifier < 0) {
-            total += applyStacking(lowestPenalty, modifier, LOWER_PENALTY)
-        } else {
-            total += applyStacking(highestBonus, modifier, HIGHER_BONUS)
-        }
-    }
-
-    return total
-}
-
-function extractModifierAdjustments(adjustmentsRecord, selectors, slug) {
-    const adjustments = Array.from(new Set(selectors.flatMap(s => adjustmentsRecord[s] ?? [])))
-    return adjustments.filter(a => [slug, null].includes(a.slug))
-}
-
-function extractModifiers(synthetics, selectors, options) {
-    const { modifierAdjustments, modifiers: syntheticModifiers } = synthetics
-    const modifiers = Array.from(new Set(selectors))
-        .flatMap(s => syntheticModifiers[s] ?? [])
-        .flatMap(d => d(options) ?? [])
-    for (const modifier of modifiers) {
-        modifier.adjustments = extractModifierAdjustments(modifierAdjustments, selectors, modifier.slug)
-    }
-
-    return modifiers
-}
-
-function toggleOffShieldBlock(messageId) {
-    for (const app of ['#chat-log', '#chat-popout']) {
-        const selector = `${app} > li.chat-message[data-message-id="${messageId}"] button[data-action=shield-block]`
-        const button = htmlQuery(document.body, selector)
-        button?.classList.remove('shield-activated')
-    }
-    CONFIG.PF2E.chatDamageButtonShieldToggle = false
-}
-
-function htmlQuery(parent, selectors) {
-    if (!(parent instanceof Element || parent instanceof Document)) return null
-    return parent.querySelector(selectors)
-}
-
 export function onClickShieldBlock(target, shieldButton, messageEl) {
     const getTokens = () => {
         return [target]
@@ -487,4 +219,52 @@ export function onClickShieldBlock(target, shieldButton, messageEl) {
             })
             .tooltipster('open')
     }
+}
+
+function toggleOffShieldBlock(messageId) {
+    for (const app of ['#chat-log', '#chat-popout']) {
+        const selector = `${app} > li.chat-message[data-message-id="${messageId}"] button[data-action=shield-block]`
+        const button = htmlQuery(document.body, selector)
+        button?.classList.remove('shield-activated')
+    }
+    CONFIG.PF2E.chatDamageButtonShieldToggle = false
+}
+
+async function shiftAdjustDamage(token, { message, multiplier, rollIndex }) {
+    const content = await renderTemplate('systems/pf2e/templates/chat/damage/adjustment-dialog.hbs')
+    const AdjustmentDialog = class extends Dialog {
+        activateListeners($html) {
+            super.activateListeners($html)
+            $html[0].querySelector('input')?.focus()
+        }
+    }
+    const isHealing = multiplier < 0
+    new AdjustmentDialog({
+        title: game.i18n.localize(isHealing ? 'PF2E.UI.shiftModifyHealingTitle' : 'PF2E.UI.shiftModifyDamageTitle'),
+        content,
+        buttons: {
+            ok: {
+                label: game.i18n.localize('PF2E.OK'),
+                callback: async $dialog => {
+                    // In case of healing, multipler will have negative sign. The user will expect that positive
+                    // modifier would increase healing value, while negative would decrease.
+                    const adjustment = (Number($dialog[0].querySelector('input')?.value) || 0) * Math.sign(multiplier)
+                    applyDamageFromMessage(token, {
+                        message,
+                        multiplier,
+                        addend: adjustment,
+                        promptModifier: false,
+                        rollIndex,
+                    })
+                },
+            },
+            cancel: {
+                label: 'Cancel',
+            },
+        },
+        default: 'ok',
+        close: () => {
+            toggleOffShieldBlock(message.id)
+        },
+    }).render(true)
 }
