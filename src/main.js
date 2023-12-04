@@ -44,7 +44,6 @@ Hooks.once('init', () => {
     const isGM = isUserGM()
 
     game.settings.register(MODULE_ID, 'settings-min-migration-version', {
-        scope: 'world',
         config: false,
         key: 'settings-min-migration-version',
         type: Number,
@@ -118,10 +117,10 @@ Hooks.once('ready', () => {
         if (!conflicting && ready) ready(isGM)
     }
 
-    if (!isGM) return
-
-    for (const conflict of CONFLICTS) {
-        warn('module-conflict', { name: conflict }, true)
+    if (isGM) {
+        for (const conflict of CONFLICTS) {
+            warn('module-conflict', { name: conflict }, true)
+        }
     }
 
     const settingsMinMigrationVersion = getSetting('settings-min-migration-version')
