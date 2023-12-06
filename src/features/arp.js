@@ -11,6 +11,8 @@ const PREPARE_SHIELD_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.shield.pro
 const PREPARE_ARMOR_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData'
 const PREPARE_ARMOR_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData'
 
+const HANDWRAPS_SLUG = 'handwraps-of-mighty-blows'
+
 export function registerArp() {
     return {
         settings: [
@@ -72,12 +74,14 @@ function isValidWeapon(weapon) {
     const group = weapon._source.system.group
     const category = weapon._source.system.category
     const slug = weapon._source.system.slug
-    return (
-        group !== 'shield' &&
-        (slug === 'handwraps-of-mighty-blows' || category !== 'unarmed') &&
-        !traits.includes('alchemical') &&
-        !traits.includes('bomb')
-    )
+
+    if (category === 'unarmed' && slug !== HANDWRAPS_SLUG) {
+        return !!weapon.actor.itemTypes.weapon.find(
+            weapon => weapon.slug === HANDWRAPS_SLUG && weapon.category === 'unarmed' && weapon.isEquipped && weapon.isInvested
+        )
+    }
+
+    return group !== 'shield' && !traits.includes('alchemical') && !traits.includes('bomb')
 }
 
 function onPrepareWeaponData(wrapped) {
