@@ -1,3 +1,7 @@
+# 1.24.5
+
+-   fixed issue with `Handwraps of Mighty Blows` not always providing the runes to unarmed strikes when using `Automatic Rune Progression`
+
 # 1.24.4
 
 -   fixed settings migration only working for the GM
