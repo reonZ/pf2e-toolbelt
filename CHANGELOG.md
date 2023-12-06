@@ -1,3 +1,7 @@
+# 1.24.6
+
+-   fixed heal button error when trying to heal an actor with bonus healing when using `Target Token Helper`
+
 # 1.24.5
 
 -   fixed issue with `Handwraps of Mighty Blows` not always providing the runes to unarmed strikes when using `Automatic Rune Progression`
