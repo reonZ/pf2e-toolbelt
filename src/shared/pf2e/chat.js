@@ -2,7 +2,7 @@ import { onDamageApplied } from '../../features/target'
 import { isInstanceOf } from '../misc'
 import { applyStackingRules } from './actor'
 import { htmlQuery } from './dom'
-import { ErrorPF2e } from './misc'
+import { ErrorPF2e, signedInteger } from './misc'
 import { extractDamageDice, extractEphemeralEffects, extractModifiers, extractNotes } from './rules'
 
 export async function applyDamageFromMessage(
