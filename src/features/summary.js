@@ -237,11 +237,13 @@ async function getData(actor) {
 
                 const slotSpells = []
                 const isCantrip = slot.isCantrip
-                const actives = slot.active.filter(x => x && x.uses?.max !== 0)
                 const isBroken = !isCantrip && isCharge && !stavesActive
 
-                for (let slotId = 0; slotId < actives.length; slotId++) {
-                    const { spell, expended, virtual, uses, castLevel } = actives[slotId]
+                for (let slotId = 0; slotId < slot.active.length; slotId++) {
+                    const active = slot.active[slotId]
+                    if (!active || active.uses?.max === 0) continue
+
+                    const { spell, expended, virtual, uses, castLevel } = active
 
                     slotSpells.push({
                         name: spell.name,
