@@ -1,3 +1,12 @@
+# 1.25.0
+
+-   this is a `5.10.5` release
+-   `Spells Summary` updates:
+    -   added support for the `Preparing a Staff` feature of `PF2e Dailies`
+    -   fixed rituals labels
+    -   fixed disabled cast button styling
+    -   fixed issue with spell slot index when prepared spellcasting entry had empty slots in between spells
+
 # 1.24.6
 
 -   fixed heal button error when trying to heal an actor with bonus healing when using `Target Token Helper`

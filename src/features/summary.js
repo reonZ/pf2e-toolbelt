@@ -338,7 +338,6 @@ async function getData(actor) {
         spells,
         rituals,
         focusPool,
-        pf2eStavesActive,
         hasFocusCantrips,
         isOwner: actor.isOwner,
         entryRank: rank => game.i18n.format('PF2E.Item.Spell.Rank.Ordinal', { rank: ordinalString(rank) }),
