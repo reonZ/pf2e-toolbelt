@@ -9,9 +9,7 @@
             "discord": "Idle#3251"
         }
     ],
-    "esmodules": [
-        "scripts/main.js"
-    ],
+    "esmodules": ["scripts/main.js"],
     "compatibility": {
         "minimum": "11.315",
         "verified": "11"
@@ -25,9 +23,7 @@
     "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/1.24.6/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
-    "styles": [
-        "styles/toolbelt.css"
-    ],
+    "styles": ["styles/toolbelt.css"],
     "relationships": {
         "systems": [
             {
@@ -35,7 +31,7 @@
                 "type": "system",
                 "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.json",
                 "compatibility": {
-                    "minimum": "5.10.0"
+                    "minimum": "5.10.5"
                 }
             }
         ],
@@ -86,9 +82,7 @@
         {
             "name": "PF2e Toolbelt",
             "sorting": "m",
-            "packs": [
-                "macros"
-            ]
+            "packs": ["macros"]
         }
     ]
 }

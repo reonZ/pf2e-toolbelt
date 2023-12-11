@@ -100,11 +100,20 @@ function onToggleFocusPool(event, actor) {
     actor.update({ 'system.resources.focus.value': points })
 }
 
-function onChargeReset(sheet, entryId) {
-    const original = getSpellcastingOriginalSection(sheet.element)
-    const entry = original.find(`.item-container.spellcasting-entry[data-item-id=${entryId}]`)
-    const btn = entry.find('.spell-ability-data .statistic-values a.pf2e-staves-charge')
-    btn[0]?.click()
+function onChargesReset(sheet, actor, entryId) {
+    if (game.modules.get('pf2e-staves')?.active) {
+        const original = getSpellcastingOriginalSection(sheet.element)
+        const entry = original.find(`.item-container.spellcasting-entry[data-item-id=${entryId}]`)
+        const btn = entry.find('.spell-ability-data .statistic-values a.pf2e-staves-charge')
+        btn[0]?.click()
+        return
+    }
+
+    const dailies = game.modules.get('pf2e-dailies')
+    if (!dailies?.active) return
+
+    const entry = actor.spellcasting.get(entryId)
+    dailies.api.updateEntryCharges(entry, 9999)
 }
 
 function onSlotsReset(event, sheet, actor) {
@@ -114,7 +123,7 @@ function onSlotsReset(event, sheet, actor) {
     if (!itemId) return
 
     if (isCharge) {
-        onChargeReset(sheet, itemId)
+        onChargesReset(sheet, actor, itemId)
         return
     }
 
@@ -189,7 +198,16 @@ function getSpellcastingSummarySection(html) {
 
 async function getData(actor) {
     const focusPool = actor.system.resources.focus ?? { value: 0, max: 0 }
-    const stavesActive = game.modules.get('pf2e-staves')?.active
+    const pf2eStavesActive = game.modules.get('pf2e-staves')?.active
+    const pf2eDailies = game.modules.get('pf2e-dailies')
+    const pf2eDailiesActive = pf2eDailies?.active
+    const stavesActive = pf2eStavesActive || (pf2eDailiesActive && isNewerVersion(pf2eDailies.version, '2.14.0'))
+    const chargesPath = pf2eStavesActive
+        ? 'flags.pf2e-staves.charges'
+        : pf2eDailiesActive
+        ? 'flags.pf2e-dailies.staff.charges'
+        : ''
+
     const spells = []
     const focuses = []
 
@@ -203,8 +221,16 @@ async function getData(actor) {
             const data = await entry.getSheetData()
             const isFocus = data.isFocusPool
             const isCharge = entry.system?.prepared?.value === 'charge'
-            const isStaff = getProperty(entry, 'flags.pf2e-staves.staveID') !== undefined
-            const charges = { value: getProperty(entry, 'flags.pf2e-staves.charges') ?? 0 }
+
+            const charges = (() => {
+                const dailiesData = pf2eDailiesActive && pf2eDailies.api.getSpellcastingEntryStaffData(entry)
+                const { charges, max } = dailiesData ?? getProperty(entry, 'flags.pf2e-staves.charges') ?? { charges: 0, max: 0 }
+                return {
+                    value: charges,
+                    max,
+                    noMax: true,
+                }
+            })()
 
             for (const slot of data.levels) {
                 if (!slot.active.length || slot.uses?.max === 0) continue
@@ -229,7 +255,7 @@ async function getData(actor) {
                         itemId: spell.id,
                         inputId: data.isInnate ? spell.id : data.id,
                         inputPath: isCharge
-                            ? 'flags.pf2e-staves.charges'
+                            ? chargesPath
                             : data.isInnate
                             ? 'system.location.uses.value'
                             : `system.slots.slot${slot.level}.value`,
@@ -247,9 +273,7 @@ async function getData(actor) {
                         expended: expended ?? (isFocus && !isCantrip ? focusPool.value <= 0 : false),
                         action: spell.system.time.value,
                         type: isCharge
-                            ? isStaff
-                                ? `${MODULE_ID}.summary.staff`
-                                : `${MODULE_ID}.summary.charges`
+                            ? `${MODULE_ID}.summary.staff`
                             : data.isInnate
                             ? 'PF2E.PreparationTypeInnate'
                             : data.isSpontaneous
@@ -312,7 +336,7 @@ async function getData(actor) {
         spells,
         rituals,
         focusPool,
-        stavesActive,
+        pf2eStavesActive,
         hasFocusCantrips,
         isOwner: actor.isOwner,
         entryRank: rank => game.i18n.format('PF2E.Item.Spell.Rank.Ordinal', { rank: ordinalString(rank) }),

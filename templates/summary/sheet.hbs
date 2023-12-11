@@ -58,7 +58,7 @@
                         data-entry-id="{{#if spell.isInnate}}{{spell.itemId}}{{else}}{{spell.entryId}}{{/if}}" placeholder="0" min="0"
                         max="{{spell.uses.max}}" {{disabled (not @root.isOwner)}}>
                 </span>
-                {{#if spell.uses.max}}
+                {{#if (and spell.uses.max (not spell.uses.noMax))}}
                 <span class="slash"> / </span>
                 <span class="spell-max-input">
                     <input type="number" value="{{spell.uses.max}}" placeholder="0" disabled />
