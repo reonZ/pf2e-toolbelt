@@ -1,3 +1,7 @@
+# 1.25.1
+
+-   staff spellcasting entry spells will now be shown as expended when appropriate, taking into account possible use of spontaneous spell slots
+
 # 1.25.0
 
 -   this is a `5.10.5` release
