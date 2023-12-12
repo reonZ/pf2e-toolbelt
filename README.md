@@ -169,7 +169,7 @@ When hovering over a spell, the resources used by the spell will also be dislaye
 
 The alternate mode does not allow to create, edit or delete the spells, nor does it allow to change the spells selected from a spellbook. It is there to make it easier to see what is available during playtime.
 
-This feature is fully compatible with the module [PF2e Staves](https://foundryvtt.com/packages/pf2e-staves)
+This feature is fully compatible with the modules [PF2e Staves](https://foundryvtt.com/packages/pf2e-staves) and [PF2e Dailies](https://foundryvtt.com/packages/pf2e-dailies)
 
 ## Stances
 
