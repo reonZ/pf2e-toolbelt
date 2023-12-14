@@ -164,8 +164,7 @@ async function onToggleSummary(event, sheet) {
 async function onItemToChat(event, actor) {
     const itemId = $(event.currentTarget).closest('.item').attr('data-item-id')
     const item = actor.items.get(itemId)
-    if (!item || (item.isOfType('physical') && !item.isIdentified)) return
-    await item.toMessage(event)
+    item.toMessage(event)
 }
 
 function onSpellcastingBtnToggle(event, html, sheet) {
