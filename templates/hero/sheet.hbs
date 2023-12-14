@@ -1,4 +1,4 @@
-<h3 class="header">
+<header>
     {{i18n 'label'}}
     {{#if canTrade}}
     <button type="button" data-action="hero-actions-trade">
@@ -9,7 +9,7 @@
         <i class="fas fa-question"></i>
     </button>
     {{/if}}
-</h3>
+</header>
 <ol class="actions-list item-list directory-list heroActions-list" {{#unless canUse}} data-discard="{{diff}}" {{/unless}}>
     {{#each list as |action|}}
     <li class="item action" data-uuid="{{action.uuid}}">

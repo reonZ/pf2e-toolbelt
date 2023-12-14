@@ -8,6 +8,11 @@
             .item-name {
                 h4 {
                     white-space: nowrap;
+                    cursor: pointer;
+
+                    &:hover {
+                        color: var(--color-pf-primary);
+                    }
                 }
             }
 
