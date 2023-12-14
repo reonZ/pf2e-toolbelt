@@ -64,9 +64,9 @@ const WEAPON_POTENCY_PRICE = {
 }
 
 const WEAPON_STRIKING_PRICE = {
-    striking: 65,
-    greaterStriking: 1065,
-    majorStriking: 31065,
+    1: 65,
+    2: 1065,
+    3: 31065,
 }
 
 function isValidWeapon(weapon) {
@@ -93,8 +93,8 @@ function onPrepareWeaponData(wrapped) {
     const traits = this._source.system.traits.value
     if (traits.includes('alchemical') && traits.includes('bomb')) return wrapped()
 
-    this.system.potencyRune.value = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
-    this.system.strikingRune.value = level < 4 ? null : level < 12 ? 'striking' : level < 19 ? 'greaterStriking' : 'majorStriking'
+    this.system.runes.potency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
+    this.system.runes.striking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3
 
     wrapped()
 }
@@ -107,10 +107,10 @@ function onPrepareWeaponDerivedData(wrapped) {
     let coins = this.price.value.toObject()
     if (!coins.gp) return
 
-    const potency = this.system.potencyRune.value
+    const potency = this.system.runes.potency
     if (potency) coins.gp -= WEAPON_POTENCY_PRICE[potency]
 
-    const striking = this.system.strikingRune.value
+    const striking = this.system.runes.striking
     if (striking) coins.gp -= WEAPON_STRIKING_PRICE[striking]
 
     coins = new game.pf2e.Coins(coins)
@@ -179,9 +179,9 @@ const ARMOR_POTENCY_PRICE = {
 }
 
 const ARMOR_RESILIENCY_PRICE = {
-    resilient: 340,
-    greaterResilient: 3440,
-    majorResilient: 49440,
+    1: 340,
+    2: 3440,
+    3: 49440,
 }
 
 function isValidArmor(armor) {
@@ -194,9 +194,8 @@ function onPrepareArmorData(wrapped) {
 
     const level = actor.level
 
-    this.system.potencyRune.value = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
-    this.system.resiliencyRune.value =
-        level < 8 ? null : level < 14 ? 'resilient' : level < 20 ? 'greaterResilient' : 'majorResilient'
+    this.system.runes.potency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
+    this.system.runes.resilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3
 
     wrapped()
 }
@@ -209,10 +208,10 @@ function onPrepareArmorDerivedData(wrapped) {
     let coins = this.price.value.toObject()
     if (!coins.gp) return
 
-    const potency = this.system.potencyRune.value
+    const potency = this.system.runes.potency
     if (potency) coins.gp -= ARMOR_POTENCY_PRICE[potency]
 
-    const resiliency = this.system.resiliencyRune.value
+    const resiliency = this.system.runes.resilient
     if (resiliency) coins.gp -= ARMOR_RESILIENCY_PRICE[resiliency]
 
     coins = new game.pf2e.Coins(coins)
