@@ -1,3 +1,10 @@
+# 1.26.0
+
+-   this is a `5.11.0` release
+-   fixed breaking errors with `Automatic Rune Progression`
+-   fixed styling for `Hero Actions`
+-   fixed attack message modifiers still showing when using `Hide Modifiers`
+
 # 1.25.1
 
 -   staff spellcasting entry spells will now be shown as expended when appropriate, taking into account possible use of spontaneous spell slots
