@@ -1,3 +1,8 @@
+# 1.27.2
+
+-   `Target Token Helper` updates:
+    -   updated styling of the "big" healing-only button to look like the one from the system
+
 # 1.27.1
 
 -   added try/catch on all the `prepareBaseData`, `prepareDerivedData` and `prepareEmbeddedDocuments` wrappers of the module to avoid migration errors with the system
