@@ -1,4 +1,4 @@
-# 1.26.1
+# 1.27.0
 
 -   `Target Token Helper` updates:
     -   the concerned actor of fast-healing and regeneration messages will now automatically be added as a target
