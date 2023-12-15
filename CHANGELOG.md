@@ -1,3 +1,7 @@
+# 1.27.1
+
+-   added try/catch on all the `prepareBaseData`, `prepareDerivedData` and `prepareEmbeddedDocuments` wrappers of the module to avoid migration errors with the system
+
 # 1.27.0
 
 -   `Target Token Helper` updates:
