@@ -1,4 +1,4 @@
-import { registerWrapper } from '../shared/libwrapper'
+import { registerWrapper, wrapperError } from '../shared/libwrapper'
 import { info } from '../shared/notification'
 import { getSetting } from '../shared/settings'
 
@@ -85,16 +85,20 @@ function isValidWeapon(weapon) {
 }
 
 function onPrepareWeaponData(wrapped) {
-    const actor = this.actor
-    if (!isValidActor(actor, true) || !isValidWeapon(this)) return wrapped()
+    try {
+        const actor = this.actor
+        if (!isValidActor(actor, true) || !isValidWeapon(this)) return wrapped()
 
-    const level = actor.level
+        const level = actor.level
 
-    const traits = this._source.system.traits.value
-    if (traits.includes('alchemical') && traits.includes('bomb')) return wrapped()
+        const traits = this._source.system.traits.value
+        if (traits.includes('alchemical') && traits.includes('bomb')) return wrapped()
 
-    this.system.runes.potency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
-    this.system.runes.striking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3
+        this.system.runes.potency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
+        this.system.runes.striking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3
+    } catch {
+        wrapperError('arp', PREPARE_WEAPON_DATA)
+    }
 
     wrapped()
 }
@@ -102,24 +106,28 @@ function onPrepareWeaponData(wrapped) {
 function onPrepareWeaponDerivedData(wrapped) {
     wrapped()
 
-    if (!isValidActor(this.actor) || this.isSpecific || !isValidWeapon(this)) return
+    try {
+        if (!isValidActor(this.actor) || this.isSpecific || !isValidWeapon(this)) return
 
-    let coins = this.price.value.toObject()
-    if (!coins.gp) return
+        let coins = this.price.value.toObject()
+        if (!coins.gp) return
 
-    const potency = this.system.runes.potency
-    if (potency) coins.gp -= WEAPON_POTENCY_PRICE[potency]
+        const potency = this.system.runes.potency
+        if (potency) coins.gp -= WEAPON_POTENCY_PRICE[potency]
 
-    const striking = this.system.runes.striking
-    if (striking) coins.gp -= WEAPON_STRIKING_PRICE[striking]
+        const striking = this.system.runes.striking
+        if (striking) coins.gp -= WEAPON_STRIKING_PRICE[striking]
 
-    coins = new game.pf2e.Coins(coins)
+        coins = new game.pf2e.Coins(coins)
 
-    if ((potency || striking) && !this.system.runes.property.length) {
-        coins = coins.add(this._source.system.price.value)
+        if ((potency || striking) && !this.system.runes.property.length) {
+            coins = coins.add(this._source.system.price.value)
+        }
+
+        this.system.price.value = coins
+    } catch {
+        wrapperError('arp', PREPARE_WEAPON_DERIVED_DATA)
     }
-
-    this.system.price.value = coins
 }
 
 /**
@@ -140,13 +148,17 @@ function isValidShield(shield) {
 }
 
 function onPrepareShieldData(wrapped) {
-    const actor = this.actor
-    if (!isValidActor(actor, true) || !isValidShield(this)) return wrapped()
+    try {
+        const actor = this.actor
+        if (!isValidActor(actor, true) || !isValidShield(this)) return wrapped()
 
-    const level = actor.level
+        const level = actor.level
 
-    this.system.runes.reinforcing =
-        level < 4 ? null : level < 7 ? 1 : level < 10 ? 2 : level < 13 ? 3 : level < 16 ? 4 : level < 19 ? 5 : 6
+        this.system.runes.reinforcing =
+            level < 4 ? null : level < 7 ? 1 : level < 10 ? 2 : level < 13 ? 3 : level < 16 ? 4 : level < 19 ? 5 : 6
+    } catch {
+        wrapperError('arp', PREPARE_SHIELD_DATA)
+    }
 
     wrapped()
 }
@@ -154,17 +166,21 @@ function onPrepareShieldData(wrapped) {
 function onPrepareShieldDerivedData(wrapped) {
     wrapped()
 
-    if (!isValidActor(this.actor) || this.isSpecific || !isValidShield(this)) return
+    try {
+        if (!isValidActor(this.actor) || this.isSpecific || !isValidShield(this)) return
 
-    let coins = this.price.value.toObject()
-    if (!coins.gp) return
+        let coins = this.price.value.toObject()
+        if (!coins.gp) return
 
-    const reinforcing = this.system.runes.reinforcing
-    if (reinforcing) coins.gp -= SHIELD_REINFORCING[reinforcing].price
+        const reinforcing = this.system.runes.reinforcing
+        if (reinforcing) coins.gp -= SHIELD_REINFORCING[reinforcing].price
 
-    coins = new game.pf2e.Coins(coins)
+        coins = new game.pf2e.Coins(coins)
 
-    this.system.price.value = coins
+        this.system.price.value = coins
+    } catch {
+        wrapperError('arp', PREPARE_SHIELD_DERIVED_DATA)
+    }
 }
 
 /**
@@ -189,13 +205,17 @@ function isValidArmor(armor) {
 }
 
 function onPrepareArmorData(wrapped) {
-    const actor = this.actor
-    if (!isValidActor(actor, true) || !isValidArmor(this)) return wrapped()
+    try {
+        const actor = this.actor
+        if (!isValidActor(actor, true) || !isValidArmor(this)) return wrapped()
 
-    const level = actor.level
+        const level = actor.level
 
-    this.system.runes.potency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
-    this.system.runes.resilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3
+        this.system.runes.potency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
+        this.system.runes.resilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3
+    } catch {
+        wrapperError('arp', PREPARE_ARMOR_DATA)
+    }
 
     wrapped()
 }
@@ -203,22 +223,26 @@ function onPrepareArmorData(wrapped) {
 function onPrepareArmorDerivedData(wrapped) {
     wrapped()
 
-    if (!isValidActor(this.actor) || this.isSpecific || !isValidArmor(this)) return
+    try {
+        if (!isValidActor(this.actor) || this.isSpecific || !isValidArmor(this)) return
 
-    let coins = this.price.value.toObject()
-    if (!coins.gp) return
+        let coins = this.price.value.toObject()
+        if (!coins.gp) return
 
-    const potency = this.system.runes.potency
-    if (potency) coins.gp -= ARMOR_POTENCY_PRICE[potency]
+        const potency = this.system.runes.potency
+        if (potency) coins.gp -= ARMOR_POTENCY_PRICE[potency]
 
-    const resiliency = this.system.runes.resilient
-    if (resiliency) coins.gp -= ARMOR_RESILIENCY_PRICE[resiliency]
+        const resiliency = this.system.runes.resilient
+        if (resiliency) coins.gp -= ARMOR_RESILIENCY_PRICE[resiliency]
 
-    coins = new game.pf2e.Coins(coins)
+        coins = new game.pf2e.Coins(coins)
 
-    if ((potency || resiliency) && !this.system.runes.property.length) {
-        coins = coins.add(this._source.system.price.value)
+        if ((potency || resiliency) && !this.system.runes.property.length) {
+            coins = coins.add(this._source.system.price.value)
+        }
+
+        this.system.price.value = coins
+    } catch {
+        wrapperError('arp', PREPARE_ARMOR_DERIVED_DATA)
     }
-
-    this.system.price.value = coins
 }

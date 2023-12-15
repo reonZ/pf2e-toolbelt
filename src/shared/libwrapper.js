@@ -7,3 +7,7 @@ export function registerWrapper(path, callback, type = 'WRAPPER') {
 export function unregisterWrapper(id) {
     libWrapper.unregister(MODULE_ID, id)
 }
+
+export function wrapperError(feature, path) {
+    console.error(`an error occured in the feature '${feature}' of the module '${MODULE_ID}' with the wrapper: '${path}'`)
+}
