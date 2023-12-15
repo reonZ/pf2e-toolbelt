@@ -223,6 +223,20 @@
                         }
                     }
 
+                    &.healing-only {
+                        &:not(.small) {
+                            flex-direction: row;
+                            justify-content: center;
+                            gap: 0.25rem;
+
+                            .label {
+                                font-size: var(--font-size-14);
+                                font-weight: normal;
+                                text-transform: none;
+                            }
+                        }
+                    }
+
                     &.small {
                         padding-block: 0.3em calc(0.3em - 1px);
                         height: 1em;
