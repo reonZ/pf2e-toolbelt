@@ -170,69 +170,78 @@ async function createMeasuredTemplate(template, _, userId) {
 }
 
 let HEALINGS_REGEX
-function isValidDamageMessage(message) {
-    if (message.rolls[0].options.evaluatePersistent) return false
-
-    const healingsRegex = (HEALINGS_REGEX ??= (() => {
+function isRegenMessage(message) {
+    HEALINGS_REGEX ??= (() => {
         const healings = [
             game.i18n.localize('PF2E.Encounter.Broadcast.FastHealing.fast-healing.ReceivedMessage'),
             game.i18n.localize('PF2E.Encounter.Broadcast.FastHealing.regeneration.ReceivedMessage'),
         ]
         return new RegExp(`^<div>(${healings.join('|')})</div>`)
-    })())
+    })()
+    return HEALINGS_REGEX.test(message.flavor)
+}
 
-    return !healingsRegex.test(message.flavor)
+function isValidDamageMessage(message) {
+    return !message.rolls[0].options.evaluatePersistent
 }
 
 function preCreateChatMessage(message) {
     const isDamageRoll = message.isDamageRoll
+    const updates = []
 
-    if (isDamageRoll) {
-        if (!isValidDamageMessage(message)) return
+    if (isDamageRoll && !isValidDamageMessage(message)) return
 
-        if (!getFlag(message, 'target.targets')) {
-            const targets = game.user.targets
-            if (targets.size) {
-                updateSourceFlag(
-                    message,
-                    'target.targets',
-                    Array.from(targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
-                )
-            }
-        }
+    if (isDamageRoll && !getFlag(message, 'target')) {
+        const token = message.token
+        const actor = token?.actor
+        const isRegen = isRegenMessage(message)
+
+        const targets = isRegen
+            ? actor
+                ? [{ token: token.uuid, actor: actor.uuid }]
+                : []
+            : Array.from(game.user.targets.map(target => ({ token: target.document.uuid, actor: target.actor.uuid })))
+
+        updates.push(['targets', targets])
+        if (isRegen) updates.push(['isRegen', true])
 
         if (message.rolls.length === 2) {
-            const splashRollIndex = message.rolls.findIndex(roll => roll.options?.splashOnly)
-            const regularRollIndex = message.rolls.findIndex(
+            const rolls = message.rolls.filter(roll => roll.options)
+            const splashRollIndex = rolls.findIndex(roll => roll.options.splashOnly)
+            const regularRollIndex = rolls.findIndex(
                 roll =>
-                    !roll.options?.splashOnly &&
-                    roll.options?.damage?.modifiers.some(modifier => modifier.damageCategory === 'splash')
+                    !roll.options.splashOnly &&
+                    roll.options.damage?.modifiers.some(modifier => modifier.damageCategory === 'splash')
             )
 
             if (splashRollIndex !== -1 && regularRollIndex !== -1) {
-                updateSourceFlag(message, 'target.splashIndex', splashRollIndex)
+                updates.push(['splashIndex', splashRollIndex])
             }
         }
     }
 
-    if (!isDamageRoll && message.getFlag('pf2e', 'context.type') !== 'spell-cast') return
+    if (isDamageRoll || message.getFlag('pf2e', 'context.type') === 'spell-cast') {
+        const item = message.item
+        const save = item && item.type === 'spell' && item.system.defense?.save
+        if (save) {
+            const dc = (() => {
+                if (!item.trickMagicEntry) return item.spellcasting?.statistic.dc.value
+                return $(message.content).find('[data-action=spell-save]').data()?.dc
+            })()
+            if (typeof dc === 'number') updates.push(['save', { ...save, dc }])
+        }
+    }
 
-    const item = message.item
-    if (item?.type !== 'spell') return
+    if (!updates.length) return
 
-    const save = item.system.defense?.save
-    if (!save) return
-
-    const dc = (() => {
-        if (!item.trickMagicEntry) return item.spellcasting?.statistic.dc.value
-        return $(message.content).find('[data-action=spell-save]').data()?.dc
-    })()
-    if (typeof dc !== 'number') return
-
-    updateSourceFlag(message, 'target.save', {
-        ...save,
-        dc,
-    })
+    updateSourceFlag(
+        message,
+        'target',
+        updates.reduce((acc, [key, value]) => {
+            acc[key] = value
+            return acc
+        }, {})
+    )
 }
 
 async function renderChatMessage(message, html) {
@@ -366,7 +375,7 @@ async function renderDamageChatMessage(message, html) {
         buttons.append(toggleBtn)
     }
 
-    if (game.user.isGM || message.isAuthor) {
+    if (data?.isRegen !== true && (game.user.isGM || message.isAuthor)) {
         const targetsTooltip = localize('target.chat.targets.tooltip')
         const targetsBtn = $(`<button class="targets" title="${targetsTooltip}">
     <i class="fa-solid fa-bullseye-arrow"></i>
@@ -511,7 +520,7 @@ async function getMessageData(message) {
         )
     ).filter(Boolean)
 
-    return { targets, save }
+    return { targets, save, isRegen: getFlag(message, 'target.isRegen') }
 }
 
 async function getTargetFromEvent(event) {
