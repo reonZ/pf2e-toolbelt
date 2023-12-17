@@ -1,3 +1,7 @@
+# 1.27.3
+
+-   reduce the foundry version requirement to `11.311`
+
 # 1.27.2
 
 -   `Target Token Helper` updates:
