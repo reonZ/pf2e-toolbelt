@@ -38,7 +38,7 @@ const FEATURES = [
 
 const CONFLICTS = new Set()
 
-const SETTINGS_MIGRATION_VERSION = 1
+const SETTINGS_MIGRATION_VERSION = 2
 
 let firstClientSetting = null
 
@@ -128,8 +128,8 @@ Hooks.once('ready', () => {
     const settingsMinMigrationVersion = getSetting('settings-min-migration-version')
     if (settingsMinMigrationVersion < SETTINGS_MIGRATION_VERSION) {
         FEATURES.forEach(({ settings }) => {
-            settings.forEach(({ migrate, key }) => {
-                if (!migrate) return
+            settings.forEach(({ migrate, key, scope }) => {
+                if (!migrate || (scope !== 'client' && !isGM)) return
 
                 const originalValue = getSetting(key)
                 let migratedValue = originalValue

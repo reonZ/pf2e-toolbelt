@@ -23,7 +23,7 @@ export function createChoicesHook(event, listener, callback = () => {}) {
     let HOOK = null
 
     return function (value, skipCallback = false) {
-        if (value === false) value = 'disabled'
+        if (String(value) === 'false') value = 'disabled'
 
         if (value === 'disabled' && HOOK) {
             Hooks.off(event, HOOK)

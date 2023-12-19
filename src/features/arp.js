@@ -1,12 +1,9 @@
 import { registerWrapper, wrapperError } from '../shared/libwrapper'
 import { info } from '../shared/notification'
-import { getSetting } from '../shared/settings'
+import { choiceSettingIsEnabled, getChoiceSetting, migrateBooleanToChoice } from '../shared/settings'
 
 const PREPARE_WEAPON_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData'
 const PREPARE_WEAPON_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData'
-
-const PREPARE_SHIELD_DATA = 'CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData'
-const PREPARE_SHIELD_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData'
 
 const PREPARE_ARMOR_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData'
 const PREPARE_ARMOR_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData'
@@ -18,29 +15,27 @@ export function registerArp() {
         settings: [
             {
                 name: 'arp',
-                type: Boolean,
-                default: false,
+                type: String,
+                default: 'disabled',
+                choices: ['disabled', 'force', 'lower'],
                 requiresReload: true,
+                migrate: {
+                    2: value => migrateBooleanToChoice(value, 'force'),
+                },
             },
         ],
         conflicts: ['pf2e-arp'],
         init: () => {
-            const setting = getSetting('arp')
-            if (!setting) return
+            if (!choiceSettingIsEnabled('arp')) return
 
             registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, 'WRAPPER')
             registerWrapper(PREPARE_WEAPON_DERIVED_DATA, onPrepareWeaponDerivedData, 'WRAPPER')
 
             registerWrapper(PREPARE_ARMOR_DATA, onPrepareArmorData, 'WRAPPER')
             registerWrapper(PREPARE_ARMOR_DERIVED_DATA, onPrepareArmorDerivedData, 'WRAPPER')
-
-            // if (setting === 'with-shield') {
-            //     registerWrapper(PREPARE_SHIELD_DATA, onPrepareShieldData, 'WRAPPER')
-            //     registerWrapper(PREPARE_SHIELD_DERIVED_DATA, onPrepareShieldDerivedData, 'WRAPPER')
-            // }
         },
         ready: isGM => {
-            if (isGM && getSetting('arp') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
+            if (isGM && choiceSettingIsEnabled('arp') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
                 game.settings.set('pf2e', 'automaticBonusVariant', 'noABP')
                 info('arp.forceVariant')
             }
@@ -89,13 +84,22 @@ function onPrepareWeaponData(wrapped) {
         const actor = this.actor
         if (!isValidActor(actor, true) || !isValidWeapon(this)) return wrapped()
 
-        const level = actor.level
-
         const traits = this._source.system.traits.value
         if (traits.includes('alchemical') && traits.includes('bomb')) return wrapped()
 
-        this.system.runes.potency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
-        this.system.runes.striking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3
+        const level = actor.level
+        const forceUpdate = getChoiceSetting('arp') === 'force'
+
+        const expectedPotency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
+        const expectedStriking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3
+
+        if (this.system.runes.potency <= expectedPotency || forceUpdate) {
+            this.system.runes.potency = expectedPotency
+        }
+
+        if (this.system.runes.striking <= expectedStriking || forceUpdate) {
+            this.system.runes.striking = expectedStriking
+        }
     } catch {
         wrapperError('arp', PREPARE_WEAPON_DATA)
     }
@@ -131,59 +135,6 @@ function onPrepareWeaponDerivedData(wrapped) {
 }
 
 /**
- * shield
- */
-
-const SHIELD_REINFORCING = {
-    1: { price: 75, increase: 44 }, // level 4
-    2: { price: 300, increase: 52 }, // level 7
-    3: { price: 900, increase: 64 }, // level 10
-    4: { price: 2500, increase: 80 }, // level 13
-    5: { price: 8000, increase: 84 }, // level 16
-    6: { price: 32000, increase: 108 }, // level 19
-}
-
-function isValidShield(shield) {
-    return true
-}
-
-function onPrepareShieldData(wrapped) {
-    try {
-        const actor = this.actor
-        if (!isValidActor(actor, true) || !isValidShield(this)) return wrapped()
-
-        const level = actor.level
-
-        this.system.runes.reinforcing =
-            level < 4 ? null : level < 7 ? 1 : level < 10 ? 2 : level < 13 ? 3 : level < 16 ? 4 : level < 19 ? 5 : 6
-    } catch {
-        wrapperError('arp', PREPARE_SHIELD_DATA)
-    }
-
-    wrapped()
-}
-
-function onPrepareShieldDerivedData(wrapped) {
-    wrapped()
-
-    try {
-        if (!isValidActor(this.actor) || this.isSpecific || !isValidShield(this)) return
-
-        let coins = this.price.value.toObject()
-        if (!coins.gp) return
-
-        const reinforcing = this.system.runes.reinforcing
-        if (reinforcing) coins.gp -= SHIELD_REINFORCING[reinforcing].price
-
-        coins = new game.pf2e.Coins(coins)
-
-        this.system.price.value = coins
-    } catch {
-        wrapperError('arp', PREPARE_SHIELD_DERIVED_DATA)
-    }
-}
-
-/**
  * amor
  */
 
@@ -210,9 +161,18 @@ function onPrepareArmorData(wrapped) {
         if (!isValidActor(actor, true) || !isValidArmor(this)) return wrapped()
 
         const level = actor.level
+        const forceUpdate = getChoiceSetting('arp') === 'force'
 
-        this.system.runes.potency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
-        this.system.runes.resilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3
+        const expectedPotency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
+        const expectedResilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3
+
+        if (this.system.runes.potency <= expectedPotency || forceUpdate) {
+            this.system.runes.potency = expectedPotency
+        }
+
+        if (this.system.runes.resilient <= expectedResilient || forceUpdate) {
+            this.system.runes.resilient = expectedResilient
+        }
     } catch {
         wrapperError('arp', PREPARE_ARMOR_DATA)
     }
