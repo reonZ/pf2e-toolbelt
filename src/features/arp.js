@@ -221,5 +221,5 @@ function renderPhysicalItemSheetPF2e(sheet, html) {
     if (!item || !item.isOfType('weapon', 'armor') || !isValidActor(item.actor, true)) return
 
     const lookups = ['potency', 'striking', 'resilient'].map(x => `[name="system.runes.${x}"]`).join(', ')
-    html.find(`.window-content .sheet-content .sheet-body [data-tab=details] fieldset .form-group:has(${lookups})`).hide()
+    html.find(`[data-tab=details] fieldset .form-group:has(${lookups})`).hide()
 }
