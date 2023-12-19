@@ -11,6 +11,7 @@ import { registerStances } from './features/stances'
 import { registerSpellsSummary } from './features/summary'
 import { registerTargetTokenHelper } from './features/target'
 import { registerUnided } from './features/unided'
+import { registerUntarget } from './features/untarget'
 import { permaConditionEffect } from './macros/condition'
 import { MODULE_ID } from './module'
 import { localize } from './shared/localize'
@@ -32,6 +33,7 @@ const FEATURES = [
     registerHideModifiers(),
     registerShare(),
     registerTargetTokenHelper(),
+    registerUntarget(),
 ]
 
 const CONFLICTS = new Set()
