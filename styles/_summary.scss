@@ -46,6 +46,14 @@
 
             .item-name {
                 grid-area: name;
+
+                h4 {
+                    > a {
+                        &:hover {
+                            color: var(--secondary);
+                        }
+                    }
+                }
             }
 
             .spell-type {

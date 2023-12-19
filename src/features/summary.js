@@ -65,7 +65,6 @@ function addSummaryEvents(html, sheet, actor) {
     summary.find('.focus-pips').on('click contextmenu', event => onToggleFocusPool(event, actor))
     summary.find('.spell-slots-increment-reset').on('click', event => onSlotsReset(event, sheet, actor))
     summary.find('.item-image').on('click', event => onItemToChat(event, actor))
-    summary.find('.item-name > h4').on('click', event => onToggleSummary(event, sheet))
 }
 
 async function onUsesInputChange(event, actor) {
@@ -154,11 +153,6 @@ function onCastSpell(event, actor) {
     if (!spell) return
 
     collection.entry.cast(spell, { slot: slotId, level: slotLevel })
-}
-
-async function onToggleSummary(event, sheet) {
-    const item = event.currentTarget.closest('.item')
-    await sheet.itemRenderer.toggleSummary(item)
 }
 
 async function onItemToChat(event, actor) {

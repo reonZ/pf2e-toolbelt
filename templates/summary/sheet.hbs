@@ -39,7 +39,10 @@
                 <i class="fa-solid fa-message"></i>
                 {{/if}}
             </div>
-            <h4>{{spell.name}} {{{actionGlyph spell.action}}}</h4>
+            <h4 class="name">
+                <a data-action="toggle-summary">{{spell.name}} </a>
+                {{{actionGlyph spell.action}}}
+            </h4>
         </div>
 
         <div class="spell-type">
@@ -91,6 +94,8 @@
         {{/if}}
 
         <div class="spell-range" data-tooltip="{{spell.entryName}}: DC {{spell.entryDc}}">{{spell.range}}</div>
+
+        <div class="item-summary" hidden="hidden"></div>
     </li>
 
     {{/each}}
