@@ -1,3 +1,12 @@
+# 1.29.0
+
+-   `Automatic Rune Progression` updates:
+    -   the setting is now a multi-choice instead of an enabled/disabled
+    -   `Force Update` will always update the runes to be based on the actor's level
+    -   `Keep Highest` will only update the runes if they are currently lower than what they should be at that level, allowing the use of higher tier runes
+    -   if you previsouly had the setting enabled, it will automatically be replaced by the `Force Update` option
+    -   when the `Force Update` option is chosen, the potency, striking and resilient dropdowns in the item sheet will be removed
+
 # 1.28.0
 
 -   added a `Un-Target` client setting, it will remove all the user's targets at turn/round change
