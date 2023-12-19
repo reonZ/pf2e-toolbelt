@@ -1,3 +1,11 @@
+# 1.28.0
+
+-   added a `Un-Target` client setting, it will remove all the user's targets at turn/round change
+-   added a `Force Un-Target` world setting, it will forcibly remove the targets of all users at turn/round change
+-   `Spells Summary` updates:
+    -   fixed spell name over style
+    -   fixed spell description not showing up on click
+
 # 1.27.3
 
 -   reduce the foundry version requirement to `11.311`
