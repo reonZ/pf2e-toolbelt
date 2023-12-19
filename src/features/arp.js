@@ -26,13 +26,18 @@ export function registerArp() {
         ],
         conflicts: ['pf2e-arp'],
         init: () => {
-            if (!choiceSettingIsEnabled('arp')) return
+            const setting = getChoiceSetting('arp')
+            if (setting === 'disabled') return
 
             registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, 'WRAPPER')
             registerWrapper(PREPARE_WEAPON_DERIVED_DATA, onPrepareWeaponDerivedData, 'WRAPPER')
 
             registerWrapper(PREPARE_ARMOR_DATA, onPrepareArmorData, 'WRAPPER')
             registerWrapper(PREPARE_ARMOR_DERIVED_DATA, onPrepareArmorDerivedData, 'WRAPPER')
+
+            if (setting === 'force') {
+                Hooks.on('renderPhysicalItemSheetPF2e', renderPhysicalItemSheetPF2e)
+            }
         },
         ready: isGM => {
             if (isGM && choiceSettingIsEnabled('arp') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
@@ -205,4 +210,16 @@ function onPrepareArmorDerivedData(wrapped) {
     } catch {
         wrapperError('arp', PREPARE_ARMOR_DERIVED_DATA)
     }
+}
+
+/**
+ * item sheet
+ */
+
+function renderPhysicalItemSheetPF2e(sheet, html) {
+    const item = sheet.item
+    if (!item || !item.isOfType('weapon', 'armor') || !isValidActor(item.actor, true)) return
+
+    const lookups = ['potency', 'striking', 'resilient'].map(x => `[name="system.runes.${x}"]`).join(', ')
+    html.find(`.window-content .sheet-content .sheet-body [data-tab=details] fieldset .form-group:has(${lookups})`).hide()
 }
