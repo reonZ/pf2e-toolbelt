@@ -1,3 +1,9 @@
+# 1.29.2
+
+-   due to issues with settings migration, some settings needed to be completely reset to their default value:
+    -   `Automatic Rune Progression`
+    -   `Target Token Helper - Chat`
+
 # 1.29.1
 
 -   fixed runes dropdowns reappearing on item sheet refresh
