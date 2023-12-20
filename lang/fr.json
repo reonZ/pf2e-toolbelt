@@ -6,7 +6,7 @@
                 "name": "Pas d'Encombrement laché",
                 "hint": "(Nécessite le rechargement) L'équipement laché dans l'inventaire de l'acteur ne sera plus pris en compte dans le calcul de la valeur d'Encombrement."
             },
-            "arp": {
+            "auto-runes": {
                 "name": "Progression automatique des runes",
                 "hint": "(Nécessite le rechargement) Sera utilisée à la place de la variant de règle PBA pour donner automatiquement les runes de puissance/frappe/résilience à l'équipement."
             },

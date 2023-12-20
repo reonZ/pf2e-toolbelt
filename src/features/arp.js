@@ -1,6 +1,6 @@
 import { registerWrapper, wrapperError } from '../shared/libwrapper'
 import { info } from '../shared/notification'
-import { choiceSettingIsEnabled, getChoiceSetting, migrateBooleanToChoice } from '../shared/settings'
+import { choiceSettingIsEnabled, getSetting } from '../shared/settings'
 
 const PREPARE_WEAPON_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData'
 const PREPARE_WEAPON_DERIVED_DATA = 'CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData'
@@ -14,19 +14,16 @@ export function registerArp() {
     return {
         settings: [
             {
-                name: 'arp',
+                name: 'auto-runes',
                 type: String,
                 default: 'disabled',
                 choices: ['disabled', 'force', 'lower'],
                 requiresReload: true,
-                migrate: {
-                    2: value => migrateBooleanToChoice(value, 'force'),
-                },
             },
         ],
         conflicts: ['pf2e-arp'],
         init: () => {
-            const setting = getChoiceSetting('arp')
+            const setting = getSetting('auto-runes')
             if (setting === 'disabled') return
 
             registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, 'WRAPPER')
@@ -40,7 +37,7 @@ export function registerArp() {
             }
         },
         ready: isGM => {
-            if (isGM && choiceSettingIsEnabled('arp') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
+            if (isGM && choiceSettingIsEnabled('auto-runes') && game.settings.get('pf2e', 'automaticBonusVariant') !== 'noABP') {
                 game.settings.set('pf2e', 'automaticBonusVariant', 'noABP')
                 info('arp.forceVariant')
             }
@@ -93,7 +90,7 @@ function onPrepareWeaponData(wrapped) {
         if (traits.includes('alchemical') && traits.includes('bomb')) return wrapped()
 
         const level = actor.level
-        const forceUpdate = getChoiceSetting('arp') === 'force'
+        const forceUpdate = getSetting('auto-runes') === 'force'
 
         const expectedPotency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3
         const expectedStriking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3
@@ -106,7 +103,7 @@ function onPrepareWeaponData(wrapped) {
             this.system.runes.striking = expectedStriking
         }
     } catch {
-        wrapperError('arp', PREPARE_WEAPON_DATA)
+        wrapperError('auto-runes', PREPARE_WEAPON_DATA)
     }
 
     wrapped()
@@ -135,7 +132,7 @@ function onPrepareWeaponDerivedData(wrapped) {
 
         this.system.price.value = coins
     } catch {
-        wrapperError('arp', PREPARE_WEAPON_DERIVED_DATA)
+        wrapperError('auto-runes', PREPARE_WEAPON_DERIVED_DATA)
     }
 }
 
@@ -166,7 +163,7 @@ function onPrepareArmorData(wrapped) {
         if (!isValidActor(actor, true) || !isValidArmor(this)) return wrapped()
 
         const level = actor.level
-        const forceUpdate = getChoiceSetting('arp') === 'force'
+        const forceUpdate = getSetting('auto-runes') === 'force'
 
         const expectedPotency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3
         const expectedResilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3
@@ -179,7 +176,7 @@ function onPrepareArmorData(wrapped) {
             this.system.runes.resilient = expectedResilient
         }
     } catch {
-        wrapperError('arp', PREPARE_ARMOR_DATA)
+        wrapperError('auto-runes', PREPARE_ARMOR_DATA)
     }
 
     wrapped()
@@ -208,7 +205,7 @@ function onPrepareArmorDerivedData(wrapped) {
 
         this.system.price.value = coins
     } catch {
-        wrapperError('arp', PREPARE_ARMOR_DERIVED_DATA)
+        wrapperError('auto-runes', PREPARE_ARMOR_DERIVED_DATA)
     }
 }
 

@@ -7,7 +7,7 @@ import { warn } from '../shared/notification'
 import { templatePath } from '../shared/path'
 import { applyDamageFromMessage, onClickShieldBlock } from '../shared/pf2e/chat'
 import { DegreeOfSuccess } from '../shared/pf2e/success'
-import { choiceSettingIsEnabled, getChoiceSetting, getSetting, migrateBooleanToChoice } from '../shared/settings'
+import { choiceSettingIsEnabled, getSetting } from '../shared/settings'
 import { socketEmit, socketOff, socketOn } from '../shared/socket'
 import { getTemplateTokens } from '../shared/template'
 import { isActiveGM, isUserGM } from '../shared/user'
@@ -59,15 +59,12 @@ export function registerTargetTokenHelper() {
                 onChange: setHooks,
             },
             {
-                name: 'target-chat',
+                name: 'target-client',
                 type: String,
                 default: 'disabled',
                 choices: ['disabled', 'small', 'big'],
                 scope: 'client',
                 onChange: value => setRenderMessageHook(value && getSetting('target')),
-                migrate: {
-                    1: value => migrateBooleanToChoice(value, 'small'),
-                },
             },
             {
                 name: 'target-template',
@@ -245,7 +242,7 @@ function preCreateChatMessage(message) {
 }
 
 async function renderChatMessage(message, html) {
-    const clientEnabled = choiceSettingIsEnabled('target-chat')
+    const clientEnabled = choiceSettingIsEnabled('target-client')
 
     if (clientEnabled && message.isDamageRoll) {
         if (!isValidDamageMessage(message)) return
@@ -395,7 +392,7 @@ async function renderDamageChatMessage(message, html) {
 
     clonedRows.removeClass('damage-application').addClass('target-damage-application')
 
-    if (getChoiceSetting('target-chat') !== 'big') clonedRows.find('button').addClass('small')
+    if (getSetting('target-client') !== 'big') clonedRows.find('button').addClass('small')
 
     clonedRows.find('[data-action]').each(function () {
         const action = this.dataset.action

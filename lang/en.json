@@ -10,7 +10,7 @@
                 "name": "Weightless Coins",
                 "hint": "(Requires Reload) Coins are weightless when enabled."
             },
-            "arp": {
+            "auto-runes": {
                 "name": "Automatic Rune Progression",
                 "hint": "(Requires Reload) Meant to be used in stead of the ABP variant rule to automatically give potency/striking/resilient runes to equipment. 'Force Update' will always update the runes based on actor level while 'Keep Highest' will update the runes only if they are currently lower than what they should be at that level.",
                 "choices": {
@@ -112,7 +112,7 @@
                 "name": "Target Token Helper",
                 "hint": "Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below."
             },
-            "target-chat": {
+            "target-client": {
                 "name": "Target Token Helper - Chat",
                 "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll.",
                 "choices": {
