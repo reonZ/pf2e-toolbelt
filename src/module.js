@@ -1,2 +1,1 @@
-export const MODULE_ID = 'pf2e-toolbelt'
-
+export const MODULE_ID = "pf2e-toolbelt";

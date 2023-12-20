@@ -1,111 +1,120 @@
-import { bindOnPreCreateSpellDamageChatMessage } from '../../shared/chat'
-import { subLocalize } from '../../shared/localize'
-import { templatePath } from '../../shared/path'
+import { bindOnPreCreateSpellDamageChatMessage } from "../../shared/chat";
+import { subLocalize } from "../../shared/localize";
+import { templatePath } from "../../shared/path";
 
-const localize = subLocalize('merge.multi')
+const localize = subLocalize("merge.multi");
 
 export class MultiCast extends Application {
-    #message
-    #event
+	#message;
+	#event;
 
-    constructor(event, message, options) {
-        super(options)
-        this.#event = event
-        this.#message = message
-    }
+	constructor(event, message, options) {
+		super(options);
+		this.#event = event;
+		this.#message = message;
+	}
 
-    get title() {
-        return localize('title', this.spell)
-    }
+	get title() {
+		return localize("title", this.spell);
+	}
 
-    get template() {
-        return templatePath('merge/multi')
-    }
+	get template() {
+		return templatePath("merge/multi");
+	}
 
-    getData(options) {
-        return mergeObject(super.getData(options), {
-            i18n: localize,
-        })
-    }
+	getData(options) {
+		return mergeObject(super.getData(options), {
+			i18n: localize,
+		});
+	}
 
-    activateListeners(html) {
-        html.find('[data-action=cast]').on('click', this.#onCast.bind(this))
-        html.find('[data-action=cancel]').on('click', this.#onCancel.bind(this))
-    }
+	activateListeners(html) {
+		html.find("[data-action=cast]").on("click", this.#onCast.bind(this));
+		html.find("[data-action=cancel]").on("click", this.#onCancel.bind(this));
+	}
 
-    async #onCast(event) {
-        event.preventDefault()
+	async #onCast(event) {
+		event.preventDefault();
 
-        const nb = this.element.find('[name=multi]').val()
-        if (nb < 1) {
-            localize.error('zero')
-            this.close()
-            return
-        }
+		const nb = this.element.find("[name=multi]").val();
+		if (nb < 1) {
+			localize.error("zero");
+			this.close();
+			return;
+		}
 
-        const message = this.#message
-        if (!message) return
+		const message = this.#message;
+		if (!message) return;
 
-        const spell = message.item
-        const actor = message.actor
-        if (!actor || !spell) return
+		const spell = message.item;
+		const actor = message.actor;
+		if (!actor || !spell) return;
 
-        const updateSource = (damages, heightening) => {
-            for (const [id, damage] of Object.entries(damages)) {
-                for (let i = 0; i < nb - 1; i++) {
-                    const newId = randomID()
+		const updateSource = (damages, heightening) => {
+			for (const [id, damage] of Object.entries(damages)) {
+				for (let i = 0; i < nb - 1; i++) {
+					const newId = randomID();
 
-                    damages[newId] = damage
+					damages[newId] = damage;
 
-                    if (heightening.type === 'interval') {
-                        const damage = heightening.damage[id]
-                        if (damage) heightening.damage[newId] = damage
-                    } else if (heightening.type === 'fixed') {
-                        for (const [level, data] of Object.entries(heightening.levels)) {
-                            const damage = data.damage.value[id]
-                            if (damage) heightening.levels[level].damage.value[newId] = damage
-                        }
-                    }
-                }
-            }
-        }
+					if (heightening.type === "interval") {
+						const damage = heightening.damage[id];
+						if (damage) heightening.damage[newId] = damage;
+					} else if (heightening.type === "fixed") {
+						for (const [level, data] of Object.entries(heightening.levels)) {
+							const damage = data.damage.value[id];
+							if (damage)
+								heightening.levels[level].damage.value[newId] = damage;
+						}
+					}
+				}
+			}
+		};
 
-        const embeddedSource = deepClone(message.flags.pf2e.casting?.embeddedSpell)
+		const embeddedSource = deepClone(message.flags.pf2e.casting?.embeddedSpell);
 
-        if (embeddedSource) {
-            const damages = embeddedSource.system.damage
-            const heightening = (embeddedSource.system.heightening ??= {})
+		if (embeddedSource) {
+			const damages = embeddedSource.system.damage;
 
-            updateSource(damages, heightening)
+			embeddedSource.system.heightening ??= {};
+			const heightening = embeddedSource.system.heightening;
 
-            const newSpell = new CONFIG.Item.documentClass(embeddedSource, { parent: actor })
-            newSpell.trickMagicEntry = spell.trickMagicEntry
+			updateSource(damages, heightening);
 
-            const overlayIds = message.getFlag('pf2e', 'origin.variant.overlays')
-            const castLevel = message.getFlag('pf2e', 'origin.castLevel') ?? spell.rank
-            const modifiedSpell = newSpell.loadVariant({ overlayIds, castLevel })
-            const castSpell = modifiedSpell ?? newSpell
+			const newSpell = new CONFIG.Item.documentClass(embeddedSource, {
+				parent: actor,
+			});
+			newSpell.trickMagicEntry = spell.trickMagicEntry;
 
-            castSpell.rollDamage(this.#event)
-        } else {
-            const spellSource = spell.toObject()
-            const damages = spellSource.system.damage
-            const heightening = spellSource.system.heightening ?? {}
+			const overlayIds = message.getFlag("pf2e", "origin.variant.overlays");
+			const castLevel =
+				message.getFlag("pf2e", "origin.castLevel") ?? spell.rank;
+			const modifiedSpell = newSpell.loadVariant({ overlayIds, castLevel });
+			const castSpell = modifiedSpell ?? newSpell;
 
-            updateSource(damages, heightening)
-            const newSpell = spell.clone({ 'system.damage': damages, 'system.heightening': heightening })
-            newSpell.rollDamage(this.#event)
-        }
+			castSpell.rollDamage(this.#event);
+		} else {
+			const spellSource = spell.toObject();
+			const damages = spellSource.system.damage;
+			const heightening = spellSource.system.heightening ?? {};
 
-        if (spell.damageKinds.size) {
-            bindOnPreCreateSpellDamageChatMessage(message)
-        }
+			updateSource(damages, heightening);
+			const newSpell = spell.clone({
+				"system.damage": damages,
+				"system.heightening": heightening,
+			});
+			newSpell.rollDamage(this.#event);
+		}
 
-        this.close()
-    }
+		if (spell.damageKinds.size) {
+			bindOnPreCreateSpellDamageChatMessage(message);
+		}
 
-    #onCancel(event) {
-        event.preventDefault()
-        this.close()
-    }
+		this.close();
+	}
+
+	#onCancel(event) {
+		event.preventDefault();
+		this.close();
+	}
 }
