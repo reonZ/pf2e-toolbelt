@@ -42,13 +42,6 @@ let firstClientSetting = null
 Hooks.once('init', () => {
     const isGM = isUserGM()
 
-    game.settings.register(MODULE_ID, 'settings-min-migration-version', {
-        config: false,
-        key: 'settings-min-migration-version',
-        type: Number,
-        default: 0,
-    })
-
     const settings = FEATURES.flatMap(({ settings = [] }) =>
         settings.map(setting => {
             const key = setting.name
