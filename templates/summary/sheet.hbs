@@ -52,9 +52,7 @@
                 <i class="fa-solid fa-link-slash broken"></i>
                 {{/if}}
             </span>
-            {{#unless spell.isCantrip}}
-
-            {{#if (or spell.isSpontaneous spell.isInnate spell.isActiveCharge)}}
+            {{#if (and (not spell.isCantrip) (or spell.isSpontaneous spell.isInnate spell.isActiveCharge))}}
             <div class="uses">
                 <span class="spell-slots-input">
                     <input type="number" value="{{spell.uses.value}}" data-input-path="{{spell.inputPath}}"
@@ -79,11 +77,8 @@
             <a class="item-toggle-prepare" data-action="toggle-slot-expended">
                 <i class="fas fa-fw {{#if spell.expended}}fa-plus-square{{else}}fa-minus-square{{/if}}"></i>
             </a>
-
             {{/if}}
 
-
-            {{/unless}}
         </div>
 
         {{#if @root.isOwner}}
