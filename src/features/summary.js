@@ -234,10 +234,11 @@ async function getData(actor) {
 						isSpontaneous: data.isSpontaneous || data.isFlexible,
 						groupId: group.id,
 						uses: uses ?? (isCharge ? charges : group.uses),
-						expended: isCharge
-							? !charges.canPayCost(groupNumber)
-							: expended ??
-							  (isFocus && !isCantrip ? focusPool.value <= 0 : false),
+						expended:
+							isCharge && !isCantrip
+								? !charges.canPayCost(groupNumber)
+								: expended ??
+								  (isFocus && !isCantrip ? focusPool.value <= 0 : false),
 						action: spell.system.time.value,
 						type: isCharge
 							? `${MODULE_ID}.summary.staff`
