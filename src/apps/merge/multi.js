@@ -61,10 +61,10 @@ export class MultiCast extends Application {
 						const damage = heightening.damage[id];
 						if (damage) heightening.damage[newId] = damage;
 					} else if (heightening.type === "fixed") {
-						for (const [level, data] of Object.entries(heightening.levels)) {
-							const damage = data.damage.value[id];
-							if (damage)
-								heightening.levels[level].damage.value[newId] = damage;
+						for (const data of Object.values(heightening.levels)) {
+							const damage = data.damage[id];
+							if (!damage) continue;
+							data.damage[newId] = damage;
 						}
 					}
 				}
@@ -81,15 +81,15 @@ export class MultiCast extends Application {
 
 			updateSource(damages, heightening);
 
-			const newSpell = new CONFIG.Item.documentClass(embeddedSource, {
+			const newSpell = new Item.implementation(embeddedSource, {
 				parent: actor,
 			});
+
 			newSpell.trickMagicEntry = spell.trickMagicEntry;
 
 			const overlayIds = message.getFlag("pf2e", "origin.variant.overlays");
-			const castLevel =
-				message.getFlag("pf2e", "origin.castLevel") ?? spell.rank;
-			const modifiedSpell = newSpell.loadVariant({ overlayIds, castLevel });
+			const castRank = message.getFlag("pf2e", "origin.castRank") ?? spell.rank;
+			const modifiedSpell = newSpell.loadVariant({ overlayIds, castRank });
 			const castSpell = modifiedSpell ?? newSpell;
 
 			castSpell.rollDamage(this.#event);
@@ -99,10 +99,12 @@ export class MultiCast extends Application {
 			const heightening = spellSource.system.heightening ?? {};
 
 			updateSource(damages, heightening);
+
 			const newSpell = spell.clone({
 				"system.damage": damages,
 				"system.heightening": heightening,
 			});
+
 			newSpell.rollDamage(this.#event);
 		}
 
