@@ -1,4 +1,5 @@
 @import './hero';
+@import './inventory';
 @import './knowledges';
 @import './merge';
 @import './macros';
@@ -11,5 +12,19 @@
 [role='tooltip'] {
     i.pf2e-toolbelt-die {
         font-size: 0.9em;
+    }
+}
+
+.app.sheet.actor.character .sheet-content > .tab {
+    &.toggled {
+        > .directory-list:not(.alternate) {
+            display: none;
+        }
+    }
+
+    &:not(.toggled) {
+        > .alternate {
+            display: none;
+        }
     }
 }

@@ -1,14 +1,12 @@
 import { MODULE_ID } from "../module";
-import { isPlayedActor } from "../shared/actor";
+import { characterSheetExtraTab } from "../shared/actor";
 import { createChoicesHook } from "../shared/hook";
 import {
-	setInMemory,
 	localeCompare,
 	ordinalString,
 	refreshCharacterSheets,
-	getInMemory,
 } from "../shared/misc";
-import { templatePath } from "../shared/path";
+import { spellSlotGroupIdToNumber } from "../shared/pf2e/misc";
 import { getSetting } from "../shared/settings";
 
 const setHook = createChoicesHook(
@@ -37,56 +35,31 @@ export function registerSpellsSummary() {
 }
 
 async function renderCharacterSheetPF2e(sheet, html) {
-	const actor = sheet.actor;
-	if (!isPlayedActor(actor)) return;
-
-	const tab = getSpellcastingTab(html);
-
-	if (getInMemory(sheet, "toggled")) tab.addClass("toggled");
-
-	getSpellcastingNav(html).on("click", (event) =>
-		onSpellcastingBtnToggle(event, html, sheet),
-	);
-	await addSummaryTab(html, sheet, actor);
-
-	if (tab.hasClass("toggled") && tab.hasClass("active")) {
-		sheet._restoreScrollPositions(html);
-	}
+	characterSheetExtraTab({
+		sheet,
+		html,
+		tabName: "spellcasting",
+		templateFolder: "summary/sheet",
+		getData,
+		addEvents,
+	});
 }
 
-async function addSummaryTab(html, sheet, actor) {
-	const tab = getSpellcastingTab(html);
-	const data = await getData(actor);
-
-	const template = await renderTemplate(templatePath("summary/sheet"), data);
-
-	tab.append(template);
-	addSummaryEvents(html, sheet, actor);
-}
-
-function addSummaryEvents(html, sheet, actor) {
-	const summary = getSpellcastingSummarySection(html);
-
-	const inputs = summary.find(".spell-type .uses .spell-slots-input input");
+function addEvents(html, sheet, actor) {
+	const inputs = html.find(".spell-type .uses .spell-slots-input input");
 	inputs.on("change", (event) => onUsesInputChange(event, actor));
 	inputs.on("focus", onUsesInputFocus);
 	inputs.on("blur", onUsesInputBlur);
 
-	summary
-		.find("[data-action=cast-spell]")
-		.on("click", (event) => onCastSpell(event, actor));
-	summary
-		.find(".item-toggle-prepare")
-		.on("click", (event) => onTogglePrepare(event, actor));
-	summary
+	html
 		.find(".focus-pips")
 		.on("click contextmenu", (event) => onToggleFocusPool(event, actor));
-	summary
+
+	html
 		.find(".spell-slots-increment-reset")
 		.on("click", (event) => onSlotsReset(event, sheet, actor));
-	summary
-		.find(".item-image")
-		.on("click", (event) => onItemToChat(event, actor));
+
+	html.find(".item-image").on("click", (event) => onItemToChat(event, actor));
 }
 
 async function onUsesInputChange(event, actor) {
@@ -107,19 +80,6 @@ function onUsesInputBlur(event) {
 	event.currentTarget.closest(".item")?.classList.remove("hover");
 }
 
-function onTogglePrepare(event, actor) {
-	event.preventDefault();
-	const { slotLevel, slotId, entryId, expended } = $(event.currentTarget)
-		.closest(".item")
-		.data();
-	const collection = actor.spellcasting.collections.get(entryId);
-	collection?.setSlotExpendedState(
-		slotLevel ?? 0,
-		slotId ?? 0,
-		expended !== true,
-	);
-}
-
 function onToggleFocusPool(event, actor) {
 	event.preventDefault();
 	const change = event.type === "click" ? 1 : -1;
@@ -129,7 +89,9 @@ function onToggleFocusPool(event, actor) {
 
 function onChargesReset(sheet, actor, entryId) {
 	if (game.modules.get("pf2e-staves")?.active) {
-		const original = getSpellcastingOriginalSection(sheet.element);
+		const original = getSpellcastingTab(sheet.element).find(
+			".directory-list.spellcastingEntry-list",
+		);
 		const entry = original.find(
 			`.item-container.spellcasting-entry[data-item-id=${entryId}]`,
 		);
@@ -150,7 +112,7 @@ function onChargesReset(sheet, actor, entryId) {
 function onSlotsReset(event, sheet, actor) {
 	event.preventDefault();
 
-	const { itemId, level, isCharge } = $(event.currentTarget).data();
+	const { itemId, rank, isCharge } = $(event.currentTarget).data();
 	if (!itemId) return;
 
 	if (isCharge) {
@@ -162,7 +124,7 @@ function onSlotsReset(event, sheet, actor) {
 	if (!item) return;
 
 	if (item.isOfType("spellcastingEntry")) {
-		const slotLevel = level >= 0 && level <= 11 ? `slot${level}` : "slot0";
+		const slotLevel = rank >= 0 && rank <= 11 ? `slot${rank}` : "slot0";
 		const slot = item.system.slots?.[slotLevel];
 		if (slot) item.update({ [`system.slots.${slotLevel}.value`]: slot.max });
 	} else if (item.isOfType("spell")) {
@@ -171,58 +133,16 @@ function onSlotsReset(event, sheet, actor) {
 	}
 }
 
-function onCastSpell(event, actor) {
-	event.preventDefault();
-
-	const target = $(event.currentTarget);
-	if (target.prop("disabled")) return;
-
-	const { itemId, slotLevel, slotId, entryId } = target.closest(".item").data();
-	const collection = actor.spellcasting.collections.get(entryId);
-	if (!collection) return;
-
-	const spell = collection.get(itemId);
-	if (!spell) return;
-
-	collection.entry.cast(spell, { slot: slotId, level: slotLevel });
-}
-
 async function onItemToChat(event, actor) {
 	const itemId = $(event.currentTarget).closest(".item").attr("data-item-id");
 	const item = actor.items.get(itemId);
 	item.toMessage(event);
 }
 
-function onSpellcastingBtnToggle(event, html, sheet) {
-	event.preventDefault();
-
-	const tab = getSpellcastingTab(html);
-
-	if (tab.hasClass("active")) {
-		tab.toggleClass("toggled");
-		tab.scrollTop(0);
-		setInMemory(sheet, "toggled", tab.hasClass("toggled"));
-	}
-}
-
-function getSpellcastingNav(html) {
-	return html.find("nav.sheet-navigation .item[data-tab=spellcasting]");
-}
-
 function getSpellcastingTab(html) {
 	return html.find(
 		"section.sheet-body .sheet-content > .tab[data-tab=spellcasting]",
 	);
-}
-
-function getSpellcastingOriginalSection(html) {
-	return getSpellcastingTab(html).find(
-		".directory-list.spellcastingEntry-list",
-	);
-}
-
-function getSpellcastingSummarySection(html) {
-	return getSpellcastingTab(html).find(".directory-list.summary");
 }
 
 async function getData(actor) {
@@ -273,24 +193,25 @@ async function getData(actor) {
 				};
 			})();
 
-			for (const slot of data.levels) {
-				if (!slot.active.length || slot.uses?.max === 0) continue;
+			for (const group of data.groups) {
+				if (!group.active.length || group.uses?.max === 0) continue;
 
 				const slotSpells = [];
-				const isCantrip = slot.isCantrip;
+				const isCantrip = group.id === "cantrips";
+				const groupNumber = spellSlotGroupIdToNumber(group.id);
 				const isBroken = !isCantrip && isCharge && !stavesActive;
 
-				for (let slotId = 0; slotId < slot.active.length; slotId++) {
-					const active = slot.active[slotId];
+				for (let slotId = 0; slotId < group.active.length; slotId++) {
+					const active = group.active[slotId];
 					if (!active || active.uses?.max === 0) continue;
 
-					const { spell, expended, virtual, uses, castLevel } = active;
+					const { spell, expended, virtual, uses, castRank } = active;
 
 					slotSpells.push({
 						name: spell.name,
 						img: spell.img,
 						range: spell.system.range.value || "-",
-						castLevel: castLevel ?? spell.level,
+						castRank: castRank ?? spell.rank,
 						slotId,
 						entryId,
 						entryDc,
@@ -301,7 +222,7 @@ async function getData(actor) {
 							? chargesPath
 							: data.isInnate
 							  ? "system.location.uses.value"
-							  : `system.slots.slot${slot.level}.value`,
+							  : `system.slots.slot${groupNumber}.value`,
 						isCharge,
 						isActiveCharge: isCharge && stavesActive,
 						isBroken,
@@ -311,10 +232,10 @@ async function getData(actor) {
 						isFocus,
 						isPrepared: data.isPrepared,
 						isSpontaneous: data.isSpontaneous || data.isFlexible,
-						slotLevel: slot.level,
-						uses: uses ?? (isCharge ? charges : slot.uses),
+						groupId: group.id,
+						uses: uses ?? (isCharge ? charges : group.uses),
 						expended: isCharge
-							? !charges.canPayCost(slot.level)
+							? !charges.canPayCost(groupNumber)
 							: expended ??
 							  (isFocus && !isCantrip ? focusPool.value <= 0 : false),
 						action: spell.system.time.value,
@@ -327,7 +248,7 @@ async function getData(actor) {
 								  : data.isFlexible
 									  ? "PF2E.SpellFlexibleLabel"
 									  : isFocus
-										  ? "PF2E.SpellFocusLabel"
+										  ? "PF2E.TraitFocus"
 										  : "PF2E.SpellPreparedLabel",
 						order: isCharge
 							? 0
@@ -353,8 +274,8 @@ async function getData(actor) {
 						}
 					}
 
-					spells[slot.level] ??= [];
-					spells[slot.level].push(...slotSpells);
+					spells[groupNumber] ??= [];
+					spells[groupNumber].push(...slotSpells);
 				}
 			}
 		}),
@@ -370,6 +291,7 @@ async function getData(actor) {
 				: (a, b) => localeCompare(a.name, b.name);
 
 		for (const entry of spells) {
+			if (!entry) continue;
 			entry.sort(sort);
 		}
 	}
@@ -381,14 +303,14 @@ async function getData(actor) {
 	}
 
 	const ritualData = await actor.spellcasting.ritual?.getSheetData();
-	const rituals = ritualData?.levels.flatMap((slot, slotId) =>
+	const rituals = ritualData?.groups.flatMap((slot, slotId) =>
 		slot.active
 			.map(({ spell }) => ({
 				name: spell.name,
 				img: spell.img,
 				slotId,
 				itemId: spell.id,
-				level: spell.level,
+				rank: spell.rank,
 				time: spell.system.time.value,
 			}))
 			.filter(Boolean),

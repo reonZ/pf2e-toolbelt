@@ -1,0 +1,378 @@
+.app.sheet.actor.character .sheet-content > .tab[data-tab='inventory'] {
+    > .alternate {
+        --gap: 5px;
+        --cell-padding: 3px;
+        --border-radius: 4px;
+        --item-cell-size: 44px;
+
+        @mixin inventory-grid($cell-width) {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, $cell-width);
+        }
+
+        @mixin greyed-out {
+            filter: grayscale(1) opacity(0.7);
+        }
+
+        @mixin item-mask($color, $opacity: 0.3) {
+            &::after {
+                position: absolute;
+                content: '';
+                inset: 0;
+                background-color: $color;
+                border-radius: var(--border-radius);
+                opacity: $opacity;
+            }
+        }
+
+        margin-top: -6px;
+        padding: 2px;
+        overflow: hidden scroll;
+        width: 100%;
+
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        hr {
+            width: 100%;
+            margin: 0;
+        }
+
+        .item .inner-item,
+        .equipped-items .main-items .large .fake {
+            background-color: #9b9b9b;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+
+            box-shadow: inset 0 0 2px 0px #000, inset 0 0 6px 0px #fff;
+            border-radius: var(--border-radius);
+        }
+
+        .item {
+            --common: #fff;
+            --uncommon: #ff8664;
+            --rare: #002eff;
+            --unique: #c63cff;
+
+            --rarity-color: var(--common);
+
+            --color-valid: #33c43f;
+            --color-invalid: #ff0000;
+
+            padding: var(--cell-padding);
+
+            .inner-item {
+                position: relative;
+                aspect-ratio: 1/1;
+
+                // background-color: #9b9b9b;
+                // background-position: center;
+                // background-repeat: no-repeat;
+                // background-size: contain;
+
+                // box-shadow: inset 0 0 2px 0px #000, inset 0 0 6px 0px #fff;
+                // border-radius: var(--border-radius);
+
+                &:not(.common) {
+                    box-shadow: inset 0 0 6px 1px var(--rarity-color);
+                }
+
+                &.uncommon {
+                    --rarity-color: var(--uncommon);
+                }
+
+                &.rare {
+                    --rarity-color: var(--rare);
+                }
+
+                &.unique {
+                    --rarity-color: var(--unique);
+                }
+
+                .vignette {
+                    position: absolute;
+                    background-color: #000000b5;
+                    color: #fff;
+                    margin: 0;
+                    padding: 0;
+                    text-align: center;
+                    height: 1.2em;
+                    white-space: nowrap;
+                    font-family: var(--sans-serif);
+                    border-radius: var(--border-radius);
+
+                    &.invested {
+                        left: -2px;
+                        top: -2px;
+                        aspect-ratio: 1/1;
+                        padding-inline: 2px;
+                        font-size: 0.9em;
+                    }
+
+                    &.uses {
+                        font-size: 0.7em;
+                        inset: -2px 0 auto 0;
+                        border-radius: var(--border-radius) var(--border-radius) 0 0;
+                    }
+
+                    &:not(input) {
+                        pointer-events: none;
+                    }
+                }
+            }
+
+            &.ghost {
+                .inner-item {
+                    @include item-mask(var(--color-valid));
+                }
+            }
+
+            &:not(.ghost) {
+                &.dragged {
+                    .inner-item {
+                        @include greyed-out;
+                    }
+                }
+            }
+        }
+
+        .equipped-items {
+            @include inventory-grid(var(--item-cell-size));
+            grid-template-rows: var(--item-cell-size) repeat(auto-fill, var(--item-cell-size));
+
+            margin-bottom: var(--gap);
+
+            .main-items {
+                grid-column: span 6;
+                grid-row: span 2;
+
+                display: grid;
+                grid-template-columns: repeat(auto-fill, var(--item-cell-size));
+
+                .large {
+                    grid-column: span 2;
+                    grid-row: span 2;
+                    padding: var(--cell-padding);
+
+                    .item {
+                        &:not(.fake) {
+                            padding: 0;
+                        }
+
+                        &.fake {
+                            aspect-ratio: 1/1;
+                            position: relative;
+
+                            &:not(:only-child) {
+                                display: none;
+                            }
+                        }
+                    }
+
+                    &.hand {
+                        .fake {
+                            background-image: url(/icons/skills/melee/unarmed-punch-fist.webp);
+                        }
+
+                        &.right {
+                            .item[data-two-hands='true'] {
+                                @include greyed-out();
+                            }
+
+                            .fake {
+                                transform: scaleX(-1);
+                            }
+                        }
+                    }
+
+                    &.armor {
+                        .fake {
+                            background-image: url(/icons/equipment/chest/shirt-simple-grey.webp);
+                        }
+                    }
+
+                    &.valid {
+                        .inner-item,
+                        .fake {
+                            @include item-mask(var(--color-valid));
+                        }
+                    }
+
+                    &.invalid {
+                        .inner-item,
+                        .fake {
+                            @include item-mask(var(--color-invalid));
+                        }
+                    }
+
+                    &:not(.valid):not(.invalid) {
+                        .item {
+                            &.fake {
+                                @include greyed-out;
+                            }
+                        }
+                    }
+
+                    .inner-item {
+                        .vignette {
+                            &.invested {
+                                font-size: 1.3em;
+                                padding-inline: 3px;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .item {
+                .vignette {
+                    &.quantity,
+                    &.uses {
+                        display: none;
+                    }
+                }
+
+                &.add {
+                    .inner-item {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        color: #363636;
+                        box-shadow: inset 0 0 6px 1px #363636;
+
+                        .equip {
+                            font-size: 1.6em;
+                        }
+
+                        .invest {
+                            font-size: 1.6em;
+                        }
+
+                        .forbidden {
+                            font-size: 1.8em;
+                        }
+                    }
+                }
+            }
+
+            &:not(.show) {
+                .item.add {
+                    display: none;
+                }
+            }
+
+            &:not(.add-equip) {
+                .item.add .equip {
+                    display: none;
+                }
+            }
+
+            &:not(.add-invest) {
+                .item.add .invest {
+                    display: none;
+                }
+            }
+
+            &:not(.add-forbidden) {
+                .item.add .forbidden {
+                    display: none;
+                }
+            }
+        }
+
+        .container-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+
+            &:not(.active) {
+                display: none;
+            }
+
+            .containers {
+                @include inventory-grid(54px);
+
+                margin-block: var(--gap);
+
+                .container {
+                    &.small {
+                        transform: scale(0.8);
+                    }
+
+                    &:not([data-container-id]) {
+                        filter: grayscale(1);
+                    }
+
+                    &.back {
+                        .inner-item::after {
+                            position: absolute;
+                            content: '';
+                            background-image: url(/systems/pf2e/icons/other/enter-exit.svg);
+                            background-position: center 20%;
+                            background-repeat: no-repeat;
+                            background-size: 60%;
+                            inset: 0;
+                            transform: scaleX(-1);
+                        }
+                    }
+
+                    &.valid {
+                        .inner-item {
+                            @include item-mask(var(--color-valid));
+                        }
+                    }
+
+                    &.invalid {
+                        .inner-item {
+                            @include item-mask(var(--color-invalid));
+                        }
+                    }
+
+                    .inner-item {
+                        .vignette {
+                            &.capacity {
+                                font-size: 0.7em;
+                                inset: auto 0 0 0;
+                                border-radius: 0 0 var(--border-radius) var(--border-radius);
+                            }
+                        }
+                    }
+                }
+            }
+
+            .items-list {
+                flex: 1;
+                margin-bottom: calc(var(--item-cell-size) + var(--gap));
+                margin-top: var(--gap);
+
+                .items-grid {
+                    @include inventory-grid(var(--item-cell-size));
+
+                    .inner-item {
+                        .vignette {
+                            &.quantity {
+                                width: 3ch;
+                                font-size: 0.8em;
+                                bottom: -2px;
+                                right: -2px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#pf2e-toolbelt-inventory-cursor-image {
+    width: 32px;
+    aspect-ratio: 1/1;
+    position: fixed;
+    border-radius: 4px;
+    z-index: 2147483647;
+    opacity: 0.7;
+    pointer-events: none;
+}

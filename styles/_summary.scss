@@ -1,22 +1,6 @@
 .app.sheet.actor.character .sheet-content > .tab[data-tab='spellcasting'] {
-    &.toggled {
-        > .directory-list:not(.summary) {
-            display: none;
-        }
-    }
-
-    &:not(.toggled) {
-        > .directory-list.summary {
-            display: none;
-        }
-    }
-
-    > .directory-list.summary {
+    > .spell-list.alternate {
         margin-bottom: 3em;
-
-        .spellbook-header .item-controls {
-            padding: 0;
-        }
 
         .virtual {
             position: relative;
@@ -40,6 +24,7 @@
 
         .item {
             display: grid;
+            row-gap: 0;
             grid:
                 'name type cast-spell range' auto
                 'content content content content' auto/10fr 6fr 2fr 4fr;
@@ -54,6 +39,10 @@
                         }
                     }
                 }
+
+                .item-image {
+                    cursor: pointer;
+                }
             }
 
             .spell-type {
@@ -66,7 +55,23 @@
 
             .spell-range {
                 grid-area: range;
-                text-align: end;
+                justify-content: end;
+            }
+
+            &:not(.header-row) {
+                .spell-range {
+                    padding-right: 0.1em;
+                }
+            }
+
+            &.header-row {
+                .item-controls {
+                    padding: 0;
+                }
+
+                .spell-range {
+                    padding-right: 0.5em;
+                }
             }
 
             .item-summary {
@@ -84,9 +89,9 @@
                 }
             }
 
-            &.ritual:not(.spell-level-header) {
+            &.ritual:not(.header-row) {
                 .spell-range {
-                    padding-right: 1em;
+                    padding-right: 0.5em;
                 }
             }
 
@@ -110,29 +115,27 @@
                     }
                 }
             }
-        }
 
-        .expended {
-            .item-name,
-            .uses-label,
-            .spell-range {
-                color: var(--color-disabled);
-                text-decoration: line-through;
+            &.expended {
+                .item-name,
+                .uses-label,
+                .spell-range {
+                    color: var(--color-disabled);
+                    text-decoration: line-through;
+                }
+
+                button {
+                    background: var(--color-disabled);
+                    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+                    cursor: not-allowed;
+                }
             }
-        }
 
-        .cast-spell {
-            button:disabled {
-                background: var(--color-disabled);
-                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-                cursor: not-allowed;
-            }
-        }
-
-        .spell-type {
-            .item-toggle-prepare {
-                margin-left: 0.25em;
-                color: var(--body);
+            .spell-type {
+                .item-toggle-prepare {
+                    margin-left: 0.25em;
+                    color: var(--body);
+                }
             }
         }
     }
