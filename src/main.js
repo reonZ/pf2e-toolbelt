@@ -1,7 +1,9 @@
 import { registerArp } from "./features/arp";
+import { registerDebug } from "./features/debug";
 import { registerEffectsPanelHelper } from "./features/effects";
 import { registerGiveth } from "./features/giveth";
 import { registerHeroActions } from "./features/hero";
+import { registerInventory } from "./features/inventory";
 import { registerKnowledges } from "./features/knowledges";
 import { registerMerge } from "./features/merge";
 import { registerHideModifiers } from "./features/modifiers";
@@ -33,6 +35,8 @@ const FEATURES = [
 	registerShare(),
 	registerTargetTokenHelper(),
 	registerUntarget(),
+	registerInventory(),
+	registerDebug(),
 ];
 
 const CONFLICTS = new Set();
