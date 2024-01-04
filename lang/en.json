@@ -2,6 +2,10 @@
     "pf2e-toolbelt": {
         "settings": {
             "client": "Client Settings",
+            "inventory": {
+                "name": "Fun Inventory",
+                "hint": "Offers the ability to toggle between the regular and an alternate version of the character sheet's `Inventory` tab at any moment by clicking once more on the tab icon."
+            },
             "nobulk": {
                 "name": "No Dropped Bulk",
                 "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
@@ -345,6 +349,11 @@
                 "enemies": "Enemies",
                 "allies": "Allies",
                 "all": "Both"
+            }
+        },
+        "inventory": {
+            "identifier": {
+                "error": "The sheet has been refreshed in between the start of the drag action and the drop, the action is therefor being canceled."
             }
         },
         "macros": {

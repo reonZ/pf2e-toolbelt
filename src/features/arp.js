@@ -1,5 +1,6 @@
 import { registerWrapper, wrapperError } from "../shared/libwrapper";
 import { info } from "../shared/notification";
+import { HANDWRAPS_SLUG } from "../shared/pf2e/item";
 import { choiceSettingIsEnabled, getSetting } from "../shared/settings";
 
 const PREPARE_WEAPON_DATA =
@@ -11,8 +12,6 @@ const PREPARE_ARMOR_DATA =
 	"CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData";
 const PREPARE_ARMOR_DERIVED_DATA =
 	"CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData";
-
-const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 
 export function registerArp() {
 	return {

@@ -1,19 +1,11 @@
 import { MODULE_ID } from "../module";
-import { characterSheetExtraTab } from "../shared/actor";
-import { createChoicesHook } from "../shared/hook";
 import {
-	localeCompare,
-	ordinalString,
-	refreshCharacterSheets,
-} from "../shared/misc";
+	registerCharacterSheetExtraTab,
+	unregisterCharacterSheetExtraTab,
+} from "../shared/actor";
+import { localeCompare, ordinalString } from "../shared/misc";
 import { spellSlotGroupIdToNumber } from "../shared/pf2e/misc";
 import { getSetting } from "../shared/settings";
-
-const setHook = createChoicesHook(
-	"renderCharacterSheetPF2e",
-	renderCharacterSheetPF2e,
-	() => refreshCharacterSheets(),
-);
 
 export function registerSpellsSummary() {
 	return {
@@ -24,25 +16,28 @@ export function registerSpellsSummary() {
 				default: "disabled",
 				scope: "client",
 				choices: ["disabled", "enabled", "sort"],
-				onChange: (value) => setHook(value),
+				onChange: (value) => setup(value),
 			},
 		],
 		conflicts: ["pf2e-spells-summary"],
-		init: (isGm) => {
-			if (getSetting("summary") !== "disabled") setHook(true, true);
+		ready: (isGm) => {
+			setup();
 		},
 	};
 }
 
-async function renderCharacterSheetPF2e(sheet, html) {
-	characterSheetExtraTab({
-		sheet,
-		html,
-		tabName: "spellcasting",
-		templateFolder: "summary/sheet",
-		getData,
-		addEvents,
-	});
+function setup(value) {
+	const enabled = (value ?? getSetting("summary")) !== "disabled";
+	if (enabled) {
+		registerCharacterSheetExtraTab({
+			tabName: "spellcasting",
+			templateFolder: "summary/sheet",
+			getData,
+			addEvents,
+		});
+	} else {
+		unregisterCharacterSheetExtraTab("spellcasting");
+	}
 }
 
 function addEvents(html, sheet, actor) {

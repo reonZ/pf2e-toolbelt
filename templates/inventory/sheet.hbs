@@ -1,0 +1,105 @@
+<div class="alternate">
+    <div class="equipped-items" data-area="equipped">
+        <div class="main-items">
+            <div class="large hand left" data-equipped-slot="left-hand">
+                <div class="item fake"></div>
+                {{#if equipped.hands.[0]}}
+                {{> item item=equipped.hands.[0]}}
+                {{/if}}
+            </div>
+            <div class="large armor" data-equipped-slot="armor">
+                <div class="item fake"></div>
+                {{#if equipped.armor.[0]}}
+                {{> item item=equipped.armor.[0]}}
+                {{/if}}
+            </div>
+            <div class="large hand right" data-equipped-slot="right-hand">
+                <div class="item fake"></div>
+                {{#if equipped.hands.[1]}}
+                {{> item item=equipped.hands.[1] twoHands=(and equipped.hands.[0] (eq equipped.hands.[0] equipped.hands.[1]))}}
+                {{/if}}
+            </div>
+        </div>
+
+        {{#each equipped.others as |item|}}
+        {{> item item=item}}
+        {{/each}}
+        <div class="item add">
+            <div class="inner-item">
+                <i class="fa-solid fa-gem invest"></i>
+                <i class="fa-solid fa-user equip"></i>
+                <i class="fa-solid fa-ban forbidden"></i>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    {{#each tabs as |tab|}}
+    <div class="container-tab{{#if (eq @root.selectedTab tab.id)}} active{{/if}}" data-tab-id="{{ifThen tab.id tab.id 'undefined'}}">
+        <div class="containers" data-area="containers">
+            <div class="item container" {{#if tab.item}}data-container-id="undefined" {{/if}}>
+                <div class="inner-item" style="background-image: url({{@root.actor.img}});"></div>
+            </div>
+            {{#if tab.item}}
+            {{#each tab.parents as |container|}}
+            {{> container container=container}}
+            {{/each}}
+            {{> container container=tab.item class='back' anonymous=true}}
+            {{/if}}
+            {{#each tab.containers as |container|}}
+            {{> container container=container}}
+            {{/each}}
+            {{#each tab.trailings as |container|}}
+            {{> container container=container class='small'}}
+            {{/each}}
+        </div>
+
+        <hr>
+
+        <div class="items-list" data-area="items-list">
+            <div class="items-grid" data-area="items-grid" data-tab-id="{{ifThen tab.id tab.id 'undefined'}}">
+                {{#each tab.matrix as |item|}}
+                {{> item item=item}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+
+{{#*inline "item"}}
+<div class="item {{#if item.isInvested}} invested{{/if}}" {{#if item}} {{#if twoHands}} data-two-hands="{{twoHands}}" {{else}}
+    data-item-id="{{item.id}}" {{/if}} data-item-img="{{item.img}}" {{/if}}>
+    <div class="inner-item {{item.rarity}}" {{#if item}} style="background-image: url({{item.img}});" {{/if}}>
+        {{#if (and item.isIdentified (ne item.isInvested null))}}
+        <div class="vignette icon equip">
+            <i class="fa-solid fa-gem invested"></i>
+            <i class="fa-light fa-gem equipped"></i>
+        </div>
+        {{else}}
+        {{#with item.uses as |uses|}}
+        {{#if (gt uses.max 1)}}
+        <span class="vignette uses">{{uses.value}}/{{uses.max}}</span>
+        {{/if}}
+        {{/with}}
+        {{/if}}
+        <input class="vignette quantity" type="number" min="0" value="{{item.quantity}}">
+        {{#if item.handsHeld}}
+        <div class="vignette icon hands">
+            <i class="fa-solid fa-hand-back-fist hand"></i>
+            <i class="fa-{{item.handsHeld}} fa-inverse fa-solid number"></i>
+        </div>
+        {{/if}}
+    </div>
+</div>
+{{/inline}}
+
+
+{{#*inline "container"}}
+<div class="item container {{class}}" {{#unless anonymous}}data-container-id="{{container.id}}" {{/unless}}>
+    <div class="inner-item {{container.rarity}}" style="background-image: url({{container.img}});">
+        <span class="vignette capacity">{{@root.containerBulk container}}</span>
+    </div>
+</div>
+{{/inline}}
