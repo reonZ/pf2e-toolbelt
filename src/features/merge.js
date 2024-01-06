@@ -198,7 +198,7 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
 		const { options, total, terms } = roll;
 		const term = terms[0];
 		const formula = roll.formula
-			.replaceAll(/(\[[\w,]+\])/g, "")
+			.replaceAll(/(\[[\w,-]+\])/g, "")
 			.replace(/^\(/, "")
 			.replace(/\)$/, "");
 		const group = groupedRolls.find(
