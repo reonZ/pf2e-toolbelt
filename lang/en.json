@@ -3,7 +3,7 @@
         "settings": {
             "client": "Client Settings",
             "inventory": {
-                "name": "Fun Inventory",
+                "name": "Inventory",
                 "hint": "Offers the ability to toggle between the regular and an alternate version of the character sheet's `Inventory` tab at any moment by clicking once more on the tab icon."
             },
             "nobulk": {

@@ -1,3 +1,21 @@
+# 1.30.0
+
+-   this is a `5.12.0` release
+-   `Spell Summary` updates:
+    -   updated to use the new system data
+    -   added the prepared toggle button to cantrips as is now done in the system
+    -   now grey out expended spell images
+    -   fixed focus spell category label
+    -   fixed overall broken styling
+-   `Multi Cast` updates:
+    -   updated to use the new system data
+-   `Merge Damage` updates:
+    -   fixed error with formulas with hyphened damage types, the error wasn't preventing the feature from working but was still an eyesore in the console
+-   added a new `Inventory` client setting:
+    -   this is a work in progress and is more of a gimmick than an actual useful feature
+    -   it offers the ability to toggle between the regular and an alternate version of the character sheet's `Inventory` tab at any moment by clicking once more on the tab icon
+    -   you can drag & drop item icons around to rearange them or directly equip/invest them depending on where they are dropped
+
 # 1.29.2
 
 -   due to issues with settings migration, some settings needed to be completely reset to their default value:
