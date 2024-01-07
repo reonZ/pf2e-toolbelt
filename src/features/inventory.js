@@ -18,6 +18,7 @@ import {
 	setInMemory,
 } from "../shared/misc";
 import { error } from "../shared/notification";
+import { templatePath } from "../shared/path";
 import {
 	canBeInvested,
 	hasWornSlot,
@@ -34,6 +35,8 @@ const closeHook = createHook(
 	"closeCharacterSheetPF2e",
 	closeCharacterSheetPF2e,
 );
+
+let dragging = false;
 
 export function registerInventory() {
 	return {
@@ -69,6 +72,7 @@ function setup(value) {
 			templateFolder: "inventory/sheet",
 			getData,
 			addEvents,
+			onRender,
 		});
 	} else {
 		unregisterCharacterSheetExtraTab("inventory");
@@ -86,6 +90,14 @@ function closeCharacterSheetPF2e(sheet, html) {
 	if (!data) return;
 
 	setFlag(actor, "inventory", data);
+}
+
+function onRender(actor, sheet, inner) {
+	const sidebar = inner.find("> aside");
+	sidebar.css("position", "relative");
+	sidebar.append(
+		"<div id='pf2e-toobelt-inventory-item-details' class='hidden'></div>",
+	);
 }
 
 function getCurrentData(tabElement) {
@@ -323,9 +335,9 @@ async function getData(actor, sheet, tabElement) {
 	};
 }
 
-function addEvents(html, sheet, actor) {
-	const containerTabs = html.find("[data-tab-id]");
-	for (const container of html.find("[data-container-id]")) {
+function addEvents(tab, sheet, actor, inner) {
+	const containerTabs = tab.find("[data-tab-id]");
+	for (const container of tab.find("[data-container-id]")) {
 		container.addEventListener("click", (event) => {
 			const tabId = container.dataset.containerId;
 
@@ -336,12 +348,23 @@ function addEvents(html, sheet, actor) {
 		});
 	}
 
+	const sidebar = inner.find("#pf2e-toobelt-inventory-item-details")[0];
+	const itemElements = tab.find("[data-item-id], [data-container-id]");
+	for (const itemElement of itemElements) {
+		itemElement.addEventListener("mouseenter", (event) =>
+			onItemDetails(event, actor, itemElement, sidebar),
+		);
+		itemElement.addEventListener("mouseleave", (event) => {
+			sidebar.classList.add("hidden");
+		});
+	}
+
 	if (!actor.isOwner) return;
 
 	dragIdentifier = randomID();
 
 	makeDraggable({
-		element: html[0],
+		element: tab[0],
 		selector: "[data-item-id]",
 		filter: "input",
 		draggedClass: "dragged",
@@ -352,15 +375,38 @@ function addEvents(html, sheet, actor) {
 			img: (target) => target.dataset.itemImg,
 		},
 		createGhost: createGhost,
+		onDragStart: () => onDragStart(sidebar),
 		onDragEnd: (event, draggable, options) => onDragEnd(sheet, options),
 		droppables: [
-			containersDroppable(html, sheet),
-			otherEquipmentDroppable(html, sheet),
-			largeEquipmentDroppable(html, sheet),
-			itemsListDroppable(html, sheet),
-			itemsGridDroppabe(html, sheet),
+			containersDroppable(tab, sheet),
+			otherEquipmentDroppable(tab, sheet),
+			largeEquipmentDroppable(tab, sheet),
+			itemsListDroppable(tab, sheet),
+			itemsGridDroppable(tab, sheet),
 		],
 	});
+}
+
+async function onItemDetails(event, actor, itemElement, sidebar) {
+	if (dragging) return;
+
+	let details = itemElement.dataset.details;
+
+	if (!details) {
+		const item = getItemFromElement(actor, itemElement);
+		if (!item) return;
+
+		details = await renderTemplate(templatePath("inventory/details"), { item });
+		itemElement.dataset.details = details;
+	}
+
+	sidebar.innerHTML = details;
+	sidebar.classList.remove("hidden");
+}
+
+function onDragStart(sidebar) {
+	dragging = true;
+	sidebar.classList.add("hidden");
 }
 
 /**
@@ -368,6 +414,7 @@ function addEvents(html, sheet, actor) {
  * @param {Parameters<DraggableDragEndFunction>[2]} options
  */
 function onDragEnd(sheet, { dropped, canceled }) {
+	dragging = false;
 	if (canceled || !dropped) return;
 	setInMemory(sheet, "inventory.requireSave", true);
 }
@@ -387,7 +434,7 @@ function checkIdentifier(draggable) {
 }
 
 /** @returns {DroppableOptions} */
-function itemsGridDroppabe(html, sheet) {
+function itemsGridDroppable(html, sheet) {
 	/** @type {DroppableFunction} */
 	function onDragEnter(event, draggable, droppable) {
 		if (
@@ -844,6 +891,7 @@ function containersDroppable(html, sheet) {
 	return {
 		element: html[0],
 		selector: "[data-container-id]",
+		filter: ".back",
 		purgeOnLeave: true,
 		onDragEnter,
 		onDrop,
@@ -917,7 +965,8 @@ function getItemFromElement(actor, element) {
 	if (!element) return;
 
 	const el = element instanceof HTMLElement ? element : element.element;
-	const itemId = el.dataset.itemId;
+	const { itemId, containerId } = el.dataset;
+	const id = itemId ?? containerId;
 
-	if (itemId) return actor.items.get(itemId);
+	if (id) return actor.items.get(id);
 }

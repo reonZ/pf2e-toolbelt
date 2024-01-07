@@ -370,7 +370,8 @@
                         transform: scale(0.8);
                     }
 
-                    &:not([data-container-id]) {
+                    &:not([data-container-id]),
+                    &.back {
                         filter: grayscale(1);
                     }
 
@@ -423,4 +424,24 @@
     opacity: 0.7;
     pointer-events: none;
     left: -10000px;
+}
+
+#pf2e-toobelt-inventory-item-details {
+    position: absolute;
+    z-index: 100;
+    top: 20%;
+    left: 0;
+    right: 0;
+
+    background: #000;
+    border-radius: 4px;
+    box-shadow: 0 0 0px 1px var(--sidebar-title), 0 0 6px black;
+
+    padding: 4px 6px;
+
+    .header {
+        text-align: center;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--sidebar-title);
+    }
 }

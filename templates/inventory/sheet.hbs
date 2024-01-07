@@ -45,7 +45,7 @@
             {{#each tab.parents as |container|}}
             {{> container container=container}}
             {{/each}}
-            {{> container container=tab.item class='back' anonymous=true}}
+            {{> container container=tab.item class='back'}}
             {{/if}}
             {{#each tab.containers as |container|}}
             {{> container container=container}}
@@ -97,7 +97,7 @@
 
 
 {{#*inline "container"}}
-<div class="item container {{class}}" {{#unless anonymous}}data-container-id="{{container.id}}" {{/unless}}>
+<div class="item container {{class}}" data-container-id="{{container.id}}">
     <div class="inner-item {{container.rarity}}" style="background-image: url({{container.img}});">
         <span class="vignette capacity">{{@root.containerBulk container}}</span>
     </div>

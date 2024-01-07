@@ -49,7 +49,12 @@ async function characterSheetInnerRender(wrapped, data) {
 
 	const element = this.element;
 
-	for (const { tabName, getData, templateFolder } of registered.tabs) {
+	for (const {
+		tabName,
+		getData,
+		templateFolder,
+		onRender,
+	} of registered.tabs) {
 		const innerTab = getCharacterSheetTab(inner, tabName);
 
 		const tabData = await getData(
@@ -62,6 +67,10 @@ async function characterSheetInnerRender(wrapped, data) {
 			templatePath(templateFolder),
 			tabData,
 		);
+
+		if (onRender) {
+			await onRender(actor, this, inner);
+		}
 
 		if (getInMemory(this, `${tabName}.toggled`)) {
 			innerTab.addClass("toggled");
@@ -90,7 +99,7 @@ function characterSheetActiveListeners(wrapped, inner) {
 			);
 
 		const tab = getCharacterSheetTab(inner, tabName);
-		addEvents(tab.find("> .alternate"), this, actor);
+		addEvents(tab.find("> .alternate"), this, actor, inner);
 	}
 }
 
