@@ -1,3 +1,7 @@
+# 1.30.1
+
+-   fixed an error with `Dice So Nice`
+
 # 1.30.0
 
 -   this is a `5.12.0` release
@@ -14,7 +18,7 @@
 -   added a new `Inventory` client setting:
     -   this is a work in progress and is more of a gimmick than an actual useful feature
     -   it offers the ability to toggle between the regular and an alternate version of the character sheet's `Inventory` tab at any moment by clicking once more on the tab icon
-    -   you can drag & drop item icons around to rearange them or directly equip/invest them depending on where they are dropped
+    -   you can drag & drop item icons around to rearrange them or directly equip/invest them depending on where they are dropped
 
 # 1.29.2
 
