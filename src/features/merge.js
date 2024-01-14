@@ -279,7 +279,8 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
 					result.hidden = true;
 				}
 			} else {
-				for (const operand of (term.term ?? term).operands) {
+				const operands = (term.term ?? term).operands ?? [];
+				for (const operand of operands) {
 					setHidden(operand);
 				}
 			}
