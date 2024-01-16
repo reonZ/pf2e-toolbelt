@@ -13,7 +13,7 @@ When disabled, the features will have no impact on your world/client whatsoever.
 This feature is made to replace the `Automatic Bonus Progression` variant rule, instead it will automatically give the `potency`, `striking` and `resilient` runes on character's equipment when appropriate. Nothing else from the regular `Automatic Bonus Progression` will be replicated.
 
 -   Weapons/Strikes with the `alchemical` & `bomb` traits will not receive any weapon potency/striking runes
--   Weapons/Strikes belonging to the `shield` group will not receive any weapon potency/striking runes
+-   Weapons/Strikes belonging to the `shield` group will not receive any weapon potency/striking runes (except `Shield Boss` and `Shield Spikes`)
 -   Weapons/Strikes belonging to the `unarmed` category will not receive any weapon potency/striking runes, those will come from the invested `Handwraps of Mighty Blows`
 
 NOTE: The module will automatically disable the system `Automatic Bonus Progression` variant rule to function properly when this feature is enabled.

@@ -1,3 +1,8 @@
+# 1.31.0
+
+-   `Automatic Rune Progression` updates:
+    -   added exception for `Shield Boss` and `Shield Spikes` to the shield exception (so they get the runes)
+
 # 1.30.1
 
 -   fixed an error with `Dice So Nice`
