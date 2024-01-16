@@ -85,11 +85,15 @@ const WEAPON_STRIKING_PRICE = {
 	3: 31065,
 };
 
+function isShieldWeapon(weapon) {
+	return ["shield-boss", "shield-spikes"].includes(
+		weapon._source.system.baseItem,
+	);
+}
+
 function isValidWeapon(weapon) {
 	const traits = weapon._source.system.traits.value;
-	const group = weapon._source.system.group;
-	const category = weapon._source.system.category;
-	const slug = weapon._source.system.slug;
+	const { group, category, slug } = weapon._source.system;
 
 	if (category === "unarmed" && slug !== HANDWRAPS_SLUG) {
 		return !!weapon.actor.itemTypes.weapon.find(
@@ -102,7 +106,7 @@ function isValidWeapon(weapon) {
 	}
 
 	return (
-		group !== "shield" &&
+		(group !== "shield" || isShieldWeapon(weapon)) &&
 		!traits.includes("alchemical") &&
 		!traits.includes("bomb")
 	);
