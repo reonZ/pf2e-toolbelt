@@ -1,3 +1,7 @@
+# 1.31.1
+
+-   now use a custom localization key for the `Open Sheet` tooltip
+
 # 1.31.0
 
 -   `Automatic Rune Progression` updates:
