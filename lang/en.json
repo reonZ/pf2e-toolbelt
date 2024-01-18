@@ -339,6 +339,9 @@
                         "withoutOffset": "Result: ({die}) {success}"
                     },
                     "dcWithValue": "DC {dc}"
+                },
+                "row": {
+                    "sheet": "Open Sheet"
                 }
             },
             "menu": {

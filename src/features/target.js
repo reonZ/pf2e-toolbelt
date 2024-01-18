@@ -600,6 +600,7 @@ async function getMessageData(message) {
 						save: hasSave && templateSave,
 						canReroll: targetSave?.canReroll,
 						rerolled: REROLL[targetSave?.rerolled],
+						i18n: subLocalize("target.chat.row"),
 					}),
 				};
 			}),
