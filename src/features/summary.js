@@ -85,13 +85,13 @@ function onToggleFocusPool(event, actor) {
 function onChargesReset(sheet, actor, entryId) {
 	if (game.modules.get("pf2e-staves")?.active) {
 		const original = getSpellcastingTab(sheet.element).find(
-			".directory-list.spellcastingEntry-list"
+			".directory-list.spellcastingEntry-list",
 		);
 		const entry = original.find(
-			`.item-container.spellcasting-entry[data-item-id=${entryId}]`
+			`.item-container.spellcasting-entry[data-item-id=${entryId}]`,
 		);
 		const btn = entry.find(
-			".spell-ability-data .statistic-values a.pf2e-staves-charge"
+			".spell-ability-data .statistic-values a.pf2e-staves-charge",
 		);
 		btn[0]?.click();
 		return;
@@ -136,7 +136,7 @@ async function onItemToChat(event, actor) {
 
 function getSpellcastingTab(html) {
 	return html.find(
-		"section.sheet-body .sheet-content > .tab[data-tab=spellcasting]"
+		"section.sheet-body .sheet-content > .tab[data-tab=spellcasting]",
 	);
 }
 
@@ -151,8 +151,8 @@ async function getData(actor) {
 	const chargesPath = pf2eStavesActive
 		? "flags.pf2e-staves.charges"
 		: pf2eDailiesActive
-		? "flags.pf2e-dailies.staff.charges"
-		: "";
+		  ? "flags.pf2e-dailies.staff.charges"
+		  : "";
 
 	const spells = [];
 	const focuses = [];
@@ -218,8 +218,8 @@ async function getData(actor) {
 						inputPath: isCharge
 							? chargesPath
 							: data.isInnate
-							? "system.location.uses.value"
-							: `system.slots.slot${groupNumber}.value`,
+							  ? "system.location.uses.value"
+							  : `system.slots.slot${groupNumber}.value`,
 						isCharge,
 						isActiveCharge: isCharge && stavesActive,
 						isBroken,
@@ -235,34 +235,34 @@ async function getData(actor) {
 							isCharge && !isCantrip
 								? !charges.canPayCost(groupNumber)
 								: expended ??
-									(isFocus && !isCantrip ? focusPool.value <= 0 : false),
+								  (isFocus && !isCantrip ? focusPool.value <= 0 : false),
 						action: spell.system.time.value,
 						type: isCharge
 							? `${MODULE_ID}.summary.staff`
 							: data.isInnate
-							? "PF2E.PreparationTypeInnate"
-							: data.isSpontaneous
-							? "PF2E.PreparationTypeSpontaneous"
-							: data.isFlexible
-							? "PF2E.SpellFlexibleLabel"
-							: isFocus
-							? "PF2E.TraitFocus"
-							: isScroll
-							? `${MODULE_ID}.summary.scroll`
-							: isWand
-							? `${MODULE_ID}.summary.wand`
-							: "PF2E.SpellPreparedLabel",
+							  ? "PF2E.PreparationTypeInnate"
+							  : data.isSpontaneous
+								  ? "PF2E.PreparationTypeSpontaneous"
+								  : data.isFlexible
+									  ? "PF2E.SpellFlexibleLabel"
+									  : isFocus
+										  ? "PF2E.TraitFocus"
+										  : isScroll
+											  ? `${MODULE_ID}.summary.scroll`
+											  : isWand
+												  ? `${MODULE_ID}.summary.wand`
+										  		  : "PF2E.SpellPreparedLabel",
 						order: isCharge
 							? 0
 							: data.isPrepared
-							? 1
-							: isFocus
-							? 2
-							: data.isInnate
-							? 3
-							: data.isSpontaneous
-							? 4
-							: 5,
+							  ? 1
+							  : isFocus
+								  ? 2
+								  : data.isInnate
+									  ? 3
+									  : data.isSpontaneous
+										  ? 4
+										  : 5,
 						noHover: data.isPrepared || isCantrip || isBroken || isFocus,
 					});
 				}
@@ -280,7 +280,7 @@ async function getData(actor) {
 					spells[groupNumber].push(...slotSpells);
 				}
 			}
-		})
+		}),
 	);
 
 	if (spells.length) {
@@ -315,7 +315,7 @@ async function getData(actor) {
 				rank: spell.rank,
 				time: spell.system.time.value,
 			}))
-			.filter(Boolean)
+			.filter(Boolean),
 	);
 
 	return {
