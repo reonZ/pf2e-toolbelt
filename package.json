@@ -1,0 +1,21 @@
+{
+    "name": "pf2e-toolbelt",
+    "scripts": {
+        "build": "esbuild src/main.js --bundle --keep-names --minify --sourcemap --outdir=scripts",
+        "dev": "esbuild src/main.js --bundle --keep-names --watch --outdir=scripts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/reonZ/pf2e-toolbelt.git"
+    },
+    "author": "Idle",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/reonZ/pf2e-toolbelt/issues"
+    },
+    "homepage": "https://github.com/reonZ/pf2e-toolbelt#readme",
+    "devDependencies": {
+        "@biomejs/biome": "1.5.x",
+        "esbuild": "0.x"
+    }
+}
