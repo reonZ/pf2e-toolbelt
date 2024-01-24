@@ -8,7 +8,7 @@ import {
 } from "../shared/flags";
 import { createChoicesHook, createHook } from "../shared/hook";
 import { localize, subLocalize } from "../shared/localize";
-import { getInMemory, setInMemory } from "../shared/misc";
+import { deleteInMemory, getInMemory, setInMemory } from "../shared/misc";
 import { warn } from "../shared/notification";
 import { templatePath } from "../shared/path";
 import {
@@ -617,10 +617,20 @@ async function getTargetFromEvent(event) {
 	return fromUuid(targetUuid);
 }
 
+function isRollingSave(message, target) {
+	return getInMemory(message, `target.save.${target.id}`);
+}
+
+function setRollingSave(message, target) {
+	setInMemory(message, `target.save.${target.id}`, true);
+}
+
 async function rerollSave(event, message, { dc }) {
 	const target = await getTargetFromEvent(event);
 	const actor = target?.actor;
 	if (!actor) return;
+
+	if (isRollingSave(message, target)) return;
 
 	const flag = getFlag(message, `target.saves.${target.id}`);
 	if (!flag?.roll || flag.rerolled) return;
@@ -681,6 +691,8 @@ async function rerollSave(event, message, { dc }) {
 		});
 	}
 
+	setRollingSave(message, target);
+
 	const oldRoll = Roll.fromJSON(flag.roll);
 	const unevaluatedNewRoll = oldRoll.clone();
 	unevaluatedNewRoll.options.isReroll = true;
@@ -694,7 +706,7 @@ async function rerollSave(event, message, { dc }) {
 
 	const newRoll = await unevaluatedNewRoll.evaluate({ async: true });
 	await roll3dDice(newRoll);
-	
+
 	Hooks.callAll(
 		"pf2e.reroll",
 		Roll.fromJSON(flag.roll),
@@ -749,8 +761,12 @@ async function rollSave(event, message, { dc, statistic }) {
 	const actor = target?.actor;
 	if (!actor) return;
 
+	if (isRollingSave(message, target)) return;
+
 	const save = actor.saves[statistic];
 	if (!save) return;
+
+	setRollingSave(message, target);
 
 	const item = (() => {
 		const item = message.item;
@@ -803,16 +819,18 @@ async function rollSave(event, message, { dc, statistic }) {
 	});
 }
 
-function updateMessageSave({ message, target, data }) {
+async function updateMessageSave({ message, target, data }) {
 	if (typeof message === "string") {
 		message = game.messages.get(message);
 		if (!message) return;
 	}
 
-	if (typeof data.success === "number")
+	if (typeof data.success === "number") {
 		data.success = DEGREE_OF_SUCCESS[data.success];
+	}
 
-	setFlag(message, `target.saves.${target}`, deepClone(data));
+	await setFlag(message, `target.saves.${target}`, deepClone(data));
+	deleteInMemory(message, `target.save.${target}`);
 }
 
 async function openTargetSheet(event) {
