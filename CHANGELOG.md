@@ -1,3 +1,8 @@
+# 1.32.0
+
+-   `Target Token Helper` updates:
+    -   added support for `Dice So Nice` when rolling inline saves
+
 # 1.31.1
 
 -   now use a custom localization key for the `Open Sheet` tooltip
