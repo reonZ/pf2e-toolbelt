@@ -2,6 +2,7 @@
 
 -   `Target Token Helper` updates:
     -   added support for `Dice So Nice` when rolling inline saves
+    -   added a anti-spam to prevent users from clicking more than once on an inline save button
 
 # 1.31.1
 
