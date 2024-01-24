@@ -178,7 +178,9 @@
         },
         "summary": {
             "staff": "Staff",
-            "charges": "Charges"
+            "charges": "Charges",
+            "wand": "Wand",
+            "scroll": "Scroll"
         },
         "giveth": {
             "giveth": "Giveth to {target}",

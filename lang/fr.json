@@ -121,7 +121,9 @@
         },
         "summary": {
             "staff": "Bâton",
-            "charges": "Charges"
+            "charges": "Charges",
+            "wand": "Baguette",
+            "scroll": "Parchemin"
         },
         "giveth": {
             "giveth": "Donné à {target}",

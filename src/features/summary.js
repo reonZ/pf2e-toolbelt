@@ -248,9 +248,9 @@ async function getData(actor) {
               : isFocus
               ? "PF2E.TraitFocus"
               : isScroll
-              ? "Scroll"
+              ? `${MODULE_ID}.summary.scroll`
               : isWand
-              ? "Wand"
+              ? `${MODULE_ID}.summary.wand`
               : "PF2E.SpellPreparedLabel",
             order: isCharge
               ? 0

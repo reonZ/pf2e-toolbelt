@@ -4629,7 +4629,7 @@ border-radius: 2px; white-space: nowrap; word-break: break-all;">${label}</span>
               uses: uses ?? (isCharge ? charges : group.uses),
               expended: isCharge && !isCantrip ? !charges.canPayCost(groupNumber) : expended ?? (isFocus && !isCantrip ? focusPool.value <= 0 : false),
               action: spell.system.time.value,
-              type: isCharge ? `${MODULE_ID}.summary.staff` : data.isInnate ? "PF2E.PreparationTypeInnate" : data.isSpontaneous ? "PF2E.PreparationTypeSpontaneous" : data.isFlexible ? "PF2E.SpellFlexibleLabel" : isFocus ? "PF2E.TraitFocus" : isScroll ? "Scroll" : isWand ? "Wand" : "PF2E.SpellPreparedLabel",
+              type: isCharge ? `${MODULE_ID}.summary.staff` : data.isInnate ? "PF2E.PreparationTypeInnate" : data.isSpontaneous ? "PF2E.PreparationTypeSpontaneous" : data.isFlexible ? "PF2E.SpellFlexibleLabel" : isFocus ? "PF2E.TraitFocus" : isScroll ? `${MODULE_ID}.summary.scroll` : isWand ? `${MODULE_ID}.summary.wand` : "PF2E.SpellPreparedLabel",
               order: isCharge ? 0 : data.isPrepared ? 1 : isFocus ? 2 : data.isInnate ? 3 : data.isSpontaneous ? 4 : 5,
               noHover: data.isPrepared || isCantrip || isBroken || isFocus
             });
