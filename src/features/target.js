@@ -1,4 +1,5 @@
 import { bindOnPreCreateSpellDamageChatMessage } from "../shared/chat";
+import { roll3dDice } from "../shared/dicesonice";
 import {
 	getFlag,
 	moduleFlagUpdate,
@@ -692,6 +693,8 @@ async function rerollSave(event, message, { dc }) {
 	);
 
 	const newRoll = await unevaluatedNewRoll.evaluate({ async: true });
+	await roll3dDice(newRoll);
+	
 	Hooks.callAll(
 		"pf2e.reroll",
 		Roll.fromJSON(flag.roll),
@@ -775,7 +778,8 @@ async function rollSave(event, message, { dc, statistic }) {
 		origin: actor,
 		skipDialog: event.shiftKey ? !skipDefault : skipDefault,
 		createMessage: false,
-		callback: (roll, __, msg) => {
+		callback: async (roll, __, msg) => {
+			await roll3dDice(roll);
 			packet.data = {
 				value: roll.total,
 				die: roll.dice[0].total,
