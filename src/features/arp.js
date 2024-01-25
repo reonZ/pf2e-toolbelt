@@ -162,7 +162,7 @@ function onPrepareWeaponDerivedData(wrapped) {
 		coins = new game.pf2e.Coins(coins);
 
 		if ((potency || striking) && !this.system.runes.property.length) {
-			coins = coins.add(this._source.system.price.value);
+			coins = coins.plus(this._source.system.price.value);
 		}
 
 		this.system.price.value = coins;
@@ -238,7 +238,7 @@ function onPrepareArmorDerivedData(wrapped) {
 		coins = new game.pf2e.Coins(coins);
 
 		if ((potency || resiliency) && !this.system.runes.property.length) {
-			coins = coins.add(this._source.system.price.value);
+			coins = coins.plus(this._source.system.price.value);
 		}
 
 		this.system.price.value = coins;
