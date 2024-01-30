@@ -2,7 +2,7 @@
     "name": "pf2e-toolbelt",
     "scripts": {
         "build": "esbuild src/main.js --bundle --keep-names --minify --sourcemap --outdir=scripts",
-        "dev": "esbuild src/main.js --bundle --keep-names --watch --outdir=scripts"
+        "dev": "esbuild src/main.js --bundle --keep-names --watch --sourcemap --outdir=scripts"
     },
     "repository": {
         "type": "git",
