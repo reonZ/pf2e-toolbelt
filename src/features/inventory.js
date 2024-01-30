@@ -4,21 +4,9 @@ import {
 	registerCharacterSheetExtraTab,
 	unregisterCharacterSheetExtraTab,
 } from "../shared/actor";
-import {
-	closestInside,
-	makeDraggable,
-	newClassList,
-} from "../shared/draggable";
+import { closestInside, makeDraggable } from "../shared/draggable";
 import { getFlag, setFlag } from "../shared/flags";
 import { createHook } from "../shared/hook";
-import {
-	getElementIndex,
-	getInMemory,
-	indexIsValid,
-	setInMemory,
-} from "../shared/misc";
-import { error } from "../shared/notification";
-import { templatePath } from "../shared/path";
 import {
 	canBeInvested,
 	hasWornSlot,
@@ -28,7 +16,15 @@ import {
 	isOneHanded,
 	isTwoHanded,
 	itemCarryUpdate,
-} from "../shared/pf2e/item";
+} from "../shared/item";
+import {
+	getElementIndex,
+	getInMemory,
+	indexIsValid,
+	setInMemory,
+} from "../shared/misc";
+import { error } from "../shared/notification";
+import { templatePath } from "../shared/path";
 import { getSetting } from "../shared/settings";
 
 const closeHook = createHook(

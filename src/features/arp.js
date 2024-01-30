@@ -1,6 +1,6 @@
+import { HANDWRAPS_SLUG } from "../shared/item";
 import { registerWrapper, wrapperError } from "../shared/libwrapper";
 import { info } from "../shared/notification";
-import { HANDWRAPS_SLUG } from "../shared/pf2e/item";
 import { choiceSettingIsEnabled, getSetting } from "../shared/settings";
 
 const PREPARE_WEAPON_DATA =
