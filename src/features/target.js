@@ -140,7 +140,7 @@ async function createMeasuredTemplate(template, _, userId) {
 
 	const localize = subLocalize("target.menu");
 	const item = template.item;
-	const actor = item?.actor;
+	const actor = template.actor;
 	const self = !actor ? undefined : actor.token ?? actor.getActiveTokens()[0];
 
 	const data = {
