@@ -1,8 +1,15 @@
+#
+
+-   this is a `5.13.0` release
+-   updated the different helpers and data changes made in the system
+-   `Target Token Helper` updates:
+    -   made possible to use the `Target Self` option for inline templates
+
 # 1.32.0
 
 -   `Target Token Helper` updates:
     -   added support for `Dice So Nice` when rolling inline saves
-    -   added a anti-spam to prevent users from clicking more than once on an inline save button
+    -   added an anti-spam to prevent users from clicking more than once on an inline save button
 
 # 1.31.1
 
