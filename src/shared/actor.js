@@ -9,6 +9,8 @@ const registered = {
 
 const CHARACTER_SHEET_INNER_RENDER =
 	"CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._renderInner";
+const CHARACTER_SHEET_RENDER =
+	"CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._render";
 const CHARACTER_SHEET_ACTIVE_LISTENERS =
 	"CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.activateListeners";
 
@@ -19,6 +21,7 @@ export function isPlayedActor(actor) {
 export function registerCharacterSheetExtraTab(options) {
 	if (!registered.wrapperIds.length) {
 		registered.wrapperIds = [
+			registerWrapper(CHARACTER_SHEET_RENDER, characterSheetRender),
 			registerWrapper(CHARACTER_SHEET_INNER_RENDER, characterSheetInnerRender),
 			registerWrapper(
 				CHARACTER_SHEET_ACTIVE_LISTENERS,
@@ -36,6 +39,28 @@ export function unregisterCharacterSheetExtraTab(tabName) {
 			unregisterWrapper(wrapperId);
 		}
 		registered.wrapperIds = [];
+	}
+}
+
+async function characterSheetRender(wrapped, ...args) {
+	const positions = {};
+
+	for (const { tabName } of registered.tabs) {
+		const existingTab = getCharacterSheetTab(this.element, tabName);
+		const existingAlternate = existingTab.find(".alternate")[0];
+		if (!existingAlternate) continue;
+		positions[tabName] = existingAlternate.scrollTop;
+	}
+
+	await wrapped(...args);
+
+	for (const { tabName } of registered.tabs) {
+		const oldPosition = positions[tabName];
+		if (!oldPosition) continue;
+
+		const tab = getCharacterSheetTab(this.element, tabName);
+		const alternate = tab.find(".alternate")[0];
+		alternate.scrollTop = positions[tabName];
 	}
 }
 
