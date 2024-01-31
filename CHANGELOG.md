@@ -1,9 +1,13 @@
-#
+# 1.33.0
 
 -   this is a `5.13.0` release
 -   updated the different helpers and data changes made in the system
 -   `Target Token Helper` updates:
     -   made possible to use the `Target Self` option for inline templates
+-   `Spell Summary` updates:
+    -   do not display the sub tabs added by the system with the alternate version
+    -   fixed the `Range` label
+    -   properly restore the alternate tab scroll position on sheet render
 
 # 1.32.0
 
