@@ -178,7 +178,8 @@
         },
         "summary": {
             "staff": "Staff",
-            "charges": "Charges"
+            "charges": "Charges",
+            "range": "Range"
         },
         "giveth": {
             "giveth": "Giveth to {target}",
