@@ -3,6 +3,7 @@ import {
 	registerCharacterSheetExtraTab,
 	unregisterCharacterSheetExtraTab,
 } from "../shared/actor";
+import { subLocalize } from "../shared/localize";
 import { localeCompare, ordinalString } from "../shared/misc";
 import { spellSlotGroupIdToNumber } from "../shared/pf2e/misc";
 import { getSetting } from "../shared/settings";
@@ -318,6 +319,7 @@ async function getData(actor) {
 		focusPool,
 		hasFocusCantrips,
 		isOwner: actor.isOwner,
+		i18n: subLocalize("summary"),
 		entryRank: (rank) =>
 			game.i18n.format("PF2E.Item.Spell.Rank.Ordinal", {
 				rank: ordinalString(rank),

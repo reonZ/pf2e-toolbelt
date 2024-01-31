@@ -1,6 +1,16 @@
 .app.sheet.actor.character .sheet-content > .tab[data-tab='spellcasting'] {
+    &.toggled {
+        > .spell-collections,
+        > .sub-nav {
+            display: none;
+        }
+    }
+
     > .spell-list.alternate {
-        margin-bottom: 3em;
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+        padding: var(--space-8) var(--space-4) 0;
+        border: none;
 
         .virtual {
             position: relative;
@@ -27,7 +37,7 @@
             row-gap: 0;
             grid:
                 'name type cast-spell range' auto
-                'content content content content' auto/10fr 6fr 2fr 4fr;
+                'content content content content' auto/10fr 6fr 2fr 3fr;
 
             .item-name {
                 grid-area: name;

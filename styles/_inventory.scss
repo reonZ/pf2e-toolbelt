@@ -1,4 +1,10 @@
 .app.sheet.actor.character .sheet-content > .tab[data-tab='inventory'] {
+    &.toggled {
+        > .inventory-list {
+            display: none;
+        }
+    }
+
     > .alternate {
         --gap: 5px;
         --cell-padding: 3px;

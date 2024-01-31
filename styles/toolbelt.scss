@@ -16,12 +16,6 @@
 }
 
 .app.sheet.actor.character .sheet-content > .tab {
-    &.toggled {
-        > .directory-list:not(.alternate) {
-            display: none;
-        }
-    }
-
     &:not(.toggled) {
         > .alternate {
             display: none;

@@ -76,7 +76,7 @@ async function characterSheetInnerRender(wrapped, data) {
 			innerTab.addClass("toggled");
 		}
 
-		innerTab.children(":first").after(template);
+		innerTab.children(":last").before(template);
 	}
 
 	return inner;
