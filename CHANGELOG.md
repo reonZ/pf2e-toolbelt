@@ -2,7 +2,7 @@
 
 -   this is a `5.13.1` release
 -   `Spell Summary` updates:
-    -   added summary for rituals
+    -   added description for rituals
     -   added support for wands and scrolls
         -   their type label is `Consumable`
         -   you must first `Draw` the item before being able to `Cast` it
