@@ -1,3 +1,14 @@
+# 1.34.0
+
+-   this is a `5.13.1` release
+-   `Spell Summary` updates:
+    -   added summary for rituals
+    -   added support for wands and scrolls
+        -   their type label is `Consumable`
+        -   you must first `Draw` the item before being able to `Cast` it
+        -   you can modify and reset its charges
+    -   fixed reset icon not being vertically centered
+
 # 1.33.0
 
 -   this is a `5.13.0` release
