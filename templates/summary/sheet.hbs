@@ -30,7 +30,7 @@
     {{#each entry as |spell|}}
     <li class="item spell{{#if spell.isVirtual}} virtual{{/if}}{{#if spell.noHover}} no-hover{{/if}}{{#if spell.isBroken}} broken{{/if}}"
         data-entry-id="{{spell.entryId}}" data-slot-id="{{spell.slotId}}" data-group-id="{{spell.groupId}}" data-item-id="{{spell.itemId}}"
-        data-cast-rank="{{spell.castRank}}" {{#if spell.expended}} data-slot-expended {{/if}}>
+        data-cast-rank="{{spell.castRank}}" {{#if spell.expended}} data-slot-expended {{/if}} data-item-type="spell">
 
         <div class="item-name">
             <div class="item-image framed">
@@ -53,12 +53,13 @@
                 {{/if}}
             </span>
 
-            {{#if (and (not spell.isCantrip) (or spell.isSpontaneous spell.isInnate spell.isActiveCharge))}}
+            {{#if (and (not spell.isCantrip) (or spell.isSpontaneous spell.isInnate spell.isActiveCharge spell.consumable))}}
             <div class="uses">
                 <span class="spell-slots-input">
                     <input type="number" value="{{spell.uses.value}}" data-input-path="{{spell.inputPath}}"
-                        data-entry-id="{{#if spell.isInnate}}{{spell.itemId}}{{else}}{{spell.entryId}}{{/if}}" placeholder="0" min="0"
-                        max="{{spell.uses.max}}" {{disabled (not @root.isOwner)}}>
+                        data-entry-id="{{#if spell.isInnate}}{{spell.itemId}}{{else if spell.consumable}}{{spell.consumable.id}}{{else}}{{spell.entryId}}{{/if}}"
+                        placeholder="0" min="0" max="{{spell.uses.max}}" {{disabled (or (not @root.isOwner) (and spell.uses.autoDestroy (eq
+                        spell.uses.max 1) (lte spell.uses.value 1)))}}>
                 </span>
                 {{#if (and spell.uses.max (not spell.uses.noMax))}}
                 <span class="slash"> / </span>
@@ -67,7 +68,8 @@
                 </span>
                 {{/if}}
                 {{#if @root.isOwner}}
-                <a class="spell-slots-increment-reset" data-item-id="{{#if spell.isInnate}}{{spell.itemId}}{{else}}{{spell.entryId}}{{/if}}"
+                <a class="spell-slots-increment-reset"
+                    data-item-id="{{#if spell.isInnate}}{{spell.itemId}}{{else if spell.consumable}}{{spell.consumable.id}}{{else}}{{spell.entryId}}{{/if}}"
                     data-rank="{{spell.castRank}}" data-is-charge="{{spell.isCharge}}">
                     <i class="fas fa-redo"></i>
                 </a>
@@ -83,8 +85,12 @@
         </div>
 
         {{#if @root.isOwner}}
-        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize
-            "PF2E.CastLabel"}}</button>
+        {{#if (eq spell.consumable.isEquipped false)}}
+        <button type="button" class="cast-spell blue" data-action="draw-item" data-item-id="{{spell.consumable.id}}">{{localize
+            "PF2E.Actions.Interact.Draw.Title"}}</button>
+        {{else}}
+        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize "PF2E.Item.Spell.Cast"}}</button>
+        {{/if}}
         {{/if}}
 
         <div class="spell-range" data-tooltip="{{spell.entryName}}: DC {{spell.entryDc}}">{{spell.range}}</div>

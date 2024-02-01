@@ -119,7 +119,10 @@ function onSlotsReset(event, sheet, actor) {
 	const item = actor.items.get(itemId);
 	if (!item) return;
 
-	if (item.isOfType("spellcastingEntry")) {
+	if (item.isOfType("consumable")) {
+		const max = item.system.uses?.max;
+		if (max) item.update({ "system.uses.value": max });
+	} else if (item.isOfType("spellcastingEntry")) {
 		const slotLevel = rank >= 0 && rank <= 11 ? `slot${rank}` : "slot0";
 		const slot = item.system.slots?.[slotLevel];
 		if (slot) item.update({ [`system.slots.${slotLevel}.value`]: slot.max });
@@ -130,9 +133,14 @@ function onSlotsReset(event, sheet, actor) {
 }
 
 async function onItemToChat(event, actor) {
-	const itemId = $(event.currentTarget).closest(".item").attr("data-item-id");
-	const item = actor.items.get(itemId);
-	item.toMessage(event);
+	const { entryId, itemId, castRank } =
+		event.currentTarget.closest(".item").dataset;
+
+	const collection = actor.spellcasting.collections.get(entryId);
+	if (!collection) return;
+
+	const spell = collection.get(itemId);
+	spell?.toMessage(event, { data: { castRank: Number(castRank ?? NaN) } });
 }
 
 function getSpellcastingTab(html) {
@@ -158,125 +166,167 @@ async function getData(actor) {
 	const spells = [];
 	const focuses = [];
 
+	let rituals;
 	let hasFocusCantrips = false;
 
-	await Promise.all(
-		actor.spellcasting.regular.map(async (entry) => {
-			const entryId = entry.id;
-			const entryDc = entry.statistic.dc.value;
-			const entryName = entry.name;
-			const data = await entry.getSheetData();
-			const isFocus = data.isFocusPool;
-			const isCharge = entry.system?.prepared?.value === "charge";
+	const entries = await Promise.all(
+		actor.spellcasting.collections.map(async (spells) => {
+			return {
+				entry: spells.entry,
+				data: await spells.entry.getSheetData({ spells }),
+			};
+		}),
+	);
 
-			const charges = (() => {
-				if (!isCharge) return;
-
-				const dailiesData =
-					pf2eDailiesActive &&
-					pf2eDailies.api.getSpellcastingEntryStaffData(entry);
-				const { charges, max, canPayCost } = dailiesData ??
-					getProperty(entry, "flags.pf2e-staves.charges") ?? {
-						charges: 0,
-						max: 0,
-					};
-
-				return {
-					value: charges,
-					max,
-					noMax: true,
-					canPayCost: canPayCost ?? (() => true),
-				};
-			})();
-
-			for (const group of data.groups) {
-				if (!group.active.length || group.uses?.max === 0) continue;
-
-				const slotSpells = [];
-				const isCantrip = group.id === "cantrips";
-				const groupNumber = spellSlotGroupIdToNumber(group.id);
-				const isBroken = !isCantrip && isCharge && !stavesActive;
-
-				for (let slotId = 0; slotId < group.active.length; slotId++) {
-					const active = group.active[slotId];
-					if (!active || active.uses?.max === 0) continue;
-
-					const { spell, expended, virtual, uses, castRank } = active;
-
-					slotSpells.push({
+	for (const { entry, data } of entries) {
+		if (data.isRitual) {
+			rituals = data.groups.flatMap((slot, slotId) =>
+				slot.active
+					.map(({ spell }) => ({
 						name: spell.name,
 						img: spell.img,
-						range: spell.system.range.value || "-",
-						castRank: castRank ?? spell.rank,
 						slotId,
-						entryId,
-						entryDc,
-						entryName,
 						itemId: spell.id,
-						inputId: data.isInnate ? spell.id : data.id,
-						inputPath: isCharge
-							? chargesPath
-							: data.isInnate
+						rank: spell.rank,
+						time: spell.system.time.value,
+					}))
+					.filter(Boolean),
+			);
+			continue;
+		}
+
+		const entryId = data.id;
+		const entryDc = data.statistic.dc.value;
+		const entryName = data.name;
+		const isFocus = data.isFocusPool;
+		const isCharge = entry.system?.prepared?.value === "charge";
+		const isInnate = data.isInnate;
+		const isPrepared = data.isPrepared;
+		const isSpontaneous = data.isSpontaneous;
+		const isFlexible = data.isFlexible;
+
+		const consumable = (() => {
+			if (data.category !== "items") return;
+			const itemId = entry.id.split("-")[0];
+			return actor.items.get(itemId);
+		})();
+
+		const charges = (() => {
+			if (!isCharge) return;
+
+			const dailiesData =
+				pf2eDailiesActive &&
+				pf2eDailies.api.getSpellcastingEntryStaffData(entry);
+			const { charges, max, canPayCost } = dailiesData ??
+				getProperty(entry, "flags.pf2e-staves.charges") ?? {
+					charges: 0,
+					max: 0,
+				};
+
+			return {
+				value: charges,
+				max,
+				noMax: true,
+				canPayCost: canPayCost ?? (() => true),
+			};
+		})();
+
+		for (const group of data.groups) {
+			if (!group.active.length || group.uses?.max === 0) continue;
+
+			const slotSpells = [];
+			const isCantrip = group.id === "cantrips";
+			const groupNumber = spellSlotGroupIdToNumber(group.id);
+			const isBroken = !isCantrip && isCharge && !stavesActive;
+
+			for (let slotId = 0; slotId < group.active.length; slotId++) {
+				const active = group.active[slotId];
+				if (!active || active.uses?.max === 0) continue;
+
+				const { spell, expended, virtual, uses, castRank } = active;
+
+				slotSpells.push({
+					name: spell.name,
+					img: spell.img,
+					range: spell.system.range.value || "-",
+					castRank: castRank ?? spell.rank,
+					slotId,
+					entryId,
+					entryDc,
+					entryName,
+					itemId: spell.id,
+					inputId: isInnate ? spell.id : data.id,
+					inputPath: consumable
+						? "system.uses.value"
+						: isCharge
+						  ? chargesPath
+						  : isInnate
 							  ? "system.location.uses.value"
 							  : `system.slots.slot${groupNumber}.value`,
-						isCharge,
-						isActiveCharge: isCharge && stavesActive,
-						isBroken,
-						isVirtual: virtual,
-						isInnate: data.isInnate,
-						isCantrip: isCantrip,
-						isFocus,
-						isPrepared: data.isPrepared,
-						isSpontaneous: data.isSpontaneous || data.isFlexible,
-						groupId: group.id,
-						uses: uses ?? (isCharge ? charges : group.uses),
-						expended:
-							isCharge && !isCantrip
-								? !charges.canPayCost(groupNumber)
-								: expended ??
-								  (isFocus && !isCantrip ? focusPool.value <= 0 : false),
-						action: spell.system.time.value,
-						type: isCharge
-							? `${MODULE_ID}.summary.staff`
-							: data.isInnate
+					isCharge,
+					isActiveCharge: isCharge && stavesActive,
+					isBroken,
+					isVirtual: virtual,
+					isInnate,
+					isCantrip,
+					isFocus,
+					isPrepared,
+					isSpontaneous: isSpontaneous || isFlexible,
+					groupId: group.id,
+					consumable,
+					uses: consumable
+						? consumable.system.uses
+						: isCharge
+						  ? charges
+						  : uses ?? group.uses,
+					expended:
+						isCharge && !isCantrip
+							? !charges.canPayCost(groupNumber)
+							: expended ??
+							  (isFocus && !isCantrip ? focusPool.value <= 0 : false),
+					action: spell.system.time.value,
+					type: consumable
+						? "TYPES.Item.consumable"
+						: isCharge
+						  ? `${MODULE_ID}.summary.staff`
+						  : isInnate
 							  ? "PF2E.PreparationTypeInnate"
-							  : data.isSpontaneous
+							  : isSpontaneous
 								  ? "PF2E.PreparationTypeSpontaneous"
-								  : data.isFlexible
+								  : isFlexible
 									  ? "PF2E.SpellFlexibleLabel"
 									  : isFocus
 										  ? "PF2E.TraitFocus"
 										  : "PF2E.SpellPreparedLabel",
-						order: isCharge
-							? 0
-							: data.isPrepared
-							  ? 1
-							  : isFocus
-								  ? 2
-								  : data.isInnate
-									  ? 3
-									  : data.isSpontaneous
-										  ? 4
-										  : 5,
-						noHover: data.isPrepared || isCantrip || isBroken || isFocus,
-					});
-				}
-
-				if (slotSpells.length) {
-					if (isFocus) {
-						if (isCantrip) hasFocusCantrips = true;
-						else {
-							focuses.push(...slotSpells);
-							continue;
-						}
-					}
-
-					spells[groupNumber] ??= [];
-					spells[groupNumber].push(...slotSpells);
-				}
+					order: isCharge
+						? 0
+						: isPrepared
+						  ? 1
+						  : isFocus
+							  ? 2
+							  : isInnate
+								  ? 3
+								  : isSpontaneous
+									  ? 4
+									  : 5,
+					noHover: isPrepared || isCantrip || isBroken || isFocus,
+				});
 			}
-		}),
-	);
+
+			if (slotSpells.length) {
+				if (isFocus) {
+					if (isCantrip) hasFocusCantrips = true;
+					else {
+						focuses.push(...slotSpells);
+						continue;
+					}
+				}
+
+				spells[groupNumber] ??= [];
+				spells[groupNumber].push(...slotSpells);
+			}
+		}
+	}
 
 	if (spells.length) {
 		const sort =
@@ -298,20 +348,6 @@ async function getData(actor) {
 		spells[12] = focuses;
 		hasFocusCantrips = false;
 	}
-
-	const ritualData = await actor.spellcasting.ritual?.getSheetData();
-	const rituals = ritualData?.groups.flatMap((slot, slotId) =>
-		slot.active
-			.map(({ spell }) => ({
-				name: spell.name,
-				img: spell.img,
-				slotId,
-				itemId: spell.id,
-				rank: spell.rank,
-				time: spell.system.time.value,
-			}))
-			.filter(Boolean),
-	);
 
 	return {
 		spells,
