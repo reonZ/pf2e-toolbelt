@@ -1,7 +1,7 @@
 # 1.34.0
 
 -   this is a `5.13.1` release
--   `Spell Summary` updates:
+-   `Spells Summary` updates:
     -   added description for rituals
     -   added support for wands and scrolls
         -   their type label is `Consumable`
@@ -15,7 +15,7 @@
 -   updated the different helpers and data changes made in the system
 -   `Target Token Helper` updates:
     -   made possible to use the `Target Self` option for inline templates
--   `Spell Summary` updates:
+-   `Spells Summary` updates:
     -   do not display the sub tabs added by the system with the alternate version
     -   fixed the `Range` label
     -   properly restore the alternate tab scroll position on sheet render
@@ -42,7 +42,7 @@
 # 1.30.0
 
 -   this is a `5.12.0` release
--   `Spell Summary` updates:
+-   `Spells Summary` updates:
     -   updated to use the new system data
     -   added the prepared toggle button to cantrips as is now done in the system
     -   now grey out expended spell images
