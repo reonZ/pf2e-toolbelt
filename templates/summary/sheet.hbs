@@ -40,7 +40,7 @@
                 {{/if}}
             </div>
             <h4 class="name">
-                <a data-action="toggle-summary">{{spell.name}} </a>
+                <a data-action="toggle-summary">{{spell.name}}</a>
                 {{{actionGlyph spell.action}}}
             </h4>
         </div>
@@ -120,7 +120,10 @@
                 <i class="fa-solid fa-message"></i>
                 {{/if}}
             </div>
-            <h4>{{ritual.name}}</h4>
+            <h4 class="name">
+                <a data-action="toggle-summary">{{ritual.name}}</a>
+                {{{actionGlyph spell.action}}}
+            </h4>
         </div>
 
         <div class="spell-type">{{ritual.time}}</div>
@@ -130,6 +133,8 @@
         {{/if}}
 
         <div class="spell-range">{{ritual.rank}}</div>
+
+        <div class="item-summary" hidden="hidden"></div>
     </li>
     {{/each}}
     {{/if}}
