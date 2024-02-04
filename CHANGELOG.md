@@ -1,3 +1,8 @@
+# 1.35.1
+
+-   `Target Helper` updates:
+    -   always show die result to owned targets save
+
 # 1.35.0
 
 -   removed the `Hide Modifiers` feature now that the system handles it
