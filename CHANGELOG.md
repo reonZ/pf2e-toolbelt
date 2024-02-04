@@ -1,3 +1,7 @@
+# 1.35.3
+
+-   fixed players unable to reroll a save because of the anti-spam feature
+
 # 1.35.2
 
 -   removed `Custom Stances` setting, it hasn't been of use for a while now

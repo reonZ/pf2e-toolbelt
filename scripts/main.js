@@ -1,10 +1,6317 @@
-(()=>{var or=Object.defineProperty;var r=(e,t)=>or(e,"name",{value:t,configurable:!0});var Se="handwraps-of-mighty-blows";function At(e){return e.getFlag("core","sourceId")}r(At,"getSourceId");function rr(e,t){let n=At(e);return n?t.includes(n):!1}r(rr,"includesSourceId");function Ot(e){return Array.isArray(e)?t=>rr(t,e):t=>At(t)===e}r(Ot,"getItemSourceIdCondition");function Pt(e,t=[]){let n=typeof t=="string"?[t]:t;return n.length?n.flatMap(o=>e.itemTypes[o]):e.items}r(Pt,"getItems");function Rt(e,t,n){return Pt(e,n).some(Ot(t))}r(Rt,"hasItemWithSourceId");function we(e,t,n){return Pt(e,n).find(Ot(t))}r(we,"getItemWithSourceId");function et(e){return e.traits.has("invested")}r(et,"canBeInvested");function Mt(e){return e.system.equipped.inSlot!=null}r(Mt,"hasWornSlot");function ar(e){return e.system.usage.type==="worn"&&e.system.equipped.inSlot}r(ar,"isWornAs");function tt(e){return e.isInvested||ar(e)}r(tt,"isInvestedOrWornAs");function Ce(e){return e.isOfType("weapon")&&e.slug===Se&&e.category==="unarmed"}r(Ce,"isHandwrapsOfMightyBlows");function Ee(e){return e.system.usage.type==="held"}r(Ee,"isHeld");function Ie(e){return Ee(e)&&e.system.usage.value==="held-in-two-hands"}r(Ie,"isTwoHanded");function Lt(e){return Ee(e)&&e.system.usage.value==="held-in-one-hand"}r(Lt,"isOneHanded");function sr(e,t){let n=e.system.usage;return n.type==="worn"&&n.where?t:void 0}r(sr,"inSlotValue");function ir(e,t){let n=t??!e.system.equipped.invested;return e.traits.has("invested")?n:void 0}r(ir,"toggleInvestedValue");function ke(e,{carryType:t="worn",handsHeld:n=0,inSlot:o,invested:a,containerId:s}){let i={_id:e.id,system:{equipped:{carryType:t,handsHeld:n,inSlot:sr(e,o),invested:ir(e,a)}}};return s!==void 0&&(i.system.containerId=s),i}r(ke,"itemCarryUpdate");var C="pf2e-toolbelt";function N(e,t,n="WRAPPER"){return libWrapper.register(C,e,t,n)}r(N,"registerWrapper");function $t(e){libWrapper.unregister(C,e)}r($t,"unregisterWrapper");function Y(e,t){console.error(`an error occured in the feature '${e}' of the module '${C}' with the wrapper: '${t}'`)}r(Y,"wrapperError");function D(...e){let[t,n]=e;return t=`${C}.${t}`,n?game.i18n.format(t,n):game.i18n.localize(t)}r(D,"localize");function cr(e){return game.i18n.has(`${C}.${e}`,!1)}r(cr,"hasLocalization");function lr(e){return`${C}.${e}`}r(lr,"localizePath");function A(e){let t=r((...n)=>D(`${e}.${n[0]}`,n[1]),"fn");return Object.defineProperties(t,{warn:{value:(...n)=>R(`${e}.${n[0]}`,n[1],n[2]),enumerable:!1,configurable:!1},info:{value:(...n)=>re(`${e}.${n[0]}`,n[1],n[2]),enumerable:!1,configurable:!1},error:{value:(...n)=>W(`${e}.${n[0]}`,n[1],n[2]),enumerable:!1,configurable:!1},has:{value:n=>cr(`${e}.${n}`),enumerable:!1,configurable:!1},path:{value:n=>lr(`${e}.${n}`),enumerable:!1,configurable:!1},template:{value:(n,{hash:o})=>t(n,o),enumerable:!1,configurable:!1}}),t}r(A,"subLocalize");function nt(e,t,n,o){let a=typeof t=="string"?t:"info",s=typeof t=="object"?t:typeof n=="object"?n:void 0,i=typeof t=="boolean"?t:typeof n=="boolean"?n:o??!1;ui.notifications.notify(D(e,s),a,{permanent:i})}r(nt,"notify");function R(...e){let[t,n,o]=e;nt(t,"warning",n,o)}r(R,"warn");function re(...e){let[t,n,o]=e;nt(t,"info",n,o)}r(re,"info");function W(...e){let[t,n,o]=e;nt(t,"error",n,o)}r(W,"error");function w(e){return game.settings.get(C,e)}r(w,"getSetting");function Ft(e,t){return game.settings.set(C,e,t)}r(Ft,"setSetting");function De(e){return w(e)!=="disabled"}r(De,"choiceSettingIsEnabled");var Ht="CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData",Nt="CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData",Ut="CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData",_t="CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData";function qt(){return{settings:[{name:"auto-runes",type:String,default:"disabled",choices:["disabled","force","lower"],requiresReload:!0}],conflicts:["pf2e-arp"],init:()=>{let e=w("auto-runes");e!=="disabled"&&(N(Ht,pr,"WRAPPER"),N(Nt,mr,"WRAPPER"),N(Ut,yr,"WRAPPER"),N(_t,vr,"WRAPPER"),e==="force"&&Hooks.on("renderPhysicalItemSheetPF2e",br))},ready:e=>{e&&De("auto-runes")&&game.settings.get("pf2e","automaticBonusVariant")!=="noABP"&&(game.settings.set("pf2e","automaticBonusVariant","noABP"),re("arp.forceVariant"))}}}r(qt,"registerArp");function ue(e,t=!1){return e&&!e.getFlag("pf2e","disableABP")&&(!t||e.isOfType("character"))}r(ue,"isValidActor");var ur={1:35,2:935,3:8935,4:8935},fr={1:65,2:1065,3:31065};function dr(e){return["shield-boss","shield-spikes"].includes(e._source.system.baseItem)}r(dr,"isShieldWeapon");function Gt(e){let t=e._source.system.traits.value,{group:n,category:o,slug:a}=e._source.system;return o==="unarmed"&&a!==Se?!!e.actor.itemTypes.weapon.find(s=>s.slug===Se&&s.category==="unarmed"&&s.isEquipped&&s.isInvested):(n!=="shield"||dr(e))&&!t.includes("alchemical")&&!t.includes("bomb")}r(Gt,"isValidWeapon");function pr(e){try{let t=this.actor;if(!ue(t,!0)||!Gt(this))return e();let n=this._source.system.traits.value;if(n.includes("alchemical")&&n.includes("bomb"))return e();let o=t.level,a=w("auto-runes")==="force",s=o<2?null:o<10?1:o<16?2:3,i=o<4?null:o<12?1:o<19?2:3;(this.system.runes.potency<=s||a)&&(this.system.runes.potency=s),(this.system.runes.striking<=i||a)&&(this.system.runes.striking=i)}catch{Y("auto-runes",Ht)}e()}r(pr,"onPrepareWeaponData");function mr(e){e();try{if(!ue(this.actor)||this.isSpecific||!Gt(this))return;let t=this.price.value.toObject();if(!t.gp)return;let n=this.system.runes.potency;n&&(t.gp-=ur[n]);let o=this.system.runes.striking;o&&(t.gp-=fr[o]),t=new game.pf2e.Coins(t),(n||o)&&!this.system.runes.property.length&&(t=t.plus(this._source.system.price.value)),this.system.price.value=t}catch{Y("auto-runes",Nt)}}r(mr,"onPrepareWeaponDerivedData");var gr={1:160,2:1060,3:20560,4:20560},hr={1:340,2:3440,3:49440};function Bt(e){return!0}r(Bt,"isValidArmor");function yr(e){try{let t=this.actor;if(!ue(t,!0)||!Bt(this))return e();let n=t.level,o=w("auto-runes")==="force",a=n<5?null:n<11?1:n<18?2:3,s=n<8?null:n<14?1:n<20?2:3;(this.system.runes.potency<=a||o)&&(this.system.runes.potency=a),(this.system.runes.resilient<=s||o)&&(this.system.runes.resilient=s)}catch{Y("auto-runes",Ut)}e()}r(yr,"onPrepareArmorData");function vr(e){e();try{if(!ue(this.actor)||this.isSpecific||!Bt(this))return;let t=this.price.value.toObject();if(!t.gp)return;let n=this.system.runes.potency;n&&(t.gp-=gr[n]);let o=this.system.runes.resilient;o&&(t.gp-=hr[o]),t=new game.pf2e.Coins(t),(n||o)&&!this.system.runes.property.length&&(t=t.plus(this._source.system.price.value)),this.system.price.value=t}catch{Y("auto-runes",_t)}}r(vr,"onPrepareArmorDerivedData");function br(e,t){let n=e.item;if(!n||!n.isOfType("weapon","armor")||!ue(n.actor,!0))return;let o=["potency","striking","resilient"].map(a=>`[name="system.runes.${a}"]`).join(", ");t.find(`[data-tab=details] fieldset .form-group:has(${o})`).hide()}r(br,"renderPhysicalItemSheetPF2e");function O(e,t,n=()=>{}){let o=null;return(a,s=[],i=!1)=>{let l=a||(typeof s=="string"?[s]:s).some(u=>w(u));l&&!o?o=Hooks.on(e,t):!l&&o&&(Hooks.off(e,o),o=null),i||n(l)}}r(O,"createHook");function jt(e,t,n=()=>{}){let o=null;return(a,s=!1)=>{a==="disabled"&&o?(Hooks.off(e,o),o=null):a!=="disabled"&&!o&&(o=Hooks.on(e,t)),s||n(a)}}r(jt,"createChoicesHook");function zt(e,t){let n=Hooks.on(e,t),o=Hooks.events[e].findIndex(a=>a.id===n);if(o!==0){let[a]=Hooks.events[e].splice(o,1);Hooks.events[e].unshift(a)}return n}r(zt,"registerUpstreamHook");var Sr=O("renderApplication",ot),wr=O("renderActorSheet",ot),Cr=O("renderItemSheet",ot);function Vt(){return{settings:[{name:"debug",type:Boolean,default:!1,config:!1,scope:"client",onChange:e=>Wt(e)}],init:()=>{Wt()}}}r(Vt,"registerDebug");function Wt(e){let t=e??w("debug");Sr(t),wr(t),Cr(t)}r(Wt,"setup");function ot(e,t){let n=t.find(".document-id-link")[0];n&&n.addEventListener("click",o=>{if(!o.shiftKey)return;let a=e.object;if(!a)return;o.preventDefault(),o.stopPropagation();let s=a.type,i=2,c=s;for(;window[c];)c=`${s}${i++}`;window[c]=a,console.log(c,a)},!0)}r(ot,"onRender");var rt=O("renderEffectsPanel",Ir,Er);function Kt(){return{settings:[{name:"effect-remove",type:Boolean,default:!1,scope:"client",onChange:e=>rt(e,"condition-sheet")},{name:"condition-sheet",type:Boolean,default:!1,scope:"client",onChange:e=>rt(e,"effect-remove")}],conflicts:["pf2e-effect-description"],init:()=>{rt(!1,["effect-remove","condition-sheet"])}}}r(Kt,"registerEffectsPanelHelper");function Er(){game.pf2e.effectPanel?.render()}r(Er,"refreshEffectsPanel");function Ir(e,t){let n=`<div>${D("effects.remove")}</div>`,o='<a data-action="edit" data-tooltip="Edit Item"><i class="fa-solid fa-fw fa-pencil"></i></a>',a=t.find(".effect-item[data-item-id]").toArray();for(let s of a){let i=s.dataset.itemId,c=e.actor?.items.get(i);if(c&&(w("effect-remove")&&!c.isLocked&&c.badge&&c.badge.type==="counter"&&(s.querySelector(".effect-info .instructions").insertAdjacentHTML("beforeend",n),s.querySelector(".icon").addEventListener("contextmenu",l=>Dr(l,e),!0)),w("condition-sheet")&&c.isOfType("condition"))){let l=s.querySelector(".effect-info > h1");l.insertAdjacentHTML("beforeend",o),l.querySelector('[data-action="edit"]').addEventListener("click",u=>kr(u,e))}}}r(Ir,"renderEffectsPanel");function kr(e,t){let n=Yt(e,t);n?.isOfType("condition")&&(e.preventDefault(),n.sheet.render(!0))}r(kr,"onConditionSheet");function Dr(e,t){if(!e.shiftKey)return;let n=Yt(e,t);!n||n.isLocked||!n.badge||n.badge.type!=="counter"||(e.preventDefault(),e.stopPropagation(),e.stopImmediatePropagation(),n.delete())}r(Dr,"onRemoveEffect");function Yt(e,t){let a=e.currentTarget.closest(".effect-item[data-item-id]").dataset.itemId;return t.actor?.items.get(a)}r(Yt,"getEffect");var Te=class extends FormApplication{static{r(this,"MoveLootPopup")}constructor(t,n,o){super(t,n),this.onSubmitCallback=o}async getData(){let[t,n]=this.options.isPurchase?["PF2E.loot.PurchaseLootMessage","PF2E.loot.PurchaseLoot"]:["PF2E.loot.MoveLootMessage","PF2E.loot.MoveLoot"];return{...await super.getData(),maxQuantity:this.options.maxQuantity,newStack:this.options.newStack,lockStack:this.options.lockStack,prompt:t,buttonLabel:n}}static get defaultOptions(){return{...FormApplication.defaultOptions,id:"MoveLootPopup",classes:[],title:game.i18n.localize("PF2E.loot.MoveLootPopupTitle"),template:"systems/pf2e/templates/popups/loot/move-loot-popup.hbs",width:"auto",maxQuantity:1,newStack:!1,lockStack:!1,isPurchase:!1}}async _updateObject(t,n){this.onSubmitCallback(n.quantity,n.newStack)}};function xe(e,t){return e.localeCompare(t,game.i18n.lang)}r(xe,"localeCompare");function fe(e){for(let t of Object.values(ui.windows)){let n=t.actor;!(t instanceof ActorSheet)||!n.isOfType("character")||(!e||e===n)&&t.render()}}r(fe,"refreshCharacterSheets");function at(e,t){if(e.length!==t.length)return!1;let n=t.slice();for(let o of e){let a=n.findIndex(s=>o===s);if(a===-1)return!1;n.splice(a,1)}return!0}r(at,"compareArrays");function Jt(e){let t=new Intl.PluralRules(game.i18n.lang,{type:"ordinal"}),n=game.i18n.localize(`PF2E.OrdinalSuffixes.${t.select(e)}`);return game.i18n.format("PF2E.OrdinalNumber",{value:e,suffix:n})}r(Jt,"ordinalString");function Ae(e,t){if(typeof e!="object")return!1;let n=Reflect.getPrototypeOf(e);for(;n;){if(n.constructor.name===t)return!0;n=Reflect.getPrototypeOf(n)}return!1}r(Ae,"isInstanceOf");function V(e,t,n){return setProperty(e,`modules.${C}.${t}`,n)}r(V,"setInMemory");function K(e,t){return getProperty(e,`modules.${C}.${t}`)}r(K,"getInMemory");function Qt(e,t){let n=`modules.${C}.${t}`.split("."),o=n.pop(),a=e;for(let s of n)if(a=a[s],!a)return!0;return delete a[o]}r(Qt,"deleteInMemory");function Xt(e,t,n,o){let a=n-e,s=o-t;return Math.sqrt(a*a+s*s)}r(Xt,"calculateDistanceBetweenPoints");function Oe(e){return Array.from(e.parentElement.children).indexOf(e)}r(Oe,"getElementIndex");function Pe(e){return e!==void 0&&e!==-1}r(Pe,"indexIsValid");function T(...e){let t=e.filter(n=>typeof n=="string").join("/");return`modules/${C}/templates/${t}.hbs`}r(T,"templatePath");var U={wrapperIds:[],tabs:new Collection},Tr="CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._renderInner",xr="CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._render",Ar="CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.activateListeners";function _(e){return e&&!e.pack&&e.id&&game.actors.has(e.id)}r(_,"isPlayedActor");function Re(e){U.wrapperIds.length||(U.wrapperIds=[N(xr,Or),N(Tr,Pr),N(Ar,Rr)]),U.tabs.set(e.tabName,e)}r(Re,"registerCharacterSheetExtraTab");function Me(e){if(U.tabs.delete(e),U.wrapperIds.length&&!U.tabs.size){for(let t of U.wrapperIds)$t(t);U.wrapperIds=[]}}r(Me,"unregisterCharacterSheetExtraTab");async function Or(e,...t){let n={};for(let{tabName:o}of U.tabs){let s=J(this.element,o).find(".alternate")[0];s&&(n[o]=s.scrollTop)}await e(...t);for(let{tabName:o}of U.tabs){if(!n[o])continue;let i=J(this.element,o).find(".alternate")[0];i.scrollTop=n[o]}}r(Or,"characterSheetRender");async function Pr(e,t){let n=await e(t),o=this.actor;if(!U.tabs.size||!_(o))return n;let a=this.element;for(let{tabName:s,getData:i,templateFolder:c,onRender:l}of U.tabs){let u=J(n,s),f=await i(o,this,J(a,s)),d=await renderTemplate(T(c),f);l&&await l(o,this,n),K(this,`${s}.toggled`)&&u.addClass("toggled"),u.children(":last").before(d)}return n}r(Pr,"characterSheetInnerRender");function Rr(e,t){e(t);let n=this.actor;if(!(!U.tabs.size||!_(n)))for(let{tabName:o,addEvents:a}of U.tabs){t.find(`nav.sheet-navigation .item[data-tab=${o}]`).on("click",i=>Mr(i,t,this,o));let s=J(t,o);a(s.find("> .alternate"),this,n,t)}}r(Rr,"characterSheetActiveListeners");function J(e,t){return e.find(`section.sheet-body .sheet-content > .tab[data-tab=${t}]`)}r(J,"getCharacterSheetTab");function Mr(e,t,n,o){e.preventDefault();let a=J(t,o);a.hasClass("active")&&(a.toggleClass("toggled"),a.scrollTop(0),V(n,`${o}.toggled`,a.hasClass("toggled")))}r(Mr,"onCharacterSheetTabBtnToggle");function k(e,t,n){return e.getFlag(C,t)??n}r(k,"getFlag");function z(e,t,n){return e.setFlag(C,t,n)}r(z,"setFlag");function Zt(e,t){return e.unsetFlag(C,t)}r(Zt,"unsetFlag");function de(e,t,n){return e.updateSource({[`flags.${C}.${t}`]:n})}r(de,"updateSourceFlag");function pe(e,t,n){e[`flags.${C}.${t}`]=n}r(pe,"moduleFlagUpdate");function st(){return CONFIG.ChatMessage.documentClass}r(st,"getChatMessageClass");function*me(e,t){let n=ui.chat?.element;if(!n)return;let o=game.messages.contents,a=(t?o.findLastIndex(s=>s===t):o.length)-1;for(let s=a;s>=a-e;s--){let i=o[s];if(!i)return;let c=n.find(`[data-message-id=${i.id}]`);c.length&&(yield{message:i,html:c})}}r(me,"latestChatMessages");function Q(e,t,n=!1){return n?`<span style="background: #DDD; padding: 1px 4px; border: 1px solid var(--color-border-dark-tertiary);
-border-radius: 2px; white-space: nowrap; word-break: break-all;">${t}</span>`:t?`@UUID[${e}]{${t}}`:`@UUID[${e}]`}r(Q,"chatUUID");function Le(e){let t=e.id,n=k(e,"target.save");n&&Hooks.once("preCreateChatMessage",o=>{de(o,"target.messageId",t),de(o,"target.save",n)})}r(Le,"bindOnPreCreateSpellDamageChatMessage");function ae(e){game.socket.on(`module.${C}`,e)}r(ae,"socketOn");function se(e){game.socket.off(`module.${C}`,e)}r(se,"socketOff");function q(e){game.socket.emit(`module.${C}`,e)}r(q,"socketEmit");function ie(){return game.user===game.users.activeGM}r(ie,"isActiveGM");function $e(){let e=game.data.users.find(t=>t._id===game.data.userId);return e&&e.role>=CONST.USER_ROLES.GAMEMASTER}r($e,"isUserGM");function en(){return game.users.some(e=>e.active&&e.isGM)}r(en,"isGMOnline");function tn(e,t=!1){return t?game.users.find(n=>n.active&&n.character===e):game.users.find(n=>n.character===e)}r(tn,"getCharacterOwner");function Lr(e){let t=game.users.filter(n=>n.active&&!n.isGM&&e.testUserPermission(n,"OWNER"));return t.sort((n,o)=>n.id>o.id?1:-1),t[0]||null}r(Lr,"getActiveOwner");function it(e){return Lr(e)===game.user}r(it,"isActiveOwner");function nn(e,t=!1){return t?game.users.find(n=>n.active&&e.testUserPermission(n,"OWNER")):game.users.find(n=>e.testUserPermission(n,"OWNER"))}r(nn,"getOwner");var Fe=!1,ge=null;function sn(){return{settings:[{name:"giveth",type:String,default:"disabled",choices:["disabled","enabled","no-message"],onChange:on}],conflicts:["pf2e-giveth"],ready:e=>{w("giveth")!=="disabled"&&on(!0)}}}r(sn,"registerGiveth");function on(e){let t=game.user.isGM;e==="disabled"&&Fe?(t?se(rn):ge&&(Hooks.off("dropCanvasData",ge),ge=null),Fe=!1):e!=="disabled"&&!Fe&&(t?ae(rn):ge||(ge=zt("dropCanvasData",$r)),Fe=!0)}r(on,"setup");function rn(e){ie()&&(e.type==="giveth-condition"?Nr(e):e.type==="giveth-effect"?Ur(e):_r(e))}r(rn,"onSocket");function $r(e,t){if(!en())return!0;let n=Hr(t);if(!n)return!0;let o=e.tokens.placeables.slice().filter(a=>{if(!a.document.actorLink)return!1;let s=a.actor;if(!cn(s,t.actorId)||s.isOwner)return!1;let i=a.x+(a.hitArea?.right??0),c=a.y+(a.hitArea?.bottom??0);return t.x>=a.x&&t.y>=a.y&&t.x<=i&&t.y<=c}).sort((a,s)=>s.document.sort-a.document.sort).at(0)?.actor;return o?(Fr(n.actor,o,n.item,n.value),!1):!0}r($r,"onDropCanvasData");function Fr(e,t,n,o){let a=e.id,s=t.id,i=!(n instanceof Item);if(!i&&n.isOfType("physical")){let c=n.quantity;if(c<1)return R("giveth.notification.zero");if(c===1)return an(a,s,n.id,1,!1);new Te(e,{maxQuantity:c,lockStack:!1,isPurchase:!1},(l,u)=>{an(a,s,n.id,l,u)}).render(!0)}else{let c=i?`Compendium.${n.pack}.${n._id}`:n.uuid;n.type==="condition"?q({type:"giveth-condition",targetId:s,value:o??1,uuid:c}):q({type:"giveth-effect",targetId:s,uuid:c})}}r(Fr,"giveth");function an(e,t,n,o,a){q({type:"giveth-physical",ownerId:e,targetId:t,itemId:n,qty:o,stack:a})}r(an,"sendPhysicalRequest");function cn(e,t){return!_(e)||t&&e.id===t?!1:e.hasPlayerOwner&&!e.isToken&&e.isOfType("character","npc","vehicle")}r(cn,"isValidActor");function Hr(e){if(e.tokenId||e.type!=="Item"||!e.uuid)return;let t=fromUuidSync(e.uuid);if(!t)return;let n=t.actor;if(!n){let a=e.context?.origin.actor;n=a?fromUuidSync(a):null}if(!cn(n)||!n.isOwner)return;let o=!(t instanceof Item);if(o&&t.pack&&["effect","condition"].includes(t.type))return{actor:n,item:t,value:e.value};if(!o&&t.isOfType("physical","effect"))return{actor:n,item:t,value:e.value}}r(Hr,"getDetailsFromData");async function Nr({targetId:e,uuid:t,value:n}){let o=game.actors.get(e);if(!o)return;let a=await fromUuid(t);a&&o.increaseCondition(a.slug,{min:n})}r(Nr,"takethCondition");async function Ur({targetId:e,uuid:t}){let n=game.actors.get(e);if(!n)return;let o=await fromUuid(t);if(!o)return;let a=o.clone({"system.tokenIcon.show":!0,"system.unidentified":!1}).toObject();n.createEmbeddedDocuments("Item",[a])}r(Ur,"takethEffect");async function _r({itemId:e,ownerId:t,qty:n,stack:o,targetId:a}){let s=game.actors.get(t),i=game.actors.get(a);if(!s||!i)return;let c=s.items.get(e);if(!c)return;n=Math.min(n,c.quantity);let l=c.quantity-n,u=c.toObject();u.system.quantity=n,u.system.equipped.carryType="worn",c.isOfType("physical")&&"invested"in u.system.equipped&&(u.system.equipped.invested=c.traits.has("invested")?!1:null);let f=await i.addToInventory(u,void 0,o);if(!f||(l<1?c.delete():c.update({"system.quantity":l}),w("giveth")==="no-message"))return;let d=Q(f.uuid,f.name,!f.isIdentified);n>1&&(d+=` x${n}`);let m=D("giveth.giveth",{target:i.name});ChatMessage.create({flavor:`<h4 class="action">${m}</h4>`,content:d,speaker:ChatMessage.getSpeaker({actor:s})})}r(_r,"takethPhysical");var ce=A("hero.templates.trade"),He=class extends Application{static{r(this,"Trade")}constructor(t){super({id:`pf2e-hero-actions-trade-${t.id}`}),this._actor=t}static get defaultOptions(){return mergeObject(Application.defaultOptions,{title:ce("title"),template:T("hero/trade"),width:600,height:"auto"})}get actor(){return this._actor}get target(){return this._target}set target(t){if(!t){ce.error("no-target");return}t!==this._target&&(delete this.target?.apps?.[this.appId],this._target=t,this.render())}getData(t){return mergeObject(super.getData(),{actor:this.actor,target:this.target,targets:game.actors.filter(n=>n.type==="character"&&n.id!==this.actor.id&&n.hasPlayerOwner),actions:G(this.actor),targetActions:this.target?G(this.target):[],i18n:ce})}activateListeners(t){super.activateListeners(t),t.find('select[name="target"]').on("change",this.#n.bind(this)),t.find('[data-action="description"]').on("click",this.#e.bind(this)),t.find('[data-action="trade"]').on("click",this.#t.bind(this)),t.find('[data-action="cancel"]').on("click",()=>this.close())}render(t,n){return this.actor.apps[this.appId]=this,this.target&&(this.target.apps[this.appId]=this),super.render(t,n)}async close(t){await super.close(t),delete this.actor.apps?.[this.appId],delete this.target?.apps?.[this.appId]}#t(){if(!this.target){ce.warn("no-target");return}let t=this.element.find('[name="action"]:checked').val(),n=this.element.find('[name="targetAction"]:checked').val();if(typeof t!="string"||typeof n!="string"){ce.warn("no-select");return}let o=tn(this.target,!0)??nn(this.target,!0)??game.users.activeGM;if(!o){ce.warn("no-user");return}ln({sender:{id:game.user.id,cid:this.actor.id,uuid:t},receiver:{id:o.id,cid:this.target.id,uuid:n}}),this.close()}async#e(t){let n=$(t.currentTarget).siblings("input").val();(await fromUuid(n))?.sheet.render(!0)}#n(t){let n=t.currentTarget.value;this.target=game.actors.get(n)}};var Ue="pf2e-hero-actions",un=O("renderCharacterSheetPF2e",jr,Br),qr="Compendium.pf2e.journals.JournalEntry.BSp4LUSaOmUyjBko",_e="Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK",Gr="systems/pf2e/icons/features/feats/heroic-recovery.webp",Ne=!1;function dn(){return{name:"heroActions",settings:[{name:"hero",type:Boolean,default:!1,onChange:e=>un(e)},{name:"hero-table",type:String,default:""},{name:"hero-trade",type:Boolean,default:!1,onChange:()=>fe()},{name:"hero-private",type:Boolean,default:!1}],conflicts:[Ue],api:{createTable:oa,removeHeroActions:ca,getHeroActions:G,useHeroAction:yn,getHeroActionDetails:qe,drawHeroAction:hn,drawHeroActions:mn,sendActionToChat:Cn,discardHeroActions:vn,tradeHeroAction:gn,getDeckTable:ut,giveHeroActions:fa,createChatMessage:Ge},ready:()=>{un(!1,"hero")}}}r(dn,"registerHeroActions");function Br(e){e&&!Ne?(ae(fn),Ne=!0):!e&&Ne&&(se(fn),Ne=!1)}r(Br,"setupSocket");function fn(e){switch(e.type){case"hero.trade-reject":if(e.sender.id!==game.user.id)return;Dn(e);break;case"hero.trade-accept":if(!ie())return;In(e);break;case"hero.trade-request":if(e.receiver.id!==game.user.id)return;ta(e);break;case"hero.trade-error":if(!e.users.includes(game.user.id))return;kn(e.error);break}}r(fn,"onSocket");async function jr(e,t){let n=e.actor;_(n)&&(await zr(t,n),Wr(t,n))}r(jr,"renderCharacterSheetPF2e");async function zr(e,t){let n=G(t),o=t.heroPoints.value-n.length,a=t.isOwner,s=A("hero.templates.heroActions"),i=await renderTemplate(T("hero/sheet"),{owner:a,list:n,canUse:o>=0&&a,canDraw:o>0&&a,canTrade:w("hero-trade"),mustDiscard:o<0,diff:Math.abs(o),i18n:(c,{hash:l})=>s(c,l)});e.find(".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter] > .strikes-list:not(.skill-action-list)").first().after(i)}r(zr,"addActionsToSheet");function Wr(e,t){let n=e.find(".tab.actions .heroActions-list");n.find("[data-action=draw]").on("click",o=>Qr(t,o)),n.find("[data-action=expand]").on("click",pn),n.find("[data-action=use]").on("click",o=>Jr(t,o)),n.find("[data-action=display]").on("click",o=>Yr(t,o)),n.find("[data-action=discard]").on("click",Kr),n.find("[data-action=discard-selected]").on("click",()=>Vr(t,e)),e.find("[data-action=hero-actions-trade]").on("click",()=>gn(t))}r(Wr,"addSheetEvents");async function Vr(e,t){let o=t.find(".tab.actions .heroActions-list .action.discarded").toArray().map(a=>a.dataset.uuid);vn(e,o)}r(Vr,"onClickHeroActionsDiscard");function Kr(e){e.preventDefault();let t=$(e.currentTarget).closest(".action"),n=t.closest(".heroActions-list");t.toggleClass("discarded");let o=Number(n.attr("data-discard")??"0"),a=n.find(".action.discarded");n.toggleClass("discardable",a.length===o)}r(Kr,"onClickHeroActionDiscard");async function Yr(e,t){t.preventDefault();let n=$(t.currentTarget).closest(".action").attr("data-uuid");Cn(e,n)}r(Yr,"onClickHeroActionDisplay");async function Jr(e,t){t.preventDefault();let n=$(t.currentTarget).closest(".action").attr("data-uuid");yn(e,n)}r(Jr,"onClickHeroActionUse");async function Qr(e,t){t.preventDefault(),mn(e)}r(Qr,"onClickHeroActionsDraw");function G(e){return getProperty(e,`flags.${Ue}.heroActions`)??[]}r(G,"getHeroActions");async function ee(e,t){return e.update({[`flags.${Ue}.heroActions`]:t})}r(ee,"setHeroActions");async function pn(e){e.preventDefault();let t=$(e.currentTarget).closest(".action"),n=t.find(".item-summary");if(!n.hasClass("loaded")){let o=t.attr("data-uuid"),a=await qe(o);if(!a)return;let s=await TextEditor.enrichHTML(a.description,{async:!0});n.find(".item-description").html(s),n.addClass("loaded")}t.toggleClass("expanded")}r(pn,"onClickHeroActionExpand");async function qe(e){let t=await fromUuid(e);if(!t)return;let n=t instanceof JournalEntry?t:t.parent,o=t instanceof JournalEntry?t.pages.contents[0]:t,a=o?.text.content;if(a)return n.uuid===qr&&(a=a.replace(/^<p>/,"<p><strong>Trigger</strong> ")),{name:o.name,description:a}}r(qe,"getHeroActionDetails");async function mn(e){if(!e?.isOfType("character")){R("hero.onlyCharacter");return}let t=G(e),n=e.heroPoints.value-t.length,o=[];for(let a=0;a<n;a++){let s=await hn();if(s!==void 0){if(s===null)return;t.push(s),o.push(s)}}o.length&&(ee(e,t),Ge({actor:e,actions:o,label:a=>D("hero.actions-draw.header",{nb:a}),secret:!0}))}r(mn,"drawHeroActions");function Ge({actor:e,actions:t,label:n,secret:o=!1}){let{content:a,size:s}=Xr(t);n=typeof n=="function"?n(s):n;let i={flavor:`<h4 class="action">${n}</h4>`,content:a,speaker:ChatMessage.getSpeaker({actor:e})};o&&w("hero-private")&&(i.type=CONST.CHAT_MESSAGE_TYPES.ROLL,i.rollMode=CONST.DICE_ROLL_MODES.PRIVATE),ChatMessage.create(i)}r(Ge,"createChatMessage");function Xr(e){let t=e.map(({uuid:n,name:o})=>Q(n,o));return{content:t.map(n=>`<div style="line-height: 1.6;">${n}</div>`).join(""),size:t.length}}r(Xr,"chatActions");function gn(e){if(!e?.isOfType("character")){R("hero.onlyCharacter");return}let t=G(e);if(!t||!t.length){R("hero.no-action");return}let n=t.length-e.heroPoints.value;if(n>0){R("hero.no-points",{nb:n.toString()});return}new He(e).render(!0)}r(gn,"tradeHeroAction");async function hn(){let e=await ut(),t=A("hero.table");if(!e)return t.error("drawError",!0),null;if(!e.formula)if(game.user.isGM){if(e.compendium)return t.error("noFormulaCompendium",!0),null;await e.normalize()}else return t.error("noFormula",!0),null;e.replacement===!1&&(e.results.some(s=>!s.drawn)||await e.resetResults());let n=(await e.draw({displayChat:!1})).results[0];if(!n)return;let o=Tn(n);if(o)return{uuid:o,name:await bn(n,o)}}r(hn,"drawHeroAction");async function yn(e,t){if(!e?.isOfType("character")){R("hero.onlyCharacter");return}let n=e.heroPoints.value;if(n<1)return R("hero.use.noPoints");let o=G(e),a=o.findIndex(i=>i.uuid===t);if(a===-1)return;let s=await qe(t);s||W("hero.use.noDetails"),o.splice(a,1),s?(e.update({"system.resources.heroPoints.value":n-1,[`flags.${Ue}.heroActions`]:o}),ChatMessage.create({flavor:`<h4 class="action">${D("hero.actions-use.header")}</h4>`,content:`<h2>${s.name}</h2>${s.description}`,speaker:ChatMessage.getSpeaker({actor:e})})):ee(e,o)}r(yn,"useHeroAction");async function vn(e,t){if(!e?.isOfType("character")){R("hero.onlyCharacter");return}let n=typeof t=="string"?[t]:t,o=G(e),a=[];for(let s of n){let i=o.findIndex(c=>c.uuid===s);i!==-1&&(a.push(o[i]),o.splice(i,1))}ee(e,o),Ge({actor:e,actions:a,label:s=>D("hero.actions-discard.header",{nb:s})})}r(vn,"discardHeroActions");async function bn(e,t){return e.type!==CONST.TABLE_RESULT_TYPES.TEXT?e.text:/@UUID\[[\w\.]+\]{([\w -]+)}/.exec(e.text)?.[1]??(t&&(await fromUuid(t))?.name)}r(bn,"getLabelfromTableResult");async function Sn(e){if(!e)return;let t=await fromUuid(e);return t&&t instanceof RollTable?t:void 0}r(Sn,"getTableFromUuid");async function Zr(){return Sn(_e)}r(Zr,"getDefaultCompendiumTable");function wn(){return game.tables.find(e=>e.getFlag("core","sourceId")===_e)}r(wn,"getDefaultWorldTable");async function ea(){return Sn(w("hero-table"))}r(ea,"getCustomTable");async function ut(){return await ea()??wn()??await Zr()}r(ut,"getDeckTable");async function Cn(e,t){let n=await qe(t);if(!n)return W("hero.details.missing");ChatMessage.create({content:`<h2>${n.name}</h2>${n.description}`,speaker:ChatMessage.getSpeaker({actor:e})})}r(Cn,"sendActionToChat");function ln(e){if(e.receiver.id===game.user.id){En(e);return}q({...e,type:"hero.trade-request"})}r(ln,"sendTradeRequest");function En(e){if(game.user.isGM){In(e);return}q({...e,type:"hero.trade-accept"})}r(En,"acceptRequest");async function In(e){let{sender:t,receiver:n}=e,o=game.actors.get(t.cid),a=game.actors.get(n.cid);if(!o||!a){ct(e);return}let s=G(o),i=G(a),c=s.findIndex(g=>g.uuid===t.uuid),l=i.findIndex(g=>g.uuid===n.uuid);if(c===-1||l===-1){ct(e);return}let u=s.splice(c,1)[0],f=i.splice(l,1)[0];s.push(f),i.push(u),ee(o,s),ee(a,i);let d=Q(u.uuid),m=Q(f.uuid),h=A("hero.trade-success"),p=`<div style="line-height: 1.6">${h("offer",{offer:d})}</div>`;p+=`<div style="line-height: 1.6">${h("receive",{receive:m})}</div>`,ChatMessage.create({flavor:`<h4 class="action">${h("header",{name:a.name})}</h4>`,content:p,speaker:ChatMessage.getSpeaker({actor:o})})}r(In,"onTradeAccepted");function ct({sender:e,receiver:t},n="trade-error"){let o=new Set([e.id,t.id]);o.has(game.user.id)&&(o.delete(game.user.id),kn(n)),o.size&&q({type:"hero.trade-error",users:Array.from(o),error:n})}r(ct,"sendTradeError");function kn(e){W("hero.trade-error")}r(kn,"onTradeError");async function ta(e){let{sender:t,receiver:n}=e,o=game.actors.get(t.cid),a=game.actors.get(n.cid);if(!o||!a){ct(e);return}let s=A("hero.trade-request"),i=`<p>${s("header",{sender:o.name,receiver:a.name})}</p>`;i+=`<p>${s("give",{give:Q(t.uuid)})}</p>`,i+=`<p>${s("want",{want:Q(n.uuid)})}</p>`,i+=`<p style="margin-bottom: 1em;">${s("accept")}</p>`,await Dialog.confirm({title:s("title"),content:await TextEditor.enrichHTML(i,{async:!0})})?En(e):na(e)}r(ta,"onTradeRequest");function na(e){if(e.sender.id===game.user.id){Dn(e);return}q({...e,type:"hero.trade-reject"})}r(na,"rejectRequest");async function Dn({receiver:e}){let t=game.actors.get(e.cid);R("hero.trade-rejected",{name:t.name},!0)}r(Dn,"onTradeRejected");async function oa(){if(!game.user.isGM){R("hero.notGM");return}let e=A("hero.templates.createTable.choice"),t=T("hero/dialogs/create-table"),n={yes:{label:e("create"),icon:'<i class="fas fa-border-all"></i>',callback:s=>{let i=s.find('.window-content input[name="type"]:checked').val(),c=s.find('.window-content input[name="draw"]:checked').val()==="unique";return{type:i,unique:c}}},no:{label:e("cancel"),icon:'<i class="fas fa-times"></i>',callback:()=>null}},o={content:await renderTemplate(t,{i18n:e}),title:e("title"),buttons:n,default:"yes",close:()=>null},a=await Dialog.wait(o,void 0,{id:"pf2e-hero-actions-create-table"});a&&(a.type==="default"?sa(a.unique):ra(a.unique))}r(oa,"createTable");async function ra(e){let t=await aa(e);await lt(t),t.sheet?.render(!0)}r(ra,"createCustomTable");function aa(e=!0){let t=ft(e);return RollTable.create(t,{temporary:!1})}r(aa,"createCustomActionsTable");async function sa(e){let t=A("templates.createTable.default.confirm"),n=await wn();if(n&&await Dialog.confirm({title:t("title"),content:t("content")})){let a=ft(e);return await n.update(a),lt(n,!0)}n=await ia(e),await lt(n)}r(sa,"createDefaultTable");async function ia(e=!0){let t=await fromUuid(_e),n=ft(e,t);return RollTable.create(n,{temporary:!1})}r(ia,"createDefautActionsTable");async function lt(e,t=!1){t&&await e.normalize(),await Ft("hero-table",e.uuid)}r(lt,"setTable");function ft(e,t){let n={name:D("hero.table.name"),replacement:!(e??!0),img:Gr,description:D("hero.table.description"),flags:{core:{sourceId:_e}}};return t?mergeObject(deepClone(t._source),n):n}r(ft,"getTableSource");async function ca(){if(!game.user.isGM){R("hero.notGM");return}let e=A("hero.templates.removeActions"),t=T("hero/dialogs/remove-actions"),n={yes:{label:e("remove"),icon:'<i class="fas fa-trash"></i>',callback:s=>s.find('input[name="actor"]:checked').toArray().map(i=>game.actors.get(i.value)).filter(i=>i)},no:{label:e("cancel"),icon:'<i class="fas fa-times"></i>',callback:()=>null}},o={content:await renderTemplate(t,{actors:game.actors.filter(s=>s.type==="character"),i18n:e}),title:e("title"),buttons:n,default:"yes",render:s=>{s.on("change",'input[name="all"]',()=>la(s)),s.on("change",'input[name="actor"]',()=>ua(s))},close:()=>null},a=await Dialog.wait(o,void 0,{id:"pf2e-hero-actions-remove-actions"});if(a){if(!a.length){e.warn("noSelection");return}for(let s of a)ee(s,[]);e.info("removed")}}r(ca,"removeHeroActions");function la(e){let t=e.find('input[name="all"]')[0].checked;e.find('input[name="actor"]').prop("checked",t)}r(la,"removeActionsToggleAll");function ua(e){let t=e.find('input[name="actor"]'),n=t.filter(":checked"),o=e.find('input[name="all"]');t.length===n.length?(o.prop("checked",!0).prop("indeterminate",!1),t.prop("checked",!0)):n.length?o.prop("checked",!1).prop("indeterminate",!0):(o.prop("checked",!1).prop("indeterminate",!1),t.prop("checked",!1))}r(ua,"removeActionsToggleActor");function Tn(e){if(e.type===CONST.TABLE_RESULT_TYPES.TEXT)return/@UUID\[([\w\.]+)\]/.exec(e.text)?.[1];if(e.type===CONST.TABLE_RESULT_TYPES.DOCUMENT)return`${e.documentCollection}.${e.documentId}`;if(e.type===CONST.TABLE_RESULT_TYPES.COMPENDIUM)return`Compendium.${e.documentCollection}.${e.documentId}`}r(Tn,"documentUuidFromTableResult");async function fa(e){if(!game.user.isGM){R("hero.notGM");return}let t=A("hero.templates.giveAction");if(!e?.isOfType("character"))return t.warn("noCharacter"),null;let n=await ut();if(!n)return W("hero.table.drawError",!0),null;let o=n.replacement===!1,a=(await Promise.all(n.results.map(async g=>{let y=Tn(g);if(y)return{key:g.id,uuid:y,name:await bn(g,y),drawn:g.drawn}}))).filter(Boolean),s=T("hero/dialogs/give-action"),i=await renderTemplate(s,{actions:a,isUnique:o,i18n:t}),c={yes:{label:t("give"),icon:'<i class="fa-solid fa-gift"></i>',callback:g=>({selected:g.find("[name=action]:checked").closest(".action").toArray().map(y=>y.dataset),asDrawn:g.find("[name=drawn]").prop("checked")??!1,withMessage:g.find("[name=message]").prop("checked")})},no:{label:t("cancel"),icon:'<i class="fas fa-times"></i>',callback:()=>null}},l={title:t("title"),content:i,buttons:c,render:g=>{g.find("[data-action=expand]").on("click",pn)},close:()=>null},u=await Dialog.wait(l,void 0,{id:"pf2e-hero-actions-give-action"});if(!u)return;let{selected:f,asDrawn:d,withMessage:m}=u,h=G(e),p=[];for(let{uuid:g,name:y,key:v}of f){if(h.push({uuid:g,name:y}),!d)continue;let S=n.results.get(v);S&&!S.drawn&&p.push(v)}p.length&&await n.updateEmbeddedDocuments("TableResult",p.map(g=>({_id:g,drawn:!0}))),ee(e,h),m&&Ge({actor:e,actions:f,label:g=>D("hero.actions-give.header",{nb:g}),secret:!0})}r(fa,"giveHeroActions");var b=null,da=0;function xn(e,t){for(let[n,o]of Object.entries(t))for(let a of o){let s=e[a];!s||typeof s===n||(e[s]=void 0)}}r(xn,"cleanOptions");function An(e){if(e.element instanceof HTMLElement){xn(e,{string:["draggedClass","group","selector","filter","identifier"],number:["triggerDistance"],boolean:["cancelOnRightClick"],function:["onCancel","onDragEnd","onDragStart"]}),e.triggerDistance??=6,e.cancelOnRightClick??=!0,e.cursorImage??={},e.cursorImage.id=typeof e.cursorImage.id=="string"?e.cursorImage.id:"",e.cursorImage.img=typeof e.cursorImage.img=="function"?e.cursorImage.img:void 0,e.droppables??=[];for(let t=e.droppables.length-1;t>=0;t--){let n=e.droppables[t];if(!(n.element instanceof HTMLElement)){e.droppables.splice(t,1);continue}xn(n,{string:["selector","overClass","filter"],boolean:["purgeOnLeave"],function:["onDragEnter","onDragLeave","onDragOver","onDrop"]})}e.element.addEventListener("mousedown",t=>ma(t,e))}}r(An,"makeDraggable");async function pa(e){b&&(b.canceled=!0,b.dragging&&b.draggable.ghost&&b.draggable.ghost.reset(),b.dragging&&b.options.onCancel&&await b.options.onCancel(e,b.draggable),Pn(),await On(e))}r(pa,"onDragCancel");async function On(e){b&&(b.dragging&&b.options.onDragEnd&&await b.options.onDragEnd(e,b.draggable,{canceled:b.canceled,dropped:b.dropped}),window.removeEventListener("mousemove",Rn),window.removeEventListener("mouseup",Mn),b=null)}r(On,"onDragEnd");function Pn(){if(b){b.draggable.classList.purge(),b.draggable.ghost?.classList.purge(),b.cursorElement?.remove();for(let{classList:e}of Object.values(b.hovered))e.purge()}}r(Pn,"cleanUp");function ma(e,t){if(e.button===2&&b?.dragging&&b.options.cancelOnRightClick){pa(e);return}if(e.button)return;let n=he(e.target,t.element,t);if(!n)return;let o,a=Oe(n),s=n.parentElement,i=dt(n);b={canceled:!1,dragging:!1,dropped:!1,options:t,group:t.group,draggable:{identifier:t.identifier,element:n,triggeringElement:e.target,x:e.clientX,y:e.clientY,parent:s,index:a,classList:i,get ghost(){if(o)return t.ghostClass&&o.classList.add(t.ghostClass),o;let{element:c=n.cloneNode(!0),index:l=1/0}=t.createGhost?.(n,a)??{},u=dt(c);return t.draggedClass&&c!==n&&c.classList.remove(t.draggedClass),t.ghostClass&&u.add(t.ghostClass),o={element:c,classList:u,index:l,reset:()=>{if(c.remove(),c===n){let f=s.children[a];s.insertBefore(n,f),o.index=a,t.ghostClass&&u.remove(t.ghostClass)}else o.index=1/0}},o},resetPosition:()=>{n.remove(),s.children[a].before(n)}},droppables:t.droppables.map(c=>({...c,id:da++})),hovered:{}},window.addEventListener("mousemove",Rn),window.addEventListener("mouseup",Mn)}r(ma,"onMouseDown");async function Rn(e){if(!b)return;if(b.dragging){ha(e);return}let{clientX:t,clientY:n}=e,{draggable:o}=b;Xt(o.x,o.y,t,n)>b.options.triggerDistance&&await ga(e)}r(Rn,"onMouseMove");async function Mn(e){if(!(e.button||!b)){if(b.dragging){let t=!1;Pn(),await Promise.all(Object.values(b.hovered).map(async n=>{if(!n.droppable.onDrop)return;await n.droppable.onDrop(e,b.draggable,{classList:n.classList,element:n.element,triggeringElement:n.triggeringElement})&&(t=!0)})),b.dropped=t}await On(e)}}r(Mn,"onMouseUp");async function ga(e){if(!b.dragging){if(b.dragging=!0,b.options.cursorImage.img){let t=b.options.cursorImage.img(b.draggable.element);t instanceof HTMLElement?b.cursorElement=t:(b.cursorElement=new Image,b.cursorElement.src=typeof t=="string"?t:"")}else b.cursorElement=b.draggable.element.cloneNode(!0);b.cursorElement.id=b.options.cursorImage.id,b.options.draggedClass&&b.draggable.classList.add(b.options.draggedClass),document.body.appendChild(b.cursorElement),await b.options.onDragStart?.(e,b.draggable)}}r(ga,"onDragStart");async function ha(e){if(!b)return;let{clientX:t,clientY:n}=e,o=b.cursorElement,a=o.offsetWidth/2,s=o.offsetHeight/2;o.style.left=`${t-a}px`,o.style.top=`${n-s}px`,await Promise.all(b.droppables.map(async i=>{let c=he(e.target,i.element,{selector:i.selector,filter:i.filter}),l=b.hovered[i.id];if(l&&(!c||l.element!==c)&&await i.onDragLeave?.(e,b.draggable,{classList:l.classList,element:l.element,triggeringElement:e.target})!==!1&&(delete b.hovered[i.id],i.purgeOnLeave?l.classList.purge():i.overClass&&l.classList.remove(i.overClass)),!!c)if(l)i.onDragOver&&await i.onDragOver(e,b.draggable,{classList:l.classList,element:l.element,triggeringElement:e.target});else{let u=dt(c);await i.onDragEnter?.(e,b.draggable,{classList:u,element:c,triggeringElement:e.target})!==!1&&(i.overClass&&u.add(i.overClass),b.hovered[i.id]={id:i.id,classList:u,droppable:i,element:c,triggeringElement:e.target})}}))}r(ha,"onDragMove");function dt(e){return new class extends Set{add(t){e.classList.add(t),super.add(t)}remove(t){e.classList.remove(t),super.delete(t)}toggle(t,n){n??!e.classList.contains(t)?this.add(t):this.remove(t)}contains(t){return this.has(t)}purge(){e.classList.remove(...this)}}}r(dt,"newClassList");function he(e,t,{selector:n,filter:o}={}){if(!t.contains(e))return;if(!n&&!o)return t;let a,s=e;for(;;){if(o&&s.matches(o))return;if(!a&&n&&s.matches(n)&&(a=s),s===t)break;s=s.parentElement}return n?a:t}r(he,"closestInside");var ya=O("closeCharacterSheetPF2e",ba),mt=!1;function $n(){return{settings:[{name:"inventory",type:Boolean,default:!1,scope:"client",onChange:e=>Ln(e)}],ready:e=>{Ln()}}}r($n,"registerInventory");var pt,va=["platinum-pieces","gold-pieces","silver-pieces","copper-pieces"];function Ln(e){let t=e??w("inventory");t?Re({tabName:"inventory",templateFolder:"inventory/sheet",getData:wa,addEvents:Ca,onRender:Sa}):Me("inventory"),ya(t)}r(Ln,"setup");function ba(e,t){let n=e.actor;if(!_(n)||!K(e,"inventory.requireSave"))return;let o=J(t,"inventory")[0],a=Fn(o);a&&z(n,"inventory",a)}r(ba,"closeCharacterSheetPF2e");function Sa(e,t,n){let o=n.find("> aside");o.css("position","relative"),o.append("<div id='pf2e-toobelt-inventory-item-details' class='hidden'></div>")}r(Sa,"onRender");function Fn(e){if(!e)return;let t=e.querySelector(":scope > .alternate"),n=t.querySelector("[data-area='equipped']"),o=r(i=>n.querySelector(`[data-equipped-slot='${i}']`).querySelector("[data-item-id]")?.dataset.itemId??null,"equippedItemId"),a=r(i=>{let c={},l=i.querySelectorAll(":scope > [data-item-id]");for(let u=0;u<l.length;u++){let f=l[u];c[f.dataset.itemId]=u}return c},"itemIds"),s={};for(let i of t.querySelectorAll("[data-area='items-grid']")){let c=i.dataset.tabId;s[c]=a(i)}return{equipped:{hands:[o("left-hand"),o("right-hand")],armor:[o("armor")],others:a(n)},tabs:s}}r(Fn,"getCurrentData");async function wa(e,t,n){let o=k(e,"inventory"),a=Fn(n[0])??o??{equipped:{hands:[null,null],armor:[null],others:{}},tabs:{}};o||V(t,"inventory.requireSave",!0);let s=new Collection,i={},c=new Set,l={hands:[null,null],armor:[null],others:[]};function u(d){let m=d?.id,h=s.get(m);return h||(h={id:m,item:d,parent:d?.container,containers:[],matrix:[],parents:[]},s.set(m,h),h)}r(u,"getTab");for(let d of e.inventory){if(d.isOfType("treasure")&&d.system.stackGroup==="coins"&&va.includes(d.slug))continue;let m=d.id,h=d.container,p=u(h),g=r(E=>{i[p.id]??=[],i[p.id].push(E)},"addOrphan");if(d.isOfType("backpack")){p.containers.push(d),c.add(d),u(d);continue}let y=d.handsHeld,v=l.hands.filter(Boolean).length;if(y===2&&v===0){a.equipped.hands[0]===m?l.hands=[d,d]:g(d);continue}if(y===1&&v<=1){let E=a.equipped.hands.indexOf(m);Pe(E)?l.hands[E]=d:g(d);continue}if(!l.armor[0]&&d.isOfType("armor")&&d.isEquipped){a.equipped.armor[0]===m?l.armor[0]=d:g(d);continue}if((d.isOfType("equipment")||Ce(d))&&tt(d)){let E=a.equipped.others[m];Pe(E)?l.others[E]=d:g(d);continue}let S=a.tabs[p.id]?.[m];if(Pe(S)){p.matrix[S]=d;continue}g(d)}for(let d of s){let m=i[d.id];if(m){for(let h of m){let p=h.handsHeld,g=l.hands.filter(Boolean).length;if(g===0&&p===2){l.hands=[h,h];continue}if(g<=1&&p===1){let y=l.hands[0]?1:0;l.hands[y]=h;continue}if(!l.armor[0]&&h.isOfType("armor")&&h.isEquipped){l.armor[0]=h;continue}if((h.isOfType("equipment")||Ce(h))&&tt(h)){l.others.push(h);continue}d.matrix.push(h)}d.matrix=d.matrix.filter(Boolean)}}for(let d of s){let m=d.parent;for(;m;)d.parents.push(m),m=m.container;d.parents.reverse();let h=[d.containers,d.parents,d.item].flat();d.trailings=c.filter(p=>!h.includes(p))}s.size||u(void 0),l.others=l.others.filter(Boolean);let f=K(t,"inventory.activeTab");return{tabs:Array.from(s.values()),equipped:l,actor:e,selectedTab:s.get(f)?.id,containerBulk:d=>{let m=d.capacity;return`${m.value.toString()} / ${m.max.toString()}`}}}r(wa,"getData");function Ca(e,t,n,o){let a=e.find("[data-tab-id]");for(let c of e.find("[data-container-id]"))c.addEventListener("click",l=>{let u=c.dataset.containerId;a.removeClass("active"),a.filter(`[data-tab-id=${u}]`).addClass("active"),V(t,"inventory.activeTab",u)});let s=o.find("#pf2e-toobelt-inventory-item-details")[0],i=e.find("[data-item-id], [data-container-id]");for(let c of i)c.addEventListener("mouseenter",l=>Ea(l,n,c,s)),c.addEventListener("mouseleave",l=>{s.classList.add("hidden")});n.isOwner&&(pt=randomID(),An({element:e[0],selector:"[data-item-id]",filter:"input",draggedClass:"dragged",ghostClass:"ghost",identifier:pt,cursorImage:{id:"pf2e-toolbelt-inventory-cursor-image",img:c=>c.dataset.itemImg},createGhost:Da,onDragStart:()=>Ia(s),onDragEnd:(c,l,u)=>ka(t,u),droppables:[Pa(e,t),Oa(e,t),Aa(e,t),xa(e,t),Ta(e,t)]}))}r(Ca,"addEvents");async function Ea(e,t,n,o){if(mt)return;let a=n.dataset.details;if(!a){let s=ne(t,n);if(!s)return;a=await renderTemplate(T("inventory/details"),{item:s}),n.dataset.details=a}o.innerHTML=a,o.classList.remove("hidden")}r(Ea,"onItemDetails");function Ia(e){mt=!0,e.classList.add("hidden")}r(Ia,"onDragStart");function ka(e,{dropped:t,canceled:n}){mt=!1,!(n||!t)&&V(e,"inventory.requireSave",!0)}r(ka,"onDragEnd");function Da(e,t){return e.parentElement.dataset.area==="items-grid"?{element:e,index:t}:void 0}r(Da,"createGhost");function Be(e){return e.identifier===pt?!0:(W("inventory.identifier.error"),!1)}r(Be,"checkIdentifier");function Ta(e,t){function n(a,s,i){if(i.element===s.element||i.element===s.ghost)return;let c=s.ghost,l=Oe(i.element),u=c.index>=l?i.element:i.element.nextElementSibling;i.element.parentElement.insertBefore(c.element,u),c.index=l}r(n,"onDragEnter");function o(a,s,i){let c=i.element.parentElement;!c||he(i.triggeringElement,c,{selector:"[data-item-id]"})||!c.parentElement.contains(i.triggeringElement)||(c.appendChild(s.ghost.element),s.ghost.index=1/0)}return r(o,"onDragLeave"),{element:e[0],selector:"[data-area='items-grid'] [data-item-id]",onDragEnter:n,onDragLeave:o}}r(Ta,"itemsGridDroppable");function xa(e,t){let n=t.actor;function o(i,c,l){he(l.triggeringElement,l.element,{selector:"[data-item-id]"})||l.element.querySelector("[data-area='items-grid']").appendChild(c.ghost.element)}r(o,"onDragEnter");function a(i,c,l){c.ghost.reset()}r(a,"onDragLeave");async function s(i,c,l){if(!Be(c))return!1;let u=ne(n,c);if(!u)return!1;let f=[];return c.element===c.ghost.element?(c.ghost.classList.purge(),Hn(c.element)):(te({html:e,updates:f,item:u,...c,target:c.ghost.element}),gt(e,n),c.ghost.reset()),await n.updateEmbeddedDocuments("Item",f),!0}return r(s,"onDrop"),{element:e[0],selector:"[data-area='items-list']",onDragEnter:o,onDragLeave:a,onDrop:s}}r(xa,"itemsListDroppable");function Aa(e,t){let n=t.actor,o=e.find("[data-equipped-slot=right-hand]")[0];function a(u,f){let d=f.element.dataset.equippedSlot;if(d===u.parent.dataset.equippedSlot||f.element.querySelector("[data-two-hands]"))return{canDrop:void 0};let m=ne(n,u);if(!m)return{canDrop:!1};let h=d==="armor"?m.isOfType("armor"):!0;return{item:m,slot:d,canDrop:h}}r(a,"getData");function s({updates:u,item:f,element:d,drop:m,noTwoHand:h=!1,noUpdate:p=!1}){let g=m instanceof HTMLElement?m:m.element,y=g.dataset.equippedSlot,v=d instanceof HTMLElement?d:d.element,S=Lt(f),E=Ie(f),x=et(f);g.appendChild(v);let F=r((L,P,B,M)=>{p||u.push(ke(f,{carryType:L,handsHeld:P,inSlot:B,invested:M,containerId:null})),v.classList.toggle("invested",x&&M)},"move");if(y==="armor"){F("worn",0,!0,!0);return}if(y==="right-hand"){F("held",1,!1,S);return}F("held",E&&!h?2:1,!1,Ee(f)&&(!E||!h))}r(s,"moveItemToSlot");function i(u){let d=(u instanceof HTMLElement?u:u.element).querySelector("[data-item-id]"),m=ne(n,d);return{element:d,item:m}}r(i,"getSlottedItem");function c(u,f,d){let{canDrop:m}=a(f,d);m!==void 0&&(d.classList.toggle("valid",m),d.classList.toggle("invalid",!m))}r(c,"onDragEnter");async function l(u,f,d){if(!Be(f))return!1;let{item:m,canDrop:h,slot:p}=a(f,d);if(!h)return!1;let g=[],y=i(d),v=f.parent.dataset.area,S=f.parent.dataset.equippedSlot,E=Ie(m),x=!1;if(v==="equipped")y.item&&te({html:e,updates:g,...y});else if(v==="items-grid"){if(p==="left-hand"&&E){let F=i(o);F.item&&te({html:e,updates:g,...F})}y.item&&te({html:e,updates:g,...y,target:f.element})}else p==="armor"?y.item&&s({updates:g,...y,drop:f.parent}):S==="armor"?y.item&&(y.item.isOfType("armor")?s({updates:g,...y,drop:f.parent}):te({html:e,updates:g,...y})):p==="right-hand"?(x=!0,y.item&&s({updates:g,...y,drop:f.parent,noUpdate:!0,noTwoHand:!0})):y.item&&(E?te({html:e,updates:g,...y}):(s({updates:g,...y,drop:f.parent,noUpdate:!0}),x=!0));return s({updates:g,item:m,element:f,drop:d,noUpdate:x}),(p==="left-hand"||S==="left-hand")&&gt(e,n),await n.updateEmbeddedDocuments("Item",g),!0}return r(l,"onDrop"),{element:e.find("[data-area=equipped] .main-items")[0],selector:"[data-equipped-slot]",purgeOnLeave:!0,onDragEnter:c,onDrop:l}}r(Aa,"largeEquipmentDroppable");function Oa(e,t){let n=t.actor;function o(i,c){if(i.parent===c.element)return{canDrop:void 0};let l=ne(n,i);if(!l.isIdentified||!(l.isOfType("equipment")||Ce(l)))return{canDrop:!1};let u=et(l),f=Mt(l);return!u&&!f?{canDrop:!1}:{canDrop:!0,item:l,canInvest:u}}r(o,"getData");function a(i,c,l){let{canDrop:u,canInvest:f}=o(c,l);u!==void 0&&(l.classList.add("show"),l.classList.toggle("add-forbidden",!u),l.classList.toggle("add-invest",u&&f),l.classList.toggle("add-equip",u&&!f))}r(a,"onDragEnter");async function s(i,c,l){if(!Be(c))return!1;let{canDrop:u,canInvest:f,item:d}=o(c,l);return u?(l.element.appendChild(c.element),c.element.classList.toggle("invested",f),await n.updateEmbeddedDocuments("Item",[ke(d,{containerId:null,inSlot:!0,invested:!0})]),!0):!1}return r(s,"onDrop"),{element:e.find("[data-area=equipped]")[0],filter:".main-items",purgeOnLeave:!0,onDragEnter:a,onDrop:s}}r(Oa,"otherEquipmentDroppable");function Pa(e,t){let n=t.actor;function o(i,c){let l=ne(n,i);if(!l)return{canDrop:!1};let u=c.element.dataset.containerId;if(u==="undefined")return{item:l,canDrop:!0};let f=n.items.get(u);if(!f)return{canDrop:!1};let d=f.capacity,m=d.max.minus(d.value);return{item:l,container:f,canDrop:m.value>=l.bulk.value}}r(o,"getData");function a(i,c,l){let{canDrop:u}=o(c,l);l.classList.toggle("valid",u),l.classList.toggle("invalid",!u)}r(a,"onDragEnter");async function s(i,c,l){if(!Be(c))return!1;let{canDrop:u,item:f,container:d}=o(c,l);if(!u)return!1;let m=te({html:e,updates:[],item:f,element:c,target:d});return c.parent.dataset.equippedSlot==="left-hand"&&gt(e,n),await n.updateEmbeddedDocuments("Item",m),!0}return r(s,"onDrop"),{element:e[0],selector:"[data-container-id]",filter:".back",purgeOnLeave:!0,onDragEnter:a,onDrop:s}}r(Pa,"containersDroppable");function Hn(e){e.classList.remove("invested"),e.querySelector(".vignette.hands")?.remove()}r(Hn,"cleanContainerItem");function te({html:e,updates:t,item:n,element:o,target:a}){let s=a instanceof HTMLElement,i=o instanceof HTMLElement?o:o.element,c=s?a.closest("[data-tab-id]").dataset.tabId:a instanceof Item?a.id:a;return Hn(i),s?a.before(i):e.find(`.container-tab[data-tab-id=${c}] [data-area=items-grid]`).append(i),c=[void 0,"undefined"].includes(c)?null:c,t.push(ke(n,{containerId:c,inSlot:!1,invested:!1,carryType:c?"stowed":"worn",handsHeld:0})),t}r(te,"moveItemToContainer");function gt(e,t){let n=e.find("[data-area='equipped'] .main-items")[0],o=n.querySelector("[data-equipped-slot='left-hand']"),a=n.querySelector("[data-equipped-slot='right-hand']"),s=o.querySelector("[data-item-id]"),i=a.querySelector(".item:not(.fake)"),c=ne(t,s),l=!!c&&Ie(c);if(!l&&i?.dataset.twoHands)i.remove();else if(l&&!i){let u=s.cloneNode(!0);u.dataset.twoHands="true",a.appendChild(u)}}r(gt,"checkForTwoHandedSlots");function ne(e,t){if(!t)return;let n=t instanceof HTMLElement?t:t.element,{itemId:o,containerId:a}=n.dataset,s=o??a;if(s)return e.items.get(s)}r(ne,"getItemFromElement");var Nn=A("knowledges.editLore"),je=class extends FormApplication{static{r(this,"EditLores")}get actor(){return this.object}get id(){return`npc-edit-lores-${this.actor.id}`}get title(){return Nn("title",this.actor)}get template(){return T("knowledges/lores")}getData(t){let n=this.actor;return mergeObject(super.getData(t),{unspecified:k(n,"knowledges.unspecified")??"",specific:k(n,"knowledges.specific")??"",i18n:Nn})}async _updateObject(t,{unspecified:n,specific:o}){let a=this.object;z(a,"knowledges.unspecified",n.trim()),z(a,"knowledges.specific",o.trim())}activateListeners(t){t.find("button.cancel").on("click",this.#t.bind(this))}#t(t){t.preventDefault(),this.close()}};var Un=O("renderNPCSheetPF2e",Ra);function _n(){return{settings:[{name:"knowledges",type:Boolean,default:!1,onChange:e=>Un(e)}],conflicts:["pf2e-npc-knowledges"],ready:e=>{e&&w("knowledges")&&Un(!0)}}}r(_n,"registerKnowledges");function Ra(e,t){let n=e.actor;_(n)&&(La(n,t),Fa(t),$a(n,t))}r(Ra,"renderNPCSheetPF2e");function ht(e,t,n){return e.find(`[data-tab="main"] .recall-knowledge ${t==="header"?".section-header":".section-body"} ${n}`)}r(ht,"knowledgeSelector");function Ma(e){new je(e).render(!0)}r(Ma,"editLores");function La(e,t){let n=k(e,"knowledges.unspecified"),o=k(e,"knowledges.specific");if(!n&&!o)return;let a=e.identificationDCs.lore,s=ht(t,"body","");s.find(".identification-skills").last().remove();function i(l,u,f){return`<div class="tag-legacy identification-skills tooltipstered">${game.i18n.format("PF2E.Actor.NPC.Identification.Skills.Label",{skills:l,dc:u,adjustment:f})}</div>`}r(i,"tag");function c(l,{dc:u,start:f}){let d=l.split(",").filter(m=>m.trim()).map(m=>i(m,u,f)).join("");s.append(d)}r(c,"addTags"),c(n||"Unspecific",a[0]),c(o||"Specific",a[1])}r(La,"replaceLores");function $a(e,t){ht(t,"header","button.edit").on("click",()=>Ma(e))}r($a,"addEvents");function Fa(e){let t=ht(e,"header","button"),n='<button type="button" class="breakdown edit">Edit</button>';t.before(n)}r(Fa,"addEditButton");var yt=A("merge.multi"),ze=class extends Application{static{r(this,"MultiCast")}#t;#e;constructor(t,n,o){super(o),this.#e=t,this.#t=n}get title(){return yt("title",this.spell)}get template(){return T("merge/multi")}getData(t){return mergeObject(super.getData(t),{i18n:yt})}activateListeners(t){t.find("[data-action=cast]").on("click",this.#n.bind(this)),t.find("[data-action=cancel]").on("click",this.#o.bind(this))}async#n(t){t.preventDefault();let n=this.element.find("[name=multi]").val();if(n<1){yt.error("zero"),this.close();return}let o=this.#t;if(!o)return;let a=o.item,s=o.actor;if(!s||!a)return;let i=r((l,u)=>{for(let[f,d]of Object.entries(l))for(let m=0;m<n-1;m++){let h=randomID();if(l[h]=d,u.type==="interval"){let p=u.damage[f];p&&(u.damage[h]=p)}else if(u.type==="fixed")for(let p of Object.values(u.levels)){let g=p.damage[f];g&&(p.damage[h]=g)}}},"updateSource"),c=deepClone(o.flags.pf2e.casting?.embeddedSpell);if(c){let l=c.system.damage;c.system.heightening??={};let u=c.system.heightening;i(l,u);let f=new Item.implementation(c,{parent:s});f.trickMagicEntry=a.trickMagicEntry;let d=o.getFlag("pf2e","origin.variant.overlays"),m=o.getFlag("pf2e","origin.castRank")??a.rank;(f.loadVariant({overlayIds:d,castRank:m})??f).rollDamage(this.#e)}else{let l=a.toObject(),u=l.system.damage,f=l.system.heightening??{};i(u,f),a.clone({"system.damage":u,"system.heightening":f}).rollDamage(this.#e)}a.damageKinds.size&&Le(o),this.close()}#o(t){t.preventDefault(),this.close()}};function qn(){return CONFIG.Dice.rolls.find(e=>e.name==="DamageRoll")}r(qn,"getDamageRollClass");var vt=O("renderChatMessage",Vn,Ha);function Wn(){return{settings:[{name:"merge-damage",type:Boolean,default:!1,scope:"client",onChange:e=>vt(e,"multi-cast")},{name:"multi-cast",type:Boolean,default:!1,scope:"client",onChange:e=>vt(e,"merge-damage")}],init:e=>{vt(!1,["multi-cast","merge-damage"],!0)}}}r(Wn,"registerMerge");function Ha(){for(let{message:e,html:t}of me(10))t.find("[data-action=multi-cast]").remove(),t.find("[data-action=merge-damage]").remove(),Vn(e,t)}r(Ha,"updateMessages");function Vn(e,t){!game.user.isGM&&!e.isAuthor||(w("merge-damage")&&Jn(e)?Ua(e,t):w("multi-cast")&&e.getFlag("pf2e","origin.type")==="spell"&&Na(e,t))}r(Vn,"renderChatMessage");function Na(e,t){if(!e.item)return;let o=t.find(".message-content .chat-card .owner-buttons .spell-button");o.find("[data-action=spell-damage]").after(`<button data-action="multi-cast">${D("merge.spell.button")}</button>`),o.find("[data-action=multi-cast]").on("click",a=>{new ze(a,e).render(!0)})}r(Na,"renderSpell");function Ua(e,t){let n='<span class="pf2e-toolbelt-merge">';if(k(e,"merge.merged")){let i=D("merge.damage.split-tooltip");n+=`<button data-action="split-damage" title="${i}">`,n+='<i class="fa-duotone fa-split"></i>'}let o=D("merge.damage.tooltip");n+=`<button data-action="merge-damage" title="${o}">`,n+='<i class="fa-duotone fa-merge"></i></button>',n+="</span>";let a=jn(e),s=zn(e);t.find(".dice-result .dice-total").append(n),t.find(".pf2e-toolbelt-merge [data-action=merge-damage]").on("click",i=>{i.stopPropagation();for(let{message:c}of me(5,e)){let l=zn(c);if(!(!Jn(c)||jn(c)!==a||!at(s?.map(u=>u.actor).filter(Boolean),l?.map(u=>u.actor).filter(Boolean)))){qa(i,e,c,{actorUUID:a,targetUUIDs:s});return}}R("merge.damage.none")}),t.find(".pf2e-toolbelt-merge [data-action=split-damage]").on("click",i=>{i.stopPropagation(),_a(i,e)})}r(Ua,"renderDamage");async function _a(e,t){let n=k(t,"merge.data").flatMap(o=>o.source);await Kn(t.id),await st().createDocuments(n)}r(_a,"splitDamages");async function qa(e,t,n,{actorUUID:o,targetUUIDs:a}){let s={},i=Gn(n).concat(Gn(t));for(let{name:p,notes:g,outcome:y,modifiers:v,tags:S}of i){s[p]??={name:p,tags:S,notes:new Set,results:[]};for(let x of g)s[p].notes.add(x);s[p].results.some(x=>x.outcome===y&&at(x.modifiers,v))||s[p].results.push({outcome:y,modifiers:v})}let c=Object.values(s).map(p=>{p.label=p.name;for(let g of p.results)g.outcome&&(g.label=game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${g.outcome}`));return p});c.at(-1).isLastGroup=!0;let l=await renderTemplate(T("merge/merged"),{groups:c,hasMultipleGroups:c.length>1}),u=Bn(t),f=Bn(n),d=[];for(let p of[].concat(f,u)){let{options:g,total:y,terms:v}=p,S=v[0],E=p.formula.replaceAll(/(\[[\w,-]+\])/g,"").replace(/^\(/,"").replace(/\)$/,""),x=d.find(({options:{flavor:F,critRule:L}})=>F===g.flavor&&L===g.critRule);x?(x.terms.push(S),x.total+=y,x.formulas.push(E)):d.push({options:g,formulas:[E],total:y,terms:[S]})}let m=qn();for(let p of d){if(p.options.flavor.includes("persistent")){let{index:g}=p.formulas.reduce((y,v,S)=>{let E=new m(v).expectedValue;return E<=y.value?y:{value:E,index:S}},{value:0,index:-1});p.formulas=[p.formulas[g]],p.terms=[p.terms[g]]}p.formula=`(${p.formulas.join(" + ")})[${p.options.flavor}]`,p.term=p.terms.length<2?p.terms[0]:Yn(p.terms)}let h={class:"DamageRoll",options:{},dice:[],formula:`{${d.map(({formula:p})=>p).join(", ")}}`,total:d.reduce((p,{total:g})=>p+g,0),evaluated:!0,terms:[{class:"InstancePool",options:{},evaluated:!0,terms:d.map(({formula:p})=>p),modifiers:[],rolls:d.map(({options:p,formula:g,total:y,term:v})=>({class:"DamageInstance",options:p,dice:[],formula:g,total:y,terms:[v],evaluated:!0})),results:d.map(({total:p})=>({result:p,active:!0}))}]};if(game.modules.get("dice-so-nice")?.active){let p=r(g=>{if("results"in g)for(let y of g.results)y.hidden=!0;else{let y=(g.term??g).operands??[];for(let v of y)p(v)}},"setHidden");for(let g of h.terms[0].rolls)for(let y of g.terms)p(y)}await Kn(t.id,n.id),await st().create({flavor:l,type:CONST.CHAT_MESSAGE_TYPES.ROLL,speaker:t.speaker,flags:{[C]:{merge:{actor:o,targets:a,merged:!0,type:"damage-roll",data:i},target:{targets:a}},pf2e:{context:{options:Array.from(new Set(i.flatMap(p=>p.itemTraits)))}}},rolls:[h]})}r(qa,"mergeDamages");function Gn(e){let t=k(e,"merge.data");if(t)return t;let n=e.toObject();delete n._id,delete n.timestamp;let o=$(`<div>${e.flavor}</div>`),a=o.find("h4.action + .tags").prop("outerHTML"),s=[];o.find(".tag.tag_transparent").each(function(){s.push(this.innerHTML)});let i=n.flags.pf2e.context.notes.map(({title:c,text:l})=>`<strong>${game.i18n.localize(c)}</strong> ${game.i18n.localize(l)}`);return[{source:n,name:n.flags.pf2e.strike?.name??e.item.name,outcome:n.flags.pf2e.context.outcome,itemTraits:n.flags.pf2e.context.options.filter(c=>/^(item|self):/.test(c)),modifiers:s,tags:a,notes:i}]}r(Gn,"getMessageData");function Kn(...e){let t=e.map(n=>`[data-message-id=${n}]`).join(", ");return ui.chat.element.find(t).remove(),ChatMessage.deleteDocuments(e)}r(Kn,"removeChatMessages");function Yn(e){let t=deepClone(e[0].options);for(let n of e)n.options={};return{class:"Grouping",options:t,evaluated:!0,term:{class:"ArithmeticExpression",options:{},evaluated:!0,operator:"+",operands:[e.shift(),e.length>1?Yn(e):e[0]]}}}r(Yn,"createTermGroup");function Bn(e){return k(e,"merge.rolls")??JSON.parse(e._source.rolls[0]).terms[0].rolls}r(Bn,"getMessageRolls");function jn(e){return k(e,"merge.actor")??e.actor?.uuid}r(jn,"getActorUUID");function zn(e){let t=k(e,"target.targets");if(t)return t;let n=k(e,"merge.targets")??e.getFlag("pf2e","target");return Array.isArray(n)?n:n?[n]:[]}r(zn,"getTargetUUIDs");function Jn(e){return k(e,"merge.type")==="damage-roll"||e.getFlag("pf2e","context.type")==="damage-roll"}r(Jn,"isDamageRoll");var Qn="CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments",Xn="CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData";function Zn(){return{settings:[{name:"nobulk",type:Boolean,default:!1,requiresReload:!0},{name:"nobulk-coins",type:Boolean,default:!1,requiresReload:!0}],init:()=>{w("nobulk")&&N(Qn,Ba,"WRAPPER"),w("nobulk-coins")&&N(Xn,Ga,"WRAPPER")}}}r(Zn,"registerNobulk");function Ga(e){e();try{this.isCoinage&&(this.system.bulk.value=0)}catch{Y("nobulk",Xn)}}r(Ga,"treasurePrepareBaseData");function Ba(e,...t){e(...t);try{let n=this.inventory.bulk.constructor,o=null;Object.defineProperty(this.inventory.bulk,"value",{get(){return o||(o=n.computeTotalBulk(this.actor.inventory.filter(a=>!a.isInContainer&&a.system.equipped.carryType!=="dropped"),this.actor.size),o)}})}catch{Y("nobulk",Qn)}}r(Ba,"actorPrepareEmbeddedDocuments");var ja="CONFIG.Actor.documentClass.prototype.prepareData",za="DocumentSheet.prototype._renderInner";function eo(){return{settings:[{name:"share",type:String,default:"disabled",choices:["disabled","enabled","force"],requiresReload:!0}],init:()=>{w("share")!=="disabled"&&(N(ja,Qa,"WRAPPER"),N(za,Wa,"WRAPPER"),Hooks.on("preUpdateActor",Ka),Hooks.on("deleteActor",Va),Hooks.on("updateActor",Ya))}}}r(eo,"registerShare");async function Wa(e,...t){let n=await e(...t);if(!Ae(this,"CreatureConfig"))return n;let o=this.actor;if(!_(o)||!o.isOfType("character","npc")||ye(o).size)return n;let a=game.actors.filter(i=>i.id!==o.id&&i.isOwner&&Ve(i)).map(i=>({key:i.id,label:i.name})),s=await renderTemplate(T("share/master"),{masters:a,master:k(o,"share.master"),selectPath:`flags.${C}.share.master`,i18n:A("share.templates.master")});return n.children().last().before(s),n}r(Wa,"documentSheetRenderInner");function Va(e){so(e);let t=ye(e);Promise.all(t.map(async n=>{no(n),await Zt(n,"share.master")}))}r(Va,"deleteActor");function Ka(e,t){let n=getProperty(t,`flags.${C}.share`);if(n?.master){let o=game.actors.get(n.master);if(Ve(o)){let a=deepClone(o._source.system.attributes.hp);setProperty(t,"system.attributes.hp",a)}}else{let o=We(e),a=getProperty(t,"system.attributes.hp");o&&a&&(o.update({system:{attributes:{hp:a}}},{noHook:!0}),delete t.system.attributes.hp)}}r(Ka,"preUpdateActor");function Ya(e,t,n,o){let a=game.user.id===o,s=Za(t);if(s?.master!==void 0){let c=e;if(so(c),s.master){let l=game.actors.get(s.master);Ve(l)&&(to(c,l),ao(l,c))}else no(c)}if(!a)return;let i=ye(e);if(i.size){let c=getProperty(t,"system.attributes.hp");if(c){let l={system:{attributes:{hp:c}}};Promise.all(i.map(async u=>await u.update(l,{noHook:!0})))}else Promise.all(i.map(async l=>await Ja(l,t)))}}r(Ya,"updateActor");async function Ja(e,t){w("share")==="force"?await z(e,"toggle",!k(e,"toggle")):(e.render(!1,{action:"update"}),e._updateDependentTokens(t))}r(Ja,"refreshActor");function Qa(e){e();let t=k(this,"share.master"),n=t?game.actors.get(t):void 0;if(!Ve(n))return;We(this)||(to(this,n),ao(n,this));let o=this.system.attributes.hp;Object.defineProperty(this.system.attributes,"hp",{get(){let a=n.system.attributes.hp;return Xa(a,o),o},enumerable:!0})}r(Qa,"prepareData");function Xa(e,t){t.breakdown=e.breakdown,t.max=e.max,t.sp=deepClone(e.sp),t.temp=e.temp,t.totalModifier=e.totalModifier,t.value=e.value,t._modifiers=e._modifiers.slice()}r(Xa,"transfertHpData");function Za(e){return getProperty(e,`flags.${C}.share`)}r(Za,"getShareFlag");function ye(e){return oo(e,"slaves")??new Collection}r(ye,"getSlaves");function to(e,t){ro(e,"master",t)}r(to,"setMaster");function no(e){es(e,"master")}r(no,"unsetMaster");function We(e){return oo(e,"master")}r(We,"getMaster");function Ve(e){return e&&e.type==="character"&&!We(e)}r(Ve,"isValidMaster");function oo(e,t){return getProperty(e,`modules.${C}.share.${t}`)}r(oo,"getModuleProperty");function ro(e,t,n){setProperty(e,`modules.${C}.share.${t}`,n)}r(ro,"setModuleProperty");function es(e,t){delete e.modules?.[C]?.share?.[t]}r(es,"deleteModuleProperty");function ao(e,t){let n=ye(e);ro(e,"slaves",n.set(t.id,t))}r(ao,"addSlaveToMaster");function so(e){let t=We(e);if(!t)return;ye(t).delete(e.id)}r(so,"removeSlaveFromMaster");var ts=O("renderCharacterSheetPF2e",cs),ns=O("deleteCombat",us),os=O("deleteCombatant",mo),rs=O("createCombatant",fs),as=["Compendium.pf2e.feats-srd.Item.yeSyGnYDkl2GUNmu","Compendium.pf2e.feats-srd.Item.LI9VtCaL5ZRk0Wo8"],ss=new Map([["Compendium.pf2e.feats-srd.Item.nRjyyDulHnP5OewA",{replace:"Compendium.pf2e.feats-srd.Item.DqD7htz8Sd1dh3BT",effect:"Compendium.pf2e.feat-effects.Item.UZKIKLuwpQu47feK"}]]),is=new Map([["Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt",{effect:"Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl",action:"Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM"}],["Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28",{effect:"Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN"}],["Compendium.pf2e.feats-srd.Item.R7c4PyTNkZb0yvoT",{effect:"Compendium.pf2e.feat-effects.Item.qX62wJzDYtNxDbFv"}],["Compendium.pf2e.feats-srd.Item.bvOsJNeI0ewvQsFa",{effect:"Compendium.pf2e.feat-effects.Item.er5tvDNvpbcnlbHQ"}]]);function co(){return{name:"stances",settings:[{name:"stances",type:Boolean,default:!1,scope:"client",onChange:io}],conflicts:["pf2e-stances"],api:{getStances:bt,toggleStance:po,isValidStance:lo},ready:e=>{w("stances")&&io(!0)}}}r(co,"registerStances");function io(e){ts(e),ns(e),os(e),rs(e)}r(io,"setup");function lo(e){return e?.system.traits.value.includes("stance")&&e.system.selfEffect?.uuid}r(lo,"isValidStance");function bt(e){let t=[],n=new Set;for(let{replace:o,sourceId:a,effectUUID:s,effect:i,img:c,name:l,itemName:u,action:f}of uo(e)){o&&n.add(o);let d=f?we(e,f,"action"):we(e,a,"feat");t.push({name:l,itemName:u,uuid:a,img:c,effectUUID:s,effectID:i?.id,actionUUID:d.sourceId,actionID:d.id})}return t.filter(({uuid:o})=>!n.has(o))}r(bt,"getStances");async function cs(e,t){let n=e.actor;if(!_(n))return;let o=bt(n);if(!o.length)return;let a=n.getActiveTokens(!0,!0).some(l=>l.inCombat),s=t.find(".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter]"),i=s.find(".actions-options"),c=await renderTemplate(T("stances/sheet"),{stances:o,canUseStances:a&&!n.isDead,i18n:A("stances")});i.length?i.after(c):s.prepend(c),t.find(".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter] .pf2e-stances .pf2e-stances__stance").on("click",l=>ls(l,n))}r(cs,"renderCharacterSheetPF2e");function ls(e,t){let n=e.currentTarget,o=n.closest(".pf2e-stances")?.classList.contains("can-use-stances");if(!e.ctrlKey&&!o)return;let a=n.dataset.effectUuid;po(t,a)}r(ls,"onToggleStance");function*uo(e){for(let t of e.itemTypes.feat){let n=t.sourceId,o=ss.get(n),a=is.get(n);if(!o&&!a&&!lo(t))continue;let s=o?.effect??a?.effect??t.system.selfEffect.uuid,i=fromUuidSync(s);i&&(yield{name:(o&&fromUuidSync(o.replace)?.name)??t.name,itemName:t.name,replace:o?.replace,extra:a,sourceId:n,effectUUID:s,effect:we(e,s,"effect"),action:a?.action,img:i.img})}}r(uo,"actorStances");function fo(e){let t=[];for(let{effect:n}of uo(e))n&&t.push({uuid:n.sourceId,id:n.id});return t}r(fo,"getStancesEffects");async function po(e,t){let n=fo(e),o=n.findIndex(s=>s.uuid===t),a=!1;if(o===-1)a=!0;else{let s=n.filter(c=>c.uuid!==t).length,i=n.filter(c=>c.uuid===t).length>1;(s||i)&&n.splice(o,1)}n.length&&await e.deleteEmbeddedDocuments("Item",n.map(s=>s.id)),a&&St(e,t)}r(po,"toggleStance");async function St(e,t){let n=await fromUuid(t);if(n){let o=n.toObject();return getProperty(o,"flags.core.sourceId")||setProperty(o,"flags.core.sourceId",n.uuid),(await e.createEmbeddedDocuments("Item",[o]))[0]?.toMessage(),!0}return!1}r(St,"addStance");function us(e){for(let t of e.combatants)mo(t)}r(us,"deleteCombat");function mo(e){let t=go(e);if(t){if(!game.user.isGM&&it(t)){let n=fo(t).map(o=>o.id);n.length&&t.deleteEmbeddedDocuments("Item",n)}fe(t)}}r(mo,"deleteCombatant");function fs(e){let t=go(e);t&&(!game.user.isGM&&it(t)&&ds(t),fe(t))}r(fs,"createCombatant");function go(e){let t=e.actor;if(t&&!t.isToken&&t.isOfType("character"))return t}r(go,"getActorFromCombatant");async function ds(e){let t=bt(e);if(!(!t.length||t.filter(({effectID:a})=>a).length||!Rt(e,as,["feat"])))if(t.length===1){let a=t[0];await St(e,a.effectUUID)&&re("stances.useStance",{stance:a.name})}else ps(e,t)}r(ds,"checkForSavant");async function ps(e,t){let n=A("stances.menu");new Dialog({title:n("title"),content:await renderTemplate(T("stances/menu"),{stances:t,i18n:n}),buttons:{yes:{icon:'<i class="fa-solid fa-people-arrows"></i>',label:n("accept"),callback:o=>St(e,o.find("[name=stance]:checked").val())},no:{icon:'<i class="fa-solid fa-xmark"></i>',label:n("cancel")}}}).render(!0)}r(ps,"openStancesMenu");function yo(e){return Error(`PF2e System | ${e}`)}r(yo,"ErrorPF2e");var ho;function vo(e,{emptyStringZero:t=!1,zeroIsNegative:n=!1}={}){if(e===0&&t)return"";ho??=new Intl.NumberFormat(game.i18n.lang,{maximumFractionDigits:0,signDisplay:"always"});let o=n&&e===0?-0:e;return ho.format(o)}r(vo,"signedInteger");function bo(e){if(e==="cantrips")return 0;let t=Number(e??NaN);return t.between(0,10)?t:null}r(bo,"spellSlotGroupIdToNumber");function wo(){return{settings:[{name:"summary",type:String,default:"disabled",scope:"client",choices:["disabled","enabled","sort"],onChange:e=>So(e)}],conflicts:["pf2e-spells-summary"],ready:e=>{So()}}}r(wo,"registerSpellsSummary");function So(e){(e??w("summary"))!=="disabled"?Re({tabName:"spellcasting",templateFolder:"summary/sheet",getData:Es,addEvents:ms}):Me("spellcasting")}r(So,"setup");function ms(e,t,n){let o=e.find(".spell-type .uses .spell-slots-input input");o.on("change",a=>gs(a,n)),o.on("focus",hs),o.on("blur",ys),e.find(".focus-pips").on("click contextmenu",a=>vs(a,n)),e.find(".spell-slots-increment-reset").on("click",a=>Ss(a,t,n)),e.find(".item-image").on("click",a=>ws(a,n))}r(ms,"addEvents");async function gs(e,t){e.preventDefault();let{inputPath:n,entryId:o}=$(e.currentTarget).data(),a=e.currentTarget.valueAsNumber;t.updateEmbeddedDocuments("Item",[{_id:o,[n]:a}])}r(gs,"onUsesInputChange");function hs(e){e.preventDefault(),e.currentTarget.closest(".item")?.classList.add("hover")}r(hs,"onUsesInputFocus");function ys(e){e.preventDefault(),e.currentTarget.closest(".item")?.classList.remove("hover")}r(ys,"onUsesInputBlur");function vs(e,t){e.preventDefault();let n=e.type==="click"?1:-1,o=(t.system.resources.focus?.value??0)+n;t.update({"system.resources.focus.value":o})}r(vs,"onToggleFocusPool");function bs(e,t,n){if(game.modules.get("pf2e-staves")?.active){Cs(e.element).find(".directory-list.spellcastingEntry-list").find(`.item-container.spellcasting-entry[data-item-id=${n}]`).find(".spell-ability-data .statistic-values a.pf2e-staves-charge")[0]?.click();return}let o=game.modules.get("pf2e-dailies");if(!o?.active)return;let a=t.spellcasting.get(n);o.api.updateEntryCharges(a,9999)}r(bs,"onChargesReset");function Ss(e,t,n){e.preventDefault();let{itemId:o,rank:a,isCharge:s}=$(e.currentTarget).data();if(!o)return;if(s){bs(t,n,o);return}let i=n.items.get(o);if(i){if(i.isOfType("consumable")){let c=i.system.uses?.max;c&&i.update({"system.uses.value":c})}else if(i.isOfType("spellcastingEntry")){let c=a>=0&&a<=11?`slot${a}`:"slot0",l=i.system.slots?.[c];l&&i.update({[`system.slots.${c}.value`]:l.max})}else if(i.isOfType("spell")){let c=i.system.location.uses?.max;c&&i.update({"system.location.uses.value":c})}}}r(Ss,"onSlotsReset");async function ws(e,t){let{entryId:n,itemId:o,castRank:a}=e.currentTarget.closest(".item").dataset,s=t.spellcasting.collections.get(n);if(!s)return;s.get(o)?.toMessage(e,{data:{castRank:Number(a??NaN)}})}r(ws,"onItemToChat");function Cs(e){return e.find("section.sheet-body .sheet-content > .tab[data-tab=spellcasting]")}r(Cs,"getSpellcastingTab");async function Es(e){let t=e.system.resources.focus??{value:0,max:0},n=game.modules.get("pf2e-staves")?.active,o=game.modules.get("pf2e-dailies"),a=o?.active,s=n||a&&isNewerVersion(o.version,"2.14.0"),i=n?"flags.pf2e-staves.charges":a?"flags.pf2e-dailies.staff.charges":"",c=[],l=[],u,f=!1,d=await Promise.all(e.spellcasting.collections.map(async m=>({entry:m.entry,data:await m.entry.getSheetData({spells:m})})));for(let{entry:m,data:h}of d){if(h.isRitual){u=h.groups.flatMap((M,H)=>M.active.map(({spell:I})=>({name:I.name,img:I.img,slotId:H,itemId:I.id,rank:I.rank,time:I.system.time.value})).filter(Boolean));continue}let p=h.id,g=h.statistic.dc.value,y=h.name,v=h.isFocusPool,S=m.system?.prepared?.value==="charge",E=h.isInnate,x=h.isPrepared,F=h.isSpontaneous,L=h.isFlexible,P=(()=>{if(h.category!=="items")return;let M=m.id.split("-")[0];return e.items.get(M)})(),B=(()=>{if(!S)return;let M=a&&o.api.getSpellcastingEntryStaffData(m),{charges:H,max:I,canPayCost:j}=M??getProperty(m,"flags.pf2e-staves.charges")??{charges:0,max:0};return{value:H,max:I,noMax:!0,canPayCost:j??(()=>!0)}})();for(let M of h.groups){if(!M.active.length||M.uses?.max===0)continue;let H=[],I=M.id==="cantrips",j=bo(M.id),oe=!I&&S&&!s;for(let be=0;be<M.active.length;be++){let Ze=M.active[be];if(!Ze||Ze.uses?.max===0)continue;let{spell:Z,expended:Zo,virtual:er,uses:tr,castRank:nr}=Ze;H.push({name:Z.name,img:Z.img,range:Z.system.range.value||"-",castRank:nr??Z.rank,slotId:be,entryId:p,entryDc:g,entryName:y,itemId:Z.id,inputId:E?Z.id:h.id,inputPath:P?"system.uses.value":S?i:E?"system.location.uses.value":`system.slots.slot${j}.value`,isCharge:S,isActiveCharge:S&&s,isBroken:oe,isVirtual:er,isInnate:E,isCantrip:I,isFocus:v,isPrepared:x,isSpontaneous:F||L,groupId:M.id,consumable:P,uses:P?P.system.uses:S?B:tr??M.uses,expended:S&&!I?!B.canPayCost(j):Zo??(v&&!I?t.value<=0:!1),action:Z.system.time.value,type:P?`PF2E.Item.Consumable.Category.${P.category}`:S?`${C}.summary.staff`:E?"PF2E.PreparationTypeInnate":F?"PF2E.PreparationTypeSpontaneous":L?"PF2E.SpellFlexibleLabel":v?"PF2E.TraitFocus":"PF2E.SpellPreparedLabel",order:S?0:x?1:v?2:E?3:F?4:5,noHover:x||I||oe||v})}if(H.length){if(v)if(I)f=!0;else{l.push(...H);continue}c[j]??=[],c[j].push(...H)}}}if(c.length){let m=w("summary")==="sort"?(h,p)=>h.order===p.order?xe(h.name,p.name):h.order-p.order:(h,p)=>xe(h.name,p.name);for(let h of c)h&&h.sort(m)}return l.length&&(l.sort((m,h)=>xe(m.name,h.name)),c[12]=l,f=!1),{spells:c,rituals:u,focusPool:t,hasFocusCantrips:f,isOwner:e.isOwner,i18n:A("summary"),entryRank:m=>game.i18n.format("PF2E.Item.Spell.Rank.Ordinal",{rank:Jt(m)})}}r(Es,"getData");async function wt(e,{user:t=game.user,synchronize:n=!0}={}){if(game.modules.get("dice-so-nice")?.active)return game.dice3d.showForRoll(e,t,n)}r(wt,"roll3dDice");function Eo(e){let t=0,n={},o={},a=e.filter(i=>i.type==="ability"&&!i.ignored),s=a.reduce((i,c)=>i===null||c.force?c:i.force?i:c.modifier>i.modifier?c:i,null);for(let i of a)i.ignored=i!==s;for(let i of e){if(i.ignored){i.enabled=!1;continue}if(i.type==="untyped"){i.enabled=!0,t+=i.modifier;continue}i.modifier<0?t+=Co(o,i,LOWER_PENALTY):t+=Co(n,i,HIGHER_BONUS)}return t}r(Eo,"applyStackingRules");function Co(e,t,n){let o=e[t.type];return o===void 0?(t.enabled=!0,e[t.type]=t,t.modifier):n(t,o)?(o.enabled=!1,t.enabled=!0,e[t.type]=t,t.modifier-o.modifier):(t.enabled=!1,0)}r(Co,"applyStacking");function Ke(e,t){return e instanceof Element||e instanceof Document?e.querySelector(t):null}r(Ke,"htmlQuery");async function Io({affects:e,origin:t,target:n,item:o,domains:a,options:s}){if(!(t&&n))return[];let[i,c]=e==="target"?[t,n]:[n,t],l=[...s,i.getRollOptions(a),c.getSelfRollOptions(e)].flat(),u=o?o.isOfType("spell")?{spell:o}:{weapon:o}:{};return(await Promise.all(a.flatMap(f=>i.synthetics.ephemeralEffects[f]?.[e]??[]).map(f=>f({test:l,resolvables:u})))).flatMap(f=>f??[])}r(Io,"extractEphemeralEffects");function ko(e,t){return t.flatMap(n=>(e[n]??[]).map(o=>o.clone()))}r(ko,"extractNotes");function Do(e,t,n){return t.flatMap(o=>e[o]??[]).flatMap(o=>o(n)??[])}r(Do,"extractDamageDice");function To(e,t,n){let{modifierAdjustments:o,modifiers:a}=e,s=Array.from(new Set(t)).flatMap(i=>a[i]??[]).flatMap(i=>i(n)??[]);for(let i of s)i.adjustments=Is(o,t,i.slug);return s}r(To,"extractModifiers");function Is(e,t,n){return Array.from(new Set(t.flatMap(a=>e[a]??[]))).filter(a=>[n,null].includes(a.slug))}r(Is,"extractModifierAdjustments");async function Ct(e,{message:t,multiplier:n=1,addend:o=0,promptModifier:a=!1,rollIndex:s=0}){if(a)return ks(t,n,s);let i=[e];if(i.length===0){ui.notifications.error("PF2E.ErrorMessage.NoTokenSelected",{localize:!0});return}let c=CONFIG.PF2E.chatDamageButtonShieldToggle,l=t.rolls.at(s);if(!Ae(l,"DamageRoll"))throw yo("Unexpected error retrieving damage roll");let u=n<0?n*l.total+o:l.alter(n,o),f=[...t.flags.pf2e.context?.options??[]],d=f.filter(h=>h.startsWith("self:")).map(h=>h.replace(/^self/,"origin")),m=t.item;for(let h of i){if(!h.actor)continue;f.some(P=>P.startsWith("target"))||f.push(...h.actor.getSelfRollOptions("target"));let p=n>0?"damage-received":"healing-received",g=n>0?await Io({affects:"target",origin:t.actor,target:h.actor,item:t.item,domains:[p],options:f}):[],y=h.actor.getContextualClone(d,g),v=new Set([...f.filter(P=>!/^(?:self|target):/.test(P)),...d,...y.getSelfRollOptions()]),S=t.flags.pf2e.context?.outcome,E=[],x=[];if(typeof u=="number"&&u<0){let P=S==="criticalSuccess",B=m?.isOfType("spell")?{spell:m}:m?.isOfType("weapon")?{weapon:m}:{},M=Do(y.synthetics.damageDice,[p],{resolvables:B,test:v}).filter(I=>(I.critical===null||I.critical===P)&&I.predicate.test(v));for(let I of M){let j=`${I.diceNumber}${I.dieSize}[${I.label}]`,oe=await new Roll(j).evaluate({async:!0});oe._formula=`${I.diceNumber}${I.dieSize}`,await oe.toMessage({flags:{pf2e:{suppressDamageButtons:!0}},flavor:I.label,speaker:ChatMessage.getSpeaker({token:h})}),E.push(`${I.label} ${I.diceNumber}${I.dieSize}`),x.push(oe)}x.length&&(u-=x.map(I=>I.total).reduce((I,j)=>I+j));let H=To(y.synthetics,[p],{resolvables:B}).filter(I=>(I.critical===null||I.critical===P)&&I.predicate.test(v));u-=Eo(H??[]),E.push(...H.filter(I=>I.enabled).map(I=>`${I.label} ${vo(I.modifier)}`))}let L=(typeof u=="number"?u!==0:u.total!==0)?ko(y.synthetics.rollNotes,[p]).filter(P=>(!S||P.outcome.length===0||P.outcome.includes(S))&&P.predicate.test(v)):[];await y.applyDamage({damage:u,token:h,item:t.item,skipIWR:n<=0,rollOptions:v,shieldBlockRequest:c,breakdown:E,notes:L})}Ao(t.id),Oo(t,e.id,s)}r(Ct,"applyDamageFromMessage");function xo(e,t,n){let o=r(()=>[e],"getTokens"),a=r(s=>s[0]?.actor?.itemTypes.shield.filter(c=>c.isEquipped&&!c.isBroken&&!c.isDestroyed)??[],"getNonBrokenShields");t.classList.contains("tooltipstered")||$(t).tooltipster({animation:"fade",trigger:"click",arrow:!1,content:Ke(n,"div.hover-content"),contentAsHTML:!0,contentCloning:!0,debug:!1,interactive:!0,side:["top"],theme:"crb-hover",functionBefore:()=>{let s=o();if(!s.length)return!1;let i=a(s),c=s.length===1&&i.length>1,l=t.classList.contains("shield-activated");return c&&!l?!0:c&&t.dataset.shieldId?(t.attributes.removeNamedItem("data-shield-id"),t.classList.remove("shield-activated"),CONFIG.PF2E.chatDamageButtonShieldToggle=!1,!0):(t.classList.toggle("shield-activated"),CONFIG.PF2E.chatDamageButtonShieldToggle=!CONFIG.PF2E.chatDamageButtonShieldToggle,!1)},functionFormat:(s,i,c)=>{let l=o(),u=a(l),f=l.length===1&&u.length>1,d=t.classList.contains("shield-activated");if(f&&!d){let m=Ke(c,"ul.shield-options");if(!m)return $(c);let h=u.map(p=>{let g=document.createElement("input");g.classList.add("data"),g.type="radio",g.name="shield-id",g.value=p.id,g.addEventListener("click",()=>{t.dataset.shieldId=g.value,t.classList.add("shield-activated"),CONFIG.PF2E.chatDamageButtonShieldToggle=!0,s.close()});let y=document.createElement("span");y.classList.add("label"),y.innerHTML=p.name;let v=document.createElement("span");v.classList.add("tag");let S=game.i18n.localize("PF2E.HardnessLabel");v.innerHTML=`${S}: ${p.hardness}`;let E=document.createElement("li");return E.classList.add("item"),E.append(g,y,v),E});m.replaceChildren(...h)}return $(c)}}).tooltipster("open")}r(xo,"onClickShieldBlock");function Ao(e){for(let t of["#chat-log","#chat-popout"]){let n=`${t} > li.chat-message[data-message-id="${e}"] button[data-action=shield-block]`;Ke(document.body,n)?.classList.remove("shield-activated")}CONFIG.PF2E.chatDamageButtonShieldToggle=!1}r(Ao,"toggleOffShieldBlock");async function ks(e,{message:t,multiplier:n,rollIndex:o}){let a=await renderTemplate("systems/pf2e/templates/chat/damage/adjustment-dialog.hbs"),s=class extends Dialog{static{r(this,"AdjustmentDialog")}activateListeners(c){super.activateListeners(c),c[0].querySelector("input")?.focus()}},i=n<0;new s({title:game.i18n.localize(i?"PF2E.UI.shiftModifyHealingTitle":"PF2E.UI.shiftModifyDamageTitle"),content:a,buttons:{ok:{label:game.i18n.localize("PF2E.OK"),callback:async c=>{let l=(Number(c[0].querySelector("input")?.value)||0)*Math.sign(n);Ct(e,{message:t,multiplier:n,addend:l,promptModifier:!1,rollIndex:o})}},cancel:{label:"Cancel"}},default:"ok",close:()=>{Ao(t.id)}}).render(!0)}r(ks,"shiftAdjustDamage");var Ye={LOWER_BY_TWO:-2,LOWER:-1,INCREASE:1,INCREASE_BY_TWO:2,TO_CRITICAL_FAILURE:"criticalFailure",TO_FAILURE:"failure",TO_SUCCESS:"success",TO_CRITICAL_SUCCESS:"criticalSuccess"},Po=["criticalFailure","failure","success","criticalSuccess"],Je=class e{static{r(this,"DegreeOfSuccess")}constructor(t,n,o=null){t instanceof Roll?(this.dieResult=(t.isDeterministic?t.terms.find(a=>a instanceof NumericTerm):t.dice.find(a=>a instanceof Die&&a.faces===20))?.total??1,this.rollTotal=t.total):(this.dieResult=t.dieValue,this.rollTotal=t.dieValue+t.modifier),this.dc=typeof n=="number"?{value:n}:n,this.unadjusted=this.#o(),this.adjustment=this.#t(this.unadjusted,o),this.value=this.adjustment?this.#e(this.adjustment.amount,this.unadjusted):this.unadjusted}static CRITICAL_FAILURE=0;static FAILURE=1;static SUCCESS=2;static CRITICAL_SUCCESS=3;#t(t,n){if(!n)return null;for(let o of["all",...Po]){let{label:a,amount:s}=n[o]??{};if(s&&a&&!(t===e.CRITICAL_SUCCESS&&s===Ye.INCREASE)&&!(t===e.CRITICAL_FAILURE&&s===Ye.LOWER)&&(o==="all"||Po.indexOf(o)===t))return{label:a,amount:s}}return null}#e(t,n){switch(t){case"criticalFailure":return 0;case"failure":return 1;case"success":return 2;case"criticalSuccess":return 3;default:return Math.clamped(n+t,0,3)}}#n(t){return this.dieResult===20?this.#e(Ye.INCREASE,t):this.dieResult===1?this.#e(Ye.LOWER,t):t}#o(){let t=this.dc.value;return this.rollTotal-t>=10?this.#n(e.CRITICAL_SUCCESS):t-this.rollTotal>=10?this.#n(e.CRITICAL_FAILURE):this.rollTotal>=t?this.#n(e.SUCCESS):this.#n(e.FAILURE)}};function Ro(e,{collisionOrigin:t,collisionType:n="move"}={}){let o=e instanceof MeasuredTemplateDocument?e.object:e;if(!canvas.scene)return[];let{grid:a,dimensions:s}=canvas;if(!(a&&s))return[];if(!o?.highlightId)return[];let i=a.getHighlightLayer(o.highlightId);if(!i||a.type!==CONST.GRID_TYPES.SQUARE)return[];let c=t??o.center,l=canvas.tokens.quadtree.getObjects(i.getLocalBounds(void 0,!0)),u=a.size,f=[];for(let d of l){let m=d.document,h=[];for(let p=0;p<m.height;p++){let g=Math.floor(d.x/u)*u,v=Math.floor(d.y/u)*u+p*u;if(h.push(`${g}.${v}`),m.width>1)for(let S=1;S<m.width;S++)h.push(`${g+S*u}.${v}`)}for(let p of h){if(!i.positions.has(p))continue;let[g,y]=p.split(".").map(E=>Number(E)),v={x:g+s.size*.5,y:y+s.size*.5};if(v.x<0||v.y<0)continue;if(!(canvas.ready&&n&&CONFIG.Canvas.polygonBackends[n].testCollision(c,v,{type:n,mode:"any"}))){f.push(d);break}}}return f}r(Ro,"getTemplateTokens");var Ds={fortitude:{icon:"fa-solid fa-chess-rook",label:"PF2E.SavesFortitude"},reflex:{icon:"fa-solid fa-person-running",label:"PF2E.SavesReflex"},will:{icon:"fa-solid fa-brain",label:"PF2E.SavesWill"}},Et={hero:{icon:"fa-solid fa-hospital-symbol",reroll:"PF2E.RerollMenu.HeroPoint",rerolled:"PF2E.RerollMenu.MessageHeroPoint"},new:{icon:"fa-solid fa-dice",reroll:"PF2E.RerollMenu.KeepNew",rerolled:"PF2E.RerollMenu.MessageKeep.new"},lower:{icon:"fa-solid fa-dice-one",reroll:"PF2E.RerollMenu.KeepLower",rerolled:"PF2E.RerollMenu.MessageKeep.lower"},higher:{icon:"fa-solid fa-dice-six",reroll:"PF2E.RerollMenu.KeepHigher",rerolled:"PF2E.RerollMenu.MessageKeep.higher"}},Ts=["criticalFailure","failure","success","criticalSuccess"],xs=O("preCreateChatMessage",Ps),Ho=jt("renderChatMessage",qo),No=O("createMeasuredTemplate",As),Qe=!1;function Uo(){return{settings:[{name:"target",type:Boolean,default:!1,onChange:Mo},{name:"target-client",type:String,default:"disabled",choices:["disabled","small","big"],scope:"client",onChange:e=>Ho(e&&w("target"))},{name:"target-template",type:Boolean,default:!1,scope:"client",onChange:e=>No(e&&w("target"))}],conflicts:[],ready:()=>{w("target")&&Mo(!0);for(let{message:e,html:t}of me(10))qo(e,t)}}}r(Uo,"registerTargetTokenHelper");function Mo(e){xs(e),Ho(e),No(e&&w("target-template")),$e()&&(e&&!Qe?(ae(Lo),Qe=!0):!e&&Qe&&(se(Lo),Qe=!1))}r(Mo,"setHooks");function Lo(e){if(ie())switch(e.type){case"target.update-save":It(e);break;case"target.update-applied":Vo(e);break}}r(Lo,"onSocket");async function As(e,t,n){let o=game.user;if(o.id!==n)return;let a=A("target.menu"),s=e.item,i=e.actor,c=i?i.token??i.getActiveTokens()[0]:void 0,l={title:s?.name||a("title"),content:await renderTemplate(T("target/template-menu"),{i18n:a,noSelf:!c}),buttons:{select:{icon:'<i class="fa-solid fa-bullseye-arrow"></i>',label:a("target"),callback:g=>({targets:g.find("[name=targets]:checked").val(),self:g.find("[name=self]").prop("checked"),neutral:g.find("[name=neutral]").prop("checked")})}},close:()=>null},u=await Dialog.wait(l,void 0,{id:"pf2e-toolbelt-target-template",width:260});if(!u)return;let f=i?i.alliance:o.isGM?"opposition":"party",d=f==="party"?"opposition":f==="opposition"?"party":null,p=Ro(e).filter(g=>{if(!g.actor?.isOfType("creature","hazard","vehicle")||g.document.hidden)return!1;if(c&&g===c)return u.self;let v=g.actor?g.actor.alliance:g.alliance;return v===null?u.neutral:u.targets==="all"||u.targets==="allies"&&v===f||u.targets==="enemies"&&v===d}).map(g=>g.id);o.updateTokenTargets(p),o.broadcastActivity({targets:p})}r(As,"createMeasuredTemplate");var $o;function Os(e){return $o??=(()=>{let t=[game.i18n.localize("PF2E.Encounter.Broadcast.FastHealing.fast-healing.ReceivedMessage"),game.i18n.localize("PF2E.Encounter.Broadcast.FastHealing.regeneration.ReceivedMessage")];return new RegExp(`^<div>(${t.join("|")})</div>`)})(),$o.test(e.flavor)}r(Os,"isRegenMessage");function _o(e){return!e.rolls[0].options.evaluatePersistent}r(_o,"isValidDamageMessage");function Ps(e){let t=e.isDamageRoll,n=[];if(!(t&&!_o(e))){if(t&&!k(e,"target")){let o=e.token,a=o?.actor,s=Os(e),i=s?a?[{token:o.uuid,actor:a.uuid}]:[]:Array.from(game.user.targets.map(c=>({token:c.document.uuid,actor:c.actor.uuid})));if(n.push(["targets",i]),s&&n.push(["isRegen",!0]),e.rolls.length===2){let c=e.rolls.filter(f=>f.options),l=c.findIndex(f=>f.options.splashOnly),u=c.findIndex(f=>!f.options.splashOnly&&f.options.damage?.modifiers.some(d=>d.damageCategory==="splash"));l!==-1&&u!==-1&&n.push(["splashIndex",l])}}if(t||e.getFlag("pf2e","context.type")==="spell-cast"){let o=e.item,a=o&&o.type==="spell"&&o.system.defense?.save;if(a){let s=o.trickMagicEntry?$(e.content).find("[data-action=spell-save]").data()?.dc:o.spellcasting?.statistic.dc.value;typeof s=="number"&&n.push(["save",{...a,dc:s}])}}n.length&&de(e,"target",n.reduce((o,[a,s])=>(o[a]=s,o),{}))}}r(Ps,"preCreateChatMessage");async function qo(e,t){let n=De("target-client");if(n&&e.isDamageRoll){if(!_o(e))return;await Ms(e,t),Fo(e);return}let o=e.item;if(!(!o||o.type!=="spell")){if(n&&!o.damageKinds.size){await Rs(e,t,o),Fo(e);return}o.trickMagicEntry&&o.system.defense?.save&&t.find("[data-action=spell-damage]").on("click",()=>{Le(e)})}}r(qo,"renderChatMessage");function Fo(e){Promise.all([ui.chat,ui.chat._popout].map(async t=>{let n=t?.element[0]?.querySelector("#chat-log");!n||!t.isAtBottom&&e.user._id!==game.user._id||(await t._waitForImages(),n.scrollTop=n.scrollHeight)}));for(let t of Object.values(e.apps))t instanceof ChatPopout&&t.rendered&&t.setPosition()}r(Fo,"refreshMessage");async function Rs(e,t,n){let o=await jo(e);if(!o)return;let{targets:a,save:s}=o,i=t.find(".message-content"),c=i.find(".card-buttons");if(game.user.isGM||e.isAuthor){let u=c.find("[data-action=spell-save]"),f=$('<div class="pf2e-toolbelt-target-wrapper"></div>'),d=D("target.chat.targets.tooltip"),m=$(`<button class="pf2e-toolbelt-target-targets" title="${d}">
+(() => {
+  var __defProp = Object.defineProperty;
+  var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+  // src/shared/item.js
+  var HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
+  function getSourceId(doc) {
+    return doc.getFlag("core", "sourceId");
+  }
+  __name(getSourceId, "getSourceId");
+  function includesSourceId(doc, list) {
+    const sourceId = getSourceId(doc);
+    return sourceId ? list.includes(sourceId) : false;
+  }
+  __name(includesSourceId, "includesSourceId");
+  function getItemSourceIdCondition(sourceId) {
+    return Array.isArray(sourceId) ? (item) => includesSourceId(item, sourceId) : (item) => getSourceId(item) === sourceId;
+  }
+  __name(getItemSourceIdCondition, "getItemSourceIdCondition");
+  function getItems(actor, itemTypes = []) {
+    const types = typeof itemTypes === "string" ? [itemTypes] : itemTypes;
+    return types.length ? types.flatMap((type) => actor.itemTypes[type]) : actor.items;
+  }
+  __name(getItems, "getItems");
+  function hasItemWithSourceId(actor, sourceId, itemTypes) {
+    return getItems(actor, itemTypes).some(getItemSourceIdCondition(sourceId));
+  }
+  __name(hasItemWithSourceId, "hasItemWithSourceId");
+  function getItemWithSourceId(actor, sourceId, itemTypes) {
+    return getItems(actor, itemTypes).find(getItemSourceIdCondition(sourceId));
+  }
+  __name(getItemWithSourceId, "getItemWithSourceId");
+  function canBeInvested(item) {
+    return item.traits.has("invested");
+  }
+  __name(canBeInvested, "canBeInvested");
+  function hasWornSlot(item) {
+    return item.system.equipped.inSlot != null;
+  }
+  __name(hasWornSlot, "hasWornSlot");
+  function isWornAs(item) {
+    return item.system.usage.type === "worn" && item.system.equipped.inSlot;
+  }
+  __name(isWornAs, "isWornAs");
+  function isInvestedOrWornAs(item) {
+    return item.isInvested || isWornAs(item);
+  }
+  __name(isInvestedOrWornAs, "isInvestedOrWornAs");
+  function isHandwrapsOfMightyBlows(item) {
+    return item.isOfType("weapon") && item.slug === HANDWRAPS_SLUG && item.category === "unarmed";
+  }
+  __name(isHandwrapsOfMightyBlows, "isHandwrapsOfMightyBlows");
+  function isHeld(item) {
+    return item.system.usage.type === "held";
+  }
+  __name(isHeld, "isHeld");
+  function isTwoHanded(item) {
+    return isHeld(item) && item.system.usage.value === "held-in-two-hands";
+  }
+  __name(isTwoHanded, "isTwoHanded");
+  function isOneHanded(item) {
+    return isHeld(item) && item.system.usage.value === "held-in-one-hand";
+  }
+  __name(isOneHanded, "isOneHanded");
+  function inSlotValue(item, value) {
+    const usage = item.system.usage;
+    return usage.type === "worn" && usage.where ? value : void 0;
+  }
+  __name(inSlotValue, "inSlotValue");
+  function toggleInvestedValue(item, invest) {
+    const value = invest ?? !item.system.equipped.invested;
+    return item.traits.has("invested") ? value : void 0;
+  }
+  __name(toggleInvestedValue, "toggleInvestedValue");
+  function itemCarryUpdate(item, { carryType = "worn", handsHeld = 0, inSlot, invested, containerId }) {
+    const update = {
+      _id: item.id,
+      system: {
+        equipped: {
+          carryType,
+          handsHeld,
+          inSlot: inSlotValue(item, inSlot),
+          invested: toggleInvestedValue(item, invested)
+        }
+      }
+    };
+    if (containerId !== void 0) {
+      update.system.containerId = containerId;
+    }
+    return update;
+  }
+  __name(itemCarryUpdate, "itemCarryUpdate");
+
+  // src/module.js
+  var MODULE_ID = "pf2e-toolbelt";
+
+  // src/shared/libwrapper.js
+  function registerWrapper(path, callback, type = "WRAPPER") {
+    return libWrapper.register(MODULE_ID, path, callback, type);
+  }
+  __name(registerWrapper, "registerWrapper");
+  function unregisterWrapper(id) {
+    libWrapper.unregister(MODULE_ID, id);
+  }
+  __name(unregisterWrapper, "unregisterWrapper");
+  function wrapperError(feature, path) {
+    console.error(
+      `an error occured in the feature '${feature}' of the module '${MODULE_ID}' with the wrapper: '${path}'`
+    );
+  }
+  __name(wrapperError, "wrapperError");
+
+  // src/shared/localize.js
+  function localize(...args) {
+    let [key, data] = args;
+    key = `${MODULE_ID}.${key}`;
+    if (data)
+      return game.i18n.format(key, data);
+    return game.i18n.localize(key);
+  }
+  __name(localize, "localize");
+  function hasLocalization(key) {
+    return game.i18n.has(`${MODULE_ID}.${key}`, false);
+  }
+  __name(hasLocalization, "hasLocalization");
+  function localizePath(key) {
+    return `${MODULE_ID}.${key}`;
+  }
+  __name(localizePath, "localizePath");
+  function subLocalize(subKey) {
+    const fn = /* @__PURE__ */ __name((...args) => localize(`${subKey}.${args[0]}`, args[1]), "fn");
+    Object.defineProperties(fn, {
+      warn: {
+        value: (...args) => warn(`${subKey}.${args[0]}`, args[1], args[2]),
+        enumerable: false,
+        configurable: false
+      },
+      info: {
+        value: (...args) => info(`${subKey}.${args[0]}`, args[1], args[2]),
+        enumerable: false,
+        configurable: false
+      },
+      error: {
+        value: (...args) => error(`${subKey}.${args[0]}`, args[1], args[2]),
+        enumerable: false,
+        configurable: false
+      },
+      has: {
+        value: (key) => hasLocalization(`${subKey}.${key}`),
+        enumerable: false,
+        configurable: false
+      },
+      path: {
+        value: (key) => localizePath(`${subKey}.${key}`),
+        enumerable: false,
+        configurable: false
+      },
+      template: {
+        value: (key, { hash }) => fn(key, hash),
+        enumerable: false,
+        configurable: false
+      }
+    });
+    return fn;
+  }
+  __name(subLocalize, "subLocalize");
+
+  // src/shared/notification.js
+  function notify(str, arg1, arg2, arg3) {
+    const type = typeof arg1 === "string" ? arg1 : "info";
+    const data = typeof arg1 === "object" ? arg1 : typeof arg2 === "object" ? arg2 : void 0;
+    const permanent = typeof arg1 === "boolean" ? arg1 : typeof arg2 === "boolean" ? arg2 : arg3 ?? false;
+    ui.notifications.notify(localize(str, data), type, { permanent });
+  }
+  __name(notify, "notify");
+  function warn(...args) {
+    const [str, arg1, arg2] = args;
+    notify(str, "warning", arg1, arg2);
+  }
+  __name(warn, "warn");
+  function info(...args) {
+    const [str, arg1, arg2] = args;
+    notify(str, "info", arg1, arg2);
+  }
+  __name(info, "info");
+  function error(...args) {
+    const [str, arg1, arg2] = args;
+    notify(str, "error", arg1, arg2);
+  }
+  __name(error, "error");
+
+  // src/shared/settings.js
+  function getSetting(setting) {
+    return game.settings.get(MODULE_ID, setting);
+  }
+  __name(getSetting, "getSetting");
+  function setSetting(key, value) {
+    return game.settings.set(MODULE_ID, key, value);
+  }
+  __name(setSetting, "setSetting");
+  function choiceSettingIsEnabled(setting) {
+    return getSetting(setting) !== "disabled";
+  }
+  __name(choiceSettingIsEnabled, "choiceSettingIsEnabled");
+
+  // src/features/arp.js
+  var PREPARE_WEAPON_DATA = "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData";
+  var PREPARE_WEAPON_DERIVED_DATA = "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData";
+  var PREPARE_ARMOR_DATA = "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData";
+  var PREPARE_ARMOR_DERIVED_DATA = "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData";
+  function registerArp() {
+    return {
+      settings: [
+        {
+          name: "auto-runes",
+          type: String,
+          default: "disabled",
+          choices: ["disabled", "force", "lower"],
+          requiresReload: true
+        }
+      ],
+      conflicts: ["pf2e-arp"],
+      init: () => {
+        const setting = getSetting("auto-runes");
+        if (setting === "disabled")
+          return;
+        registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, "WRAPPER");
+        registerWrapper(
+          PREPARE_WEAPON_DERIVED_DATA,
+          onPrepareWeaponDerivedData,
+          "WRAPPER"
+        );
+        registerWrapper(PREPARE_ARMOR_DATA, onPrepareArmorData, "WRAPPER");
+        registerWrapper(
+          PREPARE_ARMOR_DERIVED_DATA,
+          onPrepareArmorDerivedData,
+          "WRAPPER"
+        );
+        if (setting === "force") {
+          Hooks.on("renderPhysicalItemSheetPF2e", renderPhysicalItemSheetPF2e);
+        }
+      },
+      ready: (isGM) => {
+        if (isGM && choiceSettingIsEnabled("auto-runes") && game.settings.get("pf2e", "automaticBonusVariant") !== "noABP") {
+          game.settings.set("pf2e", "automaticBonusVariant", "noABP");
+          info("arp.forceVariant");
+        }
+      }
+    };
+  }
+  __name(registerArp, "registerArp");
+  function isValidActor(actor, isCharacter = false) {
+    return actor && !actor.getFlag("pf2e", "disableABP") && (!isCharacter || actor.isOfType("character"));
+  }
+  __name(isValidActor, "isValidActor");
+  var WEAPON_POTENCY_PRICE = {
+    1: 35,
+    2: 935,
+    3: 8935,
+    4: 8935
+  };
+  var WEAPON_STRIKING_PRICE = {
+    1: 65,
+    2: 1065,
+    3: 31065
+  };
+  function isShieldWeapon(weapon) {
+    return ["shield-boss", "shield-spikes"].includes(
+      weapon._source.system.baseItem
+    );
+  }
+  __name(isShieldWeapon, "isShieldWeapon");
+  function isValidWeapon(weapon) {
+    const traits = weapon._source.system.traits.value;
+    const { group, category, slug } = weapon._source.system;
+    if (category === "unarmed" && slug !== HANDWRAPS_SLUG) {
+      return !!weapon.actor.itemTypes.weapon.find(
+        (weapon2) => weapon2.slug === HANDWRAPS_SLUG && weapon2.category === "unarmed" && weapon2.isEquipped && weapon2.isInvested
+      );
+    }
+    return (group !== "shield" || isShieldWeapon(weapon)) && !traits.includes("alchemical") && !traits.includes("bomb");
+  }
+  __name(isValidWeapon, "isValidWeapon");
+  function onPrepareWeaponData(wrapped) {
+    try {
+      const actor = this.actor;
+      if (!isValidActor(actor, true) || !isValidWeapon(this))
+        return wrapped();
+      const traits = this._source.system.traits.value;
+      if (traits.includes("alchemical") && traits.includes("bomb"))
+        return wrapped();
+      const level = actor.level;
+      const forceUpdate = getSetting("auto-runes") === "force";
+      const expectedPotency = level < 2 ? null : level < 10 ? 1 : level < 16 ? 2 : 3;
+      const expectedStriking = level < 4 ? null : level < 12 ? 1 : level < 19 ? 2 : 3;
+      if (this.system.runes.potency <= expectedPotency || forceUpdate) {
+        this.system.runes.potency = expectedPotency;
+      }
+      if (this.system.runes.striking <= expectedStriking || forceUpdate) {
+        this.system.runes.striking = expectedStriking;
+      }
+    } catch {
+      wrapperError("auto-runes", PREPARE_WEAPON_DATA);
+    }
+    wrapped();
+  }
+  __name(onPrepareWeaponData, "onPrepareWeaponData");
+  function onPrepareWeaponDerivedData(wrapped) {
+    wrapped();
+    try {
+      if (!isValidActor(this.actor) || this.isSpecific || !isValidWeapon(this))
+        return;
+      let coins = this.price.value.toObject();
+      if (!coins.gp)
+        return;
+      const potency = this.system.runes.potency;
+      if (potency)
+        coins.gp -= WEAPON_POTENCY_PRICE[potency];
+      const striking = this.system.runes.striking;
+      if (striking)
+        coins.gp -= WEAPON_STRIKING_PRICE[striking];
+      coins = new game.pf2e.Coins(coins);
+      if ((potency || striking) && !this.system.runes.property.length) {
+        coins = coins.plus(this._source.system.price.value);
+      }
+      this.system.price.value = coins;
+    } catch {
+      wrapperError("auto-runes", PREPARE_WEAPON_DERIVED_DATA);
+    }
+  }
+  __name(onPrepareWeaponDerivedData, "onPrepareWeaponDerivedData");
+  var ARMOR_POTENCY_PRICE = {
+    1: 160,
+    2: 1060,
+    3: 20560,
+    4: 20560
+  };
+  var ARMOR_RESILIENCY_PRICE = {
+    1: 340,
+    2: 3440,
+    3: 49440
+  };
+  function isValidArmor(armor) {
+    return true;
+  }
+  __name(isValidArmor, "isValidArmor");
+  function onPrepareArmorData(wrapped) {
+    try {
+      const actor = this.actor;
+      if (!isValidActor(actor, true) || !isValidArmor(this))
+        return wrapped();
+      const level = actor.level;
+      const forceUpdate = getSetting("auto-runes") === "force";
+      const expectedPotency = level < 5 ? null : level < 11 ? 1 : level < 18 ? 2 : 3;
+      const expectedResilient = level < 8 ? null : level < 14 ? 1 : level < 20 ? 2 : 3;
+      if (this.system.runes.potency <= expectedPotency || forceUpdate) {
+        this.system.runes.potency = expectedPotency;
+      }
+      if (this.system.runes.resilient <= expectedResilient || forceUpdate) {
+        this.system.runes.resilient = expectedResilient;
+      }
+    } catch {
+      wrapperError("auto-runes", PREPARE_ARMOR_DATA);
+    }
+    wrapped();
+  }
+  __name(onPrepareArmorData, "onPrepareArmorData");
+  function onPrepareArmorDerivedData(wrapped) {
+    wrapped();
+    try {
+      if (!isValidActor(this.actor) || this.isSpecific || !isValidArmor(this))
+        return;
+      let coins = this.price.value.toObject();
+      if (!coins.gp)
+        return;
+      const potency = this.system.runes.potency;
+      if (potency)
+        coins.gp -= ARMOR_POTENCY_PRICE[potency];
+      const resiliency = this.system.runes.resilient;
+      if (resiliency)
+        coins.gp -= ARMOR_RESILIENCY_PRICE[resiliency];
+      coins = new game.pf2e.Coins(coins);
+      if ((potency || resiliency) && !this.system.runes.property.length) {
+        coins = coins.plus(this._source.system.price.value);
+      }
+      this.system.price.value = coins;
+    } catch {
+      wrapperError("auto-runes", PREPARE_ARMOR_DERIVED_DATA);
+    }
+  }
+  __name(onPrepareArmorDerivedData, "onPrepareArmorDerivedData");
+  function renderPhysicalItemSheetPF2e(sheet, html) {
+    const item = sheet.item;
+    if (!item || !item.isOfType("weapon", "armor") || !isValidActor(item.actor, true))
+      return;
+    const lookups = ["potency", "striking", "resilient"].map((x) => `[name="system.runes.${x}"]`).join(", ");
+    html.find(`[data-tab=details] fieldset .form-group:has(${lookups})`).hide();
+  }
+  __name(renderPhysicalItemSheetPF2e, "renderPhysicalItemSheetPF2e");
+
+  // src/shared/hook.js
+  function createHook(event, listener, callback = () => {
+  }) {
+    let HOOK = null;
+    return (value, otherSettings = [], skipCallback = false) => {
+      const others = typeof otherSettings === "string" ? [otherSettings] : otherSettings;
+      const settingValue = value || others.some((s) => getSetting(s));
+      if (settingValue && !HOOK) {
+        HOOK = Hooks.on(event, listener);
+      } else if (!settingValue && HOOK) {
+        Hooks.off(event, HOOK);
+        HOOK = null;
+      }
+      if (!skipCallback)
+        callback(settingValue);
+    };
+  }
+  __name(createHook, "createHook");
+  function createChoicesHook(event, listener, callback = () => {
+  }) {
+    let HOOK = null;
+    return (value, skipCallback = false) => {
+      if (value === "disabled" && HOOK) {
+        Hooks.off(event, HOOK);
+        HOOK = null;
+      } else if (value !== "disabled" && !HOOK) {
+        HOOK = Hooks.on(event, listener);
+      }
+      if (!skipCallback)
+        callback(value);
+    };
+  }
+  __name(createChoicesHook, "createChoicesHook");
+  function registerUpstreamHook(hook, fn) {
+    const id = Hooks.on(hook, fn);
+    const index = Hooks.events[hook].findIndex((x) => x.id === id);
+    if (index !== 0) {
+      const [hooked] = Hooks.events[hook].splice(index, 1);
+      Hooks.events[hook].unshift(hooked);
+    }
+    return id;
+  }
+  __name(registerUpstreamHook, "registerUpstreamHook");
+
+  // src/features/debug.js
+  var appHook = createHook("renderApplication", onRender);
+  var actorHook = createHook("renderActorSheet", onRender);
+  var itemHook = createHook("renderItemSheet", onRender);
+  function registerDebug() {
+    return {
+      settings: [
+        {
+          name: "debug",
+          type: Boolean,
+          default: false,
+          config: false,
+          scope: "client",
+          onChange: (value) => setup(value)
+        }
+      ],
+      init: () => {
+        setup();
+      }
+    };
+  }
+  __name(registerDebug, "registerDebug");
+  function setup(value) {
+    const enabled2 = value ?? getSetting("debug");
+    appHook(enabled2);
+    actorHook(enabled2);
+    itemHook(enabled2);
+  }
+  __name(setup, "setup");
+  function onRender(app, html) {
+    const link = html.find(".document-id-link")[0];
+    if (!link)
+      return;
+    link.addEventListener(
+      "click",
+      (event) => {
+        if (!event.shiftKey)
+          return;
+        const obj = app.object;
+        if (!obj)
+          return;
+        event.preventDefault();
+        event.stopPropagation();
+        const type = obj.type;
+        let i = 2;
+        let variable = type;
+        while (window[variable]) {
+          variable = `${type}${i++}`;
+        }
+        window[variable] = obj;
+        console.log(variable, obj);
+      },
+      true
+    );
+  }
+  __name(onRender, "onRender");
+
+  // src/features/effects.js
+  var setHook = createHook(
+    "renderEffectsPanel",
+    renderEffectsPanel,
+    refreshEffectsPanel
+  );
+  function registerEffectsPanelHelper() {
+    return {
+      settings: [
+        {
+          name: "effect-remove",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: (value) => setHook(value, "condition-sheet")
+        },
+        {
+          name: "condition-sheet",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: (value) => setHook(value, "effect-remove")
+        }
+      ],
+      conflicts: ["pf2e-effect-description"],
+      init: () => {
+        setHook(false, ["effect-remove", "condition-sheet"]);
+      }
+    };
+  }
+  __name(registerEffectsPanelHelper, "registerEffectsPanelHelper");
+  function refreshEffectsPanel() {
+    game.pf2e.effectPanel?.render();
+  }
+  __name(refreshEffectsPanel, "refreshEffectsPanel");
+  function renderEffectsPanel(panel, html) {
+    const removeRow = `<div>${localize("effects.remove")}</div>`;
+    const editIcon = `<a data-action="edit" data-tooltip="Edit Item"><i class="fa-solid fa-fw fa-pencil"></i></a>`;
+    const effectPanels = html.find(".effect-item[data-item-id]").toArray();
+    for (const effectPanel of effectPanels) {
+      const id = effectPanel.dataset.itemId;
+      const effect = panel.actor?.items.get(id);
+      if (!effect)
+        continue;
+      if (getSetting("effect-remove") && !effect.isLocked && effect.badge && effect.badge.type === "counter") {
+        effectPanel.querySelector(".effect-info .instructions").insertAdjacentHTML("beforeend", removeRow);
+        effectPanel.querySelector(".icon").addEventListener(
+          "contextmenu",
+          (event) => onRemoveEffect(event, panel),
+          true
+        );
+      }
+      if (getSetting("condition-sheet") && effect.isOfType("condition")) {
+        const h1 = effectPanel.querySelector(".effect-info > h1");
+        h1.insertAdjacentHTML("beforeend", editIcon);
+        h1.querySelector('[data-action="edit"]').addEventListener(
+          "click",
+          (event) => onConditionSheet(event, panel)
+        );
+      }
+    }
+  }
+  __name(renderEffectsPanel, "renderEffectsPanel");
+  function onConditionSheet(event, panel) {
+    const effect = getEffect(event, panel);
+    if (!effect?.isOfType("condition"))
+      return;
+    event.preventDefault();
+    effect.sheet.render(true);
+  }
+  __name(onConditionSheet, "onConditionSheet");
+  function onRemoveEffect(event, panel) {
+    if (!event.shiftKey)
+      return;
+    const effect = getEffect(event, panel);
+    if (!effect || effect.isLocked || !effect.badge || effect.badge.type !== "counter")
+      return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    effect.delete();
+  }
+  __name(onRemoveEffect, "onRemoveEffect");
+  function getEffect(event, panel) {
+    const target = event.currentTarget;
+    const effect = target.closest(".effect-item[data-item-id]");
+    const id = effect.dataset.itemId;
+    return panel.actor?.items.get(id);
+  }
+  __name(getEffect, "getEffect");
+
+  // src/apps/giveth/popup.js
+  var MoveLootPopup = class extends FormApplication {
+    static {
+      __name(this, "MoveLootPopup");
+    }
+    constructor(object, options, callback) {
+      super(object, options);
+      this.onSubmitCallback = callback;
+    }
+    async getData() {
+      const [prompt, buttonLabel] = this.options.isPurchase ? ["PF2E.loot.PurchaseLootMessage", "PF2E.loot.PurchaseLoot"] : ["PF2E.loot.MoveLootMessage", "PF2E.loot.MoveLoot"];
+      return {
+        ...await super.getData(),
+        maxQuantity: this.options.maxQuantity,
+        newStack: this.options.newStack,
+        lockStack: this.options.lockStack,
+        prompt,
+        buttonLabel
+      };
+    }
+    static get defaultOptions() {
+      return {
+        ...FormApplication.defaultOptions,
+        id: "MoveLootPopup",
+        classes: [],
+        title: game.i18n.localize("PF2E.loot.MoveLootPopupTitle"),
+        template: "systems/pf2e/templates/popups/loot/move-loot-popup.hbs",
+        width: "auto",
+        maxQuantity: 1,
+        newStack: false,
+        lockStack: false,
+        isPurchase: false
+      };
+    }
+    async _updateObject(_event, formData) {
+      this.onSubmitCallback(formData.quantity, formData.newStack);
+    }
+  };
+
+  // src/shared/misc.js
+  function localeCompare(a, b) {
+    return a.localeCompare(b, game.i18n.lang);
+  }
+  __name(localeCompare, "localeCompare");
+  function refreshCharacterSheets(actor) {
+    for (const win of Object.values(ui.windows)) {
+      const winActor = win.actor;
+      if (!(win instanceof ActorSheet) || !winActor.isOfType("character"))
+        continue;
+      if (!actor || actor === winActor)
+        win.render();
+    }
+  }
+  __name(refreshCharacterSheets, "refreshCharacterSheets");
+  function compareArrays(arr1, arr2) {
+    if (arr1.length !== arr2.length)
+      return false;
+    const clonedArr2 = arr2.slice();
+    for (const arr1Value of arr1) {
+      const index = clonedArr2.findIndex((arr2Value) => arr1Value === arr2Value);
+      if (index === -1)
+        return false;
+      clonedArr2.splice(index, 1);
+    }
+    return true;
+  }
+  __name(compareArrays, "compareArrays");
+  function ordinalString(value) {
+    const pluralRules = new Intl.PluralRules(game.i18n.lang, { type: "ordinal" });
+    const suffix = game.i18n.localize(
+      `PF2E.OrdinalSuffixes.${pluralRules.select(value)}`
+    );
+    return game.i18n.format("PF2E.OrdinalNumber", { value, suffix });
+  }
+  __name(ordinalString, "ordinalString");
+  function isInstanceOf(obj, name) {
+    if (typeof obj !== "object")
+      return false;
+    let cursor = Reflect.getPrototypeOf(obj);
+    while (cursor) {
+      if (cursor.constructor.name === name)
+        return true;
+      cursor = Reflect.getPrototypeOf(cursor);
+    }
+    return false;
+  }
+  __name(isInstanceOf, "isInstanceOf");
+  function setInMemory(doc, key, value) {
+    return setProperty(doc, `modules.${MODULE_ID}.${key}`, value);
+  }
+  __name(setInMemory, "setInMemory");
+  function getInMemory(doc, key) {
+    return getProperty(doc, `modules.${MODULE_ID}.${key}`);
+  }
+  __name(getInMemory, "getInMemory");
+  function deleteInMemory(doc, key) {
+    const split = `modules.${MODULE_ID}.${key}`.split(".");
+    const last = split.pop();
+    let cursor = doc;
+    for (const key2 of split) {
+      cursor = cursor[key2];
+      if (!cursor)
+        return true;
+    }
+    return delete cursor[last];
+  }
+  __name(deleteInMemory, "deleteInMemory");
+  function calculateDistanceBetweenPoints(x1, y1, x2, y2) {
+    const x = x2 - x1;
+    const y = y2 - y1;
+    return Math.sqrt(x * x + y * y);
+  }
+  __name(calculateDistanceBetweenPoints, "calculateDistanceBetweenPoints");
+  function getElementIndex(el) {
+    return Array.from(el.parentElement.children).indexOf(el);
+  }
+  __name(getElementIndex, "getElementIndex");
+  function indexIsValid(index) {
+    return index !== void 0 && index !== -1;
+  }
+  __name(indexIsValid, "indexIsValid");
+
+  // src/shared/path.js
+  function templatePath(...path) {
+    const pathStr = path.filter((x) => typeof x === "string").join("/");
+    return `modules/${MODULE_ID}/templates/${pathStr}.hbs`;
+  }
+  __name(templatePath, "templatePath");
+
+  // src/shared/actor.js
+  var registered = {
+    wrapperIds: [],
+    tabs: new Collection()
+  };
+  var CHARACTER_SHEET_INNER_RENDER = "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._renderInner";
+  var CHARACTER_SHEET_RENDER = "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._render";
+  var CHARACTER_SHEET_ACTIVE_LISTENERS = "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.activateListeners";
+  function isPlayedActor(actor) {
+    return actor && !actor.pack && actor.id && game.actors.has(actor.id);
+  }
+  __name(isPlayedActor, "isPlayedActor");
+  function registerCharacterSheetExtraTab(options) {
+    if (!registered.wrapperIds.length) {
+      registered.wrapperIds = [
+        registerWrapper(CHARACTER_SHEET_RENDER, characterSheetRender),
+        registerWrapper(CHARACTER_SHEET_INNER_RENDER, characterSheetInnerRender),
+        registerWrapper(
+          CHARACTER_SHEET_ACTIVE_LISTENERS,
+          characterSheetActiveListeners
+        )
+      ];
+    }
+    registered.tabs.set(options.tabName, options);
+  }
+  __name(registerCharacterSheetExtraTab, "registerCharacterSheetExtraTab");
+  function unregisterCharacterSheetExtraTab(tabName) {
+    registered.tabs.delete(tabName);
+    if (registered.wrapperIds.length && !registered.tabs.size) {
+      for (const wrapperId of registered.wrapperIds) {
+        unregisterWrapper(wrapperId);
+      }
+      registered.wrapperIds = [];
+    }
+  }
+  __name(unregisterCharacterSheetExtraTab, "unregisterCharacterSheetExtraTab");
+  async function characterSheetRender(wrapped, ...args) {
+    const positions = {};
+    for (const { tabName } of registered.tabs) {
+      const existingTab = getCharacterSheetTab(this.element, tabName);
+      const existingAlternate = existingTab.find(".alternate")[0];
+      if (!existingAlternate)
+        continue;
+      positions[tabName] = existingAlternate.scrollTop;
+    }
+    await wrapped(...args);
+    for (const { tabName } of registered.tabs) {
+      const oldPosition = positions[tabName];
+      if (!oldPosition)
+        continue;
+      const tab = getCharacterSheetTab(this.element, tabName);
+      const alternate = tab.find(".alternate")[0];
+      alternate.scrollTop = positions[tabName];
+    }
+  }
+  __name(characterSheetRender, "characterSheetRender");
+  async function characterSheetInnerRender(wrapped, data) {
+    const inner = await wrapped(data);
+    const actor = this.actor;
+    if (!registered.tabs.size || !isPlayedActor(actor)) {
+      return inner;
+    }
+    const element = this.element;
+    for (const {
+      tabName,
+      getData: getData3,
+      templateFolder,
+      onRender: onRender3
+    } of registered.tabs) {
+      const innerTab = getCharacterSheetTab(inner, tabName);
+      const tabData = await getData3(
+        actor,
+        this,
+        getCharacterSheetTab(element, tabName)
+      );
+      const template = await renderTemplate(
+        templatePath(templateFolder),
+        tabData
+      );
+      if (onRender3) {
+        await onRender3(actor, this, inner);
+      }
+      if (getInMemory(this, `${tabName}.toggled`)) {
+        innerTab.addClass("toggled");
+      }
+      innerTab.children(":last").before(template);
+    }
+    return inner;
+  }
+  __name(characterSheetInnerRender, "characterSheetInnerRender");
+  function characterSheetActiveListeners(wrapped, inner) {
+    wrapped(inner);
+    const actor = this.actor;
+    if (!registered.tabs.size || !isPlayedActor(actor)) {
+      return;
+    }
+    for (const { tabName, addEvents: addEvents4 } of registered.tabs) {
+      inner.find(`nav.sheet-navigation .item[data-tab=${tabName}]`).on(
+        "click",
+        (event) => onCharacterSheetTabBtnToggle(event, inner, this, tabName)
+      );
+      const tab = getCharacterSheetTab(inner, tabName);
+      addEvents4(tab.find("> .alternate"), this, actor, inner);
+    }
+  }
+  __name(characterSheetActiveListeners, "characterSheetActiveListeners");
+  function getCharacterSheetTab(html, tabName) {
+    return html.find(
+      `section.sheet-body .sheet-content > .tab[data-tab=${tabName}]`
+    );
+  }
+  __name(getCharacterSheetTab, "getCharacterSheetTab");
+  function onCharacterSheetTabBtnToggle(event, html, sheet, tabName) {
+    event.preventDefault();
+    const tab = getCharacterSheetTab(html, tabName);
+    if (tab.hasClass("active")) {
+      tab.toggleClass("toggled");
+      tab.scrollTop(0);
+      setInMemory(sheet, `${tabName}.toggled`, tab.hasClass("toggled"));
+    }
+  }
+  __name(onCharacterSheetTabBtnToggle, "onCharacterSheetTabBtnToggle");
+
+  // src/shared/flags.js
+  function getFlag(doc, key, fallback) {
+    return doc.getFlag(MODULE_ID, key) ?? fallback;
+  }
+  __name(getFlag, "getFlag");
+  function setFlag(doc, key, value) {
+    return doc.setFlag(MODULE_ID, key, value);
+  }
+  __name(setFlag, "setFlag");
+  function unsetFlag(doc, key) {
+    return doc.unsetFlag(MODULE_ID, key);
+  }
+  __name(unsetFlag, "unsetFlag");
+  function updateSourceFlag(doc, key, value) {
+    return doc.updateSource({
+      [`flags.${MODULE_ID}.${key}`]: value
+    });
+  }
+  __name(updateSourceFlag, "updateSourceFlag");
+  function moduleFlagUpdate(update, key, value) {
+    update[`flags.${MODULE_ID}.${key}`] = value;
+  }
+  __name(moduleFlagUpdate, "moduleFlagUpdate");
+
+  // src/shared/chat.js
+  function getChatMessageClass() {
+    return CONFIG.ChatMessage.documentClass;
+  }
+  __name(getChatMessageClass, "getChatMessageClass");
+  function* latestChatMessages(nb, fromMessage) {
+    const chat = ui.chat?.element;
+    if (!chat)
+      return;
+    const messages = game.messages.contents;
+    const start = (fromMessage ? messages.findLastIndex((m) => m === fromMessage) : messages.length) - 1;
+    for (let i = start; i >= start - nb; i--) {
+      const message = messages[i];
+      if (!message)
+        return;
+      const html = chat.find(`[data-message-id=${message.id}]`);
+      if (!html.length)
+        continue;
+      yield { message, html };
+    }
+  }
+  __name(latestChatMessages, "latestChatMessages");
+  function chatUUID(uuid, label, fake = false) {
+    if (fake) {
+      return `<span style="background: #DDD; padding: 1px 4px; border: 1px solid var(--color-border-dark-tertiary);
+border-radius: 2px; white-space: nowrap; word-break: break-all;">${label}</span>`;
+    }
+    if (label)
+      return `@UUID[${uuid}]{${label}}`;
+    return `@UUID[${uuid}]`;
+  }
+  __name(chatUUID, "chatUUID");
+  function bindOnPreCreateSpellDamageChatMessage(originalMessage) {
+    const messageId = originalMessage.id;
+    const save = getFlag(originalMessage, "target.save");
+    if (!save)
+      return;
+    Hooks.once("preCreateChatMessage", (message) => {
+      updateSourceFlag(message, "target.messageId", messageId);
+      updateSourceFlag(message, "target.save", save);
+    });
+  }
+  __name(bindOnPreCreateSpellDamageChatMessage, "bindOnPreCreateSpellDamageChatMessage");
+
+  // src/shared/socket.js
+  function socketOn(callback) {
+    game.socket.on(`module.${MODULE_ID}`, callback);
+  }
+  __name(socketOn, "socketOn");
+  function socketOff(callback) {
+    game.socket.off(`module.${MODULE_ID}`, callback);
+  }
+  __name(socketOff, "socketOff");
+  function socketEmit(packet) {
+    game.socket.emit(`module.${MODULE_ID}`, packet);
+  }
+  __name(socketEmit, "socketEmit");
+
+  // src/shared/user.js
+  function isActiveGM() {
+    return game.user === game.users.activeGM;
+  }
+  __name(isActiveGM, "isActiveGM");
+  function isUserGM() {
+    const user = game.data.users.find((x) => x._id === game.data.userId);
+    return user && user.role >= CONST.USER_ROLES.GAMEMASTER;
+  }
+  __name(isUserGM, "isUserGM");
+  function isGMOnline() {
+    return game.users.some((user) => user.active && user.isGM);
+  }
+  __name(isGMOnline, "isGMOnline");
+  function getCharacterOwner(actor, connected = false) {
+    if (connected)
+      return game.users.find((x) => x.active && x.character === actor);
+    return game.users.find((x) => x.character === actor);
+  }
+  __name(getCharacterOwner, "getCharacterOwner");
+  function getActiveOwner(doc) {
+    const activeOwners = game.users.filter(
+      (user) => user.active && !user.isGM && doc.testUserPermission(user, "OWNER")
+    );
+    activeOwners.sort((a, b) => a.id > b.id ? 1 : -1);
+    return activeOwners[0] || null;
+  }
+  __name(getActiveOwner, "getActiveOwner");
+  function isActiveOwner(doc) {
+    return getActiveOwner(doc) === game.user;
+  }
+  __name(isActiveOwner, "isActiveOwner");
+  function getOwner(doc, connected = false) {
+    if (connected)
+      return game.users.find(
+        (x) => x.active && doc.testUserPermission(x, "OWNER")
+      );
+    return game.users.find((x) => doc.testUserPermission(x, "OWNER"));
+  }
+  __name(getOwner, "getOwner");
+
+  // src/features/giveth.js
+  var enabled = false;
+  var CANVAS_HOOK = null;
+  function registerGiveth() {
+    return {
+      settings: [
+        {
+          name: "giveth",
+          type: String,
+          default: "disabled",
+          choices: ["disabled", "enabled", "no-message"],
+          onChange: setup2
+        }
+      ],
+      conflicts: ["pf2e-giveth"],
+      ready: (isGM) => {
+        if (getSetting("giveth") !== "disabled")
+          setup2(true);
+      }
+    };
+  }
+  __name(registerGiveth, "registerGiveth");
+  function setup2(value) {
+    const isGM = game.user.isGM;
+    if (value === "disabled" && enabled) {
+      if (isGM)
+        socketOff(onSocket);
+      else if (CANVAS_HOOK) {
+        Hooks.off("dropCanvasData", CANVAS_HOOK);
+        CANVAS_HOOK = null;
+      }
+      enabled = false;
+    } else if (value !== "disabled" && !enabled) {
+      if (isGM)
+        socketOn(onSocket);
+      else if (!CANVAS_HOOK)
+        CANVAS_HOOK = registerUpstreamHook("dropCanvasData", onDropCanvasData);
+      enabled = true;
+    }
+  }
+  __name(setup2, "setup");
+  function onSocket(packet) {
+    if (!isActiveGM())
+      return;
+    if (packet.type === "giveth-condition")
+      takethCondition(packet);
+    else if (packet.type === "giveth-effect")
+      takethEffect(packet);
+    else
+      takethPhysical(packet);
+  }
+  __name(onSocket, "onSocket");
+  function onDropCanvasData(canvas2, data) {
+    if (!isGMOnline())
+      return true;
+    const details = getDetailsFromData(data);
+    if (!details)
+      return true;
+    const target = canvas2.tokens.placeables.slice().filter((token) => {
+      if (!token.document.actorLink)
+        return false;
+      const target2 = token.actor;
+      if (!isValidActor2(target2, data.actorId) || target2.isOwner)
+        return false;
+      const maximumX = token.x + (token.hitArea?.right ?? 0);
+      const maximumY = token.y + (token.hitArea?.bottom ?? 0);
+      return data.x >= token.x && data.y >= token.y && data.x <= maximumX && data.y <= maximumY;
+    }).sort((a, b) => b.document.sort - a.document.sort).at(0)?.actor;
+    if (!target)
+      return true;
+    giveth(details.actor, target, details.item, details.value);
+    return false;
+  }
+  __name(onDropCanvasData, "onDropCanvasData");
+  function giveth(origin, target, item, value) {
+    const ownerId = origin.id;
+    const targetId = target.id;
+    const isIndex = !(item instanceof Item);
+    if (!isIndex && item.isOfType("physical")) {
+      const qty = item.quantity;
+      if (qty < 1)
+        return warn("giveth.notification.zero");
+      if (qty === 1)
+        return sendPhysicalRequest(ownerId, targetId, item.id, 1, false);
+      new MoveLootPopup(
+        origin,
+        { maxQuantity: qty, lockStack: false, isPurchase: false },
+        (qty2, stack) => {
+          sendPhysicalRequest(ownerId, targetId, item.id, qty2, stack);
+        }
+      ).render(true);
+    } else {
+      const uuid = isIndex ? `Compendium.${item.pack}.${item._id}` : item.uuid;
+      if (item.type === "condition") {
+        socketEmit({
+          type: "giveth-condition",
+          targetId,
+          value: value ?? 1,
+          uuid
+        });
+      } else {
+        socketEmit({
+          type: "giveth-effect",
+          targetId,
+          uuid
+        });
+      }
+    }
+  }
+  __name(giveth, "giveth");
+  function sendPhysicalRequest(ownerId, targetId, itemId, qty, stack) {
+    socketEmit({
+      type: "giveth-physical",
+      ownerId,
+      targetId,
+      itemId,
+      qty,
+      stack
+    });
+  }
+  __name(sendPhysicalRequest, "sendPhysicalRequest");
+  function isValidActor2(actor, id) {
+    if (!isPlayedActor(actor) || id && actor.id === id)
+      return false;
+    return actor.hasPlayerOwner && !actor.isToken && actor.isOfType("character", "npc", "vehicle");
+  }
+  __name(isValidActor2, "isValidActor");
+  function getDetailsFromData(data) {
+    if (data.tokenId || data.type !== "Item" || !data.uuid)
+      return;
+    const item = fromUuidSync(data.uuid);
+    if (!item)
+      return;
+    let actor = item.actor;
+    if (!actor) {
+      const actorUUID = data.context?.origin.actor;
+      actor = actorUUID ? fromUuidSync(actorUUID) : null;
+    }
+    if (!isValidActor2(actor) || !actor.isOwner)
+      return;
+    const isIndex = !(item instanceof Item);
+    if (isIndex && item.pack && ["effect", "condition"].includes(item.type))
+      return { actor, item, value: data.value };
+    if (!isIndex && item.isOfType("physical", "effect"))
+      return { actor, item, value: data.value };
+  }
+  __name(getDetailsFromData, "getDetailsFromData");
+  async function takethCondition({ targetId, uuid, value }) {
+    const target = game.actors.get(targetId);
+    if (!target)
+      return;
+    const item = await fromUuid(uuid);
+    if (!item)
+      return;
+    target.increaseCondition(item.slug, { min: value });
+  }
+  __name(takethCondition, "takethCondition");
+  async function takethEffect({ targetId, uuid }) {
+    const target = game.actors.get(targetId);
+    if (!target)
+      return;
+    const item = await fromUuid(uuid);
+    if (!item)
+      return;
+    const source = item.clone({ "system.tokenIcon.show": true, "system.unidentified": false }).toObject();
+    target.createEmbeddedDocuments("Item", [source]);
+  }
+  __name(takethEffect, "takethEffect");
+  async function takethPhysical({ itemId, ownerId, qty, stack, targetId }) {
+    const owner = game.actors.get(ownerId);
+    const target = game.actors.get(targetId);
+    if (!owner || !target)
+      return;
+    const item = owner.items.get(itemId);
+    if (!item)
+      return;
+    qty = Math.min(qty, item.quantity);
+    const newQty = item.quantity - qty;
+    const source = item.toObject();
+    source.system.quantity = qty;
+    source.system.equipped.carryType = "worn";
+    if (item.isOfType("physical") && "invested" in source.system.equipped) {
+      source.system.equipped.invested = item.traits.has("invested") ? false : null;
+    }
+    const newItem = await target.addToInventory(source, void 0, stack);
+    if (!newItem)
+      return;
+    if (newQty < 1)
+      item.delete();
+    else
+      item.update({ "system.quantity": newQty });
+    if (getSetting("giveth") === "no-message")
+      return;
+    let content = chatUUID(newItem.uuid, newItem.name, !newItem.isIdentified);
+    if (qty > 1)
+      content += ` x${qty}`;
+    const giveth2 = localize("giveth.giveth", {
+      target: target.name
+    });
+    ChatMessage.create({
+      flavor: `<h4 class="action">${giveth2}</h4>`,
+      content,
+      speaker: ChatMessage.getSpeaker({ actor: owner })
+    });
+  }
+  __name(takethPhysical, "takethPhysical");
+
+  // src/apps/hero/trade.js
+  var localize2 = subLocalize("hero.templates.trade");
+  var Trade = class extends Application {
+    static {
+      __name(this, "Trade");
+    }
+    constructor(actor) {
+      super({ id: `pf2e-hero-actions-trade-${actor.id}` });
+      this._actor = actor;
+    }
+    static get defaultOptions() {
+      return mergeObject(Application.defaultOptions, {
+        title: localize2("title"),
+        template: templatePath("hero/trade"),
+        width: 600,
+        height: "auto"
+      });
+    }
+    get actor() {
+      return this._actor;
+    }
+    get target() {
+      return this._target;
+    }
+    set target(value) {
+      if (!value) {
+        localize2.error("no-target");
+        return;
+      }
+      if (value === this._target)
+        return;
+      delete this.target?.apps?.[this.appId];
+      this._target = value;
+      this.render();
+    }
+    getData(options) {
+      return mergeObject(super.getData(), {
+        actor: this.actor,
+        target: this.target,
+        targets: game.actors.filter(
+          (x) => x.type === "character" && x.id !== this.actor.id && x.hasPlayerOwner
+        ),
+        actions: getHeroActions(this.actor),
+        targetActions: this.target ? getHeroActions(this.target) : [],
+        i18n: localize2
+      });
+    }
+    activateListeners(html) {
+      super.activateListeners(html);
+      html.find('select[name="target"]').on("change", this.#onChangeTarget.bind(this));
+      html.find('[data-action="description"]').on("click", this.#onDescription.bind(this));
+      html.find('[data-action="trade"]').on("click", this.#onSendTrade.bind(this));
+      html.find('[data-action="cancel"]').on("click", () => this.close());
+    }
+    render(force, options) {
+      this.actor.apps[this.appId] = this;
+      if (this.target)
+        this.target.apps[this.appId] = this;
+      return super.render(force, options);
+    }
+    async close(options) {
+      await super.close(options);
+      delete this.actor.apps?.[this.appId];
+      delete this.target?.apps?.[this.appId];
+    }
+    #onSendTrade() {
+      if (!this.target) {
+        localize2.warn("no-target");
+        return;
+      }
+      const action = this.element.find('[name="action"]:checked').val();
+      const target = this.element.find('[name="targetAction"]:checked').val();
+      if (typeof action !== "string" || typeof target !== "string") {
+        localize2.warn("no-select");
+        return;
+      }
+      const user = getCharacterOwner(this.target, true) ?? getOwner(this.target, true) ?? game.users.activeGM;
+      if (!user) {
+        localize2.warn("no-user");
+        return;
+      }
+      sendTradeRequest({
+        sender: {
+          id: game.user.id,
+          cid: this.actor.id,
+          uuid: action
+        },
+        receiver: {
+          id: user.id,
+          cid: this.target.id,
+          uuid: target
+        }
+      });
+      this.close();
+    }
+    async #onDescription(event) {
+      const uuid = $(event.currentTarget).siblings("input").val();
+      const entry = await fromUuid(uuid);
+      entry?.sheet.render(true);
+    }
+    #onChangeTarget(event) {
+      const id = event.currentTarget.value;
+      this.target = game.actors.get(id);
+    }
+  };
+
+  // src/features/hero.js
+  var MODULE_ID2 = "pf2e-hero-actions";
+  var setHook2 = createHook(
+    "renderCharacterSheetPF2e",
+    renderCharacterSheetPF2e,
+    setupSocket
+  );
+  var JOURNAL_UUID = "Compendium.pf2e.journals.JournalEntry.BSp4LUSaOmUyjBko";
+  var TABLE_UUID = "Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK";
+  var TABLE_ICON = "systems/pf2e/icons/features/feats/heroic-recovery.webp";
+  var SOCKET = false;
+  function registerHeroActions() {
+    return {
+      name: "heroActions",
+      settings: [
+        {
+          name: "hero",
+          type: Boolean,
+          default: false,
+          onChange: (value) => setHook2(value)
+        },
+        {
+          name: "hero-table",
+          type: String,
+          default: ""
+        },
+        {
+          name: "hero-trade",
+          type: Boolean,
+          default: false,
+          onChange: () => refreshCharacterSheets()
+        },
+        {
+          name: "hero-private",
+          type: Boolean,
+          default: false
+        }
+      ],
+      conflicts: [MODULE_ID2],
+      api: {
+        createTable,
+        removeHeroActions,
+        getHeroActions,
+        useHeroAction,
+        getHeroActionDetails,
+        drawHeroAction,
+        drawHeroActions,
+        sendActionToChat,
+        discardHeroActions,
+        tradeHeroAction,
+        getDeckTable,
+        giveHeroActions,
+        createChatMessage
+      },
+      ready: () => {
+        setHook2(false, "hero");
+      }
+    };
+  }
+  __name(registerHeroActions, "registerHeroActions");
+  function setupSocket(value) {
+    if (value && !SOCKET) {
+      socketOn(onSocket2);
+      SOCKET = true;
+    } else if (!value && SOCKET) {
+      socketOff(onSocket2);
+      SOCKET = false;
+    }
+  }
+  __name(setupSocket, "setupSocket");
+  function onSocket2(packet) {
+    switch (packet.type) {
+      case "hero.trade-reject":
+        if (packet.sender.id !== game.user.id)
+          return;
+        onTradeRejected(packet);
+        break;
+      case "hero.trade-accept":
+        if (!isActiveGM())
+          return;
+        onTradeAccepted(packet);
+        break;
+      case "hero.trade-request":
+        if (packet.receiver.id !== game.user.id)
+          return;
+        onTradeRequest(packet);
+        break;
+      case "hero.trade-error":
+        if (!packet.users.includes(game.user.id))
+          return;
+        onTradeError(packet.error);
+        break;
+    }
+  }
+  __name(onSocket2, "onSocket");
+  async function renderCharacterSheetPF2e(sheet, html) {
+    const actor = sheet.actor;
+    if (!isPlayedActor(actor))
+      return;
+    await addActionsToSheet(html, actor);
+    addSheetEvents(html, actor);
+  }
+  __name(renderCharacterSheetPF2e, "renderCharacterSheetPF2e");
+  async function addActionsToSheet(html, actor) {
+    const actions = getHeroActions(actor);
+    const diff = actor.heroPoints.value - actions.length;
+    const isOwner = actor.isOwner;
+    const localize6 = subLocalize("hero.templates.heroActions");
+    const template = await renderTemplate(templatePath("hero/sheet"), {
+      owner: isOwner,
+      list: actions,
+      canUse: diff >= 0 && isOwner,
+      canDraw: diff > 0 && isOwner,
+      canTrade: getSetting("hero-trade"),
+      mustDiscard: diff < 0,
+      diff: Math.abs(diff),
+      i18n: (key, { hash }) => localize6(key, hash)
+    });
+    html.find(
+      ".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter] > .strikes-list:not(.skill-action-list)"
+    ).first().after(template);
+  }
+  __name(addActionsToSheet, "addActionsToSheet");
+  function addSheetEvents(html, actor) {
+    const list = html.find(".tab.actions .heroActions-list");
+    list.find("[data-action=draw]").on("click", (event) => onClickHeroActionsDraw(actor, event));
+    list.find("[data-action=expand]").on("click", onClickHeroActionExpand);
+    list.find("[data-action=use]").on("click", (event) => onClickHeroActionUse(actor, event));
+    list.find("[data-action=display]").on("click", (event) => onClickHeroActionDisplay(actor, event));
+    list.find("[data-action=discard]").on("click", onClickHeroActionDiscard);
+    list.find("[data-action=discard-selected]").on("click", () => onClickHeroActionsDiscard(actor, html));
+    html.find("[data-action=hero-actions-trade]").on("click", () => tradeHeroAction(actor));
+  }
+  __name(addSheetEvents, "addSheetEvents");
+  async function onClickHeroActionsDiscard(actor, html) {
+    const discarded = html.find(
+      ".tab.actions .heroActions-list .action.discarded"
+    );
+    const uuids = discarded.toArray().map((x) => x.dataset.uuid);
+    discardHeroActions(actor, uuids);
+  }
+  __name(onClickHeroActionsDiscard, "onClickHeroActionsDiscard");
+  function onClickHeroActionDiscard(event) {
+    event.preventDefault();
+    const action = $(event.currentTarget).closest(".action");
+    const list = action.closest(".heroActions-list");
+    action.toggleClass("discarded");
+    const toDiscard = Number(list.attr("data-discard") ?? "0");
+    const $discarded = list.find(".action.discarded");
+    list.toggleClass("discardable", $discarded.length === toDiscard);
+  }
+  __name(onClickHeroActionDiscard, "onClickHeroActionDiscard");
+  async function onClickHeroActionDisplay(actor, event) {
+    event.preventDefault();
+    const uuid = $(event.currentTarget).closest(".action").attr("data-uuid");
+    sendActionToChat(actor, uuid);
+  }
+  __name(onClickHeroActionDisplay, "onClickHeroActionDisplay");
+  async function onClickHeroActionUse(actor, event) {
+    event.preventDefault();
+    const uuid = $(event.currentTarget).closest(".action").attr("data-uuid");
+    useHeroAction(actor, uuid);
+  }
+  __name(onClickHeroActionUse, "onClickHeroActionUse");
+  async function onClickHeroActionsDraw(actor, event) {
+    event.preventDefault();
+    drawHeroActions(actor);
+  }
+  __name(onClickHeroActionsDraw, "onClickHeroActionsDraw");
+  function getHeroActions(actor) {
+    return getProperty(actor, `flags.${MODULE_ID2}.heroActions`) ?? [];
+  }
+  __name(getHeroActions, "getHeroActions");
+  async function setHeroActions(actor, actions) {
+    return actor.update({ [`flags.${MODULE_ID2}.heroActions`]: actions });
+  }
+  __name(setHeroActions, "setHeroActions");
+  async function onClickHeroActionExpand(event) {
+    event.preventDefault();
+    const action = $(event.currentTarget).closest(".action");
+    const summary = action.find(".item-summary");
+    if (!summary.hasClass("loaded")) {
+      const uuid = action.attr("data-uuid");
+      const details = await getHeroActionDetails(uuid);
+      if (!details)
+        return;
+      const text = await TextEditor.enrichHTML(details.description, {
+        async: true
+      });
+      summary.find(".item-description").html(text);
+      summary.addClass("loaded");
+    }
+    action.toggleClass("expanded");
+  }
+  __name(onClickHeroActionExpand, "onClickHeroActionExpand");
+  async function getHeroActionDetails(uuid) {
+    const document2 = await fromUuid(uuid);
+    if (!document2)
+      return void 0;
+    const parent = document2 instanceof JournalEntry ? document2 : document2.parent;
+    const page = document2 instanceof JournalEntry ? document2.pages.contents[0] : document2;
+    let text = page?.text.content;
+    if (!text)
+      return void 0;
+    if (parent.uuid === JOURNAL_UUID)
+      text = text.replace(/^<p>/, "<p><strong>Trigger</strong> ");
+    return { name: page.name, description: text };
+  }
+  __name(getHeroActionDetails, "getHeroActionDetails");
+  async function drawHeroActions(actor) {
+    if (!actor?.isOfType("character")) {
+      warn("hero.onlyCharacter");
+      return;
+    }
+    const actions = getHeroActions(actor);
+    const nb = actor.heroPoints.value - actions.length;
+    const drawn = [];
+    for (let i = 0; i < nb; i++) {
+      const action = await drawHeroAction();
+      if (action === void 0)
+        continue;
+      if (action === null)
+        return;
+      actions.push(action);
+      drawn.push(action);
+    }
+    if (!drawn.length)
+      return;
+    setHeroActions(actor, actions);
+    createChatMessage({
+      actor,
+      actions: drawn,
+      label: (nb2) => localize("hero.actions-draw.header", { nb: nb2 }),
+      secret: true
+    });
+  }
+  __name(drawHeroActions, "drawHeroActions");
+  function createChatMessage({ actor, actions, label, secret = false }) {
+    const { content, size } = chatActions(actions);
+    label = typeof label === "function" ? label(size) : label;
+    const data = {
+      flavor: `<h4 class="action">${label}</h4>`,
+      content,
+      speaker: ChatMessage.getSpeaker({ actor })
+    };
+    if (secret && getSetting("hero-private")) {
+      data.type = CONST.CHAT_MESSAGE_TYPES.ROLL;
+      data.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+    }
+    ChatMessage.create(data);
+  }
+  __name(createChatMessage, "createChatMessage");
+  function chatActions(actions) {
+    const links = actions.map(({ uuid, name }) => chatUUID(uuid, name));
+    return {
+      content: links.map((x) => `<div style="line-height: 1.6;">${x}</div>`).join(""),
+      size: links.length
+    };
+  }
+  __name(chatActions, "chatActions");
+  function tradeHeroAction(actor) {
+    if (!actor?.isOfType("character")) {
+      warn("hero.onlyCharacter");
+      return;
+    }
+    const actions = getHeroActions(actor);
+    if (!actions || !actions.length) {
+      warn("hero.no-action");
+      return;
+    }
+    const diff = actions.length - actor.heroPoints.value;
+    if (diff > 0) {
+      warn("hero.no-points", { nb: diff.toString() });
+      return;
+    }
+    new Trade(actor).render(true);
+  }
+  __name(tradeHeroAction, "tradeHeroAction");
+  async function drawHeroAction() {
+    const table = await getDeckTable();
+    const localize6 = subLocalize("hero.table");
+    if (!table) {
+      localize6.error("drawError", true);
+      return null;
+    }
+    if (!table.formula) {
+      if (game.user.isGM) {
+        if (table.compendium) {
+          localize6.error("noFormulaCompendium", true);
+          return null;
+        }
+        await table.normalize();
+      } else {
+        localize6.error("noFormula", true);
+        return null;
+      }
+    }
+    if (table.replacement === false) {
+      const notDrawn = table.results.some((r) => !r.drawn);
+      if (!notDrawn)
+        await table.resetResults();
+    }
+    const draw = (await table.draw({ displayChat: false })).results[0];
+    if (!draw)
+      return;
+    const uuid = documentUuidFromTableResult(draw);
+    if (uuid)
+      return { uuid, name: await getLabelfromTableResult(draw, uuid) };
+  }
+  __name(drawHeroAction, "drawHeroAction");
+  async function useHeroAction(actor, uuid) {
+    if (!actor?.isOfType("character")) {
+      warn("hero.onlyCharacter");
+      return;
+    }
+    const points = actor.heroPoints.value;
+    if (points < 1)
+      return warn("hero.use.noPoints");
+    const actions = getHeroActions(actor);
+    const index = actions.findIndex((x) => x.uuid === uuid);
+    if (index === -1)
+      return;
+    const details = await getHeroActionDetails(uuid);
+    if (!details)
+      error("hero.use.noDetails");
+    actions.splice(index, 1);
+    if (details) {
+      actor.update({
+        "system.resources.heroPoints.value": points - 1,
+        [`flags.${MODULE_ID2}.heroActions`]: actions
+      });
+      ChatMessage.create({
+        flavor: `<h4 class="action">${localize("hero.actions-use.header")}</h4>`,
+        content: `<h2>${details.name}</h2>${details.description}`,
+        speaker: ChatMessage.getSpeaker({ actor })
+      });
+    } else {
+      setHeroActions(actor, actions);
+    }
+  }
+  __name(useHeroAction, "useHeroAction");
+  async function discardHeroActions(actor, actionsUUIDS) {
+    if (!actor?.isOfType("character")) {
+      warn("hero.onlyCharacter");
+      return;
+    }
+    const uuids = typeof actionsUUIDS === "string" ? [actionsUUIDS] : actionsUUIDS;
+    const actions = getHeroActions(actor);
+    const removed = [];
+    for (const uuid of uuids) {
+      const index = actions.findIndex((x) => x.uuid === uuid);
+      if (index === -1)
+        continue;
+      removed.push(actions[index]);
+      actions.splice(index, 1);
+    }
+    setHeroActions(actor, actions);
+    createChatMessage({
+      actor,
+      actions: removed,
+      label: (nb) => localize("hero.actions-discard.header", { nb })
+    });
+  }
+  __name(discardHeroActions, "discardHeroActions");
+  async function getLabelfromTableResult(result, uuid) {
+    if (result.type !== CONST.TABLE_RESULT_TYPES.TEXT)
+      return result.text;
+    const label = /@UUID\[[\w\.]+\]{([\w -]+)}/.exec(result.text)?.[1];
+    return label ?? (uuid && (await fromUuid(uuid))?.name);
+  }
+  __name(getLabelfromTableResult, "getLabelfromTableResult");
+  async function getTableFromUuid(uuid) {
+    if (!uuid)
+      return void 0;
+    const table = await fromUuid(uuid);
+    return table && table instanceof RollTable ? table : void 0;
+  }
+  __name(getTableFromUuid, "getTableFromUuid");
+  async function getDefaultCompendiumTable() {
+    return getTableFromUuid(TABLE_UUID);
+  }
+  __name(getDefaultCompendiumTable, "getDefaultCompendiumTable");
+  function getDefaultWorldTable() {
+    return game.tables.find((x) => x.getFlag("core", "sourceId") === TABLE_UUID);
+  }
+  __name(getDefaultWorldTable, "getDefaultWorldTable");
+  async function getCustomTable() {
+    return getTableFromUuid(getSetting("hero-table"));
+  }
+  __name(getCustomTable, "getCustomTable");
+  async function getDeckTable() {
+    return await getCustomTable() ?? getDefaultWorldTable() ?? await getDefaultCompendiumTable();
+  }
+  __name(getDeckTable, "getDeckTable");
+  async function sendActionToChat(actor, uuid) {
+    const details = await getHeroActionDetails(uuid);
+    if (!details)
+      return error("hero.details.missing");
+    ChatMessage.create({
+      content: `<h2>${details.name}</h2>${details.description}`,
+      speaker: ChatMessage.getSpeaker({ actor })
+    });
+  }
+  __name(sendActionToChat, "sendActionToChat");
+  function sendTradeRequest(trade) {
+    if (trade.receiver.id === game.user.id) {
+      acceptRequest(trade);
+      return;
+    }
+    socketEmit({
+      ...trade,
+      type: "hero.trade-request"
+    });
+  }
+  __name(sendTradeRequest, "sendTradeRequest");
+  function acceptRequest(trade) {
+    if (game.user.isGM) {
+      onTradeAccepted(trade);
+      return;
+    }
+    socketEmit({
+      ...trade,
+      type: "hero.trade-accept"
+    });
+  }
+  __name(acceptRequest, "acceptRequest");
+  async function onTradeAccepted(trade) {
+    const { sender, receiver } = trade;
+    const senderActor = game.actors.get(sender.cid);
+    const receiverActor = game.actors.get(receiver.cid);
+    if (!senderActor || !receiverActor) {
+      sendTradeError(trade);
+      return;
+    }
+    const senderActions = getHeroActions(senderActor);
+    const receiverActions = getHeroActions(receiverActor);
+    const senderActionIndex = senderActions.findIndex(
+      (x) => x.uuid === sender.uuid
+    );
+    const receiverActionIndex = receiverActions.findIndex(
+      (x) => x.uuid === receiver.uuid
+    );
+    if (senderActionIndex === -1 || receiverActionIndex === -1) {
+      sendTradeError(trade);
+      return;
+    }
+    const senderAction = senderActions.splice(senderActionIndex, 1)[0];
+    const receiverAction = receiverActions.splice(receiverActionIndex, 1)[0];
+    senderActions.push(receiverAction);
+    receiverActions.push(senderAction);
+    setHeroActions(senderActor, senderActions);
+    setHeroActions(receiverActor, receiverActions);
+    const sentLink = chatUUID(senderAction.uuid);
+    const receivedLink = chatUUID(receiverAction.uuid);
+    const localize6 = subLocalize("hero.trade-success");
+    let content = `<div style="line-height: 1.6">${localize6("offer", {
+      offer: sentLink
+    })}</div>`;
+    content += `<div style="line-height: 1.6">${localize6("receive", {
+      receive: receivedLink
+    })}</div>`;
+    ChatMessage.create({
+      flavor: `<h4 class="action">${localize6("header", {
+        name: receiverActor.name
+      })}</h4>`,
+      content,
+      speaker: ChatMessage.getSpeaker({ actor: senderActor })
+    });
+  }
+  __name(onTradeAccepted, "onTradeAccepted");
+  function sendTradeError({ sender, receiver }, error2 = "trade-error") {
+    const users = /* @__PURE__ */ new Set([sender.id, receiver.id]);
+    if (users.has(game.user.id)) {
+      users.delete(game.user.id);
+      onTradeError(error2);
+    }
+    if (!users.size)
+      return;
+    socketEmit({
+      type: "hero.trade-error",
+      users: Array.from(users),
+      error: error2
+    });
+  }
+  __name(sendTradeError, "sendTradeError");
+  function onTradeError(err) {
+    error("hero.trade-error");
+  }
+  __name(onTradeError, "onTradeError");
+  async function onTradeRequest(trade) {
+    const { sender, receiver } = trade;
+    const senderActor = game.actors.get(sender.cid);
+    const receiverActor = game.actors.get(receiver.cid);
+    if (!senderActor || !receiverActor) {
+      sendTradeError(trade);
+      return;
+    }
+    const localize6 = subLocalize("hero.trade-request");
+    let content = `<p>${localize6("header", {
+      sender: senderActor.name,
+      receiver: receiverActor.name
+    })}</p>`;
+    content += `<p>${localize6("give", { give: chatUUID(sender.uuid) })}</p>`;
+    content += `<p>${localize6("want", { want: chatUUID(receiver.uuid) })}</p>`;
+    content += `<p style="margin-bottom: 1em;">${localize6("accept")}</p>`;
+    const accept = await Dialog.confirm({
+      title: localize6("title"),
+      content: await TextEditor.enrichHTML(content, { async: true })
+    });
+    if (accept)
+      acceptRequest(trade);
+    else
+      rejectRequest(trade);
+  }
+  __name(onTradeRequest, "onTradeRequest");
+  function rejectRequest(trade) {
+    if (trade.sender.id === game.user.id) {
+      onTradeRejected(trade);
+      return;
+    }
+    socketEmit({
+      ...trade,
+      type: "hero.trade-reject"
+    });
+  }
+  __name(rejectRequest, "rejectRequest");
+  async function onTradeRejected({ receiver }) {
+    const actor = game.actors.get(receiver.cid);
+    warn("hero.trade-rejected", { name: actor.name }, true);
+  }
+  __name(onTradeRejected, "onTradeRejected");
+  async function createTable() {
+    if (!game.user.isGM) {
+      warn("hero.notGM");
+      return;
+    }
+    const localize6 = subLocalize("hero.templates.createTable.choice");
+    const template = templatePath("hero/dialogs/create-table");
+    const buttons = {
+      yes: {
+        label: localize6("create"),
+        icon: '<i class="fas fa-border-all"></i>',
+        callback: (html) => {
+          const type = html.find('.window-content input[name="type"]:checked').val();
+          const unique = html.find('.window-content input[name="draw"]:checked').val() === "unique";
+          return { type, unique };
+        }
+      },
+      no: {
+        label: localize6("cancel"),
+        icon: '<i class="fas fa-times"></i>',
+        callback: () => null
+      }
+    };
+    const data = {
+      content: await renderTemplate(template, { i18n: localize6 }),
+      title: localize6("title"),
+      buttons,
+      default: "yes",
+      close: () => null
+    };
+    const result = await Dialog.wait(data, void 0, {
+      id: "pf2e-hero-actions-create-table"
+    });
+    if (!result)
+      return;
+    if (result.type === "default")
+      createDefaultTable(result.unique);
+    else
+      createCustomTable(result.unique);
+  }
+  __name(createTable, "createTable");
+  async function createCustomTable(unique) {
+    const table = await createCustomActionsTable(unique);
+    await setTable(table);
+    table.sheet?.render(true);
+  }
+  __name(createCustomTable, "createCustomTable");
+  function createCustomActionsTable(unique = true) {
+    const source = getTableSource(unique);
+    return RollTable.create(source, { temporary: false });
+  }
+  __name(createCustomActionsTable, "createCustomActionsTable");
+  async function createDefaultTable(unique) {
+    const localize6 = subLocalize("templates.createTable.default.confirm");
+    let table = await getDefaultWorldTable();
+    if (table) {
+      const override = await Dialog.confirm({
+        title: localize6("title"),
+        content: localize6("content")
+      });
+      if (override) {
+        const update = getTableSource(unique);
+        await table.update(update);
+        return setTable(table, true);
+      }
+    }
+    table = await createDefautActionsTable(unique);
+    await setTable(table);
+  }
+  __name(createDefaultTable, "createDefaultTable");
+  async function createDefautActionsTable(unique = true) {
+    const table = await fromUuid(TABLE_UUID);
+    const source = getTableSource(unique, table);
+    return RollTable.create(source, { temporary: false });
+  }
+  __name(createDefautActionsTable, "createDefautActionsTable");
+  async function setTable(table, normalize = false) {
+    if (normalize)
+      await table.normalize();
+    await setSetting("hero-table", table.uuid);
+  }
+  __name(setTable, "setTable");
+  function getTableSource(unique, table) {
+    const source = {
+      name: localize("hero.table.name"),
+      replacement: !(unique ?? true),
+      img: TABLE_ICON,
+      description: localize("hero.table.description"),
+      flags: {
+        core: {
+          sourceId: TABLE_UUID
+        }
+      }
+    };
+    if (!table)
+      return source;
+    return mergeObject(deepClone(table._source), source);
+  }
+  __name(getTableSource, "getTableSource");
+  async function removeHeroActions() {
+    if (!game.user.isGM) {
+      warn("hero.notGM");
+      return;
+    }
+    const localize6 = subLocalize("hero.templates.removeActions");
+    const template = templatePath("hero/dialogs/remove-actions");
+    const buttons = {
+      yes: {
+        label: localize6("remove"),
+        icon: '<i class="fas fa-trash"></i>',
+        callback: (html) => html.find('input[name="actor"]:checked').toArray().map((x) => game.actors.get(x.value)).filter((x) => x)
+      },
+      no: {
+        label: localize6("cancel"),
+        icon: '<i class="fas fa-times"></i>',
+        callback: () => null
+      }
+    };
+    const data = {
+      content: await renderTemplate(template, {
+        actors: game.actors.filter((x) => x.type === "character"),
+        i18n: localize6
+      }),
+      title: localize6("title"),
+      buttons,
+      default: "yes",
+      render: (html) => {
+        html.on(
+          "change",
+          'input[name="all"]',
+          () => removeActionsToggleAll(html)
+        );
+        html.on(
+          "change",
+          'input[name="actor"]',
+          () => removeActionsToggleActor(html)
+        );
+      },
+      close: () => null
+    };
+    const actors = await Dialog.wait(data, void 0, {
+      id: "pf2e-hero-actions-remove-actions"
+    });
+    if (!actors)
+      return;
+    if (!actors.length) {
+      localize6.warn("noSelection");
+      return;
+    }
+    for (const actor of actors) {
+      setHeroActions(actor, []);
+    }
+    localize6.info("removed");
+  }
+  __name(removeHeroActions, "removeHeroActions");
+  function removeActionsToggleAll(html) {
+    const state = html.find('input[name="all"]')[0].checked;
+    html.find('input[name="actor"]').prop("checked", state);
+  }
+  __name(removeActionsToggleAll, "removeActionsToggleAll");
+  function removeActionsToggleActor(html) {
+    const actors = html.find('input[name="actor"]');
+    const checked = actors.filter(":checked");
+    const all = html.find('input[name="all"]');
+    if (actors.length === checked.length) {
+      all.prop("checked", true).prop("indeterminate", false);
+      actors.prop("checked", true);
+    } else if (!checked.length) {
+      all.prop("checked", false).prop("indeterminate", false);
+      actors.prop("checked", false);
+    } else {
+      all.prop("checked", false).prop("indeterminate", true);
+    }
+  }
+  __name(removeActionsToggleActor, "removeActionsToggleActor");
+  function documentUuidFromTableResult(result) {
+    if (result.type === CONST.TABLE_RESULT_TYPES.TEXT)
+      return /@UUID\[([\w\.]+)\]/.exec(result.text)?.[1];
+    if (result.type === CONST.TABLE_RESULT_TYPES.DOCUMENT)
+      return `${result.documentCollection}.${result.documentId}`;
+    if (result.type === CONST.TABLE_RESULT_TYPES.COMPENDIUM)
+      return `Compendium.${result.documentCollection}.${result.documentId}`;
+    return void 0;
+  }
+  __name(documentUuidFromTableResult, "documentUuidFromTableResult");
+  async function giveHeroActions(actor) {
+    if (!game.user.isGM) {
+      warn("hero.notGM");
+      return;
+    }
+    const templateLocalize = subLocalize("hero.templates.giveAction");
+    if (!actor?.isOfType("character")) {
+      templateLocalize.warn("noCharacter");
+      return null;
+    }
+    const table = await getDeckTable();
+    if (!table) {
+      error("hero.table.drawError", true);
+      return null;
+    }
+    const isUnique = table.replacement === false;
+    const actionsList = (await Promise.all(
+      table.results.map(async (result2) => {
+        const uuid = documentUuidFromTableResult(result2);
+        if (!uuid)
+          return;
+        return {
+          key: result2.id,
+          uuid,
+          name: await getLabelfromTableResult(result2, uuid),
+          drawn: result2.drawn
+        };
+      })
+    )).filter(Boolean);
+    const template = templatePath("hero/dialogs/give-action");
+    const content = await renderTemplate(template, {
+      actions: actionsList,
+      isUnique,
+      i18n: templateLocalize
+    });
+    const buttons = {
+      yes: {
+        label: templateLocalize("give"),
+        icon: '<i class="fa-solid fa-gift"></i>',
+        callback: (html) => ({
+          selected: html.find("[name=action]:checked").closest(".action").toArray().map((el) => el.dataset),
+          asDrawn: html.find("[name=drawn]").prop("checked") ?? false,
+          withMessage: html.find("[name=message]").prop("checked")
+        })
+      },
+      no: {
+        label: templateLocalize("cancel"),
+        icon: '<i class="fas fa-times"></i>',
+        callback: () => null
+      }
+    };
+    const data = {
+      title: templateLocalize("title"),
+      content,
+      buttons,
+      render: (html) => {
+        html.find("[data-action=expand]").on("click", onClickHeroActionExpand);
+      },
+      close: () => null
+    };
+    const result = await Dialog.wait(data, void 0, {
+      id: "pf2e-hero-actions-give-action"
+    });
+    if (!result)
+      return;
+    const { selected, asDrawn, withMessage } = result;
+    const actions = getHeroActions(actor);
+    const tableUpdates = [];
+    for (const { uuid, name, key } of selected) {
+      actions.push({ uuid, name });
+      if (!asDrawn)
+        continue;
+      const result2 = table.results.get(key);
+      if (result2 && !result2.drawn)
+        tableUpdates.push(key);
+    }
+    if (tableUpdates.length) {
+      await table.updateEmbeddedDocuments(
+        "TableResult",
+        tableUpdates.map((key) => ({ _id: key, drawn: true }))
+      );
+    }
+    setHeroActions(actor, actions);
+    if (withMessage) {
+      createChatMessage({
+        actor,
+        actions: selected,
+        label: (nb) => localize("hero.actions-give.header", { nb }),
+        secret: true
+      });
+    }
+  }
+  __name(giveHeroActions, "giveHeroActions");
+
+  // src/shared/draggable.js
+  var dragData = null;
+  var DRAG_ID = 0;
+  function cleanOptions(options, filters) {
+    for (const [type, keys] of Object.entries(filters)) {
+      for (const key of keys) {
+        const option = options[key];
+        if (!option || typeof option === type)
+          continue;
+        options[option] = void 0;
+      }
+    }
+  }
+  __name(cleanOptions, "cleanOptions");
+  function makeDraggable(options) {
+    if (!(options.element instanceof HTMLElement))
+      return;
+    cleanOptions(options, {
+      string: ["draggedClass", "group", "selector", "filter", "identifier"],
+      number: ["triggerDistance"],
+      boolean: ["cancelOnRightClick"],
+      function: ["onCancel", "onDragEnd", "onDragStart"]
+    });
+    options.triggerDistance ??= 6;
+    options.cancelOnRightClick ??= true;
+    options.cursorImage ??= {};
+    options.cursorImage.id = typeof options.cursorImage.id === "string" ? options.cursorImage.id : "";
+    options.cursorImage.img = typeof options.cursorImage.img === "function" ? options.cursorImage.img : void 0;
+    options.droppables ??= [];
+    for (let i = options.droppables.length - 1; i >= 0; i--) {
+      const droppable = options.droppables[i];
+      if (!(droppable.element instanceof HTMLElement)) {
+        options.droppables.splice(i, 1);
+        continue;
+      }
+      cleanOptions(droppable, {
+        string: ["selector", "overClass", "filter"],
+        boolean: ["purgeOnLeave"],
+        function: ["onDragEnter", "onDragLeave", "onDragOver", "onDrop"]
+      });
+    }
+    options.element.addEventListener(
+      "mousedown",
+      (event) => onMouseDown(event, options)
+    );
+  }
+  __name(makeDraggable, "makeDraggable");
+  async function onDragCancel(event) {
+    if (!dragData)
+      return;
+    dragData.canceled = true;
+    if (dragData.dragging && dragData.draggable.ghost) {
+      dragData.draggable.ghost.reset();
+    }
+    if (dragData.dragging && dragData.options.onCancel) {
+      await dragData.options.onCancel(event, dragData.draggable);
+    }
+    cleanUp();
+    await onDragEnd(event);
+  }
+  __name(onDragCancel, "onDragCancel");
+  async function onDragEnd(event) {
+    if (!dragData)
+      return;
+    if (dragData.dragging && dragData.options.onDragEnd) {
+      await dragData.options.onDragEnd(event, dragData.draggable, {
+        canceled: dragData.canceled,
+        dropped: dragData.dropped
+      });
+    }
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+    dragData = null;
+  }
+  __name(onDragEnd, "onDragEnd");
+  function cleanUp() {
+    if (!dragData)
+      return;
+    dragData.draggable.classList.purge();
+    dragData.draggable.ghost?.classList.purge();
+    dragData.cursorElement?.remove();
+    for (const { classList } of Object.values(dragData.hovered)) {
+      classList.purge();
+    }
+  }
+  __name(cleanUp, "cleanUp");
+  function onMouseDown(event, options) {
+    if (event.button === 2 && dragData?.dragging && dragData.options.cancelOnRightClick) {
+      onDragCancel(event);
+      return;
+    }
+    if (event.button)
+      return;
+    const target = closestInside(event.target, options.element, options);
+    if (!target)
+      return;
+    let _ghost;
+    const targetIndex = getElementIndex(target);
+    const targetParent = target.parentElement;
+    const targetClassList = newClassList(target);
+    dragData = {
+      canceled: false,
+      dragging: false,
+      dropped: false,
+      options,
+      group: options.group,
+      draggable: {
+        identifier: options.identifier,
+        element: target,
+        triggeringElement: event.target,
+        x: event.clientX,
+        y: event.clientY,
+        parent: targetParent,
+        index: targetIndex,
+        classList: targetClassList,
+        get ghost() {
+          if (_ghost) {
+            if (options.ghostClass) {
+              _ghost.classList.add(options.ghostClass);
+            }
+            return _ghost;
+          }
+          const { element = target.cloneNode(true), index = Infinity } = options.createGhost?.(target, targetIndex) ?? {};
+          const classList = newClassList(element);
+          if (options.draggedClass && element !== target) {
+            element.classList.remove(options.draggedClass);
+          }
+          if (options.ghostClass) {
+            classList.add(options.ghostClass);
+          }
+          _ghost = {
+            element,
+            classList,
+            index,
+            reset: () => {
+              element.remove();
+              if (element === target) {
+                const child = targetParent.children[targetIndex];
+                targetParent.insertBefore(target, child);
+                _ghost.index = targetIndex;
+                if (options.ghostClass) {
+                  classList.remove(options.ghostClass);
+                }
+              } else {
+                _ghost.index = Infinity;
+              }
+            }
+          };
+          return _ghost;
+        },
+        resetPosition: () => {
+          target.remove();
+          targetParent.children[targetIndex].before(target);
+        }
+      },
+      droppables: options.droppables.map((droppable) => ({
+        ...droppable,
+        id: DRAG_ID++
+      })),
+      hovered: {}
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }
+  __name(onMouseDown, "onMouseDown");
+  async function onMouseMove(event) {
+    if (!dragData)
+      return;
+    if (dragData.dragging) {
+      onDragMove(event);
+      return;
+    }
+    const { clientX, clientY } = event;
+    const { draggable } = dragData;
+    const distance = calculateDistanceBetweenPoints(
+      draggable.x,
+      draggable.y,
+      clientX,
+      clientY
+    );
+    if (distance > dragData.options.triggerDistance) {
+      await onDragStart(event);
+    }
+  }
+  __name(onMouseMove, "onMouseMove");
+  async function onMouseUp(event) {
+    if (event.button || !dragData)
+      return;
+    if (dragData.dragging) {
+      let dropped = false;
+      cleanUp();
+      await Promise.all(
+        Object.values(dragData.hovered).map(async (hovered) => {
+          if (!hovered.droppable.onDrop)
+            return;
+          const hasDropped = await hovered.droppable.onDrop(
+            event,
+            dragData.draggable,
+            {
+              classList: hovered.classList,
+              element: hovered.element,
+              triggeringElement: hovered.triggeringElement
+            }
+          );
+          if (hasDropped)
+            dropped = true;
+        })
+      );
+      dragData.dropped = dropped;
+    }
+    await onDragEnd(event);
+  }
+  __name(onMouseUp, "onMouseUp");
+  async function onDragStart(event) {
+    if (dragData.dragging)
+      return;
+    dragData.dragging = true;
+    if (dragData.options.cursorImage.img) {
+      const img = dragData.options.cursorImage.img(dragData.draggable.element);
+      if (img instanceof HTMLElement) {
+        dragData.cursorElement = img;
+      } else {
+        dragData.cursorElement = new Image();
+        dragData.cursorElement.src = typeof img === "string" ? img : "";
+      }
+    } else {
+      dragData.cursorElement = dragData.draggable.element.cloneNode(true);
+    }
+    dragData.cursorElement.id = dragData.options.cursorImage.id;
+    if (dragData.options.draggedClass) {
+      dragData.draggable.classList.add(dragData.options.draggedClass);
+    }
+    document.body.appendChild(dragData.cursorElement);
+    await dragData.options.onDragStart?.(event, dragData.draggable);
+  }
+  __name(onDragStart, "onDragStart");
+  async function onDragMove(event) {
+    if (!dragData)
+      return;
+    const { clientX, clientY } = event;
+    const cursorElement = dragData.cursorElement;
+    const offsetX = cursorElement.offsetWidth / 2;
+    const offsetY = cursorElement.offsetHeight / 2;
+    cursorElement.style.left = `${clientX - offsetX}px`;
+    cursorElement.style.top = `${clientY - offsetY}px`;
+    await Promise.all(
+      dragData.droppables.map(async (droppable) => {
+        const target = closestInside(event.target, droppable.element, {
+          selector: droppable.selector,
+          filter: droppable.filter
+        });
+        const hovered = dragData.hovered[droppable.id];
+        if (hovered && (!target || hovered.element !== target)) {
+          const left = await droppable.onDragLeave?.(event, dragData.draggable, {
+            classList: hovered.classList,
+            element: hovered.element,
+            triggeringElement: event.target
+          });
+          if (left !== false) {
+            delete dragData.hovered[droppable.id];
+            if (droppable.purgeOnLeave) {
+              hovered.classList.purge();
+            } else if (droppable.overClass) {
+              hovered.classList.remove(droppable.overClass);
+            }
+          }
+        }
+        if (!target)
+          return;
+        if (!hovered) {
+          const classList = newClassList(target);
+          const entered = await droppable.onDragEnter?.(
+            event,
+            dragData.draggable,
+            {
+              classList,
+              element: target,
+              triggeringElement: event.target
+            }
+          );
+          if (entered !== false) {
+            if (droppable.overClass)
+              classList.add(droppable.overClass);
+            dragData.hovered[droppable.id] = {
+              id: droppable.id,
+              classList,
+              droppable,
+              element: target,
+              triggeringElement: event.target
+            };
+          }
+        } else if (droppable.onDragOver) {
+          await droppable.onDragOver(event, dragData.draggable, {
+            classList: hovered.classList,
+            element: hovered.element,
+            triggeringElement: event.target
+          });
+        }
+      })
+    );
+  }
+  __name(onDragMove, "onDragMove");
+  function newClassList(target) {
+    return new class extends Set {
+      add(value) {
+        target.classList.add(value);
+        super.add(value);
+      }
+      remove(value) {
+        target.classList.remove(value);
+        super.delete(value);
+      }
+      toggle(value, enabled2) {
+        const toggled = enabled2 ?? !target.classList.contains(value);
+        if (toggled)
+          this.add(value);
+        else
+          this.remove(value);
+      }
+      contains(value) {
+        return this.has(value);
+      }
+      purge() {
+        target.classList.remove(...this);
+      }
+    }();
+  }
+  __name(newClassList, "newClassList");
+  function closestInside(target, parent, { selector, filter } = {}) {
+    if (!parent.contains(target))
+      return;
+    if (!selector && !filter)
+      return parent;
+    let element;
+    let cursor = target;
+    while (true) {
+      if (filter && cursor.matches(filter))
+        return;
+      if (!element && selector && cursor.matches(selector)) {
+        element = cursor;
+      }
+      if (cursor === parent)
+        break;
+      cursor = cursor.parentElement;
+    }
+    return !selector ? parent : element;
+  }
+  __name(closestInside, "closestInside");
+
+  // src/features/inventory.js
+  var closeHook = createHook(
+    "closeCharacterSheetPF2e",
+    closeCharacterSheetPF2e
+  );
+  var dragging = false;
+  function registerInventory() {
+    return {
+      settings: [
+        {
+          name: "inventory",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: (value) => setup3(value)
+        }
+      ],
+      ready: (isGm) => {
+        setup3();
+      }
+    };
+  }
+  __name(registerInventory, "registerInventory");
+  var dragIdentifier;
+  var COINS = [
+    "platinum-pieces",
+    "gold-pieces",
+    "silver-pieces",
+    "copper-pieces"
+  ];
+  function setup3(value) {
+    const enabled2 = value ?? getSetting("inventory");
+    if (enabled2) {
+      registerCharacterSheetExtraTab({
+        tabName: "inventory",
+        templateFolder: "inventory/sheet",
+        getData,
+        addEvents,
+        onRender: onRender2
+      });
+    } else {
+      unregisterCharacterSheetExtraTab("inventory");
+    }
+    closeHook(enabled2);
+  }
+  __name(setup3, "setup");
+  function closeCharacterSheetPF2e(sheet, html) {
+    const actor = sheet.actor;
+    if (!isPlayedActor(actor))
+      return;
+    if (!getInMemory(sheet, "inventory.requireSave"))
+      return;
+    const tab = getCharacterSheetTab(html, "inventory")[0];
+    const data = getCurrentData(tab);
+    if (!data)
+      return;
+    setFlag(actor, "inventory", data);
+  }
+  __name(closeCharacterSheetPF2e, "closeCharacterSheetPF2e");
+  function onRender2(actor, sheet, inner) {
+    const sidebar = inner.find("> aside");
+    sidebar.css("position", "relative");
+    sidebar.append(
+      "<div id='pf2e-toobelt-inventory-item-details' class='hidden'></div>"
+    );
+  }
+  __name(onRender2, "onRender");
+  function getCurrentData(tabElement) {
+    if (!tabElement)
+      return;
+    const alternate = tabElement.querySelector(":scope > .alternate");
+    const equipped = alternate.querySelector("[data-area='equipped']");
+    const equippedItemId = /* @__PURE__ */ __name((slot) => {
+      const el = equipped.querySelector(`[data-equipped-slot='${slot}']`);
+      const item = el.querySelector("[data-item-id]");
+      return item?.dataset.itemId ?? null;
+    }, "equippedItemId");
+    const itemIds = /* @__PURE__ */ __name((parent) => {
+      const ids = {};
+      const items = parent.querySelectorAll(":scope > [data-item-id]");
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        ids[item.dataset.itemId] = i;
+      }
+      return ids;
+    }, "itemIds");
+    const tabs = {};
+    for (const tab of alternate.querySelectorAll("[data-area='items-grid']")) {
+      const tabId = tab.dataset.tabId;
+      tabs[tabId] = itemIds(tab);
+    }
+    return {
+      equipped: {
+        hands: [equippedItemId("left-hand"), equippedItemId("right-hand")],
+        armor: [equippedItemId("armor")],
+        others: itemIds(equipped)
+      },
+      tabs
+    };
+  }
+  __name(getCurrentData, "getCurrentData");
+  async function getData(actor, sheet, tabElement) {
+    const flags = getFlag(actor, "inventory");
+    const data = getCurrentData(tabElement[0]) ?? flags ?? {
+      equipped: {
+        hands: [null, null],
+        armor: [null],
+        others: {}
+      },
+      tabs: {}
+    };
+    if (!flags) {
+      setInMemory(sheet, "inventory.requireSave", true);
+    }
+    const tabs = new Collection();
+    const orphans = {};
+    const containers = /* @__PURE__ */ new Set();
+    const equipped = {
+      hands: [null, null],
+      armor: [null],
+      others: []
+    };
+    function getTab(item) {
+      const tabId = item?.id;
+      let tab = tabs.get(tabId);
+      if (tab)
+        return tab;
+      tab = {
+        id: tabId,
+        item,
+        parent: item?.container,
+        containers: [],
+        matrix: [],
+        parents: []
+      };
+      tabs.set(tabId, tab);
+      return tab;
+    }
+    __name(getTab, "getTab");
+    for (const item of actor.inventory) {
+      if (item.isOfType("treasure") && item.system.stackGroup === "coins" && COINS.includes(item.slug)) {
+        continue;
+      }
+      const itemId = item.id;
+      const parent = item.container;
+      const tab = getTab(parent);
+      const addOrphan = /* @__PURE__ */ __name((item2) => {
+        orphans[tab.id] ??= [];
+        orphans[tab.id].push(item2);
+      }, "addOrphan");
+      if (item.isOfType("backpack")) {
+        tab.containers.push(item);
+        containers.add(item);
+        getTab(item);
+        continue;
+      }
+      const handsHeld = item.handsHeld;
+      const equippedHands = equipped.hands.filter(Boolean).length;
+      if (handsHeld === 2 && equippedHands === 0) {
+        if (data.equipped.hands[0] === itemId) {
+          equipped.hands = [item, item];
+        } else {
+          addOrphan(item);
+        }
+        continue;
+      }
+      if (handsHeld === 1 && equippedHands <= 1) {
+        const handIndex = data.equipped.hands.indexOf(itemId);
+        if (indexIsValid(handIndex)) {
+          equipped.hands[handIndex] = item;
+        } else {
+          addOrphan(item);
+        }
+        continue;
+      }
+      if (!equipped.armor[0] && item.isOfType("armor") && item.isEquipped) {
+        if (data.equipped.armor[0] === itemId) {
+          equipped.armor[0] = item;
+        } else {
+          addOrphan(item);
+        }
+        continue;
+      }
+      if ((item.isOfType("equipment") || isHandwrapsOfMightyBlows(item)) && isInvestedOrWornAs(item)) {
+        const equippedIndex = data.equipped.others[itemId];
+        if (indexIsValid(equippedIndex)) {
+          equipped.others[equippedIndex] = item;
+        } else {
+          addOrphan(item);
+        }
+        continue;
+      }
+      const index = data.tabs[tab.id]?.[itemId];
+      if (indexIsValid(index)) {
+        tab.matrix[index] = item;
+        continue;
+      }
+      addOrphan(item);
+    }
+    for (const tab of tabs) {
+      const tabOrphans = orphans[tab.id];
+      if (!tabOrphans)
+        continue;
+      for (const item of tabOrphans) {
+        const handsHeld = item.handsHeld;
+        const equippedHands = equipped.hands.filter(Boolean).length;
+        if (equippedHands === 0 && handsHeld === 2) {
+          equipped.hands = [item, item];
+          continue;
+        }
+        if (equippedHands <= 1 && handsHeld === 1) {
+          const otherIndex = equipped.hands[0] ? 1 : 0;
+          equipped.hands[otherIndex] = item;
+          continue;
+        }
+        if (!equipped.armor[0] && item.isOfType("armor") && item.isEquipped) {
+          equipped.armor[0] = item;
+          continue;
+        }
+        if ((item.isOfType("equipment") || isHandwrapsOfMightyBlows(item)) && isInvestedOrWornAs(item)) {
+          equipped.others.push(item);
+          continue;
+        }
+        tab.matrix.push(item);
+      }
+      tab.matrix = tab.matrix.filter(Boolean);
+    }
+    for (const tab of tabs) {
+      let parent = tab.parent;
+      while (parent) {
+        tab.parents.push(parent);
+        parent = parent.container;
+      }
+      tab.parents.reverse();
+      const grouped = [tab.containers, tab.parents, tab.item].flat();
+      tab.trailings = containers.filter((item) => !grouped.includes(item));
+    }
+    if (!tabs.size)
+      getTab(void 0);
+    equipped.others = equipped.others.filter(Boolean);
+    const activeTabId = getInMemory(sheet, "inventory.activeTab");
+    return {
+      tabs: Array.from(tabs.values()),
+      equipped,
+      actor,
+      selectedTab: tabs.get(activeTabId)?.id,
+      containerBulk: (container) => {
+        const capacity = container.capacity;
+        return `${capacity.value.toString()} / ${capacity.max.toString()}`;
+      }
+    };
+  }
+  __name(getData, "getData");
+  function addEvents(tab, sheet, actor, inner) {
+    const containerTabs = tab.find("[data-tab-id]");
+    for (const container of tab.find("[data-container-id]")) {
+      container.addEventListener("click", (event) => {
+        const tabId = container.dataset.containerId;
+        containerTabs.removeClass("active");
+        containerTabs.filter(`[data-tab-id=${tabId}]`).addClass("active");
+        setInMemory(sheet, "inventory.activeTab", tabId);
+      });
+    }
+    const sidebar = inner.find("#pf2e-toobelt-inventory-item-details")[0];
+    const itemElements = tab.find("[data-item-id], [data-container-id]");
+    for (const itemElement of itemElements) {
+      itemElement.addEventListener(
+        "mouseenter",
+        (event) => onItemDetails(event, actor, itemElement, sidebar)
+      );
+      itemElement.addEventListener("mouseleave", (event) => {
+        sidebar.classList.add("hidden");
+      });
+    }
+    if (!actor.isOwner)
+      return;
+    dragIdentifier = randomID();
+    makeDraggable({
+      element: tab[0],
+      selector: "[data-item-id]",
+      filter: "input",
+      draggedClass: "dragged",
+      ghostClass: "ghost",
+      identifier: dragIdentifier,
+      cursorImage: {
+        id: "pf2e-toolbelt-inventory-cursor-image",
+        img: (target) => target.dataset.itemImg
+      },
+      createGhost,
+      onDragStart: () => onDragStart2(sidebar),
+      onDragEnd: (event, draggable, options) => onDragEnd2(sheet, options),
+      droppables: [
+        containersDroppable(tab, sheet),
+        otherEquipmentDroppable(tab, sheet),
+        largeEquipmentDroppable(tab, sheet),
+        itemsListDroppable(tab, sheet),
+        itemsGridDroppable(tab, sheet)
+      ]
+    });
+  }
+  __name(addEvents, "addEvents");
+  async function onItemDetails(event, actor, itemElement, sidebar) {
+    if (dragging)
+      return;
+    let details = itemElement.dataset.details;
+    if (!details) {
+      const item = getItemFromElement(actor, itemElement);
+      if (!item)
+        return;
+      details = await renderTemplate(templatePath("inventory/details"), { item });
+      itemElement.dataset.details = details;
+    }
+    sidebar.innerHTML = details;
+    sidebar.classList.remove("hidden");
+  }
+  __name(onItemDetails, "onItemDetails");
+  function onDragStart2(sidebar) {
+    dragging = true;
+    sidebar.classList.add("hidden");
+  }
+  __name(onDragStart2, "onDragStart");
+  function onDragEnd2(sheet, { dropped, canceled }) {
+    dragging = false;
+    if (canceled || !dropped)
+      return;
+    setInMemory(sheet, "inventory.requireSave", true);
+  }
+  __name(onDragEnd2, "onDragEnd");
+  function createGhost(dragged, draggedIndex) {
+    return dragged.parentElement.dataset.area === "items-grid" ? { element: dragged, index: draggedIndex } : void 0;
+  }
+  __name(createGhost, "createGhost");
+  function checkIdentifier(draggable) {
+    if (draggable.identifier === dragIdentifier)
+      return true;
+    error("inventory.identifier.error");
+    return false;
+  }
+  __name(checkIdentifier, "checkIdentifier");
+  function itemsGridDroppable(html, sheet) {
+    function onDragEnter(event, draggable, droppable) {
+      if (droppable.element === draggable.element || droppable.element === draggable.ghost) {
+        return;
+      }
+      const ghost = draggable.ghost;
+      const index = getElementIndex(droppable.element);
+      const target = ghost.index >= index ? droppable.element : droppable.element.nextElementSibling;
+      droppable.element.parentElement.insertBefore(ghost.element, target);
+      ghost.index = index;
+    }
+    __name(onDragEnter, "onDragEnter");
+    function onDragLeave(event, draggable, droppable) {
+      const parentGrid = droppable.element.parentElement;
+      if (!parentGrid)
+        return;
+      const isItem = closestInside(droppable.triggeringElement, parentGrid, {
+        selector: "[data-item-id]"
+      });
+      if (isItem)
+        return;
+      const parentList = parentGrid.parentElement;
+      if (!parentList.contains(droppable.triggeringElement))
+        return;
+      parentGrid.appendChild(draggable.ghost.element);
+      draggable.ghost.index = Infinity;
+    }
+    __name(onDragLeave, "onDragLeave");
+    return {
+      element: html[0],
+      selector: "[data-area='items-grid'] [data-item-id]",
+      onDragEnter,
+      onDragLeave
+    };
+  }
+  __name(itemsGridDroppable, "itemsGridDroppable");
+  function itemsListDroppable(html, sheet) {
+    const actor = sheet.actor;
+    function onDragEnter(event, draggable, droppable) {
+      const isItem = closestInside(
+        droppable.triggeringElement,
+        droppable.element,
+        {
+          selector: "[data-item-id]"
+        }
+      );
+      if (isItem)
+        return;
+      droppable.element.querySelector("[data-area='items-grid']").appendChild(draggable.ghost.element);
+    }
+    __name(onDragEnter, "onDragEnter");
+    function onDragLeave(event, draggable, droppable) {
+      draggable.ghost.reset();
+    }
+    __name(onDragLeave, "onDragLeave");
+    async function onDrop(event, draggable, droppable) {
+      if (!checkIdentifier(draggable))
+        return false;
+      const item = getItemFromElement(actor, draggable);
+      if (!item)
+        return false;
+      const updates = [];
+      if (draggable.element === draggable.ghost.element) {
+        draggable.ghost.classList.purge();
+        cleanContainerItem(draggable.element);
+      } else {
+        moveItemToContainer({
+          html,
+          updates,
+          item,
+          ...draggable,
+          target: draggable.ghost.element
+        });
+        checkForTwoHandedSlots(html, actor);
+        draggable.ghost.reset();
+      }
+      await actor.updateEmbeddedDocuments("Item", updates);
+      return true;
+    }
+    __name(onDrop, "onDrop");
+    return {
+      element: html[0],
+      selector: "[data-area='items-list']",
+      onDragEnter,
+      onDragLeave,
+      onDrop
+    };
+  }
+  __name(itemsListDroppable, "itemsListDroppable");
+  function largeEquipmentDroppable(html, sheet) {
+    const actor = sheet.actor;
+    const rightHand = html.find("[data-equipped-slot=right-hand]")[0];
+    function getData3(draggable, droppable) {
+      const slot = droppable.element.dataset.equippedSlot;
+      if (slot === draggable.parent.dataset.equippedSlot || droppable.element.querySelector("[data-two-hands]")) {
+        return { canDrop: void 0 };
+      }
+      const item = getItemFromElement(actor, draggable);
+      if (!item) {
+        return { canDrop: false };
+      }
+      const canDrop = slot === "armor" ? item.isOfType("armor") : true;
+      return {
+        item,
+        slot,
+        canDrop
+      };
+    }
+    __name(getData3, "getData");
+    function moveItemToSlot({
+      updates,
+      item,
+      element,
+      drop,
+      noTwoHand = false,
+      noUpdate = false
+    }) {
+      const dropSlot = drop instanceof HTMLElement ? drop : drop.element;
+      const slot = dropSlot.dataset.equippedSlot;
+      const movable = element instanceof HTMLElement ? element : element.element;
+      const isOneHand = isOneHanded(item);
+      const isTwoHand = isTwoHanded(item);
+      const canInvest = canBeInvested(item);
+      dropSlot.appendChild(movable);
+      const move = /* @__PURE__ */ __name((carryType, handsHeld, inSlot, invested) => {
+        if (!noUpdate) {
+          updates.push(
+            itemCarryUpdate(item, {
+              carryType,
+              handsHeld,
+              inSlot,
+              invested,
+              containerId: null
+            })
+          );
+        }
+        movable.classList.toggle("invested", canInvest && invested);
+      }, "move");
+      if (slot === "armor") {
+        move("worn", 0, true, true);
+        return;
+      }
+      if (slot === "right-hand") {
+        move("held", 1, false, isOneHand);
+        return;
+      }
+      move(
+        "held",
+        isTwoHand && !noTwoHand ? 2 : 1,
+        false,
+        isHeld(item) && (!isTwoHand || !noTwoHand)
+      );
+    }
+    __name(moveItemToSlot, "moveItemToSlot");
+    function getSlottedItem(slot) {
+      const slotElement = slot instanceof HTMLElement ? slot : slot.element;
+      const element = slotElement.querySelector("[data-item-id]");
+      const item = getItemFromElement(actor, element);
+      return { element, item };
+    }
+    __name(getSlottedItem, "getSlottedItem");
+    function onDragEnter(event, draggable, droppable) {
+      const { canDrop } = getData3(draggable, droppable);
+      if (canDrop !== void 0) {
+        droppable.classList.toggle("valid", canDrop);
+        droppable.classList.toggle("invalid", !canDrop);
+      }
+    }
+    __name(onDragEnter, "onDragEnter");
+    async function onDrop(event, draggable, droppable) {
+      if (!checkIdentifier(draggable))
+        return false;
+      const { item, canDrop, slot } = getData3(draggable, droppable);
+      if (!canDrop)
+        return false;
+      const updates = [];
+      const slotted = getSlottedItem(droppable);
+      const dragArea = draggable.parent.dataset.area;
+      const dragSlot = draggable.parent.dataset.equippedSlot;
+      const isTwoHand = isTwoHanded(item);
+      let noUpdate = false;
+      if (dragArea === "equipped") {
+        if (slotted.item) {
+          moveItemToContainer({ html, updates, ...slotted });
+        }
+      } else if (dragArea === "items-grid") {
+        if (slot === "left-hand" && isTwoHand) {
+          const otherSlotted = getSlottedItem(rightHand);
+          if (otherSlotted.item) {
+            moveItemToContainer({ html, updates, ...otherSlotted });
+          }
+        }
+        if (slotted.item) {
+          moveItemToContainer({
+            html,
+            updates,
+            ...slotted,
+            target: draggable.element
+          });
+        }
+      } else if (slot === "armor") {
+        if (slotted.item) {
+          moveItemToSlot({
+            updates,
+            ...slotted,
+            drop: draggable.parent
+          });
+        }
+      } else if (dragSlot === "armor") {
+        if (slotted.item) {
+          if (slotted.item.isOfType("armor")) {
+            moveItemToSlot({
+              updates,
+              ...slotted,
+              drop: draggable.parent
+            });
+          } else {
+            moveItemToContainer({
+              html,
+              updates,
+              ...slotted
+            });
+          }
+        }
+      } else if (slot === "right-hand") {
+        noUpdate = true;
+        if (slotted.item) {
+          moveItemToSlot({
+            updates,
+            ...slotted,
+            drop: draggable.parent,
+            noUpdate: true,
+            noTwoHand: true
+          });
+        }
+      } else if (slotted.item) {
+        if (isTwoHand) {
+          moveItemToContainer({
+            html,
+            updates,
+            ...slotted
+          });
+        } else {
+          moveItemToSlot({
+            updates,
+            ...slotted,
+            drop: draggable.parent,
+            noUpdate: true
+          });
+          noUpdate = true;
+        }
+      }
+      moveItemToSlot({
+        updates,
+        item,
+        element: draggable,
+        drop: droppable,
+        noUpdate
+      });
+      if (slot === "left-hand" || dragSlot === "left-hand") {
+        checkForTwoHandedSlots(html, actor);
+      }
+      await actor.updateEmbeddedDocuments("Item", updates);
+      return true;
+    }
+    __name(onDrop, "onDrop");
+    return {
+      element: html.find("[data-area=equipped] .main-items")[0],
+      selector: "[data-equipped-slot]",
+      purgeOnLeave: true,
+      onDragEnter,
+      onDrop
+    };
+  }
+  __name(largeEquipmentDroppable, "largeEquipmentDroppable");
+  function otherEquipmentDroppable(html, sheet) {
+    const actor = sheet.actor;
+    function getData3(draggable, droppable) {
+      if (draggable.parent === droppable.element) {
+        return { canDrop: void 0 };
+      }
+      const item = getItemFromElement(actor, draggable);
+      if (!item.isIdentified || !(item.isOfType("equipment") || isHandwrapsOfMightyBlows(item))) {
+        return { canDrop: false };
+      }
+      const canInvest = canBeInvested(item);
+      const canEquip = hasWornSlot(item);
+      if (!canInvest && !canEquip) {
+        return { canDrop: false };
+      }
+      return { canDrop: true, item, canInvest };
+    }
+    __name(getData3, "getData");
+    function onDragEnter(event, draggable, droppable) {
+      const { canDrop, canInvest } = getData3(draggable, droppable);
+      if (canDrop === void 0)
+        return;
+      droppable.classList.add("show");
+      droppable.classList.toggle("add-forbidden", !canDrop);
+      droppable.classList.toggle("add-invest", canDrop && canInvest);
+      droppable.classList.toggle("add-equip", canDrop && !canInvest);
+    }
+    __name(onDragEnter, "onDragEnter");
+    async function onDrop(event, draggable, droppable) {
+      if (!checkIdentifier(draggable))
+        return false;
+      const { canDrop, canInvest, item } = getData3(draggable, droppable);
+      if (!canDrop)
+        return false;
+      droppable.element.appendChild(draggable.element);
+      draggable.element.classList.toggle("invested", canInvest);
+      await actor.updateEmbeddedDocuments("Item", [
+        itemCarryUpdate(item, {
+          containerId: null,
+          inSlot: true,
+          invested: true
+        })
+      ]);
+      return true;
+    }
+    __name(onDrop, "onDrop");
+    return {
+      element: html.find("[data-area=equipped]")[0],
+      filter: ".main-items",
+      purgeOnLeave: true,
+      onDragEnter,
+      onDrop
+    };
+  }
+  __name(otherEquipmentDroppable, "otherEquipmentDroppable");
+  function containersDroppable(html, sheet) {
+    const actor = sheet.actor;
+    function getData3(draggable, droppable) {
+      const item = getItemFromElement(actor, draggable);
+      if (!item)
+        return { canDrop: false };
+      const containerId = droppable.element.dataset.containerId;
+      if (containerId === "undefined")
+        return { item, canDrop: true };
+      const container = actor.items.get(containerId);
+      if (!container)
+        return { canDrop: false };
+      const capacity = container.capacity;
+      const remaining = capacity.max.minus(capacity.value);
+      return {
+        item,
+        container,
+        canDrop: remaining.value >= item.bulk.value
+      };
+    }
+    __name(getData3, "getData");
+    function onDragEnter(event, draggable, droppable) {
+      const { canDrop } = getData3(draggable, droppable);
+      droppable.classList.toggle("valid", canDrop);
+      droppable.classList.toggle("invalid", !canDrop);
+    }
+    __name(onDragEnter, "onDragEnter");
+    async function onDrop(event, draggable, droppable) {
+      if (!checkIdentifier(draggable))
+        return false;
+      const { canDrop, item, container } = getData3(draggable, droppable);
+      if (!canDrop)
+        return false;
+      const updates = moveItemToContainer({
+        html,
+        updates: [],
+        item,
+        element: draggable,
+        target: container
+      });
+      if (draggable.parent.dataset.equippedSlot === "left-hand") {
+        checkForTwoHandedSlots(html, actor);
+      }
+      await actor.updateEmbeddedDocuments("Item", updates);
+      return true;
+    }
+    __name(onDrop, "onDrop");
+    return {
+      element: html[0],
+      selector: "[data-container-id]",
+      filter: ".back",
+      purgeOnLeave: true,
+      onDragEnter,
+      onDrop
+    };
+  }
+  __name(containersDroppable, "containersDroppable");
+  function cleanContainerItem(item) {
+    item.classList.remove("invested");
+    item.querySelector(".vignette.hands")?.remove();
+  }
+  __name(cleanContainerItem, "cleanContainerItem");
+  function moveItemToContainer({ html, updates, item, element, target }) {
+    const targetIsElement = target instanceof HTMLElement;
+    const movable = element instanceof HTMLElement ? element : element.element;
+    let containerId = targetIsElement ? target.closest("[data-tab-id]").dataset.tabId : target instanceof Item ? target.id : target;
+    cleanContainerItem(movable);
+    if (targetIsElement) {
+      target.before(movable);
+    } else {
+      html.find(`.container-tab[data-tab-id=${containerId}] [data-area=items-grid]`).append(movable);
+    }
+    containerId = [void 0, "undefined"].includes(containerId) ? null : containerId;
+    updates.push(
+      itemCarryUpdate(item, {
+        containerId,
+        inSlot: false,
+        invested: false,
+        carryType: containerId ? "stowed" : "worn",
+        handsHeld: 0
+      })
+    );
+    return updates;
+  }
+  __name(moveItemToContainer, "moveItemToContainer");
+  function checkForTwoHandedSlots(html, actor) {
+    const equipped = html.find("[data-area='equipped'] .main-items")[0];
+    const leftHand = equipped.querySelector("[data-equipped-slot='left-hand']");
+    const rightHand = equipped.querySelector("[data-equipped-slot='right-hand']");
+    const leftSlotted = leftHand.querySelector("[data-item-id]");
+    const rightSlotted = rightHand.querySelector(".item:not(.fake)");
+    const item = getItemFromElement(actor, leftSlotted);
+    const isTwoHand = !!item && isTwoHanded(item);
+    if (!isTwoHand && rightSlotted?.dataset.twoHands) {
+      rightSlotted.remove();
+    } else if (isTwoHand && !rightSlotted) {
+      const clone = leftSlotted.cloneNode(true);
+      clone.dataset.twoHands = "true";
+      rightHand.appendChild(clone);
+    }
+  }
+  __name(checkForTwoHandedSlots, "checkForTwoHandedSlots");
+  function getItemFromElement(actor, element) {
+    if (!element)
+      return;
+    const el = element instanceof HTMLElement ? element : element.element;
+    const { itemId, containerId } = el.dataset;
+    const id = itemId ?? containerId;
+    if (id)
+      return actor.items.get(id);
+  }
+  __name(getItemFromElement, "getItemFromElement");
+
+  // src/apps/knowledges/lores.js
+  var localize3 = subLocalize("knowledges.editLore");
+  var EditLores = class extends FormApplication {
+    static {
+      __name(this, "EditLores");
+    }
+    get actor() {
+      return this.object;
+    }
+    get id() {
+      return `npc-edit-lores-${this.actor.id}`;
+    }
+    get title() {
+      return localize3("title", this.actor);
+    }
+    get template() {
+      return templatePath("knowledges/lores");
+    }
+    getData(options) {
+      const actor = this.actor;
+      return mergeObject(super.getData(options), {
+        unspecified: getFlag(actor, "knowledges.unspecified") ?? "",
+        specific: getFlag(actor, "knowledges.specific") ?? "",
+        i18n: localize3
+      });
+    }
+    async _updateObject(event, { unspecified, specific }) {
+      const actor = this.object;
+      setFlag(actor, "knowledges.unspecified", unspecified.trim());
+      setFlag(actor, "knowledges.specific", specific.trim());
+    }
+    activateListeners(html) {
+      html.find("button.cancel").on("click", this.#onCancel.bind(this));
+    }
+    #onCancel(event) {
+      event.preventDefault();
+      this.close();
+    }
+  };
+
+  // src/features/knowledges.js
+  var setHook3 = createHook("renderNPCSheetPF2e", renderNPCSheetPF2e);
+  function registerKnowledges() {
+    return {
+      settings: [
+        {
+          name: "knowledges",
+          type: Boolean,
+          default: false,
+          onChange: (value) => setHook3(value)
+        }
+      ],
+      conflicts: ["pf2e-npc-knowledges"],
+      ready: (isGM) => {
+        if (isGM && getSetting("knowledges"))
+          setHook3(true);
+      }
+    };
+  }
+  __name(registerKnowledges, "registerKnowledges");
+  function renderNPCSheetPF2e(sheet, $html) {
+    const actor = sheet.actor;
+    if (!isPlayedActor(actor))
+      return;
+    replaceLores(actor, $html);
+    addEditButton($html);
+    addEvents2(actor, $html);
+  }
+  __name(renderNPCSheetPF2e, "renderNPCSheetPF2e");
+  function knowledgeSelector(html, section, selector) {
+    return html.find(
+      `[data-tab="main"] .recall-knowledge ${section === "header" ? ".section-header" : ".section-body"} ${selector}`
+    );
+  }
+  __name(knowledgeSelector, "knowledgeSelector");
+  function editLores(actor) {
+    new EditLores(actor).render(true);
+  }
+  __name(editLores, "editLores");
+  function replaceLores(actor, html) {
+    const unspecifics = getFlag(actor, "knowledges.unspecified");
+    const specifics = getFlag(actor, "knowledges.specific");
+    if (!unspecifics && !specifics)
+      return;
+    const lores = actor.identificationDCs.lore;
+    const body = knowledgeSelector(html, "body", "");
+    body.find(".identification-skills").last().remove();
+    function tag(skills, dc, adjustment) {
+      const content = game.i18n.format(
+        "PF2E.Actor.NPC.Identification.Skills.Label",
+        { skills, dc, adjustment }
+      );
+      return `<div class="tag-legacy identification-skills tooltipstered">${content}</div>`;
+    }
+    __name(tag, "tag");
+    function addTags(lores2, { dc, start }) {
+      const tags = lores2.split(",").filter((lore) => lore.trim()).map((lore) => tag(lore, dc, start)).join("");
+      body.append(tags);
+    }
+    __name(addTags, "addTags");
+    addTags(unspecifics || "Unspecific", lores[0]);
+    addTags(specifics || "Specific", lores[1]);
+  }
+  __name(replaceLores, "replaceLores");
+  function addEvents2(actor, html) {
+    const edit = knowledgeSelector(html, "header", "button.edit");
+    edit.on("click", () => editLores(actor));
+  }
+  __name(addEvents2, "addEvents");
+  function addEditButton(html) {
+    const attempts = knowledgeSelector(html, "header", "button");
+    const edit = '<button type="button" class="breakdown edit">Edit</button>';
+    attempts.before(edit);
+  }
+  __name(addEditButton, "addEditButton");
+
+  // src/apps/merge/multi.js
+  var localize4 = subLocalize("merge.multi");
+  var MultiCast = class extends Application {
+    static {
+      __name(this, "MultiCast");
+    }
+    #message;
+    #event;
+    constructor(event, message, options) {
+      super(options);
+      this.#event = event;
+      this.#message = message;
+    }
+    get title() {
+      return localize4("title", this.spell);
+    }
+    get template() {
+      return templatePath("merge/multi");
+    }
+    getData(options) {
+      return mergeObject(super.getData(options), {
+        i18n: localize4
+      });
+    }
+    activateListeners(html) {
+      html.find("[data-action=cast]").on("click", this.#onCast.bind(this));
+      html.find("[data-action=cancel]").on("click", this.#onCancel.bind(this));
+    }
+    async #onCast(event) {
+      event.preventDefault();
+      const nb = this.element.find("[name=multi]").val();
+      if (nb < 1) {
+        localize4.error("zero");
+        this.close();
+        return;
+      }
+      const message = this.#message;
+      if (!message)
+        return;
+      const spell = message.item;
+      const actor = message.actor;
+      if (!actor || !spell)
+        return;
+      const updateSource = /* @__PURE__ */ __name((damages, heightening) => {
+        for (const [id, damage] of Object.entries(damages)) {
+          for (let i = 0; i < nb - 1; i++) {
+            const newId = randomID();
+            damages[newId] = damage;
+            if (heightening.type === "interval") {
+              const damage2 = heightening.damage[id];
+              if (damage2)
+                heightening.damage[newId] = damage2;
+            } else if (heightening.type === "fixed") {
+              for (const data of Object.values(heightening.levels)) {
+                const damage2 = data.damage[id];
+                if (!damage2)
+                  continue;
+                data.damage[newId] = damage2;
+              }
+            }
+          }
+        }
+      }, "updateSource");
+      const embeddedSource = deepClone(message.flags.pf2e.casting?.embeddedSpell);
+      if (embeddedSource) {
+        const damages = embeddedSource.system.damage;
+        embeddedSource.system.heightening ??= {};
+        const heightening = embeddedSource.system.heightening;
+        updateSource(damages, heightening);
+        const newSpell = new Item.implementation(embeddedSource, {
+          parent: actor
+        });
+        newSpell.trickMagicEntry = spell.trickMagicEntry;
+        const overlayIds = message.getFlag("pf2e", "origin.variant.overlays");
+        const castRank = message.getFlag("pf2e", "origin.castRank") ?? spell.rank;
+        const modifiedSpell = newSpell.loadVariant({ overlayIds, castRank });
+        const castSpell = modifiedSpell ?? newSpell;
+        castSpell.rollDamage(this.#event);
+      } else {
+        const spellSource = spell.toObject();
+        const damages = spellSource.system.damage;
+        const heightening = spellSource.system.heightening ?? {};
+        updateSource(damages, heightening);
+        const newSpell = spell.clone({
+          "system.damage": damages,
+          "system.heightening": heightening
+        });
+        newSpell.rollDamage(this.#event);
+      }
+      if (spell.damageKinds.size) {
+        bindOnPreCreateSpellDamageChatMessage(message);
+      }
+      this.close();
+    }
+    #onCancel(event) {
+      event.preventDefault();
+      this.close();
+    }
+  };
+
+  // src/shared/pf2e/classes.js
+  function getDamageRollClass() {
+    return CONFIG.Dice.rolls.find((Roll2) => Roll2.name === "DamageRoll");
+  }
+  __name(getDamageRollClass, "getDamageRollClass");
+
+  // src/features/merge.js
+  var setHook4 = createHook(
+    "renderChatMessage",
+    renderChatMessage,
+    updateMessages
+  );
+  function registerMerge() {
+    return {
+      settings: [
+        {
+          name: "merge-damage",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: (value) => setHook4(value, "multi-cast")
+        },
+        {
+          name: "multi-cast",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: (value) => setHook4(value, "merge-damage")
+        }
+      ],
+      init: (isGm) => {
+        setHook4(false, ["multi-cast", "merge-damage"], true);
+      }
+    };
+  }
+  __name(registerMerge, "registerMerge");
+  function updateMessages() {
+    for (const { message, html } of latestChatMessages(10)) {
+      html.find("[data-action=multi-cast]").remove();
+      html.find("[data-action=merge-damage]").remove();
+      renderChatMessage(message, html);
+    }
+  }
+  __name(updateMessages, "updateMessages");
+  function renderChatMessage(message, html) {
+    if (!game.user.isGM && !message.isAuthor)
+      return;
+    if (getSetting("merge-damage") && isDamageRoll(message))
+      renderDamage(message, html);
+    else if (getSetting("multi-cast") && message.getFlag("pf2e", "origin.type") === "spell")
+      renderSpell(message, html);
+  }
+  __name(renderChatMessage, "renderChatMessage");
+  function renderSpell(message, html) {
+    const item = message.item;
+    if (!item)
+      return;
+    const spellBtn = html.find(
+      ".message-content .chat-card .owner-buttons .spell-button"
+    );
+    spellBtn.find("[data-action=spell-damage]").after(
+      `<button data-action="multi-cast">${localize(
+        "merge.spell.button"
+      )}</button>`
+    );
+    spellBtn.find("[data-action=multi-cast]").on("click", (event) => {
+      new MultiCast(event, message).render(true);
+    });
+  }
+  __name(renderSpell, "renderSpell");
+  function renderDamage(message, html) {
+    let buttons = '<span class="pf2e-toolbelt-merge">';
+    if (getFlag(message, "merge.merged")) {
+      const tooltip2 = localize("merge.damage.split-tooltip");
+      buttons += `<button data-action="split-damage" title="${tooltip2}">`;
+      buttons += '<i class="fa-duotone fa-split"></i>';
+    }
+    const tooltip = localize("merge.damage.tooltip");
+    buttons += `<button data-action="merge-damage" title="${tooltip}">`;
+    buttons += '<i class="fa-duotone fa-merge"></i></button>';
+    buttons += "</span>";
+    const actorUUID = getActorUUID(message);
+    const targetUUIDs = getTargetUUIDs(message);
+    html.find(".dice-result .dice-total").append(buttons);
+    html.find(".pf2e-toolbelt-merge [data-action=merge-damage]").on("click", (event) => {
+      event.stopPropagation();
+      for (const { message: otherMessage } of latestChatMessages(5, message)) {
+        const otherTargetsUUIDS = getTargetUUIDs(otherMessage);
+        if (!isDamageRoll(otherMessage) || getActorUUID(otherMessage) !== actorUUID || !compareArrays(
+          targetUUIDs?.map((t) => t.actor).filter(Boolean),
+          otherTargetsUUIDS?.map((t) => t.actor).filter(Boolean)
+        ))
+          continue;
+        mergeDamages(event, message, otherMessage, { actorUUID, targetUUIDs });
+        return;
+      }
+      warn("merge.damage.none");
+    });
+    html.find(".pf2e-toolbelt-merge [data-action=split-damage]").on("click", (event) => {
+      event.stopPropagation();
+      splitDamages(event, message);
+    });
+  }
+  __name(renderDamage, "renderDamage");
+  async function splitDamages(event, message) {
+    const sources = getFlag(message, "merge.data").flatMap((data) => data.source);
+    await removeChatMessages(message.id);
+    await getChatMessageClass().createDocuments(sources);
+  }
+  __name(splitDamages, "splitDamages");
+  async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
+    const dataGroups = {};
+    const data = getMessageData(other).concat(getMessageData(origin));
+    for (const { name, notes, outcome, modifiers, tags } of data) {
+      dataGroups[name] ??= {
+        name,
+        tags,
+        notes: /* @__PURE__ */ new Set(),
+        results: []
+      };
+      for (const note of notes) {
+        dataGroups[name].notes.add(note);
+      }
+      const exists = dataGroups[name].results.some(
+        (result) => result.outcome === outcome && compareArrays(result.modifiers, modifiers)
+      );
+      if (!exists)
+        dataGroups[name].results.push({ outcome, modifiers });
+    }
+    const groups = Object.values(dataGroups).map((group) => {
+      group.label = group.name;
+      for (const result of group.results) {
+        if (!result.outcome)
+          continue;
+        result.label = game.i18n.localize(
+          `PF2E.Check.Result.Degree.Attack.${result.outcome}`
+        );
+      }
+      return group;
+    });
+    groups.at(-1).isLastGroup = true;
+    const flavor = await renderTemplate(templatePath("merge/merged"), {
+      groups,
+      hasMultipleGroups: groups.length > 1
+    });
+    const originRolls = getMessageRolls(origin);
+    const otherRolls = getMessageRolls(other);
+    const groupedRolls = [];
+    for (const roll2 of [].concat(otherRolls, originRolls)) {
+      const { options, total, terms } = roll2;
+      const term = terms[0];
+      const formula = roll2.formula.replaceAll(/(\[[\w,-]+\])/g, "").replace(/^\(/, "").replace(/\)$/, "");
+      const group = groupedRolls.find(
+        ({ options: { flavor: flavor2, critRule } }) => flavor2 === options.flavor && critRule === options.critRule
+      );
+      if (group) {
+        group.terms.push(term);
+        group.total += total;
+        group.formulas.push(formula);
+      } else {
+        groupedRolls.push({
+          options,
+          formulas: [formula],
+          total,
+          terms: [term]
+        });
+      }
+    }
+    const DamageRoll = getDamageRollClass();
+    for (const group of groupedRolls) {
+      if (group.options.flavor.includes("persistent")) {
+        const { index } = group.formulas.reduce(
+          (prev, curr, index2) => {
+            const value = new DamageRoll(curr).expectedValue;
+            if (value <= prev.value)
+              return prev;
+            return { value, index: index2 };
+          },
+          { value: 0, index: -1 }
+        );
+        group.formulas = [group.formulas[index]];
+        group.terms = [group.terms[index]];
+      }
+      group.formula = `(${group.formulas.join(" + ")})[${group.options.flavor}]`;
+      group.term = group.terms.length < 2 ? group.terms[0] : createTermGroup(group.terms);
+    }
+    const roll = {
+      class: "DamageRoll",
+      options: {},
+      dice: [],
+      formula: `{${groupedRolls.map(({ formula }) => formula).join(", ")}}`,
+      total: groupedRolls.reduce((acc, { total }) => acc + total, 0),
+      evaluated: true,
+      terms: [
+        {
+          class: "InstancePool",
+          options: {},
+          evaluated: true,
+          terms: groupedRolls.map(({ formula }) => formula),
+          modifiers: [],
+          rolls: groupedRolls.map(({ options, formula, total, term }) => ({
+            class: "DamageInstance",
+            options,
+            dice: [],
+            formula,
+            total,
+            terms: [term],
+            evaluated: true
+          })),
+          results: groupedRolls.map(({ total }) => ({
+            result: total,
+            active: true
+          }))
+        }
+      ]
+    };
+    if (game.modules.get("dice-so-nice")?.active) {
+      const setHidden = /* @__PURE__ */ __name((term) => {
+        if ("results" in term) {
+          for (const result of term.results) {
+            result.hidden = true;
+          }
+        } else {
+          const operands = (term.term ?? term).operands ?? [];
+          for (const operand of operands) {
+            setHidden(operand);
+          }
+        }
+      }, "setHidden");
+      for (const r of roll.terms[0].rolls) {
+        for (const term of r.terms) {
+          setHidden(term);
+        }
+      }
+    }
+    await removeChatMessages(origin.id, other.id);
+    await getChatMessageClass().create({
+      flavor,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      speaker: origin.speaker,
+      flags: {
+        [MODULE_ID]: {
+          merge: {
+            actor: actorUUID,
+            targets: targetUUIDs,
+            merged: true,
+            type: "damage-roll",
+            data
+          },
+          target: {
+            targets: targetUUIDs
+          }
+        },
+        pf2e: {
+          context: {
+            options: Array.from(
+              new Set(data.flatMap((entry) => entry.itemTraits))
+            )
+          }
+        }
+      },
+      rolls: [roll]
+    });
+  }
+  __name(mergeDamages, "mergeDamages");
+  function getMessageData(message) {
+    const flags = getFlag(message, "merge.data");
+    if (flags)
+      return flags;
+    const source = message.toObject();
+    delete source._id;
+    delete source.timestamp;
+    const html = $(`<div>${message.flavor}</div>`);
+    const tags = html.find("h4.action + .tags").prop("outerHTML");
+    const modifiers = [];
+    html.find(".tag.tag_transparent").each(function() {
+      modifiers.push(this.innerHTML);
+    });
+    const notes = source.flags.pf2e.context.notes.map(
+      ({ title, text }) => `<strong>${game.i18n.localize(title)}</strong> ${game.i18n.localize(
+        text
+      )}`
+    );
+    return [
+      {
+        source,
+        name: source.flags.pf2e.strike?.name ?? message.item.name,
+        outcome: source.flags.pf2e.context.outcome,
+        itemTraits: source.flags.pf2e.context.options.filter(
+          (option) => /^(item|self):/.test(option)
+        ),
+        modifiers,
+        tags,
+        notes
+      }
+    ];
+  }
+  __name(getMessageData, "getMessageData");
+  function removeChatMessages(...ids) {
+    const joinedIds = ids.map((id) => `[data-message-id=${id}]`).join(", ");
+    ui.chat.element.find(joinedIds).remove();
+    return ChatMessage.deleteDocuments(ids);
+  }
+  __name(removeChatMessages, "removeChatMessages");
+  function createTermGroup(terms) {
+    const options = deepClone(terms[0].options);
+    for (const term of terms) {
+      term.options = {};
+    }
+    return {
+      class: "Grouping",
+      options,
+      evaluated: true,
+      term: {
+        class: "ArithmeticExpression",
+        options: {},
+        evaluated: true,
+        operator: "+",
+        operands: [
+          terms.shift(),
+          terms.length > 1 ? createTermGroup(terms) : terms[0]
+        ]
+      }
+    };
+  }
+  __name(createTermGroup, "createTermGroup");
+  function getMessageRolls(message) {
+    return getFlag(message, "merge.rolls") ?? JSON.parse(message._source.rolls[0]).terms[0].rolls;
+  }
+  __name(getMessageRolls, "getMessageRolls");
+  function getActorUUID(message) {
+    return getFlag(message, "merge.actor") ?? message.actor?.uuid;
+  }
+  __name(getActorUUID, "getActorUUID");
+  function getTargetUUIDs(message) {
+    const targetTargets = getFlag(message, "target.targets");
+    if (targetTargets)
+      return targetTargets;
+    const mergeTargets = getFlag(message, "merge.targets") ?? message.getFlag("pf2e", "target");
+    if (Array.isArray(mergeTargets))
+      return mergeTargets;
+    return mergeTargets ? [mergeTargets] : [];
+  }
+  __name(getTargetUUIDs, "getTargetUUIDs");
+  function isDamageRoll(message) {
+    return getFlag(message, "merge.type") === "damage-roll" || message.getFlag("pf2e", "context.type") === "damage-roll";
+  }
+  __name(isDamageRoll, "isDamageRoll");
+
+  // src/features/nobulk.js
+  var ACTOR_PREPARE_EMBEDDED_DOCUMENTS = "CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments";
+  var TREASURE_PREPARE_BASE_DATA = "CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData";
+  function registerNobulk() {
+    return {
+      settings: [
+        {
+          name: "nobulk",
+          type: Boolean,
+          default: false,
+          requiresReload: true
+        },
+        {
+          name: "nobulk-coins",
+          type: Boolean,
+          default: false,
+          requiresReload: true
+        }
+      ],
+      init: () => {
+        if (getSetting("nobulk"))
+          registerWrapper(
+            ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
+            actorPrepareEmbeddedDocuments,
+            "WRAPPER"
+          );
+        if (getSetting("nobulk-coins"))
+          registerWrapper(
+            TREASURE_PREPARE_BASE_DATA,
+            treasurePrepareBaseData,
+            "WRAPPER"
+          );
+      }
+    };
+  }
+  __name(registerNobulk, "registerNobulk");
+  function treasurePrepareBaseData(wrapped) {
+    wrapped();
+    try {
+      if (this.isCoinage)
+        this.system.bulk.value = 0;
+    } catch {
+      wrapperError("nobulk", TREASURE_PREPARE_BASE_DATA);
+    }
+  }
+  __name(treasurePrepareBaseData, "treasurePrepareBaseData");
+  function actorPrepareEmbeddedDocuments(wrapped, ...args) {
+    wrapped(...args);
+    try {
+      const InventoryBulk = this.inventory.bulk.constructor;
+      let _value = null;
+      Object.defineProperty(this.inventory.bulk, "value", {
+        get() {
+          if (_value)
+            return _value;
+          _value = InventoryBulk.computeTotalBulk(
+            this.actor.inventory.filter(
+              (item) => !item.isInContainer && item.system.equipped.carryType !== "dropped"
+            ),
+            this.actor.size
+          );
+          return _value;
+        }
+      });
+    } catch {
+      wrapperError("nobulk", ACTOR_PREPARE_EMBEDDED_DOCUMENTS);
+    }
+  }
+  __name(actorPrepareEmbeddedDocuments, "actorPrepareEmbeddedDocuments");
+
+  // src/features/share.js
+  var ACTOR_PREPARE_DATA = "CONFIG.Actor.documentClass.prototype.prepareData";
+  var DOCUMENT_SHEET_RENDER_INNER = "DocumentSheet.prototype._renderInner";
+  function registerShare() {
+    return {
+      settings: [
+        {
+          name: "share",
+          type: String,
+          default: "disabled",
+          choices: ["disabled", "enabled", "force"],
+          requiresReload: true
+        }
+      ],
+      init: () => {
+        const share = getSetting("share");
+        if (share === "disabled")
+          return;
+        registerWrapper(ACTOR_PREPARE_DATA, prepareData, "WRAPPER");
+        registerWrapper(
+          DOCUMENT_SHEET_RENDER_INNER,
+          documentSheetRenderInner,
+          "WRAPPER"
+        );
+        Hooks.on("preUpdateActor", preUpdateActor);
+        Hooks.on("deleteActor", deleteActor);
+        Hooks.on("updateActor", updateActor);
+      }
+    };
+  }
+  __name(registerShare, "registerShare");
+  async function documentSheetRenderInner(wrapped, ...args) {
+    const inner = await wrapped(...args);
+    if (!isInstanceOf(this, "CreatureConfig"))
+      return inner;
+    const actor = this.actor;
+    if (!isPlayedActor(actor) || !actor.isOfType("character", "npc") || getSlaves(actor).size)
+      return inner;
+    const masters = game.actors.filter((a) => a.id !== actor.id && a.isOwner && isValidMaster(a)).map((actor2) => ({
+      key: actor2.id,
+      label: actor2.name
+    }));
+    const group = await renderTemplate(templatePath("share/master"), {
+      masters,
+      master: getFlag(actor, "share.master"),
+      selectPath: `flags.${MODULE_ID}.share.master`,
+      i18n: subLocalize("share.templates.master")
+    });
+    inner.children().last().before(group);
+    return inner;
+  }
+  __name(documentSheetRenderInner, "documentSheetRenderInner");
+  function deleteActor(actor) {
+    removeSlaveFromMaster(actor);
+    const slaves = getSlaves(actor);
+    Promise.all(
+      slaves.map(async (slave) => {
+        unsetMaster(slave);
+        await unsetFlag(slave, "share.master");
+      })
+    );
+  }
+  __name(deleteActor, "deleteActor");
+  function preUpdateActor(actor, updates) {
+    const shareFlag = getProperty(updates, `flags.${MODULE_ID}.share`);
+    if (shareFlag?.master) {
+      const master = game.actors.get(shareFlag.master);
+      if (isValidMaster(master)) {
+        const hpSource = deepClone(master._source.system.attributes.hp);
+        setProperty(updates, "system.attributes.hp", hpSource);
+      }
+    } else {
+      const master = getMaster(actor);
+      const hpUpdate = getProperty(updates, "system.attributes.hp");
+      if (master && hpUpdate) {
+        master.update(
+          { system: { attributes: { hp: hpUpdate } } },
+          { noHook: true }
+        );
+        delete updates.system.attributes.hp;
+      }
+    }
+  }
+  __name(preUpdateActor, "preUpdateActor");
+  function updateActor(actor, updates, options, userId) {
+    const isOriginalUser = game.user.id === userId;
+    const shareFlag = getShareFlag(updates);
+    if (shareFlag?.master !== void 0) {
+      const slave = actor;
+      removeSlaveFromMaster(slave);
+      if (shareFlag.master) {
+        const master = game.actors.get(shareFlag.master);
+        if (isValidMaster(master)) {
+          setMaster(slave, master);
+          addSlaveToMaster(master, slave);
+        }
+      } else {
+        unsetMaster(slave);
+      }
+    }
+    if (!isOriginalUser)
+      return;
+    const slaves = getSlaves(actor);
+    if (slaves.size) {
+      const hpUpdate = getProperty(updates, "system.attributes.hp");
+      if (hpUpdate) {
+        const data = { system: { attributes: { hp: hpUpdate } } };
+        Promise.all(
+          slaves.map(async (slave) => await slave.update(data, { noHook: true }))
+        );
+      } else {
+        Promise.all(
+          slaves.map(async (slave) => await refreshActor(slave, updates))
+        );
+      }
+    }
+  }
+  __name(updateActor, "updateActor");
+  async function refreshActor(actor, data) {
+    const share = getSetting("share");
+    if (share === "force") {
+      await setFlag(actor, "toggle", !getFlag(actor, "toggle"));
+    } else {
+      actor.render(false, { action: "update" });
+      actor._updateDependentTokens(data);
+    }
+  }
+  __name(refreshActor, "refreshActor");
+  function prepareData(wrapped) {
+    wrapped();
+    const masterId = getFlag(this, "share.master");
+    const master = masterId ? game.actors.get(masterId) : void 0;
+    if (!isValidMaster(master))
+      return;
+    if (!getMaster(this)) {
+      setMaster(this, master);
+      addSlaveToMaster(master, this);
+    }
+    const hp = this.system.attributes.hp;
+    Object.defineProperty(this.system.attributes, "hp", {
+      get() {
+        const masterHp = master.system.attributes.hp;
+        transfertHpData(masterHp, hp);
+        return hp;
+      },
+      enumerable: true
+    });
+  }
+  __name(prepareData, "prepareData");
+  function transfertHpData(from, to) {
+    to.breakdown = from.breakdown;
+    to.max = from.max;
+    to.sp = deepClone(from.sp);
+    to.temp = from.temp;
+    to.totalModifier = from.totalModifier;
+    to.value = from.value;
+    to._modifiers = from._modifiers.slice();
+  }
+  __name(transfertHpData, "transfertHpData");
+  function getShareFlag(doc) {
+    return getProperty(doc, `flags.${MODULE_ID}.share`);
+  }
+  __name(getShareFlag, "getShareFlag");
+  function getSlaves(actor) {
+    return getModuleProperty(actor, "slaves") ?? new Collection();
+  }
+  __name(getSlaves, "getSlaves");
+  function setMaster(actor, master) {
+    setModuleProperty(actor, "master", master);
+  }
+  __name(setMaster, "setMaster");
+  function unsetMaster(actor) {
+    deleteModuleProperty(actor, "master");
+  }
+  __name(unsetMaster, "unsetMaster");
+  function getMaster(actor) {
+    return getModuleProperty(actor, "master");
+  }
+  __name(getMaster, "getMaster");
+  function isValidMaster(actor) {
+    return actor && actor.type === "character" && !getMaster(actor);
+  }
+  __name(isValidMaster, "isValidMaster");
+  function getModuleProperty(doc, path) {
+    return getProperty(doc, `modules.${MODULE_ID}.share.${path}`);
+  }
+  __name(getModuleProperty, "getModuleProperty");
+  function setModuleProperty(doc, path, value) {
+    setProperty(doc, `modules.${MODULE_ID}.share.${path}`, value);
+  }
+  __name(setModuleProperty, "setModuleProperty");
+  function deleteModuleProperty(doc, path) {
+    delete doc.modules?.[MODULE_ID]?.share?.[path];
+  }
+  __name(deleteModuleProperty, "deleteModuleProperty");
+  function addSlaveToMaster(master, slave) {
+    const slaves = getSlaves(master);
+    setModuleProperty(master, "slaves", slaves.set(slave.id, slave));
+  }
+  __name(addSlaveToMaster, "addSlaveToMaster");
+  function removeSlaveFromMaster(slave) {
+    const master = getMaster(slave);
+    if (!master)
+      return;
+    const slaves = getSlaves(master);
+    slaves.delete(slave.id);
+  }
+  __name(removeSlaveFromMaster, "removeSlaveFromMaster");
+
+  // src/features/stances.js
+  var setSheetHook = createHook(
+    "renderCharacterSheetPF2e",
+    renderCharacterSheetPF2e2
+  );
+  var setDeleteCombatHook = createHook("deleteCombat", deleteCombat);
+  var setDeleteCombatantHook = createHook("deleteCombatant", deleteCombatant);
+  var setCreateCombatantHook = createHook("createCombatant", createCombatant);
+  var STANCE_SAVANT = [
+    "Compendium.pf2e.feats-srd.Item.yeSyGnYDkl2GUNmu",
+    "Compendium.pf2e.feats-srd.Item.LI9VtCaL5ZRk0Wo8"
+  ];
+  var REPLACERS = /* @__PURE__ */ new Map([
+    [
+      "Compendium.pf2e.feats-srd.Item.nRjyyDulHnP5OewA",
+      // gorilla pound
+      {
+        replace: "Compendium.pf2e.feats-srd.Item.DqD7htz8Sd1dh3BT",
+        // gorilla stance
+        effect: "Compendium.pf2e.feat-effects.Item.UZKIKLuwpQu47feK"
+      }
+    ]
+  ]);
+  var EXTRAS = /* @__PURE__ */ new Map([
+    [
+      "Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt",
+      // arcane cascade
+      {
+        effect: "Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl",
+        action: "Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM"
+      }
+    ],
+    [
+      "Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28",
+      // cobra envenom
+      {
+        effect: "Compendium.pf2e.feat-effects.Item.2Qpt0CHuOMeL48rN"
+      }
+    ],
+    [
+      "Compendium.pf2e.feats-srd.Item.R7c4PyTNkZb0yvoT",
+      // dread marshal
+      {
+        effect: "Compendium.pf2e.feat-effects.Item.qX62wJzDYtNxDbFv"
+        // the stance aura
+      }
+    ],
+    [
+      "Compendium.pf2e.feats-srd.Item.bvOsJNeI0ewvQsFa",
+      // inspiring marshal
+      {
+        effect: "Compendium.pf2e.feat-effects.Item.er5tvDNvpbcnlbHQ"
+        // the stance aura
+      }
+    ]
+  ]);
+  function registerStances() {
+    return {
+      name: "stances",
+      settings: [
+        {
+          name: "stances",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: setup4
+        }
+      ],
+      conflicts: ["pf2e-stances"],
+      api: {
+        getStances,
+        toggleStance,
+        isValidStance
+      },
+      ready: (isGm) => {
+        if (getSetting("stances"))
+          setup4(true);
+      }
+    };
+  }
+  __name(registerStances, "registerStances");
+  function setup4(value) {
+    setSheetHook(value);
+    setDeleteCombatHook(value);
+    setDeleteCombatantHook(value);
+    setCreateCombatantHook(value);
+  }
+  __name(setup4, "setup");
+  function isValidStance(stance) {
+    return stance?.system.traits.value.includes("stance") && stance.system.selfEffect?.uuid;
+  }
+  __name(isValidStance, "isValidStance");
+  function getStances(actor) {
+    const stances = [];
+    const replaced = /* @__PURE__ */ new Set();
+    for (const {
+      replace,
+      sourceId,
+      effectUUID,
+      effect,
+      img,
+      name,
+      itemName,
+      action
+    } of actorStances(actor)) {
+      if (replace)
+        replaced.add(replace);
+      const foundAction = action ? getItemWithSourceId(actor, action, "action") : getItemWithSourceId(actor, sourceId, "feat");
+      stances.push({
+        name,
+        itemName,
+        uuid: sourceId,
+        img,
+        effectUUID,
+        effectID: effect?.id,
+        actionUUID: foundAction.sourceId,
+        actionID: foundAction.id
+      });
+    }
+    return stances.filter(({ uuid }) => !replaced.has(uuid));
+  }
+  __name(getStances, "getStances");
+  async function renderCharacterSheetPF2e2(sheet, html) {
+    const actor = sheet.actor;
+    if (!isPlayedActor(actor))
+      return;
+    const stances = getStances(actor);
+    if (!stances.length)
+      return;
+    const inCombat = actor.getActiveTokens(true, true).some((token) => token.inCombat);
+    const tab = html.find(
+      ".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter]"
+    );
+    const options = tab.find(".actions-options");
+    const template = await renderTemplate(templatePath("stances/sheet"), {
+      stances,
+      canUseStances: inCombat && !actor.isDead,
+      i18n: subLocalize("stances")
+    });
+    if (options.length)
+      options.after(template);
+    else
+      tab.prepend(template);
+    html.find(
+      ".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter] .pf2e-stances .pf2e-stances__stance"
+    ).on("click", (event) => onToggleStance(event, actor));
+  }
+  __name(renderCharacterSheetPF2e2, "renderCharacterSheetPF2e");
+  function onToggleStance(event, actor) {
+    const target = event.currentTarget;
+    const canUseStances = target.closest(".pf2e-stances")?.classList.contains("can-use-stances");
+    if (!event.ctrlKey && !canUseStances)
+      return;
+    const effectUUID = target.dataset.effectUuid;
+    toggleStance(actor, effectUUID);
+  }
+  __name(onToggleStance, "onToggleStance");
+  function* actorStances(actor) {
+    for (const feat of actor.itemTypes.feat) {
+      const sourceId = feat.sourceId;
+      const replacer = REPLACERS.get(sourceId);
+      const extra = EXTRAS.get(sourceId);
+      if (!replacer && !extra && !isValidStance(feat))
+        continue;
+      const effectUUID = replacer?.effect ?? extra?.effect ?? feat.system.selfEffect.uuid;
+      const effect = fromUuidSync(effectUUID);
+      if (!effect)
+        continue;
+      yield {
+        name: (replacer && fromUuidSync(replacer.replace)?.name) ?? feat.name,
+        itemName: feat.name,
+        replace: replacer?.replace,
+        extra,
+        sourceId,
+        effectUUID,
+        effect: getItemWithSourceId(actor, effectUUID, "effect"),
+        action: extra?.action,
+        img: effect.img
+      };
+    }
+  }
+  __name(actorStances, "actorStances");
+  function getStancesEffects(actor) {
+    const effects = [];
+    for (const { effect } of actorStances(actor)) {
+      if (!effect)
+        continue;
+      effects.push({
+        uuid: effect.sourceId,
+        id: effect.id
+      });
+    }
+    return effects;
+  }
+  __name(getStancesEffects, "getStancesEffects");
+  async function toggleStance(actor, effectUUID) {
+    const effects = getStancesEffects(actor);
+    const already = effects.findIndex((effect) => effect.uuid === effectUUID);
+    let create = false;
+    if (already === -1) {
+      create = true;
+    } else {
+      const other = effects.filter((effect) => effect.uuid !== effectUUID).length;
+      const more = effects.filter((effect) => effect.uuid === effectUUID).length > 1;
+      if (other || more)
+        effects.splice(already, 1);
+    }
+    if (effects.length) {
+      await actor.deleteEmbeddedDocuments(
+        "Item",
+        effects.map((x) => x.id)
+      );
+    }
+    if (create)
+      addStance(actor, effectUUID);
+  }
+  __name(toggleStance, "toggleStance");
+  async function addStance(actor, uuid) {
+    const effect = await fromUuid(uuid);
+    if (effect) {
+      const obj = effect.toObject();
+      if (!getProperty(obj, "flags.core.sourceId"))
+        setProperty(obj, "flags.core.sourceId", effect.uuid);
+      const items = await actor.createEmbeddedDocuments("Item", [obj]);
+      items[0]?.toMessage();
+      return true;
+    }
+    return false;
+  }
+  __name(addStance, "addStance");
+  function deleteCombat(combat) {
+    for (const combatant of combat.combatants) {
+      deleteCombatant(combatant);
+    }
+  }
+  __name(deleteCombat, "deleteCombat");
+  function deleteCombatant(combatant) {
+    const actor = getActorFromCombatant(combatant);
+    if (!actor)
+      return;
+    if (!game.user.isGM && isActiveOwner(actor)) {
+      const effects = getStancesEffects(actor).map((effect) => effect.id);
+      if (effects.length)
+        actor.deleteEmbeddedDocuments("Item", effects);
+    }
+    refreshCharacterSheets(actor);
+  }
+  __name(deleteCombatant, "deleteCombatant");
+  function createCombatant(combatant) {
+    const actor = getActorFromCombatant(combatant);
+    if (!actor)
+      return;
+    if (!game.user.isGM && isActiveOwner(actor))
+      checkForSavant(actor);
+    refreshCharacterSheets(actor);
+  }
+  __name(createCombatant, "createCombatant");
+  function getActorFromCombatant(combatant) {
+    const actor = combatant.actor;
+    if (actor && !actor.isToken && actor.isOfType("character"))
+      return actor;
+  }
+  __name(getActorFromCombatant, "getActorFromCombatant");
+  async function checkForSavant(actor) {
+    const stances = getStances(actor);
+    if (!stances.length)
+      return;
+    const hasStancesEffects = stances.filter(({ effectID }) => effectID).length;
+    if (hasStancesEffects)
+      return;
+    const hasSavantFeat = hasItemWithSourceId(actor, STANCE_SAVANT, ["feat"]);
+    if (!hasSavantFeat)
+      return;
+    if (stances.length === 1) {
+      const stance = stances[0];
+      if (await addStance(actor, stance.effectUUID))
+        info("stances.useStance", { stance: stance.name });
+    } else {
+      openStancesMenu(actor, stances);
+    }
+  }
+  __name(checkForSavant, "checkForSavant");
+  async function openStancesMenu(actor, stances) {
+    const localize6 = subLocalize("stances.menu");
+    new Dialog({
+      title: localize6("title"),
+      content: await renderTemplate(templatePath("stances/menu"), {
+        stances,
+        i18n: localize6
+      }),
+      buttons: {
+        yes: {
+          icon: '<i class="fa-solid fa-people-arrows"></i>',
+          label: localize6("accept"),
+          callback: (html) => addStance(actor, html.find("[name=stance]:checked").val())
+        },
+        no: {
+          icon: '<i class="fa-solid fa-xmark"></i>',
+          label: localize6("cancel")
+        }
+      }
+    }).render(true);
+  }
+  __name(openStancesMenu, "openStancesMenu");
+
+  // src/shared/pf2e/misc.js
+  function ErrorPF2e(message) {
+    return Error(`PF2e System | ${message}`);
+  }
+  __name(ErrorPF2e, "ErrorPF2e");
+  var intlNumberFormat;
+  function signedInteger(value, { emptyStringZero = false, zeroIsNegative = false } = {}) {
+    if (value === 0 && emptyStringZero)
+      return "";
+    intlNumberFormat ??= new Intl.NumberFormat(game.i18n.lang, {
+      maximumFractionDigits: 0,
+      signDisplay: "always"
+    });
+    const maybeNegativeZero = zeroIsNegative && value === 0 ? -0 : value;
+    return intlNumberFormat.format(maybeNegativeZero);
+  }
+  __name(signedInteger, "signedInteger");
+  function spellSlotGroupIdToNumber(groupId) {
+    if (groupId === "cantrips")
+      return 0;
+    const numericValue = Number(groupId ?? NaN);
+    return numericValue.between(0, 10) ? numericValue : null;
+  }
+  __name(spellSlotGroupIdToNumber, "spellSlotGroupIdToNumber");
+
+  // src/features/summary.js
+  function registerSpellsSummary() {
+    return {
+      settings: [
+        {
+          name: "summary",
+          type: String,
+          default: "disabled",
+          scope: "client",
+          choices: ["disabled", "enabled", "sort"],
+          onChange: (value) => setup5(value)
+        }
+      ],
+      conflicts: ["pf2e-spells-summary"],
+      ready: (isGm) => {
+        setup5();
+      }
+    };
+  }
+  __name(registerSpellsSummary, "registerSpellsSummary");
+  function setup5(value) {
+    const enabled2 = (value ?? getSetting("summary")) !== "disabled";
+    if (enabled2) {
+      registerCharacterSheetExtraTab({
+        tabName: "spellcasting",
+        templateFolder: "summary/sheet",
+        getData: getData2,
+        addEvents: addEvents3
+      });
+    } else {
+      unregisterCharacterSheetExtraTab("spellcasting");
+    }
+  }
+  __name(setup5, "setup");
+  function addEvents3(html, sheet, actor) {
+    const inputs = html.find(".spell-type .uses .spell-slots-input input");
+    inputs.on("change", (event) => onUsesInputChange(event, actor));
+    inputs.on("focus", onUsesInputFocus);
+    inputs.on("blur", onUsesInputBlur);
+    html.find(".focus-pips").on("click contextmenu", (event) => onToggleFocusPool(event, actor));
+    html.find(".spell-slots-increment-reset").on("click", (event) => onSlotsReset(event, sheet, actor));
+    html.find(".item-image").on("click", (event) => onItemToChat(event, actor));
+  }
+  __name(addEvents3, "addEvents");
+  async function onUsesInputChange(event, actor) {
+    event.preventDefault();
+    const { inputPath, entryId } = $(event.currentTarget).data();
+    const value = event.currentTarget.valueAsNumber;
+    actor.updateEmbeddedDocuments("Item", [{ _id: entryId, [inputPath]: value }]);
+  }
+  __name(onUsesInputChange, "onUsesInputChange");
+  function onUsesInputFocus(event) {
+    event.preventDefault();
+    event.currentTarget.closest(".item")?.classList.add("hover");
+  }
+  __name(onUsesInputFocus, "onUsesInputFocus");
+  function onUsesInputBlur(event) {
+    event.preventDefault();
+    event.currentTarget.closest(".item")?.classList.remove("hover");
+  }
+  __name(onUsesInputBlur, "onUsesInputBlur");
+  function onToggleFocusPool(event, actor) {
+    event.preventDefault();
+    const change = event.type === "click" ? 1 : -1;
+    const points = (actor.system.resources.focus?.value ?? 0) + change;
+    actor.update({ "system.resources.focus.value": points });
+  }
+  __name(onToggleFocusPool, "onToggleFocusPool");
+  function onChargesReset(sheet, actor, entryId) {
+    if (game.modules.get("pf2e-staves")?.active) {
+      const original = getSpellcastingTab(sheet.element).find(
+        ".directory-list.spellcastingEntry-list"
+      );
+      const entry2 = original.find(
+        `.item-container.spellcasting-entry[data-item-id=${entryId}]`
+      );
+      const btn = entry2.find(
+        ".spell-ability-data .statistic-values a.pf2e-staves-charge"
+      );
+      btn[0]?.click();
+      return;
+    }
+    const dailies = game.modules.get("pf2e-dailies");
+    if (!dailies?.active)
+      return;
+    const entry = actor.spellcasting.get(entryId);
+    dailies.api.updateEntryCharges(entry, 9999);
+  }
+  __name(onChargesReset, "onChargesReset");
+  function onSlotsReset(event, sheet, actor) {
+    event.preventDefault();
+    const { itemId, rank, isCharge } = $(event.currentTarget).data();
+    if (!itemId)
+      return;
+    if (isCharge) {
+      onChargesReset(sheet, actor, itemId);
+      return;
+    }
+    const item = actor.items.get(itemId);
+    if (!item)
+      return;
+    if (item.isOfType("consumable")) {
+      const max = item.system.uses?.max;
+      if (max)
+        item.update({ "system.uses.value": max });
+    } else if (item.isOfType("spellcastingEntry")) {
+      const slotLevel = rank >= 0 && rank <= 11 ? `slot${rank}` : "slot0";
+      const slot = item.system.slots?.[slotLevel];
+      if (slot)
+        item.update({ [`system.slots.${slotLevel}.value`]: slot.max });
+    } else if (item.isOfType("spell")) {
+      const max = item.system.location.uses?.max;
+      if (max)
+        item.update({ "system.location.uses.value": max });
+    }
+  }
+  __name(onSlotsReset, "onSlotsReset");
+  async function onItemToChat(event, actor) {
+    const { entryId, itemId, castRank } = event.currentTarget.closest(".item").dataset;
+    const collection = actor.spellcasting.collections.get(entryId);
+    if (!collection)
+      return;
+    const spell = collection.get(itemId);
+    spell?.toMessage(event, { data: { castRank: Number(castRank ?? NaN) } });
+  }
+  __name(onItemToChat, "onItemToChat");
+  function getSpellcastingTab(html) {
+    return html.find(
+      "section.sheet-body .sheet-content > .tab[data-tab=spellcasting]"
+    );
+  }
+  __name(getSpellcastingTab, "getSpellcastingTab");
+  async function getData2(actor) {
+    const focusPool = actor.system.resources.focus ?? { value: 0, max: 0 };
+    const pf2eStavesActive = game.modules.get("pf2e-staves")?.active;
+    const pf2eDailies = game.modules.get("pf2e-dailies");
+    const pf2eDailiesActive = pf2eDailies?.active;
+    const stavesActive = pf2eStavesActive || pf2eDailiesActive && isNewerVersion(pf2eDailies.version, "2.14.0");
+    const chargesPath = pf2eStavesActive ? "flags.pf2e-staves.charges" : pf2eDailiesActive ? "flags.pf2e-dailies.staff.charges" : "";
+    const spells = [];
+    const focuses = [];
+    let rituals;
+    let hasFocusCantrips = false;
+    const entries = await Promise.all(
+      actor.spellcasting.collections.map(async (spells2) => {
+        return {
+          entry: spells2.entry,
+          data: await spells2.entry.getSheetData({ spells: spells2 })
+        };
+      })
+    );
+    for (const { entry, data } of entries) {
+      if (data.isRitual) {
+        rituals = data.groups.flatMap(
+          (slot, slotId) => slot.active.map(({ spell }) => ({
+            name: spell.name,
+            img: spell.img,
+            slotId,
+            itemId: spell.id,
+            rank: spell.rank,
+            time: spell.system.time.value
+          })).filter(Boolean)
+        );
+        continue;
+      }
+      const entryId = data.id;
+      const entryDc = data.statistic.dc.value;
+      const entryName = data.name;
+      const isFocus = data.isFocusPool;
+      const isCharge = entry.system?.prepared?.value === "charge";
+      const isInnate = data.isInnate;
+      const isPrepared = data.isPrepared;
+      const isSpontaneous = data.isSpontaneous;
+      const isFlexible = data.isFlexible;
+      const consumable = (() => {
+        if (data.category !== "items")
+          return;
+        const itemId = entry.id.split("-")[0];
+        return actor.items.get(itemId);
+      })();
+      const charges = (() => {
+        if (!isCharge)
+          return;
+        const dailiesData = pf2eDailiesActive && pf2eDailies.api.getSpellcastingEntryStaffData(entry);
+        const { charges: charges2, max, canPayCost } = dailiesData ?? getProperty(entry, "flags.pf2e-staves.charges") ?? {
+          charges: 0,
+          max: 0
+        };
+        return {
+          value: charges2,
+          max,
+          noMax: true,
+          canPayCost: canPayCost ?? (() => true)
+        };
+      })();
+      for (const group of data.groups) {
+        if (!group.active.length || group.uses?.max === 0)
+          continue;
+        const slotSpells = [];
+        const isCantrip = group.id === "cantrips";
+        const groupNumber = spellSlotGroupIdToNumber(group.id);
+        const isBroken = !isCantrip && isCharge && !stavesActive;
+        for (let slotId = 0; slotId < group.active.length; slotId++) {
+          const active = group.active[slotId];
+          if (!active || active.uses?.max === 0)
+            continue;
+          const { spell, expended, virtual, uses, castRank } = active;
+          slotSpells.push({
+            name: spell.name,
+            img: spell.img,
+            range: spell.system.range.value || "-",
+            castRank: castRank ?? spell.rank,
+            slotId,
+            entryId,
+            entryDc,
+            entryName,
+            itemId: spell.id,
+            inputId: isInnate ? spell.id : data.id,
+            inputPath: consumable ? "system.uses.value" : isCharge ? chargesPath : isInnate ? "system.location.uses.value" : `system.slots.slot${groupNumber}.value`,
+            isCharge,
+            isActiveCharge: isCharge && stavesActive,
+            isBroken,
+            isVirtual: virtual,
+            isInnate,
+            isCantrip,
+            isFocus,
+            isPrepared,
+            isSpontaneous: isSpontaneous || isFlexible,
+            groupId: group.id,
+            consumable,
+            uses: consumable ? consumable.system.uses : isCharge ? charges : uses ?? group.uses,
+            expended: isCharge && !isCantrip ? !charges.canPayCost(groupNumber) : expended ?? (isFocus && !isCantrip ? focusPool.value <= 0 : false),
+            action: spell.system.time.value,
+            type: consumable ? `PF2E.Item.Consumable.Category.${consumable.category}` : isCharge ? `${MODULE_ID}.summary.staff` : isInnate ? "PF2E.PreparationTypeInnate" : isSpontaneous ? "PF2E.PreparationTypeSpontaneous" : isFlexible ? "PF2E.SpellFlexibleLabel" : isFocus ? "PF2E.TraitFocus" : "PF2E.SpellPreparedLabel",
+            order: isCharge ? 0 : isPrepared ? 1 : isFocus ? 2 : isInnate ? 3 : isSpontaneous ? 4 : 5,
+            noHover: isPrepared || isCantrip || isBroken || isFocus
+          });
+        }
+        if (slotSpells.length) {
+          if (isFocus) {
+            if (isCantrip)
+              hasFocusCantrips = true;
+            else {
+              focuses.push(...slotSpells);
+              continue;
+            }
+          }
+          spells[groupNumber] ??= [];
+          spells[groupNumber].push(...slotSpells);
+        }
+      }
+    }
+    if (spells.length) {
+      const sort = getSetting("summary") === "sort" ? (a, b) => a.order === b.order ? localeCompare(a.name, b.name) : a.order - b.order : (a, b) => localeCompare(a.name, b.name);
+      for (const entry of spells) {
+        if (!entry)
+          continue;
+        entry.sort(sort);
+      }
+    }
+    if (focuses.length) {
+      focuses.sort((a, b) => localeCompare(a.name, b.name));
+      spells[12] = focuses;
+      hasFocusCantrips = false;
+    }
+    return {
+      spells,
+      rituals,
+      focusPool,
+      hasFocusCantrips,
+      isOwner: actor.isOwner,
+      i18n: subLocalize("summary"),
+      entryRank: (rank) => game.i18n.format("PF2E.Item.Spell.Rank.Ordinal", {
+        rank: ordinalString(rank)
+      })
+    };
+  }
+  __name(getData2, "getData");
+
+  // src/shared/dicesonice.js
+  async function roll3dDice(roll, { user = game.user, synchronize = true } = {}) {
+    if (!game.modules.get("dice-so-nice")?.active)
+      return;
+    return game.dice3d.showForRoll(roll, user, synchronize);
+  }
+  __name(roll3dDice, "roll3dDice");
+
+  // src/shared/pf2e/actor.js
+  function applyStackingRules(modifiers) {
+    let total = 0;
+    const highestBonus = {};
+    const lowestPenalty = {};
+    const abilityModifiers = modifiers.filter(
+      (m) => m.type === "ability" && !m.ignored
+    );
+    const bestAbility = abilityModifiers.reduce((best, modifier) => {
+      if (best === null) {
+        return modifier;
+      }
+      return modifier.force ? modifier : best.force ? best : modifier.modifier > best.modifier ? modifier : best;
+    }, null);
+    for (const modifier of abilityModifiers) {
+      modifier.ignored = modifier !== bestAbility;
+    }
+    for (const modifier of modifiers) {
+      if (modifier.ignored) {
+        modifier.enabled = false;
+        continue;
+      }
+      if (modifier.type === "untyped") {
+        modifier.enabled = true;
+        total += modifier.modifier;
+        continue;
+      }
+      if (modifier.modifier < 0) {
+        total += applyStacking(lowestPenalty, modifier, LOWER_PENALTY);
+      } else {
+        total += applyStacking(highestBonus, modifier, HIGHER_BONUS);
+      }
+    }
+    return total;
+  }
+  __name(applyStackingRules, "applyStackingRules");
+  function applyStacking(best, modifier, isBetter) {
+    const existing = best[modifier.type];
+    if (existing === void 0) {
+      modifier.enabled = true;
+      best[modifier.type] = modifier;
+      return modifier.modifier;
+    }
+    if (isBetter(modifier, existing)) {
+      existing.enabled = false;
+      modifier.enabled = true;
+      best[modifier.type] = modifier;
+      return modifier.modifier - existing.modifier;
+    }
+    modifier.enabled = false;
+    return 0;
+  }
+  __name(applyStacking, "applyStacking");
+
+  // src/shared/pf2e/dom.js
+  function htmlQuery(parent, selectors) {
+    if (!(parent instanceof Element || parent instanceof Document))
+      return null;
+    return parent.querySelector(selectors);
+  }
+  __name(htmlQuery, "htmlQuery");
+
+  // src/shared/pf2e/rules.js
+  async function extractEphemeralEffects({
+    affects,
+    origin,
+    target,
+    item,
+    domains,
+    options
+  }) {
+    if (!(origin && target))
+      return [];
+    const [effectsFrom, effectsTo] = affects === "target" ? [origin, target] : [target, origin];
+    const fullOptions = [
+      ...options,
+      effectsFrom.getRollOptions(domains),
+      effectsTo.getSelfRollOptions(affects)
+    ].flat();
+    const resolvables = item ? item.isOfType("spell") ? { spell: item } : { weapon: item } : {};
+    return (await Promise.all(
+      domains.flatMap(
+        (s) => effectsFrom.synthetics.ephemeralEffects[s]?.[affects] ?? []
+      ).map((d) => d({ test: fullOptions, resolvables }))
+    )).flatMap((e) => e ?? []);
+  }
+  __name(extractEphemeralEffects, "extractEphemeralEffects");
+  function extractNotes(rollNotes, selectors) {
+    return selectors.flatMap((s) => (rollNotes[s] ?? []).map((n) => n.clone()));
+  }
+  __name(extractNotes, "extractNotes");
+  function extractDamageDice(deferredDice, selectors, options) {
+    return selectors.flatMap((s) => deferredDice[s] ?? []).flatMap((d) => d(options) ?? []);
+  }
+  __name(extractDamageDice, "extractDamageDice");
+  function extractModifiers(synthetics, selectors, options) {
+    const { modifierAdjustments, modifiers: syntheticModifiers } = synthetics;
+    const modifiers = Array.from(new Set(selectors)).flatMap((s) => syntheticModifiers[s] ?? []).flatMap((d) => d(options) ?? []);
+    for (const modifier of modifiers) {
+      modifier.adjustments = extractModifierAdjustments(
+        modifierAdjustments,
+        selectors,
+        modifier.slug
+      );
+    }
+    return modifiers;
+  }
+  __name(extractModifiers, "extractModifiers");
+  function extractModifierAdjustments(adjustmentsRecord, selectors, slug) {
+    const adjustments = Array.from(
+      new Set(selectors.flatMap((s) => adjustmentsRecord[s] ?? []))
+    );
+    return adjustments.filter((a) => [slug, null].includes(a.slug));
+  }
+  __name(extractModifierAdjustments, "extractModifierAdjustments");
+
+  // src/shared/pf2e/chat.js
+  async function applyDamageFromMessage(token, {
+    message,
+    multiplier = 1,
+    addend = 0,
+    promptModifier = false,
+    rollIndex = 0
+  }) {
+    if (promptModifier)
+      return shiftAdjustDamage(message, multiplier, rollIndex);
+    const tokens = [token];
+    if (tokens.length === 0) {
+      ui.notifications.error("PF2E.ErrorMessage.NoTokenSelected", {
+        localize: true
+      });
+      return;
+    }
+    const shieldBlockRequest = CONFIG.PF2E.chatDamageButtonShieldToggle;
+    const roll = message.rolls.at(rollIndex);
+    if (!isInstanceOf(roll, "DamageRoll"))
+      throw ErrorPF2e("Unexpected error retrieving damage roll");
+    let damage = multiplier < 0 ? multiplier * roll.total + addend : roll.alter(multiplier, addend);
+    const messageRollOptions = [...message.flags.pf2e.context?.options ?? []];
+    const originRollOptions = messageRollOptions.filter((o) => o.startsWith("self:")).map((o) => o.replace(/^self/, "origin"));
+    const messageItem = message.item;
+    for (const token2 of tokens) {
+      if (!token2.actor)
+        continue;
+      if (!messageRollOptions.some((o) => o.startsWith("target"))) {
+        messageRollOptions.push(...token2.actor.getSelfRollOptions("target"));
+      }
+      const domain = multiplier > 0 ? "damage-received" : "healing-received";
+      const ephemeralEffects = multiplier > 0 ? await extractEphemeralEffects({
+        affects: "target",
+        origin: message.actor,
+        target: token2.actor,
+        item: message.item,
+        domains: [domain],
+        options: messageRollOptions
+      }) : [];
+      const contextClone = token2.actor.getContextualClone(
+        originRollOptions,
+        ephemeralEffects
+      );
+      const applicationRollOptions = /* @__PURE__ */ new Set([
+        ...messageRollOptions.filter((o) => !/^(?:self|target):/.test(o)),
+        ...originRollOptions,
+        ...contextClone.getSelfRollOptions()
+      ]);
+      const outcome = message.flags.pf2e.context?.outcome;
+      const breakdown = [];
+      const rolls = [];
+      if (typeof damage === "number" && damage < 0) {
+        const critical = outcome === "criticalSuccess";
+        const resolvables = (() => {
+          if (messageItem?.isOfType("spell"))
+            return { spell: messageItem };
+          if (messageItem?.isOfType("weapon"))
+            return { weapon: messageItem };
+          return {};
+        })();
+        const damageDice = extractDamageDice(
+          contextClone.synthetics.damageDice,
+          [domain],
+          {
+            resolvables,
+            test: applicationRollOptions
+          }
+        ).filter(
+          (d) => (d.critical === null || d.critical === critical) && d.predicate.test(applicationRollOptions)
+        );
+        for (const dice of damageDice) {
+          const formula = `${dice.diceNumber}${dice.dieSize}[${dice.label}]`;
+          const roll2 = await new Roll(formula).evaluate({ async: true });
+          roll2._formula = `${dice.diceNumber}${dice.dieSize}`;
+          await roll2.toMessage({
+            flags: { pf2e: { suppressDamageButtons: true } },
+            flavor: dice.label,
+            speaker: ChatMessage.getSpeaker({ token: token2 })
+          });
+          breakdown.push(`${dice.label} ${dice.diceNumber}${dice.dieSize}`);
+          rolls.push(roll2);
+        }
+        if (rolls.length) {
+          damage -= rolls.map((roll2) => roll2.total).reduce((previous, current) => previous + current);
+        }
+        const modifiers = extractModifiers(contextClone.synthetics, [domain], {
+          resolvables
+        }).filter(
+          (m) => (m.critical === null || m.critical === critical) && m.predicate.test(applicationRollOptions)
+        );
+        damage -= applyStackingRules(modifiers ?? []);
+        breakdown.push(
+          ...modifiers.filter((m) => m.enabled).map((m) => `${m.label} ${signedInteger(m.modifier)}`)
+        );
+      }
+      const hasDamageOrHealing = typeof damage === "number" ? damage !== 0 : damage.total !== 0;
+      const notes = hasDamageOrHealing ? extractNotes(contextClone.synthetics.rollNotes, [domain]).filter(
+        (n) => (!outcome || n.outcome.length === 0 || n.outcome.includes(outcome)) && n.predicate.test(applicationRollOptions)
+      ) : [];
+      await contextClone.applyDamage({
+        damage,
+        token: token2,
+        item: message.item,
+        skipIWR: multiplier <= 0,
+        rollOptions: applicationRollOptions,
+        shieldBlockRequest,
+        breakdown,
+        notes
+      });
+    }
+    toggleOffShieldBlock(message.id);
+    onDamageApplied(message, token.id, rollIndex);
+  }
+  __name(applyDamageFromMessage, "applyDamageFromMessage");
+  function onClickShieldBlock(target, shieldButton, messageEl) {
+    const getTokens = /* @__PURE__ */ __name(() => {
+      return [target];
+    }, "getTokens");
+    const getNonBrokenShields = /* @__PURE__ */ __name((tokens) => {
+      const actor = tokens[0]?.actor;
+      return actor?.itemTypes.shield.filter(
+        (s) => s.isEquipped && !s.isBroken && !s.isDestroyed
+      ) ?? [];
+    }, "getNonBrokenShields");
+    if (!shieldButton.classList.contains("tooltipstered")) {
+      $(shieldButton).tooltipster({
+        animation: "fade",
+        trigger: "click",
+        arrow: false,
+        content: htmlQuery(messageEl, "div.hover-content"),
+        contentAsHTML: true,
+        contentCloning: true,
+        debug: false,
+        interactive: true,
+        side: ["top"],
+        theme: "crb-hover",
+        functionBefore: () => {
+          const tokens = getTokens();
+          if (!tokens.length)
+            return false;
+          const nonBrokenShields = getNonBrokenShields(tokens);
+          const hasMultipleShields = tokens.length === 1 && nonBrokenShields.length > 1;
+          const shieldActivated = shieldButton.classList.contains("shield-activated");
+          if (hasMultipleShields && !shieldActivated) {
+            return true;
+          }
+          if (hasMultipleShields && shieldButton.dataset.shieldId) {
+            shieldButton.attributes.removeNamedItem("data-shield-id");
+            shieldButton.classList.remove("shield-activated");
+            CONFIG.PF2E.chatDamageButtonShieldToggle = false;
+            return true;
+          }
+          shieldButton.classList.toggle("shield-activated");
+          CONFIG.PF2E.chatDamageButtonShieldToggle = !CONFIG.PF2E.chatDamageButtonShieldToggle;
+          return false;
+        },
+        functionFormat: (instance, _helper, contentEl) => {
+          const tokens = getTokens();
+          const nonBrokenShields = getNonBrokenShields(tokens);
+          const multipleShields = tokens.length === 1 && nonBrokenShields.length > 1;
+          const shieldActivated = shieldButton.classList.contains("shield-activated");
+          if (multipleShields && !shieldActivated) {
+            const listEl = htmlQuery(contentEl, "ul.shield-options");
+            if (!listEl)
+              return $(contentEl);
+            const shieldList = nonBrokenShields.map((shield) => {
+              const input = document.createElement("input");
+              input.classList.add("data");
+              input.type = "radio";
+              input.name = "shield-id";
+              input.value = shield.id;
+              input.addEventListener("click", () => {
+                shieldButton.dataset.shieldId = input.value;
+                shieldButton.classList.add("shield-activated");
+                CONFIG.PF2E.chatDamageButtonShieldToggle = true;
+                instance.close();
+              });
+              const shieldName = document.createElement("span");
+              shieldName.classList.add("label");
+              shieldName.innerHTML = shield.name;
+              const hardness = document.createElement("span");
+              hardness.classList.add("tag");
+              const hardnessLabel = game.i18n.localize("PF2E.HardnessLabel");
+              hardness.innerHTML = `${hardnessLabel}: ${shield.hardness}`;
+              const itemLi = document.createElement("li");
+              itemLi.classList.add("item");
+              itemLi.append(input, shieldName, hardness);
+              return itemLi;
+            });
+            listEl.replaceChildren(...shieldList);
+          }
+          return $(contentEl);
+        }
+      }).tooltipster("open");
+    }
+  }
+  __name(onClickShieldBlock, "onClickShieldBlock");
+  function toggleOffShieldBlock(messageId) {
+    for (const app of ["#chat-log", "#chat-popout"]) {
+      const selector = `${app} > li.chat-message[data-message-id="${messageId}"] button[data-action=shield-block]`;
+      const button = htmlQuery(document.body, selector);
+      button?.classList.remove("shield-activated");
+    }
+    CONFIG.PF2E.chatDamageButtonShieldToggle = false;
+  }
+  __name(toggleOffShieldBlock, "toggleOffShieldBlock");
+  async function shiftAdjustDamage(token, { message, multiplier, rollIndex }) {
+    const content = await renderTemplate(
+      "systems/pf2e/templates/chat/damage/adjustment-dialog.hbs"
+    );
+    const AdjustmentDialog = class extends Dialog {
+      static {
+        __name(this, "AdjustmentDialog");
+      }
+      activateListeners($html) {
+        super.activateListeners($html);
+        $html[0].querySelector("input")?.focus();
+      }
+    };
+    const isHealing = multiplier < 0;
+    new AdjustmentDialog({
+      title: game.i18n.localize(
+        isHealing ? "PF2E.UI.shiftModifyHealingTitle" : "PF2E.UI.shiftModifyDamageTitle"
+      ),
+      content,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("PF2E.OK"),
+          callback: async ($dialog) => {
+            const adjustment = (Number($dialog[0].querySelector("input")?.value) || 0) * Math.sign(multiplier);
+            applyDamageFromMessage(token, {
+              message,
+              multiplier,
+              addend: adjustment,
+              promptModifier: false,
+              rollIndex
+            });
+          }
+        },
+        cancel: {
+          label: "Cancel"
+        }
+      },
+      default: "ok",
+      close: () => {
+        toggleOffShieldBlock(message.id);
+      }
+    }).render(true);
+  }
+  __name(shiftAdjustDamage, "shiftAdjustDamage");
+
+  // src/shared/pf2e/success.js
+  var DEGREE_ADJUSTMENT_AMOUNTS = {
+    LOWER_BY_TWO: -2,
+    LOWER: -1,
+    INCREASE: 1,
+    INCREASE_BY_TWO: 2,
+    TO_CRITICAL_FAILURE: "criticalFailure",
+    TO_FAILURE: "failure",
+    TO_SUCCESS: "success",
+    TO_CRITICAL_SUCCESS: "criticalSuccess"
+  };
+  var DEGREE_OF_SUCCESS_STRINGS = [
+    "criticalFailure",
+    "failure",
+    "success",
+    "criticalSuccess"
+  ];
+  var DegreeOfSuccess = class _DegreeOfSuccess {
+    static {
+      __name(this, "DegreeOfSuccess");
+    }
+    constructor(roll, dc, dosAdjustments = null) {
+      if (roll instanceof Roll) {
+        this.dieResult = (roll.isDeterministic ? roll.terms.find((t) => t instanceof NumericTerm) : roll.dice.find((d) => d instanceof Die && d.faces === 20))?.total ?? 1;
+        this.rollTotal = roll.total;
+      } else {
+        this.dieResult = roll.dieValue;
+        this.rollTotal = roll.dieValue + roll.modifier;
+      }
+      this.dc = typeof dc === "number" ? { value: dc } : dc;
+      this.unadjusted = this.#calculateDegreeOfSuccess();
+      this.adjustment = this.#getDegreeAdjustment(
+        this.unadjusted,
+        dosAdjustments
+      );
+      this.value = this.adjustment ? this.#adjustDegreeOfSuccess(this.adjustment.amount, this.unadjusted) : this.unadjusted;
+    }
+    static CRITICAL_FAILURE = 0;
+    static FAILURE = 1;
+    static SUCCESS = 2;
+    static CRITICAL_SUCCESS = 3;
+    #getDegreeAdjustment(degree, adjustments) {
+      if (!adjustments)
+        return null;
+      for (const outcome of ["all", ...DEGREE_OF_SUCCESS_STRINGS]) {
+        const { label, amount } = adjustments[outcome] ?? {};
+        if (amount && label && !(degree === _DegreeOfSuccess.CRITICAL_SUCCESS && amount === DEGREE_ADJUSTMENT_AMOUNTS.INCREASE) && !(degree === _DegreeOfSuccess.CRITICAL_FAILURE && amount === DEGREE_ADJUSTMENT_AMOUNTS.LOWER) && (outcome === "all" || DEGREE_OF_SUCCESS_STRINGS.indexOf(outcome) === degree)) {
+          return { label, amount };
+        }
+      }
+      return null;
+    }
+    #adjustDegreeOfSuccess(amount, degreeOfSuccess) {
+      switch (amount) {
+        case "criticalFailure":
+          return 0;
+        case "failure":
+          return 1;
+        case "success":
+          return 2;
+        case "criticalSuccess":
+          return 3;
+        default:
+          return Math.clamped(degreeOfSuccess + amount, 0, 3);
+      }
+    }
+    /**
+     * @param degree The current success value
+     * @return The new success value
+     */
+    #adjustDegreeByDieValue(degree) {
+      if (this.dieResult === 20) {
+        return this.#adjustDegreeOfSuccess(
+          DEGREE_ADJUSTMENT_AMOUNTS.INCREASE,
+          degree
+        );
+      }
+      if (this.dieResult === 1) {
+        return this.#adjustDegreeOfSuccess(
+          DEGREE_ADJUSTMENT_AMOUNTS.LOWER,
+          degree
+        );
+      }
+      return degree;
+    }
+    #calculateDegreeOfSuccess() {
+      const dc = this.dc.value;
+      if (this.rollTotal - dc >= 10) {
+        return this.#adjustDegreeByDieValue(_DegreeOfSuccess.CRITICAL_SUCCESS);
+      }
+      if (dc - this.rollTotal >= 10) {
+        return this.#adjustDegreeByDieValue(_DegreeOfSuccess.CRITICAL_FAILURE);
+      }
+      if (this.rollTotal >= dc) {
+        return this.#adjustDegreeByDieValue(_DegreeOfSuccess.SUCCESS);
+      }
+      return this.#adjustDegreeByDieValue(_DegreeOfSuccess.FAILURE);
+    }
+  };
+
+  // src/shared/template.js
+  function getTemplateTokens(measuredTemplate, { collisionOrigin, collisionType = "move" } = {}) {
+    const template = measuredTemplate instanceof MeasuredTemplateDocument ? measuredTemplate.object : measuredTemplate;
+    if (!canvas.scene)
+      return [];
+    const { grid, dimensions } = canvas;
+    if (!(grid && dimensions))
+      return [];
+    if (!template?.highlightId)
+      return [];
+    const gridHighlight = grid.getHighlightLayer(template.highlightId);
+    if (!gridHighlight || grid.type !== CONST.GRID_TYPES.SQUARE)
+      return [];
+    const origin = collisionOrigin ?? template.center;
+    const tokens = canvas.tokens.quadtree.getObjects(
+      gridHighlight.getLocalBounds(void 0, true)
+    );
+    const gridSize = grid.size;
+    const containedTokens = [];
+    for (const token of tokens) {
+      const tokenDoc = token.document;
+      const tokenPositions = [];
+      for (let h = 0; h < tokenDoc.height; h++) {
+        const tokenX = Math.floor(token.x / gridSize) * gridSize;
+        const tokenY = Math.floor(token.y / gridSize) * gridSize;
+        const y = tokenY + h * gridSize;
+        tokenPositions.push(`${tokenX}.${y}`);
+        if (tokenDoc.width > 1) {
+          for (let w = 1; w < tokenDoc.width; w++) {
+            tokenPositions.push(`${tokenX + w * gridSize}.${y}`);
+          }
+        }
+      }
+      for (const position of tokenPositions) {
+        if (!gridHighlight.positions.has(position)) {
+          continue;
+        }
+        const [gx, gy] = position.split(".").map((s) => Number(s));
+        const destination = {
+          x: gx + dimensions.size * 0.5,
+          y: gy + dimensions.size * 0.5
+        };
+        if (destination.x < 0 || destination.y < 0)
+          continue;
+        const hasCollision = canvas.ready && collisionType && CONFIG.Canvas.polygonBackends[collisionType].testCollision(
+          origin,
+          destination,
+          {
+            type: collisionType,
+            mode: "any"
+          }
+        );
+        if (!hasCollision) {
+          containedTokens.push(token);
+          break;
+        }
+      }
+    }
+    return containedTokens;
+  }
+  __name(getTemplateTokens, "getTemplateTokens");
+
+  // src/features/target.js
+  var SAVES = {
+    fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
+    reflex: { icon: "fa-solid fa-person-running", label: "PF2E.SavesReflex" },
+    will: { icon: "fa-solid fa-brain", label: "PF2E.SavesWill" }
+  };
+  var REROLL = {
+    hero: {
+      icon: "fa-solid fa-hospital-symbol",
+      reroll: "PF2E.RerollMenu.HeroPoint",
+      rerolled: "PF2E.RerollMenu.MessageHeroPoint"
+    },
+    new: {
+      icon: "fa-solid fa-dice",
+      reroll: "PF2E.RerollMenu.KeepNew",
+      rerolled: "PF2E.RerollMenu.MessageKeep.new"
+    },
+    lower: {
+      icon: "fa-solid fa-dice-one",
+      reroll: "PF2E.RerollMenu.KeepLower",
+      rerolled: "PF2E.RerollMenu.MessageKeep.lower"
+    },
+    higher: {
+      icon: "fa-solid fa-dice-six",
+      reroll: "PF2E.RerollMenu.KeepHigher",
+      rerolled: "PF2E.RerollMenu.MessageKeep.higher"
+    }
+  };
+  var DEGREE_OF_SUCCESS = [
+    "criticalFailure",
+    "failure",
+    "success",
+    "criticalSuccess"
+  ];
+  var setPrecreateMessageHook = createHook(
+    "preCreateChatMessage",
+    preCreateChatMessage
+  );
+  var setRenderMessageHook = createChoicesHook(
+    "renderChatMessage",
+    renderChatMessage2
+  );
+  var setCreateTemplateHook = createHook(
+    "createMeasuredTemplate",
+    createMeasuredTemplate
+  );
+  var SOCKET2 = false;
+  function registerTargetTokenHelper() {
+    return {
+      settings: [
+        {
+          name: "target",
+          type: Boolean,
+          default: false,
+          onChange: setHooks
+        },
+        {
+          name: "target-client",
+          type: String,
+          default: "disabled",
+          choices: ["disabled", "small", "big"],
+          scope: "client",
+          onChange: (value) => setRenderMessageHook(value && getSetting("target"))
+        },
+        {
+          name: "target-template",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: (value) => setCreateTemplateHook(value && getSetting("target"))
+        }
+      ],
+      conflicts: [],
+      ready: () => {
+        if (getSetting("target"))
+          setHooks(true);
+        for (const { message, html } of latestChatMessages(10)) {
+          renderChatMessage2(message, html);
+        }
+      }
+    };
+  }
+  __name(registerTargetTokenHelper, "registerTargetTokenHelper");
+  function setHooks(value) {
+    setPrecreateMessageHook(value);
+    setRenderMessageHook(value);
+    setCreateTemplateHook(value && getSetting("target-template"));
+    if (isUserGM()) {
+      if (value && !SOCKET2) {
+        socketOn(onSocket3);
+        SOCKET2 = true;
+      } else if (!value && SOCKET2) {
+        socketOff(onSocket3);
+        SOCKET2 = false;
+      }
+    }
+  }
+  __name(setHooks, "setHooks");
+  function onSocket3(packet) {
+    if (!isActiveGM())
+      return;
+    switch (packet.type) {
+      case "target.update-save":
+        updateMessageSave(packet);
+        break;
+      case "target.update-applied":
+        updateMessageApplied(packet);
+        break;
+    }
+  }
+  __name(onSocket3, "onSocket");
+  async function createMeasuredTemplate(template, _, userId) {
+    const user = game.user;
+    if (user.id !== userId)
+      return;
+    const localize6 = subLocalize("target.menu");
+    const item = template.item;
+    const actor = template.actor;
+    const self = !actor ? void 0 : actor.token ?? actor.getActiveTokens()[0];
+    const data = {
+      title: item?.name || localize6("title"),
+      content: await renderTemplate(templatePath("target/template-menu"), {
+        i18n: localize6,
+        noSelf: !self
+      }),
+      buttons: {
+        select: {
+          icon: '<i class="fa-solid fa-bullseye-arrow"></i>',
+          label: localize6("target"),
+          callback: (html) => ({
+            targets: html.find("[name=targets]:checked").val(),
+            self: html.find("[name=self]").prop("checked"),
+            neutral: html.find("[name=neutral]").prop("checked")
+          })
+        }
+      },
+      close: () => null
+    };
+    const result = await Dialog.wait(data, void 0, {
+      id: "pf2e-toolbelt-target-template",
+      width: 260
+    });
+    if (!result)
+      return;
+    const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
+    const opposition = alliance === "party" ? "opposition" : alliance === "opposition" ? "party" : null;
+    const tokens = getTemplateTokens(template);
+    const targets = tokens.filter((token) => {
+      const validActor = token.actor?.isOfType("creature", "hazard", "vehicle");
+      if (!validActor)
+        return false;
+      if (token.document.hidden)
+        return false;
+      if (self && token === self)
+        return result.self;
+      const targetAlliance = token.actor ? token.actor.alliance : token.alliance;
+      if (targetAlliance === null)
+        return result.neutral;
+      return result.targets === "all" || result.targets === "allies" && targetAlliance === alliance || result.targets === "enemies" && targetAlliance === opposition;
+    });
+    const targetsIds = targets.map((token) => token.id);
+    user.updateTokenTargets(targetsIds);
+    user.broadcastActivity({ targets: targetsIds });
+  }
+  __name(createMeasuredTemplate, "createMeasuredTemplate");
+  var HEALINGS_REGEX;
+  function isRegenMessage(message) {
+    HEALINGS_REGEX ??= (() => {
+      const healings = [
+        game.i18n.localize(
+          "PF2E.Encounter.Broadcast.FastHealing.fast-healing.ReceivedMessage"
+        ),
+        game.i18n.localize(
+          "PF2E.Encounter.Broadcast.FastHealing.regeneration.ReceivedMessage"
+        )
+      ];
+      return new RegExp(`^<div>(${healings.join("|")})</div>`);
+    })();
+    return HEALINGS_REGEX.test(message.flavor);
+  }
+  __name(isRegenMessage, "isRegenMessage");
+  function isValidDamageMessage(message) {
+    return !message.rolls[0].options.evaluatePersistent;
+  }
+  __name(isValidDamageMessage, "isValidDamageMessage");
+  function preCreateChatMessage(message) {
+    const isDamageRoll2 = message.isDamageRoll;
+    const updates = [];
+    if (isDamageRoll2 && !isValidDamageMessage(message))
+      return;
+    if (isDamageRoll2 && !getFlag(message, "target")) {
+      const token = message.token;
+      const actor = token?.actor;
+      const isRegen = isRegenMessage(message);
+      const targets = isRegen ? actor ? [{ token: token.uuid, actor: actor.uuid }] : [] : Array.from(
+        game.user.targets.map((target) => ({
+          token: target.document.uuid,
+          actor: target.actor.uuid
+        }))
+      );
+      updates.push(["targets", targets]);
+      if (isRegen)
+        updates.push(["isRegen", true]);
+      if (message.rolls.length === 2) {
+        const rolls = message.rolls.filter((roll) => roll.options);
+        const splashRollIndex = rolls.findIndex(
+          (roll) => roll.options.splashOnly
+        );
+        const regularRollIndex = rolls.findIndex(
+          (roll) => !roll.options.splashOnly && roll.options.damage?.modifiers.some(
+            (modifier) => modifier.damageCategory === "splash"
+          )
+        );
+        if (splashRollIndex !== -1 && regularRollIndex !== -1) {
+          updates.push(["splashIndex", splashRollIndex]);
+        }
+      }
+    }
+    if (isDamageRoll2 || message.getFlag("pf2e", "context.type") === "spell-cast") {
+      const item = message.item;
+      const save = item && item.type === "spell" && item.system.defense?.save;
+      if (save) {
+        const dc = (() => {
+          if (!item.trickMagicEntry)
+            return item.spellcasting?.statistic.dc.value;
+          return $(message.content).find("[data-action=spell-save]").data()?.dc;
+        })();
+        if (typeof dc === "number")
+          updates.push(["save", { ...save, dc }]);
+      }
+    }
+    if (!updates.length)
+      return;
+    updateSourceFlag(
+      message,
+      "target",
+      updates.reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {})
+    );
+  }
+  __name(preCreateChatMessage, "preCreateChatMessage");
+  async function renderChatMessage2(message, html) {
+    const clientEnabled = choiceSettingIsEnabled("target-client");
+    deleteInMemory(message, "target.save");
+    if (clientEnabled && message.isDamageRoll) {
+      if (!isValidDamageMessage(message))
+        return;
+      await renderDamageChatMessage(message, html);
+      refreshMessage(message);
+      return;
+    }
+    const item = message.item;
+    if (!item || item.type !== "spell")
+      return;
+    if (clientEnabled && !item.damageKinds.size) {
+      await renderSpellChatMessage(message, html, item);
+      refreshMessage(message);
+      return;
+    }
+    if (item.trickMagicEntry && item.system.defense?.save) {
+      html.find("[data-action=spell-damage]").on("click", () => {
+        bindOnPreCreateSpellDamageChatMessage(message);
+      });
+    }
+  }
+  __name(renderChatMessage2, "renderChatMessage");
+  function refreshMessage(message) {
+    Promise.all(
+      [ui.chat, ui.chat._popout].map(async (chat) => {
+        const el = chat?.element[0]?.querySelector("#chat-log");
+        if (!el || !chat.isAtBottom && message.user._id !== game.user._id)
+          return;
+        await chat._waitForImages();
+        el.scrollTop = el.scrollHeight;
+      })
+    );
+    for (const app of Object.values(message.apps)) {
+      if (!(app instanceof ChatPopout))
+        continue;
+      if (!app.rendered)
+        continue;
+      app.setPosition();
+    }
+  }
+  __name(refreshMessage, "refreshMessage");
+  async function renderSpellChatMessage(message, html, spell) {
+    const data = await getMessageData2(message);
+    if (!data)
+      return;
+    const { targets, save } = data;
+    const msgContent = html.find(".message-content");
+    const cardBtns = msgContent.find(".card-buttons");
+    if (game.user.isGM || message.isAuthor) {
+      const saveBtn = cardBtns.find("[data-action=spell-save]");
+      const wrapper = $('<div class="pf2e-toolbelt-target-wrapper"></div>');
+      const targetsTooltip = localize("target.chat.targets.tooltip");
+      const targetsBtn = $(`<button class="pf2e-toolbelt-target-targets" title="${targetsTooltip}">
     <i class="fa-solid fa-bullseye-arrow"></i>
-</button>`);m.on("click",h=>Go(h,e)),f.append(m),f.append(u),c.prepend(f)}if(n?.area&&!n.traits.has("aura")&&canvas.scene?.templates.some(f=>f.message===e&&f.isOwner)&&c.find(".owner-buttons .hidden.small").removeClass("hidden"),!a.length)return;let l=$('<div class="pf2e-toolbelt-target-spell"></div>');for(let{template:u}of a)l.append("<hr>"),l.append(u);i.after(l),Bo(e,l,s)}r(Rs,"renderSpellChatMessage");function Go(e,t){e.stopPropagation();let n=game.user.targets;z(t,"target.targets",Array.from(n.map(o=>({token:o.document.uuid,actor:o.actor.uuid}))))}r(Go,"addTargets");async function Ms(e,t){let n=await jo(e),o=t.find(".message-content"),a=o.find(".damage-application"),s=$('<div class="pf2e-toolbelt-target-buttons"></div>');if(n?.targets.length&&a.length){let f=r(()=>{let h=!!K(e,"target.expanded");m.toggleClass("collapse",h),a.toggleClass("hidden",!h)},"toggleDamageRow"),d=D("target.chat.toggle.tooltip"),m=$(`<button class="toggle" title="${d}">
+</button>`);
+      targetsBtn.on("click", (event) => addTargets(event, message));
+      wrapper.append(targetsBtn);
+      wrapper.append(saveBtn);
+      cardBtns.prepend(wrapper);
+    }
+    if (spell?.area && !spell.traits.has("aura")) {
+      const template = canvas.scene?.templates.some(
+        (template2) => template2.message === message && template2.isOwner
+      );
+      if (template)
+        cardBtns.find(".owner-buttons .hidden.small").removeClass("hidden");
+    }
+    if (!targets.length)
+      return;
+    const rowsTemplate = $('<div class="pf2e-toolbelt-target-spell"></div>');
+    for (const { template } of targets) {
+      rowsTemplate.append("<hr>");
+      rowsTemplate.append(template);
+    }
+    msgContent.after(rowsTemplate);
+    addHeaderListeners(message, rowsTemplate, save);
+  }
+  __name(renderSpellChatMessage, "renderSpellChatMessage");
+  function addTargets(event, message) {
+    event.stopPropagation();
+    const targets = game.user.targets;
+    setFlag(
+      message,
+      "target.targets",
+      Array.from(
+        targets.map((target) => ({
+          token: target.document.uuid,
+          actor: target.actor.uuid
+        }))
+      )
+    );
+  }
+  __name(addTargets, "addTargets");
+  async function renderDamageChatMessage(message, html) {
+    const data = await getMessageData2(message);
+    const msgContent = html.find(".message-content");
+    const damageRows = msgContent.find(".damage-application");
+    const buttons = $('<div class="pf2e-toolbelt-target-buttons"></div>');
+    if (data?.targets.length && damageRows.length) {
+      const toggleDamageRow = /* @__PURE__ */ __name(() => {
+        const expanded = !!getInMemory(message, "target.expanded");
+        toggleBtn.toggleClass("collapse", expanded);
+        damageRows.toggleClass("hidden", !expanded);
+      }, "toggleDamageRow");
+      const toggleTooltip = localize("target.chat.toggle.tooltip");
+      const toggleBtn = $(`<button class="toggle" title="${toggleTooltip}">
     <i class="fa-solid fa-plus expand"></i>
     <i class="fa-solid fa-minus collapse"></i>
-</button>`);f(),m.on("click",h=>{h.stopPropagation(),V(e,"target.expanded",!K(e,"target.expanded")),f()}),s.append(m)}if(n?.isRegen!==!0&&(game.user.isGM||e.isAuthor)){let f=D("target.chat.targets.tooltip"),d=$(`<button class="targets" title="${f}">
+</button>`);
+      toggleDamageRow();
+      toggleBtn.on("click", (event) => {
+        event.stopPropagation();
+        setInMemory(
+          message,
+          "target.expanded",
+          !getInMemory(message, "target.expanded")
+        );
+        toggleDamageRow();
+      });
+      buttons.append(toggleBtn);
+    }
+    if (data?.isRegen !== true && (game.user.isGM || message.isAuthor)) {
+      const targetsTooltip = localize("target.chat.targets.tooltip");
+      const targetsBtn = $(`<button class="targets" title="${targetsTooltip}">
     <i class="fa-solid fa-bullseye-arrow"></i>
-</button>`);d.on("click",m=>Go(m,e)),s.append(d)}if(t.find(".dice-result .dice-total").append(s),!n?.targets.length)return;let i=a.clone();if(!i.length)return;i.removeClass("damage-application").addClass("target-damage-application"),w("target-client")!=="big"&&i.find("button").addClass("small"),i.find("[data-action]").each(function(){let f=this.dataset.action;this.dataset.action=`target-${f}`});let{targets:c,save:l}=n,u=$('<div class="pf2e-toolbelt-target-damage"></div>');for(let{uuid:f,template:d,save:m,isOwner:h,applied:p={}}of c){if(u.append("<hr>"),u.append(d),!h)continue;let g=!!(m?.result&&m.basic),y=i.clone();y.each((v,S)=>{S.dataset.rollIndex=v,S.dataset.targetUuid=f,S.classList.toggle("applied",!!p[v]||g&&m.result.success==="criticalSuccess"),g&&S.classList.add(m.result.success)}),u.append(y)}o.after(u),Bo(e,u,l),u.find("button[data-action^=target-]").on("click",f=>Ns(f,e))}r(Ms,"renderDamageChatMessage");function Bo(e,t,n){t.find("[data-action=ping-target]").on("click",Hs),t.find("[data-action=open-target-sheet]").on("click",Fs),t.find("[data-action=roll-save]").on("click",o=>$s(o,e,n)),t.find("[data-action=reroll-save]").on("click",o=>Ls(o,e,n))}r(Bo,"addHeaderListeners");async function jo(e){let t=game.user.isGM,n=k(e,"target.targets")??[],o=t||game.settings.get("pf2e","metagame_showDC"),a=t||game.settings.get("pf2e","metagame_showBreakdowns"),s=t||game.settings.get("pf2e","metagame_showResults"),i=(()=>{let l=k(e,"target.save");if(l)return{...l,...Ds[l.statistic]}})();if(!n.length&&!i)return;if(i){let l=game.i18n.format("PF2E.SavingThrowWithName",{saveName:game.i18n.localize(i.label)}),u=o?D("target.chat.save.dcWithValue",{dc:i.dc}):"";i.tooltipLabel=`${l} ${u}`,i.tooltip=await renderTemplate(T("target/save-tooltip"),{check:i.tooltipLabel})}let c=(await Promise.all(n.map(async({token:l})=>{let u=await fromUuid(l),f=u.id,d=u.actor;if(!d)return;let m=!d.hasCondition("undetected");if(!t&&!m)return;let h=d.isOwner,p=d.hasPlayerOwner,g=h||p,y=i&&!!d?.saves[i.statistic],v=await(async()=>{if(!y)return;let L=k(e,`target.saves.${f}`);if(!L)return;let P=L.rerolled,B=y&&h&&!P,M=game.i18n.localize(`PF2E.Check.Result.Degree.Check.${L.success}`),H=L.value-i.dc,I=g||s?D(`target.chat.save.result.${o?"withOffset":g?"withoutOffsetWithDie":"withoutOffset"}`,{success:M,offset:H>=0?`+${H}`:H,die:`<i class="fa-solid fa-dice-d20"></i> ${L.die}`}):void 0;return{...L,canReroll:B,tooltip:await renderTemplate(T("target/save-tooltip"),{i18n:A("target.chat.save"),check:i.tooltipLabel,result:I,modifiers:g||a?L.modifiers:[],canReroll:B,rerolled:Et[P]})}})(),S=i&&{...i,result:v},E=game.modules.get("anonymous"),x=t?!0:E?.active?E.api.playersSeeName(u.actor):u.playersCanSeeName,F=x?u.name:E?.active?E.api.getName(u.actor):D("unnamed");return{isOwner:h,canSeeName:x,hasPlayerOwner:p,uuid:l,target:u,save:S,applied:k(e,`target.applied.${f}`),template:await renderTemplate(T("target/row-header"),{name:F,isGM:t,isOwner:h,hasPlayerOwner:p,isHidden:!m,uuid:l,showSuccess:g||s,save:y&&S,canReroll:v?.canReroll,rerolled:Et[v?.rerolled],i18n:A("target.chat.row")})}}))).filter(Boolean);return t?c.sort((l,u)=>l.hasPlayerOwner-u.hasPlayerOwner):c.sort((l,u)=>!l.isOwner&&!u.isOwner?u.canSeeName-l.canSeeName:u.isOwner-l.isOwner),{targets:c,save:i,isRegen:k(e,"target.isRegen")}}r(jo,"getMessageData");async function Xe(e){let{targetUuid:t}=e.currentTarget.closest("[data-target-uuid]").dataset;return fromUuid(t)}r(Xe,"getTargetFromEvent");function zo(e,t){return K(e,`target.save.${t.id}`)}r(zo,"isRollingSave");function Wo(e,t){V(e,`target.save.${t.id}`,!0)}r(Wo,"setRollingSave");async function Ls(e,t,{dc:n}){let o=await Xe(e),a=o?.actor;if(!a||zo(t,o))return;let s=k(t,`target.saves.${o.id}`);if(!s?.roll||s.rerolled)return;let i=a.isOfType("character")?a.heroPoints.value:0,c=Object.entries(Et).map(([v,{icon:S,reroll:E}])=>{if(v==="hero"&&!i)return;let x=game.i18n.localize(E);return`<label><input type="radio" name="reroll" value="${v}"><i class="${S}"></i> ${x}</label>`}).filter(Boolean).join(""),l={yes:{icon:'<i class="fa-solid fa-rotate rotate"></i>',label:"reroll",callback:v=>v.find("[name=reroll]:checked").val()??null},no:{icon:'<i class="fa-solid fa-xmark"></i>',label:"cancel",callback:()=>null}},u=await Dialog.wait({title:`${o.name} - ${D("target.chat.save.reroll.confirm.title")}`,content:c,buttons:l,close:()=>null},{id:`pf2e-toolbelt-target-save-reroll-dialog-${o.id}`});if(!u)return;let f=u==="hero",d=f?"new":u;if(f){let{value:v,max:S}=a.heroPoints;if(v<1){R("target.chat.save.reroll.noPoints");return}await a.update({"system.resources.heroPoints.value":Math.clamped(v-1,0,S)})}Wo(t,o);let m=Roll.fromJSON(s.roll),h=m.clone();h.options.isReroll=!0,Hooks.callAll("pf2e.preReroll",Roll.fromJSON(s.roll),h,f,d);let p=await h.evaluate({async:!0});await wt(p),Hooks.callAll("pf2e.reroll",Roll.fromJSON(s.roll),p,f,d);let g=d==="higher"&&m.total>p.total||d==="lower"&&m.total<p.total?m:p;if(g===p){let v=new Je(p,n,s.dosAdjustments);g.options.degreeOfSuccess=v.value}let y={type:"target.update-save",target:o.id,data:{value:g.total,die:g.dice[0].total,success:g.degreeOfSuccess,roll:JSON.stringify(g.toJSON()),dosAdjustments:deepClone(s.dosAdjustments),modifiers:deepClone(s.modifiers),rerolled:u}};g.options.keeleyAdd10&&y.data.modifiers.push({label:D("target.chat.save.reroll.keeley"),modifier:10}),game.user.isGM||t.isAuthor?(y.message=t,It(y)):(y.message=t.id,q(y))}r(Ls,"rerollSave");async function $s(e,t,{dc:n,statistic:o}){let a=await Xe(e),s=a?.actor;if(!s||zo(t,a))return;let i=s.saves[o];if(!i)return;Wo(t,a);let c=(()=>{let f=t.item;if(f)return f;let d=k(t,"target.messageId");if(!d)return;let m=game.messages.get(d);if(m)return m.item})(),l=!game.user.settings.showCheckDialogs,u={type:"target.update-save",target:a.id};i.check.roll({dc:{value:n},item:c,origin:s,skipDialog:e.shiftKey?!l:l,createMessage:!1,callback:async(f,d,m)=>{await wt(f),u.data={value:f.total,die:f.dice[0].total,success:f.degreeOfSuccess,roll:JSON.stringify(f.toJSON()),dosAdjustments:m.getFlag("pf2e","context.dosAdjustments"),modifiers:m.getFlag("pf2e","modifiers").filter(h=>h.enabled).map(({label:h,modifier:p})=>({label:h,modifier:p}))},game.user.isGM||t.isAuthor?(u.message=t,It(u)):(u.message=t.id,q(u))}})}r($s,"rollSave");async function It({message:e,target:t,data:n}){typeof e=="string"&&(e=game.messages.get(e),!e)||(typeof n.success=="number"&&(n.success=Ts[n.success]),await z(e,`target.saves.${t}`,deepClone(n)),Qt(e,`target.save.${t}`))}r(It,"updateMessageSave");async function Fs(e){let t=await Xe(e);t&&t.actor?.sheet.render(!0)}r(Fs,"openTargetSheet");async function Hs(e){if(!canvas.ready)return;let t=await Xe(e);t&&canvas.ping(t.center)}r(Hs,"pingTarget");async function Ns(e,t){let n=e.currentTarget,{rollIndex:o,targetUuid:a}=n.closest("[data-target-uuid]").dataset,s=await fromUuid(a);if(!s)return;let i=n.dataset.action;if(i==="target-shield-block"){xo(s,n,t.element);return}Ct(s,{message:t,multiplier:i==="target-apply-healing"?-1:i==="target-half-damage"?.5:i==="target-apply-damage"?1:i==="target-double-damage"?2:3,addend:0,promptModifier:e.shiftKey,rollIndex:Number(o)})}r(Ns,"onTargetButton");function Oo(e,t,n){let o={};pe(o,`target.applied.${t}.${n}`,!0);let a=k(e,"target.splashIndex");if(a!==void 0){let s=a===0?1:0;if(n===a)pe(o,`target.applied.${t}.${s}`,!0);else{pe(o,`target.applied.${t}.${a}`,!0);let i=k(e,"target.targets")??[];for(let c of i){let l=c.token?.split(".").at(-1);l!==t&&pe(o,`target.applied.${l}.${s}`,!0)}}}game.user.isGM||e.isAuthor?Vo({message:e,updates:o}):q({type:"target.update-applied",message:e.id,updates:o})}r(Oo,"onDamageApplied");function Vo({message:e,updates:t}){typeof e=="string"&&(e=game.messages.get(e),!e)||e.update(t)}r(Vo,"updateMessageApplied");var ve=null,X=null;function Yo(){return{settings:[{name:"unided",type:String,default:"disabled",choices:["disabled","create","all"],onChange:Ko}],conflicts:["pf2e-unided"],init:()=>{Ko()}}}r(Yo,"registerUnided");function Ko(e){let t=e??w("unided");t==="disabled"?(ve&&(Hooks.off("preCreateItem",ve),ve=null),X&&(Hooks.off("preUpdateItem",X),X=null)):(ve||(ve=Hooks.on("preCreateItem",Us)),t==="all"&&!X?X=Hooks.on("preUpdateItem",_s):t!=="all"&&X&&(Hooks.off("preUpdateItem",X),X=null))}r(Ko,"setHooks");function Us(e){!e.img||!e.isOfType("physical")||(e._source.system.identification.unidentified.img=e.img)}r(Us,"preCreateItem");function _s(e,t){!e.isOfType("physical")||!("img"in t)||setProperty(t,"system.identification.unidentified.img",t.img)}r(_s,"preUpdateItem");var qs=O("updateCombat",Gs);function Jo(){return{settings:[{name:"force-untarget",type:Boolean,default:!1,onChange:kt},{name:"untarget",type:Boolean,default:!1,scope:"client",onChange:kt}],init:()=>{kt()}}}r(Jo,"registerUntarget");function kt(){qs(w("force-untarget")||w("untarget"))}r(kt,"setup");function Gs(e,t){if(!("turn"in t)&&!("round"in t))return;let n=game.user;n.updateTokenTargets(),n.broadcastActivity({targets:[]})}r(Gs,"updateCombat");var le=A("macros.condition");async function Qo(e){let t=r((f,d)=>{let m=f.find("[name=condition]"),{name:h,slug:p,img:g}=m.find(":selected").data();return{type:d,slug:p,img:g,name:f.find("[name=name]").val().trim()||le("effect-name",{condition:h}),uuid:m.val(),badge:Number(f.find("[name=badge]").val()||1),unidentified:f.find("[name=unidentified]").prop("checked")}},"callback"),n={generate:{icon:'<i class="fas fa-suitcase"></i>',label:le("generate"),callback:f=>t(f,"generate")},add:{icon:'<i class="fa-solid fa-user"></i>',label:le("add"),callback:f=>t(f,"add")}},o=Array.from(game.pf2e.ConditionManager.conditions.values()),a=new Set(o.filter(f=>!!f.badge).map(f=>f.slug)),s=await renderTemplate(T("macros/condition"),{i18n:le,conditions:Array.from(new Set(o.sort((f,d)=>f.name.localeCompare(d.name))))}),i=r(f=>{let{name:d,slug:m}=f.find("[name=condition] :selected").data();f.find("[name=name]").prop("placeholder",le("effect-name",{condition:d}));let h=a.has(m),p=f.find("[name=badge]");p.prop("disabled",!h),h||p.val(1)},"setInputs"),c=await Dialog.wait({buttons:n,content:s,title:le("title"),close:()=>null,render:f=>{i(f),f.find("[name=condition]").on("change",()=>i(f))}},{id:"pf2e-toolbelt-macros-condition",width:320});if(!c)return;let l={inMemoryOnly:!0,key:"GrantItem",uuid:c.uuid};c.badge>1&&a.has(c.slug)&&(l.alterations=[{mode:"override",property:"badge-value",value:c.badge}]);let u={name:c.name,type:"effect",img:c.img,system:{rules:[l],unidentified:c.unidentified}};c.type==="generate"||!e?await Item.create(u):await e.createEmbeddedDocuments("Item",[u])}r(Qo,"permaConditionEffect");var Tt=[qt(),Zn(),sn(),_n(),Yo(),Wn(),Kt(),wo(),co(),dn(),eo(),Uo(),Jo(),$n(),Vt()],Xo=new Set,xt=null;Hooks.once("init",()=>{let e=$e(),t=Tt.flatMap(({settings:s=[]})=>s.map(i=>{let c=i.name;return i.choices&&(i.choices=i.choices.reduce((l,u)=>(l[u]=Dt(c,`choices.${u}`),l),{})),i.key=c,i.scope??="world",i.config??=!0,i.name=Dt(c,"name"),i.hint=Dt(c,"hint"),i})),[n,o]=["world","client"].map(s=>t.filter(i=>i.scope===s));for(let s of[n,o].flat())game.settings.register(C,s.key,s);e&&(xt=o[0].key,Hooks.on("renderSettingsConfig",Bs));let a=game.modules.get(C);a.api={macros:{permaConditionEffect:Qo}};for(let s of Tt){let{init:i,conflicts:c=[],api:l,name:u}=s;if(e)for(let f of c){let d=game.modules.get(f);d?.active&&(s.conflicting=!0,Xo.add(d.title))}l&&u&&(a.api[u]=l),!s.conflicting&&i&&i(e)}});Hooks.once("ready",()=>{let e=game.user.isGM;for(let{conflicting:t,ready:n}of Tt)!t&&n&&n(e);if(e)for(let t of Xo)R("module-conflict",{name:t},!0)});function Dt(e,t){return`${C}.settings.${e}.${t}`}r(Dt,"settingPath");function Bs(e,t){if(!xt)return;t.find(`.tab[data-tab=${C}] [data-setting-id="${C}.${xt}"]`).before(`<h3>${D("settings.client")}</h3>`)}r(Bs,"renderSettingsConfig");})();
+</button>`);
+      targetsBtn.on("click", (event) => addTargets(event, message));
+      buttons.append(targetsBtn);
+    }
+    html.find(".dice-result .dice-total").append(buttons);
+    if (!data?.targets.length)
+      return;
+    const clonedRows = damageRows.clone();
+    if (!clonedRows.length)
+      return;
+    clonedRows.removeClass("damage-application").addClass("target-damage-application");
+    if (getSetting("target-client") !== "big")
+      clonedRows.find("button").addClass("small");
+    clonedRows.find("[data-action]").each(function() {
+      const action = this.dataset.action;
+      this.dataset.action = `target-${action}`;
+    });
+    const { targets, save } = data;
+    const rowsTemplate = $('<div class="pf2e-toolbelt-target-damage"></div>');
+    for (const { uuid, template, save: save2, isOwner, applied = {} } of targets) {
+      rowsTemplate.append("<hr>");
+      rowsTemplate.append(template);
+      if (!isOwner)
+        continue;
+      const isBasicSave = !!(save2?.result && save2.basic);
+      const clones = clonedRows.clone();
+      clones.each((index, el) => {
+        el.dataset.rollIndex = index;
+        el.dataset.targetUuid = uuid;
+        el.classList.toggle(
+          "applied",
+          !!applied[index] || isBasicSave && save2.result.success === "criticalSuccess"
+        );
+        if (isBasicSave)
+          el.classList.add(save2.result.success);
+      });
+      rowsTemplate.append(clones);
+    }
+    msgContent.after(rowsTemplate);
+    addHeaderListeners(message, rowsTemplate, save);
+    rowsTemplate.find("button[data-action^=target-]").on("click", (event) => onTargetButton(event, message));
+  }
+  __name(renderDamageChatMessage, "renderDamageChatMessage");
+  function addHeaderListeners(message, html, save) {
+    html.find("[data-action=ping-target]").on("click", pingTarget);
+    html.find("[data-action=open-target-sheet]").on("click", openTargetSheet);
+    html.find("[data-action=roll-save]").on("click", (event) => rollSave(event, message, save));
+    html.find("[data-action=reroll-save]").on("click", (event) => rerollSave(event, message, save));
+  }
+  __name(addHeaderListeners, "addHeaderListeners");
+  async function getMessageData2(message) {
+    const isGM = game.user.isGM;
+    const targetsFlag = getFlag(message, "target.targets") ?? [];
+    const showDC = isGM || game.settings.get("pf2e", "metagame_showDC");
+    const showMods = isGM || game.settings.get("pf2e", "metagame_showBreakdowns");
+    const showSuccess = isGM || game.settings.get("pf2e", "metagame_showResults");
+    const save = (() => {
+      const flag = getFlag(message, "target.save");
+      if (!flag)
+        return;
+      return {
+        ...flag,
+        ...SAVES[flag.statistic]
+      };
+    })();
+    if (!targetsFlag.length && !save)
+      return;
+    if (save) {
+      const saveLabel = game.i18n.format("PF2E.SavingThrowWithName", {
+        saveName: game.i18n.localize(save.label)
+      });
+      const saveDC = showDC ? localize("target.chat.save.dcWithValue", { dc: save.dc }) : "";
+      save.tooltipLabel = `${saveLabel} ${saveDC}`;
+      save.tooltip = await renderTemplate(templatePath("target/save-tooltip"), {
+        check: save.tooltipLabel
+      });
+    }
+    const targets = (await Promise.all(
+      targetsFlag.map(async ({ token }) => {
+        const target = await fromUuid(token);
+        const targetId = target.id;
+        const actor = target.actor;
+        if (!actor)
+          return;
+        const isVisible = !actor.hasCondition("undetected");
+        if (!isGM && !isVisible)
+          return;
+        const isOwner = actor.isOwner;
+        const hasPlayerOwner = actor.hasPlayerOwner;
+        const isFriendly = isOwner || hasPlayerOwner;
+        const hasSave = save && !!actor?.saves[save.statistic];
+        const targetSave = await (async () => {
+          if (!hasSave)
+            return;
+          const flag = getFlag(message, `target.saves.${targetId}`);
+          if (!flag)
+            return;
+          const rerolled = flag.rerolled;
+          const canReroll = hasSave && isOwner && !rerolled;
+          const successLabel = game.i18n.localize(
+            `PF2E.Check.Result.Degree.Check.${flag.success}`
+          );
+          const offset = flag.value - save.dc;
+          const result = isFriendly || showSuccess ? localize(
+            `target.chat.save.result.${showDC ? "withOffset" : isFriendly ? "withoutOffsetWithDie" : "withoutOffset"}`,
+            {
+              success: successLabel,
+              offset: offset >= 0 ? `+${offset}` : offset,
+              die: `<i class="fa-solid fa-dice-d20"></i> ${flag.die}`
+            }
+          ) : void 0;
+          return {
+            ...flag,
+            canReroll,
+            tooltip: await renderTemplate(templatePath("target/save-tooltip"), {
+              i18n: subLocalize("target.chat.save"),
+              check: save.tooltipLabel,
+              result,
+              modifiers: isFriendly || showMods ? flag.modifiers : [],
+              canReroll,
+              rerolled: REROLL[rerolled]
+            })
+          };
+        })();
+        const templateSave = save && {
+          ...save,
+          result: targetSave
+        };
+        const anonymous = game.modules.get("anonymous");
+        const canSeeName = isGM ? true : anonymous?.active ? anonymous.api.playersSeeName(target.actor) : target.playersCanSeeName;
+        const name = canSeeName ? target.name : anonymous?.active ? anonymous.api.getName(target.actor) : localize("unnamed");
+        return {
+          isOwner,
+          canSeeName,
+          hasPlayerOwner,
+          uuid: token,
+          target,
+          save: templateSave,
+          applied: getFlag(message, `target.applied.${targetId}`),
+          template: await renderTemplate(templatePath("target/row-header"), {
+            name,
+            isGM,
+            isOwner,
+            hasPlayerOwner,
+            isHidden: !isVisible,
+            uuid: token,
+            showSuccess: isFriendly || showSuccess,
+            save: hasSave && templateSave,
+            canReroll: targetSave?.canReroll,
+            rerolled: REROLL[targetSave?.rerolled],
+            i18n: subLocalize("target.chat.row")
+          })
+        };
+      })
+    )).filter(Boolean);
+    if (isGM) {
+      targets.sort((a, b) => a.hasPlayerOwner - b.hasPlayerOwner);
+    } else {
+      targets.sort(
+        (a, b) => !a.isOwner && !b.isOwner ? b.canSeeName - a.canSeeName : b.isOwner - a.isOwner
+      );
+    }
+    return { targets, save, isRegen: getFlag(message, "target.isRegen") };
+  }
+  __name(getMessageData2, "getMessageData");
+  async function getTargetFromEvent(event) {
+    const { targetUuid } = event.currentTarget.closest("[data-target-uuid]").dataset;
+    return fromUuid(targetUuid);
+  }
+  __name(getTargetFromEvent, "getTargetFromEvent");
+  function isRollingSave(message, target) {
+    return getInMemory(message, `target.save.${target.id}`);
+  }
+  __name(isRollingSave, "isRollingSave");
+  function setRollingSave(message, target) {
+    setInMemory(message, `target.save.${target.id}`, true);
+  }
+  __name(setRollingSave, "setRollingSave");
+  async function rerollSave(event, message, { dc }) {
+    console.log(message);
+    const target = await getTargetFromEvent(event);
+    const actor = target?.actor;
+    if (!actor)
+      return;
+    if (isRollingSave(message, target))
+      return;
+    const flag = getFlag(message, `target.saves.${target.id}`);
+    if (!flag?.roll || flag.rerolled)
+      return;
+    const heroPoints = actor.isOfType("character") ? actor.heroPoints.value : 0;
+    const template = Object.entries(REROLL).map(([type, { icon, reroll: reroll2 }]) => {
+      if (type === "hero" && !heroPoints)
+        return;
+      const label = game.i18n.localize(reroll2);
+      return `<label><input type="radio" name="reroll" value="${type}"><i class="${icon}"></i> ${label}</label>`;
+    }).filter(Boolean).join("");
+    const buttons = {
+      yes: {
+        icon: '<i class="fa-solid fa-rotate rotate"></i>',
+        label: "reroll",
+        callback: (html) => html.find("[name=reroll]:checked").val() ?? null
+      },
+      no: {
+        icon: '<i class="fa-solid fa-xmark"></i>',
+        label: "cancel",
+        callback: () => null
+      }
+    };
+    const reroll = await Dialog.wait(
+      {
+        title: `${target.name} - ${localize(
+          "target.chat.save.reroll.confirm.title"
+        )}`,
+        content: template,
+        buttons,
+        close: () => null
+      },
+      {
+        id: `pf2e-toolbelt-target-save-reroll-dialog-${target.id}`
+      }
+    );
+    if (!reroll)
+      return;
+    const isHeroReroll = reroll === "hero";
+    const keep = isHeroReroll ? "new" : reroll;
+    if (isHeroReroll) {
+      const { value, max } = actor.heroPoints;
+      if (value < 1) {
+        warn("target.chat.save.reroll.noPoints");
+        return;
+      }
+      await actor.update({
+        "system.resources.heroPoints.value": Math.clamped(value - 1, 0, max)
+      });
+    }
+    setRollingSave(message, target);
+    const oldRoll = Roll.fromJSON(flag.roll);
+    const unevaluatedNewRoll = oldRoll.clone();
+    unevaluatedNewRoll.options.isReroll = true;
+    Hooks.callAll(
+      "pf2e.preReroll",
+      Roll.fromJSON(flag.roll),
+      unevaluatedNewRoll,
+      isHeroReroll,
+      keep
+    );
+    const newRoll = await unevaluatedNewRoll.evaluate({ async: true });
+    await roll3dDice(newRoll);
+    Hooks.callAll(
+      "pf2e.reroll",
+      Roll.fromJSON(flag.roll),
+      newRoll,
+      isHeroReroll,
+      keep
+    );
+    const keptRoll = keep === "higher" && oldRoll.total > newRoll.total || keep === "lower" && oldRoll.total < newRoll.total ? oldRoll : newRoll;
+    if (keptRoll === newRoll) {
+      const success = new DegreeOfSuccess(newRoll, dc, flag.dosAdjustments);
+      keptRoll.options.degreeOfSuccess = success.value;
+    }
+    const packet = {
+      type: "target.update-save",
+      target: target.id,
+      data: {
+        value: keptRoll.total,
+        die: keptRoll.dice[0].total,
+        success: keptRoll.degreeOfSuccess,
+        roll: JSON.stringify(keptRoll.toJSON()),
+        dosAdjustments: deepClone(flag.dosAdjustments),
+        modifiers: deepClone(flag.modifiers),
+        rerolled: reroll
+      }
+    };
+    if (keptRoll.options.keeleyAdd10) {
+      packet.data.modifiers.push({
+        label: localize("target.chat.save.reroll.keeley"),
+        modifier: 10
+      });
+    }
+    if (game.user.isGM || message.isAuthor) {
+      packet.message = message;
+      updateMessageSave(packet);
+    } else {
+      packet.message = message.id;
+      socketEmit(packet);
+    }
+  }
+  __name(rerollSave, "rerollSave");
+  async function rollSave(event, message, { dc, statistic }) {
+    const target = await getTargetFromEvent(event);
+    const actor = target?.actor;
+    if (!actor)
+      return;
+    if (isRollingSave(message, target))
+      return;
+    const save = actor.saves[statistic];
+    if (!save)
+      return;
+    setRollingSave(message, target);
+    const item = (() => {
+      const item2 = message.item;
+      if (item2)
+        return item2;
+      const messageId = getFlag(message, "target.messageId");
+      if (!messageId)
+        return;
+      const otherMessage = game.messages.get(messageId);
+      if (!otherMessage)
+        return;
+      return otherMessage.item;
+    })();
+    const skipDefault = !game.user.settings.showCheckDialogs;
+    const packet = {
+      type: "target.update-save",
+      target: target.id
+    };
+    save.check.roll({
+      dc: { value: dc },
+      item,
+      origin: actor,
+      skipDialog: event.shiftKey ? !skipDefault : skipDefault,
+      createMessage: false,
+      callback: async (roll, __, msg) => {
+        await roll3dDice(roll);
+        packet.data = {
+          value: roll.total,
+          die: roll.dice[0].total,
+          success: roll.degreeOfSuccess,
+          roll: JSON.stringify(roll.toJSON()),
+          dosAdjustments: msg.getFlag("pf2e", "context.dosAdjustments"),
+          modifiers: msg.getFlag("pf2e", "modifiers").filter((modifier) => modifier.enabled).map(({ label, modifier }) => ({ label, modifier }))
+        };
+        if (game.user.isGM || message.isAuthor) {
+          packet.message = message;
+          updateMessageSave(packet);
+        } else {
+          packet.message = message.id;
+          socketEmit(packet);
+        }
+      }
+    });
+  }
+  __name(rollSave, "rollSave");
+  async function updateMessageSave({ message, target, data }) {
+    if (typeof message === "string") {
+      message = game.messages.get(message);
+      if (!message)
+        return;
+    }
+    if (typeof data.success === "number") {
+      data.success = DEGREE_OF_SUCCESS[data.success];
+    }
+    await setFlag(message, `target.saves.${target}`, deepClone(data));
+  }
+  __name(updateMessageSave, "updateMessageSave");
+  async function openTargetSheet(event) {
+    const target = await getTargetFromEvent(event);
+    if (!target)
+      return;
+    target.actor?.sheet.render(true);
+  }
+  __name(openTargetSheet, "openTargetSheet");
+  async function pingTarget(event) {
+    if (!canvas.ready)
+      return;
+    const target = await getTargetFromEvent(event);
+    if (!target)
+      return;
+    canvas.ping(target.center);
+  }
+  __name(pingTarget, "pingTarget");
+  async function onTargetButton(event, message) {
+    const btn = event.currentTarget;
+    const { rollIndex, targetUuid } = btn.closest("[data-target-uuid]").dataset;
+    const target = await fromUuid(targetUuid);
+    if (!target)
+      return;
+    const type = btn.dataset.action;
+    if (type === "target-shield-block") {
+      onClickShieldBlock(target, btn, message.element);
+      return;
+    }
+    const multiplier = type === "target-apply-healing" ? -1 : type === "target-half-damage" ? 0.5 : type === "target-apply-damage" ? 1 : type === "target-double-damage" ? 2 : 3;
+    applyDamageFromMessage(target, {
+      message,
+      multiplier,
+      addend: 0,
+      promptModifier: event.shiftKey,
+      rollIndex: Number(rollIndex)
+    });
+  }
+  __name(onTargetButton, "onTargetButton");
+  function onDamageApplied(message, tokenId, rollIndex) {
+    const updates = {};
+    moduleFlagUpdate(updates, `target.applied.${tokenId}.${rollIndex}`, true);
+    const splashRollIndex = getFlag(message, "target.splashIndex");
+    if (splashRollIndex !== void 0) {
+      const regularRollIndex = splashRollIndex === 0 ? 1 : 0;
+      if (rollIndex === splashRollIndex) {
+        moduleFlagUpdate(
+          updates,
+          `target.applied.${tokenId}.${regularRollIndex}`,
+          true
+        );
+      } else {
+        moduleFlagUpdate(
+          updates,
+          `target.applied.${tokenId}.${splashRollIndex}`,
+          true
+        );
+        const targetsFlag = getFlag(message, "target.targets") ?? [];
+        for (const target of targetsFlag) {
+          const targetId = target.token?.split(".").at(-1);
+          if (targetId === tokenId)
+            continue;
+          moduleFlagUpdate(
+            updates,
+            `target.applied.${targetId}.${regularRollIndex}`,
+            true
+          );
+        }
+      }
+    }
+    if (game.user.isGM || message.isAuthor) {
+      updateMessageApplied({ message, updates });
+    } else {
+      socketEmit({
+        type: "target.update-applied",
+        message: message.id,
+        updates
+      });
+    }
+  }
+  __name(onDamageApplied, "onDamageApplied");
+  function updateMessageApplied({ message, updates }) {
+    if (typeof message === "string") {
+      message = game.messages.get(message);
+      if (!message)
+        return;
+    }
+    message.update(updates);
+  }
+  __name(updateMessageApplied, "updateMessageApplied");
+
+  // src/features/unided.js
+  var CREATE_HOOK = null;
+  var UPDATE_HOOK = null;
+  function registerUnided() {
+    return {
+      settings: [
+        {
+          name: "unided",
+          type: String,
+          default: "disabled",
+          choices: ["disabled", "create", "all"],
+          onChange: setHooks2
+        }
+      ],
+      conflicts: ["pf2e-unided"],
+      init: () => {
+        setHooks2();
+      }
+    };
+  }
+  __name(registerUnided, "registerUnided");
+  function setHooks2(value) {
+    const settingValue = value ?? getSetting("unided");
+    if (settingValue === "disabled") {
+      if (CREATE_HOOK) {
+        Hooks.off("preCreateItem", CREATE_HOOK);
+        CREATE_HOOK = null;
+      }
+      if (UPDATE_HOOK) {
+        Hooks.off("preUpdateItem", UPDATE_HOOK);
+        UPDATE_HOOK = null;
+      }
+    } else {
+      if (!CREATE_HOOK) {
+        CREATE_HOOK = Hooks.on("preCreateItem", preCreateItem);
+      }
+      if (settingValue === "all" && !UPDATE_HOOK) {
+        UPDATE_HOOK = Hooks.on("preUpdateItem", preUpdateItem);
+      } else if (settingValue !== "all" && UPDATE_HOOK) {
+        Hooks.off("preUpdateItem", UPDATE_HOOK);
+        UPDATE_HOOK = null;
+      }
+    }
+  }
+  __name(setHooks2, "setHooks");
+  function preCreateItem(item) {
+    if (!item.img || !item.isOfType("physical"))
+      return;
+    item._source.system.identification.unidentified.img = item.img;
+  }
+  __name(preCreateItem, "preCreateItem");
+  function preUpdateItem(item, changes) {
+    if (!item.isOfType("physical") || !("img" in changes))
+      return;
+    setProperty(changes, "system.identification.unidentified.img", changes.img);
+  }
+  __name(preUpdateItem, "preUpdateItem");
+
+  // src/features/untarget.js
+  var setHook5 = createHook("updateCombat", updateCombat);
+  function registerUntarget() {
+    return {
+      settings: [
+        {
+          name: "force-untarget",
+          type: Boolean,
+          default: false,
+          onChange: setup6
+        },
+        {
+          name: "untarget",
+          type: Boolean,
+          default: false,
+          scope: "client",
+          onChange: setup6
+        }
+      ],
+      init: () => {
+        setup6();
+      }
+    };
+  }
+  __name(registerUntarget, "registerUntarget");
+  function setup6() {
+    setHook5(getSetting("force-untarget") || getSetting("untarget"));
+  }
+  __name(setup6, "setup");
+  function updateCombat(_, data) {
+    if (!("turn" in data) && !("round" in data))
+      return;
+    const user = game.user;
+    user.updateTokenTargets();
+    user.broadcastActivity({ targets: [] });
+  }
+  __name(updateCombat, "updateCombat");
+
+  // src/macros/condition.js
+  var localize5 = subLocalize("macros.condition");
+  async function permaConditionEffect(actor) {
+    const callback = /* @__PURE__ */ __name((html, type) => {
+      const condition = html.find("[name=condition]");
+      const { name, slug, img } = condition.find(":selected").data();
+      return {
+        type,
+        slug,
+        img,
+        name: html.find("[name=name]").val().trim() || localize5("effect-name", { condition: name }),
+        uuid: condition.val(),
+        badge: Number(html.find("[name=badge]").val() || 1),
+        unidentified: html.find("[name=unidentified]").prop("checked")
+      };
+    }, "callback");
+    const buttons = {
+      generate: {
+        icon: '<i class="fas fa-suitcase"></i>',
+        label: localize5("generate"),
+        callback: (html) => callback(html, "generate")
+      },
+      add: {
+        icon: '<i class="fa-solid fa-user"></i>',
+        label: localize5("add"),
+        callback: (html) => callback(html, "add")
+      }
+    };
+    const conditions = Array.from(game.pf2e.ConditionManager.conditions.values());
+    const withBadge = new Set(
+      conditions.filter((condition) => !!condition.badge).map((condition) => condition.slug)
+    );
+    const content = await renderTemplate(templatePath("macros/condition"), {
+      i18n: localize5,
+      conditions: Array.from(
+        new Set(conditions.sort((a, b) => a.name.localeCompare(b.name)))
+      )
+    });
+    const setInputs = /* @__PURE__ */ __name((html) => {
+      const { name, slug } = html.find("[name=condition] :selected").data();
+      html.find("[name=name]").prop("placeholder", localize5("effect-name", { condition: name }));
+      const hasBadge = withBadge.has(slug);
+      const badge = html.find("[name=badge]");
+      badge.prop("disabled", !hasBadge);
+      if (!hasBadge)
+        badge.val(1);
+    }, "setInputs");
+    const result = await Dialog.wait(
+      {
+        buttons,
+        content,
+        title: localize5("title"),
+        close: () => null,
+        render: (html) => {
+          setInputs(html);
+          html.find("[name=condition]").on("change", () => setInputs(html));
+        }
+      },
+      {
+        id: "pf2e-toolbelt-macros-condition",
+        width: 320
+      }
+    );
+    if (!result)
+      return;
+    const rule = {
+      inMemoryOnly: true,
+      key: "GrantItem",
+      uuid: result.uuid
+    };
+    if (result.badge > 1 && withBadge.has(result.slug)) {
+      rule.alterations = [
+        {
+          mode: "override",
+          property: "badge-value",
+          value: result.badge
+        }
+      ];
+    }
+    const source = {
+      name: result.name,
+      type: "effect",
+      img: result.img,
+      system: {
+        rules: [rule],
+        unidentified: result.unidentified
+      }
+    };
+    if (result.type === "generate" || !actor)
+      await Item.create(source);
+    else
+      await actor.createEmbeddedDocuments("Item", [source]);
+  }
+  __name(permaConditionEffect, "permaConditionEffect");
+
+  // src/main.js
+  var FEATURES = [
+    registerArp(),
+    registerNobulk(),
+    registerGiveth(),
+    registerKnowledges(),
+    registerUnided(),
+    registerMerge(),
+    registerEffectsPanelHelper(),
+    registerSpellsSummary(),
+    registerStances(),
+    registerHeroActions(),
+    registerShare(),
+    registerTargetTokenHelper(),
+    registerUntarget(),
+    registerInventory(),
+    registerDebug()
+  ];
+  var CONFLICTS = /* @__PURE__ */ new Set();
+  var firstClientSetting = null;
+  Hooks.once("init", () => {
+    const isGM = isUserGM();
+    const settings = FEATURES.flatMap(
+      ({ settings: settings2 = [] }) => settings2.map((setting) => {
+        const key = setting.name;
+        if (setting.choices) {
+          setting.choices = setting.choices.reduce((choices, choice) => {
+            choices[choice] = settingPath(key, `choices.${choice}`);
+            return choices;
+          }, {});
+        }
+        setting.key = key;
+        setting.scope ??= "world";
+        setting.config ??= true;
+        setting.name = settingPath(key, "name");
+        setting.hint = settingPath(key, "hint");
+        return setting;
+      })
+    );
+    const [worldSettings, clientSettings] = ["world", "client"].map(
+      (scope) => settings.filter((settings2) => settings2.scope === scope)
+    );
+    for (const setting of [worldSettings, clientSettings].flat()) {
+      game.settings.register(MODULE_ID, setting.key, setting);
+    }
+    if (isGM) {
+      firstClientSetting = clientSettings[0].key;
+      Hooks.on("renderSettingsConfig", renderSettingsConfig);
+    }
+    const module = game.modules.get(MODULE_ID);
+    module.api = {
+      macros: {
+        permaConditionEffect
+      }
+    };
+    for (const feature of FEATURES) {
+      const { init, conflicts = [], api, name } = feature;
+      if (isGM) {
+        for (const id of conflicts) {
+          const conflictingModule = game.modules.get(id);
+          if (conflictingModule?.active) {
+            feature.conflicting = true;
+            CONFLICTS.add(conflictingModule.title);
+          }
+        }
+      }
+      if (api && name)
+        module.api[name] = api;
+      if (!feature.conflicting && init)
+        init(isGM);
+    }
+  });
+  Hooks.once("ready", () => {
+    const isGM = game.user.isGM;
+    for (const { conflicting, ready } of FEATURES) {
+      if (!conflicting && ready)
+        ready(isGM);
+    }
+    if (isGM) {
+      for (const conflict of CONFLICTS) {
+        warn("module-conflict", { name: conflict }, true);
+      }
+    }
+  });
+  function settingPath(setting, key) {
+    return `${MODULE_ID}.settings.${setting}.${key}`;
+  }
+  __name(settingPath, "settingPath");
+  function renderSettingsConfig(_, html) {
+    if (!firstClientSetting)
+      return;
+    const group = html.find(
+      `.tab[data-tab=${MODULE_ID}] [data-setting-id="${MODULE_ID}.${firstClientSetting}"]`
+    );
+    group.before(`<h3>${localize("settings.client")}</h3>`);
+  }
+  __name(renderSettingsConfig, "renderSettingsConfig");
+})();
 //# sourceMappingURL=main.js.map
