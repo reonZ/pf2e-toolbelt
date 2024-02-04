@@ -135,6 +135,7 @@
                 .controls {
                     display: flex;
                     gap: 0.5em;
+                    white-space: nowrap;
 
                     hr {
                         width: 0;
