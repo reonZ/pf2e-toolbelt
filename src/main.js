@@ -6,7 +6,6 @@ import { registerHeroActions } from "./features/hero";
 import { registerInventory } from "./features/inventory";
 import { registerKnowledges } from "./features/knowledges";
 import { registerMerge } from "./features/merge";
-import { registerHideModifiers } from "./features/modifiers";
 import { registerNobulk } from "./features/nobulk";
 import { registerShare } from "./features/share";
 import { registerStances } from "./features/stances";
@@ -31,7 +30,6 @@ const FEATURES = [
 	registerSpellsSummary(),
 	registerStances(),
 	registerHeroActions(),
-	registerHideModifiers(),
 	registerShare(),
 	registerTargetTokenHelper(),
 	registerUntarget(),
