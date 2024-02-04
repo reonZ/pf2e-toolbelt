@@ -1,3 +1,18 @@
+# 1.35.0
+
+-   removed the `Hide Modifiers` feature now that the system handles it
+-   `Spells Summary` updates:
+    -   replaced the `Consumable` spell category with the appropriate `Wand` or `Scroll` in the spells sidebar
+-   `Target Helper` updates:
+    -   players will now see all visible targets, sorted as follow
+        -   players: owned -> player owned -> unowned
+        -   gm: unowned -> owned
+    -   icons representing owned and unowned targets have been added before their name (a special icon is shown for targets that are "hidden" from players)
+    -   respects all 3 metagame settings `Show Check DCs`, `Show Check Outcomes` and `Show Roll Breakdowns`
+    -   only the last 10 messages in the chat will be processed on reload
+-   `Merge Damage` updates:
+    -   fixed issue with damage traits not working once merged (such as `Holy`)
+
 # 1.34.0
 
 -   this is a `5.13.1` release
