@@ -349,7 +349,7 @@ function getMessageData(message) {
 			name: source.flags.pf2e.strike?.name ?? message.item.name,
 			outcome: source.flags.pf2e.context.outcome,
 			itemTraits: source.flags.pf2e.context.options.filter((option) =>
-				option.startsWith("item:"),
+				/^(item|self):/.test(option),
 			),
 			modifiers,
 			tags,
