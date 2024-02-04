@@ -74,10 +74,6 @@
                 "name": "Stances",
                 "hint": "Add stances buttons in the character sheet to toggle them faster, it will also remove stances at the end of the encounter and more."
             },
-            "custom-stances": {
-                "name": "Custom Stances",
-                "hint": "Comma separated list of compendium pack id containing custom stance feats/features, can also list directly world feats/features uuid ; Custom feats/features must have the 'stance' trait and have a self-applied effect."
-            },
             "hero": {
                 "name": "Hero Actions",
                 "hint": "Adds a section in the PF2e character sheet to manage the 'Hero Point Deck' actions alternate rule."

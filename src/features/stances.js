@@ -71,11 +71,6 @@ export function registerStances() {
 				scope: "client",
 				onChange: setup,
 			},
-			{
-				name: "custom-stances",
-				type: String,
-				default: "",
-			},
 		],
 		conflicts: ["pf2e-stances"],
 		api: {
