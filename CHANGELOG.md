@@ -2,7 +2,7 @@
 
 -   removed the `Hide Modifiers` feature now that the system handles it
 -   `Spells Summary` updates:
-    -   replaced the `Consumable` spell category with the appropriate `Wand` or `Scroll` in the spells sidebar
+    -   replaced the `Consumable` spell category with the appropriate `Wand` or `Scroll`
 -   `Target Helper` updates:
     -   players will now see all visible targets, sorted as follow
         -   players: owned -> player owned -> unowned
