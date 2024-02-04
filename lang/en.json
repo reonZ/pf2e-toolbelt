@@ -328,7 +328,8 @@
                     },
                     "result": {
                         "withOffset": "Result: ({die}) {success} by {offset}",
-                        "withoutOffset": "Result: {success}"
+                        "withoutOffset": "Result: {success}",
+                        "withoutOffsetWithDie": "Result: ({die}) {success}"
                     },
                     "dcWithValue": "DC {dc}"
                 },

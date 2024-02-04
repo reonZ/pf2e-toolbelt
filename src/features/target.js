@@ -582,7 +582,11 @@ async function getMessageData(message) {
 						isFriendly || showSuccess
 							? localize(
 									`target.chat.save.result.${
-										showDC ? "withOffset" : "withoutOffset"
+										showDC
+											? "withOffset"
+											: isFriendly
+											  ? "withoutOffsetWithDie"
+											  : "withoutOffset"
 									}`,
 									{
 										success: successLabel,
