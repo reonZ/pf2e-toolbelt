@@ -1,33 +1,51 @@
 <div class="target-header" data-target-uuid="{{uuid}}">
-    <span class="name">{{name}}</span>
+    <span class="name">
+        {{#if isHidden}}
+        <i class="fa-light fa-eye-slash" data-tooltip="{{i18n 'hidden'}}"></i>
+        {{else if hasPlayerOwner}}
+        <i class="fa-solid fa-person"></i>
+        {{else}}
+        <i class="fa-solid fa-ghost"></i>
+        {{/if}}
+        {{name}}
+    </span>
     <span class="controls">
         {{#if save.result}}
-        {{#if canReroll}}
+        {{#if (and isOwner canReroll)}}
         <a data-action="reroll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.result.tooltip}}">
             <i class="{{save.icon}}"></i>
-            <span class="degree {{save.result.success}}">{{save.result.value}}</span>
+            <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">{{save.result.value}}</span>
             <i class="fa-solid fa-rotate rotate"></i>
         </a>
         {{else}}
         <span data-tooltip="{{save.result.tooltip}}">
             <i class="{{save.icon}}"></i>
-            <span class="degree {{save.result.success}}">{{save.result.value}}</span>
+            <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">{{save.result.value}}</span>
             <i class="{{rerolled.icon}} small"></i>
         </span>
         {{/if}}
         <hr>
         {{else if save}}
+        {{#if isOwner}}
         <a data-action="roll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.tooltip}}">
             <i class="{{save.icon}}"></i>
             <i class="fa-solid fa-dice-d20 die"></i>
         </a>
+        {{else}}
+        <span data-tooltip="{{save.tooltip}}">
+            <i class="{{save.icon}}"></i>
+            <i class="fa-regular fa-circle-question"></i>
+        </span>
+        {{/if}}
         <hr>
         {{/if}}
         <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
             <i class="fa-solid fa-fw fa-signal-stream"></i>
         </a>
+        {{#if isGM}}
         <a data-action="open-target-sheet" data-tooltip="{{i18n 'sheet'}}">
             <i class="icon fa-solid fa-file"></i>
         </a>
+        {{/if}}
     </span>
 </div>

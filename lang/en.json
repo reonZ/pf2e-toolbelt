@@ -328,12 +328,13 @@
                     },
                     "result": {
                         "withOffset": "Result: ({die}) {success} by {offset}",
-                        "withoutOffset": "Result: ({die}) {success}"
+                        "withoutOffset": "Result: {success}"
                     },
                     "dcWithValue": "DC {dc}"
                 },
                 "row": {
-                    "sheet": "Open Sheet"
+                    "sheet": "Open Sheet",
+                    "hidden": "Hidden From Players"
                 }
             },
             "menu": {
@@ -360,6 +361,7 @@
                 "name-label": "Effect Name",
                 "badge-label": "Badge Value"
             }
-        }
+        },
+        "unnamed": "Unnamed"
     }
 }

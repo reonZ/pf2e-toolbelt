@@ -1,4 +1,7 @@
-import { bindOnPreCreateSpellDamageChatMessage } from "../shared/chat";
+import {
+	bindOnPreCreateSpellDamageChatMessage,
+	latestChatMessages,
+} from "../shared/chat";
 import { roll3dDice } from "../shared/dicesonice";
 import {
 	getFlag,
@@ -100,8 +103,11 @@ export function registerTargetTokenHelper() {
 			},
 		],
 		conflicts: [],
-		init: () => {
+		ready: () => {
 			if (getSetting("target")) setHooks(true);
+			for (const { message, html } of latestChatMessages(10)) {
+				renderChatMessage(message, html);
+			}
 		},
 	};
 }
@@ -406,7 +412,6 @@ async function renderDamageChatMessage(message, html) {
 	const data = await getMessageData(message);
 	const msgContent = html.find(".message-content");
 	const damageRows = msgContent.find(".damage-application");
-	const clonedRows = damageRows.clone();
 
 	const buttons = $('<div class="pf2e-toolbelt-target-buttons"></div>');
 
@@ -453,7 +458,7 @@ async function renderDamageChatMessage(message, html) {
 
 	if (!data?.targets.length) return;
 
-	const { targets, save } = data;
+	const clonedRows = damageRows.clone();
 	if (!clonedRows.length) return;
 
 	clonedRows
@@ -468,14 +473,17 @@ async function renderDamageChatMessage(message, html) {
 		this.dataset.action = `target-${action}`;
 	});
 
+	const { targets, save } = data;
 	const rowsTemplate = $('<div class="pf2e-toolbelt-target-damage"></div>');
 
-	for (const { uuid, template, save, applied = {} } of targets) {
-		const isBasicSave = !!(save?.result && save.basic);
-		const clones = clonedRows.clone();
-
+	for (const { uuid, template, save, isOwner, applied = {} } of targets) {
 		rowsTemplate.append("<hr>");
 		rowsTemplate.append(template);
+
+		if (!isOwner) continue;
+
+		const isBasicSave = !!(save?.result && save.basic);
+		const clones = clonedRows.clone();
 
 		clones.each((index, el) => {
 			el.dataset.rollIndex = index;
@@ -512,8 +520,11 @@ function addHeaderListeners(message, html, save) {
 }
 
 async function getMessageData(message) {
+	const isGM = game.user.isGM;
 	const targetsFlag = getFlag(message, "target.targets") ?? [];
-	const showDC = game.user.isGM || game.settings.get("pf2e", "metagame_showDC");
+	const showDC = isGM || game.settings.get("pf2e", "metagame_showDC");
+	const showMods = isGM || game.settings.get("pf2e", "metagame_showBreakdowns");
+	const showSuccess = isGM || game.settings.get("pf2e", "metagame_showResults");
 
 	const save = (() => {
 		const flag = getFlag(message, "target.save");
@@ -543,10 +554,16 @@ async function getMessageData(message) {
 		await Promise.all(
 			targetsFlag.map(async ({ token }) => {
 				const target = await fromUuid(token);
-				if (!target?.isOwner) return;
-
 				const targetId = target.id;
 				const actor = target.actor;
+				if (!actor) return;
+
+				const isVisible = !actor.hasCondition("undetected");
+				if (!isGM && !isVisible) return;
+
+				const isOwner = actor.isOwner;
+				const hasPlayerOwner = actor.hasPlayerOwner;
+				const isFriendly = isOwner || hasPlayerOwner;
 				const hasSave = save && !!actor?.saves[save.statistic];
 
 				const targetSave = await (async () => {
@@ -556,11 +573,24 @@ async function getMessageData(message) {
 					if (!flag) return;
 
 					const rerolled = flag.rerolled;
-					const canReroll = hasSave && !rerolled;
+					const canReroll = hasSave && isOwner && !rerolled;
 					const successLabel = game.i18n.localize(
 						`PF2E.Check.Result.Degree.Check.${flag.success}`,
 					);
 					const offset = flag.value - save.dc;
+					const result =
+						isFriendly || showSuccess
+							? localize(
+									`target.chat.save.result.${
+										showDC ? "withOffset" : "withoutOffset"
+									}`,
+									{
+										success: successLabel,
+										offset: offset >= 0 ? `+${offset}` : offset,
+										die: `<i class="fa-solid fa-dice-d20"></i> ${flag.die}`,
+									},
+							  )
+							: undefined;
 
 					return {
 						...flag,
@@ -568,17 +598,8 @@ async function getMessageData(message) {
 						tooltip: await renderTemplate(templatePath("target/save-tooltip"), {
 							i18n: subLocalize("target.chat.save"),
 							check: save.tooltipLabel,
-							result: localize(
-								`target.chat.save.result.${
-									showDC ? "withOffset" : "withoutOffset"
-								}`,
-								{
-									success: successLabel,
-									offset: offset >= 0 ? `+${offset}` : offset,
-									die: `<i class="fa-solid fa-dice-d20"></i> ${flag.die}`,
-								},
-							),
-							modifiers: flag.modifiers,
+							result,
+							modifiers: isFriendly || showMods ? flag.modifiers : [],
 							canReroll,
 							rerolled: REROLL[rerolled],
 						}),
@@ -590,14 +611,34 @@ async function getMessageData(message) {
 					result: targetSave,
 				};
 
+				const anonymous = game.modules.get("anonymous");
+				const canSeeName = isGM
+					? true
+					: anonymous?.active
+					  ? anonymous.api.playersSeeName(target.actor)
+					  : target.playersCanSeeName;
+				const name = canSeeName
+					? target.name
+					: anonymous?.active
+					  ? anonymous.api.getName(target.actor)
+					  : localize("unnamed");
+
 				return {
+					isOwner,
+					canSeeName,
+					hasPlayerOwner,
 					uuid: token,
 					target: target,
 					save: templateSave,
 					applied: getFlag(message, `target.applied.${targetId}`),
 					template: await renderTemplate(templatePath("target/row-header"), {
-						name: target.name,
+						name,
+						isGM,
+						isOwner,
+						hasPlayerOwner,
+						isHidden: !isVisible,
 						uuid: token,
+						showSuccess: isFriendly || showSuccess,
 						save: hasSave && templateSave,
 						canReroll: targetSave?.canReroll,
 						rerolled: REROLL[targetSave?.rerolled],
@@ -607,6 +648,16 @@ async function getMessageData(message) {
 			}),
 		)
 	).filter(Boolean);
+
+	if (isGM) {
+		targets.sort((a, b) => a.hasPlayerOwner - b.hasPlayerOwner);
+	} else {
+		targets.sort((a, b) =>
+			!a.isOwner && !b.isOwner
+				? b.canSeeName - a.canSeeName
+				: b.isOwner - a.isOwner,
+		);
+	}
 
 	return { targets, save, isRegen: getFlag(message, "target.isRegen") };
 }

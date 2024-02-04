@@ -121,7 +121,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding-inline: 0.3em 0.5em;
+                padding-right: 0.5em;
                 font-size: 0.9em;
                 gap: 0.5em;
 
@@ -130,6 +130,29 @@
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    display: flex;
+
+                    i {
+                        &:not(.empty) {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 18px;
+                        }
+
+                        &.fa-person {
+                            font-size: 1.1em;
+                        }
+
+                        &.fa-eye-slash {
+                            font-size: 0.9em;
+                            margin-bottom: 1px;
+                        }
+
+                        &.fa-ghost {
+                            font-size: 0.95em;
+                        }
+                    }
                 }
 
                 .controls {
@@ -148,21 +171,23 @@
                     .degree {
                         font-size: 1.1em;
 
-                        &.criticalSuccess {
-                            color: var(--criticalSuccess);
-                        }
+                        &.show {
+                            &.criticalSuccess {
+                                color: var(--criticalSuccess);
+                            }
 
-                        &.success {
-                            color: var(--success);
-                        }
+                            &.success {
+                                color: var(--success);
+                            }
 
-                        &.failure {
-                            color: var(--failure);
-                        }
+                            &.failure {
+                                color: var(--failure);
+                            }
 
-                        &.criticalFailure {
-                            text-shadow: 0 0 black;
-                            color: var(--criticalFailure);
+                            &.criticalFailure {
+                                text-shadow: 0 0 black;
+                                color: var(--criticalFailure);
+                            }
                         }
                     }
 
