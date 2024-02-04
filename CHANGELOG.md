@@ -1,3 +1,7 @@
+# 1.35.2
+
+-   removed `Custom Stances` setting, it hasn't been of use for a while now
+
 # 1.35.1
 
 -   `Target Helper` updates:
