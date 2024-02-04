@@ -41,22 +41,16 @@ export function registerMerge() {
 }
 
 function updateMessages() {
-	const chat = ui.chat?.element;
-	if (!chat) return;
-
-	for (const message of latestChatMessages(10)) {
-		const html = chat.find(`[data-message-id=${message.id}]`);
-		if (!html.length) continue;
-
+	for (const { message, html } of latestChatMessages(10)) {
 		html.find("[data-action=multi-cast]").remove();
 		html.find("[data-action=merge-damage]").remove();
-
 		renderChatMessage(message, html);
 	}
 }
 
 function renderChatMessage(message, html) {
 	if (!game.user.isGM && !message.isAuthor) return;
+
 	if (getSetting("merge-damage") && isDamageRoll(message))
 		renderDamage(message, html);
 	else if (
@@ -111,7 +105,7 @@ function renderDamage(message, html) {
 		.on("click", (event) => {
 			event.stopPropagation();
 
-			for (const otherMessage of latestChatMessages(5, message)) {
+			for (const { message: otherMessage } of latestChatMessages(5, message)) {
 				const otherTargetsUUIDS = getTargetUUIDs(otherMessage);
 
 				if (

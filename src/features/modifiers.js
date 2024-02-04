@@ -28,13 +28,7 @@ export function registerHideModifiers() {
 function updateMessages() {
 	if (game.user.isGM) return;
 
-	const chat = ui.chat?.element;
-	if (!chat) return;
-
-	for (const message of latestChatMessages(20)) {
-		const html = chat.find(`[data-message-id=${message.id}]`);
-		if (!html.length) continue;
-
+	for (const { message, html } of latestChatMessages(20)) {
 		html
 			.find(".message-header")
 			.removeClass("pf2e-toolbelt-modifiers pf2e-toolbelt-modifiers-traits");

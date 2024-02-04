@@ -5,6 +5,9 @@ export function getChatMessageClass() {
 }
 
 export function* latestChatMessages(nb, fromMessage) {
+	const chat = ui.chat?.element;
+	if (!chat) return;
+
 	const messages = game.messages.contents;
 	const start =
 		(fromMessage
@@ -14,7 +17,11 @@ export function* latestChatMessages(nb, fromMessage) {
 	for (let i = start; i >= start - nb; i--) {
 		const message = messages[i];
 		if (!message) return;
-		yield message;
+
+		const html = chat.find(`[data-message-id=${message.id}]`);
+		if (!html.length) continue;
+
+		yield { message, html };
 	}
 }
 
