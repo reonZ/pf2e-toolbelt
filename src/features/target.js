@@ -301,6 +301,7 @@ function preCreateChatMessage(message) {
 
 async function renderChatMessage(message, html) {
 	const clientEnabled = choiceSettingIsEnabled("target-client");
+	deleteInMemory(message, "target.save");
 
 	if (clientEnabled && message.isDamageRoll) {
 		if (!isValidDamageMessage(message)) return;
@@ -681,6 +682,8 @@ function setRollingSave(message, target) {
 }
 
 async function rerollSave(event, message, { dc }) {
+	console.log(message);
+
 	const target = await getTargetFromEvent(event);
 	const actor = target?.actor;
 	if (!actor) return;
@@ -885,7 +888,6 @@ async function updateMessageSave({ message, target, data }) {
 	}
 
 	await setFlag(message, `target.saves.${target}`, deepClone(data));
-	deleteInMemory(message, `target.save.${target}`);
 }
 
 async function openTargetSheet(event) {
