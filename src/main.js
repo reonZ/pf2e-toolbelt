@@ -22,6 +22,7 @@ import { isUserGM } from "./shared/user";
 const FEATURES = [
 	registerArp(),
 	registerNobulk(),
+	registerTargetTokenHelper(),
 	registerGiveth(),
 	registerKnowledges(),
 	registerUnided(),
@@ -31,7 +32,6 @@ const FEATURES = [
 	registerStances(),
 	registerHeroActions(),
 	registerShare(),
-	registerTargetTokenHelper(),
 	registerUntarget(),
 	registerInventory(),
 	registerDebug(),

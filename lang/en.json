@@ -101,7 +101,7 @@
             },
             "target": {
                 "name": "Target Token Helper",
-                "hint": "Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below."
+                "hint": "(Requires Reload) Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below."
             },
             "target-client": {
                 "name": "Target Token Helper - Chat",
@@ -332,6 +332,11 @@
                 "row": {
                     "sheet": "Open Sheet",
                     "hidden": "Hidden From Players"
+                },
+                "context": {
+                    "saves": {
+                        "name": "Roll All Saves"
+                    }
                 }
             },
             "menu": {

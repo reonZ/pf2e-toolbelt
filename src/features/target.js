@@ -1,3 +1,4 @@
+import { MODULE_ID } from "../module";
 import {
 	bindOnPreCreateSpellDamageChatMessage,
 	latestChatMessages,
@@ -82,7 +83,7 @@ export function registerTargetTokenHelper() {
 				name: "target",
 				type: Boolean,
 				default: false,
-				onChange: setHooks,
+				requiresReload: true,
 			},
 			{
 				name: "target-client",
@@ -103,8 +104,12 @@ export function registerTargetTokenHelper() {
 			},
 		],
 		conflicts: [],
-		ready: () => {
-			if (getSetting("target")) setHooks(true);
+		init: (isGM) => {
+			if (!isGM) return;
+			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
+		},
+		ready: (isGM) => {
+			if (getSetting("target")) setHooks(true, isGM);
 			for (const { message, html } of latestChatMessages(10)) {
 				renderChatMessage(message, html);
 			}
@@ -112,12 +117,12 @@ export function registerTargetTokenHelper() {
 	};
 }
 
-function setHooks(value) {
+function setHooks(value, isGM) {
 	setPrecreateMessageHook(value);
 	setRenderMessageHook(value);
 	setCreateTemplateHook(value && getSetting("target-template"));
 
-	if (isUserGM()) {
+	if (isGM) {
 		if (value && !SOCKET) {
 			socketOn(onSocket);
 			SOCKET = true;
@@ -138,6 +143,41 @@ function onSocket(packet) {
 			updateMessageApplied(packet);
 			break;
 	}
+}
+
+function getChatLogEntryContext(_, data) {
+	const getMessageData = (html) => {
+		const messageId = html.data("messageId");
+		const message = game.messages.get(messageId);
+		if (!message) return;
+
+		const inMemory = getInMemory(message, "target");
+		if (!inMemory) return;
+
+		return {
+			message,
+			inMemory,
+		};
+	};
+
+	data.unshift({
+		icon: '<i class="fa-solid fa-dice-d20"></i>',
+		name: `${MODULE_ID}.target.chat.context.saves.name`,
+		condition: (html) => {
+			const data = getMessageData(html);
+			return !!data?.inMemory.canRollSave?.length;
+		},
+		callback: (html) => {
+			const { inMemory, message } = getMessageData(html) ?? {};
+			const canRollSave = inMemory.canRollSave;
+			if (!canRollSave?.length) return;
+
+			const save = getSaveData(message);
+			if (!save) return;
+
+			rollSave({}, message, save, canRollSave);
+		},
+	});
 }
 
 async function createMeasuredTemplate(template, _, userId) {
@@ -302,6 +342,7 @@ function preCreateChatMessage(message) {
 async function renderChatMessage(message, html) {
 	const clientEnabled = choiceSettingIsEnabled("target-client");
 	deleteInMemory(message, "target.save");
+	deleteInMemory(message, "target.canRollSave");
 
 	if (clientEnabled && message.isDamageRoll) {
 		if (!isValidDamageMessage(message)) return;
@@ -520,6 +561,15 @@ function addHeaderListeners(message, html, save) {
 		.on("click", (event) => rerollSave(event, message, save));
 }
 
+function getSaveData(message) {
+	const flag = getFlag(message, "target.save");
+	if (!flag) return;
+	return {
+		...flag,
+		...SAVES[flag.statistic],
+	};
+}
+
 async function getMessageData(message) {
 	const isGM = game.user.isGM;
 	const targetsFlag = getFlag(message, "target.targets") ?? [];
@@ -527,15 +577,7 @@ async function getMessageData(message) {
 	const showMods = isGM || game.settings.get("pf2e", "metagame_showBreakdowns");
 	const showSuccess = isGM || game.settings.get("pf2e", "metagame_showResults");
 
-	const save = (() => {
-		const flag = getFlag(message, "target.save");
-		if (!flag) return;
-		return {
-			...flag,
-			...SAVES[flag.statistic],
-		};
-	})();
-
+	const save = getSaveData(message);
 	if (!targetsFlag.length && !save) return;
 
 	if (save) {
@@ -550,6 +592,8 @@ async function getMessageData(message) {
 			check: save.tooltipLabel,
 		});
 	}
+
+	const canRollSave = [];
 
 	const targets = (
 		await Promise.all(
@@ -566,19 +610,21 @@ async function getMessageData(message) {
 				const hasPlayerOwner = actor.hasPlayerOwner;
 				const isFriendly = isOwner || hasPlayerOwner;
 				const hasSave = save && !!actor?.saves[save.statistic];
+				const saveFlag = getFlag(message, `target.saves.${targetId}`);
+
+				if (hasSave && !hasPlayerOwner && !saveFlag) {
+					canRollSave.push(token);
+				}
 
 				const targetSave = await (async () => {
-					if (!hasSave) return;
+					if (!hasSave || !saveFlag) return;
 
-					const flag = getFlag(message, `target.saves.${targetId}`);
-					if (!flag) return;
-
-					const rerolled = flag.rerolled;
+					const rerolled = saveFlag.rerolled;
 					const canReroll = hasSave && isOwner && !rerolled;
 					const successLabel = game.i18n.localize(
-						`PF2E.Check.Result.Degree.Check.${flag.success}`,
+						`PF2E.Check.Result.Degree.Check.${saveFlag.success}`,
 					);
-					const offset = flag.value - save.dc;
+					const offset = saveFlag.value - save.dc;
 					const result =
 						isFriendly || showSuccess
 							? localize(
@@ -592,19 +638,19 @@ async function getMessageData(message) {
 									{
 										success: successLabel,
 										offset: offset >= 0 ? `+${offset}` : offset,
-										die: `<i class="fa-solid fa-dice-d20"></i> ${flag.die}`,
+										die: `<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}`,
 									},
 							  )
 							: undefined;
 
 					return {
-						...flag,
+						...saveFlag,
 						canReroll,
 						tooltip: await renderTemplate(templatePath("target/save-tooltip"), {
 							i18n: subLocalize("target.chat.save"),
 							check: save.tooltipLabel,
 							result,
-							modifiers: isFriendly || showMods ? flag.modifiers : [],
+							modifiers: isFriendly || showMods ? saveFlag.modifiers : [],
 							canReroll,
 							rerolled: REROLL[rerolled],
 						}),
@@ -654,6 +700,8 @@ async function getMessageData(message) {
 		)
 	).filter(Boolean);
 
+	setInMemory(message, "target.canRollSave", canRollSave);
+
 	if (isGM) {
 		targets.sort((a, b) => a.hasPlayerOwner - b.hasPlayerOwner);
 	} else {
@@ -682,8 +730,6 @@ function setRollingSave(message, target) {
 }
 
 async function rerollSave(event, message, { dc }) {
-	console.log(message);
-
 	const target = await getTargetFromEvent(event);
 	const actor = target?.actor;
 	if (!actor) return;
@@ -784,110 +830,141 @@ async function rerollSave(event, message, { dc }) {
 		keptRoll.options.degreeOfSuccess = success.value;
 	}
 
-	const packet = {
-		type: "target.update-save",
-		target: target.id,
-		data: {
-			value: keptRoll.total,
-			die: keptRoll.dice[0].total,
-			success: keptRoll.degreeOfSuccess,
-			roll: JSON.stringify(keptRoll.toJSON()),
-			dosAdjustments: deepClone(flag.dosAdjustments),
-			modifiers: deepClone(flag.modifiers),
-			rerolled: reroll,
-		},
+	const isAuthor = game.user.isGM || message.isAuthor;
+
+	const data = {
+		value: keptRoll.total,
+		die: keptRoll.dice[0].total,
+		success: keptRoll.degreeOfSuccess,
+		roll: JSON.stringify(keptRoll.toJSON()),
+		dosAdjustments: deepClone(flag.dosAdjustments),
+		modifiers: deepClone(flag.modifiers),
+		rerolled: reroll,
 	};
 
 	if (keptRoll.options.keeleyAdd10) {
-		packet.data.modifiers.push({
+		data.modifiers.push({
 			label: localize("target.chat.save.reroll.keeley"),
 			modifier: 10,
 		});
 	}
 
+	const packet = {
+		type: "target.update-save",
+		message: isAuthor ? message : message.id,
+		targets: [
+			{
+				target: target.id,
+				data,
+			},
+		],
+	};
+
 	if (game.user.isGM || message.isAuthor) {
-		packet.message = message;
 		updateMessageSave(packet);
 	} else {
-		packet.message = message.id;
 		socketEmit(packet);
 	}
 }
 
-async function rollSave(event, message, { dc, statistic }) {
-	const target = await getTargetFromEvent(event);
-	const actor = target?.actor;
-	if (!actor) return;
+async function rollSave(event, message, { dc, statistic }, tokens) {
+	const isAuthor = game.user.isGM || message.isAuthor;
 
-	if (isRollingSave(message, target)) return;
-
-	const save = actor.saves[statistic];
-	if (!save) return;
-
-	setRollingSave(message, target);
-
-	const item = (() => {
-		const item = message.item;
-		if (item) return item;
-
-		const messageId = getFlag(message, "target.messageId");
-		if (!messageId) return;
-
-		const otherMessage = game.messages.get(messageId);
-		if (!otherMessage) return;
-
-		return otherMessage.item;
-	})();
-
-	const skipDefault = !game.user.settings.showCheckDialogs;
+	const targetPromises = Array.isArray(tokens)
+		? tokens.map((uuid) => fromUuid(uuid))
+		: [getTargetFromEvent(event)];
 
 	const packet = {
 		type: "target.update-save",
-		target: target.id,
+		message: isAuthor ? message : message.id,
+		targets: [],
 	};
 
-	save.check.roll({
-		dc: { value: dc },
-		item,
-		origin: actor,
-		skipDialog: event.shiftKey ? !skipDefault : skipDefault,
-		createMessage: false,
-		callback: async (roll, __, msg) => {
-			await roll3dDice(roll);
-			packet.data = {
-				value: roll.total,
-				die: roll.dice[0].total,
-				success: roll.degreeOfSuccess,
-				roll: JSON.stringify(roll.toJSON()),
-				dosAdjustments: msg.getFlag("pf2e", "context.dosAdjustments"),
-				modifiers: msg
-					.getFlag("pf2e", "modifiers")
-					.filter((modifier) => modifier.enabled)
-					.map(({ label, modifier }) => ({ label, modifier })),
-			};
+	await Promise.all(
+		targetPromises.map(async (targetPromise) => {
+			const target = await targetPromise;
+			const actor = target?.actor;
+			if (!actor) return;
 
-			if (game.user.isGM || message.isAuthor) {
-				packet.message = message;
-				updateMessageSave(packet);
-			} else {
-				packet.message = message.id;
-				socketEmit(packet);
-			}
-		},
-	});
+			if (isRollingSave(message, target)) return;
+
+			const save = actor.saves[statistic];
+			if (!save) return;
+
+			setRollingSave(message, target);
+
+			const item = (() => {
+				const item = message.item;
+				if (item) return item;
+
+				const messageId = getFlag(message, "target.messageId");
+				if (!messageId) return;
+
+				const otherMessage = game.messages.get(messageId);
+				if (!otherMessage) return;
+
+				return otherMessage.item;
+			})();
+
+			const skipDefault = !game.user.settings.showCheckDialogs;
+
+			return new Promise((resolve) => {
+				save.check.roll({
+					dc: { value: dc },
+					item,
+					origin: actor,
+					skipDialog: event.shiftKey ? !skipDefault : skipDefault,
+					createMessage: false,
+					callback: async (roll, __, msg) => {
+						await roll3dDice(roll);
+
+						const data = {
+							value: roll.total,
+							die: roll.dice[0].total,
+							success: roll.degreeOfSuccess,
+							roll: JSON.stringify(roll.toJSON()),
+							dosAdjustments: msg.getFlag("pf2e", "context.dosAdjustments"),
+							modifiers: msg
+								.getFlag("pf2e", "modifiers")
+								.filter((modifier) => modifier.enabled)
+								.map(({ label, modifier }) => ({ label, modifier })),
+						};
+
+						packet.targets.push({
+							data,
+							target: target.id,
+						});
+
+						resolve();
+					},
+				});
+			});
+		}),
+	);
+
+	if (isAuthor) {
+		updateMessageSave(packet);
+	} else {
+		socketEmit(packet);
+	}
 }
 
-async function updateMessageSave({ message, target, data }) {
+async function updateMessageSave({ targets, message }) {
 	if (typeof message === "string") {
 		message = game.messages.get(message);
 		if (!message) return;
 	}
 
-	if (typeof data.success === "number") {
-		data.success = DEGREE_OF_SUCCESS[data.success];
+	const updates = {};
+
+	for (const { data, target } of targets) {
+		if (typeof data.success === "number") {
+			data.success = DEGREE_OF_SUCCESS[data.success];
+		}
+		updates[target] = deepClone(data);
 	}
 
-	await setFlag(message, `target.saves.${target}`, deepClone(data));
+	await setFlag(message, "target.saves", updates);
 }
 
 async function openTargetSheet(event) {
