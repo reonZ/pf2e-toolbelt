@@ -1,3 +1,8 @@
+# 1.36.1
+
+-   `Target Token Helper` updates:
+    -   fixed some setup issues
+
 # 1.36.0
 
 -   `Target Token Helper` updates:
