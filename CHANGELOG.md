@@ -1,6 +1,15 @@
+# 1.36.0
+
+-   `Target Token Helper` updates:
+    -   the `Target Token Helper` world setting now requires a reload on change
+    -   added a `Roll All Saves` context menu option to chat messages
+        -   will only appear for the GM and on messages that have targets and a save
+        -   only roll saves for non-owned targets, players will have to roll for their own actors
+        -   will only appear if there are actual saves to roll left (it deduct already rolled saves)
+
 # 1.35.3
 
--   `Target Helper` updates:
+-   `Target Token Helper` updates:
     -   fixed players unable to reroll a save because of the anti-spam feature
 
 # 1.35.2
@@ -9,7 +18,7 @@
 
 # 1.35.1
 
--   `Target Helper` updates:
+-   `Target Token Helper` updates:
     -   always show die result to owned targets save
 
 # 1.35.0
@@ -17,7 +26,7 @@
 -   removed the `Hide Modifiers` feature now that the system handles it
 -   `Spells Summary` updates:
     -   replaced the `Consumable` spell category with the appropriate `Wand` or `Scroll`
--   `Target Helper` updates:
+-   `Target Token Helper` updates:
     -   players will now see all visible targets, sorted as follow
         -   players: owned -> player owned -> unowned
         -   gm: unowned -> owned
