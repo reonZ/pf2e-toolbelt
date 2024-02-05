@@ -105,11 +105,13 @@ export function registerTargetTokenHelper() {
 		],
 		conflicts: [],
 		init: (isGM) => {
-			if (!isGM) return;
+			if (!isGM || !getSetting("target")) return;
 			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
 		},
 		ready: (isGM) => {
-			if (getSetting("target")) setHooks(true, isGM);
+			if (!getSetting("target")) return;
+
+			setHooks(true, isGM);
 			for (const { message, html } of latestChatMessages(10)) {
 				renderChatMessage(message, html);
 			}
