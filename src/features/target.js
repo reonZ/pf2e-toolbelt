@@ -710,7 +710,7 @@ async function getMessageData(message) {
 	} else {
 		targets.sort((a, b) =>
 			!a.isOwner && !b.isOwner
-				? b.canSeeName - a.canSeeName
+				? b.hasPlayerOwner - a.hasPlayerOwner
 				: b.isOwner - a.isOwner,
 		);
 	}
