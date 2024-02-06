@@ -669,7 +669,8 @@ async function getMessageData(message) {
 					? true
 					: anonymous?.active
 					  ? anonymous.api.playersSeeName(target.actor)
-					  : target.playersCanSeeName;
+					  : !game.pf2e.settings.tokens.nameVisibility ||
+						  target.playersCanSeeName;
 				const name = canSeeName
 					? target.name
 					: anonymous?.active
