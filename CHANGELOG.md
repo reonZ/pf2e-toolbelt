@@ -1,3 +1,9 @@
+# 1.36.2
+
+-   `Target Token Helper` updates:
+    -   fixed unowned target names always ending up being `Unnamed` regardless of the `Tokens Determine NPC Name Visibility` setting
+    -   fixed target sorting for player not always showing owned targets above unowned ones
+
 # 1.36.1
 
 -   `Target Token Helper` updates:
