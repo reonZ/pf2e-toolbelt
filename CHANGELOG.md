@@ -1,3 +1,10 @@
+# 1.36.3
+
+-   `Target Token Helper` updates:
+    -   changed the "hidden" icon to be the same as the regular one but not filled in
+    -   updated support for spells originating from consumables, the system data having changed
+        -   saves won't appear on damage messages that originated from a consumable spell description (only an issue from the activations tab), there is no way to link the message to the original spell currently
+
 # 1.36.2
 
 -   `Target Token Helper` updates:
