@@ -46,3 +46,10 @@ export function bindOnPreCreateSpellDamageChatMessage(originalMessage) {
 		updateSourceFlag(message, "target.save", save);
 	});
 }
+
+export function hasEmbeddedSpell(message) {
+	return (
+		message.getFlag("pf2e", "casting.embeddedSpell") ||
+		message.item?.trickMagicEntry
+	);
+}

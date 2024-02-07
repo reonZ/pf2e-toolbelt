@@ -1,6 +1,7 @@
 import { MODULE_ID } from "../module";
 import {
 	bindOnPreCreateSpellDamageChatMessage,
+	hasEmbeddedSpell,
 	latestChatMessages,
 } from "../shared/chat";
 import { roll3dDice } from "../shared/dicesonice";
@@ -23,7 +24,7 @@ import { DegreeOfSuccess } from "../shared/pf2e/success";
 import { choiceSettingIsEnabled, getSetting } from "../shared/settings";
 import { socketEmit, socketOff, socketOn } from "../shared/socket";
 import { getTemplateTokens } from "../shared/template";
-import { isActiveGM, isUserGM } from "../shared/user";
+import { isActiveGM } from "../shared/user";
 
 const SAVES = {
 	fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
@@ -321,10 +322,7 @@ function preCreateChatMessage(message) {
 		const item = message.item;
 		const save = item && item.type === "spell" && item.system.defense?.save;
 		if (save) {
-			const dc = (() => {
-				if (!item.trickMagicEntry) return item.spellcasting?.statistic.dc.value;
-				return $(message.content).find("[data-action=spell-save]").data()?.dc;
-			})();
+			const dc = item.spellcasting?.statistic.dc.value;
 			if (typeof dc === "number") updates.push(["save", { ...save, dc }]);
 		}
 	}
@@ -362,7 +360,7 @@ async function renderChatMessage(message, html) {
 		return;
 	}
 
-	if (item.trickMagicEntry && item.system.defense?.save) {
+	if (item.system.defense?.save && hasEmbeddedSpell(message)) {
 		html.find("[data-action=spell-damage]").on("click", () => {
 			bindOnPreCreateSpellDamageChatMessage(message);
 		});
