@@ -1,12 +1,7 @@
 <div class="target-header" data-target-uuid="{{uuid}}">
     <span class="name">
-        {{#if isHidden}}
-        <i class="fa-light fa-eye-slash" data-tooltip="{{i18n 'hidden'}}"></i>
-        {{else if hasPlayerOwner}}
-        <i class="fa-solid fa-person"></i>
-        {{else}}
-        <i class="fa-solid fa-ghost"></i>
-        {{/if}}
+        <i class="fa-{{ifThen isHidden 'thin' 'solid'}} fa-{{ifThen hasPlayerOwner 'person' 'ghost'}}" {{#if
+            isHidden}}data-tooltip="{{i18n 'hidden'}}" {{/if}}></i>
         {{name}}
     </span>
     <span class="controls">
