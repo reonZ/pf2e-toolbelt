@@ -20,7 +20,9 @@ export async function applyDamageFromMessage(
 		rollIndex = 0,
 	},
 ) {
-	if (promptModifier) return shiftAdjustDamage(message, multiplier, rollIndex);
+	if (promptModifier) {
+		return shiftAdjustDamage(token, { message, multiplier, rollIndex });
+	}
 
 	const tokens = [token];
 	if (tokens.length === 0) {
