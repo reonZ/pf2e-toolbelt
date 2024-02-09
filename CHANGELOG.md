@@ -1,3 +1,8 @@
+# 1.36.4
+
+-   `Target Token Helper` updates:
+    -   fixed issue with the adjusted damage popup when holding `shift`
+
 # 1.36.3
 
 -   `Target Token Helper` updates:
