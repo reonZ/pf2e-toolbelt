@@ -2,10 +2,18 @@ import { registerWrapper, unregisterWrapper } from "./libwrapper";
 import { getInMemory, setInMemory } from "./misc";
 import { templatePath } from "./path";
 
-const registered = {
+const sheetTabsRegistered = {
 	wrapperIds: [],
 	tabs: new Collection(),
 };
+
+const preparedEmbeddedRegistered = {
+	wrapperIds: [],
+	listeners: new Map(),
+};
+
+const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =
+	"CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments";
 
 const CHARACTER_SHEET_INNER_RENDER =
 	"CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._renderInner";
@@ -18,9 +26,22 @@ export function isPlayedActor(actor) {
 	return actor && !actor.pack && actor.id && game.actors.has(actor.id);
 }
 
+export function registerActorPreparedEmbeddedDocuments(feature, listener) {
+	if (!preparedEmbeddedRegistered.wrapperIds.length) {
+		preparedEmbeddedRegistered.wrapperIds = [
+			registerWrapper(
+				ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
+				actorPrepareEmbeddedDocuments,
+				"WRAPPER",
+			),
+		];
+	}
+	preparedEmbeddedRegistered.listeners.set(feature, listener);
+}
+
 export function registerCharacterSheetExtraTab(options) {
-	if (!registered.wrapperIds.length) {
-		registered.wrapperIds = [
+	if (!sheetTabsRegistered.wrapperIds.length) {
+		sheetTabsRegistered.wrapperIds = [
 			registerWrapper(CHARACTER_SHEET_RENDER, characterSheetRender),
 			registerWrapper(CHARACTER_SHEET_INNER_RENDER, characterSheetInnerRender),
 			registerWrapper(
@@ -29,23 +50,35 @@ export function registerCharacterSheetExtraTab(options) {
 			),
 		];
 	}
-	registered.tabs.set(options.tabName, options);
+	sheetTabsRegistered.tabs.set(options.tabName, options);
 }
 
 export function unregisterCharacterSheetExtraTab(tabName) {
-	registered.tabs.delete(tabName);
-	if (registered.wrapperIds.length && !registered.tabs.size) {
-		for (const wrapperId of registered.wrapperIds) {
+	sheetTabsRegistered.tabs.delete(tabName);
+	if (sheetTabsRegistered.wrapperIds.length && !sheetTabsRegistered.tabs.size) {
+		for (const wrapperId of sheetTabsRegistered.wrapperIds) {
 			unregisterWrapper(wrapperId);
 		}
-		registered.wrapperIds = [];
+		sheetTabsRegistered.wrapperIds = [];
+	}
+}
+
+function actorPrepareEmbeddedDocuments(wrapped, ...args) {
+	wrapped(...args);
+
+	for (const [feature, listener] of preparedEmbeddedRegistered.listeners) {
+		try {
+			listener.call(this);
+		} catch {
+			wrapperError(feature, ACTOR_PREPARE_EMBEDDED_DOCUMENTS);
+		}
 	}
 }
 
 async function characterSheetRender(wrapped, ...args) {
 	const positions = {};
 
-	for (const { tabName } of registered.tabs) {
+	for (const { tabName } of sheetTabsRegistered.tabs) {
 		const existingTab = getCharacterSheetTab(this.element, tabName);
 		const existingAlternate = existingTab.find(".alternate")[0];
 		if (!existingAlternate) continue;
@@ -54,7 +87,7 @@ async function characterSheetRender(wrapped, ...args) {
 
 	await wrapped(...args);
 
-	for (const { tabName } of registered.tabs) {
+	for (const { tabName } of sheetTabsRegistered.tabs) {
 		const oldPosition = positions[tabName];
 		if (!oldPosition) continue;
 
@@ -68,7 +101,7 @@ async function characterSheetInnerRender(wrapped, data) {
 	const inner = await wrapped(data);
 	const actor = this.actor;
 
-	if (!registered.tabs.size || !isPlayedActor(actor)) {
+	if (!sheetTabsRegistered.tabs.size || !isPlayedActor(actor)) {
 		return inner;
 	}
 
@@ -79,7 +112,7 @@ async function characterSheetInnerRender(wrapped, data) {
 		getData,
 		templateFolder,
 		onRender,
-	} of registered.tabs) {
+	} of sheetTabsRegistered.tabs) {
 		const innerTab = getCharacterSheetTab(inner, tabName);
 
 		const tabData = await getData(
@@ -112,11 +145,11 @@ function characterSheetActiveListeners(wrapped, inner) {
 
 	const actor = this.actor;
 
-	if (!registered.tabs.size || !isPlayedActor(actor)) {
+	if (!sheetTabsRegistered.tabs.size || !isPlayedActor(actor)) {
 		return;
 	}
 
-	for (const { tabName, addEvents } of registered.tabs) {
+	for (const { tabName, addEvents } of sheetTabsRegistered.tabs) {
 		inner
 			.find(`nav.sheet-navigation .item[data-tab=${tabName}]`)
 			.on("click", (event) =>

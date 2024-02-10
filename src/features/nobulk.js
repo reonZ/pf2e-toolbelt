@@ -1,8 +1,7 @@
+import { registerActorPreparedEmbeddedDocuments } from "../shared/actor";
 import { registerWrapper, wrapperError } from "../shared/libwrapper";
 import { getSetting } from "../shared/settings";
 
-const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =
-	"CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments";
 const TREASURE_PREPARE_BASE_DATA =
 	"CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData";
 
@@ -23,18 +22,19 @@ export function registerNobulk() {
 			},
 		],
 		init: () => {
-			if (getSetting("nobulk"))
-				registerWrapper(
-					ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
+			if (getSetting("nobulk")) {
+				registerActorPreparedEmbeddedDocuments(
+					"nobulk",
 					actorPrepareEmbeddedDocuments,
-					"WRAPPER",
 				);
-			if (getSetting("nobulk-coins"))
+			}
+			if (getSetting("nobulk-coins")) {
 				registerWrapper(
 					TREASURE_PREPARE_BASE_DATA,
 					treasurePrepareBaseData,
 					"WRAPPER",
 				);
+			}
 		},
 	};
 }
@@ -49,29 +49,22 @@ function treasurePrepareBaseData(wrapped) {
 	}
 }
 
-function actorPrepareEmbeddedDocuments(wrapped, ...args) {
-	wrapped(...args);
+function actorPrepareEmbeddedDocuments() {
+	const InventoryBulk = this.inventory.bulk.constructor;
 
-	try {
-		const InventoryBulk = this.inventory.bulk.constructor;
+	let _value = null;
 
-		let _value = null;
-
-		Object.defineProperty(this.inventory.bulk, "value", {
-			get() {
-				if (_value) return _value;
-				_value = InventoryBulk.computeTotalBulk(
-					this.actor.inventory.filter(
-						(item) =>
-							!item.isInContainer &&
-							item.system.equipped.carryType !== "dropped",
-					),
-					this.actor.size,
-				);
-				return _value;
-			},
-		});
-	} catch {
-		wrapperError("nobulk", ACTOR_PREPARE_EMBEDDED_DOCUMENTS);
-	}
+	Object.defineProperty(this.inventory.bulk, "value", {
+		get() {
+			if (_value) return _value;
+			_value = InventoryBulk.computeTotalBulk(
+				this.actor.inventory.filter(
+					(item) =>
+						!item.isInContainer && item.system.equipped.carryType !== "dropped",
+				),
+				this.actor.size,
+			);
+			return _value;
+		},
+	});
 }
