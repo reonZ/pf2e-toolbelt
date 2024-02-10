@@ -1,9 +1,17 @@
+# 1.38.0
+
+-   `Better Merchant` updates:
+    -   added a infinity icon which enables `Infinite Stock` for a singular item
+        -   the `Infinite Stocks` option must be disabled for the icon to show up
+        -   the merchant's inventory and bulk will be nullified in the sheet as soon as one item has infinite stock
+        -   same issue about item quantity applies with this
+
 # 1.37.0
 
 -   added a new `Better Merchant` world setting:
     -   adds custom features to the default system `merchant`
-    -   everything reverts back when switching to `loot` (exception may be `Infinite Stocks`, see below)
-    -   `Price Ratio` let you set a global ratio for the merchant (bewteen `0.1` and `5`)
+    -   everything reverts back when switching to `loot` (exception may be item quantity, see `Infinite Stocks`)
+    -   `Price Ratio` let you set a global ratio for the merchant (between `0.1` and `5`)
         -   new calculated price is only applied when the item is in the merchant's inventory
         -   once the item is added to another actor's inventory, the regular price is back
     -   `Receive No Coins` will not add coins to the merchant when an item is sold to another actor
@@ -11,10 +19,9 @@
         -   `Treasure` items will not be modified by this
         -   the merchant's inventory and bulk will be nullified in the sheet
         -   the `+` and `-` quantity buttons will be removed from the items (except for `Treasure` items)
-        -   the module doesn't modify the items themselves
-            -   the displayed quantity is fictional until one item is sold (on a per item bases)
-            -   once an item is sold, the quantity is deducted by the system and is updated in the item for good
-            -   because of that, the quantity cannot be reverted anymore when disabling `Infinite Stocks` or switching the actor to `Loot`
+        -   the displayed quantity is fictional until one item is sold (on a per item bases)
+        -   once an item is sold, the quantity is deducted by the system and is updated in the item for good
+        -   because of that, the quantity cannot be reverted anymore when disabling `Infinite Stocks` or switching the actor to `Loot`
 
 # 1.36.4
 
