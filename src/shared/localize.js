@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../module";
 import { error, info, warn } from "./notification";
+import { localizePath } from "./path";
 
 export function localize(...args) {
 	let [key, data] = args;
@@ -10,10 +11,6 @@ export function localize(...args) {
 
 export function hasLocalization(key) {
 	return game.i18n.has(`${MODULE_ID}.${key}`, false);
-}
-
-export function localizePath(key) {
-	return `${MODULE_ID}.${key}`;
 }
 
 export function subLocalize(subKey) {

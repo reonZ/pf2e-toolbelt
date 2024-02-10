@@ -1,0 +1,12 @@
+.sheet.actor.loot .window-content .sidebar {
+    .better-merchant {
+        label {
+            white-space: nowrap;
+        }
+
+        input[type='number'] {
+            flex: 0 4ch;
+            text-align: end;
+        }
+    }
+}

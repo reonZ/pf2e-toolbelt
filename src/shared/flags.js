@@ -1,5 +1,9 @@
 import { MODULE_ID } from "../module";
 
+export function getModuleFlags(doc) {
+	return getProperty(doc, `flags.${MODULE_ID}`);
+}
+
 export function getFlag(doc, key, fallback) {
 	return doc.getFlag(MODULE_ID, key) ?? fallback;
 }

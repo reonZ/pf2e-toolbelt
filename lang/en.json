@@ -6,6 +6,10 @@
                 "name": "Inventory",
                 "hint": "Offers the ability to toggle between the regular and an alternate version of the character sheet's `Inventory` tab at any moment by clicking once more on the tab icon."
             },
+            "merchant": {
+                "name": "Better Merchant",
+                "hint": "Add custom functionalities to the default system merchant."
+            },
             "nobulk": {
                 "name": "No Dropped Bulk",
                 "hint": "(Requires Reload) Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
@@ -362,6 +366,16 @@
                 "effect-name": "Effect: Permanent {condition}",
                 "name-label": "Effect Name",
                 "badge-label": "Badge Value"
+            }
+        },
+        "merchant": {
+            "ratio": {
+                "label": "Price Ratio",
+                "tooltip": "Ratio to apply to the price of all items sold by this merchant."
+            },
+            "no-coins": {
+                "label": "Receive No Coins",
+                "tooltip": "When an item is sold, no coins will be added to this merchant."
             }
         },
         "unnamed": "Unnamed"

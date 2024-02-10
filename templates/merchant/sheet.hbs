@@ -1,0 +1,18 @@
+<div class="gm-settings better-merchant">
+    <div class="form-group">
+        <label for="{{actorUUID}}-price-ratio">
+            <span>{{i18n 'ratio.label'}}</span>
+            <i class="fa-solid fa-info-circle" data-tooltip="{{i18n.path 'ratio.tooltip'}}"></i>
+        </label>
+        <input type="number" id="{{actorUUID}}-price-ratio" name="{{flagPath 'priceRatio'}}"
+            value="{{priceRatio.value}}" min="0" max="{{priceRatio.max}}" step="0.1">
+    </div>
+    <div class="form-group">
+        <label for="{{actorUUID}}-no-coins">
+            <span>{{i18n 'no-coins.label'}}</span>
+            <i class="fa-solid fa-info-circle" data-tooltip="{{i18n.path 'no-coins.tooltip'}}"></i>
+        </label>
+        <input type="checkbox" id="{{actorUUID}}-no-coins" name="{{flagPath 'noCoins'}}" {{checked
+            noCoins}}>
+    </div>
+</div>

@@ -5,6 +5,7 @@ import { registerGiveth } from "./features/giveth";
 import { registerHeroActions } from "./features/hero";
 import { registerInventory } from "./features/inventory";
 import { registerKnowledges } from "./features/knowledges";
+import { registerMerchant } from "./features/merchant";
 import { registerMerge } from "./features/merge";
 import { registerNobulk } from "./features/nobulk";
 import { registerShare } from "./features/share";
@@ -35,6 +36,7 @@ const FEATURES = [
 	registerUntarget(),
 	registerInventory(),
 	registerDebug(),
+	registerMerchant(),
 ];
 
 const CONFLICTS = new Set();
