@@ -1,12 +1,22 @@
-.sheet.actor.loot .window-content .sheet-sidebar {
-    .better-merchant {
-        label {
-            white-space: nowrap;
-        }
+.sheet.actor.loot .window-content {
+    .sheet-sidebar {
+        .better-merchant {
+            label {
+                white-space: nowrap;
+            }
 
-        input[type='number'] {
-            flex: 0 4ch;
-            text-align: end;
+            input[type='number'] {
+                flex: 0 4ch;
+                text-align: end;
+            }
+        }
+    }
+
+    .sheet-body .inventory-list .items {
+        .data .item-controls {
+            [data-action='toggle-infinite-item'] {
+                margin-left: 4px;
+            }
         }
     }
 }

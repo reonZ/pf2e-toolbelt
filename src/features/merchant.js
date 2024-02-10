@@ -1,4 +1,4 @@
-import { getFlag } from "../shared/flags";
+import { getFlag, setFlag } from "../shared/flags";
 import { registerWrapper, wrapperError } from "../shared/libwrapper";
 import { subLocalize } from "../shared/localize";
 import { flagPath, templatePath } from "../shared/path";
@@ -46,9 +46,12 @@ async function renderLootSheetPF2e(sheet, html) {
 		noCoins = false,
 		priceRatio = 1,
 		infiniteStocks = false,
+		infiniteItems = {},
 	} = getFlag(actor, "merchant") ?? {};
 
-	const template = await renderTemplate(templatePath("merchant/sheet"), {
+	const localize = subLocalize("merchant");
+
+	const sheetTemplate = await renderTemplate(templatePath("merchant/sheet"), {
 		noCoins,
 		infiniteStocks,
 		priceRatio: {
@@ -58,19 +61,53 @@ async function renderLootSheetPF2e(sheet, html) {
 			step: ratioStep,
 		},
 		actorUUID: actor.uuid,
-		i18n: subLocalize("merchant"),
+		i18n: localize,
 		flagPath: (str) => flagPath(`merchant.${str}`),
 	});
 
-	html.find(".sheet-sidebar .editor").before(template);
+	html.find(".sheet-sidebar .editor").before(sheetTemplate);
+
+	const itemTypes = html
+		.find(".content .sheet-body [data-item-types]")
+		.filter("[data-item-types!=treasure]");
+
+	let hasInfiniteStock = infiniteStocks;
 
 	if (infiniteStocks) {
+		itemTypes.find(".quantity a").remove();
+	} else {
+		const items = itemTypes.find("[data-item-id]");
+		const tooltip = localize.path("infinite-item.tooltip");
+
+		for (const item of items) {
+			const itemId = item.dataset.itemId;
+			const isInfinite = !!infiniteItems[itemId];
+			const toggle =
+				$(`<a data-action="toggle-infinite-item" data-tooltip="${tooltip}">
+	<i class="${isInfinite ? "fa-solid" : "fa-duotone"} fa-infinity"></i>
+</a>`)[0];
+
+			item.querySelector(".item-controls").prepend(toggle);
+
+			for (const el of item.querySelectorAll(".quantity a")) {
+				el.remove();
+			}
+
+			toggle.addEventListener("click", (event) => {
+				const flagKey = `merchant.infiniteItems.${itemId}`;
+				const current = getFlag(actor, flagKey) ?? false;
+				setFlag(actor, flagKey, !current);
+			});
+
+			if (isInfinite) {
+				hasInfiniteStock = true;
+			}
+		}
+	}
+
+	if (hasInfiniteStock) {
 		html.find(".content .sheet-body .coinage .wealth h3:last span").html("-");
-		html
-			.find(".content .sheet-body [data-item-types]")
-			.filter("[data-item-types!=treasure]")
-			.find(".quantity a")
-			.remove();
+
 		html.find(".content .sheet-body .total-bulk span").html(
 			game.i18n.format("PF2E.Actor.Inventory.TotalBulk", {
 				bulk: "-",
@@ -88,16 +125,24 @@ function itemPrepareDerivedData(wrapped) {
 		const actor = this.actor;
 		if (!actor?.isMerchant) return;
 
-		const flags = getFlag(actor, "merchant");
-		if (!flags) return;
+		const actorFlags = getFlag(actor, "merchant");
+		if (!actorFlags) return;
 
-		const { priceRatio, infiniteStocks } = flags;
+		const { priceRatio, infiniteStocks, infiniteItems = {} } = actorFlags;
 
 		if (typeof priceRatio === "number" && priceRatio !== 1) {
 			this.system.price.value = this.system.price.value.scale(priceRatio);
 		}
 
-		if (typeof infiniteStocks === "boolean" && infiniteStocks) {
+		const isInfinite = (() => {
+			if (typeof infiniteStocks === "boolean" && infiniteStocks) {
+				return true;
+			}
+			const infiniteItem = infiniteItems[this.id];
+			return typeof infiniteItem === "boolean" && infiniteItem;
+		})();
+
+		if (isInfinite) {
 			this.system.quantity = 9999;
 		}
 	} catch (error) {
