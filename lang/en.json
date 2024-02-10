@@ -379,7 +379,7 @@
             },
             "infinite-stocks": {
                 "label": "Infinite Stocks",
-                "tooltip": "The merchant's stocks will never run out."
+                "tooltip": "The merchant will never run out of items to sell (does nothing to Treasures)."
             }
         },
         "unnamed": "Unnamed"
