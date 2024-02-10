@@ -178,7 +178,14 @@ function getChatLogEntryContext(_, data) {
 			const save = getSaveData(message);
 			if (!save) return;
 
-			rollSave({}, message, save, canRollSave);
+			rollSave(
+				{
+					target: html.find(".pf2e-toolbelt-target-damage")[0],
+				},
+				message,
+				save,
+				canRollSave,
+			);
 		},
 	});
 }
@@ -360,6 +367,7 @@ async function renderChatMessage(message, html) {
 		return;
 	}
 
+	// we remove that
 	if (item.system.defense?.save && hasEmbeddedSpell(message)) {
 		html.find("[data-action=spell-damage]").on("click", () => {
 			bindOnPreCreateSpellDamageChatMessage(message);
@@ -550,15 +558,49 @@ async function renderDamageChatMessage(message, html) {
 		.on("click", (event) => onTargetButton(event, message));
 }
 
+function getRowsElement(event) {
+	return event.target?.closest(".pf2e-toolbelt-target-damage");
+}
+
+function disableSaveListeners(event) {
+	getRowsElement(event)?.classList.add("disable-saves");
+}
+
+function enableSaveListeners(event) {
+	getRowsElement(event)?.classList.remove("disable-saves");
+}
+
 function addHeaderListeners(message, html, save) {
-	html.find("[data-action=ping-target]").on("click", pingTarget);
-	html.find("[data-action=open-target-sheet]").on("click", openTargetSheet);
-	html
-		.find("[data-action=roll-save]")
-		.on("click", (event) => rollSave(event, message, save));
-	html
-		.find("[data-action=reroll-save]")
-		.on("click", (event) => rerollSave(event, message, save));
+	const listener = (event) => {
+		const target = event.target.closest("[data-action]");
+		if (!target) return;
+
+		const dataAction = target.dataset.action;
+		const saveEnabled = () => {
+			return !getRowsElement(event)?.classList.contains("disable-saves");
+		};
+
+		switch (dataAction) {
+			case "ping-target": {
+				pingTarget(event);
+				break;
+			}
+			case "open-target-sheet": {
+				openTargetSheet(event);
+				break;
+			}
+			case "roll-save": {
+				saveEnabled() && rollSave(event, message, save);
+				break;
+			}
+			case "reroll-save": {
+				saveEnabled() && rerollSave(event, message, save);
+				break;
+			}
+		}
+	};
+
+	html.on("click", listener);
 }
 
 function getSaveData(message) {
@@ -717,25 +759,14 @@ async function getMessageData(message) {
 }
 
 async function getTargetFromEvent(event) {
-	const { targetUuid } =
-		event.currentTarget.closest("[data-target-uuid]").dataset;
+	const { targetUuid } = event.target.closest("[data-target-uuid]").dataset;
 	return fromUuid(targetUuid);
-}
-
-function isRollingSave(message, target) {
-	return getInMemory(message, `target.save.${target.id}`);
-}
-
-function setRollingSave(message, target) {
-	setInMemory(message, `target.save.${target.id}`, true);
 }
 
 async function rerollSave(event, message, { dc }) {
 	const target = await getTargetFromEvent(event);
 	const actor = target?.actor;
 	if (!actor) return;
-
-	if (isRollingSave(message, target)) return;
 
 	const flag = getFlag(message, `target.saves.${target.id}`);
 	if (!flag?.roll || flag.rerolled) return;
@@ -764,6 +795,8 @@ async function rerollSave(event, message, { dc }) {
 		},
 	};
 
+	disableSaveListeners(event);
+
 	const reroll = await Dialog.wait(
 		{
 			title: `${target.name} - ${localize(
@@ -778,7 +811,10 @@ async function rerollSave(event, message, { dc }) {
 		},
 	);
 
-	if (!reroll) return;
+	if (!reroll) {
+		enableSaveListeners(event);
+		return;
+	}
 
 	const isHeroReroll = reroll === "hero";
 	const keep = isHeroReroll ? "new" : reroll;
@@ -795,8 +831,6 @@ async function rerollSave(event, message, { dc }) {
 			"system.resources.heroPoints.value": Math.clamped(value - 1, 0, max),
 		});
 	}
-
-	setRollingSave(message, target);
 
 	const oldRoll = Roll.fromJSON(flag.roll);
 	const unevaluatedNewRoll = oldRoll.clone();
@@ -881,19 +915,18 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 		targets: [],
 	};
 
+	disableSaveListeners(event);
+
 	await Promise.all(
 		targetPromises.map(async (targetPromise) => {
 			const target = await targetPromise;
 			const actor = target?.actor;
 			if (!actor) return;
 
-			if (isRollingSave(message, target)) return;
-
 			const save = actor.saves[statistic];
 			if (!save) return;
 
-			setRollingSave(message, target);
-
+			// we remove that
 			const item = (() => {
 				const item = message.item;
 				if (item) return item;
@@ -906,6 +939,7 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 
 				return otherMessage.item;
 			})();
+			// remove above
 
 			const skipDefault = !game.user.settings.showCheckDialogs;
 
@@ -913,6 +947,7 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 				save.check.roll({
 					dc: { value: dc },
 					item,
+					// item: message.item,
 					origin: actor,
 					skipDialog: event.shiftKey ? !skipDefault : skipDefault,
 					createMessage: false,

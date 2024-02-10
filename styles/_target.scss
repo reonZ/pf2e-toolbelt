@@ -209,6 +209,15 @@
                     }
                 }
             }
+
+            &.disable-saves {
+                [data-action='roll-save'],
+                [data-action='reroll-save'],
+                button {
+                    pointer-events: none;
+                    opacity: 0.3;
+                }
+            }
         }
 
         + .pf2e-toolbelt-target-damage {
