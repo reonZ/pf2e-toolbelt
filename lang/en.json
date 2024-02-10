@@ -376,6 +376,10 @@
             "no-coins": {
                 "label": "Receive No Coins",
                 "tooltip": "When an item is sold, no coins will be added to this merchant."
+            },
+            "infinite-stocks": {
+                "label": "Infinite Stocks",
+                "tooltip": "The merchant's stocks will never run out."
             }
         },
         "unnamed": "Unnamed"

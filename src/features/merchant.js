@@ -6,7 +6,7 @@ import { getSetting } from "../shared/settings";
 
 const ITEM_PREPARE_DERIVED_DATA =
 	"CONFIG.Item.documentClass.prototype.prepareDerivedData";
-const LOOT_TRANSFERT_ITEM_TO_ACTOR =
+const LOOT_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor";
 
 export function registerMerchant() {
@@ -28,8 +28,8 @@ export function registerMerchant() {
 				"WRAPPER",
 			);
 			registerWrapper(
-				LOOT_TRANSFERT_ITEM_TO_ACTOR,
-				lootTranfertItemToActor,
+				LOOT_TRANSFER_ITEM_TO_ACTOR,
+				lootTranferItemToActor,
 				"OVERRIDE",
 			);
 		},
@@ -41,13 +41,21 @@ async function renderLootSheetPF2e(sheet, html) {
 	if (!actor?.isMerchant) return;
 
 	const maxRatio = 5;
-	const { noCoins = false, priceRatio = 1 } = getFlag(actor, "merchant") ?? {};
+	const ratioStep = 0.1;
+	const {
+		noCoins = false,
+		priceRatio = 1,
+		infiniteStocks = false,
+	} = getFlag(actor, "merchant") ?? {};
 
 	const template = await renderTemplate(templatePath("merchant/sheet"), {
 		noCoins,
+		infiniteStocks,
 		priceRatio: {
 			value: Math.clamped(priceRatio, 0, maxRatio),
 			max: maxRatio,
+			min: ratioStep,
+			step: ratioStep,
 		},
 		actorUUID: actor.uuid,
 		i18n: subLocalize("merchant"),
@@ -55,27 +63,49 @@ async function renderLootSheetPF2e(sheet, html) {
 	});
 
 	html.find(".sheet-sidebar .editor").before(template);
+
+	if (infiniteStocks) {
+		html.find(".content .sheet-body .coinage .wealth h3:last span").html("-");
+		html
+			.find(".content .sheet-body [data-item-types]")
+			.filter("[data-item-types!=treasure]")
+			.find(".quantity a")
+			.remove();
+		html.find(".content .sheet-body .total-bulk span").html(
+			game.i18n.format("PF2E.Actor.Inventory.TotalBulk", {
+				bulk: "-",
+			}),
+		);
+	}
 }
 
 function itemPrepareDerivedData(wrapped) {
 	wrapped();
 
 	try {
-		if (!this.isOfType("physical")) return;
+		if (!this.isOfType("physical") || this.isOfType("treasure")) return;
 
 		const actor = this.actor;
 		if (!actor?.isMerchant) return;
 
-		const priceRatio = getFlag(actor, "merchant.priceRatio");
-		if (priceRatio == null || priceRatio === 1) return;
+		const flags = getFlag(actor, "merchant");
+		if (!flags) return;
 
-		this.system.price.value = this.system.price.value.scale(priceRatio);
+		const { priceRatio, infiniteStocks } = flags;
+
+		if (typeof priceRatio === "number" && priceRatio !== 1) {
+			this.system.price.value = this.system.price.value.scale(priceRatio);
+		}
+
+		if (typeof infiniteStocks === "boolean" && infiniteStocks) {
+			this.system.quantity = 9999;
+		}
 	} catch (error) {
 		wrapperError("merchant", ITEM_PREPARE_DERIVED_DATA);
 	}
 }
 
-async function lootTranfertItemToActor(
+async function lootTranferItemToActor(
 	targetActor,
 	item,
 	quantity,
