@@ -1,3 +1,9 @@
+# 1.39.1
+
+-   `Better Merchant` updates:
+    -   fixed players not being able to buy items
+    -   fixed trying to modify html that doesn't exist on players client
+
 # 1.39.0
 
 -   `Better Merchant` updates:
@@ -13,7 +19,7 @@
 -   `Multi Cast` updates:
     -   fixed the popup title not containing the actor's name
 -   `Target Token Helper` updates:
-    -   optimized the `Block` button behavior for the target rows
+    -   optimized the `Block` button behaviour for the target rows
 
 # 1.38.0
 
