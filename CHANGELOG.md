@@ -1,7 +1,24 @@
+# 1.39.0
+
+-   `Better Merchant` updates:
+    -   added a new `Pull from Browser` combo of buttons
+        -   the magnifier one will open the browser to the `Equipment` tab
+        -   the other button will offer the possibility to add the resulting list of items from the browser
+        -   the browser doesn't need to be rendered on screen
+        -   the browser doesn't need to have the `Equipment` tab opened
+        -   the `Equipment` tab needs to have been generated at one point before
+        -   a limit of `100` items to be added has been set
+    -   properly clamp the price ratio both in the displayed value and in its actual calculation
+    -   fixed quantity `-` and `+` buttons always being removed
+-   `Multi Cast` updates:
+    -   fixed the popup title not containing the actor's name
+-   `Target Token Helper` updates:
+    -   optimized the `Block` button behavior for the target rows
+
 # 1.38.0
 
 -   `Better Merchant` updates:
-    -   added a infinity icon which enables `Infinite Stock` for a singular item
+    -   added an infinity icon which enables `Infinite Stock` for a singular item
         -   the `Infinite Stocks` option must be disabled for the icon to show up
         -   the merchant's inventory and bulk will be nullified in the sheet as soon as one item has infinite stock
         -   same issue about item quantity applies with this
