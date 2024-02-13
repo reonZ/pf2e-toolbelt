@@ -14,7 +14,7 @@ export class MultiCast extends Application {
 	}
 
 	get title() {
-		return localize("title", this.spell);
+		return localize("title", this.#message.item);
 	}
 
 	get template() {
