@@ -34,9 +34,13 @@ export function registerMerchant() {
 				requiresReload: true,
 			},
 		],
-		init: () => {
+		init: (isGM) => {
 			if (!getSetting("merchant")) return;
-			Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
+
+			if (isGM) {
+				Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
+			}
+
 			registerWrapper(
 				ITEM_PREPARE_DERIVED_DATA,
 				itemPrepareDerivedData,
@@ -174,23 +178,12 @@ function itemPrepareDerivedData(wrapped) {
 	}
 }
 
-async function lootTranferItemToActor(
-	targetActor,
-	item,
-	quantity,
-	containerId,
-	newStack = false,
-) {
+async function lootTranferItemToActor(...args) {
+	const [targetActor, item, quantity, containerId, newStack = false] = args;
 	const thisSuper = Actor.implementation.prototype;
 
 	if (!(this.isOwner && targetActor.isOwner)) {
-		return thisSuper.transferItemToActor(
-			targetActor,
-			item,
-			quantity,
-			containerId,
-			newStack,
-		);
+		return thisSuper.transferItemToActor.apply(this, args);
 	}
 	if (this.isMerchant && item.isOfType("physical")) {
 		const itemValue = game.pf2e.Coins.fromPrice(item.price, quantity);
@@ -198,13 +191,7 @@ async function lootTranferItemToActor(
 			if (!getFlag(this, "merchant.noCoins")) {
 				await item.actor.inventory.addCoins(itemValue);
 			}
-			return thisSuper.transferItemToActor(
-				targetActor,
-				item,
-				quantity,
-				containerId,
-				newStack,
-			);
+			return thisSuper.transferItemToActor.apply(this, args);
 		}
 		if (this.isLoot) {
 			throw ErrorPF2e("Loot transfer failed");
@@ -212,13 +199,7 @@ async function lootTranferItemToActor(
 		return null;
 	}
 
-	return thisSuper.transferItemToActor(
-		targetActor,
-		item,
-		quantity,
-		containerId,
-		newStack,
-	);
+	return thisSuper.transferItemToActor.apply(this, args);
 }
 
 function opentEquipmentTab() {
