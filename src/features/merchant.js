@@ -68,7 +68,7 @@ async function renderLootSheetPF2e(sheet, html) {
 			step: RATIO_STEP,
 		},
 		actorUUID: actor.uuid,
-		i18n: localize,
+		...localize.i18n,
 		flagPath: (str) => flagPath("merchant", str),
 	});
 

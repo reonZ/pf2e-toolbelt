@@ -2,7 +2,7 @@
     <div class="form-group">
         <label for="{{actorUUID}}-price-ratio">
             <span>{{i18n 'ratio.label'}}</span>
-            <i class="fa-solid fa-info-circle" data-tooltip="{{i18n.path 'ratio.tooltip'}}"></i>
+            <i class="fa-solid fa-info-circle" data-tooltip="{{i18Path 'ratio.tooltip'}}"></i>
         </label>
         <input type="number" id="{{actorUUID}}-price-ratio" name="{{flagPath 'priceRatio'}}"
             value="{{priceRatio.value}}" min="{{priceRatio.min}}" max="{{priceRatio.max}}"
@@ -11,7 +11,7 @@
     <div class="form-group">
         <label for="{{actorUUID}}-no-coins">
             <span>{{i18n 'no-coins.label'}}</span>
-            <i class="fa-solid fa-info-circle" data-tooltip="{{i18n.path 'no-coins.tooltip'}}"></i>
+            <i class="fa-solid fa-info-circle" data-tooltip="{{i18Path 'no-coins.tooltip'}}"></i>
         </label>
         <input type="checkbox" id="{{actorUUID}}-no-coins" name="{{flagPath 'noCoins'}}" {{checked
             noCoins}}>
@@ -20,7 +20,7 @@
         <label for="{{actorUUID}}-infinite-stocks">
             <span>{{i18n 'infinite-stocks.label'}}</span>
             <i class="fa-solid fa-info-circle"
-                data-tooltip="{{i18n.path 'infinite-stocks.tooltip'}}"></i>
+                data-tooltip="{{i18Path 'infinite-stocks.tooltip'}}"></i>
         </label>
         <input type="checkbox" id="{{actorUUID}}-infinite-stocks"
             name="{{flagPath 'infiniteStocks'}}" {{checked infiniteStocks}}>
