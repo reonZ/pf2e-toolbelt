@@ -1,4 +1,4 @@
-import { calculateDistanceBetweenPoints, getElementIndex } from "./misc";
+import { calculateDistanceBetweenPoints, getElementIndex } from "module-api";
 
 /** @type {DraggableData | null} */
 let dragData = null;

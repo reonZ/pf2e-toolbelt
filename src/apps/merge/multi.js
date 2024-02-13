@@ -1,6 +1,5 @@
-import { bindOnPreCreateSpellDamageChatMessage } from "../../shared/chat";
-import { subLocalize } from "../../shared/localize";
-import { templatePath } from "../../shared/path";
+import { subLocalize, templatePath } from "module-api";
+import { bindOnPreCreateSpellDamageChatMessage } from "../../chat";
 
 const localize = subLocalize("merge.multi");
 
@@ -24,7 +23,7 @@ export class MultiCast extends Application {
 
 	getData(options) {
 		return mergeObject(super.getData(options), {
-			i18n: localize,
+			i18n: localize.template,
 		});
 	}
 

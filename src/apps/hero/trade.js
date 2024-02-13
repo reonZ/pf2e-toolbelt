@@ -1,7 +1,5 @@
+import { getOwner, subLocalize, templatePath } from "module-api";
 import { getHeroActions, sendTradeRequest } from "../../features/hero";
-import { subLocalize } from "../../shared/localize";
-import { templatePath } from "../../shared/path";
-import { getCharacterOwner, getOwner } from "../../shared/user";
 
 const localize = subLocalize("hero.templates.trade");
 
@@ -49,7 +47,7 @@ export class Trade extends Application {
 			),
 			actions: getHeroActions(this.actor),
 			targetActions: this.target ? getHeroActions(this.target) : [],
-			i18n: localize,
+			i18n: localize.template,
 		});
 	}
 
@@ -93,10 +91,7 @@ export class Trade extends Application {
 			return;
 		}
 
-		const user =
-			getCharacterOwner(this.target, true) ??
-			getOwner(this.target, true) ??
-			game.users.activeGM;
+		const user = getOwner(this.target) ?? game.users.activeGM;
 
 		if (!user) {
 			localize.warn("no-user");

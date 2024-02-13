@@ -1,21 +1,25 @@
+import {
+	chatUUID,
+	getSetting,
+	isGMOnline,
+	localize,
+	registerUpstreamHook,
+	warn,
+} from "module-api";
+import { isPlayedActor } from "../actor";
 import { MoveLootPopup } from "../apps/giveth/popup";
-import { isPlayedActor } from "../shared/actor";
-import { chatUUID } from "../shared/chat";
-import { registerUpstreamHook } from "../shared/hook";
-import { localize } from "../shared/localize";
-import { warn } from "../shared/notification";
-import { getSetting } from "../shared/settings";
-import { socketOff, socketOn, socketEmit } from "../shared/socket";
-import { isActiveGM, isGMOnline } from "../shared/user";
+import { registerSocket } from "../socket";
 
 let enabled = false;
 let CANVAS_HOOK = null;
+
+const socket = registerSocket("giveth", onSocket);
 
 export function registerGiveth() {
 	return {
 		settings: [
 			{
-				name: "giveth",
+				key: "giveth",
 				type: String,
 				default: "disabled",
 				choices: ["disabled", "enabled", "no-message"],
@@ -33,22 +37,24 @@ function setup(value) {
 	const isGM = game.user.isGM;
 
 	if (value === "disabled" && enabled) {
-		if (isGM) socketOff(onSocket);
-		else if (CANVAS_HOOK) {
+		if (isGM) {
+			socket.disable();
+		} else if (CANVAS_HOOK) {
 			Hooks.off("dropCanvasData", CANVAS_HOOK);
 			CANVAS_HOOK = null;
 		}
 		enabled = false;
 	} else if (value !== "disabled" && !enabled) {
-		if (isGM) socketOn(onSocket);
-		else if (!CANVAS_HOOK)
+		if (isGM) {
+			socket.activate();
+		} else if (!CANVAS_HOOK) {
 			CANVAS_HOOK = registerUpstreamHook("dropCanvasData", onDropCanvasData);
+		}
 		enabled = true;
 	}
 }
 
 function onSocket(packet) {
-	if (!isActiveGM()) return;
 	if (packet.type === "giveth-condition") takethCondition(packet);
 	else if (packet.type === "giveth-effect") takethEffect(packet);
 	else takethPhysical(packet);
@@ -106,14 +112,14 @@ function giveth(origin, target, item, value) {
 	} else {
 		const uuid = isIndex ? `Compendium.${item.pack}.${item._id}` : item.uuid;
 		if (item.type === "condition") {
-			socketEmit({
+			socket.emit({
 				type: "giveth-condition",
 				targetId,
 				value: value ?? 1,
 				uuid,
 			});
 		} else {
-			socketEmit({
+			socket.emit({
 				type: "giveth-effect",
 				targetId,
 				uuid,
@@ -123,7 +129,7 @@ function giveth(origin, target, item, value) {
 }
 
 function sendPhysicalRequest(ownerId, targetId, itemId, qty, stack) {
-	socketEmit({
+	socket.emit({
 		type: "giveth-physical",
 		ownerId,
 		targetId,

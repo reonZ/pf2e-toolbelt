@@ -1,8 +1,7 @@
+import { getFlag, getSetting } from "module-api";
+import { isPlayedActor } from "../actor";
 import { EditLores } from "../apps/knowledges/lores";
-import { isPlayedActor } from "../shared/actor";
-import { getFlag } from "../shared/flags";
-import { createHook } from "../shared/hook";
-import { getSetting } from "../shared/settings";
+import { createHook } from "../hooks";
 
 const setHook = createHook("renderNPCSheetPF2e", renderNPCSheetPF2e);
 
@@ -10,7 +9,7 @@ export function registerKnowledges() {
 	return {
 		settings: [
 			{
-				name: "knowledges",
+				key: "knowledges",
 				type: Boolean,
 				default: false,
 				onChange: (value) => setHook(value),

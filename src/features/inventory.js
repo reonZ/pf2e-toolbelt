@@ -1,31 +1,30 @@
 import {
-	getCharacterSheetTab,
-	isPlayedActor,
-	registerCharacterSheetExtraTab,
-	unregisterCharacterSheetExtraTab,
-} from "../shared/actor";
-import { closestInside, makeDraggable } from "../shared/draggable";
-import { getFlag, setFlag } from "../shared/flags";
-import { createHook } from "../shared/hook";
-import {
 	canBeInvested,
+	error,
+	getElementIndex,
+	getFlag,
+	getInMemory,
+	getSetting,
 	hasWornSlot,
+	indexIsValid,
 	isHandwrapsOfMightyBlows,
 	isHeld,
 	isInvestedOrWornAs,
 	isOneHanded,
 	isTwoHanded,
 	itemCarryUpdate,
-} from "../shared/item";
-import {
-	getElementIndex,
-	getInMemory,
-	indexIsValid,
+	render,
+	setFlag,
 	setInMemory,
-} from "../shared/misc";
-import { error } from "../shared/notification";
-import { templatePath } from "../shared/path";
-import { getSetting } from "../shared/settings";
+} from "module-api";
+import {
+	getCharacterSheetTab,
+	isPlayedActor,
+	registerCharacterSheetExtraTab,
+	unregisterCharacterSheetExtraTab,
+} from "../actor";
+import { closestInside, makeDraggable } from "../draggable";
+import { createHook } from "../hooks";
 
 const closeHook = createHook(
 	"closeCharacterSheetPF2e",
@@ -38,7 +37,7 @@ export function registerInventory() {
 	return {
 		settings: [
 			{
-				name: "inventory",
+				key: "inventory",
 				type: Boolean,
 				default: false,
 				scope: "client",
@@ -392,7 +391,7 @@ async function onItemDetails(event, actor, itemElement, sidebar) {
 		const item = getItemFromElement(actor, itemElement);
 		if (!item) return;
 
-		details = await renderTemplate(templatePath("inventory/details"), { item });
+		details = await render("inventory/details", { item });
 		itemElement.dataset.details = details;
 	}
 

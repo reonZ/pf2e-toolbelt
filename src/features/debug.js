@@ -1,5 +1,5 @@
-import { createHook } from "../shared/hook";
-import { getSetting } from "../shared/settings";
+import { getSetting } from "module-api";
+import { createHook } from "../hooks";
 
 const appHook = createHook("renderApplication", onRender);
 const actorHook = createHook("renderActorSheet", onRender);
@@ -9,7 +9,7 @@ export function registerDebug() {
 	return {
 		settings: [
 			{
-				name: "debug",
+				key: "debug",
 				type: Boolean,
 				default: false,
 				config: false,

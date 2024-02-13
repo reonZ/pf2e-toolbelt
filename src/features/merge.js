@@ -1,14 +1,16 @@
+import {
+	MODULE,
+	compareArrays,
+	getDamageRollClass,
+	getFlag,
+	getSetting,
+	latestChatMessages,
+	localize,
+	render,
+	warn,
+} from "module-api";
 import { MultiCast } from "../apps/merge/multi";
-import { MODULE_ID } from "../module";
-import { getChatMessageClass, latestChatMessages } from "../shared/chat";
-import { getFlag } from "../shared/flags";
-import { createHook } from "../shared/hook";
-import { localize } from "../shared/localize";
-import { compareArrays } from "../shared/misc";
-import { warn } from "../shared/notification";
-import { templatePath } from "../shared/path";
-import { getDamageRollClass } from "../shared/pf2e/classes";
-import { getSetting } from "../shared/settings";
+import { createHook } from "../hooks";
 
 const setHook = createHook(
 	"renderChatMessage",
@@ -20,14 +22,14 @@ export function registerMerge() {
 	return {
 		settings: [
 			{
-				name: "merge-damage",
+				key: "merge-damage",
 				type: Boolean,
 				default: false,
 				scope: "client",
 				onChange: (value) => setHook(value, "multi-cast"),
 			},
 			{
-				name: "multi-cast",
+				key: "multi-cast",
 				type: Boolean,
 				default: false,
 				scope: "client",
@@ -136,7 +138,7 @@ function renderDamage(message, html) {
 async function splitDamages(event, message) {
 	const sources = getFlag(message, "merge.data").flatMap((data) => data.source);
 	await removeChatMessages(message.id);
-	await getChatMessageClass().createDocuments(sources);
+	await ChatMessage.implementation.createDocuments(sources);
 }
 
 async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
@@ -179,7 +181,7 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
 
 	groups.at(-1).isLastGroup = true;
 
-	const flavor = await renderTemplate(templatePath("merge/merged"), {
+	const flavor = await render("merge/merged", {
 		groups,
 		hasMultipleGroups: groups.length > 1,
 	});
@@ -289,12 +291,12 @@ async function mergeDamages(event, origin, other, { actorUUID, targetUUIDs }) {
 
 	await removeChatMessages(origin.id, other.id);
 
-	await getChatMessageClass().create({
+	await ChatMessage.implementation.create({
 		flavor,
 		type: CONST.CHAT_MESSAGE_TYPES.ROLL,
 		speaker: origin.speaker,
 		flags: {
-			[MODULE_ID]: {
+			[MODULE.id]: {
 				merge: {
 					actor: actorUUID,
 					targets: targetUUIDs,

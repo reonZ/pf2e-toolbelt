@@ -1,5 +1,4 @@
-import { subLocalize } from "../shared/localize";
-import { templatePath } from "../shared/path";
+import { render, subLocalize } from "module-api";
 
 const localize = subLocalize("macros.condition");
 
@@ -41,8 +40,8 @@ export async function permaConditionEffect(actor) {
 			.map((condition) => condition.slug),
 	);
 
-	const content = await renderTemplate(templatePath("macros/condition"), {
-		i18n: localize,
+	const content = await render("macros/condition", {
+		i18n: localize.template,
 		conditions: Array.from(
 			new Set(conditions.sort((a, b) => a.name.localeCompare(b.name))),
 		),

@@ -1,4 +1,4 @@
-import { getSetting } from "./settings";
+import { getSetting } from "module-api";
 
 export function createHook(event, listener, callback = () => {}) {
 	let HOOK = null;
@@ -32,16 +32,4 @@ export function createChoicesHook(event, listener, callback = () => {}) {
 
 		if (!skipCallback) callback(value);
 	};
-}
-
-export function registerUpstreamHook(hook, fn) {
-	const id = Hooks.on(hook, fn);
-	const index = Hooks.events[hook].findIndex((x) => x.id === id);
-
-	if (index !== 0) {
-		const [hooked] = Hooks.events[hook].splice(index, 1);
-		Hooks.events[hook].unshift(hooked);
-	}
-
-	return id;
 }

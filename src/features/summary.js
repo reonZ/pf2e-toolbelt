@@ -1,18 +1,21 @@
-import { MODULE_ID } from "../module";
+import {
+	getSetting,
+	localeCompare,
+	localizePath,
+	ordinalString,
+	spellSlotGroupIdToNumber,
+	subLocalize,
+} from "module-api";
 import {
 	registerCharacterSheetExtraTab,
 	unregisterCharacterSheetExtraTab,
-} from "../shared/actor";
-import { subLocalize } from "../shared/localize";
-import { localeCompare, ordinalString } from "../shared/misc";
-import { spellSlotGroupIdToNumber } from "../shared/pf2e/misc";
-import { getSetting } from "../shared/settings";
+} from "../actor";
 
 export function registerSpellsSummary() {
 	return {
 		settings: [
 			{
-				name: "summary",
+				key: "summary",
 				type: String,
 				default: "disabled",
 				scope: "client",
@@ -288,7 +291,7 @@ async function getData(actor) {
 					type: consumable
 						? `PF2E.Item.Consumable.Category.${consumable.category}`
 						: isCharge
-						  ? `${MODULE_ID}.summary.staff`
+						  ? localizePath("summary.staff")
 						  : isInnate
 							  ? "PF2E.PreparationTypeInnate"
 							  : isSpontaneous

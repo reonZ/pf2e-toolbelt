@@ -1,16 +1,24 @@
+import {
+	chatUUID,
+	error,
+	getSetting,
+	isActiveGM,
+	localize,
+	refreshCharacterSheets,
+	render,
+	setSetting,
+	subLocalize,
+	templatePath,
+	warn,
+} from "module-api";
+import { isPlayedActor } from "../actor";
 import { Trade } from "../apps/hero/trade";
-import { isPlayedActor } from "../shared/actor";
-import { chatUUID } from "../shared/chat";
-import { createHook } from "../shared/hook";
-import { localize, subLocalize } from "../shared/localize";
-import { refreshCharacterSheets } from "../shared/misc";
-import { error, warn } from "../shared/notification";
-import { templatePath } from "../shared/path";
-import { getSetting, setSetting } from "../shared/settings";
-import { socketEmit, socketOff, socketOn } from "../shared/socket";
-import { isActiveGM } from "../shared/user";
+import { createHook } from "../hooks";
+import { registerSocket } from "../socket";
 
 const MODULE_ID = "pf2e-hero-actions";
+
+const socket = registerSocket("hero-action", onSocket);
 
 const setHook = createHook(
 	"renderCharacterSheetPF2e",
@@ -23,31 +31,29 @@ const TABLE_UUID = "Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK";
 
 const TABLE_ICON = "systems/pf2e/icons/features/feats/heroic-recovery.webp";
 
-let SOCKET = false;
-
 export function registerHeroActions() {
 	return {
 		name: "heroActions",
 		settings: [
 			{
-				name: "hero",
+				key: "hero",
 				type: Boolean,
 				default: false,
 				onChange: (value) => setHook(value),
 			},
 			{
-				name: "hero-table",
+				key: "hero-table",
 				type: String,
 				default: "",
 			},
 			{
-				name: "hero-trade",
+				key: "hero-trade",
 				type: Boolean,
 				default: false,
 				onChange: () => refreshCharacterSheets(),
 			},
 			{
-				name: "hero-private",
+				key: "hero-private",
 				type: Boolean,
 				default: false,
 			},
@@ -75,13 +81,7 @@ export function registerHeroActions() {
 }
 
 function setupSocket(value) {
-	if (value && !SOCKET) {
-		socketOn(onSocket);
-		SOCKET = true;
-	} else if (!value && SOCKET) {
-		socketOff(onSocket);
-		SOCKET = false;
-	}
+	socket.toggle(value);
 }
 
 function onSocket(packet) {
@@ -119,7 +119,7 @@ async function addActionsToSheet(html, actor) {
 	const isOwner = actor.isOwner;
 	const localize = subLocalize("hero.templates.heroActions");
 
-	const template = await renderTemplate(templatePath("hero/sheet"), {
+	const template = await render("hero/sheet", {
 		owner: isOwner,
 		list: actions,
 		canUse: diff >= 0 && isOwner,
@@ -127,7 +127,7 @@ async function addActionsToSheet(html, actor) {
 		canTrade: getSetting("hero-trade"),
 		mustDiscard: diff < 0,
 		diff: Math.abs(diff),
-		i18n: (key, { hash }) => localize(key, hash),
+		i18n: localize.template,
 	});
 
 	html
@@ -469,7 +469,7 @@ export function sendTradeRequest(trade) {
 		return;
 	}
 
-	socketEmit({
+	socket.emit({
 		...trade,
 		type: "hero.trade-request",
 	});
@@ -481,7 +481,7 @@ function acceptRequest(trade) {
 		return;
 	}
 
-	socketEmit({
+	socket.emit({
 		...trade,
 		type: "hero.trade-accept",
 	});
@@ -552,7 +552,7 @@ function sendTradeError({ sender, receiver }, error = "trade-error") {
 
 	if (!users.size) return;
 
-	socketEmit({
+	socket.emit({
 		type: "hero.trade-error",
 		users: Array.from(users),
 		error,
@@ -598,7 +598,7 @@ function rejectRequest(trade) {
 		return;
 	}
 
-	socketEmit({
+	socket.emit({
 		...trade,
 		type: "hero.trade-reject",
 	});
@@ -640,7 +640,7 @@ async function createTable() {
 	};
 
 	const data = {
-		content: await renderTemplate(template, { i18n: localize }),
+		content: await renderTemplate(template, { i18n: localize.template }),
 		title: localize("title"),
 		buttons,
 		default: "yes",
@@ -745,7 +745,7 @@ async function removeHeroActions() {
 	const data = {
 		content: await renderTemplate(template, {
 			actors: game.actors.filter((x) => x.type === "character"),
-			i18n: localize,
+			i18n: localize.template,
 		}),
 		title: localize("title"),
 		buttons,

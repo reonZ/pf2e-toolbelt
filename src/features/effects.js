@@ -1,6 +1,5 @@
-import { createHook } from "../shared/hook";
-import { localize } from "../shared/localize";
-import { getSetting } from "../shared/settings";
+import { getSetting, localize } from "module-api";
+import { createHook } from "../hooks";
 
 const setHook = createHook(
 	"renderEffectsPanel",
@@ -12,14 +11,14 @@ export function registerEffectsPanelHelper() {
 	return {
 		settings: [
 			{
-				name: "effect-remove",
+				key: "effect-remove",
 				type: Boolean,
 				default: false,
 				scope: "client",
 				onChange: (value) => setHook(value, "condition-sheet"),
 			},
 			{
-				name: "condition-sheet",
+				key: "condition-sheet",
 				type: Boolean,
 				default: false,
 				scope: "client",

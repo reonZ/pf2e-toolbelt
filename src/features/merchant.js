@@ -1,8 +1,13 @@
-import { getFlag, setFlag } from "../shared/flags";
-import { registerWrapper, wrapperError } from "../shared/libwrapper";
-import { subLocalize } from "../shared/localize";
-import { flagPath, templatePath } from "../shared/path";
-import { getSetting } from "../shared/settings";
+import {
+	flagPath,
+	getFlag,
+	getSetting,
+	registerWrapper,
+	render,
+	setFlag,
+	subLocalize,
+} from "module-api";
+import { wrapperError } from "../misc";
 
 const ITEM_PREPARE_DERIVED_DATA =
 	"CONFIG.Item.documentClass.prototype.prepareDerivedData";
@@ -13,7 +18,7 @@ export function registerMerchant() {
 	return {
 		settings: [
 			{
-				name: "merchant",
+				key: "merchant",
 				type: Boolean,
 				default: false,
 				requiresReload: true,
@@ -51,7 +56,7 @@ async function renderLootSheetPF2e(sheet, html) {
 
 	const localize = subLocalize("merchant");
 
-	const sheetTemplate = await renderTemplate(templatePath("merchant/sheet"), {
+	const sheetTemplate = await render("merchant/sheet", {
 		noCoins,
 		infiniteStocks,
 		priceRatio: {
@@ -61,8 +66,8 @@ async function renderLootSheetPF2e(sheet, html) {
 			step: ratioStep,
 		},
 		actorUUID: actor.uuid,
-		i18n: localize,
-		flagPath: (str) => flagPath(`merchant.${str}`),
+		i18n: localize.template,
+		flagPath: (str) => flagPath("merchant", str),
 	});
 
 	html.find(".sheet-sidebar .editor").before(sheetTemplate);

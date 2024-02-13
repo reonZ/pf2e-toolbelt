@@ -1,5 +1,5 @@
-import { createHook } from "../shared/hook";
-import { getSetting } from "../shared/settings";
+import { getSetting } from "module-api";
+import { createHook } from "../hooks";
 
 const setHook = createHook("updateCombat", updateCombat);
 
@@ -7,13 +7,13 @@ export function registerUntarget() {
 	return {
 		settings: [
 			{
-				name: "force-untarget",
+				key: "force-untarget",
 				type: Boolean,
 				default: false,
 				onChange: setup,
 			},
 			{
-				name: "untarget",
+				key: "untarget",
 				type: Boolean,
 				default: false,
 				scope: "client",

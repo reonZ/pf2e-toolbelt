@@ -1,6 +1,6 @@
-import { registerActorPreparedEmbeddedDocuments } from "../shared/actor";
-import { registerWrapper, wrapperError } from "../shared/libwrapper";
-import { getSetting } from "../shared/settings";
+import { getSetting, registerWrapper } from "module-api";
+import { registerActorPreparedEmbeddedDocuments } from "../actor";
+import { wrapperError } from "../misc";
 
 const TREASURE_PREPARE_BASE_DATA =
 	"CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData";
@@ -9,13 +9,13 @@ export function registerNobulk() {
 	return {
 		settings: [
 			{
-				name: "nobulk",
+				key: "nobulk",
 				type: Boolean,
 				default: false,
 				requiresReload: true,
 			},
 			{
-				name: "nobulk-coins",
+				key: "nobulk-coins",
 				type: Boolean,
 				default: false,
 				requiresReload: true,

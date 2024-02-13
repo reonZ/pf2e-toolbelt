@@ -1,12 +1,15 @@
-import { isPlayedActor } from "../shared/actor";
-import { createHook } from "../shared/hook";
-import { getItemWithSourceId, hasItemWithSourceId } from "../shared/item";
-import { subLocalize } from "../shared/localize";
-import { refreshCharacterSheets } from "../shared/misc";
-import { info } from "../shared/notification";
-import { templatePath } from "../shared/path";
-import { getSetting } from "../shared/settings";
-import { isActiveOwner } from "../shared/user";
+import {
+	getItemWithSourceId,
+	getSetting,
+	hasItemWithSourceId,
+	info,
+	isOwner,
+	refreshCharacterSheets,
+	render,
+	subLocalize,
+} from "module-api";
+import { isPlayedActor } from "../actor";
+import { createHook } from "../hooks";
 
 const setSheetHook = createHook(
 	"renderCharacterSheetPF2e",
@@ -65,7 +68,7 @@ export function registerStances() {
 		name: "stances",
 		settings: [
 			{
-				name: "stances",
+				key: "stances",
 				type: Boolean,
 				default: false,
 				scope: "client",
@@ -147,7 +150,7 @@ async function renderCharacterSheetPF2e(sheet, html) {
 		".sheet-body .sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter]",
 	);
 	const options = tab.find(".actions-options");
-	const template = await renderTemplate(templatePath("stances/sheet"), {
+	const template = await render("stances/sheet", {
 		stances,
 		canUseStances: inCombat && !actor.isDead,
 		i18n: subLocalize("stances"),
@@ -267,7 +270,7 @@ function deleteCombatant(combatant) {
 	const actor = getActorFromCombatant(combatant);
 	if (!actor) return;
 
-	if (!game.user.isGM && isActiveOwner(actor)) {
+	if (!game.user.isGM && isOwner(actor)) {
 		const effects = getStancesEffects(actor).map((effect) => effect.id);
 		if (effects.length) actor.deleteEmbeddedDocuments("Item", effects);
 	}
@@ -279,7 +282,7 @@ function createCombatant(combatant) {
 	const actor = getActorFromCombatant(combatant);
 	if (!actor) return;
 
-	if (!game.user.isGM && isActiveOwner(actor)) checkForSavant(actor);
+	if (!game.user.isGM && isOwner(actor)) checkForSavant(actor);
 
 	refreshCharacterSheets(actor);
 }
@@ -313,9 +316,9 @@ async function openStancesMenu(actor, stances) {
 
 	new Dialog({
 		title: localize("title"),
-		content: await renderTemplate(templatePath("stances/menu"), {
+		content: await render("stances/menu", {
 			stances,
-			i18n: localize,
+			i18n: localize.template,
 		}),
 		buttons: {
 			yes: {

@@ -1,3 +1,13 @@
+import {
+	MODULE,
+	getModule,
+	isUserGM,
+	localize,
+	registerModule,
+	registerSetting,
+	socketOn,
+	warn,
+} from "module-api";
 import { registerArp } from "./features/arp";
 import { registerDebug } from "./features/debug";
 import { registerEffectsPanelHelper } from "./features/effects";
@@ -15,10 +25,9 @@ import { registerTargetTokenHelper } from "./features/target";
 import { registerUnided } from "./features/unided";
 import { registerUntarget } from "./features/untarget";
 import { permaConditionEffect } from "./macros/condition";
-import { MODULE_ID } from "./module";
-import { localize } from "./shared/localize";
-import { warn } from "./shared/notification";
-import { isUserGM } from "./shared/user";
+import { onSocket } from "./socket";
+
+registerModule("pf2e-toolbelt");
 
 const FEATURES = [
 	registerArp(),
@@ -46,33 +55,14 @@ let firstClientSetting = null;
 Hooks.once("init", () => {
 	const isGM = isUserGM();
 
-	const settings = FEATURES.flatMap(({ settings = [] }) =>
-		settings.map((setting) => {
-			const key = setting.name;
-
-			if (setting.choices) {
-				setting.choices = setting.choices.reduce((choices, choice) => {
-					choices[choice] = settingPath(key, `choices.${choice}`);
-					return choices;
-				}, {});
-			}
-
-			setting.key = key;
-			setting.scope ??= "world";
-			setting.config ??= true;
-			setting.name = settingPath(key, "name");
-			setting.hint = settingPath(key, "hint");
-
-			return setting;
-		}),
+	const settings = FEATURES.flatMap(({ settings }) => settings ?? []);
+	const worldSettings = settings.filter(
+		({ scope }) => !scope || scope === "world",
 	);
-
-	const [worldSettings, clientSettings] = ["world", "client"].map((scope) =>
-		settings.filter((settings) => settings.scope === scope),
-	);
+	const clientSettings = settings.filter(({ scope }) => scope === "client");
 
 	for (const setting of [worldSettings, clientSettings].flat()) {
-		game.settings.register(MODULE_ID, setting.key, setting);
+		registerSetting(setting);
 	}
 
 	if (isGM) {
@@ -80,7 +70,7 @@ Hooks.once("init", () => {
 		Hooks.on("renderSettingsConfig", renderSettingsConfig);
 	}
 
-	const module = game.modules.get(MODULE_ID);
+	const module = getModule();
 	module.api = {
 		macros: {
 			permaConditionEffect,
@@ -88,7 +78,7 @@ Hooks.once("init", () => {
 	};
 
 	for (const feature of FEATURES) {
-		const { init, conflicts = [], api, name } = feature;
+		const { init, conflicts = [], api, name, socket } = feature;
 
 		if (isGM) {
 			for (const id of conflicts) {
@@ -104,6 +94,8 @@ Hooks.once("init", () => {
 
 		if (!feature.conflicting && init) init(isGM);
 	}
+
+	socketOn(onSocket);
 });
 
 Hooks.once("ready", () => {
@@ -120,15 +112,13 @@ Hooks.once("ready", () => {
 	}
 });
 
-function settingPath(setting, key) {
-	return `${MODULE_ID}.settings.${setting}.${key}`;
-}
-
 function renderSettingsConfig(_, html) {
 	if (!firstClientSetting) return;
 
+	const id = MODULE.id;
 	const group = html.find(
-		`.tab[data-tab=${MODULE_ID}] [data-setting-id="${MODULE_ID}.${firstClientSetting}"]`,
+		`.tab[data-tab=${id}] [data-setting-id="${id}.${firstClientSetting}"]`,
 	);
+
 	group.before(`<h3>${localize("settings.client")}</h3>`);
 }

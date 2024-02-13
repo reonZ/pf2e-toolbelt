@@ -1,6 +1,4 @@
-import { getFlag, setFlag } from "../../shared/flags";
-import { subLocalize } from "../../shared/localize";
-import { templatePath } from "../../shared/path";
+import { getFlag, setFlag, subLocalize, templatePath } from "module-api";
 
 const localize = subLocalize("knowledges.editLore");
 
@@ -27,7 +25,7 @@ export class EditLores extends FormApplication {
 		return mergeObject(super.getData(options), {
 			unspecified: getFlag(actor, "knowledges.unspecified") ?? "",
 			specific: getFlag(actor, "knowledges.specific") ?? "",
-			i18n: localize,
+			i18n: localize.template,
 		});
 	}
 

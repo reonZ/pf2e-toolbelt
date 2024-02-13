@@ -1,30 +1,30 @@
-import { MODULE_ID } from "../module";
 import {
-	bindOnPreCreateSpellDamageChatMessage,
-	hasEmbeddedSpell,
-	latestChatMessages,
-} from "../shared/chat";
-import { roll3dDice } from "../shared/dicesonice";
-import {
-	getFlag,
-	moduleFlagUpdate,
-	setFlag,
-	updateSourceFlag,
-} from "../shared/flags";
-import { createChoicesHook, createHook } from "../shared/hook";
-import { localize, subLocalize } from "../shared/localize";
-import { deleteInMemory, getInMemory, setInMemory } from "../shared/misc";
-import { warn } from "../shared/notification";
-import { templatePath } from "../shared/path";
-import {
+	DegreeOfSuccess,
 	applyDamageFromMessage,
+	deleteInMemory,
+	getFlag,
+	getInMemory,
+	getSetting,
+	getTemplateTokens,
+	hasEmbeddedSpell,
+	isActiveGM,
+	latestChatMessages,
+	localize,
+	localizePath,
+	moduleFlagUpdate,
 	onClickShieldBlock,
-} from "../shared/pf2e/chat";
-import { DegreeOfSuccess } from "../shared/pf2e/success";
-import { choiceSettingIsEnabled, getSetting } from "../shared/settings";
-import { socketEmit, socketOff, socketOn } from "../shared/socket";
-import { getTemplateTokens } from "../shared/template";
-import { isActiveGM } from "../shared/user";
+	render,
+	setFlag,
+	setInMemory,
+	subLocalize,
+	toggleOffShieldBlock,
+	updateSourceFlag,
+	warn,
+} from "module-api";
+import { bindOnPreCreateSpellDamageChatMessage } from "../chat";
+import { createChoicesHook, createHook } from "../hooks";
+import { roll3dDice } from "../misc";
+import { registerSocket } from "../socket";
 
 const SAVES = {
 	fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
@@ -75,19 +75,19 @@ const setCreateTemplateHook = createHook(
 	createMeasuredTemplate,
 );
 
-let SOCKET = false;
+const socket = registerSocket("target", onSocket);
 
 export function registerTargetTokenHelper() {
 	return {
 		settings: [
 			{
-				name: "target",
+				key: "target",
 				type: Boolean,
 				default: false,
 				requiresReload: true,
 			},
 			{
-				name: "target-client",
+				key: "target-client",
 				type: String,
 				default: "disabled",
 				choices: ["disabled", "small", "big"],
@@ -96,7 +96,7 @@ export function registerTargetTokenHelper() {
 					setRenderMessageHook(value && getSetting("target")),
 			},
 			{
-				name: "target-template",
+				key: "target-template",
 				type: Boolean,
 				default: false,
 				scope: "client",
@@ -112,7 +112,7 @@ export function registerTargetTokenHelper() {
 		ready: (isGM) => {
 			if (!getSetting("target")) return;
 
-			setHooks(true, isGM);
+			setHooks(isGM);
 			for (const { message, html } of latestChatMessages(10)) {
 				renderChatMessage(message, html);
 			}
@@ -120,19 +120,13 @@ export function registerTargetTokenHelper() {
 	};
 }
 
-function setHooks(value, isGM) {
-	setPrecreateMessageHook(value);
-	setRenderMessageHook(value);
-	setCreateTemplateHook(value && getSetting("target-template"));
+function setHooks(isGM) {
+	setPrecreateMessageHook(true);
+	setRenderMessageHook(true);
+	setCreateTemplateHook(getSetting("target-template"));
 
 	if (isGM) {
-		if (value && !SOCKET) {
-			socketOn(onSocket);
-			SOCKET = true;
-		} else if (!value && SOCKET) {
-			socketOff(onSocket);
-			SOCKET = false;
-		}
+		socket.activate();
 	}
 }
 
@@ -165,7 +159,7 @@ function getChatLogEntryContext(_, data) {
 
 	data.unshift({
 		icon: '<i class="fa-solid fa-dice-d20"></i>',
-		name: `${MODULE_ID}.target.chat.context.saves.name`,
+		name: localizePath("target.chat.context.saves.name"),
 		condition: (html) => {
 			const data = getMessageData(html);
 			return !!data?.inMemory.canRollSave?.length;
@@ -201,8 +195,8 @@ async function createMeasuredTemplate(template, _, userId) {
 
 	const data = {
 		title: item?.name || localize("title"),
-		content: await renderTemplate(templatePath("target/template-menu"), {
-			i18n: localize,
+		content: await render("target/template-menu", {
+			i18n: localize.template,
 			noSelf: !self,
 		}),
 		buttons: {
@@ -347,8 +341,7 @@ function preCreateChatMessage(message) {
 }
 
 async function renderChatMessage(message, html) {
-	const clientEnabled = choiceSettingIsEnabled("target-client");
-	deleteInMemory(message, "target.save");
+	const clientEnabled = getSetting("target-client") !== "disabled";
 	deleteInMemory(message, "target.canRollSave");
 
 	if (clientEnabled && message.isDamageRoll) {
@@ -630,7 +623,7 @@ async function getMessageData(message) {
 			? localize("target.chat.save.dcWithValue", { dc: save.dc })
 			: "";
 		save.tooltipLabel = `${saveLabel} ${saveDC}`;
-		save.tooltip = await renderTemplate(templatePath("target/save-tooltip"), {
+		save.tooltip = await render("target/save-tooltip", {
 			check: save.tooltipLabel,
 		});
 	}
@@ -688,7 +681,7 @@ async function getMessageData(message) {
 					return {
 						...saveFlag,
 						canReroll,
-						tooltip: await renderTemplate(templatePath("target/save-tooltip"), {
+						tooltip: await render("target/save-tooltip", {
 							i18n: subLocalize("target.chat.save"),
 							check: save.tooltipLabel,
 							result,
@@ -725,7 +718,7 @@ async function getMessageData(message) {
 					target: target,
 					save: templateSave,
 					applied: getFlag(message, `target.applied.${targetId}`),
-					template: await renderTemplate(templatePath("target/row-header"), {
+					template: await render("target/row-header", {
 						name,
 						isGM,
 						isOwner,
@@ -898,7 +891,7 @@ async function rerollSave(event, message, { dc }) {
 	if (game.user.isGM || message.isAuthor) {
 		updateMessageSave(packet);
 	} else {
-		socketEmit(packet);
+		socket.emit(packet);
 	}
 }
 
@@ -981,7 +974,7 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 	if (isAuthor) {
 		updateMessageSave(packet);
 	} else {
-		socketEmit(packet);
+		socket.emit(packet);
 	}
 }
 
@@ -1028,7 +1021,16 @@ async function onTargetButton(event, message) {
 	const type = btn.dataset.action;
 
 	if (type === "target-shield-block") {
-		onClickShieldBlock(target, btn, message.element);
+		const messageId = message.id;
+
+		if (!btn.classList.contains("shield-activated")) {
+			toggleOffShieldBlock(messageId);
+		}
+
+		requestAnimationFrame(() => {
+			onClickShieldBlock(target, btn, message.element);
+		});
+
 		return;
 	}
 
@@ -1043,46 +1045,53 @@ async function onTargetButton(event, message) {
 					  ? 2
 					  : 3;
 
-	applyDamageFromMessage(target, {
+	applyDamageFromMessage({
 		message,
 		multiplier,
 		addend: 0,
 		promptModifier: event.shiftKey,
 		rollIndex: Number(rollIndex),
+		tokens: [target],
+		onDamageApplied,
 	});
 }
 
-export function onDamageApplied(message, tokenId, rollIndex) {
+export function onDamageApplied(message, tokens, rollIndex) {
 	const updates = {};
-	moduleFlagUpdate(updates, `target.applied.${tokenId}.${rollIndex}`, true);
 
-	const splashRollIndex = getFlag(message, "target.splashIndex");
-	if (splashRollIndex !== undefined) {
-		const regularRollIndex = splashRollIndex === 0 ? 1 : 0;
+	for (const token of tokens) {
+		const tokenId = token.id;
 
-		if (rollIndex === splashRollIndex) {
-			moduleFlagUpdate(
-				updates,
-				`target.applied.${tokenId}.${regularRollIndex}`,
-				true,
-			);
-		} else {
-			moduleFlagUpdate(
-				updates,
-				`target.applied.${tokenId}.${splashRollIndex}`,
-				true,
-			);
+		moduleFlagUpdate(updates, `target.applied.${tokenId}.${rollIndex}`, true);
 
-			const targetsFlag = getFlag(message, "target.targets") ?? [];
-			for (const target of targetsFlag) {
-				const targetId = target.token?.split(".").at(-1);
-				if (targetId === tokenId) continue;
+		const splashRollIndex = getFlag(message, "target.splashIndex");
+		if (splashRollIndex !== undefined) {
+			const regularRollIndex = splashRollIndex === 0 ? 1 : 0;
 
+			if (rollIndex === splashRollIndex) {
 				moduleFlagUpdate(
 					updates,
-					`target.applied.${targetId}.${regularRollIndex}`,
+					`target.applied.${tokenId}.${regularRollIndex}`,
 					true,
 				);
+			} else {
+				moduleFlagUpdate(
+					updates,
+					`target.applied.${tokenId}.${splashRollIndex}`,
+					true,
+				);
+
+				const targetsFlag = getFlag(message, "target.targets") ?? [];
+				for (const target of targetsFlag) {
+					const targetId = target.token?.split(".").at(-1);
+					if (targetId === tokenId) continue;
+
+					moduleFlagUpdate(
+						updates,
+						`target.applied.${targetId}.${regularRollIndex}`,
+						true,
+					);
+				}
 			}
 		}
 	}
@@ -1090,7 +1099,7 @@ export function onDamageApplied(message, tokenId, rollIndex) {
 	if (game.user.isGM || message.isAuthor) {
 		updateMessageApplied({ message, updates });
 	} else {
-		socketEmit({
+		socket.emit({
 			type: "target.update-applied",
 			message: message.id,
 			updates,

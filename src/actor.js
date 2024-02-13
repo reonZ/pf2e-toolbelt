@@ -1,6 +1,10 @@
-import { registerWrapper, unregisterWrapper } from "./libwrapper";
-import { getInMemory, setInMemory } from "./misc";
-import { templatePath } from "./path";
+import {
+	getInMemory,
+	registerWrapper,
+	render,
+	setInMemory,
+	unregisterWrapper,
+} from "module-api";
 
 const sheetTabsRegistered = {
 	wrapperIds: [],
@@ -121,10 +125,7 @@ async function characterSheetInnerRender(wrapped, data) {
 			getCharacterSheetTab(element, tabName),
 		);
 
-		const template = await renderTemplate(
-			templatePath(templateFolder),
-			tabData,
-		);
+		const template = await render(templateFolder, tabData);
 
 		if (onRender) {
 			await onRender(actor, this, inner);

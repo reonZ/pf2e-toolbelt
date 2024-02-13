@@ -17,5 +17,8 @@
     "devDependencies": {
         "@biomejs/biome": "1.5.x",
         "esbuild": "0.x"
+    },
+    "dependencies": {
+        "module-api": "github:reonZ/module-api"
     }
 }

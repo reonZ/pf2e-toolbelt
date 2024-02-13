@@ -1,11 +1,19 @@
-import { MODULE_ID } from "../module";
-import { isPlayedActor } from "../shared/actor";
-import { getFlag, setFlag, unsetFlag } from "../shared/flags";
-import { registerWrapper } from "../shared/libwrapper";
-import { subLocalize } from "../shared/localize";
-import { isInstanceOf } from "../shared/misc";
-import { templatePath } from "../shared/path";
-import { getSetting } from "../shared/settings";
+import {
+	deleteInMemory,
+	flagPath,
+	getFlag,
+	getFlagProperty,
+	getInMemory,
+	getSetting,
+	isInstanceOf,
+	registerWrapper,
+	render,
+	setFlag,
+	setInMemory,
+	subLocalize,
+	unsetFlag,
+} from "module-api";
+import { isPlayedActor } from "../actor";
 
 const ACTOR_PREPARE_DATA = "CONFIG.Actor.documentClass.prototype.prepareData";
 const DOCUMENT_SHEET_RENDER_INNER = "DocumentSheet.prototype._renderInner";
@@ -14,7 +22,7 @@ export function registerShare() {
 	return {
 		settings: [
 			{
-				name: "share",
+				key: "share",
 				type: String,
 				default: "disabled",
 				choices: ["disabled", "enabled", "force"],
@@ -58,10 +66,10 @@ async function documentSheetRenderInner(wrapped, ...args) {
 			label: actor.name,
 		}));
 
-	const group = await renderTemplate(templatePath("share/master"), {
+	const group = await render("share/master", {
 		masters,
 		master: getFlag(actor, "share.master"),
-		selectPath: `flags.${MODULE_ID}.share.master`,
+		selectPath: flagPath("share.master"),
 		i18n: subLocalize("share.templates.master"),
 	});
 
@@ -83,7 +91,7 @@ function deleteActor(actor) {
 }
 
 function preUpdateActor(actor, updates) {
-	const shareFlag = getProperty(updates, `flags.${MODULE_ID}.share`);
+	const shareFlag = getFlagProperty(updates, "share");
 	if (shareFlag?.master) {
 		const master = game.actors.get(shareFlag.master);
 		if (isValidMaster(master)) {
@@ -107,7 +115,7 @@ function preUpdateActor(actor, updates) {
 function updateActor(actor, updates, options, userId) {
 	const isOriginalUser = game.user.id === userId;
 
-	const shareFlag = getShareFlag(updates);
+	const shareFlag = getFlagProperty(updates, "share");
 	if (shareFlag?.master !== undefined) {
 		const slave = actor;
 
@@ -186,45 +194,29 @@ function transfertHpData(from, to) {
 	to._modifiers = from._modifiers.slice();
 }
 
-function getShareFlag(doc) {
-	return getProperty(doc, `flags.${MODULE_ID}.share`);
-}
-
 function getSlaves(actor) {
-	return getModuleProperty(actor, "slaves") ?? new Collection();
+	return getInMemory(actor, "share.slaves") ?? new Collection();
 }
 
 function setMaster(actor, master) {
-	setModuleProperty(actor, "master", master);
+	return setInMemory(actor, "share.master", master);
 }
 
 function unsetMaster(actor) {
-	deleteModuleProperty(actor, "master");
+	return deleteInMemory(actor, "share.master");
 }
 
 function getMaster(actor) {
-	return getModuleProperty(actor, "master");
+	return getInMemory(actor, "share.master");
 }
 
 function isValidMaster(actor) {
 	return actor && actor.type === "character" && !getMaster(actor);
 }
 
-function getModuleProperty(doc, path) {
-	return getProperty(doc, `modules.${MODULE_ID}.share.${path}`);
-}
-
-function setModuleProperty(doc, path, value) {
-	setProperty(doc, `modules.${MODULE_ID}.share.${path}`, value);
-}
-
-function deleteModuleProperty(doc, path) {
-	delete doc.modules?.[MODULE_ID]?.share?.[path];
-}
-
 function addSlaveToMaster(master, slave) {
 	const slaves = getSlaves(master);
-	setModuleProperty(master, "slaves", slaves.set(slave.id, slave));
+	return setInMemory(master, "share.slaves", slaves.set(slave.id, slave));
 }
 
 function removeSlaveFromMaster(slave) {

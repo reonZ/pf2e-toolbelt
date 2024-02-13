@@ -1,4 +1,4 @@
-import { getSetting } from "../shared/settings";
+import { getSetting } from "module-api";
 
 let CREATE_HOOK = null;
 let UPDATE_HOOK = null;
@@ -7,7 +7,7 @@ export function registerUnided() {
 	return {
 		settings: [
 			{
-				name: "unided",
+				key: "unided",
 				type: String,
 				default: "disabled",
 				choices: ["disabled", "create", "all"],

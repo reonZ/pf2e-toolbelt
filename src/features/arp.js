@@ -1,7 +1,5 @@
-import { HANDWRAPS_SLUG } from "../shared/item";
-import { registerWrapper, wrapperError } from "../shared/libwrapper";
-import { info } from "../shared/notification";
-import { choiceSettingIsEnabled, getSetting } from "../shared/settings";
+import { HANDWRAPS_SLUG, getSetting, info, registerWrapper } from "module-api";
+import { wrapperError } from "../misc";
 
 const PREPARE_WEAPON_DATA =
 	"CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData";
@@ -17,7 +15,7 @@ export function registerArp() {
 	return {
 		settings: [
 			{
-				name: "auto-runes",
+				key: "auto-runes",
 				type: String,
 				default: "disabled",
 				choices: ["disabled", "force", "lower"],
@@ -50,7 +48,7 @@ export function registerArp() {
 		ready: (isGM) => {
 			if (
 				isGM &&
-				choiceSettingIsEnabled("auto-runes") &&
+				getSetting("auto-runes") !== "disabled" &&
 				game.settings.get("pf2e", "automaticBonusVariant") !== "noABP"
 			) {
 				game.settings.set("pf2e", "automaticBonusVariant", "noABP");
