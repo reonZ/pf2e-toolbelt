@@ -1,7 +1,9 @@
 import {
+	ErrorPF2e,
 	flagPath,
 	getFlag,
 	getSetting,
+	getTabResults,
 	registerWrapper,
 	render,
 	setFlag,
@@ -9,10 +11,14 @@ import {
 } from "module-api";
 import { wrapperError } from "../misc";
 
+const localize = subLocalize("merchant");
+
 const ITEM_PREPARE_DERIVED_DATA =
 	"CONFIG.Item.documentClass.prototype.prepareDerivedData";
 const LOOT_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor";
+
+const PULL_LIMIT = 100;
 
 const RATIO_MAX = 5;
 const RATIO_MIN = 0.1;
@@ -56,8 +62,6 @@ async function renderLootSheetPF2e(sheet, html) {
 		infiniteItems = {},
 	} = getFlag(actor, "merchant") ?? {};
 
-	const localize = subLocalize("merchant");
-
 	const sheetTemplate = await render("merchant/sheet", {
 		noCoins,
 		infiniteStocks,
@@ -72,7 +76,17 @@ async function renderLootSheetPF2e(sheet, html) {
 		flagPath: (str) => flagPath("merchant", str),
 	});
 
-	html.find(".sheet-sidebar .editor").before(sheetTemplate);
+	const sidebar = html.find(".sheet-sidebar");
+
+	sidebar.find(".editor").before(sheetTemplate);
+
+	const better = sidebar.find(".better-merchant");
+	better
+		.find("[data-action=pull-from-browser]")
+		.on("click", (event) => pullFromBrowser(event, actor));
+	better
+		.find("[data-action=open-equipment-tab]")
+		.on("click", (event) => opentEquipmentTab());
 
 	const itemTypes = html
 		.find(".content .sheet-body [data-item-types]")
@@ -203,6 +217,44 @@ async function lootTranferItemToActor(
 		containerId,
 		newStack,
 	);
+}
+
+function opentEquipmentTab() {
+	const browser = game.pf2e.compendiumBrowser;
+	const tab = browser.tabs.equipment;
+	const data = tab.isInitialized ? tab.filterData : undefined;
+	browser.openTab("equipment", data);
+}
+
+function pullFromBrowser(event, actor) {
+	const browser = game.pf2e.compendiumBrowser;
+
+	const tab = browser.tabs.equipment;
+	if (!tab.isInitialized) {
+		localize.warn("browser.noTab");
+		opentEquipmentTab();
+		return;
+	}
+
+	const nb = tab.currentIndex.length;
+	if (nb > PULL_LIMIT) {
+		localize.error("browser.limit", { limit: PULL_LIMIT });
+		opentEquipmentTab();
+		return;
+	}
+
+	const name = actor.name;
+	const msg = localize("browser.dialogMsg", { nb, name });
+
+	Dialog.confirm({
+		content: `<div style="margin-bottom: 0.5em;">${msg}</div>`,
+		title: `${name} - ${localize("browser.pull")}`,
+		yes: async (html) => {
+			localize.info("browser.wait");
+			const results = (await getTabResults(tab)).filter(Boolean);
+			actor.createEmbeddedDocuments("Item", results);
+		},
+	});
 }
 
 function clampRatio(value) {

@@ -383,6 +383,13 @@
             },
             "infinite-item": {
                 "tooltip": "Infinite Stock"
+            },
+            "browser": {
+                "pull": "Pull from Browser",
+                "limit": "The number of items to add exceeds the limit of <strong>{limit}</strong>!!",
+                "dialogMsg": "Pull the {nb} items into <strong>{name}</strong>'s inventory? The process can take several seconds depending on the amount of items.",
+                "noTab": "No <strong>Equipment</strong> tab was generated in the compendium browser.",
+                "wait": "Please wait for the items to be processed."
             }
         },
         "unnamed": "Unnamed"

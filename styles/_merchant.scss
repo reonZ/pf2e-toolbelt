@@ -9,6 +9,14 @@
                 flex: 0 4ch;
                 text-align: end;
             }
+
+            .pull-items {
+                display: flex;
+
+                button:last-child {
+                    flex: 0;
+                }
+            }
         }
     }
 
