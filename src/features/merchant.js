@@ -14,6 +14,10 @@ const ITEM_PREPARE_DERIVED_DATA =
 const LOOT_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor";
 
+const RATIO_MAX = 5;
+const RATIO_MIN = 0.1;
+const RATIO_STEP = 0.1;
+
 export function registerMerchant() {
 	return {
 		settings: [
@@ -45,8 +49,6 @@ async function renderLootSheetPF2e(sheet, html) {
 	const actor = sheet.actor;
 	if (!actor?.isMerchant) return;
 
-	const maxRatio = 5;
-	const ratioStep = 0.1;
 	const {
 		noCoins = false,
 		priceRatio = 1,
@@ -60,13 +62,13 @@ async function renderLootSheetPF2e(sheet, html) {
 		noCoins,
 		infiniteStocks,
 		priceRatio: {
-			value: Math.clamped(priceRatio, 0, maxRatio),
-			max: maxRatio,
-			min: ratioStep,
-			step: ratioStep,
+			value: clampRatio(priceRatio),
+			max: RATIO_MAX,
+			min: RATIO_MIN,
+			step: RATIO_STEP,
 		},
 		actorUUID: actor.uuid,
-		i18n: localize.template,
+		i18n: localize,
 		flagPath: (str) => flagPath("merchant", str),
 	});
 
@@ -136,7 +138,8 @@ function itemPrepareDerivedData(wrapped) {
 		const { priceRatio, infiniteStocks, infiniteItems = {} } = actorFlags;
 
 		if (typeof priceRatio === "number" && priceRatio !== 1) {
-			this.system.price.value = this.system.price.value.scale(priceRatio);
+			const ratio = clampRatio(priceRatio);
+			this.system.price.value = this.system.price.value.scale(ratio);
 		}
 
 		const isInfinite = (() => {
@@ -200,4 +203,8 @@ async function lootTranferItemToActor(
 		containerId,
 		newStack,
 	);
+}
+
+function clampRatio(value) {
+	return Math.clamped(value, RATIO_MIN, RATIO_MAX);
 }
