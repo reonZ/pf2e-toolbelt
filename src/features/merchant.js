@@ -37,9 +37,9 @@ export function registerMerchant() {
 		init: (isGM) => {
 			if (!getSetting("merchant")) return;
 
-			if (isGM) {
-				Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
-			}
+			Hooks.on("renderLootSheetPF2e", (...args) =>
+				renderLootSheetPF2e(isGM, ...args),
+			);
 
 			registerWrapper(
 				ITEM_PREPARE_DERIVED_DATA,
@@ -55,7 +55,7 @@ export function registerMerchant() {
 	};
 }
 
-async function renderLootSheetPF2e(sheet, html) {
+async function renderLootSheetPF2e(isGM, sheet, html) {
 	const actor = sheet.actor;
 	if (!actor?.isMerchant) return;
 
@@ -66,31 +66,33 @@ async function renderLootSheetPF2e(sheet, html) {
 		infiniteItems = {},
 	} = getFlag(actor, "merchant") ?? {};
 
-	const sheetTemplate = await render("merchant/sheet", {
-		noCoins,
-		infiniteStocks,
-		priceRatio: {
-			value: clampRatio(priceRatio),
-			max: RATIO_MAX,
-			min: RATIO_MIN,
-			step: RATIO_STEP,
-		},
-		actorUUID: actor.uuid,
-		...localize.i18n,
-		flagPath: (str) => flagPath("merchant", str),
-	});
+	if (isGM) {
+		const sheetTemplate = await render("merchant/sheet", {
+			noCoins,
+			infiniteStocks,
+			priceRatio: {
+				value: clampRatio(priceRatio),
+				max: RATIO_MAX,
+				min: RATIO_MIN,
+				step: RATIO_STEP,
+			},
+			actorUUID: actor.uuid,
+			...localize.i18n,
+			flagPath: (str) => flagPath("merchant", str),
+		});
 
-	const sidebar = html.find(".sheet-sidebar");
+		const sidebar = html.find(".sheet-sidebar");
 
-	sidebar.find(".editor").before(sheetTemplate);
+		sidebar.find(".editor").before(sheetTemplate);
 
-	const better = sidebar.find(".better-merchant");
-	better
-		.find("[data-action=pull-from-browser]")
-		.on("click", (event) => pullFromBrowser(event, actor));
-	better
-		.find("[data-action=open-equipment-tab]")
-		.on("click", (event) => opentEquipmentTab());
+		const better = sidebar.find(".better-merchant");
+		better
+			.find("[data-action=pull-from-browser]")
+			.on("click", (event) => pullFromBrowser(event, actor));
+		better
+			.find("[data-action=open-equipment-tab]")
+			.on("click", (event) => opentEquipmentTab());
+	}
 
 	const itemTypes = html
 		.find(".content .sheet-body [data-item-types]")
@@ -98,33 +100,36 @@ async function renderLootSheetPF2e(sheet, html) {
 
 	let hasInfiniteStock = infiniteStocks;
 
-	if (infiniteStocks) {
+	if (infiniteStocks && isGM) {
 		itemTypes.find(".quantity a").remove();
-	} else {
+	} else if (!infiniteStocks) {
 		const items = itemTypes.find("[data-item-id]");
 		const tooltip = localize.path("infinite-item.tooltip");
 
 		for (const item of items) {
 			const itemId = item.dataset.itemId;
 			const isInfinite = !!infiniteItems[itemId];
-			const toggle =
-				$(`<a data-action="toggle-infinite-item" data-tooltip="${tooltip}">
+
+			if (isGM) {
+				const toggle =
+					$(`<a data-action="toggle-infinite-item" data-tooltip="${tooltip}">
 	<i class="${isInfinite ? "fa-solid" : "fa-duotone"} fa-infinity"></i>
 </a>`)[0];
 
-			item.querySelector(".item-controls").prepend(toggle);
+				item.querySelector(".item-controls").prepend(toggle);
 
-			if (isInfinite) {
-				for (const el of item.querySelectorAll(".quantity a")) {
-					el.remove();
+				if (isInfinite) {
+					for (const el of item.querySelectorAll(".quantity a")) {
+						el.remove();
+					}
 				}
-			}
 
-			toggle.addEventListener("click", (event) => {
-				const flagKey = `merchant.infiniteItems.${itemId}`;
-				const current = getFlag(actor, flagKey) ?? false;
-				setFlag(actor, flagKey, !current);
-			});
+				toggle.addEventListener("click", (event) => {
+					const flagKey = `merchant.infiniteItems.${itemId}`;
+					const current = getFlag(actor, flagKey) ?? false;
+					setFlag(actor, flagKey, !current);
+				});
+			}
 
 			if (isInfinite) {
 				hasInfiniteStock = true;
