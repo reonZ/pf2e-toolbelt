@@ -110,8 +110,10 @@ async function renderLootSheetPF2e(sheet, html) {
 
 			item.querySelector(".item-controls").prepend(toggle);
 
-			for (const el of item.querySelectorAll(".quantity a")) {
-				el.remove();
+			if (isInfinite) {
+				for (const el of item.querySelectorAll(".quantity a")) {
+					el.remove();
+				}
 			}
 
 			toggle.addEventListener("click", (event) => {
