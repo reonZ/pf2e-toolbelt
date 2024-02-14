@@ -17,6 +17,8 @@ const ITEM_PREPARE_DERIVED_DATA =
 	"CONFIG.Item.documentClass.prototype.prepareDerivedData";
 const LOOT_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor";
+const ACTOR_TRANSFER_ITEM_TO_LOOT =
+	"CONFIG.PF2E.Actor.documentClasses.character.prototype.transferItemToActor";
 
 const PULL_LIMIT = 100;
 
@@ -49,6 +51,11 @@ export function registerMerchant() {
 			registerWrapper(
 				LOOT_TRANSFER_ITEM_TO_ACTOR,
 				lootTranferItemToActor,
+				"OVERRIDE",
+			);
+			registerWrapper(
+				ACTOR_TRANSFER_ITEM_TO_LOOT,
+				actorTranferItemToLoot,
 				"OVERRIDE",
 			);
 		},
@@ -196,6 +203,28 @@ async function lootTranferItemToActor(...args) {
 			if (!getFlag(this, "merchant.noCoins")) {
 				await item.actor.inventory.addCoins(itemValue);
 			}
+			return thisSuper.transferItemToActor.apply(this, args);
+		}
+		if (this.isLoot) {
+			throw ErrorPF2e("Loot transfer failed");
+		}
+		return null;
+	}
+
+	return thisSuper.transferItemToActor.apply(this, args);
+}
+
+async function actorTranferItemToLoot(...args) {
+	const [targetLoot, item, quantity, containerId, newStack = false] = args;
+	const thisSuper = Actor.implementation.prototype;
+
+	if (!(this.isOwner && targetLoot.isOwner)) {
+		return thisSuper.transferItemToActor.apply(this, args);
+	}
+	if (targetLoot.isMerchant && item.isOfType("physical")) {
+		const itemValue = game.pf2e.Coins.fromPrice(item.price, quantity/2);
+		if (await targetLoot.inventory.removeCoins(itemValue)) {
+			await item.actor.inventory.addCoins(itemValue);
 			return thisSuper.transferItemToActor.apply(this, args);
 		}
 		if (this.isLoot) {
