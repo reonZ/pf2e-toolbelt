@@ -1,0 +1,11 @@
+<input type="text" name="filter-name" value="{{value}}" placeholder="{{i18n 'placeholder'}}">
+<button type="button" data-action="save-filter">
+    {{#if editing}}
+    {{i18n 'save'}}
+    {{else}}
+    {{i18n 'create'}}
+    {{/if}}
+</button>
+<button type="button" data-action="reset-filter">
+    {{i18n 'reset'}}
+</button>

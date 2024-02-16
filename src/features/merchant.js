@@ -1,15 +1,24 @@
 import {
 	ErrorPF2e,
+	calculateItemPrice,
 	flagPath,
+	getActionGlyph,
+	getBrowserTab,
 	getFlag,
+	getHighestName,
 	getSetting,
 	getTabResults,
+	openBrowserTab,
 	registerWrapper,
 	render,
 	setFlag,
 	subLocalize,
 } from "module-api";
+import { BuyItems } from "../apps/merchant/buy";
 import { wrapperError } from "../misc";
+import { registerSocket } from "../socket";
+
+const socket = registerSocket("merchant", onSocket);
 
 const localize = subLocalize("merchant");
 
@@ -17,12 +26,18 @@ const ITEM_PREPARE_DERIVED_DATA =
 	"CONFIG.Item.documentClass.prototype.prepareDerivedData";
 const LOOT_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor";
+const ACTOR_TRANSFER_ITEM_TO_ACTOR =
+	"CONFIG.Actor.documentClass.prototype.transferItemToActor";
 
 const PULL_LIMIT = 100;
 
-const RATIO_MAX = 5;
-const RATIO_MIN = 0.1;
-const RATIO_STEP = 0.1;
+export const PRICE_RATIO = {
+	min: 0.1,
+	max: 5,
+	step: 0.1,
+	buy: 0.5,
+	sell: 1,
+};
 
 export function registerMerchant() {
 	return {
@@ -37,9 +52,11 @@ export function registerMerchant() {
 		init: (isGM) => {
 			if (!getSetting("merchant")) return;
 
-			Hooks.on("renderLootSheetPF2e", (...args) =>
-				renderLootSheetPF2e(isGM, ...args),
-			);
+			Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
+
+			if (isGM) {
+				socket.activate();
+			}
 
 			registerWrapper(
 				ITEM_PREPARE_DERIVED_DATA,
@@ -51,16 +68,31 @@ export function registerMerchant() {
 				lootTranferItemToActor,
 				"OVERRIDE",
 			);
+			registerWrapper(
+				ACTOR_TRANSFER_ITEM_TO_ACTOR,
+				actorTranferItemToActor,
+				"MIXED",
+			);
 		},
 	};
 }
 
-async function renderLootSheetPF2e(isGM, sheet, html) {
+function onSocket(packet, userId) {
+	switch (packet.type) {
+		case "buy-deal":
+			makeBuyDeal(packet, userId);
+			break;
+	}
+}
+
+async function renderLootSheetPF2e(sheet, html) {
 	const actor = sheet.actor;
 	if (!actor?.isMerchant) return;
 
+	const isGM = game.user.isGM;
 	const {
 		noCoins = false,
+		buyItems = false,
 		priceRatio = 1,
 		infiniteStocks = false,
 		infiniteItems = {},
@@ -69,12 +101,11 @@ async function renderLootSheetPF2e(isGM, sheet, html) {
 	if (isGM) {
 		const sheetTemplate = await render("merchant/sheet", {
 			noCoins,
+			buyItems,
 			infiniteStocks,
 			priceRatio: {
-				value: clampRatio(priceRatio),
-				max: RATIO_MAX,
-				min: RATIO_MIN,
-				step: RATIO_STEP,
+				...PRICE_RATIO,
+				value: clampPriceRatio("sell", priceRatio),
 			},
 			actorUUID: actor.uuid,
 			...localize.i18n,
@@ -91,7 +122,10 @@ async function renderLootSheetPF2e(isGM, sheet, html) {
 			.on("click", (event) => pullFromBrowser(event, actor));
 		better
 			.find("[data-action=open-equipment-tab]")
-			.on("click", (event) => opentEquipmentTab());
+			.on("click", (event) => openEquipmentTab());
+		better
+			.find("[data-action=open-buy-settings]")
+			.on("click", (event) => openBuySettings(event, actor));
 	}
 
 	const itemTypes = html
@@ -162,8 +196,8 @@ function itemPrepareDerivedData(wrapped) {
 
 		const { priceRatio, infiniteStocks, infiniteItems = {} } = actorFlags;
 
-		if (typeof priceRatio === "number" && priceRatio !== 1) {
-			const ratio = clampRatio(priceRatio);
+		if (priceRatio !== 1) {
+			const ratio = clampPriceRatio("sell", priceRatio);
 			this.system.price.value = this.system.price.value.scale(ratio);
 		}
 
@@ -184,7 +218,7 @@ function itemPrepareDerivedData(wrapped) {
 }
 
 async function lootTranferItemToActor(...args) {
-	const [targetActor, item, quantity, containerId, newStack = false] = args;
+	const [targetActor, item, quantity] = args;
 	const thisSuper = Actor.implementation.prototype;
 
 	if (!(this.isOwner && targetActor.isOwner)) {
@@ -207,27 +241,262 @@ async function lootTranferItemToActor(...args) {
 	return thisSuper.transferItemToActor.apply(this, args);
 }
 
-function opentEquipmentTab() {
-	const browser = game.pf2e.compendiumBrowser;
-	const tab = browser.tabs.equipment;
-	const data = tab.isInitialized ? tab.filterData : undefined;
-	browser.openTab("equipment", data);
+function getFilters(actor) {
+	return getFlag(actor, "merchant.filters")?.slice() ?? [];
+}
+
+export function getBuyAll(actor) {
+	return getFlag(actor, "merchant.buyAll") ?? true;
+}
+
+function createPurse(filter, itemPrice) {
+	const isDefault = filter instanceof Actor;
+	const purse = clampPurse(
+		isDefault ? getFlag(filter, "merchant.buyPurse") : filter.purse,
+	);
+	const ratio = clampPriceRatio(
+		"buy",
+		isDefault ? getFlag(filter, "merchant.buyRatio") : filter.priceRatio,
+	);
+	const price = itemPrice.scale(ratio);
+	const isInfinite = purse < 0;
+	const goldValue = price.goldValue;
+
+	return {
+		price,
+		ratio,
+		purse,
+		goldValue,
+		isInfinite,
+		canAfford: isInfinite || purse >= goldValue,
+	};
+}
+
+async function actorTranferItemToActor(wrapped, ...args) {
+	const [buyer, item, quantity = 1, containerId, newStack] = args;
+	if (
+		!buyer.isOfType("loot") ||
+		!buyer.isMerchant ||
+		!getFlag(buyer, "merchant.buyItems") ||
+		!this?.isOfType("character", "npc")
+	) {
+		return wrapped(...args);
+	}
+
+	const targetName = buyer.name;
+	const itemQuantity = Math.min(quantity, item.quantity);
+	const itemPrice = calculateItemPrice(item, itemQuantity);
+
+	const totalPurse = createPurse(buyer, itemPrice);
+	if (!totalPurse.canAfford) {
+		localize.info("buy.poor.total", { actor: targetName });
+		return;
+	}
+
+	let poor = false;
+	let selected = null;
+	const filters = getFilters(buyer);
+
+	for (const filter of filters) {
+		if (BuyItems.compareItemWithFilter(item, filter)) {
+			const purse = createPurse(filter, itemPrice);
+			if (!purse.canAfford) {
+				poor = true;
+				continue;
+			}
+			selected = filter.id;
+			break;
+		}
+	}
+
+	if (!selected && !getBuyAll(buyer)) {
+		localize.info(poor ? "buy.poor.filter" : "buy.refuse", {
+			actor: targetName,
+		});
+		return;
+	}
+
+	makeBuyDeal({
+		buyer,
+		seller: this,
+		item,
+		quantity,
+		containerId,
+		newStack,
+		filter: selected,
+	});
+}
+
+async function makeBuyDeal(options, senderId) {
+	const getDocument = async (option, Class) => {
+		return option instanceof Class ? option : await fromUuid(option);
+	};
+
+	const errorMsg = (err) => {
+		localize.error(
+			"An error occured while making a deal (F12 for more details in the console).",
+		);
+		throw new Error(err);
+	};
+
+	const buyer = await getDocument(options.buyer, Actor);
+	const seller = await getDocument(options.seller, Actor);
+	const item = await getDocument(options.item, Item);
+
+	if (!buyer || !seller || !item) {
+		const docs = ["buyer", "seller", "item"]
+			.map((x) => `${x}: ${options[x].uuid ?? options[x]}`)
+			.join(", ");
+		errorMsg(
+			`Missing actors or item to finish processing the buy deal, ${docs}.`,
+		);
+	}
+
+	if (!buyer.isOwner || !seller.isOwner) {
+		socket.emit({
+			...options,
+			type: "buy-deal",
+			buyer: buyer.uuid,
+			seller: seller.uuid,
+			item: item.uuid,
+		});
+		return;
+	}
+
+	// get item data
+	const itemQuantity = Math.min(options.quantity, item.quantity);
+	const itemPrice = calculateItemPrice(item, itemQuantity);
+
+	// get purse data
+	const filters = getFilters(buyer);
+	const filter = filters.find((f) => f.id === options.filter);
+	const totalPurse = createPurse(buyer, itemPrice);
+	const filterPurse = filter ? createPurse(filter, itemPrice) : undefined;
+
+	const purseError = (type, purse) => {
+		errorMsg(
+			`${buyer.uuid} can't buy ${itemQuantity} x ${item.uuid}, the ${type} gold purse doesn't have enough founds, need: ${goldPrice}, has: ${purse}.`,
+		);
+	};
+
+	if (!totalPurse.canAfford) {
+		purseError("total", totalPurse);
+	}
+	if (filterPurse && !filterPurse.canAfford) {
+		purseError("filter", filter.purse);
+	}
+
+	const selectedPurse = filterPurse ?? totalPurse;
+
+	// update seller's money
+	const newQuantity = item.quantity - itemQuantity;
+	await seller.inventory.addCoins(selectedPurse.price);
+
+	// update/delete seller's item
+	if (newQuantity < 1) {
+		await item.delete();
+	} else {
+		await item.update({ "system.quantity": newQuantity });
+	}
+
+	// update buyer's purses
+	const purseUpdates = {};
+	if (!totalPurse.isInfinite) {
+		purseUpdates[flagPath("merchant.buyPurse")] =
+			totalPurse.purse - selectedPurse.goldValue;
+	}
+	if (filterPurse && !filterPurse.isInfinite) {
+		filter.purse = filterPurse.purse - selectedPurse.goldValue;
+		purseUpdates[flagPath("merchant.filters")] = filters;
+	}
+	if (!isEmpty(purseUpdates)) {
+		await buyer.update(purseUpdates);
+	}
+
+	// add buyer's item
+	const newItemData = item.toObject();
+	newItemData.system.quantity = itemQuantity;
+	newItemData.system.equipped.carryType = "worn";
+	if ("invested" in newItemData.system.equipped) {
+		newItemData.system.equipped.invested = item.traits.has("invested")
+			? false
+			: null;
+	}
+	await buyer.addToInventory(newItemData, options.container, options.newStack);
+
+	// send message
+	createBuyMessage(
+		buyer,
+		seller,
+		item,
+		itemQuantity,
+		senderId,
+		selectedPurse.goldValue,
+	);
+}
+
+export async function createBuyMessage(
+	buyer,
+	seller,
+	item,
+	quantity,
+	senderId,
+	goldValue,
+) {
+	const buyerName = getHighestName(buyer);
+
+	const buyMessage = {
+		user: senderId ?? game.user.id,
+		speaker: ChatMessage.getSpeaker({
+			actor: buyer,
+			alias: buyerName,
+		}),
+		flavor: await renderTemplate(
+			"systems/pf2e/templates/chat/action/flavor.hbs",
+			{
+				action: {
+					title: "PF2E.Actions.Interact.Title",
+					subtitle: localize("sold.subtitle"),
+					glyph: getActionGlyph(1),
+				},
+				traits: [
+					{
+						name: "manipulate",
+						label: CONFIG.PF2E.featTraits.manipulate,
+						description: CONFIG.PF2E.traitsDescriptions.manipulate,
+					},
+				],
+			},
+		),
+		content: localize("sold.message", {
+			buyer: buyerName,
+			quantity,
+			item: item.name,
+			seller: getHighestName(seller),
+			price: parseFloat(goldValue.toFixed(2)),
+		}),
+		type: CONST.CHAT_MESSAGE_TYPES.EMOTE,
+	};
+
+	ChatMessage.implementation.create(buyMessage);
+}
+
+function openEquipmentTab() {
+	openBrowserTab("equipment", true);
 }
 
 function pullFromBrowser(event, actor) {
-	const browser = game.pf2e.compendiumBrowser;
-
-	const tab = browser.tabs.equipment;
+	const tab = getBrowserTab("equipment");
 	if (!tab.isInitialized) {
 		localize.warn("browser.noTab");
-		opentEquipmentTab();
+		openEquipmentTab();
 		return;
 	}
 
 	const nb = tab.currentIndex.length;
 	if (nb > PULL_LIMIT) {
 		localize.error("browser.limit", { limit: PULL_LIMIT });
-		opentEquipmentTab();
+		openEquipmentTab();
 		return;
 	}
 
@@ -245,6 +514,21 @@ function pullFromBrowser(event, actor) {
 	});
 }
 
-function clampRatio(value) {
-	return Math.clamped(value, RATIO_MIN, RATIO_MAX);
+function openBuySettings(event, actor) {
+	new BuyItems(actor).render(true);
+}
+
+/**
+ * @param {"buy"|"sell"} type
+ * @param {unknown} value
+ * @returns {number}
+ */
+export function clampPriceRatio(type, value) {
+	if (!Number.isNumeric(value)) return PRICE_RATIO[type];
+	return Math.clamped(value, PRICE_RATIO.min, PRICE_RATIO.max);
+}
+
+export function clampPurse(value) {
+	if (!Number.isNumeric(value)) return -1;
+	return Math.max(value, -1);
 }

@@ -384,8 +384,53 @@
             "infinite-item": {
                 "tooltip": "Infinite Stock"
             },
+            "buy": {
+                "empty": "You cannot save an empty filter.",
+                "label": "Buy Items",
+                "tooltip": "Enables the <strong>Buy Items</strong> feature.",
+                "title": "{name} - Buy Items",
+                "placeholder": "Filter Name",
+                "create": "Create Filter",
+                "created": "Filter <strong>{name}</strong> was created.",
+                "save": "Save Filter",
+                "saved": "Filter <strong>{name}</strong> was saved.",
+                "reset": "Reset Filter",
+                "up": "Increase Priority",
+                "down": "Lower Priority",
+                "edit": "Edit Filter",
+                "price": {
+                    "label": "Price Ratio",
+                    "tooltip": "Price ratio for this filter."
+                },
+                "purse": {
+                    "label": "Gold Purse",
+                    "tooltip": "Amount of gold to be spent on this filter (0 = no more money to buy, empty = infinit amount).<br><em>Note: Will not display anything smaller than gold but still keep track of it</em>.",
+                    "total": {
+                        "label": "Total Gold Purse",
+                        "tooltip": "Total amount of gold available on this merchant (0 = no more money to buy, empty = infinit amount).<br><em>Note: Will not display anything smaller than gold but still keep track of it</em>."
+                    }
+                },
+                "default": {
+                    "label": "Default Filter",
+                    "tooltip": "If disabled, items not matching any filter will be rejected by the merchant.",
+                    "all": "Any Item"
+                },
+                "delete": {
+                    "title": "Delete Filter",
+                    "content": "Are you sure you want to delete the <strong>{name}</strong> filter?"
+                },
+                "refuse": "<strong>{actor}</strong> isn't interested in buying your goods.",
+                "poor": {
+                    "total": "<strong>{actor}</strong> doesn't have the means to buy what you are selling.",
+                    "filter": "<strong>{actor}</strong> isn't willing to pay for what you are offering."
+                }
+            },
+            "sold": {
+                "subtitle": "Buy Item",
+                "message": "{buyer} buys {quantity} × {item} from {seller} for {price}gp."
+            },
             "browser": {
-                "pull": "Pull from Browser",
+                "pull": "From Browser",
                 "limit": "The number of items to add exceeds the limit of <strong>{limit}</strong>!!",
                 "dialogMsg": "Pull the {nb} items into <strong>{name}</strong>'s inventory? The process can take several seconds depending on the amount of items.",
                 "noTab": "No <strong>Equipment</strong> tab was generated in the compendium browser.",
