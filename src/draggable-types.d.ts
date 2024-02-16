@@ -15,6 +15,10 @@ declare type OptionsFilter<T> = {
 
 declare type DraggableOptions = {
     element: HTMLElement
+    /**
+     * unique identifier, can be useful to make sure the draggable was started
+     * in the current application render
+     */
     identifier?: string
     selector?: string
     filter?: string

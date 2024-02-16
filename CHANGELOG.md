@@ -1,3 +1,19 @@
+# 1.40.0
+
+-   added a new `Hero Actions - Give Actions` macro (it was already in the API)
+-   `Better Merchant` updates:
+    -   added a new `Buy Items` feature
+        -   once the feature enabled, it will block the transfer if the trade is rejected for any reason
+        -   it uses filters processed from top to bottom, they are the same as the ones in the compendium browser
+        -   a filter is selected if it matches the item data and have enough gold remaining in its allocated purse (or have infinite gold)
+        -   once a filter is selected, its ratio will be used for the purchase
+        -   if no filter is selected, the ratio of the default filter will be used unless the `All Items` setting is disabled, in that case, the buy will be rejected
+        -   if the total gold purse cannot afford the buy, the trade will be rejected
+        -   if the selected filter purse cannot afford the buy and the `All Items` setting is disabled, the trade will be rejected
+        -   the gold purse of the selected filter will see its amount deducted by the calculated price (unless infinite)
+        -   the total gold purse is always used to check if an item can be purchased (unless infinite)
+        -   the total gold purse is always deducted by the calculated price (unless infinite)
+
 # 1.39.1
 
 -   `Better Merchant` updates:

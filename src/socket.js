@@ -12,6 +12,8 @@ const registeredSockets = {};
  * @type {ModuleSocketFunction}
  */
 export function onSocket(packet, senderId) {
+	if (!packet.key) return;
+
 	const user = game.user;
 	if (user.id === senderId) return;
 
