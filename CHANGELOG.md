@@ -1,3 +1,8 @@
+# 1.40.1
+
+-   `Automatic Rune Progression` updates:
+    -   fixed check for handwraps being equipped/invested not always working depending on the order the data is processed by the system
+
 # 1.40.0
 
 -   added a new `Hero Actions - Give Actions` macro (it was already in the API)
