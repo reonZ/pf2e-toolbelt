@@ -95,13 +95,13 @@ function isValidWeapon(weapon) {
 
 	if (category === "unarmed" && slug !== HANDWRAPS_SLUG) {
 		return !!weapon.actor.itemTypes.weapon.find(
-			(weapon) =>
-				weapon.slug === HANDWRAPS_SLUG &&
-				weapon._source.system.category === "unarmed" &&
-				weapon._source.system.equipped.carryType === "worn" &&
-				weapon._source.system.equipped.inSlot === true &&
-				weapon._source.system.equipped.invested === true &&
-				weapon._source.system.identification.status === "identified",
+			(item) =>
+				item.slug === HANDWRAPS_SLUG &&
+				item._source.system.category === "unarmed" &&
+				item._source.system.equipped.carryType === "worn" &&
+				item._source.system.equipped.inSlot === true &&
+				item._source.system.equipped.invested === true &&
+				item._source.system.identification.status === "identified",
 		);
 	}
 
