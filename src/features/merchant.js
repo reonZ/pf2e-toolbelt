@@ -277,10 +277,29 @@ async function actorTranferItemToActor(wrapped, ...args) {
 	if (
 		!buyer.isOfType("loot") ||
 		!buyer.isMerchant ||
-		!getFlag(buyer, "merchant.buyItems") ||
-		!this?.isOfType("character", "npc")
+		!getFlag(buyer, "merchant.buyItems")
 	) {
 		return wrapped(...args);
+	}
+
+	const hasPlayerOwner = this.hasPlayerOwner;
+
+	switch (this.type) {
+		case "character":
+		case "party":
+			break;
+		case "loot":
+			if (!hasPlayerOwner || this.isMerchant) {
+				return wrapped(...args);
+			}
+			break;
+		case "npc":
+			if (!hasPlayerOwner) {
+				return wrapped(...args);
+			}
+			break;
+		default:
+			return wrapped(...args);
 	}
 
 	const targetName = buyer.name;
