@@ -1,3 +1,9 @@
+# 1.40.2
+
+-   `Better Merchant` updates:
+    -   added more actor types allowed to sell items (with conditions associated to them)
+    -   fixed filter data being modified while editing a filter and changind its traits
+
 # 1.40.1
 
 -   `Automatic Rune Progression` updates:
