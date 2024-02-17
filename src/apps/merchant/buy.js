@@ -377,7 +377,7 @@ export class BuyItems extends Application {
 
 		const filterData = getEquipmentTabData({
 			collapsed: true,
-			mergeWith: filter,
+			mergeWith: deepClone(filter),
 		});
 
 		this.tab.filterData = filterData;
