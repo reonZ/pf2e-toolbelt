@@ -1,9 +1,10 @@
-import { getSetting } from "module-api";
-import { createHook } from "../hooks";
+import { calledIfSetting, createHook } from "../misc";
 
-const appHook = createHook("renderApplication", onRender);
-const actorHook = createHook("renderActorSheet", onRender);
-const itemHook = createHook("renderItemSheet", onRender);
+const hooks = [
+	createHook("renderApplication", onRender),
+	createHook("renderActorSheet", onRender),
+	createHook("renderItemSheet", onRender),
+];
 
 export function registerDebug() {
 	return {
@@ -14,20 +15,17 @@ export function registerDebug() {
 				default: false,
 				config: false,
 				scope: "client",
-				onChange: (value) => setup(value),
+				onChange: setup,
 			},
 		],
-		init: () => {
-			setup();
-		},
+		init: calledIfSetting(setup, "debug"),
 	};
 }
 
 function setup(value) {
-	const enabled = value ?? getSetting("debug");
-	appHook(enabled);
-	actorHook(enabled);
-	itemHook(enabled);
+	for (const setHook of hooks) {
+		setHook(value);
+	}
 }
 
 function onRender(app, html) {

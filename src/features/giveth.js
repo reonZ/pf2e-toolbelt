@@ -1,19 +1,21 @@
 import {
+	MoveLootPopup,
 	chatUUID,
 	getSetting,
 	isGMOnline,
 	localize,
-	registerUpstreamHook,
+	transferItemToActor,
 	warn,
 } from "module-api";
 import { isPlayedActor } from "../actor";
-import { MoveLootPopup } from "../apps/giveth/popup";
-import { registerSocket } from "../socket";
+import { calledIfSetting, createHook, createSocket } from "../misc";
 
-let enabled = false;
-let CANVAS_HOOK = null;
+const setHook = createHook("dropCanvasData", dropCanvasData, {
+	isUpstream: true,
+	useChoices: true,
+});
 
-const socket = registerSocket("giveth", onSocket);
+const socket = createSocket("giveth", onSocket);
 
 export function registerGiveth() {
 	return {
@@ -27,30 +29,15 @@ export function registerGiveth() {
 			},
 		],
 		conflicts: ["pf2e-giveth"],
-		ready: (isGM) => {
-			if (getSetting("giveth") !== "disabled") setup(true);
-		},
+		ready: calledIfSetting(setup, "giveth"),
 	};
 }
 
 function setup(value) {
-	const isGM = game.user.isGM;
-
-	if (value === "disabled" && enabled) {
-		if (isGM) {
-			socket.disable();
-		} else if (CANVAS_HOOK) {
-			Hooks.off("dropCanvasData", CANVAS_HOOK);
-			CANVAS_HOOK = null;
-		}
-		enabled = false;
-	} else if (value !== "disabled" && !enabled) {
-		if (isGM) {
-			socket.activate();
-		} else if (!CANVAS_HOOK) {
-			CANVAS_HOOK = registerUpstreamHook("dropCanvasData", onDropCanvasData);
-		}
-		enabled = true;
+	if (game.user.isGM) {
+		socket.toggle(value);
+	} else {
+		setHook(value);
 	}
 }
 
@@ -60,7 +47,7 @@ function onSocket(packet) {
 	else takethPhysical(packet);
 }
 
-function onDropCanvasData(canvas, data) {
+function dropCanvasData(canvas, data) {
 	if (!isGMOnline()) return true;
 
 	const details = getDetailsFromData(data);
@@ -97,16 +84,25 @@ function giveth(origin, target, item, value) {
 
 	if (!isIndex && item.isOfType("physical")) {
 		const qty = item.quantity;
-		if (qty < 1) return warn("giveth.notification.zero");
 
-		if (qty === 1)
+		if (qty < 1) {
+			return warn("giveth.notification.zero");
+		}
+		if (qty === 1) {
 			return sendPhysicalRequest(ownerId, targetId, item.id, 1, false);
+		}
+
+		const stackable = target.inventory.findStackableItem(item._source);
 
 		new MoveLootPopup(
 			origin,
-			{ maxQuantity: qty, lockStack: false, isPurchase: false },
-			(qty, stack) => {
-				sendPhysicalRequest(ownerId, targetId, item.id, qty, stack);
+			{
+				quantity: { max: qty, default: qty },
+				lockStack: !stackable,
+				isPurchase: false,
+			},
+			(quantity, newStack) => {
+				sendPhysicalRequest(ownerId, targetId, item.id, quantity, newStack);
 			},
 		).render(true);
 	} else {
@@ -200,28 +196,19 @@ async function takethPhysical({ itemId, ownerId, qty, stack, targetId }) {
 	const item = owner.items.get(itemId);
 	if (!item) return;
 
-	qty = Math.min(qty, item.quantity);
-	const newQty = item.quantity - qty;
-
-	const source = item.toObject();
-	source.system.quantity = qty;
-	source.system.equipped.carryType = "worn";
-	if (item.isOfType("physical") && "invested" in source.system.equipped) {
-		source.system.equipped.invested = item.traits.has("invested")
-			? false
-			: null;
-	}
-
-	const newItem = await target.addToInventory(source, undefined, stack);
-	if (!newItem) return;
-
-	if (newQty < 1) item.delete();
-	else item.update({ "system.quantity": newQty });
+	const itemQuantity = Math.min(qty, item.quantity);
+	const newItem = await transferItemToActor(
+		target,
+		item,
+		itemQuantity,
+		undefined,
+		stack,
+	);
 
 	if (getSetting("giveth") === "no-message") return;
 
 	let content = chatUUID(newItem.uuid, newItem.name, !newItem.isIdentified);
-	if (qty > 1) content += ` x${qty}`;
+	if (itemQuantity > 1) content += ` x${itemQuantity}`;
 
 	const giveth = localize("giveth.giveth", {
 		target: target.name,

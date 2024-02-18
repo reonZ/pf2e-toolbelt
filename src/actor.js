@@ -11,14 +11,6 @@ const sheetTabsRegistered = {
 	tabs: new Collection(),
 };
 
-const preparedEmbeddedRegistered = {
-	wrapperIds: [],
-	listeners: new Map(),
-};
-
-const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =
-	"CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments";
-
 const CHARACTER_SHEET_INNER_RENDER =
 	"CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._renderInner";
 const CHARACTER_SHEET_RENDER =
@@ -28,19 +20,6 @@ const CHARACTER_SHEET_ACTIVE_LISTENERS =
 
 export function isPlayedActor(actor) {
 	return actor && !actor.pack && actor.id && game.actors.has(actor.id);
-}
-
-export function registerActorPreparedEmbeddedDocuments(feature, listener) {
-	if (!preparedEmbeddedRegistered.wrapperIds.length) {
-		preparedEmbeddedRegistered.wrapperIds = [
-			registerWrapper(
-				ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
-				actorPrepareEmbeddedDocuments,
-				"WRAPPER",
-			),
-		];
-	}
-	preparedEmbeddedRegistered.listeners.set(feature, listener);
 }
 
 export function registerCharacterSheetExtraTab(options) {
@@ -67,24 +46,12 @@ export function unregisterCharacterSheetExtraTab(tabName) {
 	}
 }
 
-function actorPrepareEmbeddedDocuments(wrapped, ...args) {
-	wrapped(...args);
-
-	for (const [feature, listener] of preparedEmbeddedRegistered.listeners) {
-		try {
-			listener.call(this);
-		} catch {
-			wrapperError(feature, ACTOR_PREPARE_EMBEDDED_DOCUMENTS);
-		}
-	}
-}
-
 async function characterSheetRender(wrapped, ...args) {
 	const positions = {};
 
 	for (const { tabName } of sheetTabsRegistered.tabs) {
 		const existingTab = getCharacterSheetTab(this.element, tabName);
-		const existingAlternate = existingTab.find(".alternate")[0];
+		const existingAlternate = existingTab.find(".toolbelt-alternate")[0];
 		if (!existingAlternate) continue;
 		positions[tabName] = existingAlternate.scrollTop;
 	}
@@ -96,7 +63,7 @@ async function characterSheetRender(wrapped, ...args) {
 		if (!oldPosition) continue;
 
 		const tab = getCharacterSheetTab(this.element, tabName);
-		const alternate = tab.find(".alternate")[0];
+		const alternate = tab.find(".toolbelt-alternate")[0];
 		alternate.scrollTop = positions[tabName];
 	}
 }
@@ -116,6 +83,7 @@ async function characterSheetInnerRender(wrapped, data) {
 		getData,
 		templateFolder,
 		onRender,
+		beforeSelector,
 	} of sheetTabsRegistered.tabs) {
 		const innerTab = getCharacterSheetTab(inner, tabName);
 
@@ -135,7 +103,11 @@ async function characterSheetInnerRender(wrapped, data) {
 			innerTab.addClass("toggled");
 		}
 
-		innerTab.children(":last").before(template);
+		if (beforeSelector) {
+			innerTab.find(beforeSelector).before(template);
+		} else {
+			innerTab.children(":last").before(template);
+		}
 	}
 
 	return inner;
@@ -158,7 +130,7 @@ function characterSheetActiveListeners(wrapped, inner) {
 			);
 
 		const tab = getCharacterSheetTab(inner, tabName);
-		addEvents(tab.find("> .alternate"), this, actor, inner);
+		addEvents(tab.find(".toolbelt-alternate"), this, actor, inner);
 	}
 }
 

@@ -4,7 +4,6 @@ import {
 	getElementIndex,
 	getFlag,
 	getInMemory,
-	getSetting,
 	hasWornSlot,
 	indexIsValid,
 	isHandwrapsOfMightyBlows,
@@ -13,6 +12,7 @@ import {
 	isOneHanded,
 	isTwoHanded,
 	itemCarryUpdate,
+	refreshActorSheets,
 	render,
 	setFlag,
 	setInMemory,
@@ -24,12 +24,9 @@ import {
 	unregisterCharacterSheetExtraTab,
 } from "../actor";
 import { closestInside, makeDraggable } from "../draggable";
-import { createHook } from "../hooks";
+import { calledIfSetting, createHook } from "../misc";
 
-const closeHook = createHook(
-	"closeCharacterSheetPF2e",
-	closeCharacterSheetPF2e,
-);
+const setHook = createHook("closeCharacterSheetPF2e", closeCharacterSheetPF2e);
 
 let dragging = false;
 
@@ -41,12 +38,10 @@ export function registerInventory() {
 				type: Boolean,
 				default: false,
 				scope: "client",
-				onChange: (value) => setup(value),
+				onChange: setup,
 			},
 		],
-		ready: (isGm) => {
-			setup();
-		},
+		ready: calledIfSetting(setup, "inventory"),
 	};
 }
 
@@ -60,8 +55,7 @@ const COINS = [
 ];
 
 function setup(value) {
-	const enabled = value ?? getSetting("inventory");
-	if (enabled) {
+	if (value) {
 		registerCharacterSheetExtraTab({
 			tabName: "inventory",
 			templateFolder: "inventory/sheet",
@@ -72,7 +66,9 @@ function setup(value) {
 	} else {
 		unregisterCharacterSheetExtraTab("inventory");
 	}
-	closeHook(enabled);
+
+	setHook(value);
+	refreshActorSheets("character");
 }
 
 function closeCharacterSheetPF2e(sheet, html) {
@@ -98,7 +94,9 @@ function onRender(actor, sheet, inner) {
 function getCurrentData(tabElement) {
 	if (!tabElement) return;
 
-	const alternate = tabElement.querySelector(":scope > .alternate");
+	const alternate = tabElement.querySelector(".toolbelt-alternate");
+	if (!alternate) return;
+
 	const equipped = alternate.querySelector("[data-area='equipped']");
 
 	const equippedItemId = (slot) => {

@@ -1,7 +1,11 @@
-import { getSetting } from "module-api";
+import { calledIfSetting, createHook } from "../misc";
 
-let CREATE_HOOK = null;
-let UPDATE_HOOK = null;
+const setCreateHook = createHook("preCreateItem", preCreateItem, {
+	useChoices: true,
+});
+const setUpdateHook = createHook("preUpdateItem", preUpdateItem, {
+	useChoices: "all",
+});
 
 export function registerUnided() {
 	return {
@@ -11,39 +15,17 @@ export function registerUnided() {
 				type: String,
 				default: "disabled",
 				choices: ["disabled", "create", "all"],
-				onChange: setHooks,
+				onChange: setup,
 			},
 		],
 		conflicts: ["pf2e-unided"],
-		init: () => {
-			setHooks();
-		},
+		init: calledIfSetting(setup, "unided"),
 	};
 }
 
-function setHooks(value) {
-	const settingValue = value ?? getSetting("unided");
-
-	if (settingValue === "disabled") {
-		if (CREATE_HOOK) {
-			Hooks.off("preCreateItem", CREATE_HOOK);
-			CREATE_HOOK = null;
-		}
-		if (UPDATE_HOOK) {
-			Hooks.off("preUpdateItem", UPDATE_HOOK);
-			UPDATE_HOOK = null;
-		}
-	} else {
-		if (!CREATE_HOOK) {
-			CREATE_HOOK = Hooks.on("preCreateItem", preCreateItem);
-		}
-		if (settingValue === "all" && !UPDATE_HOOK) {
-			UPDATE_HOOK = Hooks.on("preUpdateItem", preUpdateItem);
-		} else if (settingValue !== "all" && UPDATE_HOOK) {
-			Hooks.off("preUpdateItem", UPDATE_HOOK);
-			UPDATE_HOOK = null;
-		}
-	}
+function setup(value) {
+	setCreateHook(value);
+	setUpdateHook(value);
 }
 
 function preCreateItem(item) {

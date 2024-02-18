@@ -1,4 +1,4 @@
-<ol class="spell-list alternate">
+<ol class="spell-list toolbelt-alternate">
     {{#if spells.length}}
     {{#each spells as |entry|}}
     {{#if entry includeZero=true}}
@@ -18,7 +18,8 @@
             {{#if (or (eq @index 12) (and (eq @index 0) @root.hasFocusCantrips))}}
             <span class="pips focus-pips">
                 {{#times @root.focusPool.max}}
-                <i class="{{#if (gt @root.focusPool.value this)}}fas fa-dot-circle{{else}}far fa-circle{{/if}}"></i>
+                <i
+                    class="{{#if (gt @root.focusPool.value this)}}fas fa-dot-circle{{else}}far fa-circle{{/if}}"></i>
                 {{/times}}
             </span>
             {{/if}}
@@ -29,8 +30,10 @@
 
     {{#each entry as |spell|}}
     <li class="item spell{{#if spell.isVirtual}} virtual{{/if}}{{#if spell.noHover}} no-hover{{/if}}{{#if spell.isBroken}} broken{{/if}}"
-        data-entry-id="{{spell.entryId}}" data-slot-id="{{spell.slotId}}" data-group-id="{{spell.groupId}}" data-item-id="{{spell.itemId}}"
-        data-cast-rank="{{spell.castRank}}" {{#if spell.expended}} data-slot-expended {{/if}} data-item-type="spell">
+        data-entry-id="{{spell.entryId}}" data-slot-id="{{spell.slotId}}"
+        data-group-id="{{spell.groupId}}" data-item-id="{{spell.itemId}}"
+        data-cast-rank="{{spell.castRank}}" {{#if spell.expended}} data-slot-expended {{/if}}
+        data-item-type="spell">
 
         <div class="item-name">
             <div class="item-image framed">
@@ -53,13 +56,16 @@
                 {{/if}}
             </span>
 
-            {{#if (and (not spell.isCantrip) (or spell.isSpontaneous spell.isInnate spell.isActiveCharge spell.consumable))}}
+            {{#if (and (not spell.isCantrip) (or spell.isSpontaneous spell.isInnate
+            spell.isActiveCharge spell.consumable))}}
             <div class="uses">
                 <span class="spell-slots-input">
-                    <input type="number" value="{{spell.uses.value}}" data-input-path="{{spell.inputPath}}"
+                    <input type="number" value="{{spell.uses.value}}"
+                        data-input-path="{{spell.inputPath}}"
                         data-entry-id="{{#if spell.isInnate}}{{spell.itemId}}{{else if spell.consumable}}{{spell.consumable.id}}{{else}}{{spell.entryId}}{{/if}}"
-                        placeholder="0" min="0" max="{{spell.uses.max}}" {{disabled (or (not @root.isOwner) (and spell.uses.autoDestroy (eq
-                        spell.uses.max 1) (lte spell.uses.value 1)))}}>
+                        placeholder="0" min="0" max="{{spell.uses.max}}" {{disabled (or (not
+                        @root.isOwner) (and spell.uses.autoDestroy (eq spell.uses.max 1) (lte
+                        spell.uses.value 1)))}}>
                 </span>
                 {{#if (and spell.uses.max (not spell.uses.noMax))}}
                 <span class="slash"> / </span>
@@ -76,9 +82,10 @@
                 {{/if}}
             </div>
 
-            {{else if (and spell.isPrepared @root.isOwner)}}
+            {{else if (and spell.isPrepared @root.isOwner (not spell.isCantrip))}}
             <a class="item-toggle-prepare" data-action="toggle-slot-expended">
-                <i class="fas fa-fw {{#if spell.expended}}fa-plus-square{{else}}fa-minus-square{{/if}}"></i>
+                <i
+                    class="fas fa-fw {{#if spell.expended}}fa-plus-square{{else}}fa-minus-square{{/if}}"></i>
             </a>
             {{/if}}
 
@@ -86,14 +93,17 @@
 
         {{#if @root.isOwner}}
         {{#if (eq spell.consumable.isEquipped false)}}
-        <button type="button" class="cast-spell blue" data-action="draw-item" data-item-id="{{spell.consumable.id}}">{{localize
+        <button type="button" class="cast-spell blue" data-action="draw-item"
+            data-item-id="{{spell.consumable.id}}">{{localize
             "PF2E.Actions.Interact.Draw.Title"}}</button>
         {{else}}
-        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize "PF2E.Item.Spell.Cast"}}</button>
+        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize
+            "PF2E.Item.Spell.Cast"}}</button>
         {{/if}}
         {{/if}}
 
-        <div class="spell-range" data-tooltip="{{spell.entryName}}: DC {{spell.entryDc}}">{{spell.range}}</div>
+        <div class="spell-range" data-tooltip="{{spell.entryName}}: DC {{spell.entryDc}}">
+            {{spell.range}}</div>
 
         <div class="item-summary" hidden="hidden"></div>
     </li>
@@ -116,8 +126,8 @@
     </li>
 
     {{#each rituals as |ritual|}}
-    <li class="item spell ritual" data-group-id="{{ritual.rank}}" data-cast-rank="{{ritual.rank}}" data-entry-id="rituals"
-        data-item-id="{{ritual.itemId}}">
+    <li class="item spell ritual" data-group-id="{{ritual.rank}}" data-cast-rank="{{ritual.rank}}"
+        data-entry-id="rituals" data-item-id="{{ritual.itemId}}">
 
         <div class="item-name">
             <div class="item-image framed">
@@ -135,7 +145,8 @@
         <div class="spell-type">{{ritual.time}}</div>
 
         {{#if @root.isOwner}}
-        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize "PF2E.CastLabel"}}</button>
+        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize
+            "PF2E.CastLabel"}}</button>
         {{/if}}
 
         <div class="spell-range">{{ritual.rank}}</div>

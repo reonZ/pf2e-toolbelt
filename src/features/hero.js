@@ -4,7 +4,7 @@ import {
 	getSetting,
 	isActiveGM,
 	localize,
-	refreshCharacterSheets,
+	refreshActorSheets,
 	render,
 	setSetting,
 	subLocalize,
@@ -13,17 +13,15 @@ import {
 } from "module-api";
 import { isPlayedActor } from "../actor";
 import { Trade } from "../apps/hero/trade";
-import { createHook } from "../hooks";
-import { registerSocket } from "../socket";
+import { calledIfSetting, createHook, createSocket } from "../misc";
 
-const MODULE_ID = "pf2e-hero-actions";
+const STANDALONE_ID = "pf2e-hero-actions";
 
-const socket = registerSocket("hero-action", onSocket);
+const socket = createSocket("hero-action", onSocket);
 
 const setHook = createHook(
 	"renderCharacterSheetPF2e",
 	renderCharacterSheetPF2e,
-	setupSocket,
 );
 
 const JOURNAL_UUID = "Compendium.pf2e.journals.JournalEntry.BSp4LUSaOmUyjBko";
@@ -39,7 +37,7 @@ export function registerHeroActions() {
 				key: "hero",
 				type: Boolean,
 				default: false,
-				onChange: (value) => setHook(value),
+				onChange: setup,
 			},
 			{
 				key: "hero-table",
@@ -50,7 +48,7 @@ export function registerHeroActions() {
 				key: "hero-trade",
 				type: Boolean,
 				default: false,
-				onChange: () => refreshCharacterSheets(),
+				onChange: () => refreshActorSheets("character"),
 			},
 			{
 				key: "hero-private",
@@ -58,7 +56,7 @@ export function registerHeroActions() {
 				default: false,
 			},
 		],
-		conflicts: [MODULE_ID],
+		conflicts: [STANDALONE_ID],
 		api: {
 			createTable,
 			removeHeroActions,
@@ -74,14 +72,13 @@ export function registerHeroActions() {
 			giveHeroActions,
 			createChatMessage,
 		},
-		ready: () => {
-			setHook(false, "hero");
-		},
+		init: calledIfSetting(setup, "hero"),
 	};
 }
 
-function setupSocket(value) {
+function setup(value) {
 	socket.toggle(value);
+	setHook(value);
 }
 
 function onSocket(packet) {
@@ -199,11 +196,11 @@ async function onClickHeroActionsDraw(actor, event) {
 }
 
 export function getHeroActions(actor) {
-	return getProperty(actor, `flags.${MODULE_ID}.heroActions`) ?? [];
+	return getProperty(actor, `flags.${STANDALONE_ID}.heroActions`) ?? [];
 }
 
 async function setHeroActions(actor, actions) {
-	return actor.update({ [`flags.${MODULE_ID}.heroActions`]: actions });
+	return actor.update({ [`flags.${STANDALONE_ID}.heroActions`]: actions });
 }
 
 async function onClickHeroActionExpand(event) {
@@ -381,7 +378,7 @@ async function useHeroAction(actor, uuid) {
 	if (details) {
 		actor.update({
 			"system.resources.heroPoints.value": points - 1,
-			[`flags.${MODULE_ID}.heroActions`]: actions,
+			[`flags.${STANDALONE_ID}.heroActions`]: actions,
 		});
 
 		ChatMessage.create({

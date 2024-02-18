@@ -13,12 +13,12 @@ import {
 	render,
 	setFlag,
 	subLocalize,
+	transferItemToActor,
 } from "module-api";
 import { BuyItems } from "../apps/merchant/buy";
-import { wrapperError } from "../misc";
-import { registerSocket } from "../socket";
+import { createSocket, wrapperError } from "../misc";
 
-const socket = registerSocket("merchant", onSocket);
+const socket = createSocket("merchant", onSocket);
 
 const localize = subLocalize("merchant");
 
@@ -406,20 +406,8 @@ async function makeBuyDeal(options, senderId) {
 	}
 
 	const selectedPurse = filterPurse ?? totalPurse;
-
-	// update seller's money
-	const newQuantity = item.quantity - itemQuantity;
-	await seller.inventory.addCoins(selectedPurse.price);
-
-	// update/delete seller's item
-	if (newQuantity < 1) {
-		await item.delete();
-	} else {
-		await item.update({ "system.quantity": newQuantity });
-	}
-
-	// update buyer's purses
 	const purseUpdates = {};
+
 	if (!totalPurse.isInfinite) {
 		purseUpdates[flagPath("merchant.buyPurse")] =
 			totalPurse.purse - selectedPurse.goldValue;
@@ -432,18 +420,10 @@ async function makeBuyDeal(options, senderId) {
 		await buyer.update(purseUpdates);
 	}
 
-	// add buyer's item
-	const newItemData = item.toObject();
-	newItemData.system.quantity = itemQuantity;
-	newItemData.system.equipped.carryType = "worn";
-	if ("invested" in newItemData.system.equipped) {
-		newItemData.system.equipped.invested = item.traits.has("invested")
-			? false
-			: null;
-	}
-	await buyer.addToInventory(newItemData, options.container, options.newStack);
+	await seller.inventory.addCoins(selectedPurse.price);
 
-	// send message
+	await transferItemToActor(buyer, item, itemQuantity);
+
 	createBuyMessage(
 		buyer,
 		seller,

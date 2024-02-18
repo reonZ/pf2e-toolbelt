@@ -1,7 +1,9 @@
 import { getSetting } from "module-api";
-import { createHook } from "../hooks";
+import { createHook } from "../misc";
 
 const setHook = createHook("updateCombat", updateCombat);
+
+const setupDebounced = debounce(setup, 1);
 
 export function registerUntarget() {
 	return {
@@ -10,24 +12,23 @@ export function registerUntarget() {
 				key: "force-untarget",
 				type: Boolean,
 				default: false,
-				onChange: setup,
+				onChange: setupDebounced,
 			},
 			{
 				key: "untarget",
 				type: Boolean,
 				default: false,
 				scope: "client",
-				onChange: setup,
+				onChange: setupDebounced,
 			},
 		],
-		init: () => {
-			setup();
-		},
+		init: setupDebounced,
 	};
 }
 
 function setup() {
-	setHook(getSetting("force-untarget") || getSetting("untarget"));
+	const enabled = getSetting("force-untarget") || getSetting("untarget");
+	setHook(enabled);
 }
 
 function updateCombat(_, data) {

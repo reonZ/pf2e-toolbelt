@@ -5,7 +5,6 @@ import {
 	localize,
 	registerModule,
 	registerSetting,
-	socketOn,
 	warn,
 } from "module-api";
 import { registerArp } from "./features/arp";
@@ -25,7 +24,6 @@ import { registerTargetTokenHelper } from "./features/target";
 import { registerUnided } from "./features/unided";
 import { registerUntarget } from "./features/untarget";
 import { permaConditionEffect } from "./macros/condition";
-import { onSocket } from "./socket";
 
 registerModule("pf2e-toolbelt");
 
@@ -78,7 +76,7 @@ Hooks.once("init", () => {
 	};
 
 	for (const feature of FEATURES) {
-		const { init, conflicts = [], api, name, socket } = feature;
+		const { init, conflicts = [], api, name } = feature;
 
 		if (isGM) {
 			for (const id of conflicts) {
@@ -90,12 +88,15 @@ Hooks.once("init", () => {
 			}
 		}
 
-		if (api && name) module.api[name] = api;
+		if (api) {
+			if (!name) {
+				throw new Error("API needs a module name to be added");
+			}
+			module.api[name] = api;
+		}
 
 		if (!feature.conflicting && init) init(isGM);
 	}
-
-	socketOn(onSocket);
 });
 
 Hooks.once("ready", () => {

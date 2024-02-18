@@ -10,6 +10,7 @@ import {
 	registerCharacterSheetExtraTab,
 	unregisterCharacterSheetExtraTab,
 } from "../actor";
+import { calledIfSetting } from "../misc";
 
 export function registerSpellsSummary() {
 	return {
@@ -20,22 +21,20 @@ export function registerSpellsSummary() {
 				default: "disabled",
 				scope: "client",
 				choices: ["disabled", "enabled", "sort"],
-				onChange: (value) => setup(value),
+				onChange: setup,
 			},
 		],
 		conflicts: ["pf2e-spells-summary"],
-		ready: (isGm) => {
-			setup();
-		},
+		ready: calledIfSetting(setup, "summary"),
 	};
 }
 
 function setup(value) {
-	const enabled = (value ?? getSetting("summary")) !== "disabled";
-	if (enabled) {
+	if (value) {
 		registerCharacterSheetExtraTab({
 			tabName: "spellcasting",
 			templateFolder: "summary/sheet",
+			beforeSelector: ".spell-collections [data-tab=known-spells]",
 			getData,
 			addEvents,
 		});
@@ -251,7 +250,7 @@ async function getData(actor) {
 				slotSpells.push({
 					name: spell.name,
 					img: spell.img,
-					range: spell.system.range.value || "-",
+					range: spell.system.range.value || "-  ",
 					castRank: castRank ?? spell.rank,
 					slotId,
 					entryId,

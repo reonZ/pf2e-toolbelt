@@ -1,23 +1,21 @@
 import {
 	getItemWithSourceId,
-	getSetting,
 	hasItemWithSourceId,
 	info,
 	isOwner,
-	refreshCharacterSheets,
+	refreshActorSheets,
 	render,
 	subLocalize,
 } from "module-api";
 import { isPlayedActor } from "../actor";
-import { createHook } from "../hooks";
+import { calledIfSetting, createHook } from "../misc";
 
-const setSheetHook = createHook(
-	"renderCharacterSheetPF2e",
-	renderCharacterSheetPF2e,
-);
-const setDeleteCombatHook = createHook("deleteCombat", deleteCombat);
-const setDeleteCombatantHook = createHook("deleteCombatant", deleteCombatant);
-const setCreateCombatantHook = createHook("createCombatant", createCombatant);
+const hooks = [
+	createHook("deleteCombat", deleteCombat),
+	createHook("deleteCombatant", deleteCombatant),
+	createHook("createCombatant", createCombatant),
+	createHook("renderCharacterSheetPF2e", renderCharacterSheetPF2e),
+];
 
 const STANCE_SAVANT = [
 	"Compendium.pf2e.feats-srd.Item.yeSyGnYDkl2GUNmu",
@@ -81,17 +79,15 @@ export function registerStances() {
 			toggleStance,
 			isValidStance,
 		},
-		ready: (isGm) => {
-			if (getSetting("stances")) setup(true);
-		},
+		ready: calledIfSetting(setup, "stances"),
 	};
 }
 
 function setup(value) {
-	setSheetHook(value);
-	setDeleteCombatHook(value);
-	setDeleteCombatantHook(value);
-	setCreateCombatantHook(value);
+	for (const setHook of hooks) {
+		setHook(value);
+	}
+	refreshActorSheets("character");
 }
 
 function isValidStance(stance) {
@@ -275,7 +271,7 @@ function deleteCombatant(combatant) {
 		if (effects.length) actor.deleteEmbeddedDocuments("Item", effects);
 	}
 
-	refreshCharacterSheets(actor);
+	actor.sheet.render();
 }
 
 function createCombatant(combatant) {
@@ -284,7 +280,7 @@ function createCombatant(combatant) {
 
 	if (!game.user.isGM && isOwner(actor)) checkForSavant(actor);
 
-	refreshCharacterSheets(actor);
+	actor.sheet.render();
 }
 
 function getActorFromCombatant(combatant) {

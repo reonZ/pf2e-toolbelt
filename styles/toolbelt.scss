@@ -17,7 +17,7 @@
 
 .app.sheet.actor.character .sheet-content > .tab {
     &:not(.toggled) {
-        > .alternate {
+        .toolbelt-alternate {
             display: none;
         }
     }

@@ -1,4 +1,4 @@
-<div class="alternate">
+<div class="toolbelt-alternate">
     <div class="equipped-items" data-area="equipped">
         <div class="main-items">
             <div class="large hand left" data-equipped-slot="left-hand">
@@ -16,7 +16,8 @@
             <div class="large hand right" data-equipped-slot="right-hand">
                 <div class="item fake"></div>
                 {{#if equipped.hands.[1]}}
-                {{> item item=equipped.hands.[1] twoHands=(and equipped.hands.[0] (eq equipped.hands.[0] equipped.hands.[1]))}}
+                {{> item item=equipped.hands.[1] twoHands=(and equipped.hands.[0] (eq
+                equipped.hands.[0] equipped.hands.[1]))}}
                 {{/if}}
             </div>
         </div>
@@ -36,7 +37,8 @@
     <hr>
 
     {{#each tabs as |tab|}}
-    <div class="container-tab{{#if (eq @root.selectedTab tab.id)}} active{{/if}}" data-tab-id="{{ifThen tab.id tab.id 'undefined'}}">
+    <div class="container-tab{{#if (eq @root.selectedTab tab.id)}} active{{/if}}"
+        data-tab-id="{{ifThen tab.id tab.id 'undefined'}}">
         <div class="containers" data-area="containers">
             <div class="item container" {{#if tab.item}}data-container-id="undefined" {{/if}}>
                 <div class="inner-item" style="background-image: url({{@root.actor.img}});"></div>
@@ -58,7 +60,8 @@
         <hr>
 
         <div class="items-list" data-area="items-list">
-            <div class="items-grid" data-area="items-grid" data-tab-id="{{ifThen tab.id tab.id 'undefined'}}">
+            <div class="items-grid" data-area="items-grid"
+                data-tab-id="{{ifThen tab.id tab.id 'undefined'}}">
                 {{#each tab.matrix as |item|}}
                 {{> item item=item}}
                 {{/each}}
@@ -69,9 +72,11 @@
 </div>
 
 {{#*inline "item"}}
-<div class="item {{#if item.isInvested}} invested{{/if}}" {{#if item}} {{#if twoHands}} data-two-hands="{{twoHands}}" {{else}}
-    data-item-id="{{item.id}}" {{/if}} data-item-img="{{item.img}}" {{/if}}>
-    <div class="inner-item {{item.rarity}}" {{#if item}} style="background-image: url({{item.img}});" {{/if}}>
+<div class="item {{#if item.isInvested}} invested{{/if}}" {{#if item}} {{#if twoHands}}
+    data-two-hands="{{twoHands}}" {{else}} data-item-id="{{item.id}}" {{/if}}
+    data-item-img="{{item.img}}" {{/if}}>
+    <div class="inner-item {{item.rarity}}" {{#if item}}
+        style="background-image: url({{item.img}});" {{/if}}>
         {{#if (and item.isIdentified (ne item.isInvested null))}}
         <div class="vignette icon equip">
             <i class="fa-solid fa-gem invested"></i>

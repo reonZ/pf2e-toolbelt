@@ -1,7 +1,8 @@
 import { getSetting, registerWrapper } from "module-api";
-import { registerActorPreparedEmbeddedDocuments } from "../actor";
 import { wrapperError } from "../misc";
 
+const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =
+	"CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments";
 const TREASURE_PREPARE_BASE_DATA =
 	"CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData";
 
@@ -23,9 +24,10 @@ export function registerNobulk() {
 		],
 		init: () => {
 			if (getSetting("nobulk")) {
-				registerActorPreparedEmbeddedDocuments(
-					"nobulk",
+				registerWrapper(
+					ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
 					actorPrepareEmbeddedDocuments,
+					"WRAPPER",
 				);
 			}
 			if (getSetting("nobulk-coins")) {
@@ -49,22 +51,29 @@ function treasurePrepareBaseData(wrapped) {
 	}
 }
 
-function actorPrepareEmbeddedDocuments() {
-	const InventoryBulk = this.inventory.bulk.constructor;
+function actorPrepareEmbeddedDocuments(wrapped) {
+	wrapped();
 
-	let _value = null;
+	try {
+		const InventoryBulk = this.inventory.bulk.constructor;
 
-	Object.defineProperty(this.inventory.bulk, "value", {
-		get() {
-			if (_value) return _value;
-			_value = InventoryBulk.computeTotalBulk(
-				this.actor.inventory.filter(
-					(item) =>
-						!item.isInContainer && item.system.equipped.carryType !== "dropped",
-				),
-				this.actor.size,
-			);
-			return _value;
-		},
-	});
+		let _value = null;
+
+		Object.defineProperty(this.inventory.bulk, "value", {
+			get() {
+				if (_value) return _value;
+				_value = InventoryBulk.computeTotalBulk(
+					this.actor.inventory.filter(
+						(item) =>
+							!item.isInContainer &&
+							item.system.equipped.carryType !== "dropped",
+					),
+					this.actor.size,
+				);
+				return _value;
+			},
+		});
+	} catch {
+		wrapperError("nobulk", ACTOR_PREPARE_EMBEDDED_DOCUMENTS);
+	}
 }

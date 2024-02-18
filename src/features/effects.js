@@ -1,11 +1,9 @@
 import { getSetting, localize } from "module-api";
-import { createHook } from "../hooks";
+import { createHook } from "../misc";
 
-const setHook = createHook(
-	"renderEffectsPanel",
-	renderEffectsPanel,
-	refreshEffectsPanel,
-);
+const setHook = createHook("renderEffectsPanel", renderEffectsPanel);
+
+const setupDebounced = debounce(setup, 1);
 
 export function registerEffectsPanelHelper() {
 	return {
@@ -15,21 +13,25 @@ export function registerEffectsPanelHelper() {
 				type: Boolean,
 				default: false,
 				scope: "client",
-				onChange: (value) => setHook(value, "condition-sheet"),
+				onChange: setupDebounced,
 			},
 			{
 				key: "condition-sheet",
 				type: Boolean,
 				default: false,
 				scope: "client",
-				onChange: (value) => setHook(value, "effect-remove"),
+				onChange: setupDebounced,
 			},
 		],
 		conflicts: ["pf2e-effect-description"],
-		init: () => {
-			setHook(false, ["effect-remove", "condition-sheet"]);
-		},
+		init: setupDebounced,
 	};
+}
+
+function setup() {
+	const enabled = getSetting("effect-remove") || getSetting("condition-sheet");
+	setHook(enabled);
+	refreshEffectsPanel();
 }
 
 function refreshEffectsPanel() {

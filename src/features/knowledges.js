@@ -1,7 +1,7 @@
-import { getFlag, getSetting } from "module-api";
+import { getFlag, refreshActorSheets } from "module-api";
 import { isPlayedActor } from "../actor";
 import { EditLores } from "../apps/knowledges/lores";
-import { createHook } from "../hooks";
+import { calledIfSetting, createHook } from "../misc";
 
 const setHook = createHook("renderNPCSheetPF2e", renderNPCSheetPF2e);
 
@@ -12,14 +12,17 @@ export function registerKnowledges() {
 				key: "knowledges",
 				type: Boolean,
 				default: false,
-				onChange: (value) => setHook(value),
+				onChange: setup,
 			},
 		],
 		conflicts: ["pf2e-npc-knowledges"],
-		ready: (isGM) => {
-			if (isGM && getSetting("knowledges")) setHook(true);
-		},
+		ready: calledIfSetting(setup, "knowledges"),
 	};
+}
+
+function setup(value) {
+	setHook(value);
+	refreshActorSheets("npc");
 }
 
 function renderNPCSheetPF2e(sheet, $html) {

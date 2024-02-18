@@ -22,9 +22,7 @@ import {
 	warn,
 } from "module-api";
 import { bindOnPreCreateSpellDamageChatMessage } from "../chat";
-import { createChoicesHook, createHook } from "../hooks";
-import { roll3dDice } from "../misc";
-import { registerSocket } from "../socket";
+import { createHook, createSocket, roll3dDice } from "../misc";
 
 const SAVES = {
 	fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
@@ -62,20 +60,16 @@ const DEGREE_OF_SUCCESS = [
 	"criticalSuccess",
 ];
 
-const setPrecreateMessageHook = createHook(
-	"preCreateChatMessage",
-	preCreateChatMessage,
-);
-const setRenderMessageHook = createChoicesHook(
-	"renderChatMessage",
-	renderChatMessage,
-);
-const setCreateTemplateHook = createHook(
+const setRenderHook = createHook("renderChatMessage", renderChatMessage, {
+	useChoices: true,
+});
+const setTemplateHook = createHook(
 	"createMeasuredTemplate",
 	createMeasuredTemplate,
+	{ useChoices: true },
 );
 
-const socket = registerSocket("target", onSocket);
+const socket = createSocket("target", onSocket);
 
 export function registerTargetTokenHelper() {
 	return {
@@ -92,27 +86,33 @@ export function registerTargetTokenHelper() {
 				default: "disabled",
 				choices: ["disabled", "small", "big"],
 				scope: "client",
-				onChange: (value) =>
-					setRenderMessageHook(value && getSetting("target")),
+				onChange: (value) => setHook(setRenderHook, value),
 			},
 			{
 				key: "target-template",
 				type: Boolean,
 				default: false,
 				scope: "client",
-				onChange: (value) =>
-					setCreateTemplateHook(value && getSetting("target")),
+				onChange: (value) => setHook(setTemplateHook, value),
 			},
 		],
 		conflicts: [],
 		init: (isGM) => {
-			if (!isGM || !getSetting("target")) return;
-			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
+			if (!getSetting("target")) return;
+
+			if (isGM) {
+				socket.activate();
+				Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
+			}
+
+			Hooks.on("preCreateChatMessage", preCreateChatMessage);
 		},
 		ready: (isGM) => {
 			if (!getSetting("target")) return;
 
-			setHooks(isGM);
+			setRenderHook(getSetting("target-client"));
+			setTemplateHook(getSetting("target-template"));
+
 			for (const { message, html } of latestChatMessages(10)) {
 				renderChatMessage(message, html);
 			}
@@ -120,14 +120,9 @@ export function registerTargetTokenHelper() {
 	};
 }
 
-function setHooks(isGM) {
-	setPrecreateMessageHook(true);
-	setRenderMessageHook(true);
-	setCreateTemplateHook(getSetting("target-template"));
-
-	if (isGM) {
-		socket.activate();
-	}
+function setHook(hook, value) {
+	const realValue = getSetting("target") ? value : "disabled";
+	hook(realValue);
 }
 
 function onSocket(packet) {

@@ -1,15 +1,14 @@
 .app.sheet.actor.character .sheet-content > .tab[data-tab='spellcasting'] {
     &.toggled {
-        > .spell-collections,
-        > .sub-nav {
+        > .sub-nav,
+        > .spell-collections > [data-group] {
             display: none;
         }
     }
 
-    > .spell-list.alternate {
+    .spell-list.toolbelt-alternate {
         overflow-y: auto;
-        scrollbar-gutter: stable;
-        padding: var(--space-8) var(--space-4) 0;
+        padding: var(--space-8) var(--space-4);
         border: none;
 
         .virtual {
@@ -38,6 +37,10 @@
             grid:
                 'name type cast-spell range' auto
                 'content content content content' auto/10fr 6fr 2fr 3fr;
+
+            > * {
+                justify-self: auto;
+            }
 
             .item-name {
                 grid-area: name;
