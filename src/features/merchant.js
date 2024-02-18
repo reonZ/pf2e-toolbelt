@@ -52,10 +52,9 @@ export const merchantOptions = {
 	init: (isGM) => {
 		if (!getSetting("merchant")) return;
 
-		Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
-
 		if (isGM) {
 			socket.activate();
+			Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
 		}
 
 		registerWrapper(
@@ -90,7 +89,6 @@ async function renderLootSheetPF2e(sheet, html) {
 	const actor = sheet.actor;
 	if (!actor?.isMerchant) return;
 
-	const isGM = game.user.isGM;
 	const {
 		noCoins = false,
 		buyItems = false,
@@ -99,35 +97,33 @@ async function renderLootSheetPF2e(sheet, html) {
 		infiniteItems = {},
 	} = getFlag(actor, "merchant") ?? {};
 
-	if (isGM) {
-		const sheetTemplate = await render("merchant/sheet", {
-			noCoins,
-			buyItems,
-			infiniteStocks,
-			priceRatio: {
-				...PRICE_RATIO,
-				value: clampPriceRatio("sell", priceRatio),
-			},
-			actorUUID: actor.uuid,
-			...localize.i18n,
-			flagPath: (str) => flagPath("merchant", str),
-		});
+	const sheetTemplate = await render("merchant/sheet", {
+		noCoins,
+		buyItems,
+		infiniteStocks,
+		priceRatio: {
+			...PRICE_RATIO,
+			value: clampPriceRatio("sell", priceRatio),
+		},
+		actorUUID: actor.uuid,
+		...localize.i18n,
+		flagPath: (str) => flagPath("merchant", str),
+	});
 
-		const sidebar = html.find(".sheet-sidebar");
+	const sidebar = html.find(".sheet-sidebar");
 
-		sidebar.find(".editor").before(sheetTemplate);
+	sidebar.find(".editor").before(sheetTemplate);
 
-		const better = sidebar.find(".better-merchant");
-		better
-			.find("[data-action=pull-from-browser]")
-			.on("click", (event) => pullFromBrowser(event, actor));
-		better
-			.find("[data-action=open-equipment-tab]")
-			.on("click", (event) => openEquipmentTab());
-		better
-			.find("[data-action=open-buy-settings]")
-			.on("click", (event) => openBuySettings(event, actor));
-	}
+	const better = sidebar.find(".better-merchant");
+	better
+		.find("[data-action=pull-from-browser]")
+		.on("click", (event) => pullFromBrowser(event, actor));
+	better
+		.find("[data-action=open-equipment-tab]")
+		.on("click", (event) => openEquipmentTab());
+	better
+		.find("[data-action=open-buy-settings]")
+		.on("click", (event) => openBuySettings(event, actor));
 
 	const itemTypes = html
 		.find(".content .sheet-body [data-item-types]")
@@ -135,9 +131,9 @@ async function renderLootSheetPF2e(sheet, html) {
 
 	let hasInfiniteStock = infiniteStocks;
 
-	if (infiniteStocks && isGM) {
+	if (infiniteStocks) {
 		itemTypes.find(".quantity a").remove();
-	} else if (!infiniteStocks) {
+	} else {
 		const items = itemTypes.find("[data-item-id]");
 		const tooltip = localize.path("infinite-item.tooltip");
 
@@ -145,26 +141,24 @@ async function renderLootSheetPF2e(sheet, html) {
 			const itemId = item.dataset.itemId;
 			const isInfinite = !!infiniteItems[itemId];
 
-			if (isGM) {
-				const toggle =
-					$(`<a data-action="toggle-infinite-item" data-tooltip="${tooltip}">
+			const toggle =
+				$(`<a data-action="toggle-infinite-item" data-tooltip="${tooltip}">
 	<i class="${isInfinite ? "fa-solid" : "fa-duotone"} fa-infinity"></i>
 </a>`)[0];
 
-				item.querySelector(".item-controls").prepend(toggle);
+			item.querySelector(".item-controls").prepend(toggle);
 
-				if (isInfinite) {
-					for (const el of item.querySelectorAll(".quantity a")) {
-						el.remove();
-					}
+			if (isInfinite) {
+				for (const el of item.querySelectorAll(".quantity a")) {
+					el.remove();
 				}
-
-				toggle.addEventListener("click", (event) => {
-					const flagKey = `merchant.infiniteItems.${itemId}`;
-					const current = getFlag(actor, flagKey) ?? false;
-					setFlag(actor, flagKey, !current);
-				});
 			}
+
+			toggle.addEventListener("click", (event) => {
+				const flagKey = `merchant.infiniteItems.${itemId}`;
+				const current = getFlag(actor, flagKey) ?? false;
+				setFlag(actor, flagKey, !current);
+			});
 
 			if (isInfinite) {
 				hasInfiniteStock = true;
