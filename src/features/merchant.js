@@ -439,36 +439,50 @@ export async function createBuyMessage(
 ) {
 	const buyerName = getHighestName(buyer);
 
+	const speaker = ChatMessage.getSpeaker({
+		actor: buyer,
+		alias: buyerName,
+	});
+
+	const flavor = await renderTemplate(
+		"systems/pf2e/templates/chat/action/flavor.hbs",
+		{
+			action: {
+				title: "PF2E.Actions.Interact.Title",
+				subtitle: localize("sold.subtitle"),
+				glyph: getActionGlyph(1),
+			},
+			traits: [
+				{
+					name: "manipulate",
+					label: CONFIG.PF2E.featTraits.manipulate,
+					description: CONFIG.PF2E.traitsDescriptions.manipulate,
+				},
+			],
+		},
+	);
+
+	const message = localize("sold.message", {
+		buyer: buyerName,
+		quantity,
+		item: await TextEditor.enrichHTML(item.link, { async: true }),
+		seller: getHighestName(seller),
+		price: parseFloat(goldValue.toFixed(2)),
+	});
+
+	const content = await renderTemplate(
+		"systems/pf2e/templates/chat/action/content.hbs",
+		{
+			imgPath: item.img,
+			message: message.replace(/\b1 × /, ""),
+		},
+	);
+
 	const buyMessage = {
 		user: senderId ?? game.user.id,
-		speaker: ChatMessage.getSpeaker({
-			actor: buyer,
-			alias: buyerName,
-		}),
-		flavor: await renderTemplate(
-			"systems/pf2e/templates/chat/action/flavor.hbs",
-			{
-				action: {
-					title: "PF2E.Actions.Interact.Title",
-					subtitle: localize("sold.subtitle"),
-					glyph: getActionGlyph(1),
-				},
-				traits: [
-					{
-						name: "manipulate",
-						label: CONFIG.PF2E.featTraits.manipulate,
-						description: CONFIG.PF2E.traitsDescriptions.manipulate,
-					},
-				],
-			},
-		),
-		content: localize("sold.message", {
-			buyer: buyerName,
-			quantity,
-			item: item.name,
-			seller: getHighestName(seller),
-			price: parseFloat(goldValue.toFixed(2)),
-		}),
+		speaker,
+		flavor,
+		content,
 		type: CONST.CHAT_MESSAGE_TYPES.EMOTE,
 	};
 
