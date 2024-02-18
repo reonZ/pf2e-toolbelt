@@ -6,40 +6,39 @@ const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =
 const TREASURE_PREPARE_BASE_DATA =
 	"CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData";
 
-export function registerNobulk() {
-	return {
-		settings: [
-			{
-				key: "nobulk",
-				type: Boolean,
-				default: false,
-				requiresReload: true,
-			},
-			{
-				key: "nobulk-coins",
-				type: Boolean,
-				default: false,
-				requiresReload: true,
-			},
-		],
-		init: () => {
-			if (getSetting("nobulk")) {
-				registerWrapper(
-					ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
-					actorPrepareEmbeddedDocuments,
-					"WRAPPER",
-				);
-			}
-			if (getSetting("nobulk-coins")) {
-				registerWrapper(
-					TREASURE_PREPARE_BASE_DATA,
-					treasurePrepareBaseData,
-					"WRAPPER",
-				);
-			}
+export const nobulkOptions = {
+	name: "nobulk",
+	settings: [
+		{
+			key: "nobulk",
+			type: Boolean,
+			default: false,
+			requiresReload: true,
 		},
-	};
-}
+		{
+			key: "nobulk-coins",
+			type: Boolean,
+			default: false,
+			requiresReload: true,
+		},
+	],
+	init: () => {
+		if (getSetting("nobulk")) {
+			registerWrapper(
+				ACTOR_PREPARE_EMBEDDED_DOCUMENTS,
+				actorPrepareEmbeddedDocuments,
+				"WRAPPER",
+			);
+		}
+		if (getSetting("nobulk-coins")) {
+			registerWrapper(
+				TREASURE_PREPARE_BASE_DATA,
+				treasurePrepareBaseData,
+				"WRAPPER",
+			);
+		}
+	},
+};
 
 function treasurePrepareBaseData(wrapped) {
 	wrapped();

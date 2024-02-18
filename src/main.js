@@ -7,43 +7,43 @@ import {
 	registerSetting,
 	warn,
 } from "module-api";
-import { registerArp } from "./features/arp";
-import { registerDebug } from "./features/debug";
-import { registerEffectsPanelHelper } from "./features/effects";
-import { registerGiveth } from "./features/giveth";
-import { registerHeroActions } from "./features/hero";
-import { registerInventory } from "./features/inventory";
-import { registerKnowledges } from "./features/knowledges";
-import { registerMerchant } from "./features/merchant";
-import { registerMerge } from "./features/merge";
-import { registerNobulk } from "./features/nobulk";
-import { registerShare } from "./features/share";
-import { registerStances } from "./features/stances";
-import { registerSpellsSummary } from "./features/summary";
-import { registerTargetTokenHelper } from "./features/target";
-import { registerUnided } from "./features/unided";
-import { registerUntarget } from "./features/untarget";
+import { arpOptions } from "./features/arp";
+import { debugOptions } from "./features/debug";
+import { effectsOptions } from "./features/effects";
+import { givethOptions } from "./features/giveth";
+import { heroOptions } from "./features/hero";
+import { inventoryOptions } from "./features/inventory";
+import { knowledgesOptions } from "./features/knowledges";
+import { merchantOptions } from "./features/merchant";
+import { mergeOptions } from "./features/merge";
+import { nobulkOptions } from "./features/nobulk";
+import { shareOptions } from "./features/share";
+import { stancesOptions } from "./features/stances";
+import { summaryOptions } from "./features/summary";
+import { targetOptions } from "./features/target";
+import { unidedOptions } from "./features/unided";
+import { untargetOptions } from "./features/untarget";
 import { permaConditionEffect } from "./macros/condition";
 
 registerModule("pf2e-toolbelt");
 
 const FEATURES = [
-	registerArp(),
-	registerNobulk(),
-	registerTargetTokenHelper(),
-	registerGiveth(),
-	registerKnowledges(),
-	registerUnided(),
-	registerMerge(),
-	registerEffectsPanelHelper(),
-	registerSpellsSummary(),
-	registerStances(),
-	registerHeroActions(),
-	registerShare(),
-	registerUntarget(),
-	registerInventory(),
-	registerDebug(),
-	registerMerchant(),
+	arpOptions,
+	debugOptions,
+	effectsOptions,
+	givethOptions,
+	heroOptions,
+	inventoryOptions,
+	knowledgesOptions,
+	merchantOptions,
+	mergeOptions,
+	nobulkOptions,
+	shareOptions,
+	stancesOptions,
+	summaryOptions,
+	targetOptions,
+	unidedOptions,
+	untargetOptions,
 ];
 
 const CONFLICTS = new Set();
@@ -53,7 +53,7 @@ let firstClientSetting = null;
 Hooks.once("init", () => {
 	const isGM = isUserGM();
 
-	const settings = FEATURES.flatMap(({ settings }) => settings ?? []);
+	const settings = FEATURES.flatMap(({ settings }) => settings);
 	const worldSettings = settings.filter(
 		({ scope }) => !scope || scope === "world",
 	);
@@ -63,9 +63,12 @@ Hooks.once("init", () => {
 		registerSetting(setting);
 	}
 
-	if (isGM) {
-		firstClientSetting = clientSettings[0].key;
-		Hooks.on("renderSettingsConfig", renderSettingsConfig);
+	if (isGM && clientSettings.length) {
+		const first = clientSettings.find((x) => x.config !== false);
+		if (first) {
+			firstClientSetting = first.key;
+			Hooks.on("renderSettingsConfig", renderSettingsConfig);
+		}
 	}
 
 	const module = getModule();

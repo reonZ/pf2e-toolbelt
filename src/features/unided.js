@@ -1,31 +1,29 @@
-import { calledIfSetting, createHook } from "../misc";
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
-const setCreateHook = createHook("preCreateItem", preCreateItem, {
-	useChoices: true,
-});
-const setUpdateHook = createHook("preUpdateItem", preUpdateItem, {
-	useChoices: "all",
-});
+export const unidedOptions = {
+	name: "unided",
+	settings: [
+		{
+			key: "unided",
+			type: String,
+			default: "disabled",
+			choices: ["disabled", "create", "all"],
+			onChange: setup,
+		},
+	],
+	hooks: [
+		{ event: "preCreateItem", listener: preCreateItem, useChoices: true },
+		{ event: "preUpdateItem", listener: preUpdateItem, useChoices: "all" },
+	],
+	conflicts: ["pf2e-unided"],
+	init: calledIfSetting(setup, "unided"),
+};
 
-export function registerUnided() {
-	return {
-		settings: [
-			{
-				key: "unided",
-				type: String,
-				default: "disabled",
-				choices: ["disabled", "create", "all"],
-				onChange: setup,
-			},
-		],
-		conflicts: ["pf2e-unided"],
-		init: calledIfSetting(setup, "unided"),
-	};
-}
+const { hooks } = createTool(unidedOptions);
 
 function setup(value) {
-	setCreateHook(value);
-	setUpdateHook(value);
+	hooks.setAll(value);
 }
 
 function preCreateItem(item) {

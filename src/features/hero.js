@@ -11,70 +11,66 @@ import {
 	templatePath,
 	warn,
 } from "module-api";
-import { isPlayedActor } from "../actor";
+import { isPlayedActor } from "../actor-sheet";
 import { Trade } from "../apps/hero/trade";
-import { calledIfSetting, createHook, createSocket } from "../misc";
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
 const STANDALONE_ID = "pf2e-hero-actions";
-
-const socket = createSocket("hero-action", onSocket);
-
-const setHook = createHook(
-	"renderCharacterSheetPF2e",
-	renderCharacterSheetPF2e,
-);
 
 const JOURNAL_UUID = "Compendium.pf2e.journals.JournalEntry.BSp4LUSaOmUyjBko";
 const TABLE_UUID = "Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK";
 
 const TABLE_ICON = "systems/pf2e/icons/features/feats/heroic-recovery.webp";
 
-export function registerHeroActions() {
-	return {
-		name: "heroActions",
-		settings: [
-			{
-				key: "hero",
-				type: Boolean,
-				default: false,
-				onChange: setup,
-			},
-			{
-				key: "hero-table",
-				type: String,
-				default: "",
-			},
-			{
-				key: "hero-trade",
-				type: Boolean,
-				default: false,
-				onChange: () => refreshActorSheets("character"),
-			},
-			{
-				key: "hero-private",
-				type: Boolean,
-				default: false,
-			},
-		],
-		conflicts: [STANDALONE_ID],
-		api: {
-			createTable,
-			removeHeroActions,
-			getHeroActions,
-			useHeroAction,
-			getHeroActionDetails,
-			drawHeroAction,
-			drawHeroActions,
-			sendActionToChat,
-			discardHeroActions,
-			tradeHeroAction,
-			getDeckTable,
-			giveHeroActions,
-			createChatMessage,
+export const heroOptions = {
+	name: "heroActions",
+	settings: [
+		{
+			key: "hero",
+			type: Boolean,
+			default: false,
+			onChange: setup,
 		},
-		init: calledIfSetting(setup, "hero"),
-	};
-}
+		{
+			key: "hero-table",
+			type: String,
+			default: "",
+		},
+		{
+			key: "hero-trade",
+			type: Boolean,
+			default: false,
+			onChange: () => refreshActorSheets("character"),
+		},
+		{
+			key: "hero-private",
+			type: Boolean,
+			default: false,
+		},
+	],
+	socket: onSocket,
+	hooks: [["renderCharacterSheetPF2e", renderCharacterSheetPF2e]],
+	conflicts: [STANDALONE_ID],
+	api: {
+		createTable,
+		removeHeroActions,
+		getHeroActions,
+		useHeroAction,
+		getHeroActionDetails,
+		drawHeroAction,
+		drawHeroActions,
+		sendActionToChat,
+		discardHeroActions,
+		tradeHeroAction,
+		getDeckTable,
+		giveHeroActions,
+		createChatMessage,
+	},
+	init: calledIfSetting(setup, "hero"),
+};
+
+const { socket, setHook } = createTool(heroOptions);
 
 function setup(value) {
 	socket.toggle(value);

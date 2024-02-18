@@ -22,28 +22,29 @@ import {
 	isPlayedActor,
 	registerCharacterSheetExtraTab,
 	unregisterCharacterSheetExtraTab,
-} from "../actor";
+} from "../actor-sheet";
 import { closestInside, makeDraggable } from "../draggable";
-import { calledIfSetting, createHook } from "../misc";
-
-const setHook = createHook("closeCharacterSheetPF2e", closeCharacterSheetPF2e);
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
 let dragging = false;
 
-export function registerInventory() {
-	return {
-		settings: [
-			{
-				key: "inventory",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: setup,
-			},
-		],
-		ready: calledIfSetting(setup, "inventory"),
-	};
-}
+export const inventoryOptions = {
+	name: "inventory",
+	settings: [
+		{
+			key: "inventory",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: setup,
+		},
+	],
+	hooks: [["closeCharacterSheetPF2e", closeCharacterSheetPF2e]],
+	ready: calledIfSetting(setup, "inventory"),
+};
+
+const { setHook } = createTool(inventoryOptions);
 
 let dragIdentifier;
 

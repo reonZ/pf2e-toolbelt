@@ -9,25 +9,24 @@ import {
 import {
 	registerCharacterSheetExtraTab,
 	unregisterCharacterSheetExtraTab,
-} from "../actor";
+} from "../actor-sheet";
 import { calledIfSetting } from "../misc";
 
-export function registerSpellsSummary() {
-	return {
-		settings: [
-			{
-				key: "summary",
-				type: String,
-				default: "disabled",
-				scope: "client",
-				choices: ["disabled", "enabled", "sort"],
-				onChange: setup,
-			},
-		],
-		conflicts: ["pf2e-spells-summary"],
-		ready: calledIfSetting(setup, "summary"),
-	};
-}
+export const summaryOptions = {
+	name: "summary",
+	settings: [
+		{
+			key: "summary",
+			type: String,
+			default: "disabled",
+			scope: "client",
+			choices: ["disabled", "enabled", "sort"],
+			onChange: setup,
+		},
+	],
+	conflicts: ["pf2e-spells-summary"],
+	ready: calledIfSetting(setup, "summary"),
+};
 
 function setup(value) {
 	if (value) {

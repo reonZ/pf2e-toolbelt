@@ -7,15 +7,9 @@ import {
 	render,
 	subLocalize,
 } from "module-api";
-import { isPlayedActor } from "../actor";
-import { calledIfSetting, createHook } from "../misc";
-
-const hooks = [
-	createHook("deleteCombat", deleteCombat),
-	createHook("deleteCombatant", deleteCombatant),
-	createHook("createCombatant", createCombatant),
-	createHook("renderCharacterSheetPF2e", renderCharacterSheetPF2e),
-];
+import { isPlayedActor } from "../actor-sheet";
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
 const STANCE_SAVANT = [
 	"Compendium.pf2e.feats-srd.Item.yeSyGnYDkl2GUNmu",
@@ -61,32 +55,36 @@ const EXTRAS = new Map([
 	],
 ]);
 
-export function registerStances() {
-	return {
-		name: "stances",
-		settings: [
-			{
-				key: "stances",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: setup,
-			},
-		],
-		conflicts: ["pf2e-stances"],
-		api: {
-			getStances,
-			toggleStance,
-			isValidStance,
+export const stancesOptions = {
+	name: "stances",
+	settings: [
+		{
+			key: "stances",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: setup,
 		},
-		ready: calledIfSetting(setup, "stances"),
-	};
-}
+	],
+	hooks: [
+		["deleteCombat", deleteCombat],
+		["deleteCombatant", deleteCombatant],
+		["createCombatant", createCombatant],
+		["renderCharacterSheetPF2e", renderCharacterSheetPF2e],
+	],
+	conflicts: ["pf2e-stances"],
+	api: {
+		getStances,
+		toggleStance,
+		isValidStance,
+	},
+	ready: calledIfSetting(setup, "stances"),
+};
+
+const { hooks } = createTool(stancesOptions);
 
 function setup(value) {
-	for (const setHook of hooks) {
-		setHook(value);
-	}
+	hooks.setAll(value);
 	refreshActorSheets("character");
 }
 

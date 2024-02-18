@@ -11,52 +11,51 @@ const PREPARE_ARMOR_DATA =
 const PREPARE_ARMOR_DERIVED_DATA =
 	"CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData";
 
-export function registerArp() {
-	return {
-		settings: [
-			{
-				key: "auto-runes",
-				type: String,
-				default: "disabled",
-				choices: ["disabled", "force", "lower"],
-				requiresReload: true,
-			},
-		],
-		conflicts: ["pf2e-arp"],
-		init: () => {
-			const setting = getSetting("auto-runes");
-			if (setting === "disabled") return;
-
-			registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, "WRAPPER");
-			registerWrapper(
-				PREPARE_WEAPON_DERIVED_DATA,
-				onPrepareWeaponDerivedData,
-				"WRAPPER",
-			);
-
-			registerWrapper(PREPARE_ARMOR_DATA, onPrepareArmorData, "WRAPPER");
-			registerWrapper(
-				PREPARE_ARMOR_DERIVED_DATA,
-				onPrepareArmorDerivedData,
-				"WRAPPER",
-			);
-
-			if (setting === "force") {
-				Hooks.on("renderPhysicalItemSheetPF2e", renderPhysicalItemSheetPF2e);
-			}
+export const arpOptions = {
+	name: "arp",
+	settings: [
+		{
+			key: "auto-runes",
+			type: String,
+			default: "disabled",
+			choices: ["disabled", "force", "lower"],
+			requiresReload: true,
 		},
-		ready: (isGM) => {
-			if (
-				isGM &&
-				getSetting("auto-runes") !== "disabled" &&
-				game.settings.get("pf2e", "automaticBonusVariant") !== "noABP"
-			) {
-				game.settings.set("pf2e", "automaticBonusVariant", "noABP");
-				info("arp.forceVariant");
-			}
-		},
-	};
-}
+	],
+	conflicts: ["pf2e-arp"],
+	init: () => {
+		const setting = getSetting("auto-runes");
+		if (setting === "disabled") return;
+
+		registerWrapper(PREPARE_WEAPON_DATA, onPrepareWeaponData, "WRAPPER");
+		registerWrapper(
+			PREPARE_WEAPON_DERIVED_DATA,
+			onPrepareWeaponDerivedData,
+			"WRAPPER",
+		);
+
+		registerWrapper(PREPARE_ARMOR_DATA, onPrepareArmorData, "WRAPPER");
+		registerWrapper(
+			PREPARE_ARMOR_DERIVED_DATA,
+			onPrepareArmorDerivedData,
+			"WRAPPER",
+		);
+
+		if (setting === "force") {
+			Hooks.on("renderPhysicalItemSheetPF2e", renderPhysicalItemSheetPF2e);
+		}
+	},
+	ready: (isGM) => {
+		if (
+			isGM &&
+			getSetting("auto-runes") !== "disabled" &&
+			game.settings.get("pf2e", "automaticBonusVariant") !== "noABP"
+		) {
+			game.settings.set("pf2e", "automaticBonusVariant", "noABP");
+			info("arp.forceVariant");
+		}
+	},
+};
 
 function isValidActor(actor, isCharacter = false) {
 	return (

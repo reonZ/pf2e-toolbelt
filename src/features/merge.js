@@ -10,33 +10,33 @@ import {
 	warn,
 } from "module-api";
 import { MultiCast } from "../apps/merge/multi";
-import { createHook } from "../misc";
-
-const setHook = createHook("renderChatMessage", renderChatMessage);
+import { createTool } from "../tool";
 
 const setupDebounced = debounce(setup, 1);
 
-export function registerMerge() {
-	return {
-		settings: [
-			{
-				key: "merge-damage",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: setupDebounced,
-			},
-			{
-				key: "multi-cast",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: setupDebounced,
-			},
-		],
-		init: setupDebounced,
-	};
-}
+export const mergeOptions = {
+	name: "merge",
+	settings: [
+		{
+			key: "merge-damage",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: setupDebounced,
+		},
+		{
+			key: "multi-cast",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: setupDebounced,
+		},
+	],
+	hooks: [["renderChatMessage", renderChatMessage]],
+	init: setupDebounced,
+};
+
+const { setHook } = createTool(mergeOptions);
 
 function setup() {
 	const enabled = getSetting("merge-damage") || getSetting("multi-cast");

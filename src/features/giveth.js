@@ -7,31 +7,35 @@ import {
 	transferItemToActor,
 	warn,
 } from "module-api";
-import { isPlayedActor } from "../actor";
-import { calledIfSetting, createHook, createSocket } from "../misc";
+import { isPlayedActor } from "../actor-sheet";
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
-const setHook = createHook("dropCanvasData", dropCanvasData, {
-	isUpstream: true,
-	useChoices: true,
-});
+export const givethOptions = {
+	name: "giveth",
+	settings: [
+		{
+			key: "giveth",
+			type: String,
+			default: "disabled",
+			choices: ["disabled", "enabled", "no-message"],
+			onChange: setup,
+		},
+	],
+	hooks: [
+		{
+			event: "dropCanvasData",
+			listener: dropCanvasData,
+			isUpstream: true,
+			useChoices: true,
+		},
+	],
+	socket: onSocket,
+	conflicts: ["pf2e-giveth"],
+	ready: calledIfSetting(setup, "giveth"),
+};
 
-const socket = createSocket("giveth", onSocket);
-
-export function registerGiveth() {
-	return {
-		settings: [
-			{
-				key: "giveth",
-				type: String,
-				default: "disabled",
-				choices: ["disabled", "enabled", "no-message"],
-				onChange: setup,
-			},
-		],
-		conflicts: ["pf2e-giveth"],
-		ready: calledIfSetting(setup, "giveth"),
-	};
-}
+const { socket, setHook } = createTool(givethOptions);
 
 function setup(value) {
 	if (game.user.isGM) {

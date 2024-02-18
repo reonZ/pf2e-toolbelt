@@ -1,24 +1,25 @@
 import { getFlag, refreshActorSheets } from "module-api";
-import { isPlayedActor } from "../actor";
+import { isPlayedActor } from "../actor-sheet";
 import { EditLores } from "../apps/knowledges/lores";
-import { calledIfSetting, createHook } from "../misc";
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
-const setHook = createHook("renderNPCSheetPF2e", renderNPCSheetPF2e);
+export const knowledgesOptions = {
+	name: "knowledges",
+	settings: [
+		{
+			key: "knowledges",
+			type: Boolean,
+			default: false,
+			onChange: setup,
+		},
+	],
+	hooks: [["renderNPCSheetPF2e", renderNPCSheetPF2e]],
+	conflicts: ["pf2e-npc-knowledges"],
+	ready: calledIfSetting(setup, "knowledges"),
+};
 
-export function registerKnowledges() {
-	return {
-		settings: [
-			{
-				key: "knowledges",
-				type: Boolean,
-				default: false,
-				onChange: setup,
-			},
-		],
-		conflicts: ["pf2e-npc-knowledges"],
-		ready: calledIfSetting(setup, "knowledges"),
-	};
-}
+const { setHook } = createTool(knowledgesOptions);
 
 function setup(value) {
 	setHook(value);

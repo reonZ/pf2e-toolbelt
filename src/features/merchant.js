@@ -16,9 +16,8 @@ import {
 	transferItemToActor,
 } from "module-api";
 import { BuyItems } from "../apps/merchant/buy";
-import { createSocket, wrapperError } from "../misc";
-
-const socket = createSocket("merchant", onSocket);
+import { wrapperError } from "../misc";
+import { createTool } from "../tool";
 
 const localize = subLocalize("merchant");
 
@@ -39,43 +38,45 @@ export const PRICE_RATIO = {
 	sell: 1,
 };
 
-export function registerMerchant() {
-	return {
-		settings: [
-			{
-				key: "merchant",
-				type: Boolean,
-				default: false,
-				requiresReload: true,
-			},
-		],
-		init: (isGM) => {
-			if (!getSetting("merchant")) return;
-
-			Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
-
-			if (isGM) {
-				socket.activate();
-			}
-
-			registerWrapper(
-				ITEM_PREPARE_DERIVED_DATA,
-				itemPrepareDerivedData,
-				"WRAPPER",
-			);
-			registerWrapper(
-				LOOT_TRANSFER_ITEM_TO_ACTOR,
-				lootTranferItemToActor,
-				"OVERRIDE",
-			);
-			registerWrapper(
-				ACTOR_TRANSFER_ITEM_TO_ACTOR,
-				actorTranferItemToActor,
-				"MIXED",
-			);
+export const merchantOptions = {
+	name: "merchant",
+	settings: [
+		{
+			key: "merchant",
+			type: Boolean,
+			default: false,
+			requiresReload: true,
 		},
-	};
-}
+	],
+	socket: onSocket,
+	init: (isGM) => {
+		if (!getSetting("merchant")) return;
+
+		Hooks.on("renderLootSheetPF2e", renderLootSheetPF2e);
+
+		if (isGM) {
+			socket.activate();
+		}
+
+		registerWrapper(
+			ITEM_PREPARE_DERIVED_DATA,
+			itemPrepareDerivedData,
+			"WRAPPER",
+		);
+		registerWrapper(
+			LOOT_TRANSFER_ITEM_TO_ACTOR,
+			lootTranferItemToActor,
+			"OVERRIDE",
+		);
+		registerWrapper(
+			ACTOR_TRANSFER_ITEM_TO_ACTOR,
+			actorTranferItemToActor,
+			"MIXED",
+		);
+	},
+};
+
+const { socket } = createTool(merchantOptions);
 
 function onSocket(packet, userId) {
 	switch (packet.type) {

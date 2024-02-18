@@ -1,32 +1,32 @@
 import { getSetting, localize } from "module-api";
-import { createHook } from "../misc";
-
-const setHook = createHook("renderEffectsPanel", renderEffectsPanel);
+import { createTool } from "../tool";
 
 const setupDebounced = debounce(setup, 1);
 
-export function registerEffectsPanelHelper() {
-	return {
-		settings: [
-			{
-				key: "effect-remove",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: setupDebounced,
-			},
-			{
-				key: "condition-sheet",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: setupDebounced,
-			},
-		],
-		conflicts: ["pf2e-effect-description"],
-		init: setupDebounced,
-	};
-}
+export const effectsOptions = {
+	name: "effects",
+	settings: [
+		{
+			key: "effect-remove",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: setupDebounced,
+		},
+		{
+			key: "condition-sheet",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: setupDebounced,
+		},
+	],
+	hooks: [["renderEffectsPanel", renderEffectsPanel]],
+	conflicts: ["pf2e-effect-description"],
+	init: setupDebounced,
+};
+
+const { setHook } = createTool(effectsOptions);
 
 function setup() {
 	const enabled = getSetting("effect-remove") || getSetting("condition-sheet");

@@ -1,31 +1,30 @@
-import { calledIfSetting, createHook } from "../misc";
+import { calledIfSetting } from "../misc";
+import { createTool } from "../tool";
 
-const hooks = [
-	createHook("renderApplication", onRender),
-	createHook("renderActorSheet", onRender),
-	createHook("renderItemSheet", onRender),
-];
+export const debugOptions = {
+	name: "debug",
+	settings: [
+		{
+			key: "debug",
+			type: Boolean,
+			default: false,
+			config: false,
+			scope: "client",
+			onChange: setup,
+		},
+	],
+	hooks: [
+		["renderApplication", onRender],
+		["renderActorSheet", onRender],
+		["renderItemSheet", onRender],
+	],
+	init: calledIfSetting(setup, "debug"),
+};
 
-export function registerDebug() {
-	return {
-		settings: [
-			{
-				key: "debug",
-				type: Boolean,
-				default: false,
-				config: false,
-				scope: "client",
-				onChange: setup,
-			},
-		],
-		init: calledIfSetting(setup, "debug"),
-	};
-}
+const { hooks } = createTool(debugOptions);
 
 function setup(value) {
-	for (const setHook of hooks) {
-		setHook(value);
-	}
+	hooks.setAll(value);
 }
 
 function onRender(app, html) {

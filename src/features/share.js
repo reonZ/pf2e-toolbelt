@@ -13,39 +13,38 @@ import {
 	subLocalize,
 	unsetFlag,
 } from "module-api";
-import { isPlayedActor } from "../actor";
+import { isPlayedActor } from "../actor-sheet";
 
 const ACTOR_PREPARE_DATA = "CONFIG.Actor.documentClass.prototype.prepareData";
 const DOCUMENT_SHEET_RENDER_INNER = "DocumentSheet.prototype._renderInner";
 
-export function registerShare() {
-	return {
-		settings: [
-			{
-				key: "share",
-				type: String,
-				default: "disabled",
-				choices: ["disabled", "enabled", "force"],
-				requiresReload: true,
-			},
-		],
-		init: () => {
-			const share = getSetting("share");
-			if (share === "disabled") return;
-
-			registerWrapper(ACTOR_PREPARE_DATA, prepareData, "WRAPPER");
-			registerWrapper(
-				DOCUMENT_SHEET_RENDER_INNER,
-				documentSheetRenderInner,
-				"WRAPPER",
-			);
-
-			Hooks.on("preUpdateActor", preUpdateActor);
-			Hooks.on("deleteActor", deleteActor);
-			Hooks.on("updateActor", updateActor);
+export const shareOptions = {
+	name: "share",
+	settings: [
+		{
+			key: "share",
+			type: String,
+			default: "disabled",
+			choices: ["disabled", "enabled", "force"],
+			requiresReload: true,
 		},
-	};
-}
+	],
+	init: () => {
+		const share = getSetting("share");
+		if (share === "disabled") return;
+
+		registerWrapper(ACTOR_PREPARE_DATA, prepareData, "WRAPPER");
+		registerWrapper(
+			DOCUMENT_SHEET_RENDER_INNER,
+			documentSheetRenderInner,
+			"WRAPPER",
+		);
+
+		Hooks.on("preUpdateActor", preUpdateActor);
+		Hooks.on("deleteActor", deleteActor);
+		Hooks.on("updateActor", updateActor);
+	},
+};
 
 async function documentSheetRenderInner(wrapped, ...args) {
 	const inner = await wrapped(...args);

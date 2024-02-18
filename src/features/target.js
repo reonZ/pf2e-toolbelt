@@ -22,7 +22,8 @@ import {
 	warn,
 } from "module-api";
 import { bindOnPreCreateSpellDamageChatMessage } from "../chat";
-import { createHook, createSocket, roll3dDice } from "../misc";
+import { roll3dDice } from "../misc";
+import { createTool } from "../tool";
 
 const SAVES = {
 	fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
@@ -60,69 +61,73 @@ const DEGREE_OF_SUCCESS = [
 	"criticalSuccess",
 ];
 
-const setRenderHook = createHook("renderChatMessage", renderChatMessage, {
-	useChoices: true,
-});
-const setTemplateHook = createHook(
-	"createMeasuredTemplate",
-	createMeasuredTemplate,
-	{ useChoices: true },
-);
-
-const socket = createSocket("target", onSocket);
-
-export function registerTargetTokenHelper() {
-	return {
-		settings: [
-			{
-				key: "target",
-				type: Boolean,
-				default: false,
-				requiresReload: true,
-			},
-			{
-				key: "target-client",
-				type: String,
-				default: "disabled",
-				choices: ["disabled", "small", "big"],
-				scope: "client",
-				onChange: (value) => setHook(setRenderHook, value),
-			},
-			{
-				key: "target-template",
-				type: Boolean,
-				default: false,
-				scope: "client",
-				onChange: (value) => setHook(setTemplateHook, value),
-			},
-		],
-		conflicts: [],
-		init: (isGM) => {
-			if (!getSetting("target")) return;
-
-			if (isGM) {
-				socket.activate();
-				Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
-			}
-
-			Hooks.on("preCreateChatMessage", preCreateChatMessage);
+export const targetOptions = {
+	name: "target",
+	settings: [
+		{
+			key: "target",
+			type: Boolean,
+			default: false,
+			requiresReload: true,
 		},
-		ready: (isGM) => {
-			if (!getSetting("target")) return;
-
-			setRenderHook(getSetting("target-client"));
-			setTemplateHook(getSetting("target-template"));
-
-			for (const { message, html } of latestChatMessages(10)) {
-				renderChatMessage(message, html);
-			}
+		{
+			key: "target-client",
+			type: String,
+			default: "disabled",
+			choices: ["disabled", "small", "big"],
+			scope: "client",
+			onChange: (value) => setHook("chat", value),
 		},
-	};
-}
+		{
+			key: "target-template",
+			type: Boolean,
+			default: false,
+			scope: "client",
+			onChange: (value) => setHook("template", value),
+		},
+	],
+	hooks: [
+		{
+			key: "chat",
+			event: "renderChatMessage",
+			listener: renderChatMessage,
+			useChoices: true,
+		},
+		{
+			key: "template",
+			event: "createMeasuredTemplate",
+			listener: createMeasuredTemplate,
+			useChoices: true,
+		},
+	],
+	socket: onSocket,
+	init: (isGM) => {
+		if (!getSetting("target")) return;
 
-function setHook(hook, value) {
+		if (isGM) {
+			socket.activate();
+			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
+		}
+
+		Hooks.on("preCreateChatMessage", preCreateChatMessage);
+	},
+	ready: (isGM) => {
+		if (!getSetting("target")) return;
+
+		hooks.setFromSetting("chat", "target-client");
+		hooks.setFromSetting("template", "target-template");
+
+		for (const { message, html } of latestChatMessages(10)) {
+			renderChatMessage(message, html);
+		}
+	},
+};
+
+const { hooks, socket } = createTool(targetOptions);
+
+function setHook(key, value) {
 	const realValue = getSetting("target") ? value : "disabled";
-	hook(realValue);
+	hooks.set(key, realValue);
 }
 
 function onSocket(packet) {
