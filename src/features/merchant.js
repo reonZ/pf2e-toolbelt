@@ -2,8 +2,7 @@ import {
 	ErrorPF2e,
 	calculateItemPrice,
 	createFancyLink,
-	createManipulateFlavor,
-	createTradeContent,
+	createTradeMessage,
 	flagPath,
 	getBrowserTab,
 	getFlag,
@@ -420,22 +419,22 @@ async function makeBuyDeal(options, senderId) {
 	await seller.inventory.addCoins(selectedPurse.price);
 
 	const newItem = await transferItemToActor(buyer, item, itemQuantity);
-	const buyerName = getHighestName(buyer);
+
 	const message = localize("sold.message", {
-		buyer: buyerName,
+		buyer: getHighestName(buyer),
 		quantity: itemQuantity,
 		item: await createFancyLink(newItem),
 		seller: getHighestName(seller),
 		price: parseFloat(selectedPurse.goldValue.toFixed(2)),
 	});
 
-	ChatMessage.implementation.create({
-		user: senderId ?? game.user.id,
-		speaker: ChatMessage.getSpeaker({ actor: buyer, alias: buyerName }),
-		flavor: await createManipulateFlavor(localize("sold.subtitle")),
-		content: await createTradeContent(message, newItem.img),
-		type: CONST.CHAT_MESSAGE_TYPES.EMOTE,
-	});
+	await createTradeMessage(
+		localize("sold.subtitle"),
+		message,
+		buyer,
+		newItem,
+		senderId,
+	);
 }
 
 function openEquipmentTab() {
