@@ -1,6 +1,8 @@
 import {
 	MoveLootPopup,
-	chatUUID,
+	createFancyLink,
+	createTradeMessage,
+	getHighestName,
 	getSetting,
 	isGMOnline,
 	localize,
@@ -45,10 +47,10 @@ function setup(value) {
 	}
 }
 
-function onSocket(packet) {
+function onSocket(packet, userId) {
 	if (packet.type === "giveth-condition") takethCondition(packet);
 	else if (packet.type === "giveth-effect") takethEffect(packet);
-	else takethPhysical(packet);
+	else takethPhysical(packet, userId);
 }
 
 function dropCanvasData(canvas, data) {
@@ -192,7 +194,10 @@ async function takethEffect({ targetId, uuid }) {
 	target.createEmbeddedDocuments("Item", [source]);
 }
 
-async function takethPhysical({ itemId, ownerId, qty, stack, targetId }) {
+async function takethPhysical(
+	{ itemId, ownerId, qty, stack, targetId },
+	senderId,
+) {
 	const owner = game.actors.get(ownerId);
 	const target = game.actors.get(targetId);
 	if (!owner || !target) return;
@@ -211,16 +216,18 @@ async function takethPhysical({ itemId, ownerId, qty, stack, targetId }) {
 
 	if (getSetting("giveth") === "no-message") return;
 
-	let content = chatUUID(newItem.uuid, newItem.name, !newItem.isIdentified);
-	if (itemQuantity > 1) content += ` x${itemQuantity}`;
-
-	const giveth = localize("giveth.giveth", {
-		target: target.name,
+	const message = localize("giveth.giveth", {
+		giver: getHighestName(owner),
+		quantity: itemQuantity,
+		item: await createFancyLink(newItem),
+		recipient: getHighestName(target),
 	});
 
-	ChatMessage.create({
-		flavor: `<h4 class="action">${giveth}</h4>`,
-		content,
-		speaker: ChatMessage.getSpeaker({ actor: owner }),
-	});
+	await createTradeMessage(
+		localize("giveth.subtitle"),
+		message,
+		owner,
+		newItem,
+		senderId,
+	);
 }

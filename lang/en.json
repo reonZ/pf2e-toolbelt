@@ -173,7 +173,8 @@
             "range": "Range"
         },
         "giveth": {
-            "giveth": "Giveth to {target}",
+            "subtitle": "Giveth Item",
+            "giveth": "{giver} giveth {quantity} × {item} to {recipient}.",
             "notification": {
                 "zero": "You cannot give an item you don't have yourself.",
                 "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
