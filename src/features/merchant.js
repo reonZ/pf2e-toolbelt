@@ -420,40 +420,20 @@ async function makeBuyDeal(options, senderId) {
 	await seller.inventory.addCoins(selectedPurse.price);
 
 	const newItem = await transferItemToActor(buyer, item, itemQuantity);
-
-	createBuyMessage(
-		buyer,
-		seller,
-		newItem,
-		itemQuantity,
-		senderId,
-		selectedPurse.goldValue,
-	);
-}
-
-export async function createBuyMessage(
-	buyer,
-	seller,
-	item,
-	quantity,
-	senderId,
-	goldValue,
-) {
 	const buyerName = getHighestName(buyer);
-
 	const message = localize("sold.message", {
 		buyer: buyerName,
-		quantity,
-		item: await createFancyLink(item),
+		quantity: itemQuantity,
+		item: await createFancyLink(newItem),
 		seller: getHighestName(seller),
-		price: parseFloat(goldValue.toFixed(2)),
+		price: parseFloat(selectedPurse.goldValue.toFixed(2)),
 	});
 
 	ChatMessage.implementation.create({
 		user: senderId ?? game.user.id,
 		speaker: ChatMessage.getSpeaker({ actor: buyer, alias: buyerName }),
 		flavor: await createManipulateFlavor(localize("sold.subtitle")),
-		content: await createTradeContent(message, item.img),
+		content: await createTradeContent(message, newItem.img),
 		type: CONST.CHAT_MESSAGE_TYPES.EMOTE,
 	});
 }
