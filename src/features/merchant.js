@@ -419,12 +419,12 @@ async function makeBuyDeal(options, senderId) {
 
 	await seller.inventory.addCoins(selectedPurse.price);
 
-	await transferItemToActor(buyer, item, itemQuantity);
+	const newItem = await transferItemToActor(buyer, item, itemQuantity);
 
 	createBuyMessage(
 		buyer,
 		seller,
-		item,
+		newItem,
 		itemQuantity,
 		senderId,
 		selectedPurse.goldValue,
