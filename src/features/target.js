@@ -63,7 +63,7 @@ const DEGREE_OF_SUCCESS = [
 	"criticalSuccess",
 ];
 
-const TEXTEDITOR_ACTIVATE_LISTENERS = "TextEditor.activateListeners";
+const TEXTEDITOR_ENRICH_HTML = "TextEditor.enrichHTML";
 const CHATLOG_ACTIVATE_LISTENERS = "ChatLog.prototype.activateListeners";
 
 export const targetOptions = {
@@ -114,8 +114,10 @@ export const targetOptions = {
 			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
 		}
 
-		registerWrapper(TEXTEDITOR_ACTIVATE_LISTENERS, textEditorActivateListeners);
+		registerWrapper(TEXTEDITOR_ENRICH_HTML, textEditorEnrichHTML);
 		registerWrapper(CHATLOG_ACTIVATE_LISTENERS, chatActivateListeners);
+
+		document.body.addEventListener("dragstart", onDragStart, true);
 
 		Hooks.on("preCreateChatMessage", preCreateChatMessage);
 	},
@@ -150,22 +152,29 @@ function onSocket(packet) {
 	}
 }
 
-function textEditorActivateListeners(wrapped) {
-	wrapped();
-	$("body").on("dragstart", "a.inline-check", onDragInlineCheck);
+const INLINE_CHECK_REGEX =
+	/(class="inline-check[\w0-9 -]*"[^>]+data-pf2-check="(reflex|fortitude|will)")/g;
+async function textEditorEnrichHTML(wrapped, ...args) {
+	let enriched = await wrapped(...args);
+	enriched = enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
+	return enriched;
 }
 
 function chatActivateListeners(wrapped, html) {
 	wrapped(html);
-	html.on("drop", "li.chat-message", onChatMessageDrop);
+	html[0].addEventListener("drop", onChatMessageDrop);
 }
 
 function onChatMessageDrop(event) {
+	const target = event.target.closest("li.chat-message");
+	if (!target) return;
+
 	const { isBasic, pf2Dc, pf2Check, type, pf2RollOptions, pf2Traits } =
-		TextEditor.getDragEventData(event.originalEvent) ?? {};
+		TextEditor.getDragEventData(event);
 	if (type !== `${MODULE.id}-check-roll`) return;
 
-	const message = game.messages.get(event.currentTarget.dataset.messageId);
+	const messageId = target.dataset.messageId;
+	const message = game.messages.get(messageId);
 	if (!message || (!game.user.isGM && !message.isAuthor)) return;
 	if (getFlag(message, "target.save") || !message.isDamageRoll) return;
 
@@ -183,18 +192,27 @@ function onChatMessageDrop(event) {
 }
 
 let BASIC_SAVE_REGEX;
-function onDragInlineCheck(event) {
-	const link = event.currentTarget;
+function onDragStart(event) {
+	const { target, dataTransfer } = event;
+	if (
+		!dataTransfer ||
+		!(target instanceof HTMLAnchorElement) ||
+		!target.classList.contains("inline-check")
+	)
+		return;
+
 	const data = {
-		...link.dataset,
+		...target.dataset,
 		type: `${MODULE.id}-check-roll`,
 	};
 
 	if (!data.pf2Dc) return;
 	if (!["reflex", "will", "fortitude"].includes(data.pf2Check)) return;
 
+	event.stopPropagation();
+
 	if (data.isBasic == null) {
-		const label = link
+		const label = target
 			.querySelector("span.label")
 			?.lastChild.textContent.trim();
 
@@ -215,7 +233,7 @@ function onDragInlineCheck(event) {
 		}
 	}
 
-	event.originalEvent.dataTransfer.setData("text/plain", JSON.stringify(data));
+	dataTransfer.setData("text/plain", JSON.stringify(data));
 }
 
 function getChatLogEntryContext(_, data) {
@@ -419,8 +437,6 @@ function preCreateChatMessage(message) {
 async function renderChatMessage(message, html) {
 	const clientEnabled = getSetting("target-client") !== "disabled";
 	deleteInMemory(message, "target.canRollSave");
-
-	html.find("a.inline-check").attr("draggable", true);
 
 	if (clientEnabled && message.isDamageRoll) {
 		if (!isValidDamageMessage(message)) return;
