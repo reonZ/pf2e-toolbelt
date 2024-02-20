@@ -342,6 +342,11 @@
                     "saves": {
                         "name": "Roll All Saves"
                     }
+                },
+                "drop": {
+                    "unauth": "You can only do that on messages you are the author of.",
+                    "already": "This message already has a save check linked to it.",
+                    "added": "You have successfully added a save to the message."
                 }
             },
             "menu": {

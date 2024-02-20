@@ -8,6 +8,7 @@ import {
 	getSetting,
 	getTemplateTokens,
 	hasEmbeddedSpell,
+	info,
 	isActiveGM,
 	latestChatMessages,
 	localize,
@@ -175,8 +176,17 @@ function onChatMessageDrop(event) {
 
 	const messageId = target.dataset.messageId;
 	const message = game.messages.get(messageId);
-	if (!message || (!game.user.isGM && !message.isAuthor)) return;
-	if (getFlag(message, "target.save") || !message.isDamageRoll) return;
+	if (!message || !message.isDamageRoll) return;
+
+	if (!game.user.isGM && !message.isAuthor) {
+		warn("target.chat.drop.unauth");
+		return;
+	}
+
+	if (getFlag(message, "target.save")) {
+		warn("target.chat.drop.already");
+		return;
+	}
 
 	setFlag(message, "target", {
 		rollOptions: [
@@ -189,6 +199,8 @@ function onChatMessageDrop(event) {
 			statistic: pf2Check,
 		},
 	});
+
+	info("target.chat.drop.added");
 }
 
 let BASIC_SAVE_REGEX;
