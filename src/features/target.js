@@ -1,5 +1,6 @@
 import {
 	DegreeOfSuccess,
+	MODULE,
 	applyDamageFromMessage,
 	deleteInMemory,
 	getFlag,
@@ -13,6 +14,7 @@ import {
 	localizePath,
 	moduleFlagUpdate,
 	onClickShieldBlock,
+	registerWrapper,
 	render,
 	setFlag,
 	setInMemory,
@@ -60,6 +62,9 @@ const DEGREE_OF_SUCCESS = [
 	"success",
 	"criticalSuccess",
 ];
+
+const TEXTEDITOR_ACTIVATE_LISTENERS = "TextEditor.activateListeners";
+const CHATLOG_ACTIVATE_LISTENERS = "ChatLog.prototype.activateListeners";
 
 export const targetOptions = {
 	name: "target",
@@ -109,6 +114,9 @@ export const targetOptions = {
 			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
 		}
 
+		registerWrapper(TEXTEDITOR_ACTIVATE_LISTENERS, textEditorActivateListeners);
+		registerWrapper(CHATLOG_ACTIVATE_LISTENERS, chatActivateListeners);
+
 		Hooks.on("preCreateChatMessage", preCreateChatMessage);
 	},
 	ready: (isGM) => {
@@ -140,6 +148,74 @@ function onSocket(packet) {
 			updateMessageApplied(packet);
 			break;
 	}
+}
+
+function textEditorActivateListeners(wrapped) {
+	wrapped();
+	$("body").on("dragstart", "a.inline-check", onDragInlineCheck);
+}
+
+function chatActivateListeners(wrapped, html) {
+	wrapped(html);
+	html.on("drop", "li.chat-message", onChatMessageDrop);
+}
+
+function onChatMessageDrop(event) {
+	const { isBasic, pf2Dc, pf2Check, type, pf2RollOptions, pf2Traits } =
+		TextEditor.getDragEventData(event.originalEvent) ?? {};
+	if (type !== `${MODULE.id}-check-roll`) return;
+
+	const message = game.messages.get(event.currentTarget.dataset.messageId);
+	if (!message || (!game.user.isGM && !message.isAuthor)) return;
+	if (getFlag(message, "target.save") || !message.isDamageRoll) return;
+
+	setFlag(message, "target", {
+		rollOptions: [
+			...(pf2Traits?.split(",").map((o) => o.trim()) ?? []),
+			...(pf2RollOptions?.split(",").map((o) => o.trim()) ?? []),
+		],
+		save: {
+			basic: isBasic,
+			dc: Number(pf2Dc),
+			statistic: pf2Check,
+		},
+	});
+}
+
+let BASIC_SAVE_REGEX;
+function onDragInlineCheck(event) {
+	const link = event.currentTarget;
+	const data = {
+		...link.dataset,
+		type: `${MODULE.id}-check-roll`,
+	};
+
+	if (!data.pf2Dc) return;
+	if (!["reflex", "will", "fortitude"].includes(data.pf2Check)) return;
+
+	if (data.isBasic == null) {
+		const label = link
+			.querySelector("span.label")
+			?.lastChild.textContent.trim();
+
+		if (label) {
+			if (!BASIC_SAVE_REGEX) {
+				const saves = Object.values(CONFIG.PF2E.saves).map((x) =>
+					game.i18n.localize(x),
+				);
+				const joined = game.i18n.format("PF2E.InlineCheck.BasicWithSave", {
+					save: `(${saves.join("|")})`,
+				});
+				BASIC_SAVE_REGEX = new RegExp(joined);
+			}
+
+			data.isBasic = BASIC_SAVE_REGEX.test(label);
+		} else {
+			data.isBasic = false;
+		}
+	}
+
+	event.originalEvent.dataTransfer.setData("text/plain", JSON.stringify(data));
 }
 
 function getChatLogEntryContext(_, data) {
@@ -343,6 +419,8 @@ function preCreateChatMessage(message) {
 async function renderChatMessage(message, html) {
 	const clientEnabled = getSetting("target-client") !== "disabled";
 	deleteInMemory(message, "target.canRollSave");
+
+	html.find("a.inline-check").attr("draggable", true);
 
 	if (clientEnabled && message.isDamageRoll) {
 		if (!isValidDamageMessage(message)) return;
@@ -919,30 +997,27 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 			const save = actor.saves[statistic];
 			if (!save) return;
 
-			// we remove that
 			const item = (() => {
 				const item = message.item;
 				if (item) return item;
 
 				const messageId = getFlag(message, "target.messageId");
-				if (!messageId) return;
-
-				const otherMessage = game.messages.get(messageId);
-				if (!otherMessage) return;
-
-				return otherMessage.item;
+				if (messageId) {
+					const otherMessage = game.messages.get(messageId);
+					return otherMessage?.item;
+				}
 			})();
-			// remove above
 
 			const skipDefault = !game.user.settings.showCheckDialogs;
+			const rollOptions = getFlag(message, "target.rollOptions");
 
 			return new Promise((resolve) => {
 				save.check.roll({
 					dc: { value: dc },
 					item,
-					// item: message.item,
 					origin: actor,
 					skipDialog: event.shiftKey ? !skipDefault : skipDefault,
+					extraRollOptions: rollOptions,
 					createMessage: false,
 					callback: async (roll, __, msg) => {
 						await roll3dDice(roll);
