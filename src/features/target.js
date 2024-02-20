@@ -152,8 +152,8 @@ function onSocket(packet) {
 	}
 }
 
-const INLINE_CHECK_REGEX =
-	/(class="inline-check[\w0-9 -]*"[^>]+data-pf2-check="(reflex|fortitude|will)")/g;
+const INLINE_CHECK_REGEX = /(class="inline-check[\w0-9 -]*")/g;
+// /(class="inline-check[\w0-9 -]*"[^>]+data-pf2-check="(reflex|fortitude|will)")/g;
 async function textEditorEnrichHTML(wrapped, ...args) {
 	let enriched = await wrapped(...args);
 	enriched = enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
@@ -206,8 +206,10 @@ function onDragStart(event) {
 		type: `${MODULE.id}-check-roll`,
 	};
 
-	if (!data.pf2Dc) return;
-	if (!["reflex", "will", "fortitude"].includes(data.pf2Check)) return;
+	if (!data.pf2Dc || !["reflex", "will", "fortitude"].includes(data.pf2Check)) {
+		event.preventDefault();
+		return;
+	}
 
 	event.stopPropagation();
 
