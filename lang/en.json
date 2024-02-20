@@ -109,7 +109,7 @@
             },
             "target-client": {
                 "name": "Target Token Helper - Chat",
-                "hint": "Damage chat messages will have extra application damage rows for each owned token that was targeted during the roll.",
+                "hint": "Damage chat messages will have extra rows for each token that was targeted during the roll.",
                 "choices": {
                     "disabled": "Disabled",
                     "small": "Small Buttons",
@@ -118,7 +118,7 @@
             },
             "target-template": {
                 "name": "Target Token Helper - Template",
-                "hint": "When placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template (with various criterias)."
+                "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside the template (with various criterias)."
             },
             "force-untarget": {
                 "name": "Force Un-Target",
@@ -126,7 +126,7 @@
             },
             "untarget": {
                 "name": "Un-Target",
-                "hint": "Will remove all your targets at turn/round change. This is overiden by the 'Force Un-Target' world setting."
+                "hint": "Will remove all your targets at turn/round change. This is overridden by the 'Force Un-Target' world setting."
             }
         },
         "module-conflict": "The module <strong>{name}</strong> is not needed while using <strong>PF2e Toolbelt</strong>, you can disable it safely",
