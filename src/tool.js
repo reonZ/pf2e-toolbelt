@@ -6,7 +6,7 @@ import {
 	socketOn,
 } from "module-api";
 
-export function createTool(options) {
+export function checkFeatureOptions(options) {
 	if (!options.name) {
 		throw new Error("module features need a name");
 	}
@@ -14,6 +14,10 @@ export function createTool(options) {
 	if (!options.settings?.length) {
 		throw new Error("module features need at least one setting");
 	}
+}
+
+export function createTool(options) {
+	checkFeatureOptions(options);
 
 	const tool = {};
 

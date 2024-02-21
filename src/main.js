@@ -24,27 +24,33 @@ import { targetOptions } from "./features/target";
 import { unidedOptions } from "./features/unided";
 import { untargetOptions } from "./features/untarget";
 import { permaConditionEffect } from "./macros/condition";
+import { checkFeatureOptions } from "./tool";
 
 registerModule("pf2e-toolbelt");
 
-const FEATURES = [
-	arpOptions,
-	debugOptions,
-	effectsOptions,
-	givethOptions,
-	heroOptions,
-	inventoryOptions,
-	knowledgesOptions,
-	merchantOptions,
-	mergeOptions,
-	nobulkOptions,
-	shareOptions,
-	stancesOptions,
-	summaryOptions,
-	targetOptions,
-	unidedOptions,
-	untargetOptions,
-];
+const FEATURES = new Collection(
+	[
+		arpOptions,
+		debugOptions,
+		effectsOptions,
+		givethOptions,
+		heroOptions,
+		inventoryOptions,
+		knowledgesOptions,
+		merchantOptions,
+		mergeOptions,
+		nobulkOptions,
+		shareOptions,
+		stancesOptions,
+		summaryOptions,
+		targetOptions,
+		unidedOptions,
+		untargetOptions,
+	].map((feature) => {
+		checkFeatureOptions(feature);
+		return [feature.name, feature];
+	}),
+);
 
 const CONFLICTS = new Set();
 
@@ -53,7 +59,8 @@ let firstClientSetting = null;
 Hooks.once("init", () => {
 	const isGM = isUserGM();
 
-	const settings = FEATURES.flatMap(({ settings }) => settings);
+	// biome-ignore lint/complexity/useFlatMap: Collection doesn't have flatMap
+	const settings = FEATURES.map(({ settings }) => settings).flat();
 	const worldSettings = settings.filter(
 		({ scope }) => !scope || scope === "world",
 	);
@@ -117,12 +124,11 @@ Hooks.once("ready", () => {
 });
 
 function renderSettingsConfig(_, html) {
-	if (!firstClientSetting) return;
-
-	const id = MODULE.id;
-	const group = html.find(
-		`.tab[data-tab=${id}] [data-setting-id="${id}.${firstClientSetting}"]`,
-	);
-
-	group.before(`<h3>${localize("settings.client")}</h3>`);
+	if (firstClientSetting) {
+		const id = MODULE.id;
+		const group = html.find(
+			`.tab[data-tab=${id}] [data-setting-id="${id}.${firstClientSetting}"]`,
+		);
+		group.before(`<h3>${localize("settings.client")}</h3>`);
+	}
 }
