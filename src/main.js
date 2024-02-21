@@ -25,34 +25,30 @@ import { templateOptions } from "./features/template";
 import { unidedOptions } from "./features/unided";
 import { untargetOptions } from "./features/untarget";
 import { permaConditionEffect } from "./macros/condition";
+import { settingIsEnabled } from "./misc";
 import { checkFeatureOptions } from "./tool";
 
 registerModule("pf2e-toolbelt");
 
-const FEATURES = new Collection(
-	[
-		arpOptions,
-		debugOptions,
-		effectsOptions,
-		givethOptions,
-		heroOptions,
-		inventoryOptions,
-		knowledgesOptions,
-		merchantOptions,
-		mergeOptions,
-		nobulkOptions,
-		shareOptions,
-		stancesOptions,
-		summaryOptions,
-		targetOptions,
-		templateOptions,
-		unidedOptions,
-		untargetOptions,
-	].map((feature) => {
-		checkFeatureOptions(feature);
-		return [feature.name, feature];
-	}),
-);
+const FEATURES = [
+	arpOptions,
+	debugOptions,
+	effectsOptions,
+	givethOptions,
+	heroOptions,
+	inventoryOptions,
+	knowledgesOptions,
+	merchantOptions,
+	mergeOptions,
+	nobulkOptions,
+	shareOptions,
+	stancesOptions,
+	summaryOptions,
+	targetOptions,
+	templateOptions,
+	unidedOptions,
+	untargetOptions,
+];
 
 const CONFLICTS = new Set();
 
@@ -60,9 +56,13 @@ let firstClientSetting = null;
 
 Hooks.once("init", () => {
 	const isGM = isUserGM();
+	const settings = [];
 
-	// biome-ignore lint/complexity/useFlatMap: Collection doesn't have flatMap
-	const settings = FEATURES.map(({ settings }) => settings).flat();
+	for (const feature of FEATURES) {
+		checkFeatureOptions(feature);
+		settings.push(...feature.settings);
+	}
+
 	const worldSettings = settings.filter(
 		({ scope }) => !scope || scope === "world",
 	);
@@ -101,9 +101,6 @@ Hooks.once("init", () => {
 		}
 
 		if (api) {
-			if (!name) {
-				throw new Error("API needs a module name to be added");
-			}
 			module.api[name] = api;
 		}
 
@@ -126,11 +123,27 @@ Hooks.once("ready", () => {
 });
 
 function renderSettingsConfig(_, html) {
+	const moduleId = MODULE.id;
+	const moduleTab = html.find(`.tab[data-tab=${moduleId}]`);
+
+	const getSettingSection = (setting) => {
+		return moduleTab.find(`[data-setting-id="${moduleId}.${setting}"]`);
+	};
+
 	if (firstClientSetting) {
-		const id = MODULE.id;
-		const group = html.find(
-			`.tab[data-tab=${id}] [data-setting-id="${id}.${firstClientSetting}"]`,
-		);
-		group.before(`<h3>${localize("settings.client")}</h3>`);
+		const section = getSettingSection(firstClientSetting);
+		section.before(`<h3>${localize("settings.client")}</h3>`);
+	}
+
+	for (const { hideSettings = [] } of FEATURES) {
+		for (const { global, settings } of hideSettings) {
+			const enabled = settingIsEnabled(global);
+			if (enabled) continue;
+
+			for (const setting of settings) {
+				const section = getSettingSection(setting);
+				section.remove();
+			}
+		}
 	}
 }

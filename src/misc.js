@@ -1,12 +1,4 @@
-import {
-	MODULE,
-	getSetting,
-	isChoiceSetting,
-	registerUpstreamHook,
-	socketEmit,
-	socketOff,
-	socketOn,
-} from "module-api";
+import { MODULE, getSetting, isChoiceSetting } from "module-api";
 
 export function wrapperError(feature, path) {
 	console.error(

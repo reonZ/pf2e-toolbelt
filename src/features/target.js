@@ -83,6 +83,12 @@ export const targetOptions = {
 			scope: "client",
 		},
 	],
+	hideSettings: [
+		{
+			global: "target",
+			settings: ["target-client"],
+		},
+	],
 	socket: onSocket,
 	init: (isGM) => {
 		if (!getSetting("target")) return;
