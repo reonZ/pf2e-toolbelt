@@ -6,7 +6,6 @@ import {
 	getFlag,
 	getInMemory,
 	getSetting,
-	getTemplateTokens,
 	hasEmbeddedSpell,
 	info,
 	isActiveGM,
@@ -82,28 +81,6 @@ export const targetOptions = {
 			default: "disabled",
 			choices: ["disabled", "small", "big"],
 			scope: "client",
-			onChange: (value) => setHook("chat", value),
-		},
-		{
-			key: "target-template",
-			type: Boolean,
-			default: false,
-			scope: "client",
-			onChange: (value) => setHook("template", value),
-		},
-	],
-	hooks: [
-		{
-			key: "chat",
-			event: "renderChatMessage",
-			listener: renderChatMessage,
-			useChoices: true,
-		},
-		{
-			key: "template",
-			event: "createMeasuredTemplate",
-			listener: createMeasuredTemplate,
-			useChoices: true,
 		},
 	],
 	socket: onSocket,
@@ -125,8 +102,7 @@ export const targetOptions = {
 	ready: (isGM) => {
 		if (!getSetting("target")) return;
 
-		hooks.setFromSetting("chat", "target-client");
-		hooks.setFromSetting("template", "target-template");
+		Hooks.on("renderChatMessage", renderChatMessage);
 
 		for (const { message, html } of latestChatMessages(10)) {
 			renderChatMessage(message, html);
@@ -134,12 +110,7 @@ export const targetOptions = {
 	},
 };
 
-const { hooks, socket } = createTool(targetOptions);
-
-function setHook(key, value) {
-	const realValue = getSetting("target") ? value : "disabled";
-	hooks.set(key, realValue);
-}
+const { socket } = createTool(targetOptions);
 
 function onSocket(packet) {
 	if (!isActiveGM()) return;
@@ -290,74 +261,6 @@ function getChatLogEntryContext(_, data) {
 			);
 		},
 	});
-}
-
-async function createMeasuredTemplate(template, _, userId) {
-	const user = game.user;
-	if (user.id !== userId) return;
-
-	const localize = subLocalize("target.menu");
-	const item = template.item;
-	const actor = template.actor;
-	const self = !actor ? undefined : actor.token ?? actor.getActiveTokens()[0];
-
-	const data = {
-		title: item?.name || localize("title"),
-		content: await render("target/template-menu", {
-			i18n: localize.template,
-			noSelf: !self,
-		}),
-		buttons: {
-			select: {
-				icon: '<i class="fa-solid fa-bullseye-arrow"></i>',
-				label: localize("target"),
-				callback: (html) => ({
-					targets: html.find("[name=targets]:checked").val(),
-					self: html.find("[name=self]").prop("checked"),
-					neutral: html.find("[name=neutral]").prop("checked"),
-				}),
-			},
-		},
-		close: () => null,
-	};
-
-	const result = await Dialog.wait(data, undefined, {
-		id: "pf2e-toolbelt-target-template",
-		width: 260,
-	});
-	if (!result) return;
-
-	const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
-	const opposition =
-		alliance === "party"
-			? "opposition"
-			: alliance === "opposition"
-			  ? "party"
-			  : null;
-
-	const tokens = getTemplateTokens(template);
-	const targets = tokens.filter((token) => {
-		const validActor = token.actor?.isOfType("creature", "hazard", "vehicle");
-		if (!validActor) return false;
-
-		if (token.document.hidden) return false;
-
-		if (self && token === self) return result.self;
-
-		const targetAlliance = token.actor ? token.actor.alliance : token.alliance;
-
-		if (targetAlliance === null) return result.neutral;
-
-		return (
-			result.targets === "all" ||
-			(result.targets === "allies" && targetAlliance === alliance) ||
-			(result.targets === "enemies" && targetAlliance === opposition)
-		);
-	});
-
-	const targetsIds = targets.map((token) => token.id);
-	user.updateTokenTargets(targetsIds);
-	user.broadcastActivity({ targets: targetsIds });
 }
 
 let HEALINGS_REGEX;

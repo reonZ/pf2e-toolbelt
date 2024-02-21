@@ -21,6 +21,7 @@ import { shareOptions } from "./features/share";
 import { stancesOptions } from "./features/stances";
 import { summaryOptions } from "./features/summary";
 import { targetOptions } from "./features/target";
+import { templateOptions } from "./features/template";
 import { unidedOptions } from "./features/unided";
 import { untargetOptions } from "./features/untarget";
 import { permaConditionEffect } from "./macros/condition";
@@ -44,6 +45,7 @@ const FEATURES = new Collection(
 		stancesOptions,
 		summaryOptions,
 		targetOptions,
+		templateOptions,
 		unidedOptions,
 		untargetOptions,
 	].map((feature) => {

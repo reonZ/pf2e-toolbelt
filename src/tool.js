@@ -57,9 +57,13 @@ export function createTool(options) {
 
 		if (options.hooks.length === 1) {
 			/**
-			 * @type {ReturnType<createHook>}
+			 * @type {ReturnType<createHook> & {fromSetting: (setting: value) => void}}
 			 */
 			tool.setHook = [...hooks][0][1];
+			tool.setHook.fromSetting = function (setting) {
+				const value = getSetting(setting);
+				this(value);
+			};
 		}
 	}
 

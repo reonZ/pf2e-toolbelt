@@ -105,10 +105,10 @@
             },
             "target": {
                 "name": "Target Token Helper",
-                "hint": "(Requires Reload) Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below."
+                "hint": "(Requires Reload) Allow the use of Target Token Helper in your world, while this world setting needs to be enabled for the global feature to work, there is also a cient setting of the same name that needs to be enabled (see below)."
             },
             "target-client": {
-                "name": "Target Token Helper - Chat",
+                "name": "Target Token Helper",
                 "hint": "Damage chat messages will have extra rows for each token that was targeted during the roll.",
                 "choices": {
                     "disabled": "Disabled",
@@ -117,7 +117,7 @@
                 }
             },
             "target-template": {
-                "name": "Target Token Helper - Template",
+                "name": "Template Targetting",
                 "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside the template (with various criterias)."
             },
             "force-untarget": {
