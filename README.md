@@ -223,14 +223,20 @@ The alternate mode does not allow to create, edit or delete the spells, nor does
 
 This feature is fully compatible with the modules [PF2e Staves](https://foundryvtt.com/packages/pf2e-staves) and [PF2e Dailies](https://foundryvtt.com/packages/pf2e-dailies)
 
-## Target Token Helper - Chat
+## Target Token Helper
 
 ![](./readme/target/targets.webp)
 
 Damage chat messages will have extra rows for each token that was targeted during the roll.
 The ability to roll saves can directly be handled from there as well.
 
-## Target Token Helper - Template
+You can drag & drop a save-check inline link from anywhere in foundry onto a damage chat message to add a `save` entry to it:
+
+-   only links that have a DC and are of type reflex, will or fortitude will be draggable
+-   the damage message musn't already have a `save` module entry
+-   you must be the author of the damage message (or GM)
+
+## Template Targetting
 
 ![](./readme/target/template.webp)
 
