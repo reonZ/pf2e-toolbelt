@@ -9,7 +9,7 @@ export const unidedOptions = {
 			type: String,
 			default: "disabled",
 			choices: ["disabled", "create", "all"],
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	hooks: [

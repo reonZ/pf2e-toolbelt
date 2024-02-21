@@ -21,7 +21,7 @@ export const givethOptions = {
 			type: String,
 			default: "disabled",
 			choices: ["disabled", "enabled", "no-message"],
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	hooks: [

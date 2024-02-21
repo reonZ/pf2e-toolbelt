@@ -10,7 +10,7 @@ export const debugOptions = {
 			default: false,
 			config: false,
 			scope: "client",
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	hooks: [

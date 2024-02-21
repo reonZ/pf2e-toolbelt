@@ -37,7 +37,7 @@ export const inventoryOptions = {
 			type: Boolean,
 			default: false,
 			scope: "client",
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	hooks: [["closeCharacterSheetPF2e", closeCharacterSheetPF2e]],

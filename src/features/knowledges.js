@@ -11,7 +11,7 @@ export const knowledgesOptions = {
 			key: "knowledges",
 			type: Boolean,
 			default: false,
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	hooks: [["renderNPCSheetPF2e", renderNPCSheetPF2e]],

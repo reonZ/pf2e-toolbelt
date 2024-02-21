@@ -30,7 +30,7 @@ export const heroOptions = {
 			key: "hero",
 			type: Boolean,
 			default: false,
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 		{
 			key: "hero-table",

@@ -63,7 +63,7 @@ export const stancesOptions = {
 			type: Boolean,
 			default: false,
 			scope: "client",
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	hooks: [

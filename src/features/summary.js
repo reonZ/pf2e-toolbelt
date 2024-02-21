@@ -21,7 +21,7 @@ export const summaryOptions = {
 			default: "disabled",
 			scope: "client",
 			choices: ["disabled", "enabled", "sort"],
-			onChange: setup,
+			onChange: (value) => setup(value),
 		},
 	],
 	conflicts: ["pf2e-spells-summary"],
