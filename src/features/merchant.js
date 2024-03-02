@@ -127,7 +127,9 @@ async function browserInnerRender(wrapped, data) {
 
 	const tabElement = inner.find(".content .tab[data-tab=equipment]");
 
-	tabElement.find(".control-area").prepend(`<h2>${actor.name}</h2>`);
+	const controlArea = tabElement.find(".control-area");
+	controlArea.prepend(`<h2>${actor.name}</h2>`);
+	controlArea.find("input[name=textFilter]").remove();
 
 	const footer = tabElement.find(".list-buttons");
 	footer.find("button").remove();

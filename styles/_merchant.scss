@@ -342,6 +342,12 @@
         height: 100%;
     }
 
+    #tagfilter {
+        > dl {
+            margin-top: 0;
+        }
+    }
+
     .spell-browser {
         .list-buttons {
             width: auto;
