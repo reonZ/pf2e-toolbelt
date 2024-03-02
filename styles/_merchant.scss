@@ -10,12 +10,16 @@
                 text-align: center;
             }
 
-            .pull-items,
             .buy-items {
                 display: grid;
                 grid-template-columns: 1fr 33px;
                 align-items: center;
                 justify-items: center;
+                margin-top: 3px;
+            }
+
+            button {
+                padding-block: 0;
             }
         }
     }
@@ -323,6 +327,57 @@
                             padding: 6px 14px;
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+#compendium-browser > section.window-content > .content-box.toolbelt-merchant {
+    & > nav {
+        display: none;
+    }
+
+    & > section.content {
+        height: 100%;
+    }
+
+    .spell-browser {
+        .list-buttons {
+            width: auto;
+            display: grid;
+            grid-template-columns: auto auto auto;
+            align-items: center;
+            column-gap: 2em;
+            right: 18px;
+
+            > label,
+            > div {
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
+                font-weight: bold;
+                gap: 0.3em;
+
+                input[type='checkbox'] {
+                    margin: 0;
+                    flex: 0 14px;
+                }
+            }
+        }
+
+        ul.result-list {
+            height: calc(100% - 24px);
+
+            .item {
+                > input[type='checkbox'],
+                > i {
+                    margin: 0 0.5em;
+                    flex: 0 14px;
+                }
+
+                > i {
+                    cursor: default;
                 }
             }
         }

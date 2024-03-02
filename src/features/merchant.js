@@ -3,16 +3,21 @@ import {
 	calculateItemPrice,
 	createFancyLink,
 	createTradeMessage,
+	deleteInMemory,
 	flagPath,
+	getBrowser,
 	getBrowserTab,
 	getFlag,
 	getHighestName,
+	getInMemory,
+	getInMemoryAndSetIfNot,
 	getSetting,
-	getTabResults,
+	includesBrowserUUID,
 	openBrowserTab,
 	registerWrapper,
 	render,
 	setFlag,
+	setInMemory,
 	subLocalize,
 	transferItemToActor,
 } from "module-api";
@@ -28,6 +33,13 @@ const LOOT_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor";
 const ACTOR_TRANSFER_ITEM_TO_ACTOR =
 	"CONFIG.Actor.documentClass.prototype.transferItemToActor";
+const BROWSER_CLOSE = "game.pf2e.compendiumBrowser.constructor.prototype.close";
+const BROWSER_INNER_RENDER =
+	"game.pf2e.compendiumBrowser.constructor.prototype._renderInner";
+const BROWSER_ACTIVE_LISTENERS =
+	"game.pf2e.compendiumBrowser.constructor.prototype.activateListeners";
+const BROWSER_RENDER_RESULTS =
+	"game.pf2e.compendiumBrowser.tabs.equipment.constructor.prototype.renderResults";
 
 const PULL_LIMIT = 100;
 
@@ -74,6 +86,13 @@ export const merchantOptions = {
 			"MIXED",
 		);
 	},
+	ready: (isGM) => {
+		if (!isGM || !getSetting("merchant")) return;
+		registerWrapper(BROWSER_CLOSE, browserClose);
+		registerWrapper(BROWSER_INNER_RENDER, browserInnerRender);
+		registerWrapper(BROWSER_RENDER_RESULTS, browserRenderResults);
+		registerWrapper(BROWSER_ACTIVE_LISTENERS, browserActiveListeners);
+	},
 };
 
 const { socket } = createTool(merchantOptions);
@@ -84,6 +103,230 @@ function onSocket(packet, userId) {
 			makeBuyDeal(packet, userId);
 			break;
 	}
+}
+
+async function browserClose(wrapped, options) {
+	deleteInMemory(this, "merchant");
+	await wrapped(options);
+}
+
+async function browserInnerRender(wrapped, data) {
+	const inner = await wrapped(data);
+	const actor = getInMemory(this, "merchant.actor");
+	if (!actor) return inner;
+
+	deleteInMemory(this, "merchant.selection");
+
+	setInMemory(
+		this,
+		"merchant.owned",
+		actor.inventory.map((x) => x.sourceId),
+	);
+
+	inner.addClass("toolbelt-merchant");
+
+	const tabElement = inner.find(".content .tab[data-tab=equipment]");
+
+	tabElement.find(".control-area").prepend(`<h2>${actor.name}</h2>`);
+
+	const footer = tabElement.find(".list-buttons");
+	footer.find("button").remove();
+
+	const selected = localize("browser.selected");
+	footer.append(`<div>${selected}: <span>0</span>/<span>0</span></div>`);
+
+	const btn = localize("browser.add");
+	footer.append(`<button type='button'>${btn}</button>`);
+
+	const all = localize("browser.all");
+	footer.append(`<label>${all} <input type='checkbox'></button></label>`);
+
+	return inner;
+}
+
+function updateBrowser(selection, skipAll = false) {
+	const browserApp = document.getElementById("compendium-browser");
+	if (!browserApp) return;
+
+	const browserTab = browserApp.querySelector(
+		".content-box.toolbelt-merchant .content .tab[data-tab=equipment]",
+	);
+	const footer = browserTab.querySelector(".list-buttons");
+
+	const tab = getBrowserTab("equipment");
+	const selected = selection.length;
+	const total = tab.currentIndex.length;
+
+	const numbers = footer.querySelectorAll(":scope > div span");
+	if (numbers.length) {
+		numbers[0].textContent = selected;
+		numbers[1].textContent = total;
+	}
+
+	const isAtLimit = selected >= PULL_LIMIT;
+
+	if (!skipAll) {
+		const checkbox = footer.querySelector(":scope > label input");
+		if (checkbox) {
+			if (selected === 0) {
+				checkbox.indeterminate = false;
+				checkbox.checked = false;
+			} else if (isAtLimit || selected >= total) {
+				checkbox.indeterminate = false;
+				checkbox.checked = true;
+			} else {
+				checkbox.indeterminate = true;
+				checkbox.checked = true;
+			}
+		}
+	}
+
+	footer.querySelector("button").disabled = selected === 0;
+
+	const reachedLimit = localize("browser.limit");
+	const checkboxes = browserTab.querySelectorAll(".result-list .item input");
+	for (const checkbox of checkboxes) {
+		const checked = checkbox.checked;
+		const disabled = !checked && isAtLimit;
+
+		checkbox.disabled = disabled;
+		checkbox.dataset.tooltip = disabled ? reachedLimit : "";
+	}
+}
+
+function fillSelection(
+	tab,
+	selection,
+	owned = getInMemory(tab.browser, "merchant.owned"),
+) {
+	selection.length = 0;
+	for (const { uuid } of tab.currentIndex) {
+		if (includesBrowserUUID(owned, uuid)) continue;
+		selection.push(uuid);
+		if (selection.length >= PULL_LIMIT) break;
+	}
+	return selection;
+}
+
+function browserActiveListeners(wrapped, inner) {
+	wrapped(inner);
+
+	// biome-ignore lint/complexity/noUselessThisAlias: <explanation>
+	const browser = this;
+	const actor = getInMemory(browser, "merchant.actor");
+	if (!actor) return;
+
+	const browserTab = inner[0].querySelector(
+		".content .tab[data-tab=equipment]",
+	);
+	const footer = browserTab.querySelector(".list-buttons");
+
+	const checkbox = footer.querySelector("label input[type=checkbox]");
+	if (checkbox) {
+		const tab = getBrowserTab("equipment");
+
+		checkbox.addEventListener("change", () => {
+			const checkAll = checkbox.checked;
+			const selection = getInMemory(tab.browser, "merchant.selection");
+
+			if (checkAll) fillSelection(tab, selection);
+			else selection.length = 0;
+
+			const checkboxes = browserTab.querySelectorAll(".item input");
+			for (const checkbox of checkboxes) {
+				const uuid = checkbox.dataset.uuid;
+				checkbox.checked = selection.includes(uuid);
+			}
+
+			updateBrowser(selection, false);
+		});
+	}
+
+	const btn = footer.querySelector("button");
+	if (btn) {
+		btn.addEventListener("click", () => {
+			const selection = getInMemory(browser, "merchant.selection");
+			const msg = localize("browser.dialogMsg", { nb: selection.length });
+
+			Dialog.confirm({
+				content: `<div style="margin-bottom: 0.5em;">${msg}</div>`,
+				title: `${localize("browser.pull")} - ${actor.name}`,
+				yes: async (html) => {
+					localize.info("browser.wait");
+
+					const items = await Promise.all(
+						selection.map((uuid) => fromUuid(uuid)),
+					);
+
+					await actor.createEmbeddedDocuments(
+						"Item",
+						items.map((item) => item.toObject()),
+					);
+
+					localize.info("browser.finished");
+				},
+			});
+		});
+	}
+}
+
+async function browserRenderResults(wrapped, start) {
+	const items = await wrapped(start);
+	const owned = getInMemory(this.browser, "merchant.owned");
+	if (!owned) return items;
+
+	const browser = this.browser;
+
+	const selection = getInMemoryAndSetIfNot(
+		browser,
+		"merchant.selection",
+		() => {
+			const selection = fillSelection(this, [], owned);
+			updateBrowser(selection);
+			return selection;
+		},
+	);
+
+	const isAtLimit =
+		selection.length >= PULL_LIMIT
+			? `data-tooltip="${localize("browser.limit")}" disabled`
+			: "";
+
+	const ownedStr = localize("browser.owned");
+	const isOwned = `<i class="fa-solid fa-box" data-tooltip="${ownedStr}"></i>`;
+
+	for (const item of items) {
+		for (const a of item.querySelectorAll(":scope > a")) {
+			a.remove();
+		}
+
+		const uuid = item.dataset.entryUuid;
+
+		if (includesBrowserUUID(owned, uuid)) {
+			item.insertAdjacentHTML("beforeend", isOwned);
+			continue;
+		}
+
+		const checked = selection.includes(uuid) ? "checked" : "";
+		item.insertAdjacentHTML(
+			"beforeend",
+			`<input type='checkbox' data-uuid="${uuid}" 
+			${checked} ${!checked ? isAtLimit : ""}>`,
+		);
+
+		const checkbox = item.querySelector("input");
+		checkbox.addEventListener("change", () => {
+			if (checkbox.checked) {
+				selection.push(uuid);
+			} else {
+				const index = selection.indexOf(uuid);
+				selection.splice(index, 1);
+			}
+			updateBrowser(selection);
+		});
+	}
+
+	return items;
 }
 
 async function renderLootSheetPF2e(sheet, html) {
@@ -117,11 +360,8 @@ async function renderLootSheetPF2e(sheet, html) {
 
 	const better = sidebar.find(".better-merchant");
 	better
-		.find("[data-action=pull-from-browser]")
-		.on("click", (event) => pullFromBrowser(event, actor));
-	better
 		.find("[data-action=open-equipment-tab]")
-		.on("click", (event) => openEquipmentTab());
+		.on("click", (event) => openEquipmentTab(actor));
 	better
 		.find("[data-action=open-buy-settings]")
 		.on("click", (event) => openBuySettings(event, actor));
@@ -437,37 +677,10 @@ async function makeBuyDeal(options, senderId) {
 	);
 }
 
-function openEquipmentTab() {
-	openBrowserTab("equipment", true);
-}
-
-function pullFromBrowser(event, actor) {
-	const tab = getBrowserTab("equipment");
-	if (!tab.isInitialized) {
-		localize.warn("browser.noTab");
-		openEquipmentTab();
-		return;
-	}
-
-	const nb = tab.currentIndex.length;
-	if (nb > PULL_LIMIT) {
-		localize.error("browser.limit", { limit: PULL_LIMIT });
-		openEquipmentTab();
-		return;
-	}
-
-	const name = actor.name;
-	const msg = localize("browser.dialogMsg", { nb, name });
-
-	Dialog.confirm({
-		content: `<div style="margin-bottom: 0.5em;">${msg}</div>`,
-		title: `${name} - ${localize("browser.pull")}`,
-		yes: async (html) => {
-			localize.info("browser.wait");
-			const results = (await getTabResults(tab)).filter(Boolean);
-			actor.createEmbeddedDocuments("Item", results);
-		},
-	});
+function openEquipmentTab(actor) {
+	const browser = getBrowser();
+	setInMemory(browser, "merchant", { actor });
+	openBrowserTab("equipment", false);
 }
 
 function openBuySettings(event, actor) {

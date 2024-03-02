@@ -437,10 +437,14 @@
             },
             "browser": {
                 "pull": "From Browser",
-                "limit": "The number of items to add exceeds the limit of <strong>{limit}</strong>!!",
-                "dialogMsg": "Pull the {nb} items into <strong>{name}</strong>'s inventory? The process can take several seconds depending on the amount of items.",
-                "noTab": "No <strong>Equipment</strong> tab was generated in the compendium browser.",
-                "wait": "Please wait for the items to be processed."
+                "limit": "You have reached the limit!",
+                "dialogMsg": "<p>Are you sure you want to add the item(s) (selected: <strong>{nb}</strong>) to the merchant?</p><p>The process can take several seconds depending on the amount of items.</p>",
+                "wait": "Please wait for the items to be processed.",
+                "finished": "Items have finished being added to the merchant actor.",
+                "selected": "Selected",
+                "add": "Add To Merchant",
+                "all": "Select All",
+                "owned": "This item is already in the merchant's inventory"
             }
         },
         "unnamed": "Unnamed"
