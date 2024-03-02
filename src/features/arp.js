@@ -93,7 +93,7 @@ function isValidWeapon(weapon) {
 	const { group, category, slug } = weapon._source.system;
 
 	if (category === "unarmed" && slug !== HANDWRAPS_SLUG) {
-		return !!weapon.actor.itemTypes.weapon.find(
+		return weapon.actor.itemTypes.weapon.some(
 			(item) =>
 				item.slug === HANDWRAPS_SLUG &&
 				item._source.system.category === "unarmed" &&
