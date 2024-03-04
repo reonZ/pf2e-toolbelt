@@ -254,6 +254,7 @@ function browserActiveListeners(wrapped, inner) {
 				title: `${localize("browser.pull")} - ${actor.name}`,
 				yes: async (html) => {
 					localize.info("browser.wait");
+					browser.close();
 
 					const items = await Promise.all(
 						selection.map((uuid) => fromUuid(uuid)),
