@@ -12,7 +12,6 @@ import {
 	getInMemory,
 	getInMemoryAndSetIfNot,
 	getSetting,
-	includesBrowserUUID,
 	openBrowserTab,
 	registerWrapper,
 	render,
@@ -203,7 +202,7 @@ function fillSelection(
 ) {
 	selection.length = 0;
 	for (const { uuid } of tab.currentIndex) {
-		if (includesBrowserUUID(owned, uuid)) continue;
+		if (owned.includes(uuid)) continue;
 		selection.push(uuid);
 		if (selection.length >= PULL_LIMIT) break;
 	}
@@ -304,7 +303,7 @@ async function browserRenderResults(wrapped, start) {
 
 		const uuid = item.dataset.entryUuid;
 
-		if (includesBrowserUUID(owned, uuid)) {
+		if (owned.includes(uuid)) {
 			item.insertAdjacentHTML("beforeend", isOwned);
 			continue;
 		}
