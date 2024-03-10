@@ -854,7 +854,9 @@ async function rerollSave(event, message, { dc }) {
 	);
 
 	const newRoll = await unevaluatedNewRoll.evaluate({ async: true });
-	await roll3dDice(newRoll);
+	if (game.settings.get("pf2e", "metagame_showBreakdowns")) {
+		await roll3dDice(newRoll);
+	}
 
 	Hooks.callAll(
 		"pf2e.reroll",
@@ -959,7 +961,9 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 					extraRollOptions: rollOptions,
 					createMessage: false,
 					callback: async (roll, __, msg) => {
-						await roll3dDice(roll);
+						if (game.settings.get("pf2e", "metagame_showBreakdowns")) {
+							await roll3dDice(roll);
+						}
 
 						const data = {
 							value: roll.total,
