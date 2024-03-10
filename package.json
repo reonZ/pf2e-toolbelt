@@ -19,6 +19,7 @@
         "esbuild": "0.x"
     },
     "dependencies": {
-        "module-api": "github:reonZ/module-api"
+        "module-api": "github:reonZ/module-api",
+        "nouislider": "^15.7.1"
     }
 }

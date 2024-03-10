@@ -1,3 +1,8 @@
+# 1.41.2
+
+-   `Target Token Helper` updates:
+    -   fixed closing the `Check Modifiers Dialog` without rolling not giving back access to the chat message
+
 # 1.41.1
 
 -   `Target Token Helper` updates:
