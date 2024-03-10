@@ -121,10 +121,10 @@ const { socket } = createTool(targetOptions);
 function onSocket(packet) {
 	if (!isActiveGM()) return;
 	switch (packet.type) {
-		case "target.update-save":
+		case "update-save":
 			updateMessageSave(packet);
 			break;
-		case "target.update-applied":
+		case "update-applied":
 			updateMessageApplied(packet);
 			break;
 	}
@@ -897,7 +897,7 @@ async function rerollSave(event, message, { dc }) {
 	}
 
 	const packet = {
-		type: "target.update-save",
+		type: "update-save",
 		message: isAuthor ? message : message.id,
 		targets: [
 			{
@@ -922,7 +922,7 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 		: [getTargetFromEvent(event)];
 
 	const packet = {
-		type: "target.update-save",
+		type: "update-save",
 		message: isAuthor ? message : message.id,
 		targets: [],
 	};
