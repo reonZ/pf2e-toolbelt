@@ -601,7 +601,7 @@ async function renderDamageChatMessage(message, html) {
 	addHeaderListeners(message, rowsTemplate, save);
 	rowsTemplate
 		.find("button[data-action^=target-]")
-		.on("click", (event) => onTargetButton(event, message));
+		.on("click", (event) => onTargetButton(event, message, html));
 }
 
 function getRowsElement(event) {
@@ -1081,7 +1081,7 @@ async function pingTarget(event) {
 	canvas.ping(target.center);
 }
 
-async function onTargetButton(event, message) {
+async function onTargetButton(event, message, html) {
 	const btn = event.currentTarget;
 	const { rollIndex, targetUuid } = btn.closest("[data-target-uuid]").dataset;
 	const target = await fromUuid(targetUuid);
@@ -1097,7 +1097,7 @@ async function onTargetButton(event, message) {
 		}
 
 		requestAnimationFrame(() => {
-			onClickShieldBlock(target, btn, message.element);
+			onClickShieldBlock(target, btn, html[0]);
 		});
 
 		return;
