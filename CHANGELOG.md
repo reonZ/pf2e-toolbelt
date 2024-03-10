@@ -1,3 +1,8 @@
+# 1.41.3
+
+-   `Target Token Helper` updates:
+    -   fixed not being able to use the `Block` button when equipped with more than one shield
+
 # 1.41.2
 
 -   `Target Token Helper` updates:
