@@ -983,15 +983,34 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 				}
 			})();
 
-			const skipDefault = !game.user.settings.showCheckDialogs;
 			const rollOptions = getFlag(message, "target.rollOptions");
+			const skipDefault = !game.user.settings.showCheckDialogs;
+			const skipDialog = event.shiftKey ? !skipDefault : skipDefault;
+
+			if (targetPromises.length === 1 && !skipDialog) {
+				let checkDialog;
+
+				Hooks.once("renderCheckModifiersDialog", (dialog) => {
+					checkDialog = dialog;
+				});
+
+				const hookId = Hooks.on("closeCheckModifiersDialog", (dialog) => {
+					if (checkDialog !== dialog) return;
+
+					Hooks.off("closeCheckModifiersDialog", hookId);
+
+					if (!dialog.isResolved) {
+						enableSaveListeners(event);
+					}
+				});
+			}
 
 			return new Promise((resolve) => {
 				save.check.roll({
 					dc: { value: dc },
 					item,
 					origin: actor,
-					skipDialog: event.shiftKey ? !skipDefault : skipDefault,
+					skipDialog,
 					extraRollOptions: rollOptions,
 					createMessage: false,
 					callback: async (roll, __, msg) => {
