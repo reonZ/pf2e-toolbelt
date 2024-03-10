@@ -1,8 +1,44 @@
+# 1.41.1
+
+-   `Target Token Helper` updates:
+    -   the module will now roll ghosted dice with `Dice So Nice` when rolling a save check with the `Show Roll Breakdowns` metagame setting disabled
+
+# 1.41.0
+
+-   this is a `5.14.0` release
+-   updated the module to maintain compatibility with the latest system version
+-   readme as been updated at long last
+-   improved management of settings across the different features
+    -   fixed some fringe quirks
+    -   can hide settings in relation to another one being disabled
+        -   the only one for now is `Target Token Helper` client setting
+-   split up `Template Targeting` from `Target Token Helper`, this is now its own separate feature, there was no reason for it to be disabled when the `Target Token Helper` was turned off as it is a client side feature entirely that doesn't interact with the rest
+-   `Giveth` updates:
+    -   updated the transfer item popup
+    -   updated the giveth message to look more fancy
+-   `Spells Summary`:
+    -   updated all the broken stylings
+    -   now shows the spells specific roll options above the spells list
+    -   fixed prepare spell toggle showing for cantrips
+-   `Better Merchant` updates:
+    -   updated the buy message to look more fancy
+    -   complete rework of the `From Browser` feature
+        -   it now works directly from a modified version of the compendium browser
+        -   the name filter field has been removed, it was interfering too much with the feature
+        -   you can now pick which items among the ones present in the browser up to a limit of 100
+-   `Target Token Helper` updates:
+    -   no longer roll `Dice So Nice` on save check when the `Show Roll Breakdowns` metagame setting is disabled
+    -   you can now drag & drop save-check inline links onto a damage chat message
+        -   this will add the save directly into the damage message
+        -   only links that have a DC and are of type reflex, will or fortitude will be draggable
+        -   the damage message musn't already have a `save` module entry
+        -   you must be the author of the damage message (or GM)
+
 # 1.40.2
 
 -   `Better Merchant` updates:
     -   added more actor types allowed to sell items (with conditions associated to them)
-    -   fixed filter data being modified while editing a filter and changind its traits
+    -   fixed filter data being modified while editing a filter and changing its traits
 
 # 1.40.1
 

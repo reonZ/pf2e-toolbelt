@@ -117,7 +117,7 @@
                 }
             },
             "target-template": {
-                "name": "Template Targetting",
+                "name": "Template Targeting",
                 "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside the template (with various criterias)."
             },
             "force-untarget": {

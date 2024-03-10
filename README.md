@@ -89,7 +89,7 @@ More than one of each can be set, simply by separating them with commas.
 
 Once saved, the custom Lores will replace the generic ones on the sheet.
 
-## Better Merchant
+## Better Merchant (Requires Reload)
 
 ![](./readme/merchant/settings.webp)
 
@@ -97,7 +97,7 @@ This will add extra settings to the default system merchant
 
 ### From Browser
 
-Lets you pull items directly from the compendium browser using the current results in the `Equipment` tab, if the result exceeds 100 items, the request will be rejected.
+Lets you add items directly from the compendium browser using a modified version of the `Equipment` browser tab, a limit of 100 items has been set.
 
 ### Buy Items
 
