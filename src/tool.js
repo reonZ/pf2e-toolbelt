@@ -109,10 +109,10 @@ function createSocket(key, listener) {
 
 	const toolKey = `tool-${key}-`;
 
-	const onSocket = (packet) => {
+	const onSocket = (packet, userId) => {
 		if (!packet.type?.startsWith(toolKey)) return;
 		packet.type = packet.type.slice(toolKey.length);
-		listener(packet);
+		listener(packet, userId);
 	};
 
 	return {

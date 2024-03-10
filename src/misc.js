@@ -6,14 +6,6 @@ export function wrapperError(feature, path) {
 	);
 }
 
-export async function roll3dDice(
-	roll,
-	{ user = game.user, synchronize = true } = {},
-) {
-	if (!game.modules.get("dice-so-nice")?.active) return;
-	return game.dice3d.showForRoll(roll, user, synchronize);
-}
-
 export function settingIsEnabled(setting) {
 	const value = getSetting(setting);
 	return isChoiceSetting(setting) ? value !== "disabled" : value;

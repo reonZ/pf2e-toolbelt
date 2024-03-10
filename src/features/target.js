@@ -24,7 +24,6 @@ import {
 	warn,
 } from "module-api";
 import { bindOnPreCreateSpellDamageChatMessage } from "../chat";
-import { roll3dDice } from "../misc";
 import { createTool } from "../tool";
 
 const SAVES = {
@@ -93,8 +92,9 @@ export const targetOptions = {
 	init: (isGM) => {
 		if (!getSetting("target")) return;
 
+		socket.activate();
+
 		if (isGM) {
-			socket.activate();
 			Hooks.on("getChatLogEntryContext", getChatLogEntryContext);
 		}
 
@@ -118,16 +118,52 @@ export const targetOptions = {
 
 const { socket } = createTool(targetOptions);
 
-function onSocket(packet) {
-	if (!isActiveGM()) return;
+function onSocket(packet, userId) {
+	const activeGM = isActiveGM();
+
 	switch (packet.type) {
-		case "update-save":
-			updateMessageSave(packet);
+		case "update-save": {
+			activeGM && updateMessageSave(packet);
 			break;
-		case "update-applied":
-			updateMessageApplied(packet);
+		}
+		case "update-applied": {
+			activeGM && updateMessageApplied(packet);
 			break;
+		}
+		case "dice-so-nice": {
+			game.user.id !== userId && roll3dDice(packet.roll, packet.target, true);
+			break;
+		}
 	}
+}
+
+async function roll3dDice(rollData, targetData, self = false) {
+	if (!game.modules.get("dice-so-nice")?.active) return;
+
+	const target =
+		targetData instanceof TokenDocument
+			? targetData
+			: await fromUuid(targetData);
+
+	const user = game.user;
+	const roll = rollData instanceof Roll ? rollData : Roll.fromData(rollData);
+
+	const synchronize =
+		!self && game.settings.get("pf2e", "metagame_showBreakdowns");
+
+	if (!self && !synchronize) {
+		socket.emit({
+			type: "dice-so-nice",
+			roll: roll.toJSON(),
+			target: target?.uuid,
+		});
+	} else if (self) {
+		if (!user.isGM && !target?.playersCanSeeName) {
+			roll.ghost = true;
+		}
+	}
+
+	return game.dice3d.showForRoll(roll, user, synchronize);
 }
 
 const INLINE_CHECK_REGEX = /(class="inline-check[\w0-9 -]*")/g;
@@ -854,9 +890,7 @@ async function rerollSave(event, message, { dc }) {
 	);
 
 	const newRoll = await unevaluatedNewRoll.evaluate({ async: true });
-	if (game.settings.get("pf2e", "metagame_showBreakdowns")) {
-		await roll3dDice(newRoll);
-	}
+	await roll3dDice(newRoll, target);
 
 	Hooks.callAll(
 		"pf2e.reroll",
@@ -961,9 +995,7 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
 					extraRollOptions: rollOptions,
 					createMessage: false,
 					callback: async (roll, __, msg) => {
-						if (game.settings.get("pf2e", "metagame_showBreakdowns")) {
-							await roll3dDice(roll);
-						}
+						await roll3dDice(roll, target);
 
 						const data = {
 							value: roll.total,
@@ -1118,7 +1150,7 @@ export function onDamageApplied(message, tokens, rollIndex) {
 		updateMessageApplied({ message, updates });
 	} else {
 		socket.emit({
-			type: "target.update-applied",
+			type: "update-applied",
 			message: message.id,
 			updates,
 		});
