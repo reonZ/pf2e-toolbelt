@@ -3,6 +3,7 @@ import {
 	localeCompare,
 	localizePath,
 	ordinalString,
+	refreshActorSheets,
 	spellSlotGroupIdToNumber,
 	subLocalize,
 } from "module-api";
@@ -29,7 +30,7 @@ export const summaryOptions = {
 };
 
 function setup(value) {
-	if (value) {
+	if (value !== "disabled") {
 		registerCharacterSheetExtraTab({
 			tabName: "spellcasting",
 			templateFolder: "summary/sheet",
@@ -40,6 +41,8 @@ function setup(value) {
 	} else {
 		unregisterCharacterSheetExtraTab("spellcasting");
 	}
+
+	refreshActorSheets("character");
 }
 
 function addEvents(html, sheet, actor) {
