@@ -1,3 +1,11 @@
+# 1.41.4
+
+-   `Spells Summary`:
+    -   fixed feature not properly unregistering itself when disabled
+    -   fixed character sheets not being re-rendered on setting change
+-   `Target Token Helper` updates:
+    -   `Roll All Saves` will now always skip the modifiers dialog
+
 # 1.41.3
 
 -   `Target Token Helper` updates:
