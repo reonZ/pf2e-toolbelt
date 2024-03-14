@@ -230,6 +230,10 @@ This feature is fully compatible with the modules [PF2e Staves](https://foundryv
 Damage chat messages will have extra rows for each token that was targeted during the roll.
 The ability to roll saves can directly be handled from there as well.
 
+A GM can right click on a message with saves and select the `Roll All Saves` option to roll the save for all the NPCs that have yet to roll.
+
+NOTE: The displayed tooltip for the saves respect all the system metagame settings.
+
 You can drag & drop a save-check inline link from anywhere in foundry onto a damage chat message to add a `save` entry to it:
 
 -   only links that have a DC and are of type reflex, will or fortitude will be draggable
