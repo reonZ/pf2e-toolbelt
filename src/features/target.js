@@ -323,12 +323,7 @@ function preCreateChatMessage(message) {
             ? actor
                 ? [{ token: token.uuid, actor: actor.uuid }]
                 : []
-            : Array.from(
-                  game.user.targets.map((target) => ({
-                      token: target.document.uuid,
-                      actor: target.actor.uuid,
-                  }))
-              );
+            : getTargets();
 
         updates.push(["targets", targets]);
         if (isRegen) updates.push(["isRegen", true]);
@@ -464,20 +459,20 @@ async function renderSpellChatMessage(message, html, spell) {
     addHeaderListeners(message, rowsTemplate, save);
 }
 
-function addTargets(event, message) {
-    event.stopPropagation();
-    const targets = game.user.targets;
-
-    setFlag(
-        message,
-        "target.targets",
-        Array.from(
-            targets.map((target) => ({
+function getTargets() {
+    return Array.from(
+        game.user.targets
+            .filter((target) => target.actor)
+            .map((target) => ({
                 token: target.document.uuid,
                 actor: target.actor.uuid,
             }))
-        )
     );
+}
+
+function addTargets(event, message) {
+    event.stopPropagation();
+    setFlag(message, "target.targets", getTargets());
 }
 
 async function renderDamageChatMessage(message, html) {
