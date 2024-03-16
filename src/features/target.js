@@ -692,14 +692,20 @@ async function getMessageData(message) {
                               )
                             : undefined;
 
+                    const adjustment =
+                        (isFriendly || showMods) && saveFlag.success !== saveFlag.unadjustedOutcome
+                            ? saveFlag.dosAdjustments[saveFlag.unadjustedOutcome]?.label
+                            : undefined;
+
                     return {
                         ...saveFlag,
                         canReroll,
                         tooltip: await render("target/save-tooltip", {
-                            i18n: subLocalize("target.chat.save"),
+                            i18n: subLocalize("target.chat.save").template,
                             check: save.tooltipLabel,
                             result,
                             modifiers: isFriendly || showMods ? saveFlag.modifiers : [],
+                            adjustment,
                             canReroll,
                             rerolled: REROLL[rerolled],
                         }),
@@ -967,12 +973,15 @@ async function rollSave(event, message, { dc, statistic }, tokens) {
                     callback: async (roll, __, msg) => {
                         await roll3dDice(roll, target);
 
+                        const context = msg.getFlag("pf2e", "context");
+
                         const data = {
                             value: roll.total,
                             die: roll.dice[0].total,
                             success: roll.degreeOfSuccess,
                             roll: JSON.stringify(roll.toJSON()),
-                            dosAdjustments: msg.getFlag("pf2e", "context.dosAdjustments"),
+                            dosAdjustments: context.dosAdjustments,
+                            unadjustedOutcome: context.unadjustedOutcome,
                             modifiers: msg
                                 .getFlag("pf2e", "modifiers")
                                 .filter((modifier) => modifier.enabled)

@@ -332,7 +332,8 @@
                         "withoutOffset": "Result: {success}",
                         "withoutOffsetWithDie": "Result: ({die}) {success}"
                     },
-                    "dcWithValue": "DC {dc}"
+                    "dcWithValue": "DC {dc}",
+                    "adjustment": "Adjustment: {value}"
                 },
                 "row": {
                     "sheet": "Open Sheet",
