@@ -1,3 +1,9 @@
+# 1.42.0
+
+-   `Target Token Helper` updates:
+    -   now show degree of success adjustment in the save tooltip if any
+    -   fixed error when adding targets linked to an actor no longer existing
+
 # 1.41.4
 
 -   `Spells Summary`:
