@@ -225,7 +225,7 @@ This feature is fully compatible with the modules [PF2e Staves](https://foundryv
 
 ## Target Token Helper
 
-https://github.com/reonZ/pf2e-toolbelt/raw/master/readme/target/video.mp4
+https://www.youtube.com/shorts/xuH7POYqt8s
 
 Damage chat messages will have extra rows for each token that was targeted during the roll.
 The ability to roll saves can directly be handled from there as well.
