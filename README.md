@@ -227,6 +227,8 @@ This feature is fully compatible with the modules [PF2e Staves](https://foundryv
 
 https://www.youtube.com/shorts/xuH7POYqt8s
 
+https://github.com/reonZ/pf2e-toolbelt/assets/651462/e3e75ceb-1d4c-41c8-9f1d-1e24660720a2
+
 Damage chat messages will have extra rows for each token that was targeted during the roll.
 The ability to roll saves can directly be handled from there as well.
 
