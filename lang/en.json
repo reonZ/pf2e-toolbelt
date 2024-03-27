@@ -105,7 +105,7 @@
             },
             "target": {
                 "name": "Target Token Helper",
-                "hint": "(Requires Reload) Allow the use of Target Token Helper in your world, while this world setting needs to be enabled for the global feature to work. When enabled, a client setting of the same name will be added to allow individual users the choice of enabling or not this feature."
+                "hint": "(Requires Reload) Allow the use of Target Token Helper in your world. When enabled, a client setting of the same name will be added to allow individual users the choice of enabling or not this feature."
             },
             "target-client": {
                 "name": "Target Token Helper",
