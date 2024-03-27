@@ -170,8 +170,8 @@
             }
 
             &.disable-saves {
-                [data-action='roll-save'],
-                [data-action='reroll-save'],
+                [data-action="roll-save"],
+                [data-action="reroll-save"],
                 button {
                     pointer-events: none;
                     opacity: 0.3;
@@ -214,7 +214,11 @@
                             -webkit-background-clip: text;
                             -webkit-text-fill-color: transparent;
                             background-clip: text;
-                            background-image: linear-gradient(to right, var(--text-dark) 50%, var(--color-text-light-6) 50%);
+                            background-image: linear-gradient(
+                                to right,
+                                var(--text-dark) 50%,
+                                var(--color-text-light-6) 50%
+                            );
                         }
                     }
 
@@ -235,6 +239,7 @@
                     &.small {
                         padding-block: 0.3em calc(0.3em - 1px);
                         height: 1em;
+                        line-height: 1;
 
                         img,
                         i {
@@ -244,14 +249,14 @@
 
                     &::after {
                         position: absolute;
-                        content: '';
+                        content: "";
                         inset: 0;
                         border-radius: 2px;
                     }
                 }
 
                 &.success {
-                    [data-action='target-half-damage'] {
+                    [data-action="target-half-damage"] {
                         &::after {
                             box-shadow: inset 0 0 6px var(--success);
                         }
@@ -259,7 +264,7 @@
                 }
 
                 &.failure {
-                    [data-action='target-apply-damage'] {
+                    [data-action="target-apply-damage"] {
                         &::after {
                             box-shadow: inset 0 0 6px var(--failure);
                         }
@@ -267,7 +272,7 @@
                 }
 
                 &.criticalFailure {
-                    [data-action='target-double-damage'] {
+                    [data-action="target-double-damage"] {
                         &::after {
                             box-shadow: inset 0 0 6px var(--criticalFailure);
                         }
@@ -296,7 +301,7 @@
     }
 }
 
-[id^='pf2e-toolbelt-target-save-reroll-dialog-'] {
+[id^="pf2e-toolbelt-target-save-reroll-dialog-"] {
     .dialog-content {
         display: flex;
         flex-direction: column;
@@ -319,7 +324,7 @@
     }
 }
 
-[role='tooltip'] {
+[role="tooltip"] {
     .pf2e-toolbelt-target-save {
         font-size: 0.9em;
         display: flex;
