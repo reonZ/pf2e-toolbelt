@@ -1,3 +1,8 @@
+# 1.42.2
+
+-   `Target Token Helper` updates:
+    -   fixed error on chat render when a registered targets no longer exist in the scene
+
 # 1.42.1
 
 -   `Target Token Helper` updates:
