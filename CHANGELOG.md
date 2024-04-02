@@ -1,3 +1,9 @@
+# 1.42.1
+
+-   `Target Token Helper` updates:
+    -   fixed `enrichHTML` not handling synchronous calls
+    -   fixed small buttons line height issue with some browsers
+
 # 1.42.0
 
 -   `Target Token Helper` updates:

@@ -148,7 +148,7 @@ NOTE: The `Force Refresh` should only be used if you notice some modules getting
 
 ## Target Token Helper (Requires Reload)
 
-Allow the use of Target Token Helper in your world, its different parts are client side settings and can be found below.
+Allow the use of Target Token Helper in your world. When enabled, a client setting of the same name will be added to allow individual users the choice of enabling or not this feature.
 
 ## Set Un-Identified Image
 
