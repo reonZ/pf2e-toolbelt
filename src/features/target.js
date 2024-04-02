@@ -655,6 +655,8 @@ async function getMessageData(message) {
         await Promise.all(
             targetsFlag.map(async ({ token }) => {
                 const target = await fromUuid(token);
+                if (!target) return;
+
                 const targetId = target.id;
                 const actor = target.actor;
                 if (!actor) return;
