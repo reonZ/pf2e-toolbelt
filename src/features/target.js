@@ -158,11 +158,18 @@ async function roll3dDice(rollData, targetData, self = false) {
 }
 
 const INLINE_CHECK_REGEX = /(class="inline-check[\w0-9 -]*")/g;
-// /(class="inline-check[\w0-9 -]*"[^>]+data-pf2-check="(reflex|fortitude|will)")/g;
-async function textEditorEnrichHTML(wrapped, ...args) {
-    let enriched = await wrapped(...args);
-    enriched = enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
-    return enriched;
+function textEditorEnrichHTML(wrapped, ...args) {
+    let enriched = wrapped(...args);
+
+    if (typeof enriched === "string") {
+        enriched = enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
+        return enriched;
+    }
+
+    return Promise.resolve().then(async () => {
+        enriched = await enriched;
+        return enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
+    });
 }
 
 function chatActivateListeners(wrapped, html) {
