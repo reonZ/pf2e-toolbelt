@@ -2,17 +2,34 @@
     "pf2e-toolbelt": {
         "settings": {
             "client": "客户端设置",
+            "inventory": {
+                "name": "库存",
+                "hint": "启用后，可以通过点击物品按钮来切换常规版本和[库存]版本。"
+            },
+            "merchant": {
+                "name": "更好的商人",
+                "hint": "为系统默认的商人卡增添新的功能选项。"
+            },
             "nobulk": {
                 "name": "掉落物不计重",
-                "hint": "（需要重新载入）角色物品库中的掉落装备将不再计入负重上限"
+                "hint": "（需要重新载入）角色物品库中的掉落装备将不再计入负重上限。"
+            },
+            "nobulk-coins": {
+                "name": "货币不计重",
+                "hint": "（需要重新载入）角色物品库中的货币将不再计入负重上限。"
             },
             "auto-runes": {
                 "name": "自动符文进程",
                 "hint": "（需要重新载入）用于替代原本的 [自动成长加值] 变体规则，启用后将根据等级进度自动为装备赋予潜能(效力)/强击/抗力符文。"
+                "choices": {
+                    "disabled": "禁用",
+                    "force": "物品符文始终与角色等级匹配",
+                    "lower": "仅当物品符文低于等级时更新"
+                }
             },
             "unided": {
                 "name": "未鉴定物品图标",
-                "hint": "自动将物品的未鉴定状态退保替换成与常规图标相同（注：经测试似乎无效）",
+                "hint": "自动将物品的未鉴定状态替换成与常规图标相同。",
                 "choices": {
                     "disabled": "禁用",
                     "create": "仅限新建物品",
@@ -33,7 +50,7 @@
             },
             "multi-cast": {
                 "name": "多重施法",
-                "hint": "在法术的‘伤害’按钮旁边添加一个新的‘多重’按钮，点击它便可以同时多次施展法术实例，启用此设置后只会有最新的10条消息会同步更新。（注：经测试，对法术飞弹无效）"
+                "hint": "在法术的‘伤害’按钮旁边添加一个新的‘多重’按钮，点击它便可以同时多次施展法术实例，启用此设置后只会有最新的10条消息会同步更新。"
             },
             "merge-damage": {
                 "name": "合并伤害",
@@ -61,10 +78,6 @@
                 "name": "架势",
                 "hint": "在角色表中添加架势按钮，以便玩家可以更快速地切换架势。该功能还有一些别的帮助，比如架势会在遭遇战结束后快速移除，等等。"
             },
-            "custom-stances": {
-                "name": "自定义架势",
-                "hint": "用逗号分隔那些包含自定义架势专长/特征的合集包id。也可以直接列出其在本世界中的专长/特征uuid。注意，自定义专长/特征必须拥有'架势'特征标签，并且应当能够应用于自身。"
-            },
             "hero": {
                 "name": "英雄点动作",
                 "hint": "在PF2e角色表中添加管理‘英雄点卡牌’可用规则的相关内容"
@@ -80,25 +93,58 @@
             "hero-private": {
                 "name": "英雄点动作 - 私下抽取",
                 "hint": "启用后，抽取英雄点动作的信息将会是个人信息而不再公开。"
+            },
+            "share": {
+                "name": "共享生命池",
+                "hint": "允许两个角色分别亦 \"主人\" 和 \"随从\" 的关系共享生命值与临时生命值。确认谁为 \"主人\" 的功能按键可在一个生物其角色卡的 `配置 Configure` 菜单中找到。只有在你注意到某些模组导致你的 \"随从\" 出现不同步情况时，才应使用 `强制刷新` 功能。",
+                "choices": {
+                    "disabled": "禁止",
+                    "enabled": "开启",
+                    "force": "强制刷新"
+                }
+            },
+            "target": {
+                "name": "瞄准帮手",
+                "hint": "（需要重新载入）允许在你的世界中使用瞄准帮手功能（前身为Pf2e-Target-Damage），启用后，将增加一个同名的客户端设置选项，允许用户自行决定是否要启用该功能"
+            },
+            "target-client": {
+                "name": "瞄准帮手",
+                "hint": "在 [伤害] 聊天消息中，为掷骰过程中每个被瞄准的token添加单独的一行伤害应用栏。",
+                "choices": {
+                    "disabled": "禁止",
+                    "small": "小按钮",
+                    "big": "大按钮"
+                }
+            },
+            "target-template": {
+                "name": "测量版瞄准",
+                "hint": "当在场景中放置一个测量板时，将弹出一个对话框，询问你是否需要瞄准测量板内的token（可以根据条件进行筛选）。"
+            },
+            "force-untarget": {
+                "name": "强制取消目标",
+                "hint": "将在回合/轮变更时强制移除所有用户的目标。如果启用此设置，'取消目标'客户端设置将被覆盖。"
+            },
+            "untarget": {
+                "name": "取消目标",
+                "hint": "将在回合/轮变更时移除所有你的目标。这将被'强制取消目标'世界设置所覆盖。"
             }
         },
-        "module-conflict": " 该 <strong>{name}</strong> mod 不再被需要，因为其功能已被 <strong>PF2e Toolbelt</strong> 替代，你可以安全地禁用它。",
+        "module-conflict": "在启用 <strong>PF2e Toolbelt</strong> 模组后，该 <strong>{name}</strong> 将不再被需要，你可以安全地移除该冗余模组。",
         "arp": {
-            "forceVariant": "<strong>PF2e Toolbelt</strong> 已禁用 pf2e 系统自带的 自动成长加值 变体规则以保证运行顺利。"
+            "forceVariant": "启用 <strong>PF2e Toolbelt</strong> 将禁用 pf2e 系统中的'自动成长加值'变体规则"
         },
         "knowledges": {
-            "templates": {
-                "editLore": {
-                    "save": "保存",
-                    "cancel": "取消",
-                    "specific": "特定学识",
-                    "unspecified": "非特定学识",
-                    "hint": "用英文逗号分割学识，这会替换角色卡中的一般学识"
-                }
+            "editLore": {
+                "title": "{name} - 编辑学识",
+                "save": "保存",
+                "cancel": "取消",
+                "specific": "特定学识",
+                "unspecified": "非特定学识",
+                "hint": "用英文逗号分割学识，这会替换角色卡中的一般学识"
             }
         },
         "effects": {
-            "remove": "[Shift + 右键] 移除效果"
+            "remove": "[Shift + 鼠标右键] 移除效果"
         },
         "merge": {
             "spell": {
@@ -113,18 +159,22 @@
             },
             "damage": {
                 "tooltip": "与过往消息合并",
+                "split-tooltip": "拆分回原始信息",
                 "none": "未找到其它该类型的伤害消息"
             },
             "merged": {
-                "header": "合并的伤害掷骰: {name}"
+                "header": "合并的伤害掷骰: {name}",
+                "outcome": "结果: {outcome}"
             }
         },
         "summary": {
             "staff": "法杖",
-            "charges": "充能"
+            "charges": "充能",
+            "range": "射程"
         },
         "giveth": {
-            "giveth": "给予 {target}",
+            "subtitle": "给予物品",
+            "giveth": "{giver} 将 {quantity} × {item} 给予了 {recipient}.",
             "notification": {
                 "zero": "你不能给予一项你没有的东西。",
                 "withQty": "将 {qty} {item} 给予 <strong>{target}</strong>.",
@@ -133,12 +183,21 @@
         },
         "stances": {
             "noCombat": "只有在遭遇模式，你才能进入为保持一个架势",
-            "useStance": "自动进入架势：A '{stance}'",
+            "useStance": "自动进入架势：'{stance}'",
             "menu": {
                 "title": "架势贯通",
                 "select": "请选择一个架势",
                 "accept": "确定",
                 "cancel": "取消"
+            }
+        },
+        "share": {
+            "templates": {
+                "master": {
+                    "label": "共享HP",
+                    "hint": "选定主人后，该角色将共享其主人的生命值（以及耐力）",
+                    "select": "选择主人"
+                }
             }
         },
         "hero": {
@@ -149,7 +208,7 @@
             },
             "trade-request": {
                 "title": "交换请求",
-                "header": "剧角色 {sender} 想要与 {receiver} 进行交换",
+                "header": "角色 {sender} 想要与 {receiver} 进行交换",
                 "give": "提供: {give}",
                 "want": "需求: {want}",
                 "accept": "你是否接受该提议？"
@@ -167,6 +226,9 @@
             },
             "actions-use": {
                 "header": "消耗一点英雄点以使用"
+            },
+            "actions-give": {
+                "header": "被给予 ({nb}) 英雄点动作"
             },
             "trade-rejected": "你的英雄点交换请求已被 {name} 拒绝。",
             "trade-error": "英雄点交换过程中发生了错误。",
@@ -225,6 +287,15 @@
                     "label": "英雄点动作",
                     "tbd": "待定",
                     "trade": "交换"
+                },
+                "giveAction": {
+                    "noCharacter": "你必须选中一个角色才能获得该英雄点动作",
+                    "title": "给予角色英雄点动作",
+                    "drawn": "已丢弃",
+                    "give": "给予动作",
+                    "cancel": "取消",
+                    "asDrawn": "给予时视作丢弃",
+                    "withMessage": "生成提示消息"
                 }
             },
             "table": {
@@ -233,7 +304,150 @@
                 "noFormula": "英雄点卡牌列表没有任何公式，通知你的GM，Ta搞砸了。",
                 "noFormulaCompendium": "英雄点卡牌列表没有任何公式，其是一个合集表。",
                 "drawError": "抽取过程中出现了错误，大概率是因为列表中包含有不符合前置要求的结果。"
+            },
+            "notGM": "只有 GM 可以使用该功能",
+            "onlyCharacter": "英雄点动作系统仅能作用于玩家角色"
+        },
+        "target": {
+            "chat": {
+                "targets": {
+                    "tooltip": "为该消息添加目标"
+                },
+                "toggle": {
+                    "tooltip": "展开原始伤害按钮"
+                },
+                "save": {
+                    "reroll": {
+                        "tooltip": "可以重骰豁免检定",
+                        "noPoints": "你需要至少 1 英雄点才能重骰。",
+                        "confirm": {
+                            "title": "重骰豁免检定",
+                            "reroll": "重骰",
+                            "cancel": "取消"
+                        },
+                        "keeley": "重骰并使用较低结果"
+                    },
+                    "result": {
+                        "withOffset": "结果: ({die}) {success} 因 {offset}",
+                        "withoutOffset": "结果: {success}",
+                        "withoutOffsetWithDie": "结果: ({die}) {success}"
+                    },
+                    "dcWithValue": "DC {dc}",
+                    "adjustment": "调整: {value}"
+                },
+                "row": {
+                    "sheet": "打开角色卡",
+                    "hidden": "对玩家隐藏"
+                },
+                "context": {
+                    "saves": {
+                        "name": "为所有目标进行豁免掷骰"
+                    }
+                },
+                "drop": {
+                    "unauth": "你只能在你为发出者的消息上进行此类操作。",
+                    "already": "此消息已存在与其相关联的豁免检定。",
+                    "added": "你已成功为该消息添加了一则豁免检定"
+                }
+            },
+            "menu": {
+                "title": "测量板",
+                "target": "目标",
+                "self": "包括自身",
+                "neutral": "包括中立",
+                "enemies": "敌人",
+                "allies": "盟友",
+                "all": "全部"
             }
-        }
+        },
+        "inventory": {
+            "identifier": {
+                "error": "在拖拽操作和下拉的过程中，该表已被更新，因此该操作将被取消。"
+            }
+        },
+        "macros": {
+            "condition": {
+                "title": "永久状态效果",
+                "generate": "生成",
+                "add": "添加",
+                "effect-name": "效果: 永久 {condition}",
+                "name-label": "效果名称",
+                "badge-label": "徽标计数"
+            }
+        },
+        "merchant": {
+            "ratio": {
+                "label": "价格倍率",
+                "tooltip": "适用于该商人出售的所有物品，应用该倍率于其物价。"
+            },
+            "no-coins": {
+                "label": "无货币收入",
+                "tooltip": "当该商人出售货物时，其背包内不会增加货币。"
+            },
+            "infinite-stocks": {
+                "label": "无限库存",
+                "tooltip": "该商人的物品永远不会售罄（对‘宝藏’物品不生效）。"
+            },
+            "infinite-item": {
+                "tooltip": "无限库存"
+            },
+            "buy": {
+                "empty": "你不能保存一个空的过滤器。",
+                "label": "购买物品",
+                "tooltip": "启用 <strong>购买物品</strong> 功能。",
+                "title": "{name} - 购买物品",
+                "placeholder": "过滤器名称",
+                "create": "创造过滤器",
+                "created": "成功创造 <strong>{name}</strong> 过滤器。",
+                "save": "保存过滤器",
+                "saved": "成功保存 <strong>{name}</strong> 过滤器。",
+                "reset": "重置过滤器",
+                "up": "增加优先级",
+                "down": "降低优先级",
+                "edit": "编辑过滤器",
+                "price": {
+                    "label": "价格倍率",
+                    "tooltip": "对该过滤器生效的价格悲虑。"
+                },
+                "purse": {
+                    "label": "金币范围",
+                    "tooltip": "在此过滤器中适用的金币消耗范围 (0 = 无钱购买, empty = 无穷大)。<br><em>注: 虽然不会显示低于金币范围的内容，但仍然会记录追踪其信息</em>.",
+                    "total": {
+                        "label": "全部金币范围",
+                        "tooltip": "可在该商人处可用的金币总量 (0 = 无钱购买, empty = 无穷大).<br><em>注: 虽然不会显示低于金币范围的内容，但仍然会记录追踪其信息</em>."
+                    }
+                },
+                "default": {
+                    "label": "默认过滤器",
+                    "tooltip": "若禁用，商家拒收任何不符合筛选条件的商品。",
+                    "all": "任何物品"
+                },
+                "delete": {
+                    "title": "删除过滤器",
+                    "content": "你确定要删除 <strong>{name}</strong> 过滤器?"
+                },
+                "refuse": "<strong>{actor}</strong> 对你的货物不感兴趣。",
+                "poor": {
+                    "total": "<strong>{actor}</strong> 无力购买你的商品。",
+                    "filter": "<strong>{actor}</strong> 不想为你提供的商品买单。"
+                }
+            },
+            "sold": {
+                "subtitle": "购买物品",
+                "message": "{buyer} 以 {price}gp 的价格，从 {seller} 处购买了 {quantity} × {item} ."
+            },
+            "browser": {
+                "pull": "从合集包中浏览",
+                "limit": "你已到达上限!",
+                "dialogMsg": "<p>你确定要向该商人添加这些物品 (选中: <strong>{nb}</strong>) 吗?</p><p>根据物品数量的不同，该过程可能需要数秒钟.</p>",
+                "wait": "请等待物品被添加完成.",
+                "finished": "物品已被成功添加到该商人的角色卡中.",
+                "selected": "选中",
+                "add": "添加至商人",
+                "all": "选择所有",
+                "owned": "该物品已经存在于商人的库存中了"
+            }
+        },
+        "unnamed": "未命名"
     }
 }
