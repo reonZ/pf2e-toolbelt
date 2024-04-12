@@ -1,3 +1,11 @@
+# 1.43.0
+
+-   `Spells Summary` updates:
+    -   is now compatible with the version `3.0.0` of `PF2e Dailies`
+    -   no longer be compatible with previous versions of `PF2e Dailies`
+    -   no longer offer backward compatibility support for `PF2e Staves`
+    -   fixed issue with flexible specasting uses showing even not hovered
+
 # 1.42.2
 
 -   `Target Token Helper` updates:
@@ -17,7 +25,7 @@
 
 # 1.41.4
 
--   `Spells Summary`:
+-   `Spells Summary` updates:
     -   fixed feature not properly unregistering itself when disabled
     -   fixed character sheets not being re-rendered on setting change
 -   `Target Token Helper` updates:
