@@ -57,17 +57,17 @@
             </span>
 
             {{#if (and (not spell.isCantrip) (or spell.isSpontaneous spell.isInnate
-            spell.isActiveCharge spell.consumable))}}
+            spell.isActiveCharges spell.consumable))}}
             <div class="uses">
                 <span class="spell-slots-input">
-                    <input type="number" value="{{spell.uses.value}}"
-                        data-input-path="{{spell.inputPath}}"
+                    <input type="number" value="{{spell.uses.value}}" {{#if spell.isStaff}}
+                        data-is-staff="true" {{else}} data-input-path="{{spell.inputPath}}" {{/if}}
                         data-entry-id="{{#if spell.isInnate}}{{spell.itemId}}{{else if spell.consumable}}{{spell.consumable.id}}{{else}}{{spell.entryId}}{{/if}}"
                         placeholder="0" min="0" max="{{spell.uses.max}}" {{disabled (or (not
                         @root.isOwner) (and spell.uses.autoDestroy (eq spell.uses.max 1) (lte
                         spell.uses.value 1)))}}>
                 </span>
-                {{#if (and spell.uses.max (not spell.uses.noMax))}}
+                {{#if (and spell.uses.max (not spell.isStaff))}}
                 <span class="slash"> / </span>
                 <span class="spell-max-input">
                     <input type="number" value="{{spell.uses.max}}" placeholder="0" disabled />
@@ -76,7 +76,8 @@
                 {{#if @root.isOwner}}
                 <a class="spell-slots-increment-reset"
                     data-item-id="{{#if spell.isInnate}}{{spell.itemId}}{{else if spell.consumable}}{{spell.consumable.id}}{{else}}{{spell.entryId}}{{/if}}"
-                    data-rank="{{spell.castRank}}" data-is-charge="{{spell.isCharge}}">
+                    data-rank="{{spell.castRank}}" data-is-staff="{{spell.isStaff}}"
+                    data-is-charge="{{spell.isCharges}}">
                     <i class="fas fa-redo"></i>
                 </a>
                 {{/if}}
