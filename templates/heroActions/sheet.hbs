@@ -1,0 +1,54 @@
+<header class="heroActions-header">
+    {{i18n 'label'}}
+    {{#if isOwner}}
+    <div class="controls">
+        {{#if useCount}}
+        <button type="button" class="redraw" data-action="hero-actions-draw">
+            <i class="fa-regular fa-cards-blank"></i>
+            {{i18n 'redraw'}}
+        </button>
+        {{else if mustDraw}}
+        <button type="button" class="draw" data-action="hero-actions-draw">
+            <i class="fa-regular fa-cards-blank"></i>
+            {{i18n 'draw' nb=diff}}
+        </button>
+        {{/if}}
+        {{#if canTrade}}
+        <button type="button" data-action="hero-actions-trade">
+            <i class="fas fa-right-left"></i> {{i18n 'trade'}}
+        </button>
+        {{/if}}
+    </div>
+    {{/if}}
+</header>
+<ol class="actions-list item-list directory-list heroActions-list" {{#if mustDiscard}}
+    data-discard="{{diff}}" {{/if}}>
+    {{#each actions as |action|}}
+    <li class="item action" data-uuid="{{action.uuid}}">
+        <div class="item-name">
+            <div data-action="hero-action-chat" class="item-image"
+                style="background-image: url(systems/pf2e/icons/actions/Passive.webp)">
+                <i class="fas fa-comment-alt"></i>
+            </div>
+            <h4 data-action="hero-action-expand">{{action.name}}</h4>
+        </div>
+        {{#if @root.isOwner}}
+        <div class="item-controls">
+            {{#if @root.canUse}}
+            <button type="button" data-action="hero-action-use">
+                {{@root.i18n 'action.use'}}
+            </button>
+            {{/if}}
+            {{#if @root.mustDiscard}}
+            <button type="button" class="discard" data-action="hero-action-discard">
+                {{@root.i18n 'action.discard'}}
+            </button>
+            {{/if}}
+        </div>
+        {{/if}}
+        <div class="item-summary" hidden="hidden">
+            <div class="item-description"></div>
+        </div>
+    </li>
+    {{/each}}
+</ol>

@@ -1,10 +1,73 @@
+# 2.0.0
+
+-   the module has been completely remade from scratch
+-   the module no longer contains compendium packs
+-   the `Inventory`, `Npc Lore Knowledges` and `Multi-Cast` features have been retired
+-   the settings have received an overhaul
+    -   everything has been reset
+    -   some settings have been added or split into more settings
+    -   all settings are now grouped by feature (with a title for each feature)
+    -   some settings are now enabled/set by default (only the ones that are dependent on a feature-enabling setting)
+    -   no longer has settings that could be hidden when another setting is disabled
+-   `Better Merchant`:
+    -   complete rework of the feature
+    -   removed individual `Infinite Stock`
+    -   selling ratio now works off filters like buying does
+    -   selling items doesn't add coins to the inventory, it instead keep track of it in the filters
+    -   buying/selling filters now use a modified version of the compendium browser
+    -   for GM: price numbers of a ratio other than 1 will be colored and can be hovered over to see which filter changed it and at which ratio
+-   `Effects Panel`:
+    -   no longer add the `Condition-Sheet Icon` to persistent damage conditions
+-   `Giveth`:
+    -   no longer allows to drag & drop effects/conditions onto unowned actors, the feature is strictly reserved for giving "equipment"
+-   `Hero Actions`:
+    -   revisited the design and ergonomics of the sheet UI
+    -   some styling improvement were made to the different dialogs used
+    -   you can now "safely" use the `Private` and `Allow Trade` settings together
+        -   users who don't own targetted characters will not be shown the list of their actions (and therefor can't select which one they want to receive)
+        -   when receiving a trade request, the user will have to select which action they want to give without knowing what they are offered
+    -   a new `Hero Set Variant` setting has been added
+        -   when set to 0, the feature will work as before: a character is allowed to have 1 hero action per hero point available
+        -   when set to any number, the feature functions differently and instead have characters draw a set amount of cards (equal to the setting number) and can use any of them by spending a hero point without being forced to discard or draw any action
+-   `Hide Damage`:
+    -   this new setting lets you hide the damage value of non-player owned creature from players, it can be particularly useful paired with the target helper feature so player don't know if they should reroll or not a save just by seeing some big number in the chat message
+-   `Merge Damages`:
+    -   material is now propagated to the all the damage instances of the same type instead of splitting them into multiple instances (which was basically creating issues with IWR instead of fixing them)
+    -   details will now be hidden from players when merging damages for non-player owned creatures (when necessary)
+    -   merged message will now use the targets from the original messages instead of using current targets
+    -   if merged damages have more than on roll (usually for splash), those rolls will be added to the merged message as extra rolls
+-   `Spells Summary`:
+    -   even though the end user experience hasn't changed much, it now works very similarly to the regular spellcasting tab (it is also now an actual tab)
+    -   spell `uses` are now directly available in the spell rows instead of having to hover over them
+    -   mousing over the `category` of a spell will show the name of the spellcasting entry in a tooltip
+-   `Share Health Pool` is now `Shared Data`:
+    -   the option to select a master is now limited to GMs
+    -   a master must be a "linked" character actor to be selected
+    -   only "linked" actors can select a master
+    -   an actor can now take advantage of turn start/end if their master is in combat
+        -   effects/conditions on the actor will trigger/expire as if it was in the encounter
+        -   if the actor is already in the encounter, nothing special will be done
+    -   an actor can use its master's skills proficiencies
+    -   an actor can use its master's invested handwraps/weapon fundamental & property runes
+    -   an actor can use its master's invested armor/bracers potency & resilient runes
+-   `Target Helper`:
+    -   now can use substitute rolls
+    -   a new icon that can be hovered over shows up if a save roll results in having notes
+    -   no longer disables the chat message when a roll is inbound
+    -   no longer show target rows on private messages
+-   `Template Helper`:
+    -   added a new `Auto Dismiss` settings which will remove the template after setting the targets (or cancelled)
+        -   `Orphan Only` refers to templates that do not originate from spell messages (no little trash icon to remove them)
+-   `Use Button`:
+    -   new client settings that either add new use buttons or enhance existing ones
+
 # 1.43.0
 
 -   `Spells Summary` updates:
     -   is now compatible with the version `3.0.0` of `PF2e Dailies`
-    -   no longer be compatible with previous versions of `PF2e Dailies`
+    -   no longer compatible with previous versions of `PF2e Dailies`
     -   no longer offer backward compatibility support for `PF2e Staves`
-    -   fixed issue with flexible specasting uses showing even not hovered
+    -   fixed issue with flexible spellcasting uses showing even not hovered
 
 # 1.42.2
 

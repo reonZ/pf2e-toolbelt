@@ -2,14 +2,6 @@
 node_modules/
 releases/
 scripts/
-ignore.txt
-release.mjs
 *.code-workspace
-tsconfig.json
-jsconfig.json
-webpack*.*
-*.log
-CURRENT
-LOCK
-LOG*
-MANIFEST*
+release.mjs
+ignore.txt

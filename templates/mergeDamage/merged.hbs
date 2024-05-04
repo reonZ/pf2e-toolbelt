@@ -1,0 +1,20 @@
+{{#each groups as |group|}}
+<div class="pf2e-toolbelt-merged-group">
+    <h4 class="action"><strong>{{group.label}}</strong></h4>
+    {{{group.tags}}}
+    <div class="actions" {{#unless @root.showBreakdown}}data-visibility="gm" {{/unless}}>
+        {{#each group.results as |result|}}
+        <h4 class="action">
+            <strong>
+                {{result.label}}
+                {{#if (gt result.count 1)}}
+                x{{result.count}}
+                {{/if}}
+            </strong>
+        </h4>
+        {{{result.modifiers}}}
+        {{/each}}
+        {{{group.notes}}}
+    </div>
+</div>
+{{/each}}

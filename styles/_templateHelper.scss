@@ -1,0 +1,38 @@
+[id="pf2e-toolbelt.templateHelper.menu.dialog"] {
+    .dialog-content {
+        display: flex;
+        justify-content: space-between;
+        margin-right: 5px;
+
+        .left,
+        .right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+
+            input {
+                flex: 0 0 20px;
+                width: 20px;
+                margin-inline: 5px;
+
+                &[type="radio"] {
+                    inset: 0;
+                }
+
+                &[type="checkbox"] {
+                    height: 1.2em;
+                }
+            }
+        }
+    }
+
+    .dialog-buttons {
+        margin-top: 0.5em;
+    }
+}

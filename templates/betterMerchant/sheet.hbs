@@ -1,0 +1,22 @@
+<div class="gm-settings better-merchant">
+    <div>
+        <button type="button" data-action="open-equipment-tab">
+            <i class="fa-solid fa-person-dolly"></i>
+            {{i18n 'browser'}}
+        </button>
+    </div>
+    <div>
+        <button type="button" data-action="open-filtes-menu">
+            <i class="fa-solid fa-sack-dollar"></i>
+            {{i18n 'filters'}}
+        </button>
+    </div>
+    <div class="form-group">
+        <label>
+            <span>{{i18n 'infiniteAll.label'}}</span>
+            <i class="fa-solid fa-info-circle"
+                data-tooltip="{{i18n.path 'infiniteAll.tooltip'}}"></i>
+        </label>
+        <input type="checkbox" name="infiniteAll" {{checked infiniteAll}}>
+    </div>
+</div>

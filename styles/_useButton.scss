@@ -1,0 +1,15 @@
+.sheet.actor.character .sheet-body .sheet-content {
+    .tab.inventory {
+        [data-item-types="consumable"] {
+            .item-controls {
+                .use-consumable {
+                    margin-right: 0.15rem;
+                }
+
+                span.use-consumable {
+                    color: rgba(0, 0, 0, 0.5);
+                }
+            }
+        }
+    }
+}

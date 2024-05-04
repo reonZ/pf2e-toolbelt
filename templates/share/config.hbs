@@ -1,0 +1,17 @@
+<h3>{{i18n "header"}}</h3>
+<div class="form-group">
+    <label>{{i18n 'master.label'}}</label>
+    <select name="{{masterInput}}" {{#unless
+        masters.length}}data-tooltip="{{i18n.path 'master.disabled'}}" disabled{{/unless}}>
+        <option value=""></option>
+        {{selectOptions masters selected=masterId nameAttr="value" labelAttr="label"}}
+    </select>
+    <p class="hint">{{i18n 'master.hint'}}</p>
+</div>
+{{#each groups as |group|}}
+<div class="form-group">
+    <label>{{group.label}}</label>
+    <input type="checkbox" name="{{group.input}}" {{checked group.checked}}>
+    <p class="hint">{{group.hint}}</p>
+</div>
+{{/each}}

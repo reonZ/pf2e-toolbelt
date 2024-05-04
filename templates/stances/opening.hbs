@@ -1,0 +1,8 @@
+<p>{{i18n 'select' name=actor.name}}</p>
+{{#each stances as |stance|}}
+<label>
+    <input type="radio" name="stance" value="{{stance.effectUUID}}" {{#unless
+        @index}}checked{{/unless}}>
+    <span>{{stance.name}}</span>
+</label>
+{{/each}}

@@ -1,15 +1,11 @@
-.sheet.actor.character .sheet-body .sheet-content {
-    [data-tab='actions'] .tab-content .actions-panels [data-tab='encounter'] .pf2e-stances {
+.app.sheet.actor.character .sheet-content .tab.actions .tab-content .tab[data-tab="encounter"] {
+    .pf2e-stances {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5em 1em;
         justify-content: center;
 
-        &:first-child {
-            margin-top: 0.5em;
-        }
-
-        .pf2e-stances__stance {
+        .stance {
             display: flex;
             align-items: center;
             gap: 0.5em;
@@ -17,7 +13,7 @@
             padding-right: 0.5em;
             cursor: pointer;
 
-            .pf2e-stances__img {
+            .img {
                 flex: 0 0 32px;
                 height: 32px;
                 width: 32px;
@@ -26,7 +22,7 @@
                 background-size: cover;
             }
 
-            .pf2e-stances__name {
+            .name {
                 flex: 1;
                 white-space: nowrap;
             }
@@ -34,18 +30,24 @@
             &.active {
                 box-shadow: inset 0 0 4px black;
 
-                .pf2e-stances__img {
+                .img {
                     border: 1px solid transparent;
                 }
 
-                .pf2e-stances__name {
+                .name {
+                    color: var(--primary);
+                }
+            }
+
+            &:hover {
+                .name {
                     color: var(--primary);
                 }
             }
         }
 
-        &:not(.can-use-stances) {
-            .pf2e-stances__stance {
+        &[data-tooltip] {
+            .stance {
                 box-shadow: 0 0 1px black;
                 cursor: not-allowed;
 
@@ -53,7 +55,7 @@
                     filter: grayscale(1) blur(1px);
                 }
 
-                .pf2e-stances__img {
+                .img {
                     border: 0;
                 }
             }
@@ -61,21 +63,23 @@
     }
 }
 
-.app.window-app.dialog {
-    .window-content {
-        .dialog-content {
-            .pf2e-stances-menu {
-                margin-bottom: 0.5em;
+[id="pf2e-toolbelt.stances.opening.dialog"] {
+    .dialog-content {
+        display: flex;
+        flex-direction: column;
 
-                label {
-                    height: 24px;
-                    display: block;
-                }
-
-                input {
-                    margin-right: 0.5em;
-                }
-            }
+        p {
+            text-align: center;
         }
+
+        label {
+            display: flex;
+            align-items: baseline;
+            gap: 0.3em;
+        }
+    }
+
+    .dialog-buttons {
+        margin-top: 0.8em;
     }
 }

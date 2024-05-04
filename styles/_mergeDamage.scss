@@ -1,0 +1,39 @@
+.chat-message {
+    .message-header {
+        .pf2e-toolbelt-merged-group {
+            margin-block: 3px 6px;
+            padding: 3px;
+            box-shadow: 0 0 4px 0px black;
+            border-radius: 2px;
+
+            .actions {
+                width: 100%;
+
+                .notes {
+                    min-height: 2px;
+                }
+            }
+        }
+    }
+
+    .message-content {
+        .dice-result {
+            .dice-total {
+                .pf2e-toolbelt-merge-buttons {
+                    position: absolute;
+                    right: 0px;
+                    bottom: 1px;
+                    display: flex;
+                    gap: 1px;
+
+                    button {
+                        width: 22px;
+                        height: 22px;
+                        font-size: 10px;
+                        line-height: 1px;
+                    }
+                }
+            }
+        }
+    }
+}

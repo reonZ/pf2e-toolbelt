@@ -1,0 +1,24 @@
+<div class="pf2e-toolbelt-target-save">
+    <div>{{check}}</div>
+    {{#if result}}
+
+    <div class="result">{{{result}}}</div>
+
+    {{#if adjustment}}
+    <div class="adjustment">
+        {{i18n 'adjustment' value=adjustment}}
+    </div>
+    {{/if}}
+
+    {{#each modifiers as |modifier|}}
+    <div>{{modifier.label}} {{numberFormat modifier.modifier decimals=0 sign=true}}</div>
+    {{/each}}
+
+    {{#if canReroll}}
+    <div class="note"><i class="fa-solid fa-rotate rotate"></i> {{i18n 'reroll'}}</div>
+    {{else}}
+    <div class="note"><i class="{{rerolled.icon}}"></i> {{localize rerolled.rerolled}}</div>
+    {{/if}}
+
+    {{/if}}
+</div>

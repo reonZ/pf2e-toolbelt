@@ -1,9 +1,0 @@
-<div class="pf2e-stances-menu">
-    <h3>{{i18n 'select'}}</h3>
-    {{#each stances as |stance|}}
-    <label>
-        <input type="radio" name="stance" value="{{stance.effectUUID}}" {{#unless @index}}checked{{/unless}}>
-        <span>{{stance.name}}</span>
-    </label>
-    {{/each}}
-</div>

@@ -1,0 +1,332 @@
+.chat-message {
+    .message-content {
+        > .damage-application {
+            &.hidden {
+                display: none;
+            }
+        }
+
+        .card-buttons {
+            .pf2e-toolbelt-target-wrapper {
+                display: flex;
+
+                .pf2e-toolbelt-target-setTargets {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex: 0;
+                    font-size: 1.2em;
+
+                    i {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+
+        .dice-result {
+            .dice-total {
+                .pf2e-toolbelt-target-buttons {
+                    position: absolute;
+                    left: 0px;
+                    bottom: 1px;
+
+                    display: flex;
+
+                    .pf2e-toolbelt-target-setTargets,
+                    .pf2e-toolbelt-target-toggleDamageRows {
+                        width: 22px;
+                        height: 22px;
+                        line-height: 1px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        i {
+                            margin: 0;
+                        }
+                    }
+
+                    .pf2e-toolbelt-target-toggleDamageRows {
+                        &.expanded {
+                            .expand {
+                                display: none;
+                            }
+                        }
+
+                        &:not(.expanded) {
+                            .collapse {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        + .pf2e-toolbelt-target-targetRows {
+            --criticalSuccess: rgb(0, 128, 0);
+            --success: rgb(0, 0, 255);
+            --failure: rgb(255 106 0);
+            --criticalFailure: rgb(255, 0, 0);
+
+            .target-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding-right: 0.5em;
+                font-size: 0.9em;
+                gap: 0.5em;
+                height: 1.3em;
+
+                .name {
+                    font-weight: bold;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: flex;
+
+                    i {
+                        &:not(.empty) {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 18px;
+                        }
+
+                        &.fa-person {
+                            font-size: 1.1em;
+                        }
+
+                        &.fa-eye-slash {
+                            font-size: 0.9em;
+                            margin-bottom: 1px;
+                        }
+
+                        &.fa-ghost {
+                            font-size: 0.95em;
+                        }
+                    }
+                }
+
+                .controls {
+                    display: flex;
+                    gap: 0.5em;
+                    white-space: nowrap;
+                    align-items: center;
+
+                    hr {
+                        width: 0;
+                        border: none;
+                        border-left: 1px solid var(--color-border-light-primary);
+                        border-right: 1px solid var(--color-border-light-highlight);
+                        margin: 0;
+                        height: 1.1em;
+                    }
+
+                    .degree {
+                        font-size: 1.1em;
+
+                        &.show {
+                            &.criticalSuccess {
+                                color: var(--criticalSuccess);
+                            }
+
+                            &.success {
+                                color: var(--success);
+                            }
+
+                            &.failure {
+                                color: var(--failure);
+                            }
+
+                            &.criticalFailure {
+                                text-shadow: 0 0 black;
+                                color: var(--criticalFailure);
+                            }
+                        }
+                    }
+
+                    i {
+                        &.die {
+                            font-size: 0.95em;
+                        }
+
+                        &.rotate {
+                            font-size: 0.9em;
+                            margin-left: 1px;
+                        }
+
+                        &.small {
+                            font-size: 0.9em;
+                            opacity: 0.8;
+                        }
+
+                        &.list {
+                            font-size: 0.96em;
+                        }
+                    }
+                }
+            }
+
+            .target-damage-application {
+                display: flex;
+                justify-content: center;
+                margin-top: 3px;
+
+                button {
+                    position: relative;
+                    align-items: center;
+                    display: flex;
+                    flex-direction: column;
+                    font-size: var(--font-size-18);
+                    height: 2em;
+                    justify-content: space-around;
+                    line-height: unset;
+                    padding: 0;
+
+                    img {
+                        border: none;
+                        height: var(--font-size-18);
+                    }
+
+                    span {
+                        font-size: 0.5em;
+                        font-weight: 500;
+                        text-transform: uppercase;
+                    }
+
+                    &.half-damage {
+                        i {
+                            -moz-background-clip: text;
+                            -moz-text-fill-color: transparent;
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            background-image: linear-gradient(
+                                to right,
+                                var(--text-dark) 50%,
+                                var(--color-text-light-6) 50%
+                            );
+                        }
+                    }
+
+                    &::after {
+                        position: absolute;
+                        content: "";
+                        inset: 0;
+                        border-radius: 2px;
+                    }
+                }
+
+                &.small {
+                    button {
+                        height: 1em;
+
+                        img,
+                        i {
+                            display: none;
+                        }
+                    }
+                }
+
+                &.success {
+                    [data-action="target-half-damage"] {
+                        &::after {
+                            box-shadow: inset 0 0 6px var(--success);
+                        }
+                    }
+                }
+
+                &.failure {
+                    [data-action="target-apply-damage"] {
+                        &::after {
+                            box-shadow: inset 0 0 6px var(--failure);
+                        }
+                    }
+                }
+
+                &.criticalFailure {
+                    [data-action="target-double-damage"] {
+                        &::after {
+                            box-shadow: inset 0 0 6px var(--criticalFailure);
+                        }
+                    }
+                }
+
+                &.applied {
+                    button {
+                        filter: blur(1px);
+                    }
+                }
+            }
+        }
+    }
+}
+
+[id="pf2e-toolbelt.targetHelper.reroll.dialog"] {
+    .dialog-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+
+        label {
+            input {
+                margin-right: 0.3em;
+            }
+
+            i {
+                width: 20px;
+                text-align: center;
+            }
+        }
+    }
+
+    .dialog-buttons {
+        margin-top: 0.5em;
+    }
+}
+
+[role="tooltip"] {
+    .pf2e-toolbelt-target-save {
+        font-size: 0.9em;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        gap: 0.2em;
+
+        .result {
+            i {
+                font-size: 0.8em;
+            }
+        }
+
+        .note {
+            font-style: italic;
+            font-size: 0.8em;
+            align-self: flex-end;
+
+            i {
+                font-size: 0.95em;
+
+                &:not(.rotate) {
+                    opacity: 0.8;
+                }
+            }
+        }
+    }
+
+    .pf2e-toolbelt-target-notes {
+        font-size: 0.9em;
+        list-style: none;
+        padding: 0;
+
+        .roll-note {
+            strong {
+                &::after {
+                    content: ":";
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,33 @@
+<div class="header">
+    {{i18n 'select'}}
+    <select name="target" {{disabled (eq others.length 1)}}>
+        {{selectOptions others selected=others.[0].id nameAttr="id" labelAttr="name"}}
+    </select>
+</div>
+<div class="actions">
+    <div class="left">
+        {{#each actions as |action|}}
+        <div class="action" data-uuid="{{action.uuid}}">
+            <input type="radio" name="action" value="{{action.uuid}}" {{checked (eq @index 0)}} />
+            <label data-action="description"> {{action.name}}</label>
+        </div>
+        {{/each}}
+    </div>
+    <i class="exchange fa-solid fa-right-left"></i>
+    {{#each others as |other|}}
+    <div class="right{{#if (eq @index 0)}} selected{{/if}}" data-target-id="{{other.id}}">
+        {{#each other.actions as |action|}}
+        <div class="action" data-uuid="{{action.uuid}}">
+            {{#if other.isPrivate}}
+            <label>??????</label>
+            {{else}}
+            <label data-action="description">{{action.name}}</label>
+            <input type="radio" name="action-{{other.id}}" value="{{action.uuid}}" {{checked (eq
+                @index 0)}} />
+            {{/if}}
+
+        </div>
+        {{/each}}
+    </div>
+    {{/each}}
+</div>
