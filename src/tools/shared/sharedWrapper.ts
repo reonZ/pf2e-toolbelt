@@ -14,7 +14,7 @@ function createSharedWrapper<TListener extends (...args: any[]) => any>(
             MODULE.error(`an error occured in the shared wrapper'\n${path}`, error);
 
             const wrapFn = args.splice(0)[0] as Function;
-            wrapFn(...args);
+            return wrapFn(...args);
         }
     };
 

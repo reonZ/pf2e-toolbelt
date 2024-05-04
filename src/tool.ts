@@ -184,7 +184,7 @@ function createToolWrappers(config: ToolConfig) {
 
                     if (type !== "OVERRIDE") {
                         const wrapFn = args.splice(0)[0] as Function;
-                        wrapFn(...args);
+                        return wrapFn(...args);
                     }
                 }
             };
