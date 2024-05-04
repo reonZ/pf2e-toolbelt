@@ -107,6 +107,7 @@ const {
         },
     ],
     api: {
+        canTrade,
         discardHeroActions,
         drawHeroAction,
         drawHeroActions,
@@ -117,6 +118,7 @@ const {
         removeHeroActions,
         sendActionToChat,
         tradeHeroAction,
+        usesCountVariant,
         useHeroAction,
     },
     onSocket: (packet: SocketPacket, senderId) => {
@@ -154,23 +156,30 @@ const {
     },
 } as const);
 
+function canTrade() {
+    return settings.trade;
+}
+
+function usesCountVariant() {
+    return settings.count > 0;
+}
+
 async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
     const actions = getHeroActions(actor);
-    const count = settings.count;
-    const useCount = count > 0;
+    const usesCount = usesCountVariant();
     const heroPoints = actor.heroPoints.value;
     const diff = heroPoints - actions.length;
-    const mustDiscard = !useCount && diff < 0;
-    const mustDraw = !useCount && diff > 0;
+    const mustDiscard = !usesCount && diff < 0;
+    const mustDraw = !usesCount && diff > 0;
 
     const template = await render("sheet", {
         actions,
-        useCount,
+        usesCount,
         mustDiscard,
         mustDraw,
-        canUse: (useCount && heroPoints > 0) || diff >= 0,
-        canTrade: actions.length && !mustDiscard && !mustDraw && settings.trade,
+        canUse: (usesCount && heroPoints > 0) || diff >= 0,
+        canTrade: actions.length && !mustDiscard && !mustDraw && canTrade(),
         diff: Math.abs(diff),
         isOwner: actor.isOwner,
     });
@@ -362,9 +371,9 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     }
 
     const heroPoints = actor.heroPoints.value;
-    const useCount = !!settings.count;
+    const usesCount = usesCountVariant();
 
-    if (!useCount && heroPoints < actions.length) {
+    if (!usesCount && heroPoints < actions.length) {
         localize.warn("error.mustDiscard", { nb: actions.length - heroPoints });
         return;
     }
@@ -601,11 +610,13 @@ function onDiscardAction(actor: CharacterPF2e, uuid: string, el: HTMLElement) {
     }
 }
 
-function discardHeroActions(actor: CharacterPF2e, uuids: string[]) {
+function discardHeroActions(actor: CharacterPF2e, uuids: string[] | string) {
     if (!isValidActor(actor)) return;
 
     const actions = getHeroActions(actor);
     const removed = [];
+
+    uuids = Array.isArray(uuids) ? uuids : [uuids];
 
     for (const uuid of uuids) {
         const index = actions.findIndex((x) => x.uuid === uuid);
@@ -627,8 +638,8 @@ async function drawHeroActions(actor: CharacterPF2e) {
 
     const drawn = [];
     const count = settings.count;
-    const useCount = count > 0;
-    const actions = useCount ? [] : getHeroActions(actor);
+    const usesCount = count > 0;
+    const actions = usesCount ? [] : getHeroActions(actor);
     const nb = count || actor.heroPoints.value - actions.length;
 
     if (nb <= 0) {
