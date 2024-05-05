@@ -185,7 +185,7 @@ async function actorTransferItemToActor(
                 seller: this,
                 filter: itemFilter.filter,
                 item,
-                price: itemFilter.price.goldValue,
+                price: itemFilter.price.toObject(),
                 quantity: realQuantity,
             },
             game.user.id
@@ -196,7 +196,7 @@ async function actorTransferItemToActor(
             seller: this.uuid,
             item: item.uuid,
             filter: itemFilter.filter.id,
-            price: itemFilter.price.goldValue,
+            price: itemFilter.price.toObject(),
             quantity: realQuantity,
         });
     }
@@ -209,7 +209,7 @@ async function buyItem(
         item: string | PhysicalItemPF2e;
         quantity: number;
         filter: ExtractedFilter | string;
-        price: number;
+        price: Coins;
     },
     senderId: string
 ) {
@@ -243,15 +243,17 @@ async function buyItem(
 
     const updates = {};
     const defaultFilter = filters.splice(-1)[0];
+    const price = new game.pf2e.Coins(options.price);
+    const goldValue = price.goldValue;
 
     if (defaultFilter.purse !== Infinity && (filter.useDefault || filter.id === "default")) {
-        setFlagProperty(updates, "default.buy.purse", defaultFilter.purse - options.price);
+        setFlagProperty(updates, "default.buy.purse", defaultFilter.purse - goldValue);
     }
 
     if (filter.id !== "default" && filter.purse !== Infinity) {
         const filterIndex = filters.findIndex((x) => x.id === filter.id);
 
-        filter.purse -= options.price;
+        filter.purse -= goldValue;
         filters.splice(filterIndex, 1, filter);
 
         setFlagProperty(updates, "filters.buy", filters);
@@ -259,12 +261,14 @@ async function buyItem(
 
     await buyer.update(updates);
 
+    await seller.inventory.addCoins(price);
+
     const content = localize("buy.message.content", {
         buyer: getHighestName(buyer),
         quantity,
         item: newItem.link,
         seller: getHighestName(seller),
-        price: parseFloat(options.price.toFixed(2)),
+        price: parseFloat(goldValue.toFixed(2)),
     });
 
     createTradeMessage(localize("buy.message.subtitle"), content, buyer, newItem, senderId);
@@ -1088,7 +1092,12 @@ function getFilters<
         ...filter,
         name: filter.name.trim() || filter.id,
         ratio: clampPriceRatio(type, filter.ratio),
-        purse: filter.purse ? Math.max(0, filter.purse) : type === "buy" ? Infinity : 0,
+        purse:
+            typeof filter.purse === "number"
+                ? Math.max(0, filter.purse)
+                : type === "buy"
+                ? Infinity
+                : 0,
     }));
 }
 
