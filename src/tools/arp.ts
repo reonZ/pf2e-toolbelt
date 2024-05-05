@@ -1,10 +1,4 @@
-import {
-    HANDWRAPS_SLUG,
-    getEquippedHandwraps,
-    htmlElement,
-    libWrapper,
-    querySelector,
-} from "pf2e-api";
+import { HANDWRAPS_SLUG, getEquippedHandwraps, htmlElement, libWrapper } from "pf2e-api";
 import { createTool } from "../tool";
 import {
     ARMOR_PREPARE_BASE_DATA,

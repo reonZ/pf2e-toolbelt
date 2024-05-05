@@ -32,7 +32,7 @@
                 },
                 "message": {
                     "name": "Send Message to Chat",
-                    "hint": "When an is giveth to another actor, a chat message will be generated."
+                    "hint": "When an item is given to another actor, a chat message will be generated."
                 }
             },
             "heroActions": {
@@ -55,7 +55,7 @@
                 },
                 "count": {
                     "name": "Hero Set Variant",
-                    "hint": "If 0, characters can only have one hero action per hero point. Otherwise, the number of hero actions will be disociated from the number of hero points available and characters will redraw hero actions in bundle."
+                    "hint": "If 0, characters can only have one hero action per hero point. Otherwise, the number of hero actions will be dissociated from the number of hero points available and characters will redraw hero actions in set."
                 }
             },
             "noBulk": {
@@ -81,14 +81,14 @@
                 }
             },
             "untarget": {
-                "title": "Detargeting",
+                "title": "De-targeting",
                 "force": {
-                    "name": "Force Detargeting",
+                    "name": "Force De-targeting",
                     "hint": "Will forcibly remove the targets of all users at turn/round change."
                 },
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Will remove all your targets at turn/round change. This can be overridden by the 'Force Detargeting' world setting."
+                    "hint": "Will remove all your targets at turn/round change. This can be overridden by the 'Force De-targeting' world setting."
                 }
             },
             "templateHelper": {

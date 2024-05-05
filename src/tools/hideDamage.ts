@@ -1,4 +1,4 @@
-import { querySelector, refreshLatestMessages } from "pf2e-api";
+import { refreshLatestMessages } from "pf2e-api";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 

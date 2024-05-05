@@ -19,6 +19,8 @@ import {
 } from "pf2e-api";
 import { createTool } from "../tool";
 
+const INFINITE = "∞";
+
 const PULL_LIMIT = 100;
 
 const RATIO = {
@@ -823,7 +825,7 @@ async function lootSheetPF2eRenderInner(
 
         if (infiniteAll) {
             const quantityElement = querySelector(itemElement, ".quantity");
-            quantityElement.innerHTML = "∞";
+            quantityElement.innerHTML = INFINITE;
         }
     }
 
@@ -831,9 +833,9 @@ async function lootSheetPF2eRenderInner(
         const bulkElement = querySelector(html, ".total-bulk span");
         const wealthElement = querySelector(html, ".coinage .wealth .item-name:last-child span");
 
-        wealthElement.innerHTML = "∞";
+        wealthElement.innerHTML = INFINITE;
         bulkElement.innerHTML = game.i18n.format("PF2E.Actor.Inventory.TotalBulk", {
-            bulk: "∞",
+            bulk: INFINITE,
         });
     }
 

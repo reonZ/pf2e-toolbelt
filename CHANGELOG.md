@@ -36,10 +36,6 @@
     -   details will now be hidden from players when merging damages for non-player owned creatures (when necessary)
     -   merged message will now use the targets from the original messages instead of using current targets
     -   if merged damages have more than on roll (usually for splash), those rolls will be added to the merged message as extra rolls
--   `Spells Summary`:
-    -   even though the end user experience hasn't changed much, it now works very similarly to the regular spellcasting tab (it is also now an actual tab)
-    -   spell `uses` are now directly available in the spell rows instead of having to hover over them
-    -   mousing over the `category` of a spell will show the name of the spellcasting entry in a tooltip
 -   `Share Health Pool` is now `Shared Data`:
     -   the option to select a master is now limited to GMs
     -   a master must be a "linked" character actor to be selected
@@ -50,6 +46,10 @@
     -   an actor can use its master's skills proficiencies
     -   an actor can use its master's invested handwraps/weapon fundamental & property runes
     -   an actor can use its master's invested armor/bracers potency & resilient runes
+-   `Spells Summary`:
+    -   even though the end user experience hasn't changed much, it now works very similarly to the regular spellcasting tab (it is also now an actual tab)
+    -   spell `uses` are now directly available in the spell rows instead of having to hover over them
+    -   mousing over the `category` of a spell will show the name of the spellcasting entry in a tooltip
 -   `Target Helper`:
     -   now can use substitute rolls
     -   a new icon that can be hovered over shows up if a save roll results in having notes
@@ -59,7 +59,7 @@
     -   added a new `Auto Dismiss` settings which will remove the template after setting the targets (or cancelled)
         -   `Orphan Only` refers to templates that do not originate from spell messages (no little trash icon to remove them)
 -   `Use Button`:
-    -   new client settings that either add new use buttons or enhance existing ones
+    -   new feature that either add new use buttons or enhance existing ones
 
 # 1.43.0
 
