@@ -808,7 +808,9 @@ async function lootSheetPF2eRenderInner(
     }
 
     const itemFilters = isGM ? getFilters(actor, "sell", true) : false;
-    const itemElements = html.querySelectorAll(".sheet-body .inventory-list [data-item-id]");
+    const itemElements = html.querySelectorAll(
+        ".sheet-body .inventory-list .items > [data-item-id]"
+    );
 
     for (const itemElement of itemElements) {
         const { itemId } = elementData(itemElement);
