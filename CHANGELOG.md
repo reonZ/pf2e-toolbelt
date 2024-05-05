@@ -1,3 +1,10 @@
+# 2.0.2
+
+-   `Better Merchant`:
+    -   fixed error when the merchant had any container in their inventory
+-   `Stances`:
+    -   fixed error with missing actions that are associated with a stance
+
 # 2.0.1
 
 -   `Better Merchant`:
