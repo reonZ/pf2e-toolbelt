@@ -1,3 +1,9 @@
+# 2.0.1
+
+-   `Better Merchant`:
+    -   fixed actors not receiving coins from selling items to a merchant
+    -   fixed not being able to set a buy purse to `0` to prevent the merchant from buying items.
+
 # 2.0.0
 
 -   the module has been completely remade from scratch
