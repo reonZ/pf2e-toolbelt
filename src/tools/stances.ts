@@ -5,7 +5,6 @@ import {
     getItemWithSourceId,
     hasItemWithSourceId,
     isOwner,
-    isPlayedActor,
     querySelector,
     renderCharacterSheets,
 } from "pf2e-api";
@@ -83,6 +82,10 @@ const { config, settings, hooks, wrappers, localize, render, waitDialog } = crea
             event: "createCombatant",
             listener: onCreateCombatant,
         },
+        {
+            event: "deleteCombatant",
+            listener: onDeleteCombatant,
+        },
     ],
     wrappers: [
         {
@@ -154,6 +157,10 @@ function onPreDeleteCombatant(combatant: CombatantPF2e) {
         "Item",
         effects.map(({ effectID }) => effectID)
     );
+}
+
+function onDeleteCombatant(combatant: CombatantPF2e) {
+    renderCharacterSheets();
 }
 
 async function onCreateCombatant(combatant: CombatantPF2e) {
