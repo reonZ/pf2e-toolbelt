@@ -34,7 +34,6 @@ const {
     getFlagProperty,
     getInMemory,
     setInMemory,
-    deleteInMemory,
 } = createTool({
     name: "share",
     settings: [

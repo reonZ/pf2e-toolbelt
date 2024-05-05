@@ -1,3 +1,14 @@
+# 2.1.0
+
+-   `Hero Actions`:
+    -   added a new gm-only `Give` button to manually give actions to a character
+-   `Shared Data`:
+    -   it is now possible for a master to have more than one linked actor
+    -   non-"linked" actors can now also select a master (NPCs & Characters only)
+    -   NPCs cannot use the `Skills Proficiencies` or `Weapon Runes` options
+-   `Target Helper`:
+    -   no longer shows the result of the die if the `Show Check Outcomes` metamage setting is disabled
+
 # 2.0.2
 
 -   `Better Merchant`:
