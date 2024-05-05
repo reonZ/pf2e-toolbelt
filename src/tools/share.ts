@@ -18,7 +18,8 @@ import {
 import { createTool } from "../tool";
 import { WEAPON_PREPARE_BASE_DATA } from "./shared/prepareDocument";
 
-const shareOptions = ["health", "turn", "skills", "weapon", "armor"] as const;
+const characterShareOptions = ["health", "turn", "skills", "weapon", "armor"] as const;
+const npcShareOptions = ["health", "turn", "armor"] as const;
 
 const {
     config,
@@ -115,15 +116,13 @@ async function documentSheetRenderInner(
 
     const config = getFlag<ConfigFlags>(actor, "config");
 
-    const masters =
-        !actor.prototypeToken.actorLink || getSlave(actor)
-            ? []
-            : game.actors
-                  .filter((x): x is CharacterPF2e | NPCPF2e =>
-                      isValidMaster(x as ActorPF2e, actor.id)
-                  )
-                  .map((x) => ({ value: x.id, label: x.name }));
+    const masters = getSlaves(actor).length
+        ? []
+        : (game.actors as Actors<ActorPF2e>)
+              .filter((x): x is CharacterPF2e => isValidMaster(x, actor.id))
+              .map((x) => ({ value: x.id, label: x.name }));
 
+    const shareOptions = actor.isOfType("character") ? characterShareOptions : npcShareOptions;
     const groups = shareOptions.map((group) => ({
         label: localize("config", group, "label"),
         hint: localize("config", group, "hint"),
@@ -147,7 +146,7 @@ async function documentSheetRenderInner(
 
 function weaponPrepareBaseData(this: WeaponPF2e) {
     const actor = this.actor;
-    if (!actor?.isOfType("character", "npc")) return;
+    if (!actor?.isOfType("character")) return;
 
     const { config, master } = getMasterAndConfig(actor) ?? {};
     if (!config?.weapon || !master) return;
@@ -187,9 +186,9 @@ async function combatResetActors(this: EncounterPF2e): Promise<void> {
             if (!actor.isOfType("character")) return [actor];
 
             const familiar = actor.familiar;
-            const slave = getSlave(actor, "turn");
+            const slaves = getSlaves(actor, "turn");
 
-            return [actor, familiar, slave];
+            return [actor, familiar, ...slaves];
         }),
         R.compact
     );
@@ -206,25 +205,28 @@ async function combatantStartTurn(
     const { actor, encounter } = this;
     if (!encounter || !actor?.isOfType("character", "npc")) return;
 
-    const slave = getSlave(actor, "turn");
-    if (!slave || slave.combatant) return;
+    const slaves = getSlaves(actor, "turn");
 
-    const eventType = "turn-start";
-    const slaveUpdates: Record<string, unknown> = {};
+    for (const slave of slaves) {
+        if (!slave || slave.combatant) return;
 
-    for (const rule of slave?.rules ?? []) {
-        await rule.onUpdateEncounter?.({ event: eventType, actorUpdates: slaveUpdates });
-    }
+        const eventType = "turn-start";
+        const slaveUpdates: Record<string, unknown> = {};
 
-    await slave?.update(slaveUpdates);
+        for (const rule of slave?.rules ?? []) {
+            await rule.onUpdateEncounter?.({ event: eventType, actorUpdates: slaveUpdates });
+        }
 
-    for (const effect of slave.itemTypes.effect) {
-        await effect.onEncounterEvent(eventType);
-    }
+        await slave?.update(slaveUpdates);
 
-    if (slave.isOfType("character") && slave.familiar) {
-        for (const effect of slave.familiar.itemTypes.effect) {
+        for (const effect of slave.itemTypes.effect) {
             await effect.onEncounterEvent(eventType);
+        }
+
+        if (slave.isOfType("character") && slave.familiar) {
+            for (const effect of slave.familiar.itemTypes.effect) {
+                await effect.onEncounterEvent(eventType);
+            }
         }
     }
 }
@@ -239,26 +241,29 @@ async function combatantEndTurn(
     const { actor, encounter } = this;
     if (!encounter || !actor?.isOfType("character", "npc")) return;
 
-    const slave = getSlave(actor, "turn");
-    if (!slave || slave.combatant) return;
+    const slaves = getSlaves(actor, "turn");
 
-    const scene = game.scenes.get<ScenePF2e>(this.sceneId);
-    const token = slave.getDependentTokens({ linked: true, scenes: scene })[0];
+    for (const slave of slaves) {
+        if (!slave || slave.combatant) return;
 
-    const activeConditions = slave.conditions.active;
-    for (const condition of activeConditions) {
-        await condition.onEndTurn({ token });
-    }
+        const scene = game.scenes.get<ScenePF2e>(this.sceneId);
+        const token = slave.getDependentTokens({ linked: true, scenes: scene })[0];
 
-    const eventType = "turn-end";
+        const activeConditions = slave.conditions.active;
+        for (const condition of activeConditions) {
+            await condition.onEndTurn({ token });
+        }
 
-    for (const effect of slave.itemTypes.effect) {
-        await effect.onEncounterEvent(eventType);
-    }
+        const eventType = "turn-end";
 
-    if (slave.isOfType("character") && slave.familiar) {
-        for (const effect of slave.familiar.itemTypes.effect) {
+        for (const effect of slave.itemTypes.effect) {
             await effect.onEncounterEvent(eventType);
+        }
+
+        if (slave.isOfType("character") && slave.familiar) {
+            for (const effect of slave.familiar.itemTypes.effect) {
+                await effect.onEncounterEvent(eventType);
+            }
         }
     }
 }
@@ -268,11 +273,11 @@ function onDeleteActor(actor: ActorPF2e) {
 
     const master = getMaster(actor);
     if (master) {
-        deleteInMemory(master, "slave");
+        removeSlave(master, actor);
     }
 
-    const slave = getSlave(actor);
-    if (slave) {
+    const slaves = getSlaves(actor);
+    for (const slave of slaves) {
         unsetFlag(slave, "config.master");
     }
 }
@@ -285,7 +290,7 @@ function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) 
         const master = getMaster(actor);
 
         if (master) {
-            deleteInMemory(master, "slave");
+            removeSlave(master, actor);
         }
     }
 
@@ -308,7 +313,39 @@ function actorPrepareBaseData(this: ActorPF2e, wrapped: libWrapper.RegisterCallb
     const master = getMaster(this);
     if (!master) return;
 
-    setInMemory(master, "slave", this.id);
+    const slaveId = getSlaveId(this);
+    const slaveIds = getInMemory<SlaveId[]>(master, "slaves");
+
+    if (!slaveIds) {
+        setInMemory(master, "slaves", [slaveId]);
+    } else if (findSlaveIndex(slaveIds, slaveId) === -1) {
+        slaveIds.push(slaveId);
+    }
+}
+
+function getSlaveId(actor: ActorPF2e): SlaveId {
+    return actor.token ? { scene: actor.token.scene.id, token: actor.token.id } : actor.id;
+}
+
+function findSlaveIndex(slaveIds: SlaveId[], slaveId: SlaveId) {
+    if (typeof slaveId === "string") {
+        return slaveIds.indexOf(slaveId);
+    }
+    return slaveIds.findIndex(
+        (x) => typeof x === "object" && x.scene === slaveId.scene && x.token === slaveId.token
+    );
+}
+
+function removeSlave(master: CharacterPF2e, slave: ActorPF2e) {
+    const slaveIds = getInMemory<SlaveId[]>(master, "slaves");
+    if (!slaveIds) return;
+
+    const slaveId = getSlaveId(slave);
+    const slaveIndex = findSlaveIndex(slaveIds, slaveId);
+
+    if (slaveIndex !== -1) {
+        slaveIds.splice(slaveIndex, 1);
+    }
 }
 
 function actorPrepareDerivedData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -366,13 +403,15 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
 
     if (!game.ready || !this.isOfType("character", "npc")) return;
 
-    const slave = getSlave(this);
-    if (slave) {
-        slave.reset();
-        slave.sheet.render();
+    const slaves = getSlaves(this);
+    if (slaves.length) {
+        for (const slave of slaves) {
+            slave.reset();
+            slave.sheet.render();
 
-        for (const token of slave.getActiveTokens(true, false)) {
-            token.renderFlags.set({ refreshBars: true });
+            for (const token of slave.getActiveTokens()) {
+                token.renderFlags.set({ refreshBars: true });
+            }
         }
 
         return;
@@ -386,7 +425,7 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
         this.system.attributes.hp = mergeObject(new game.pf2e.StatisticModifier("hp"), masterHp);
     }
 
-    if (config.skills) {
+    if (config.skills && this.isOfType("character")) {
         const Statistic = getStatisticClass(this.skills.acrobatics);
 
         for (const shortForm of SKILL_ABBREVIATIONS) {
@@ -431,23 +470,25 @@ function getMasterAndConfig(actor: ActorPF2e) {
     return isValidMaster(master) ? { master, config } : undefined;
 }
 
-function getSlave(actor: ActorPF2e, withConfig?: ConfigOption) {
-    const slaveId = getInMemory<string>(actor, "slave");
-    if (!slaveId) return;
-
-    const slave = game.actors.get<ActorPF2e>(slaveId);
-    if (!isValidSlave(slave)) return;
-
-    return !withConfig || getFlag(slave, "config", withConfig) ? slave : undefined;
+function getSlaves(actor: ActorPF2e, withConfig?: ConfigOption) {
+    return R.pipe(
+        getInMemory<SlaveId[]>(actor, "slaves") ?? [],
+        R.map((slaveId) =>
+            typeof slaveId === "string"
+                ? game.actors.get<ActorPF2e>(slaveId)
+                : game.scenes.get(slaveId.scene)?.tokens.get<TokenDocumentPF2e>(slaveId.token)
+                      ?.actor
+        ),
+        R.compact,
+        R.filter(
+            (slave): slave is ShareActor =>
+                isValidSlave(slave) && (!withConfig || !!getFlag(slave, "config", withConfig))
+        )
+    );
 }
 
 function isValidSlave(actor: ActorPF2e | null | undefined): actor is ShareActor {
-    return (
-        !!actor?.id &&
-        !actor.pack &&
-        !!actor.prototypeToken.actorLink &&
-        actor.isOfType("character", "npc")
-    );
+    return !!actor?.id && !actor.pack && actor.isOfType("character", "npc");
 }
 
 function isValidMaster(actor: ActorPF2e | null | undefined, id?: string): actor is CharacterPF2e {
@@ -463,7 +504,9 @@ function isValidMaster(actor: ActorPF2e | null | undefined, id?: string): actor 
     );
 }
 
-type ConfigOption = (typeof shareOptions)[number];
+type ConfigOption = (typeof characterShareOptions)[number];
+
+type SlaveId = string | { scene: string; token: string };
 
 type ConfigFlags = { [k in ConfigOption]: boolean } & {
     master: string;
