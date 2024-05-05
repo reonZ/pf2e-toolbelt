@@ -270,9 +270,8 @@ function getStances(actor: CharacterPF2e) {
         }
 
         const existingEffect = getItemWithSourceId(actor, effectUUID, "effect");
-        const foundAction = extra?.action
-            ? getItemWithSourceId<ItemPF2e>(actor, extra.action, "action")
-            : feat;
+        const foundAction =
+            (extra?.action && getItemWithSourceId<ItemPF2e>(actor, extra.action, "action")) || feat;
 
         stances.push({
             name: (replacer && fromUuidSync(replacer.replace)?.name) ?? feat.name,
