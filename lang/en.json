@@ -209,7 +209,8 @@
                 "label": "Hero Actions",
                 "draw": "Draw {nb}",
                 "redraw": "Redraw",
-                "trade": "Trade"
+                "trade": "Trade",
+                "give": "Give"
             },
             "trade": {
                 "title": "Trade Hero Action",

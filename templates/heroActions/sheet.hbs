@@ -18,6 +18,11 @@
             <i class="fas fa-right-left"></i> {{i18n 'trade'}}
         </button>
         {{/if}}
+        {{#if isGM}}
+        <button type="button" class="give" data-action="give-actions">
+            <i class="fa-solid fa-gift"></i> {{i18n 'give'}}
+        </button>
+        {{/if}}
     </div>
     {{/if}}
 </header>

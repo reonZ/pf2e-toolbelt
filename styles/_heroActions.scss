@@ -14,6 +14,11 @@
 
                     animation: heroActionsDraw 0.75s infinite alternate;
                 }
+
+                &.give {
+                    background: var(--visibility-gm-bg);
+                    border: 1px dotted rgba(75, 74, 68, 0.5);
+                }
             }
         }
 

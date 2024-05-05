@@ -19,28 +19,6 @@ import {
     CHARACTER_SHEET_RENDER_INNER,
 } from "./shared/characterSheet";
 
-type HeroActionFlag = toolbelt.heroActions.HeroActionFlag;
-
-type SocketPacket = {
-    type: "trade-request" | "trade-reject" | "trade-error" | "trade-accept";
-    sender: {
-        id: string;
-        cid: string;
-        uuid: string;
-    };
-    receiver: {
-        id: string;
-        cid: string;
-        uuid?: string;
-    };
-};
-
-type ExchangeObj = {
-    actor: CharacterPF2e;
-    actions: HeroActionFlag[];
-    index: number;
-};
-
 const TABLE_UUID = "Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK";
 const JOURNAL_UUID = "Compendium.pf2e.journals.JournalEntry.BSp4LUSaOmUyjBko";
 
@@ -182,6 +160,7 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
         canTrade: actions.length && !mustDiscard && !mustDraw && canTrade(),
         diff: Math.abs(diff),
         isOwner: actor.isOwner,
+        isGM: game.user.isGM,
     });
 
     const tab = querySelector(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
@@ -197,6 +176,10 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
 
     addListener(tab, "[data-action='hero-actions-draw']", () => drawHeroActions(actor));
     addListener(tab, "[data-action='hero-actions-trade']", () => tradeHeroAction(actor, this));
+
+    if (game.user.isGM) {
+        addListener(tab, "[data-action='give-actions']", () => giveHeroActions(actor));
+    }
 
     const addActionListener = (
         action: string,
@@ -930,5 +913,27 @@ async function removeHeroActions() {
 
     translate.info("removed");
 }
+
+type HeroActionFlag = toolbelt.heroActions.HeroActionFlag;
+
+type SocketPacket = {
+    type: "trade-request" | "trade-reject" | "trade-error" | "trade-accept";
+    sender: {
+        id: string;
+        cid: string;
+        uuid: string;
+    };
+    receiver: {
+        id: string;
+        cid: string;
+        uuid?: string;
+    };
+};
+
+type ExchangeObj = {
+    actor: CharacterPF2e;
+    actions: HeroActionFlag[];
+    index: number;
+};
 
 export { config as heroActionsTool };
