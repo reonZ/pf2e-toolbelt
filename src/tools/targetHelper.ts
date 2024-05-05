@@ -1015,7 +1015,9 @@ async function getMessageData(message: ChatMessagePF2e) {
                               {
                                   success: successLabel,
                                   offset: offset >= 0 ? `+${offset}` : offset,
-                                  die: `<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}`,
+                                  die: `<i class="fa-solid fa-dice-d20"></i> ${
+                                      showBreakdowns ? saveFlag.die : "??"
+                                  }`,
                               }
                           )
                         : undefined;
