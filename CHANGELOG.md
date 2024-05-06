@@ -1,3 +1,8 @@
+# 2.1.1
+
+-   `Hero Actions`:
+    -   fixed error when trying to `give` hero actions manually and not using the `draw with replacement` option in the table
+
 # 2.1.0
 
 -   `Hero Actions`:
@@ -7,7 +12,7 @@
     -   non-"linked" actors can now also select a master (NPCs & Characters only)
     -   NPCs cannot use the `Skills Proficiencies` or `Weapon Runes` options
 -   `Target Helper`:
-    -   no longer shows the result of the die if the `Show Check Outcomes` metamage setting is disabled
+    -   no longer shows the result of the die if the `Show Check Outcomes` metagame setting is disabled
 
 # 2.0.2
 
