@@ -825,7 +825,7 @@ async function giveHeroActions(actor: CharacterPF2e) {
         const parent = closest(el, ".action");
         return elementData<{ uuid: string; name: string; key: string }>(parent);
     });
-    const asDrawn = querySelector<HTMLInputElement>(html, "[name='drawn']").checked;
+    const asDrawn = html.querySelector<HTMLInputElement>("[name='drawn']")?.checked;
     const withMessage = querySelector<HTMLInputElement>(html, "[name='message']").checked;
     const tableUpdates = [];
 
