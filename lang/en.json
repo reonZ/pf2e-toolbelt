@@ -340,9 +340,9 @@
                 "dcWithValue": "DC {dc}",
                 "reroll": "Can reroll the save check",
                 "result": {
-                    "withOffset": "Result: ({die}) {success} by {offset}",
-                    "withoutOffset": "Result: {success}",
-                    "withoutOffsetWithDie": "Result: ({die}) {success}"
+                    "format": "Result: {result}",
+                    "withOffset": "{success} by {offset}",
+                    "withoutOffset": "{success}"
                 }
             },
             "header": {

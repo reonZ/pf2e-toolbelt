@@ -257,7 +257,7 @@ function onGetChatLogEntryContext($html: JQuery, data: EntryContextOption[]) {
             const targets = R.compact(promisedTargets);
             if (!targets.length) return;
 
-            rollSaves({}, message, save, targets);
+            rollSaves(new MouseEvent("click"), message, save, targets);
         },
     });
 }
@@ -709,7 +709,7 @@ async function addHeaderListeners(
 }
 
 async function rollSaves(
-    event: { shiftKey?: boolean },
+    event: MouseEvent,
     message: ChatMessagePF2e,
     { dc, statistic }: MessageSaveData,
     targets: CreatureTokenDocument[]
@@ -732,6 +732,7 @@ async function rollSaves(
 
             return new Promise<void>((resolve) => {
                 save.check.roll({
+                    event,
                     dc: { value: dc },
                     item,
                     origin: actor,
@@ -741,9 +742,11 @@ async function rollSaves(
                     callback: async (roll, success, msg) => {
                         await roll3dDice(roll, target);
 
+                        const whispers = msg.whisper;
                         const context = msg.getFlag<CheckContextChatFlag>("pf2e", "context")!;
                         const modifiers = msg.getFlag<RawModifier[]>("pf2e", "modifiers")!;
                         const data: MessageTargetSave = {
+                            whispers: msg.whisper,
                             value: roll.total,
                             die: (roll.terms[0] as NumericTerm).total,
                             success: success!,
@@ -881,6 +884,7 @@ async function rerollSave(
             }) ?? [];
 
     const data: MessageTargetSave = {
+        whispers: flag.whispers,
         value: keptRoll.total,
         die: (keptRoll.terms[0] as NumericTerm).total,
         success: outcome,
@@ -1002,25 +1006,6 @@ async function getMessageData(message: ChatMessagePF2e) {
                 const successLabel = game.i18n.localize(
                     `PF2E.Check.Result.Degree.Check.${saveFlag.success}`
                 );
-                const result =
-                    isFriendly || showResults
-                        ? localize(
-                              `tooltip.result.${
-                                  showDC
-                                      ? "withOffset"
-                                      : isFriendly
-                                      ? "withoutOffsetWithDie"
-                                      : "withoutOffset"
-                              }`,
-                              {
-                                  success: successLabel,
-                                  offset: offset >= 0 ? `+${offset}` : offset,
-                                  die: `<i class="fa-solid fa-dice-d20"></i> ${
-                                      showBreakdowns ? saveFlag.die : "??"
-                                  }`,
-                              }
-                          )
-                        : undefined;
                 const adjustment =
                     (isFriendly || showBreakdowns) &&
                     saveFlag.unadjustedOutcome &&
@@ -1032,13 +1017,29 @@ async function getMessageData(message: ChatMessagePF2e) {
                 const notesList = RollNotePF2e.notesToHTML(notes);
                 notesList?.classList.add("pf2e-toolbelt-target-notes");
 
+                let result = "";
+
+                if (isFriendly || showBreakdowns) {
+                    result += `(<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}) `;
+                }
+
+                if (isFriendly || showResults) {
+                    result += localize(
+                        `tooltip.result.${showDC ? "withOffset" : "withoutOffset"}`,
+                        {
+                            success: successLabel,
+                            offset: offset >= 0 ? `+${offset}` : offset,
+                        }
+                    );
+                }
+
                 return {
                     ...saveFlag,
                     notes: notesList?.outerHTML,
                     canReroll,
                     tooltip: await render("tooltip", {
                         check: save.tooltipLabel,
-                        result,
+                        result: result ? localize("tooltip.result.format", { result }) : undefined,
                         modifiers: isFriendly || showBreakdowns ? saveFlag.modifiers : [],
                         adjustment,
                         canReroll,
@@ -1141,6 +1142,7 @@ type MessageSaveFlag = {
 };
 
 type MessageTargetSave = {
+    whispers: string[];
     value: number;
     die: number;
     success: DegreeOfSuccessString;
