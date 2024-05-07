@@ -742,11 +742,10 @@ async function rollSaves(
                     callback: async (roll, success, msg) => {
                         await roll3dDice(roll, target);
 
-                        const whispers = msg.whisper;
                         const context = msg.getFlag<CheckContextChatFlag>("pf2e", "context")!;
                         const modifiers = msg.getFlag<RawModifier[]>("pf2e", "modifiers")!;
                         const data: MessageTargetSave = {
-                            whispers: msg.whisper,
+                            whispers: msg.whisper.filter((userId) => game.users.get(userId)?.isGM),
                             value: roll.total,
                             die: (roll.terms[0] as NumericTerm).total,
                             success: success!,
@@ -955,7 +954,9 @@ async function getMessageData(message: ChatMessagePF2e) {
     const save = getSaveFlag(message) as MessageSaveDataWithTooltip | undefined;
     if (!targetsFlag.length && !save) return;
 
-    const isGM = game.user.isGM;
+    const user = game.user;
+    const isGM = user.isGM;
+    const userId = user.id;
     const author = save?.author ? await fromUuid<ActorPF2e>(save.author) : undefined;
     const showDC = isGM || game.pf2e.settings.metagame.dcs || author?.hasPlayerOwner;
     const showBreakdowns = isGM || game.pf2e.settings.metagame.breakdowns;
@@ -1003,40 +1004,44 @@ async function getMessageData(message: ChatMessagePF2e) {
                 const rerolled = saveFlag.rerolled;
                 const canReroll = hasSave && isOwner && !rerolled;
                 const offset = saveFlag.value - save.dc;
-                const successLabel = game.i18n.localize(
-                    `PF2E.Check.Result.Degree.Check.${saveFlag.success}`
-                );
                 const adjustment =
                     (isFriendly || showBreakdowns) &&
                     saveFlag.unadjustedOutcome &&
                     saveFlag.success !== saveFlag.unadjustedOutcome
                         ? saveFlag.dosAdjustments?.[saveFlag.unadjustedOutcome]?.label
                         : undefined;
-
+                const isPrivate = !hasPlayerOwner && saveFlag.whispers.length;
+                const canSeeResult = isGM || !isPrivate;
                 const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
                 const notesList = RollNotePF2e.notesToHTML(notes);
                 notesList?.classList.add("pf2e-toolbelt-target-notes");
 
                 let result = "";
 
-                if (isFriendly || showBreakdowns) {
-                    result += `(<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}) `;
-                }
+                if (canSeeResult) {
+                    if (isFriendly || showBreakdowns) {
+                        result += `(<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}) `;
+                    }
 
-                if (isFriendly || showResults) {
-                    result += localize(
-                        `tooltip.result.${showDC ? "withOffset" : "withoutOffset"}`,
-                        {
-                            success: successLabel,
-                            offset: offset >= 0 ? `+${offset}` : offset,
-                        }
-                    );
+                    if (isFriendly || showResults) {
+                        result += localize(
+                            `tooltip.result.${showDC ? "withOffset" : "withoutOffset"}`,
+                            {
+                                success: game.i18n.localize(
+                                    `PF2E.Check.Result.Degree.Check.${saveFlag.success}`
+                                ),
+                                offset: offset >= 0 ? `+${offset}` : offset,
+                            }
+                        );
+                    }
                 }
 
                 return {
                     ...saveFlag,
                     notes: notesList?.outerHTML,
                     canReroll,
+                    isPrivate,
+                    canSeeResult,
                     tooltip: await render("tooltip", {
                         check: save.tooltipLabel,
                         result: result ? localize("tooltip.result.format", { result }) : undefined,
@@ -1082,6 +1087,8 @@ async function getMessageData(message: ChatMessagePF2e) {
                     showSuccess: isFriendly || showResults,
                     save: hasSave && templateSave,
                     canReroll: targetSave?.canReroll,
+                    isPrivate: isGM && targetSave?.isPrivate,
+                    canSeeResult: targetSave?.canSeeResult,
                     rerolled: targetSave?.rerolled ? REROLL[targetSave.rerolled] : undefined,
                 }),
             };
