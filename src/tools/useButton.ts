@@ -1,8 +1,12 @@
 import {
+    addListenerAll,
+    appendHTMLFromString,
+    closest,
     createHTMLFromString,
     elementData,
     getActionGlyph,
     htmlElement,
+    querySelector,
     renderCharacterSheets,
     selfApplyEffectFromMessage,
 } from "pf2e-api";
@@ -12,7 +16,7 @@ import {
     CHARACTER_SHEET_RENDER_INNER,
 } from "./shared/characterSheet";
 
-const debouncedSetup = debounce(setup, 1);
+const debouncedSetupWrappers = debounce(setupWrappers, 1);
 
 const { config, settings, hook, wrappers } = createTool({
     name: "useButton",
@@ -22,14 +26,14 @@ const { config, settings, hook, wrappers } = createTool({
             type: Boolean,
             default: false,
             scope: "client",
-            onChange: debouncedSetup,
+            onChange: debouncedSetupWrappers,
         },
         {
             key: "consumables",
             type: Boolean,
             default: false,
             scope: "client",
-            onChange: debouncedSetup,
+            onChange: debouncedSetupWrappers,
         },
         {
             key: "selfApplied",
@@ -63,7 +67,7 @@ const { config, settings, hook, wrappers } = createTool({
     },
 } as const);
 
-function setup() {
+function setupWrappers() {
     wrappers.toggleAll(settings.actions || settings.consumables);
     renderCharacterSheets();
 }
@@ -116,33 +120,61 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
             const item = actor.items.get(itemId);
             if (!item?.isOfType("feat", "action") || !item.frequency) continue;
 
-            const actionIcon = getActionGlyph(item.actionCost);
-            const disabled = item.frequency.value < 1 ? "disabled" : "";
-            const template = `<div class="button-group">
-            <button type="button" class="use-action" data-action="toolbelt-use-action" ${disabled}>
-                <span>${useLabel}</span>
-                <span class="action-glyph">${actionIcon}</span>
-            </button>
-        </div>`;
-            const btn = createHTMLFromString(template);
+            let btn: HTMLButtonElement | null;
 
-            btn.addEventListener("click", async (event) => {
-                event.preventDefault();
+            if (item.system.selfEffect) {
+                btn = actionElement.querySelector<HTMLButtonElement>("[data-action='use-action']");
+            } else {
+                const actionIcon = getActionGlyph(item.actionCost);
+                const template = `<div class="button-group">
+                    <button type="button" class="use-action">
+                            <span>${useLabel}</span>
+                            <span class="action-glyph">${actionIcon}</span>
+                    </button>
+                </div>`;
 
-                const { value } = item.frequency!;
-                if (value < 1) return;
+                const group = createHTMLFromString(template);
 
-                await item.update({ "system.frequency.value": value - 1 });
-                item.toMessage(event);
-            });
+                btn = querySelector<HTMLButtonElement>(group, "button");
+                actionElement.querySelector(".button-group")?.append(group);
+            }
 
-            actionElement.querySelector(".button-group")?.append(btn);
+            if (btn instanceof HTMLButtonElement) {
+                if (item.frequency.value >= 1) {
+                    btn.dataset.toolbeltUse = "true";
+                } else {
+                    btn.disabled = true;
+                }
+            }
         }
     }
 }
 
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
+
+    const getItem = (btn: HTMLButtonElement) => {
+        const { itemId } = elementData(closest(btn, "[data-item-id]"));
+        return actor.items.get<FeatPF2e<CharacterPF2e> | AbilityItemPF2e<CharacterPF2e>>(itemId);
+    };
+
+    addListenerAll(
+        html,
+        ".use-action[data-toolbelt-use='true']",
+        (event, btn: HTMLButtonElement) => {
+            const item = getItem(btn);
+            if (!item) return;
+
+            const { value } = item.frequency!;
+            if (value < 1) return;
+
+            item.update({ "system.frequency.value": value - 1 });
+
+            if (!item.system.selfEffect) {
+                item.toMessage(event);
+            }
+        }
+    );
 }
 
 async function onCreateChatMessage(message: ChatMessagePF2e) {
