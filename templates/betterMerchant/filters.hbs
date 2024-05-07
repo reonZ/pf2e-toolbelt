@@ -66,14 +66,12 @@
     <div class="group">
         <label data-tooltip="{{@root.i18n.path 'enabled.tooltip'}}">
             {{@root.i18n 'enabled.label'}}
-            <input type="checkbox" name="enabled" {{checked filter.enabled}} {{disabled
-                filter.locked}}>
+            <input type="checkbox" name="enabled" {{checked filter.enabled}}>
         </label>
-        {{#if (eq type 'buy')}}
+        {{#if (and (eq type 'buy') (not filter.locked))}}
         <label data-tooltip="{{@root.i18n.path 'useDefault.tooltip'}}">
             {{@root.i18n 'useDefault.label'}}
-            <input type="checkbox" name="useDefault" {{checked filter.useDefault}} {{disabled
-                filter.locked}}>
+            <input type="checkbox" name="useDefault" {{checked filter.useDefault}}>
         </label>
         {{/if}}
     </div>

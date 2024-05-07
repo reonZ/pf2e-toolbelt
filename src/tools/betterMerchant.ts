@@ -287,37 +287,38 @@ async function lootActorTransferItemToActor(
 
     if (this.isMerchant && item.isOfType("physical")) {
         const itemValue = game.pf2e.Coins.fromPrice(item.price, quantity);
+        const itemFilter = testItem(this, item, "sell", quantity);
 
-        if (await targetActor.inventory.removeCoins(itemValue)) {
-            const itemFilter = testItem(this, item, "sell", quantity);
+        if (!itemFilter) {
+            localize.warn("sell.refuse", {
+                actor: this.name,
+                item: item.name,
+            });
+            return null;
+        } else if (itemFilter && (await targetActor.inventory.removeCoins(itemValue))) {
+            const goldValue = itemValue.goldValue;
+            const filters = getFlag<ItemFilter[]>(this, "filters", "sell")?.slice() ?? [];
+            const defaultFilter = getFlag<Partial<ItemFilter>>(this, "default", "sell");
+            const updates = setFlagProperty(
+                {},
+                "default.sell.purse",
+                (defaultFilter?.purse ?? 0) + goldValue
+            );
 
-            if (itemFilter) {
-                const goldValue = itemValue.goldValue;
-                const filters = getFlag<ItemFilter[]>(this, "filters", "sell")?.slice() ?? [];
-                const defaultFilter = getFlag<Partial<ItemFilter>>(this, "default", "sell");
-                const updates = setFlagProperty(
-                    {},
-                    "default.sell.purse",
-                    (defaultFilter?.purse ?? 0) + goldValue
-                );
+            if (itemFilter.filter.id !== "default") {
+                const filterIndex = filters.findIndex((x) => x.id === itemFilter.filter.id);
 
-                if (itemFilter.filter.id !== "default") {
-                    const filterIndex = filters.findIndex((x) => x.id === itemFilter.filter.id);
+                if (filterIndex !== -1) {
+                    itemFilter.filter.purse += goldValue;
+                    filters.splice(filterIndex, 1, itemFilter.filter);
 
-                    if (filterIndex !== -1) {
-                        itemFilter.filter.purse += goldValue;
-                        filters.splice(filterIndex, 1, itemFilter.filter);
-
-                        setFlagProperty(updates, "filters.sell", filters);
-                    }
+                    setFlagProperty(updates, "filters.sell", filters);
                 }
-
-                await this.update(updates);
             }
 
+            await this.update(updates);
+
             return thisSuper.transferItemToActor.apply(this, args);
-        } else if (this.isLoot) {
-            throw ErrorPF2e("Loot transfer failed");
         } else {
             return null;
         }
@@ -369,6 +370,8 @@ function testItem(actor: LootPF2e, item: PhysicalItemPF2e, type: ItemFilterType,
 
         return { price, filter: itemFilter };
     }
+
+    if (!defaultFilter.enabled) return;
 
     const price = calculateItemPrice(item, quantity, defaultFilter.ratio);
     if (type === "buy" && defaultFilter.purse < price.goldValue) return;
@@ -1078,13 +1081,15 @@ function getFilters<
     const filters = getFlag<F[]>(actor, "filters", type)?.slice() ?? [];
 
     if (withDefault) {
-        const defaultFilter = getFlag<Partial<F>>(actor, "default", type) ?? {};
+        const defaultFilter = getFlag<Partial<F>>(actor, "default", type) ?? {
+            enabled: true,
+        };
 
         filters.push({
             ...defaultFilter,
             id: "default",
             name: localize("filters.default", type),
-            enabled: true,
+            enabled: defaultFilter.enabled ?? true,
             locked: true,
             useDefault: true,
         } as F);
@@ -1116,6 +1121,7 @@ function setFilters<
         setFlagProperty(updates, "default", type, {
             ratio: defaultFilter.ratio,
             purse: defaultFilter.purse,
+            enabled: defaultFilter.enabled,
         });
     }
 
