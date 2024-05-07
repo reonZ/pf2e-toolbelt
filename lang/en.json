@@ -320,6 +320,10 @@
                     "label": "Skills Proficiencies",
                     "hint": "Use the master's skills proficiencies."
                 },
+                "hero": {
+                    "label": "Hero Points",
+                    "hint": "Use the master's hero points."
+                },
                 "weapon": {
                     "label": "Weapon Runes",
                     "hint": "Use the master's invested handwraps/weapon fundamental & property runes."

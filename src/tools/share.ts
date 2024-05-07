@@ -18,7 +18,7 @@ import {
 import { createTool } from "../tool";
 import { WEAPON_PREPARE_BASE_DATA } from "./shared/prepareDocument";
 
-const characterShareOptions = ["health", "turn", "skills", "weapon", "armor"] as const;
+const characterShareOptions = ["health", "turn", "skills", "hero", "weapon", "armor"] as const;
 const npcShareOptions = ["health", "turn", "armor"] as const;
 
 const {
@@ -282,7 +282,8 @@ function onDeleteActor(actor: ActorPF2e) {
 }
 
 function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) {
-    if (!actor.primaryUpdater || !actor.isOfType("character", "npc")) return;
+    const isCharacter = actor.isOfType("character");
+    if (!actor.primaryUpdater || (!isCharacter && !actor.isOfType("npc"))) return;
 
     const masterUpdate = getFlagProperty<string>(changed, "config.master");
     if (masterUpdate !== undefined) {
@@ -293,14 +294,23 @@ function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) 
         }
     }
 
-    const master = getMaster(actor);
-    if (master) {
-        if (!getFlag(actor, "config.health")) return;
+    const data = getMasterAndConfig(actor);
+    if (!data) return;
 
-        const hpUpdate = getProperty(changed, "system.attributes.hp");
-        master.update({ "system.attributes.hp": hpUpdate });
+    const { master, config } = data;
 
-        return;
+    if (config.health) {
+        const update = getProperty<CharacterHitPoints>(changed, "system.attributes.hp");
+        if (update) {
+            master.update({ "system.attributes.hp": deepClone(update) });
+        }
+    }
+
+    if (isCharacter && config.hero) {
+        const update = getProperty<ValueAndMax>(changed, "system.resources.heroPoints");
+        if (update) {
+            master.update({ "system.resources.heroPoints": deepClone(update) });
+        }
     }
 }
 
@@ -400,7 +410,8 @@ function actorPrepareDerivedData(this: ActorPF2e, wrapped: libWrapper.RegisterCa
 function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback) {
     wrapped();
 
-    if (!game.ready || !this.isOfType("character", "npc")) return;
+    const isCharacter = this.isOfType("character");
+    if (!game.ready || (!isCharacter && !this.isOfType("npc"))) return;
 
     const slaves = getSlaves(this);
     if (slaves.length) {
@@ -424,7 +435,12 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
         this.system.attributes.hp = mergeObject(new game.pf2e.StatisticModifier("hp"), masterHp);
     }
 
-    if (config.skills && this.isOfType("character")) {
+    if (isCharacter && config.hero) {
+        this.system.resources.heroPoints.max = master.system.resources.heroPoints.max;
+        this.system.resources.heroPoints.value = master.system.resources.heroPoints.value;
+    }
+
+    if (isCharacter && config.skills) {
         const Statistic = getStatisticClass(this.skills.acrobatics);
 
         for (const shortForm of SKILL_ABBREVIATIONS) {
