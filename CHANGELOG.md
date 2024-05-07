@@ -1,3 +1,19 @@
+# 2.2.0
+
+-   `Better Merchant`:
+    -   you can now disable the default filters
+        -   the default filter will never be chosen as the filter for the transation if disabled
+        -   this won't change the `Use Default Purse` behavior of the other filters and will still make sure the default purse has enough gold for the transaction
+-   `Share Data`:
+    -   a master can now share its hero points with another character actor
+-   `Target Helper`:
+    -   re-formatted the save tooltip stucture based on the different metagame settings (let's hope i got it right this time)
+    -   GMs can now roll an inline save private and its result won't be shown to the players
+        -   by having your global roll mode set to private/blind/self at the time of rolling the save
+        -   by having your modifiers window roll mode set to private/blind/self
+        -   by holding `ctrl` while clicking on the inline save
+        -   reroll will keep the private state of the orginal roll
+
 # 2.1.1
 
 -   `Hero Actions`:
