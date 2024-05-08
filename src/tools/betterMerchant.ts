@@ -242,7 +242,7 @@ async function buyItem(
     }
 
     const updates = {};
-    const defaultFilter = filters.splice(-1)[0];
+    const defaultFilter = filters.pop()!;
     const price = new game.pf2e.Coins(options.price);
     const goldValue = price.goldValue;
 
@@ -352,7 +352,7 @@ function itemPrepareDerivedData(this: ItemPF2e, wrapped: libWrapper.RegisterCall
 
 function testItem(actor: LootPF2e, item: PhysicalItemPF2e, type: ItemFilterType, quantity = 1) {
     const itemFilters = getFilters(actor, type, true);
-    const defaultFilter = itemFilters.splice(-1)[0];
+    const defaultFilter = itemFilters.pop()!;
 
     for (const itemFilter of itemFilters) {
         const { enabled, ratio, purse, useDefault, filter } = itemFilter;
