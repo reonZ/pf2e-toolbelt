@@ -1,7 +1,7 @@
 import {
     addListenerAll,
-    appendHTMLFromString,
     closest,
+    consumeItem,
     createHTMLFromString,
     elementData,
     getActionGlyph,
@@ -83,28 +83,20 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
         for (const consumableElement of consumableElements) {
             const { itemId } = elementData(consumableElement);
             const item = actor.items.get(itemId);
-            if (!item?.isOfType("consumable")) continue;
+            if (!item?.isOfType("consumable") || item.category === "ammo") continue;
 
             const [type, tooltip] =
                 item.uses.value < 1
                     ? ["span", "PF2E.Item.Consumable.Uses.None"]
                     : ["a", "PF2E.Action.Use"];
-            const template = `<${type} class="use-consumable" data-action="use-consumable" 
-            data-tooltip="${tooltip}">
+            const template = `<${type} class="use-consumable" data-tooltip="${tooltip}">
                 <i class="fa-solid fa-play"></i>
             </${type}>`;
 
             const btn = createHTMLFromString(template);
 
-            if (type === "a") {
-                btn.addEventListener("click", (event) => {
-                    event.preventDefault();
-
-                    const { value } = item.uses;
-                    if (value < 1) return;
-
-                    item.consume();
-                });
+            if (item.uses.value) {
+                btn.dataset.action = "toolbelt-use-consumable";
             }
 
             consumableElement.querySelector(".item-controls")?.prepend(btn);
@@ -153,17 +145,24 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
 
-    const getItem = (btn: HTMLButtonElement) => {
+    const getItem = (btn: HTMLElement) => {
         const { itemId } = elementData(closest(btn, "[data-item-id]"));
-        return actor.items.get<FeatPF2e<CharacterPF2e> | AbilityItemPF2e<CharacterPF2e>>(itemId);
+        return actor.items.get<ItemPF2e<CharacterPF2e>>(itemId);
     };
+
+    addListenerAll(html, "[data-action='toolbelt-use-consumable']", (event, btn) => {
+        const item = getItem(btn);
+        if (item?.isOfType("consumable") && item.category !== "ammo") {
+            consumeItem(event, item);
+        }
+    });
 
     addListenerAll(
         html,
         ".use-action[data-toolbelt-use='true']",
         (event, btn: HTMLButtonElement) => {
             const item = getItem(btn);
-            if (!item) return;
+            if (!item?.isOfType("feat", "action")) return;
 
             const { value } = item.frequency!;
             if (value < 1) return;
