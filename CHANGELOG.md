@@ -1,10 +1,10 @@
 # 2.3.0
 
 -   `Use Button`:
-    -   `Add To Actions` no lnoger creates a second `use` button to actions that already have one (because they have a self-applied effect), it now instead piggy back on the existing button to consume a charge on use
+    -   `Add To Actions` no longer creates a second `use` button to actions that already have one (because they have a self-applied effect), it now instead piggy back on the existing button to consume a charge on use
     -   `Add To Consumables`
         -   no longer adds a button for ammunition
-        -   now constructs a more indepth message depending on the consumable
+        -   now constructs a more in-depth message depending on the consumable
             -   scrolls/wands doesn't change
             -   items with a formula will now have their description above the roll
             -   other items will have their description used instead of the generic system message
