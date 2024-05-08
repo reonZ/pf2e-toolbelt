@@ -1,18 +1,30 @@
+# 2.3.0
+
+-   `Use Button`:
+    -   `Add To Actions` no lnoger creates a second `use` button to actions that already have one (because they have a self-applied effect), it now instead piggy back on the existing button to consume a charge on use
+    -   `Add To Consumables`
+        -   no longer adds a button for ammunition
+        -   now constructs a more indepth message depending on the consumable
+            -   scrolls/wands doesn't change
+            -   items with a formula will now have their description above the roll
+            -   other items will have their description used instead of the generic system message
+            -   the `use` button and footer are stripped from the items description when used that way
+
 # 2.2.0
 
 -   `Better Merchant`:
     -   you can now disable the default filters
-        -   the default filter will never be chosen as the filter for the transation if disabled
-        -   this won't change the `Use Default Purse` behavior of the other filters and will still make sure the default purse has enough gold for the transaction
+        -   the default filter will never be chosen as the filter for the transaction if disabled
+        -   this won't change the `Use Default Purse` behaviour of the other filters and will still make sure the default purse has enough gold for the transaction
 -   `Share Data`:
     -   a master can now share its hero points with another character actor
 -   `Target Helper`:
-    -   re-formatted the save tooltip stucture based on the different metagame settings (let's hope i got it right this time)
+    -   re-formatted the save tooltip structure based on the different metagame settings (let's hope i got it right this time)
     -   GMs can now roll an inline save private and its result won't be shown to the players
         -   by having your global roll mode set to private/blind/self at the time of rolling the save
         -   by having your modifiers window roll mode set to private/blind/self
         -   by holding `ctrl` while clicking on the inline save
-        -   reroll will keep the private state of the orginal roll
+        -   reroll will keep the private state of the original roll
 
 # 2.1.1
 
