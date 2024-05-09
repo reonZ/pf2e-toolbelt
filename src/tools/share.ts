@@ -322,38 +322,25 @@ function actorPrepareBaseData(this: ActorPF2e, wrapped: libWrapper.RegisterCallb
     const master = getMaster(this);
     if (!master) return;
 
-    const slaveId = getSlaveId(this);
-    const slaveIds = getInMemory<SlaveId[]>(master, "slaves");
+    const slaveUUID = this.uuid;
+    const slaveUUIDs = getInMemory<string[]>(master, "slaves");
 
-    if (!slaveIds) {
-        setInMemory(master, "slaves", [slaveId]);
-    } else if (findSlaveIndex(slaveIds, slaveId) === -1) {
-        slaveIds.push(slaveId);
+    if (!slaveUUIDs) {
+        setInMemory(master, "slaves", [slaveUUID]);
+    } else if (!slaveUUIDs.includes(slaveUUID)) {
+        slaveUUIDs.push(slaveUUID);
     }
-}
-
-function getSlaveId(actor: ActorPF2e): SlaveId {
-    return actor.token ? { scene: actor.token.scene.id, token: actor.token.id } : actor.id;
-}
-
-function findSlaveIndex(slaveIds: SlaveId[], slaveId: SlaveId) {
-    if (typeof slaveId === "string") {
-        return slaveIds.indexOf(slaveId);
-    }
-    return slaveIds.findIndex(
-        (x) => typeof x === "object" && x.scene === slaveId.scene && x.token === slaveId.token
-    );
 }
 
 function removeSlave(master: CharacterPF2e, slave: ActorPF2e) {
-    const slaveIds = getInMemory<SlaveId[]>(master, "slaves");
-    if (!slaveIds) return;
+    const slaveUUIDs = getInMemory<string[]>(master, "slaves");
+    if (!slaveUUIDs) return;
 
-    const slaveId = getSlaveId(slave);
-    const slaveIndex = findSlaveIndex(slaveIds, slaveId);
+    const slaveUUID = slave.uuid;
+    const slaveIndex = slaveUUIDs.indexOf(slaveUUID);
 
     if (slaveIndex !== -1) {
-        slaveIds.splice(slaveIndex, 1);
+        slaveUUIDs.splice(slaveIndex, 1);
     }
 }
 
@@ -487,13 +474,8 @@ function getMasterAndConfig(actor: ActorPF2e) {
 
 function getSlaves(actor: ActorPF2e, withConfig?: ConfigOption) {
     return R.pipe(
-        getInMemory<SlaveId[]>(actor, "slaves") ?? [],
-        R.map((slaveId) =>
-            typeof slaveId === "string"
-                ? game.actors.get<ActorPF2e>(slaveId)
-                : game.scenes.get(slaveId.scene)?.tokens.get<TokenDocumentPF2e>(slaveId.token)
-                      ?.actor
-        ),
+        getInMemory<string[]>(actor, "slaves") ?? [],
+        R.map((slaveUUID) => fromUuidSync<CompendiumCollectionIndex | FoundryDocument>(slaveUUID)),
         R.compact,
         R.filter(
             (slave): slave is ShareActor =>
@@ -502,14 +484,17 @@ function getSlaves(actor: ActorPF2e, withConfig?: ConfigOption) {
     );
 }
 
-function isValidSlave(actor: ActorPF2e | null | undefined): actor is ShareActor {
-    return !!actor?.id && !actor.pack && actor.isOfType("character", "npc");
+function isValidSlave(actor: FoundryDocument | CompendiumCollectionIndex): actor is ShareActor {
+    return (
+        isInstanceOf<ActorPF2e>(actor, "ActorPF2e") &&
+        isPlayedActor(actor) &&
+        actor.isOfType("character", "npc")
+    );
 }
 
 function isValidMaster(actor: ActorPF2e | null | undefined, id?: string): actor is CharacterPF2e {
     return (
-        !!actor?.id &&
-        !actor.pack &&
+        isPlayedActor(actor) &&
         !!actor.prototypeToken.actorLink &&
         (!id || actor.id !== id) &&
         actor.isOfType("character") &&
@@ -520,8 +505,6 @@ function isValidMaster(actor: ActorPF2e | null | undefined, id?: string): actor 
 }
 
 type ConfigOption = (typeof characterShareOptions)[number];
-
-type SlaveId = string | { scene: string; token: string };
 
 type ConfigFlags = { [k in ConfigOption]: boolean } & {
     master: string;
