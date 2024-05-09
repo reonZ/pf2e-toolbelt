@@ -1,3 +1,11 @@
+#
+
+-   `Target Helper`:
+    -   now adds hazards & vehicles as targets
+-   `Template Helper`:
+    -   now targets hazards & vehicles
+    -   still doesn't target "hidden" tokens
+
 # 2.3.0
 
 -   `Use Button`:
