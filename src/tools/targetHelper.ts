@@ -219,7 +219,7 @@ function getMessageTargets(message: ChatMessagePF2e) {
 function getCurrentTargets(): string[] {
     return R.pipe(
         Array.from(game.user.targets as Set<TokenPF2e>),
-        R.filter((target) => !!target.actor?.isOfType("creature")),
+        R.filter((target) => !!target.actor?.isOfType("creature", "hazard", "vehicle")),
         R.map((target) => target.document.uuid)
     );
 }
