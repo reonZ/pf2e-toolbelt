@@ -68,7 +68,9 @@ async function onCreateMeasuredTemplate(
         const tokens = getTemplateTokens(template);
         const targets = tokens.filter((token) => {
             const actor = token.actor;
-            if (token.document.hidden || !actor?.isOfType("creature")) return false;
+            if (token.document.hidden || !actor?.isOfType("creature", "hazard", "vehicle")) {
+                return false;
+            }
 
             if (self && token === self) return targetSelf;
 
