@@ -18,10 +18,12 @@ import { mergeDamageTool } from "./tools/mergeDamage";
 import { hideDamageTool } from "./tools/hideDamage";
 import { useButtonTool } from "./tools/useButton";
 import { betterMerchantTool } from "./tools/betterMerchant";
+import { actionableTool } from "./tools/actionable";
 
 MODULE.register("pf2e-toolbelt", "PF2e Toolbelt");
 
 const TOOLS: ToolConfig[] = [
+    actionableTool,
     arpTool,
     betterMerchantTool,
     debugTool,

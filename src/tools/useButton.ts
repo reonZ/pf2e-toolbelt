@@ -15,6 +15,7 @@ import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
     CHARACTER_SHEET_RENDER_INNER,
 } from "./shared/characterSheet";
+import { getActionMacro } from "./actionable";
 
 const debouncedSetupWrappers = debounce(setupWrappers, 1);
 
@@ -74,7 +75,6 @@ function setupWrappers() {
 
 async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
-    const useLabel = game.i18n.localize("PF2E.Action.Use");
 
     if (settings.consumables) {
         const consumableElements = html.querySelectorAll(
@@ -110,25 +110,21 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
         for (const actionElement of actionElements) {
             const { itemId } = elementData(actionElement);
             const item = actor.items.get(itemId);
-            if (!item?.isOfType("feat", "action") || !item.frequency) continue;
+            if (
+                !item?.isOfType("feat", "action") ||
+                !item.frequency ||
+                (await getActionMacro(item))
+            ) {
+                continue;
+            }
 
             let btn: HTMLButtonElement | null;
 
             if (item.system.selfEffect) {
                 btn = actionElement.querySelector<HTMLButtonElement>("[data-action='use-action']");
             } else {
-                const actionIcon = getActionGlyph(item.actionCost);
-                const template = `<div class="button-group">
-                    <button type="button" class="use-action">
-                            <span>${useLabel}</span>
-                            <span class="action-glyph">${actionIcon}</span>
-                    </button>
-                </div>`;
-
-                const group = createHTMLFromString(template);
-
-                btn = querySelector<HTMLButtonElement>(group, "button");
-                actionElement.querySelector(".button-group")?.append(group);
+                btn = createActionUseButton(item);
+                actionElement.querySelector(".button-group")?.append(btn);
             }
 
             if (btn instanceof HTMLButtonElement) {
@@ -142,26 +138,40 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
     }
 }
 
+function createActionUseButton(item: AbilityItemPF2e | FeatPF2e) {
+    const useLabel = game.i18n.localize("PF2E.Action.Use");
+    const actionIcon = getActionGlyph(item.actionCost);
+    const template = `<button type="button" class="use-action">
+            <span>${useLabel}</span>
+            <span class="action-glyph">${actionIcon}</span>
+    </button>`;
+    return createHTMLFromString<HTMLButtonElement>(template);
+}
+
+function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
+    const { itemId } = elementData(closest(btn, "[data-item-id]"));
+    return actor.items.get<ItemPF2e<CharacterPF2e>>(itemId);
+}
+
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
 
-    const getItem = (btn: HTMLElement) => {
-        const { itemId } = elementData(closest(btn, "[data-item-id]"));
-        return actor.items.get<ItemPF2e<CharacterPF2e>>(itemId);
-    };
-
-    addListenerAll(html, "[data-action='toolbelt-use-consumable']", (event, btn) => {
-        const item = getItem(btn);
-        if (item?.isOfType("consumable") && item.category !== "ammo") {
-            consumeItem(event, item);
+    addListenerAll(
+        html,
+        "[data-action='toolbelt-use-consumable']",
+        (event, btn: HTMLButtonElement) => {
+            const item = getItemFromActionButton(actor, btn);
+            if (item?.isOfType("consumable") && item.category !== "ammo") {
+                consumeItem(event, item);
+            }
         }
-    });
+    );
 
     addListenerAll(
         html,
         ".use-action[data-toolbelt-use='true']",
         (event, btn: HTMLButtonElement) => {
-            const item = getItem(btn);
+            const item = getItemFromActionButton(actor, btn);
             if (!item?.isOfType("feat", "action")) return;
 
             const { value } = item.frequency!;
@@ -169,7 +179,7 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
 
             item.update({ "system.frequency.value": value - 1 });
 
-            if (!item.system.selfEffect) {
+            if (!btn.dataset.skipMessage && !item.system.selfEffect) {
                 item.toMessage(event);
             }
         }
@@ -188,4 +198,9 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
     });
 }
 
-export { config as useButtonTool };
+export {
+    config as useButtonTool,
+    settings as useButtonToolSetting,
+    createActionUseButton,
+    getItemFromActionButton,
+};

@@ -2,6 +2,17 @@
     "pf2e-toolbelt": {
         "settings": {
             "requiresReload": "(Requires Reload)",
+            "actionable": {
+                "title": "Actionable",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Adds a way to link a macro to a character action."
+                },
+                "message": {
+                    "name": "Chat Message",
+                    "hint": "When using an action macro, should the action's description be sent to chat."
+                }
+            },
             "arp": {
                 "title": "Automatic Rune Progression",
                 "enabled": {
@@ -450,6 +461,12 @@
                     "content": "{buyer} buys {quantity} × {item} from {seller} for {price}gp."
                 },
                 "error": "An error occured when trying to process a trade request from <strong>{user}</strong>."
+            }
+        },
+        "actionable": {
+            "itemSheet": {
+                "label": "Macro",
+                "hint": " or a macro that will be executed when this action is used"
             }
         }
     }
