@@ -1,3 +1,8 @@
+# 2.4.1
+
+-   `Actionable`:
+    -   fixed error with passive actions
+
 # 2.4.0
 
 -   added a new `Actionable` Feature:
