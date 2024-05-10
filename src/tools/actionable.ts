@@ -148,7 +148,12 @@ async function actionSheetPF2eRenderInner(
 ) {
     const $html = await wrapped(data);
     const item = this.item;
-    if (item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED) return $html;
+    if (
+        item.system.actionType.value === "passive" ||
+        item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED
+    ) {
+        return $html;
+    }
 
     const html = htmlElement($html);
     const label = localize("itemSheet.label");
@@ -178,7 +183,12 @@ function actionSheetPF2eActivateListeners(
     wrapped($html);
 
     const item = this.item;
-    if (item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED) return $html;
+    if (
+        item.system.actionType.value === "passive" ||
+        item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED
+    ) {
+        return $html;
+    }
 
     const html = htmlElement($html);
     const group = querySelector(html, "[data-drop-zone='self-applied-effect']");
@@ -194,7 +204,8 @@ function actionSheetPF2eActivateListeners(
 }
 
 async function actionSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
-    if (!this.isEditable) return;
+    const item = this.item;
+    if (!this.isEditable || item.system.actionType.value === "passive") return;
 
     const doc = await (async (): Promise<Item | Macro | null> => {
         try {
@@ -223,10 +234,7 @@ async function actionSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, eve
         throw ErrorPF2e("Invalid item drop");
     }
 
-    const item = this.item;
-
     if (doc instanceof Item) {
-        if (item.system.actionType.value === "passive") return;
         await item.update({ "system.selfEffect": { uuid: item.uuid, name: item.name } });
         return;
     }
