@@ -1,3 +1,12 @@
+# 2.4.0
+
+-   added a new `Actionable` Feature:
+    -   this lets you link a macro to a character action
+    -   compatible with both regular and feat actions
+    -   simply drag & drop a macro in the `Details` tab of the action the same way you would for a self-applied effect
+    -   a `use` button will be generated to execute the macro (compatible with the `Use Button` feature)
+    -   the macro is executed with the character as `actor` parameter
+
 # 2.3.1
 
 -   `Target Helper`:
