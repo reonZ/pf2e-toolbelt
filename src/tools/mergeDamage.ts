@@ -11,6 +11,7 @@ import {
 } from "pf2e-api";
 import { createTool } from "../tool";
 import { getMessageTargets, setTargetHelperFlagProperty } from "./targetHelper";
+import { DEGREE_OF_SUCCESS_STRINGS } from "pf2e-api/src/success";
 
 const { config, settings, hook, localize, getFlag, render, setFlagProperty } = createTool({
     name: "mergeDamage",
@@ -109,7 +110,9 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             groups[name].results.push({
                 outcome,
                 modifiers,
-                label: game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${outcome}`),
+                label: game.i18n.localize(
+                    `PF2E.Check.Result.Degree.Attack.${outcome ?? DEGREE_OF_SUCCESS_STRINGS[2]}`
+                ),
                 count: 1,
             });
         }
