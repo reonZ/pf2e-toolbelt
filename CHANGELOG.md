@@ -1,7 +1,12 @@
+# 2.4.3
+
+-   `Merge Damage`:
+    -   avoid `null` degree of sucess for merged damages
+
 # 2.4.2
 
--   `Target Helper`:
-    - make sure long instances of damage do not stretch the message outside of its bounds
+-   `Merge Damage`:
+    -   make sure long instances of damage do not stretch the message outside of its bounds
 
 # 2.4.1
 
