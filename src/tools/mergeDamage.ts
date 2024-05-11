@@ -43,11 +43,14 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
     if ((!game.user.isGM && !message.isAuthor) || !actor || !isDamageRoll(message)) return;
 
     const html = htmlElement($html);
-    const template = await render("buttons", {
-        merged: getFlag(message, "merged"),
-    });
+    const merged = getFlag<boolean>(message, "merged");
+    const template = await render("buttons", { merged });
     const buttons = createHTMLFromString(template);
     const targets = getTargets(message);
+
+    if (merged) {
+        html.classList.add("merged");
+    }
 
     querySelector(html, ".dice-result .dice-total").append(buttons);
 

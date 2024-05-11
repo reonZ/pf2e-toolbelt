@@ -914,7 +914,7 @@ async function rerollSave(
 
 async function roll3dDice(
     roll: Rolled<CheckRoll> | RollJSON,
-    target: CreatureTokenDocument | string | undefined,
+    target: CreatureTokenDocument | string | undefined | null,
     self = false
 ) {
     if (!game.dice3d) return;

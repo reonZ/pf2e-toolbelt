@@ -1,4 +1,10 @@
 .chat-message {
+    &.merged {
+        .message-content .damage-roll .dice-result .instance {
+            white-space: unset;
+        }
+    }
+
     .message-content {
         > .damage-application {
             &.hidden {
