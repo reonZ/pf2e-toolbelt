@@ -1,3 +1,8 @@
+# 2.4.2
+
+-   `Target Helper`:
+    - make sure long instances of damage do not stretch the message outside of its bounds
+
 # 2.4.1
 
 -   `Actionable`:
