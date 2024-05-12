@@ -734,7 +734,7 @@ async function getLabelfromTableResult(result: TableResult, uuid: string) {
 
 function documentUuidFromTableResult(result: TableResult) {
     if (result.type === CONST.TABLE_RESULT_TYPES.TEXT) {
-        return /@UUID\[([\w\.]+)\]/.exec(result.text)?.[1];
+        return /@UUID\[([\w\.-]+)\]/.exec(result.text)?.[1];
     }
     if (result.type === CONST.TABLE_RESULT_TYPES.DOCUMENT) {
         return `${result.documentCollection}.${result.documentId}`;
