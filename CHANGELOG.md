@@ -1,3 +1,8 @@
+# 2.4.4
+
+-   `Hero Actions`:
+    -   fixed a parsing issue when using a custom table pointing to a custom compendium pack journal
+
 # 2.4.3
 
 -   `Merge Damage`:
