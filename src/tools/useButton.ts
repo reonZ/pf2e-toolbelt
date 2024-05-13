@@ -6,18 +6,17 @@ import {
     elementData,
     getActionGlyph,
     htmlElement,
-    querySelector,
     renderCharacterSheets,
     selfApplyEffectFromMessage,
 } from "pf2e-api";
 import { createTool } from "../tool";
+import { getActionMacro } from "./actionable";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
     CHARACTER_SHEET_RENDER_INNER,
 } from "./shared/characterSheet";
-import { getActionMacro } from "./actionable";
 
-const debouncedSetupWrappers = debounce(setupWrappers, 1);
+const debouncedSetupWrappers = foundry.utils.debounce(setupWrappers, 1);
 
 const { config, settings, hook, wrappers } = createTool({
     name: "useButton",
@@ -199,8 +198,8 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
 }
 
 export {
-    config as useButtonTool,
-    settings as useButtonToolSetting,
     createActionUseButton,
     getItemFromActionButton,
+    config as useButtonTool,
+    settings as useButtonToolSetting,
 };

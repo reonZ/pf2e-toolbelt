@@ -300,14 +300,20 @@ function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) 
     const { master, config } = data;
 
     if (config.health) {
-        const update = getProperty<CharacterHitPoints>(changed, "system.attributes.hp");
+        const update = foundry.utils.getProperty<CharacterHitPoints>(
+            changed,
+            "system.attributes.hp"
+        );
         if (update) {
             master.update({ "system.attributes.hp": deepClone(update) });
         }
     }
 
     if (isCharacter && config.hero) {
-        const update = getProperty<ValueAndMax>(changed, "system.resources.heroPoints");
+        const update = foundry.utils.getProperty<ValueAndMax>(
+            changed,
+            "system.resources.heroPoints"
+        );
         if (update) {
             master.update({ "system.resources.heroPoints": deepClone(update) });
         }
@@ -419,7 +425,10 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
 
     if (config.health) {
         const masterHp = master.system.attributes.hp;
-        this.system.attributes.hp = mergeObject(new game.pf2e.StatisticModifier("hp"), masterHp);
+        this.system.attributes.hp = foundry.utils.mergeObject(
+            new game.pf2e.StatisticModifier("hp"),
+            masterHp
+        );
     }
 
     if (isCharacter && config.hero) {

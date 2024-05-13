@@ -31,7 +31,7 @@ function createSharedWrapper<TListener extends (...args: any[]) => any>(
             if (id in listeners) {
                 delete listeners[id];
             }
-            if (wrapperId !== null && isEmpty(listeners)) {
+            if (wrapperId !== null && foundry.utils.isEmpty(listeners)) {
                 unregisterWrapper(wrapperId);
                 wrapperId = null;
             }

@@ -60,7 +60,7 @@ const REROLL = {
     },
 } as const;
 
-const debouncedRefreshMessages = debounce(() => refreshLatestMessages(20), 1);
+const debouncedRefreshMessages = foundry.utils.debounce(() => refreshLatestMessages(20), 1);
 
 const {
     config,
@@ -888,8 +888,8 @@ async function rerollSave(
         die: (keptRoll.terms[0] as NumericTerm).total,
         success: outcome,
         roll: JSON.stringify(keptRoll.toJSON()),
-        dosAdjustments: deepClone(flag.dosAdjustments),
-        modifiers: deepClone(flag.modifiers),
+        dosAdjustments: foundry.utils.deepClone(flag.dosAdjustments),
+        modifiers: foundry.utils.deepClone(flag.modifiers),
         notes: notes.map((note) => note.toObject()),
         rerolled: reroll,
     };

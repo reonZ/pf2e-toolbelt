@@ -154,7 +154,7 @@ function createToolWrappers(config: ToolConfig) {
         let wrapper: ToolActivable;
 
         if (path in sharedWrappers) {
-            const wrapperId = randomID();
+            const wrapperId = foundry.utils.randomID();
 
             wrapper = {
                 activate() {

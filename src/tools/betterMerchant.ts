@@ -724,7 +724,7 @@ function browserActivateListeners(
             const search = filterData.search.text.trim();
 
             if (search) {
-                setProperty(extractedData, "search.text", search);
+                foundry.utils.setProperty(extractedData, "search.text", search);
             }
 
             for (const type of ["checkboxes", "multiselects"] as const) {
@@ -733,10 +733,14 @@ function browserActivateListeners(
 
                     const path = `${type}.${category}`;
 
-                    setProperty(extractedData, `${path}.selected`, data.selected);
+                    foundry.utils.setProperty(extractedData, `${path}.selected`, data.selected);
 
                     if ("conjunction" in data) {
-                        setProperty(extractedData, `${path}.conjunction`, data.conjunction);
+                        foundry.utils.setProperty(
+                            extractedData,
+                            `${path}.conjunction`,
+                            data.conjunction
+                        );
                     }
                 }
             }
@@ -747,13 +751,17 @@ function browserActivateListeners(
                 for (const [category, data] of Object.entries(filterData[type])) {
                     // @ts-ignore
                     const defaultCategory = defaultType[category];
-                    if (objectsEqual(data.values, defaultCategory.values)) continue;
+                    if (foundry.utils.objectsEqual(data.values, defaultCategory.values)) continue;
 
-                    setProperty(extractedData, `${type}.${category}.values`, data.values);
+                    foundry.utils.setProperty(
+                        extractedData,
+                        `${type}.${category}.values`,
+                        data.values
+                    );
                 }
             }
 
-            if (isEmpty(extractedData)) {
+            if (foundry.utils.isEmpty(extractedData)) {
                 localize.warn("browserFilter.empty");
                 return;
             }
@@ -772,7 +780,7 @@ function browserActivateListeners(
                 }
             }
 
-            const id = randomID();
+            const id = foundry.utils.randomID();
             const itemFilter: ItemFilter = {
                 id,
                 name: id,
@@ -982,7 +990,7 @@ class FiltersMenu extends Application {
                     ? el.valueAsNumber
                     : el.value.trim();
 
-            setProperty(filter, key, value);
+            foundry.utils.setProperty(filter, key, value);
             setFilters(this.actor, type, itemFilters);
         });
 
@@ -1025,7 +1033,7 @@ class FiltersMenu extends Application {
             const itemFilter = itemFilters.at(filterIndex)?.filter;
             if (!itemFilter) return;
 
-            const filter = mergeObject(defaultData, itemFilter);
+            const filter = foundry.utils.mergeObject(defaultData, itemFilter);
 
             if (itemFilter.ranges) {
                 for (const key in itemFilter.ranges) {

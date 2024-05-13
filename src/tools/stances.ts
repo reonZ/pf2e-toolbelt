@@ -232,7 +232,7 @@ async function addStance(actor: CharacterPF2e, effectUUID: string) {
     if (!(effect instanceof Item) || !effect.isOfType("effect")) return;
 
     const source = effect.toObject();
-    setProperty(source, "flags.core.sourceId", effectUUID);
+    foundry.utils.setProperty(source, "flags.core.sourceId", effectUUID);
 
     const [item] = await actor.createEmbeddedDocuments("Item", [source]);
     item?.toMessage();

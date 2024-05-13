@@ -1,6 +1,6 @@
 import { createTool } from "../tool";
 
-const debouncedSetup = debounce(setup, 1);
+const debouncedSetup = foundry.utils.debounce(setup, 1);
 
 const { config, settings, hook } = createTool({
     name: "untarget",

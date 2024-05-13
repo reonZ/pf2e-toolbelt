@@ -43,7 +43,7 @@ function onPrecreateItem(item: ItemPF2e) {
 
 function onPreUpdateItem(item: ItemPF2e, data: DeepPartial<ItemSourcePF2e>) {
     if (!("img" in item) || !item.isOfType("physical")) return;
-    setProperty(data, "system.identification.unidentified.img", data.img);
+    foundry.utils.setProperty(data, "system.identification.unidentified.img", data.img);
 }
 
 export { config as unidedTool };

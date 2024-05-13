@@ -9,7 +9,7 @@ import {
 } from "pf2e-api";
 import { createTool } from "../tool";
 
-const debouncedSetup = debounce(setup, 1);
+const debouncedSetup = foundry.utils.debounce(setup, 1);
 
 const { config, localize, socket, settings, hook } = createTool({
     name: "giveth",
