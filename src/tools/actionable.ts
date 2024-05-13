@@ -158,18 +158,24 @@ async function actionSheetPF2eRenderInner(
     const html = htmlElement($html);
     const label = localize("itemSheet.label");
     const group = querySelector(html, "[data-drop-zone='self-applied-effect']");
-    const dropZone = group.querySelector(".drop-zone.empty");
-    const macro = await getActionMacro(item);
+    if (!group) return $html;
 
-    querySelector(group, ":scope > label").innerText += ` / ${label}`;
-    querySelector(group, ".hint").innerText += localize("itemSheet.hint");
+    const labelEl = querySelector(group, ":scope > label");
+    const hintEl = querySelector(group, ".hint");
 
+    if (labelEl) labelEl.innerText += ` / ${label}`;
+    if (hintEl) hintEl.innerText += localize("itemSheet.hint");
+
+    const dropZone = group?.querySelector(".drop-zone.empty");
     if (!dropZone) return $html;
+
+    const macro = await getActionMacro(item);
 
     if (macro) {
         dropZone.outerHTML = await render("dropzone", { macro });
     } else {
-        querySelector(dropZone, ".name").innerText += ` / ${label}`;
+        const nameEl = querySelector(dropZone, ".name");
+        if (nameEl) nameEl.innerText += ` / ${label}`;
     }
 
     return $html;
@@ -187,11 +193,12 @@ function actionSheetPF2eActivateListeners(
         item.system.actionType.value === "passive" ||
         item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED
     ) {
-        return $html;
+        return;
     }
 
     const html = htmlElement($html);
     const group = querySelector(html, "[data-drop-zone='self-applied-effect']");
+    if (!group) return;
 
     addListener(group, "[data-action='open-macro-sheet']", async () => {
         const macro = await getActionMacro(item);

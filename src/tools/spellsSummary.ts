@@ -87,6 +87,7 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
 
     const spellcastingTab = getSpellcastingTab(html);
     const spellsSummaryTab = querySelector(spellcastingTab, ".tab.spells-summary");
+    if (!spellsSummaryTab) return;
 
     addListenerAll(
         spellsSummaryTab,
@@ -111,7 +112,7 @@ function toggleSpellcastingTab(this: CharacterSheetPF2e, html: HTMLElement, navI
     const isActive = querySelector(
         spellcastingNav,
         "[data-tab='spells-summary']"
-    ).classList.contains("active");
+    )?.classList.contains("active");
 
     const tabName = isActive ? "known-spells" : "spells-summary";
     this.activateTab(tabName, { group: "spell-collections" });

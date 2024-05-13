@@ -58,9 +58,9 @@ async function onCreateMeasuredTemplate(
     );
 
     if (html) {
-        const target = querySelector<HTMLInputElement>(html, "[name='targets']:checked").value;
-        const targetNeutral = querySelector<HTMLInputElement>(html, "[name='neutral']").checked;
-        const targetSelf = querySelector<HTMLInputElement>(html, "[name='self']").checked;
+        const target = querySelector<HTMLInputElement>(html, "[name='targets']:checked")?.value;
+        const targetNeutral = querySelector<HTMLInputElement>(html, "[name='neutral']")?.checked;
+        const targetSelf = querySelector<HTMLInputElement>(html, "[name='self']")?.checked;
         const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
         const opposition =
             alliance === "party" ? "opposition" : alliance === "opposition" ? "party" : null;

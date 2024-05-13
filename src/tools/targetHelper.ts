@@ -352,8 +352,10 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
 
 async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
     const msgContent = querySelector(html, ".message-content");
+    if (!msgContent) return;
+
     const damageRows = querySelectorArray(msgContent, ".damage-application");
-    const diceTotalElement = msgContent.querySelector(".dice-result .dice-total");
+    const diceTotalElement = querySelector(msgContent, ".dice-result .dice-total");
     if (!damageRows.length || !diceTotalElement) return;
 
     const data = await getMessageData(message);
@@ -552,7 +554,7 @@ function onChatMessageDrop(event: DragEvent) {
 }
 
 async function onTargetButton(event: MouseEvent, btn: HTMLButtonElement, message: ChatMessagePF2e) {
-    const { rollIndex, targetUuid } = elementData(closest(btn, "[data-target-uuid]"));
+    const { rollIndex, targetUuid } = elementData(closest(btn, "[data-target-uuid]")!);
     const target = await fromUuid<CreatureTokenDocument>(targetUuid);
     if (!target) return;
 
@@ -566,7 +568,7 @@ async function onTargetButton(event: MouseEvent, btn: HTMLButtonElement, message
         }
 
         requestAnimationFrame(() => {
-            onClickShieldBlock(btn, closest(btn, ".chat-message"), target);
+            onClickShieldBlock(btn, closest(btn, ".chat-message")!, target);
         });
 
         return;
@@ -635,7 +637,9 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
     if (!data?.save) return;
 
     const msgContent = querySelector(html, ".message-content");
-    const cardBtns = msgContent.querySelector<HTMLElement>(".card-buttons");
+    if (!msgContent) return;
+
+    const cardBtns = msgContent?.querySelector<HTMLElement>(".card-buttons");
     const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
 
     if (saveBtn && (game.user.isGM || message.isAuthor)) {
@@ -817,7 +821,7 @@ async function rerollSave(
     if (!html) return;
 
     const rerollElement = querySelector<HTMLInputElement>(html, "[name='reroll']:checked");
-    const reroll = rerollElement.value as keyof typeof REROLL;
+    const reroll = rerollElement!.value as keyof typeof REROLL;
     const isHeroReroll = reroll === "hero";
     const keep = isHeroReroll ? "new" : reroll;
 
