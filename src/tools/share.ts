@@ -305,7 +305,7 @@ function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) 
             "system.attributes.hp"
         );
         if (update) {
-            master.update({ "system.attributes.hp": deepClone(update) });
+            master.update({ "system.attributes.hp": foundry.utils.deepClone(update) });
         }
     }
 
@@ -315,7 +315,7 @@ function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) 
             "system.resources.heroPoints"
         );
         if (update) {
-            master.update({ "system.resources.heroPoints": deepClone(update) });
+            master.update({ "system.resources.heroPoints": foundry.utils.deepClone(update) });
         }
     }
 }
