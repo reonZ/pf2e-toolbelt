@@ -84,6 +84,7 @@ function onRenderEffectsPanel(panel: EffectsPanel, $html: JQuery) {
             effect.slug !== "persistent-damage"
         ) {
             const h1 = querySelector(effectsPanel, ".effect-info > h1");
+            if (!h1) continue;
 
             appendHTMLFromString(h1, editIcon);
             addListener(h1, "[data-action='edit']", (event, el) =>
@@ -117,6 +118,8 @@ function onEditCondition(event: MouseEvent, el: HTMLElement, actor: ActorPF2e) {
 
 function getEffect(target: HTMLElement, actor: ActorPF2e) {
     const effectEl = closest(target, ".effect-item[data-item-id]");
+    if (!effectEl) return;
+
     const { itemId } = elementData(effectEl);
     return actor.items.get<EffectPF2e>(itemId);
 }

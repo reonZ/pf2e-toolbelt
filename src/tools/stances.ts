@@ -135,6 +135,7 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
     if (!actor.isOwner) return;
 
     const encounterTab = getEncounterTab(html);
+    if (!encounterTab) return;
 
     addListenerAll(encounterTab, ".pf2e-stances .stance", (event, el) => {
         const uuid = elementData(el).effectUuid;
@@ -195,9 +196,10 @@ async function onCreateCombatant(combatant: CombatantPF2e) {
     });
 
     const effectUUID = html
-        ? querySelector<HTMLInputElement>(html, "[name='stance']:checked").value
+        ? querySelector<HTMLInputElement>(html, "[name='stance']:checked")?.value
         : stances[0].effectUUID;
 
+    if (!effectUUID) return;
     addStance(actor, effectUUID);
 }
 

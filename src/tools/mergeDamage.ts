@@ -53,7 +53,7 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
         html.classList.add("merged");
     }
 
-    querySelector(html, ".dice-result .dice-total").append(buttons);
+    querySelector(html, ".dice-result .dice-total")?.append(buttons);
 
     addListener(buttons, "[data-action='merge-damage']", (event) => {
         event.stopPropagation();

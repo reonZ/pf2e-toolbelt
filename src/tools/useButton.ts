@@ -148,7 +148,7 @@ function createActionUseButton(item: AbilityItemPF2e | FeatPF2e) {
 }
 
 function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
-    const { itemId } = elementData(closest(btn, "[data-item-id]"));
+    const { itemId } = elementData(closest(btn, "[data-item-id]")!);
     return actor.items.get<ItemPF2e<CharacterPF2e>>(itemId);
 }
 

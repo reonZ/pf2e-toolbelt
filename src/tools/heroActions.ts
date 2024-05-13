@@ -173,6 +173,7 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
     const actor = this.actor;
     const tab = querySelector(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
     const list = querySelector(tab, ".heroActions-list");
+    if (!list || !tab) return;
 
     addListener(tab, "[data-action='hero-actions-draw']", () => drawHeroActions(actor));
     addListener(tab, "[data-action='hero-actions-trade']", () => tradeHeroAction(actor, this));
@@ -187,6 +188,8 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
     ) => {
         addListenerAll(list, `[data-action="${action}"]`, (event: Event, el: HTMLElement) => {
             const actionEl = closest(el, "[data-uuid]");
+            if (!actionEl) return;
+
             const { uuid } = elementData(actionEl);
             callback(actor, uuid, actionEl);
         });
@@ -305,7 +308,10 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
         content: await TextEditor.enrichHTML(content, { async: true }),
         onRender: (html) => {
             addListenerAll(html, "[data-action='description']", async (event, el) => {
-                const { uuid } = elementData(closest(el, ".action"));
+                const action = closest(el, ".action");
+                if (!action) return;
+
+                const { uuid } = elementData(action);
                 const entry = await fromUuid(uuid);
                 entry?.sheet.render(true);
             });
@@ -324,7 +330,7 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
         packet.receiver.uuid = querySelector<HTMLInputElement>(
             html,
             "[name='action']:checked"
-        ).value;
+        )!.value;
     }
 
     if (game.user.isGM) {
@@ -394,7 +400,10 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
         });
 
         addListenerAll(html, "[data-action='description']", async (event, el) => {
-            const { uuid } = elementData(closest(el, ".action"));
+            const action = closest(el, ".action");
+            if (!action) return;
+
+            const { uuid } = elementData(action);
             const entry = await fromUuid(uuid);
             entry?.sheet.render(true);
         });
@@ -415,14 +424,19 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
 
     if (html === null) return;
 
-    const targetId = querySelector<HTMLSelectElement>(html, ".header [name='target']").value;
+    const targetId = querySelector<HTMLSelectElement>(html, ".header [name='target']")?.value;
     const target = game.actors.get<CharacterPF2e>(targetId);
     if (!target) return;
 
-    const actionUuid = querySelector<HTMLInputElement>(html, ".left [name='action']:checked").value;
+    const actionUuid = querySelector<HTMLInputElement>(
+        html,
+        ".left [name='action']:checked"
+    )?.value;
     const targetActionUUid = html.querySelector<HTMLInputElement>(
         `.right [name="action-${targetId}"]:checked`
     )?.value;
+
+    if (!actionUuid || !targetActionUUid) return;
 
     if (target.isOwner && targetActionUUid) {
         const targetActions = others.find((x) => x.id === targetId)!.actions;
@@ -452,7 +466,7 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
         },
         receiver: {
             id: getOwner(target)?.id ?? game.users.activeGM!.id,
-            cid: targetId,
+            cid: targetId!,
             uuid: targetActionUUid,
         },
     });
@@ -476,7 +490,7 @@ function exchangeHeroActions(trader1: ExchangeObj, trader2: ExchangeObj, senderI
 
 async function onExpandAction(actor: CharacterPF2e, uuid: string, actionEl: HTMLElement) {
     const duration = 0.4;
-    const summaryEl = querySelector(actionEl, ".item-summary");
+    const summaryEl = querySelector(actionEl, ".item-summary")!;
 
     if (!summaryEl.classList.contains("loaded")) {
         const details = await getHeroActionDetails(uuid);
@@ -579,7 +593,7 @@ async function getHeroActionDetails(uuid: string) {
 }
 
 function onDiscardAction(actor: CharacterPF2e, uuid: string, el: HTMLElement) {
-    const parent = closest(el, ".actions-list");
+    const parent = closest(el, ".actions-list")!;
     const toDiscard = Number(elementData(parent).discard);
     const discarded = querySelectorArray(parent, ".item.discarded").map((x) => elementData(x).uuid);
 
@@ -813,6 +827,8 @@ async function giveHeroActions(actor: CharacterPF2e) {
         onRender: (html) => {
             addListenerAll(html, "[data-action='expand']", (event, el) => {
                 const actionEl = closest(el, "[data-uuid]");
+                if (!actionEl) return;
+
                 const { uuid } = elementData(actionEl);
                 onExpandAction(actor, uuid, actionEl);
             });
@@ -822,11 +838,11 @@ async function giveHeroActions(actor: CharacterPF2e) {
     if (!html) return;
 
     const selected = querySelectorArray(html, "[name='action']:checked").map((el) => {
-        const parent = closest(el, ".action");
+        const parent = closest(el, ".action")!;
         return elementData<{ uuid: string; name: string; key: string }>(parent);
     });
-    const asDrawn = html.querySelector<HTMLInputElement>("[name='drawn']")?.checked;
-    const withMessage = querySelector<HTMLInputElement>(html, "[name='message']").checked;
+    const asDrawn = querySelector<HTMLInputElement>(html, "[name='drawn']")?.checked;
+    const withMessage = querySelector<HTMLInputElement>(html, "[name='message']")!.checked;
     const tableUpdates = [];
 
     for (const { uuid, name, key } of selected) {
@@ -860,7 +876,7 @@ async function removeHeroActions() {
     const translate = localize.sub("removeActions");
 
     const onRender = (html: HTMLElement) => {
-        const allInput = querySelector<HTMLInputElement>(html, "[name='all']");
+        const allInput = querySelector<HTMLInputElement>(html, "[name='all']")!;
         const actorInputs = querySelectorArray<HTMLInputElement>(html, "[name='actor']");
 
         allInput.addEventListener("change", () => {

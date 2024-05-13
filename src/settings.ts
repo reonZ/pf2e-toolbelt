@@ -14,6 +14,7 @@ const firstSettings: { tool: string; key: string }[] = [];
 function onRenderSettingsConfig(app: SettingsConfig, $html: JQuery) {
     const html = htmlElement($html);
     const tab = querySelector(html, `.tab[data-tab="${MODULE.id}"]`);
+    if (!tab) return;
 
     for (const { tool, key } of firstSettings) {
         const group = tab.querySelector(`[data-setting-id="${MODULE.id}.${key}"]`);
@@ -31,7 +32,7 @@ function onRenderSettingsConfig(app: SettingsConfig, $html: JQuery) {
         const setting = game.settings.settings.get(settingId)!;
 
         if (setting.requiresReload) {
-            const label = querySelector(group, "label");
+            const label = querySelector(group, "label")!;
             label.textContent = `${label.textContent} ${localize("settings.requiresReload")}`;
         }
     }

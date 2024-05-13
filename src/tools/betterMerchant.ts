@@ -1,5 +1,4 @@
 import {
-    ErrorPF2e,
     R,
     addListener,
     addListenerAll,
@@ -496,6 +495,7 @@ async function browserRenderInner(
         html,
         "section.content .tab[data-tab='equipment'] .list-buttons"
     );
+    if (!listButtons) return $html;
 
     html.classList.add("toolbelt-merchant");
 
@@ -611,6 +611,8 @@ function updateBrowser(selection: string[], skipAll = false) {
     if (!browserTab) return;
 
     const listButtons = querySelector(browserTab, ".list-buttons");
+    if (!listButtons) return;
+
     const tab = game.pf2e.compendiumBrowser.tabs.equipment;
     const selected = selection.length;
     const total = tab.currentIndex.length;
@@ -640,7 +642,7 @@ function updateBrowser(selection: string[], skipAll = false) {
         }
     }
 
-    querySelector<HTMLButtonElement>(listButtons, "button").disabled = selected === 0;
+    querySelector<HTMLButtonElement>(listButtons, "button")!.disabled = selected === 0;
 
     for (const checkbox of checkboxes) {
         const checked = checkbox.checked;
@@ -661,12 +663,14 @@ function browserActivateListeners(
     const data = getInMemory<BrowserData>(this);
     if (!data?.actor?.isMerchant) return;
 
-    const actor = data.actor;
     const html = htmlElement($html);
-    const browser = this;
-    const tab = browser.tabs.equipment;
     const tabEl = querySelector(html, "section.content .tab[data-tab='equipment']");
     const listButtons = querySelector(tabEl, ".list-buttons");
+    if (!listButtons) return;
+
+    const actor = data.actor;
+    const browser = this;
+    const tab = browser.tabs.equipment;
 
     if (data.type === "pull") {
         addListener(listButtons, "[data-action='add-to-merchant']", async () => {
@@ -707,7 +711,7 @@ function browserActivateListeners(
                     selection.length = 0;
                 }
 
-                const checkboxes = tabEl.querySelectorAll<HTMLInputElement>(".item input");
+                const checkboxes = tabEl!.querySelectorAll<HTMLInputElement>(".item input");
                 for (const checkbox of checkboxes) {
                     const { uuid } = elementData(checkbox);
                     checkbox.checked = selection.includes(uuid);
@@ -835,14 +839,16 @@ async function lootSheetPF2eRenderInner(
             if (filter) {
                 const priceElement = querySelector(itemElement, ".price");
 
-                priceElement.classList.add(filter.ratio < 1 ? "cheap" : "expensive");
-                priceElement.dataset.tooltip = `${filter.name} (${filter.ratio})`;
+                if (priceElement) {
+                    priceElement.classList.add(filter.ratio < 1 ? "cheap" : "expensive");
+                    priceElement.dataset.tooltip = `${filter.name} (${filter.ratio})`;
+                }
             }
         }
 
         if (infiniteAll) {
             const quantityElement = querySelector(itemElement, ".quantity");
-            quantityElement.innerHTML = INFINITE;
+            if (quantityElement) quantityElement.innerHTML = INFINITE;
         }
     }
 
@@ -850,10 +856,14 @@ async function lootSheetPF2eRenderInner(
         const bulkElement = querySelector(html, ".total-bulk span");
         const wealthElement = querySelector(html, ".coinage .wealth .item-name:last-child span");
 
-        wealthElement.innerHTML = INFINITE;
-        bulkElement.innerHTML = game.i18n.format("PF2E.Actor.Inventory.TotalBulk", {
-            bulk: INFINITE,
-        });
+        if (bulkElement) {
+            bulkElement.innerHTML = game.i18n.format("PF2E.Actor.Inventory.TotalBulk", {
+                bulk: INFINITE,
+            });
+        }
+        if (wealthElement) {
+            wealthElement.innerHTML = INFINITE;
+        }
     }
 
     return $html;
@@ -871,6 +881,7 @@ function lootSheetPF2eActivateListeners(
 
     const html = htmlElement($html);
     const betterMenu = querySelector(html, ".better-merchant");
+    if (!betterMenu) return;
 
     addListener(betterMenu, "[data-action='open-equipment-tab']", () => {
         openEquipmentTab({ actor, type: "pull", owned: [] });
@@ -963,7 +974,7 @@ class FiltersMenu extends Application {
 
         const getItemData = (el: HTMLElement) => {
             const data = elementData<{ id: string; type: ItemFilterType }>(
-                closest(el, "[data-id]")
+                closest(el, "[data-id]")!
             );
             const { type, id } = data;
 
