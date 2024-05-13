@@ -5,7 +5,7 @@
 
 # 2.4.5
 
--   made extra checks across the features to avoid missing elements errors
+-   added extra checks across the features to avoid missing elements errors
 
 # 2.4.4
 
@@ -15,7 +15,7 @@
 # 2.4.3
 
 -   `Merge Damage`:
-    -   avoid `null` degree of sucess for merged damages
+    -   avoid `null` degree of success for merged damages
 
 # 2.4.2
 
