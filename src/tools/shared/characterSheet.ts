@@ -76,7 +76,7 @@ function characterSheetPF2eActivateListeners(
 
 function hasValidCharacter(sheet: CharacterSheetPF2e) {
     const actor = sheet.actor;
-    return isPlayedActor(actor) && actor.permission > CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED;
+    return isPlayedActor(actor) && actor.permission > CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED;
 }
 
 export {

@@ -150,7 +150,7 @@ async function actionSheetPF2eRenderInner(
     const item = this.item;
     if (
         item.system.actionType.value === "passive" ||
-        item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED
+        item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED
     ) {
         return $html;
     }
@@ -185,7 +185,7 @@ function actionSheetPF2eActivateListeners(
     const item = this.item;
     if (
         item.system.actionType.value === "passive" ||
-        item.permission <= CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED
+        item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED
     ) {
         return $html;
     }
