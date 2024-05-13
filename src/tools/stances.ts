@@ -235,6 +235,7 @@ async function addStance(actor: CharacterPF2e, effectUUID: string) {
 
     const source = effect.toObject();
     foundry.utils.setProperty(source, "flags.core.sourceId", effectUUID);
+    foundry.utils.setProperty(source, "_stats.compendiumSource", effectUUID);
 
     const [item] = await actor.createEmbeddedDocuments("Item", [source]);
     item?.toMessage();
