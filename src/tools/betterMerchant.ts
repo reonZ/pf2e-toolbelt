@@ -1140,7 +1140,7 @@ function setFilters<
 
 function clampPriceRatio(type: ItemFilterType, value: number | undefined) {
     if (typeof value !== "number") return RATIO[type].default;
-    return Math.clamped(value, RATIO[type].min, RATIO[type].max).toNearest(0.1, "floor");
+    return Math.clamp(value, RATIO[type].min, RATIO[type].max).toNearest(0.1, "floor");
 }
 
 type ItemFilterType = "buy" | "sell";

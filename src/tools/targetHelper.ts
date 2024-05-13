@@ -830,7 +830,7 @@ async function rerollSave(
         }
 
         await actor.update({
-            "system.resources.heroPoints.value": Math.clamped(value - 1, 0, max),
+            "system.resources.heroPoints.value": Math.clamp(value - 1, 0, max),
         });
     }
 
