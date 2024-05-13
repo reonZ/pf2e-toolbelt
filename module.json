@@ -9,22 +9,26 @@
             "discord": "Idle#3251"
         }
     ],
-    "esmodules": ["scripts/main.js"],
+    "esmodules": [
+        "scripts/main.js"
+    ],
     "compatibility": {
         "minimum": "12.322",
         "verified": "12.322",
         "maximum": "12"
     },
     "socket": true,
-    "version": "2.4.5",
+    "version": "2.5.0",
     "manifestPlusVersion": "1.2.0",
     "url": "https://github.com/reonZ/pf2e-toolbelt",
     "readme": "https://github.com/reonZ/pf2e-toolbelt/blob/master/README.md",
     "manifest": "https://raw.githubusercontent.com/reonZ/pf2e-toolbelt/master/module.json",
-    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/2.4.5/module.zip",
+    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/2.5.0/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
-    "styles": ["styles/pf2e-toolbelt.css"],
+    "styles": [
+        "styles/pf2e-toolbelt.css"
+    ],
     "relationships": {
         "systems": [
             {

@@ -1,3 +1,8 @@
+# 2.5.0
+
+-   this is a `6.0.0-beta1` release
+-   this is the first version of the module for v12, there was a significant amount of stuff that needed to be changed and most likely more that were missed
+
 # 2.4.5
 
 -   made extra checks across the features to avoid missing elements errors
