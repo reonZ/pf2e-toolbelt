@@ -4,7 +4,7 @@
     <select name="{{masterInput}}" {{#unless
         masters.length}}data-tooltip="{{i18n.path 'master.disabled'}}" disabled{{/unless}}>
         <option value=""></option>
-        {{selectOptions masters selected=masterId nameAttr="value" labelAttr="label"}}
+        {{selectOptions masters selected=masterId valueAttr="value" labelAttr="label"}}
     </select>
     <p class="hint">{{i18n 'master.hint'}}</p>
 </div>

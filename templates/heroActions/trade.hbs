@@ -1,7 +1,7 @@
 <div class="header">
     {{i18n 'select'}}
     <select name="target" {{disabled (eq others.length 1)}}>
-        {{selectOptions others selected=others.[0].id nameAttr="id" labelAttr="name"}}
+        {{selectOptions others selected=others.[0].id valueAttr="id" labelAttr="name"}}
     </select>
 </div>
 <div class="actions">
