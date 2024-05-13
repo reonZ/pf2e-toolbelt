@@ -1,6 +1,6 @@
 # 2.4.5
 
--   made extra checks accross the features to avoid missing elements errors
+-   made extra checks across the features to avoid missing elements errors
 
 # 2.4.4
 
