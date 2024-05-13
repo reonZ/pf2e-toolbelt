@@ -460,7 +460,7 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
             // @ts-ignore
             this.skills[longForm] = statistic;
             // @ts-ignore
-            this.system.skills[shortForm] = mergeObject(statistic.getTraceData(), {
+            this.system.skills[shortForm] = foundry.utils.mergeObject(statistic.getTraceData(), {
                 attribute,
                 rank: masterSkill.rank,
             });
