@@ -668,7 +668,7 @@ function createActionsMessage(
     };
 
     if (settings.private) {
-        data.type = CONST.CHAT_MESSAGE_TYPES.ROLL;
+        data.type = CONST.CHAT_MESSAGE_STYLES.ROLL;
         data.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
     }
 

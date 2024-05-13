@@ -229,7 +229,7 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             groups,
             showBreakdown,
         }),
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        type: CONST.CHAT_MESSAGE_STYLES.ROLL,
         speaker: message.speaker,
         flags: {
             pf2e: {
