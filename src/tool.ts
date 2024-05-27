@@ -73,7 +73,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
     const waitDialog = async (
         template: string,
         dialogOptions: ToolWaitDialogOptions,
-        applicationOptions: ApplicationRenderOptions = {}
+        applicationOptions: ApplicationPositionOptions = {}
     ) => {
         const translate = localize.sub(template);
 
@@ -376,7 +376,7 @@ type ToolObject<TConfig extends ToolConfig> = {
     waitDialog: (
         template: string,
         options: ToolWaitDialogOptions,
-        applicationOptions?: ApplicationRenderOptions
+        applicationOptions?: ApplicationPositionOptions
     ) => Promise<HTMLElement | null>;
     getFlag: typeof getFlag;
     setFlag: typeof setFlag;

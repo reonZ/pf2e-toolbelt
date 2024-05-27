@@ -918,7 +918,7 @@ class FiltersMenu extends Application {
         return templatePath("filters");
     }
 
-    render(force?: boolean, options?: ApplicationRenderOptions): this {
+    render(force?: boolean, options?: ApplicationPositionOptions): this {
         this.actor.apps[this.appId] = this;
         return super.render(force, options);
     }

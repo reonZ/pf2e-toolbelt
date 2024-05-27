@@ -682,8 +682,10 @@ function createActionsMessage(
     };
 
     if (settings.private) {
-        data.type = CONST.CHAT_MESSAGE_STYLES.ROLL;
-        data.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        data.whisper = game.users
+            .filter((user) => user.isGM)
+            .map((user) => user.id)
+            .concat(senderId);
     }
 
     ChatMessage.implementation.create(data);
