@@ -168,7 +168,13 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             group.terms = [group.terms[index]];
         }
 
-        group.formula = `(${group.formulas.join(" + ")})[${group.type}]`;
+        const type = R.compact([
+            group.type,
+            group.persistent ? "persistent" : undefined,
+            ...group.materials,
+        ]).join(",");
+
+        group.formula = `(${group.formulas.join(" + ")})[${type}]`;
         group.term = group.terms.length < 2 ? group.terms[0] : createTermGroup(group.terms);
     }
 
@@ -195,17 +201,23 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
                 evaluated: true,
                 terms: groupedInstances.map(({ formula }) => formula),
                 modifiers: [],
-                rolls: groupedInstances.map(({ formula, total, term, type, materials }) => ({
-                    class: "DamageInstance",
-                    options: {
-                        flavor: [type, ...materials].join(","),
-                    },
-                    dice: [],
-                    formula,
-                    total,
-                    terms: [term],
-                    evaluated: true,
-                })),
+                rolls: groupedInstances.map(
+                    ({ formula, total, term, type, materials, persistent }) => ({
+                        class: "DamageInstance",
+                        options: {
+                            flavor: R.compact([
+                                type,
+                                persistent ? "persistent" : undefined,
+                                ...materials,
+                            ]).join(","),
+                        },
+                        dice: [],
+                        formula,
+                        total,
+                        terms: [term],
+                        evaluated: true,
+                    })
+                ),
                 results: groupedInstances.map(({ total }) => ({
                     result: total,
                     active: true,
@@ -229,7 +241,6 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             groups,
             showBreakdown,
         }),
-        type: CONST.CHAT_MESSAGE_STYLES.ROLL,
         speaker: message.speaker,
         flags: {
             pf2e: {
