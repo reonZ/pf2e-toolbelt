@@ -211,21 +211,22 @@ function actionSheetPF2eActivateListeners(
 }
 
 async function actionSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
-    const item = this.item;
-    if (!this.isEditable || item.system.actionType.value === "passive") return;
+    if (!this.isEditable || this.item.system.actionType.value === "passive") {
+        return;
+    }
 
-    const doc = await (async (): Promise<Item | Macro | null> => {
+    const item = await (async (): Promise<ItemPF2e | Macro | null> => {
         try {
             const dataString = event.dataTransfer?.getData("text/plain");
-            const dropData = JSON.parse(dataString ?? "{}");
+            const dropData = JSON.parse(dataString ?? "");
             if (typeof dropData !== "object") return null;
 
             if (dropData.type === "Item") {
-                return (await Item.implementation.fromDropData(dropData)) ?? null;
+                return (await getDocumentClass("Item").fromDropData(dropData)) ?? null;
             }
 
             if (dropData.type === "Macro") {
-                return (await Macro.fromDropData(dropData)) ?? null;
+                return (await getDocumentClass("Macro").fromDropData(dropData)) ?? null;
             }
 
             return null;
@@ -234,19 +235,13 @@ async function actionSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, eve
         }
     })();
 
-    if (
-        !(isInstanceOf<ItemPF2e>(doc, "ItemPF2e") && doc.isOfType("effect")) &&
-        !(doc instanceof Macro)
-    ) {
+    if (item instanceof Item && item.isOfType("effect")) {
+        await this.item.update({ "system.selfEffect": { uuid: item.uuid, name: item.name } });
+    } else if (item instanceof Macro) {
+        await setFlag(this.item, "macro", item.uuid);
+    } else {
         throw ErrorPF2e("Invalid item drop");
     }
-
-    if (doc instanceof Item) {
-        await item.update({ "system.selfEffect": { uuid: item.uuid, name: item.name } });
-        return;
-    }
-
-    await setFlag(item, "macro", doc.uuid);
 }
 
 export { config as actionableTool, getActionMacro };
