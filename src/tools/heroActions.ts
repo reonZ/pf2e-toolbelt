@@ -208,8 +208,8 @@ function isValidActor(actor: CharacterPF2e) {
 }
 
 function getTradeDataFromPacket(packet: SocketPacket) {
-    const sender = game.actors.get<ActorPF2e>(packet.sender.cid);
-    const receiver = game.actors.get<ActorPF2e>(packet.receiver.cid);
+    const sender = game.actors.get(packet.sender.cid) as ActorPF2e;
+    const receiver = game.actors.get(packet.receiver.cid) as ActorPF2e;
 
     if (!sender?.isOfType("character") || !receiver?.isOfType("character")) {
         socket.emit({
@@ -305,7 +305,7 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
 
     const html = await waitDialog("trade.request", {
         yes: "fa-solid fa-handshake",
-        content: await TextEditor.enrichHTML(content, { async: true }),
+        content: await TextEditor.enrichHTML(content),
         onRender: (html) => {
             addListenerAll(html, "[data-action='description']", async (event, el) => {
                 const action = closest(el, ".action");
@@ -425,7 +425,7 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     if (html === null) return;
 
     const targetId = querySelector<HTMLSelectElement>(html, ".header [name='target']")?.value;
-    const target = game.actors.get<CharacterPF2e>(targetId);
+    const target = targetId ? (game.actors.get(targetId) as CharacterPF2e) : undefined;
     if (!target) return;
 
     const actionUuid = querySelector<HTMLInputElement>(
@@ -496,7 +496,7 @@ async function onExpandAction(actor: CharacterPF2e, uuid: string, actionEl: HTML
         const details = await getHeroActionDetails(uuid);
         if (!details) return;
 
-        const text = await TextEditor.enrichHTML(details.description, { async: true });
+        const text = await TextEditor.enrichHTML(details.description);
         const descEl = querySelector(summaryEl, ".item-description");
 
         appendHTMLFromString(descEl, text);
@@ -678,7 +678,7 @@ function createActionsMessage(
         flavor: `<h4 class="action">${translate(label, { nb: actions.length, name: other })}</h4>`,
         content,
         speaker: ChatMessage.getSpeaker({ actor }),
-        user: senderId,
+        author: senderId,
     };
 
     if (settings.private) {
@@ -919,7 +919,7 @@ async function removeHeroActions() {
 
     const actors = R.pipe(
         querySelectorArray<HTMLInputElement>(html, "[name='actor']:checked"),
-        R.map((input) => game.actors.get<CharacterPF2e>(input.value)),
+        R.map((input) => game.actors.get(input.value) as CharacterPF2e),
         R.compact
     );
 

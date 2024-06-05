@@ -7,29 +7,20 @@ const textEditorWrappers = {
     [TEXTEDITOR_ENRICH_HTML]: createSharedWrapper(TEXTEDITOR_ENRICH_HTML, textEditorEnrichHTML),
 };
 
-function textEditorEnrichHTML(
+async function textEditorEnrichHTML(
     this: TextEditor,
     listeners: ((enriched: string) => string)[],
     wrapped: libWrapper.RegisterCallback,
     content: string,
     options?: EnrichmentOptions
-): Promisable<string> {
-    let enriched = wrapped(content, options) as string | Promise<string>;
+): Promise<string> {
+    let enriched = (await wrapped(content, options)) as string;
 
-    if (typeof enriched === "string") {
-        for (const listener of listeners) {
-            enriched = listener.call(this, enriched);
-        }
-        return enriched;
+    for (const listener of listeners) {
+        enriched = listener.call(this, enriched);
     }
 
-    return Promise.resolve().then(async () => {
-        enriched = await enriched;
-        for (const listener of listeners) {
-            enriched = listener.call(this, enriched);
-        }
-        return enriched;
-    });
+    return enriched;
 }
 
 export { TEXTEDITOR_ENRICH_HTML, textEditorWrappers };
