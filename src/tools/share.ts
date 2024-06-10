@@ -245,7 +245,7 @@ async function combatantEndTurn(
     for (const slave of slaves) {
         if (!slave || slave.combatant) return;
 
-        const scene = game.scenes.get<ScenePF2e>(this.sceneId);
+        const scene = game.scenes.get(this.sceneId) as ScenePF2e;
         const token = slave.getDependentTokens({ linked: true, scenes: scene })[0];
 
         const activeConditions = slave.conditions.active;
@@ -448,7 +448,7 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
             const attribute = SKILL_EXPANDED[longForm].attribute;
             const statistic = new Statistic(this, {
                 slug: longForm,
-                label: CONFIG.PF2E.skills[shortForm] ?? longForm,
+                label: CONFIG.PF2E.skillList[longForm] ?? longForm,
                 attribute,
                 domains: [longForm, `${attribute}-based`, "skill-check", "all"],
                 modifiers: [],
@@ -477,7 +477,7 @@ function getMasterAndConfig(actor: ActorPF2e) {
     const config = getFlag<ConfigFlags>(actor, "config");
     if (!config?.master) return;
 
-    const master = game.actors.get<ActorPF2e>(config.master);
+    const master = game.actors.get(config.master) as ActorPF2e;
     return isValidMaster(master) ? { master, config } : undefined;
 }
 
