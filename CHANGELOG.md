@@ -1,4 +1,4 @@
-#
+# 2.6.0
 
 -   this is a system `6.0.1` release
 -   lot of internal changes were made
@@ -10,7 +10,7 @@
 -   `Giveth`:
     -   the feature was reworked to be compatible with the latest changes
 -   `Hero Actions`:
-    -   now uses whisper for private message because of the v12 changes to private rolls
+    -   now uses whisper for private message because of the v12 changes to roll messages
 -   `Merge Damages`:
     -   fixed persistent damages being lost on merge
 -   `De-targeting`:
