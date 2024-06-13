@@ -1,4 +1,4 @@
-import { libWrapper } from "pf2e-api";
+import { libWrapper } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const WEAPON_PREPARE_BASE_DATA =
@@ -22,11 +22,16 @@ const prepareDocumentWrappers = {
 
 function prepareBaseData<T extends FoundryDocument>(
     this: T,
+    wrapperError: (error: Error) => void,
     listeners: (() => void)[],
     wrapped: libWrapper.RegisterCallback
 ) {
-    for (const listener of listeners) {
-        listener.call(this);
+    try {
+        for (const listener of listeners) {
+            listener.call(this);
+        }
+    } catch (error) {
+        wrapperError(error);
     }
 
     wrapped();

@@ -1,24 +1,24 @@
 import {
+    DEGREE_OF_SUCCESS_STRINGS,
+    DegreeOfSuccess,
     MODULE,
     R,
     RollNotePF2e,
+    SAVE_TYPES,
     addListener,
     addListenerAll,
     applyDamageFromMessage,
-    closest,
-    createHTMLFromString,
-    elementData,
+    createHTMLElement,
+    elementDataset,
     extractNotes,
-    getActiveModule,
-    isActiveGM,
+    htmlClosest,
+    htmlQuery,
+    htmlQueryAll,
+    isInstanceOf,
     onClickShieldBlock,
-    querySelector,
-    querySelectorArray,
     refreshLatestMessages,
-    saveTypes,
     toggleOffShieldBlock,
-} from "pf2e-api";
-import { DEGREE_OF_SUCCESS_STRINGS, DegreeOfSuccess } from "pf2e-api/src/success";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 import { TEXTEDITOR_ENRICH_HTML } from "./shared/textEditor";
@@ -159,7 +159,7 @@ const {
 } as const);
 
 function onSocket(packet: SocketPacket, senderId: string) {
-    if (!isActiveGM()) return;
+    if (game.user !== game.users.activeGM) return;
 
     switch (packet.type) {
         case "update-applied": {
@@ -204,7 +204,8 @@ function isRegenMessage(message: ChatMessagePF2e) {
 
 function isDamageMessage(
     message: ChatMessagePF2e
-): message is Omit<ChatMessagePF2e, "rolls"> & { rolls: Rolled<DamageRoll>[] } {
+): message is ChatMessagePF2e & { rolls: Rolled<DamageRoll>[] } {
+    message.rolls;
     return message.isDamageRoll;
 }
 
@@ -218,7 +219,7 @@ function getMessageTargets(message: ChatMessagePF2e) {
 
 function getCurrentTargets(): string[] {
     return R.pipe(
-        Array.from(game.user.targets as Set<TokenPF2e>),
+        Array.from(game.user.targets),
         R.filter((target) => !!target.actor?.isOfType("creature", "hazard", "vehicle")),
         R.map((target) => target.document.uuid)
     );
@@ -227,7 +228,7 @@ function getCurrentTargets(): string[] {
 function onGetChatLogEntryContext($html: JQuery, data: EntryContextOption[]) {
     const getMessageData = (html: JQuery) => {
         const messageId = html.data("messageId");
-        const message = game.messages.get<ChatMessagePF2e>(messageId);
+        const message = game.messages.get(messageId) as ChatMessagePF2e;
         if (!message) return;
 
         return {
@@ -250,11 +251,11 @@ function onGetChatLogEntryContext($html: JQuery, data: EntryContextOption[]) {
             const save = getSaveFlag(message);
             if (!save) return;
 
-            const promisedTargets = await Promise.all(
-                canRollSave.map((uuid) => fromUuid<CreatureTokenDocument>(uuid))
-            );
+            const promisedTargets = await Promise.all(canRollSave.map((uuid) => fromUuid(uuid)));
 
-            const targets = R.compact(promisedTargets);
+            const targets = promisedTargets.filter((token): token is TokenDocumentPF2e =>
+                isValidToken(token)
+            );
             if (!targets.length) return;
 
             rollSaves(new MouseEvent("click"), message, save, targets);
@@ -291,9 +292,11 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
     }
 
     if (isDamage && message.rolls.length === 2) {
-        const splashRollIndex = message.rolls.findIndex((roll) => roll.options.splashOnly);
+        const splashRollIndex = message.rolls.findIndex(
+            (roll: DamageRoll) => roll.options.splashOnly
+        );
         const regularRollIndex = message.rolls.findIndex(
-            (roll) =>
+            (roll: DamageRoll) =>
                 !roll.options.splashOnly &&
                 roll.options.damage?.modifiers?.some(
                     (modifier) =>
@@ -342,7 +345,7 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
             const save = getFlag<MessageSaveFlag>(this, "save");
             if (!save) return;
 
-            Hooks.once("preCreateChatMessage", (message) => {
+            Hooks.once("preCreateChatMessage", (message: ChatMessage) => {
                 updateSourceFlag(message, "messageId", messageId);
                 updateSourceFlag(message, "save", save);
             });
@@ -351,18 +354,18 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
 }
 
 async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
-    const msgContent = querySelector(html, ".message-content");
+    const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
 
-    const damageRows = querySelectorArray(msgContent, ".damage-application");
-    const diceTotalElement = querySelector(msgContent, ".dice-result .dice-total");
+    const damageRows = htmlQueryAll(msgContent, ".damage-application");
+    const diceTotalElement = htmlQuery(msgContent, ".dice-result .dice-total");
     if (!damageRows.length || !diceTotalElement) return;
 
     const data = await getMessageData(message);
 
     html.addEventListener("drop", onChatMessageDrop);
 
-    const wrapper = createHTMLFromString("<div class='pf2e-toolbelt-target-buttons'></div>");
+    const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
 
     diceTotalElement.append(wrapper);
 
@@ -372,14 +375,12 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
     }
 
     if (data?.targets.length) {
-        const toggleTooltip = localize("toggleDamageRows");
-        const toggleTemplate = `<button class="pf2e-toolbelt-target-toggleDamageRows" 
-            title="${toggleTooltip}">
-                <i class="fa-solid fa-plus expand"></i>
-                <i class="fa-solid fa-minus collapse"></i>
-            </button>`;
-        const toggleBtn = createHTMLFromString(toggleTemplate);
+        const toggleBtn = createHTMLElement("button", {
+            classes: ["pf2e-toolbelt-target-toggleDamageRows"],
+            innerHTML: `<i class="fa-solid fa-plus expand"></i><i class="fa-solid fa-minus collapse"></i>`,
+        });
 
+        toggleBtn.title = localize("toggleDamageRows");
         toggleBtn.addEventListener("click", (event) => {
             event.stopPropagation();
 
@@ -420,14 +421,18 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         return clone;
     });
 
-    const rowsWrapper = createHTMLFromString("<div class='pf2e-toolbelt-target-targetRows'></div>");
+    const rowsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-targetRows"] });
 
     for (const { template, isOwner, save, uuid, applied } of data.targets) {
-        const hr = document.createElement("hr");
-        const row = createHTMLFromString(template);
+        const hrElement = createHTMLElement("hr");
+        const rowElement = createHTMLElement("div", {
+            dataset: { targetUuid: uuid },
+            classes: ["target-header"],
+            innerHTML: template,
+        });
 
-        rowsWrapper.append(hr);
-        rowsWrapper.append(row);
+        rowsWrapper.append(hrElement);
+        rowsWrapper.append(rowElement);
 
         if (!isOwner) continue;
 
@@ -474,11 +479,11 @@ function onDragStart(event: DragEvent) {
     )
         return;
 
-    const dataset = elementData(target);
+    const dataset = elementDataset(target);
 
     if (
         !dataset.pf2Dc ||
-        !saveTypes.includes(dataset.pf2Check as SaveType) ||
+        !SAVE_TYPES.includes(dataset.pf2Check as SaveType) ||
         !["reflex", "will", "fortitude"].includes(dataset.pf2Check)
     ) {
         event.preventDefault();
@@ -518,14 +523,14 @@ function onChatMessageDrop(event: DragEvent) {
     const target = (event.target as HTMLElement)?.closest<HTMLLIElement>("li.chat-message");
     if (!target) return;
 
-    const data = TextEditor.getDragEventData<SaveDragData>(event);
+    const data = TextEditor.getDragEventData(event);
     if (!data) return;
 
-    const { type, dc, basic, options, statistic, traits } = data;
+    const { type, dc, basic, options, statistic, traits } = data as SaveDragData;
     if (type !== `${MODULE.id}-check-roll`) return;
 
     const messageId = target.dataset.messageId;
-    const message = game.messages.get<ChatMessagePF2e>(messageId);
+    const message = messageId ? (game.messages.get(messageId) as ChatMessagePF2e) : undefined;
     if (!message || !message.isDamageRoll) return;
 
     if (!game.user.isGM && !message.isAuthor) {
@@ -554,11 +559,11 @@ function onChatMessageDrop(event: DragEvent) {
 }
 
 async function onTargetButton(event: MouseEvent, btn: HTMLButtonElement, message: ChatMessagePF2e) {
-    const { rollIndex, targetUuid } = elementData(closest(btn, "[data-target-uuid]")!);
-    const target = await fromUuid<CreatureTokenDocument>(targetUuid);
-    if (!target) return;
+    const { rollIndex, targetUuid } = elementDataset(htmlClosest(btn, "[data-target-uuid]")!);
+    const target = await fromUuid(targetUuid);
+    if (!isValidToken(target)) return;
 
-    const { action } = elementData<{ action: TargetButtonAction }>(btn);
+    const { action } = elementDataset<{ action: TargetButtonAction }>(btn);
 
     if (action === "target-shield-block") {
         const messageId = message.id;
@@ -568,7 +573,7 @@ async function onTargetButton(event: MouseEvent, btn: HTMLButtonElement, message
         }
 
         requestAnimationFrame(() => {
-            onClickShieldBlock(btn, closest(btn, ".chat-message")!, target);
+            onClickShieldBlock(btn, htmlClosest(btn, ".chat-message")!, target);
         });
 
         return;
@@ -636,14 +641,14 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
     const data = await getMessageData(message);
     if (!data?.save) return;
 
-    const msgContent = querySelector(html, ".message-content");
+    const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
 
     const cardBtns = msgContent?.querySelector<HTMLElement>(".card-buttons");
     const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
 
     if (saveBtn && (game.user.isGM || message.isAuthor)) {
-        const wrapper = createHTMLFromString("<div class='pf2e-toolbelt-target-wrapper'></div>");
+        const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
         const setTargetsBtn = createSetTargetsBtn(message);
 
         wrapper.append(setTargetsBtn, saveBtn);
@@ -653,14 +658,17 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
     const { targets, save } = data;
     if (!targets.length) return;
 
-    const rowsWrapper = createHTMLFromString("<div class='pf2e-toolbelt-target-targetRows'></div>");
+    const rowsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-targetRows"] });
 
     for (const { template } of targets) {
-        const hr = document.createElement("hr");
-        const row = createHTMLFromString(template);
+        const hrElement = createHTMLElement("hr");
+        const rowElement = createHTMLElement("div", {
+            classes: ["target-header"],
+            innerHTML: template,
+        });
 
-        rowsWrapper.append(hr);
-        rowsWrapper.append(row);
+        rowsWrapper.append(hrElement);
+        rowsWrapper.append(rowElement);
     }
 
     msgContent.after(rowsWrapper);
@@ -669,15 +677,16 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
 }
 
 function createSetTargetsBtn(message: ChatMessagePF2e) {
-    const tooltip = localize("setTargets");
-    const template = `<button class="pf2e-toolbelt-target-setTargets" data-action="set-targets"
-        title="${tooltip}">
-        <i class="fa-solid fa-bullseye-arrow"></i>
-    </button>`;
-    const btn = createHTMLFromString(template);
+    const btnElement = createHTMLElement("button", {
+        classes: ["pf2e-toolbelt-target-setTargets"],
+        dataset: { action: "set-targets" },
+        innerHTML: "<i class='fa-solid fa-bullseye-arrow'></i>",
+    });
 
-    btn.addEventListener("click", (event) => onSetTargets(event, message));
-    return btn;
+    btnElement.title = localize("setTargets");
+    btnElement.addEventListener("click", (event) => onSetTargets(event, message));
+
+    return btnElement;
 }
 
 async function addHeaderListeners(
@@ -685,12 +694,12 @@ async function addHeaderListeners(
     html: HTMLElement,
     save?: MessageSaveDataWithTooltip
 ) {
-    const targetElements = html.querySelectorAll("[data-target-uuid]");
+    const targetElements = html.querySelectorAll<HTMLElement>("[data-target-uuid]");
 
     for (const targetElement of targetElements) {
-        const { targetUuid } = elementData(targetElement);
-        const target = await fromUuid<CreatureTokenDocument>(targetUuid);
-        if (!target) continue;
+        const { targetUuid } = elementDataset(targetElement);
+        const target = await fromUuid(targetUuid);
+        if (!isValidToken(target)) continue;
 
         addListener(targetElement, "[data-action='ping-target']", () => {
             canvas.ping(target.center);
@@ -716,14 +725,14 @@ async function rollSaves(
     event: MouseEvent,
     message: ChatMessagePF2e,
     { dc, statistic }: MessageSaveData,
-    targets: CreatureTokenDocument[]
+    targets: TokenDocumentPF2e[]
 ) {
-    const user = game.user as UserPF2e;
+    const user = game.user;
     const updates: Record<string, MessageTargetSave> = {};
 
     await Promise.all(
         targets.map((target) => {
-            const actor = target.actor;
+            const actor = target.actor as CreaturePF2e;
             if (!actor) return;
 
             const save = actor.saves[statistic];
@@ -751,7 +760,7 @@ async function rollSaves(
                         const data: MessageTargetSave = {
                             whispers: msg.whisper.filter((userId) => game.users.get(userId)?.isGM),
                             value: roll.total,
-                            die: (roll.terms[0] as NumericTerm).total,
+                            die: (roll.terms[0] as foundry.dice.terms.NumericTerm).total,
                             success: success!,
                             roll: JSON.stringify(roll.toJSON()),
                             dosAdjustments: context.dosAdjustments,
@@ -786,9 +795,9 @@ async function rerollSave(
     event: MouseEvent,
     message: ChatMessagePF2e,
     { dc, statistic }: MessageSaveData,
-    target: CreatureTokenDocument
+    target: TokenDocumentPF2e
 ) {
-    const actor = target?.actor;
+    const actor = target?.actor as CreaturePF2e | undefined;
     if (!actor) return;
 
     const flag = getFlag<MessageTargetSave>(message, `saves.${target.id}`);
@@ -797,9 +806,9 @@ async function rerollSave(
     const content = R.pipe(
         Object.entries(REROLL),
         actor.isOfType("character") && actor.heroPoints.value > 0
-            ? R.identity
+            ? R.identity()
             : R.filter(([type]) => type !== "hero"),
-        R.map.indexed(([type, { icon, reroll }], i) => {
+        R.map(([type, { icon, reroll }], i) => {
             const label = game.i18n.localize(reroll);
             const checked = i === 0 ? "checked" : "";
 
@@ -808,7 +817,7 @@ async function rerollSave(
                 <i class="${icon}"></i> ${label}
             </label>`;
         }),
-        R.compact,
+        R.filter(R.isTruthy),
         R.join("")
     );
 
@@ -820,7 +829,7 @@ async function rerollSave(
 
     if (!html) return;
 
-    const rerollElement = querySelector<HTMLInputElement>(html, "[name='reroll']:checked");
+    const rerollElement = htmlQuery<HTMLInputElement>(html, "[name='reroll']:checked");
     const reroll = rerollElement!.value as keyof typeof REROLL;
     const isHeroReroll = reroll === "hero";
     const keep = isHeroReroll ? "new" : reroll;
@@ -889,7 +898,7 @@ async function rerollSave(
     const data: MessageTargetSave = {
         whispers: flag.whispers,
         value: keptRoll.total,
-        die: (keptRoll.terms[0] as NumericTerm).total,
+        die: (keptRoll.terms[0] as foundry.dice.terms.NumericTerm).total,
         success: outcome,
         roll: JSON.stringify(keptRoll.toJSON()),
         dosAdjustments: foundry.utils.deepClone(flag.dosAdjustments),
@@ -918,7 +927,7 @@ async function rerollSave(
 
 async function roll3dDice(
     roll: Rolled<CheckRoll> | RollJSON,
-    target: CreatureTokenDocument | string | undefined | null,
+    target: Maybe<TokenDocumentPF2e> | string,
     self = false
 ) {
     if (!game.dice3d) return;
@@ -927,7 +936,7 @@ async function roll3dDice(
     const synchronize = !self && game.pf2e.settings.metagame.breakdowns;
 
     roll = roll instanceof Roll ? roll : Roll.fromData<Rolled<CheckRoll>>(roll);
-    target = typeof target === "string" ? await fromUuid<CreatureTokenDocument>(target) : target;
+    target = typeof target === "string" ? await fromUuid<TokenDocumentPF2e>(target) : target;
 
     if (!self && !synchronize) {
         socket.emit({
@@ -982,11 +991,11 @@ async function getMessageData(message: ChatMessagePF2e) {
 
     const allTargets = await Promise.all(
         targetsFlag.map(async (tokenUUID) => {
-            const target = await fromUuid<CreatureTokenDocument>(tokenUUID);
-            if (!target) return;
+            const target = await fromUuid(tokenUUID);
+            if (!isValidToken(target)) return;
 
             const targetId = target.id;
-            const targetActor = target.actor;
+            const targetActor = target.actor as CreaturePF2e;
             if (!targetActor) return;
 
             const isHidden = target.hidden || targetActor.hasCondition("unnoticed", "undetected");
@@ -1062,14 +1071,9 @@ async function getMessageData(message: ChatMessagePF2e) {
                 result: targetSave,
             };
 
-            const anonymous = getActiveModule<AnonymousModule>("anonymous");
-            const canSeeName = isGM
-                ? true
-                : anonymous?.api.playersSeeName(target.actor) ??
-                  (!game.pf2e.settings.tokens.nameVisibility || target.playersCanSeeName);
-            const name = canSeeName
-                ? target.name
-                : anonymous?.api.getName(target.actor) ?? localize("unnamed");
+            const canSeeName =
+                isGM || !game.pf2e.settings.tokens.nameVisibility || target.playersCanSeeName;
+            const name = canSeeName ? target.name : localize("unnamed");
 
             const applied = getFlag<boolean[]>(message, `applied.${targetId}`) ?? [];
 
@@ -1087,7 +1091,6 @@ async function getMessageData(message: ChatMessagePF2e) {
                     isOwner,
                     hasPlayerOwner,
                     isHidden,
-                    uuid: tokenUUID,
                     showSuccess: isFriendly || showResults,
                     save: hasSave && templateSave,
                     canReroll: targetSave?.canReroll,
@@ -1102,7 +1105,7 @@ async function getMessageData(message: ChatMessagePF2e) {
     setInMemory(message, "canRollSave", canRollSave);
     setInMemory(message, "canApplyDamage", canApplyDamage);
 
-    const targets = R.compact(allTargets);
+    const targets = R.filter(allTargets, R.isTruthy);
 
     if (isGM) {
         targets.sort((a, b) => Number(a.hasPlayerOwner) - Number(b.hasPlayerOwner));
@@ -1125,6 +1128,10 @@ function getSaveFlag(message: ChatMessagePF2e): MessageSaveData | undefined {
         ...flag,
         ...SAVES[flag.statistic],
     };
+}
+
+function isValidToken(doc: Maybe<ClientDocument>): doc is TokenDocumentPF2e {
+    return isInstanceOf(doc, "TokenDocumentPF2e") && !!doc.actor?.isOfType("creature");
 }
 
 type TargetButtonAction =
@@ -1200,8 +1207,6 @@ type SocketPacket =
           message: string;
           updates: Record<string, MessageTargetSave>;
       };
-
-type CreatureTokenDocument = TokenDocumentPF2e<CreaturePF2e>;
 
 type SaveDragData = {
     basic: boolean;

@@ -1,13 +1,12 @@
 import {
     addListener,
     addListenerAll,
-    beforeHTMLFromString,
+    createHTMLElement,
     getActiveModule,
     getSummarizedSpellsDataForRender,
-    isPlayedActor,
-    querySelector,
+    htmlQuery,
     renderCharacterSheets,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -61,18 +60,29 @@ async function characterSheetPF2eRenderInner(
     const summarizedData = await getSummarizedSpellsDataForRender(
         actor,
         settings.sort,
-        localize.path,
+        {
+            staff: localize.path("staff"),
+            charges: localize.path("charges"),
+        },
         entries
     );
-    const tab = await render("sheet", summarizedData);
-    const nav = `<a data-tab="spells-summary" 
-    data-group="spell-collections">Spell Summary</a>`;
-    const spellcastingTab = getSpellcastingTab(html);
-    const knownSpellsTab = querySelector(spellcastingTab, ".tab[data-tab='known-spells']");
-    const knownSpellsNav = querySelector(spellcastingTab, "nav [data-tab='known-spells']");
 
-    beforeHTMLFromString(knownSpellsNav, nav);
-    beforeHTMLFromString(knownSpellsTab, tab);
+    const spellcastingTab = getSpellcastingTab(html);
+    const dataset = { tab: "spells-summary", group: "spell-collections" };
+
+    const navElement = createHTMLElement("a", {
+        dataset,
+        innerHTML: localize("label"),
+    });
+
+    const tabElement = createHTMLElement("div", {
+        dataset,
+        classes: ["tab", "spells-summary"],
+        innerHTML: await render("sheet", summarizedData),
+    });
+
+    htmlQuery(spellcastingTab, "nav [data-tab='known-spells']")?.before(navElement);
+    htmlQuery(spellcastingTab, ".tab[data-tab='known-spells']")?.before(tabElement);
 }
 
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
@@ -82,11 +92,11 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
         toggleSpellcastingTab.call(this, html, el)
     );
 
-    const pf2eDailies = getActiveModule<PF2eDailiesModule>("pf2e-dailies");
+    const pf2eDailies = getActiveModule("pf2e-dailies");
     if (!pf2eDailies) return;
 
     const spellcastingTab = getSpellcastingTab(html);
-    const spellsSummaryTab = querySelector(spellcastingTab, ".tab.spells-summary");
+    const spellsSummaryTab = htmlQuery(spellcastingTab, ".tab.spells-summary");
     if (!spellsSummaryTab) return;
 
     addListenerAll(
@@ -108,18 +118,17 @@ function toggleSpellcastingTab(this: CharacterSheetPF2e, html: HTMLElement, navI
     if (!navIcon.classList.contains("active")) return;
 
     const spellcastingTab = getSpellcastingTab(html);
-    const spellcastingNav = querySelector(spellcastingTab, "nav");
-    const isActive = querySelector(
-        spellcastingNav,
-        "[data-tab='spells-summary']"
-    )?.classList.contains("active");
+    const spellcastingNav = htmlQuery(spellcastingTab, "nav");
+    const isActive = htmlQuery(spellcastingNav, "[data-tab='spells-summary']")?.classList.contains(
+        "active"
+    );
 
     const tabName = isActive ? "known-spells" : "spells-summary";
     this.activateTab(tabName, { group: "spell-collections" });
 }
 
 function getSpellcastingTab(html: HTMLElement) {
-    return querySelector(html, ".sheet-content .tab[data-tab='spellcasting']");
+    return htmlQuery(html, ".sheet-content .tab[data-tab='spellcasting']");
 }
 
 export { config as spellsSummaryTool };

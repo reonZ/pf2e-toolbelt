@@ -1,4 +1,4 @@
-import { htmlElement, libWrapper } from "pf2e-api";
+import { libWrapper } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const CHATMESSAGE_GET_HTML = "ChatMessage.prototype.getHTML";
@@ -9,15 +9,20 @@ const chatMessageWrappers = {
 
 async function chatMessageGetHTML(
     this: ChatMessagePF2e,
+    wrapperError: (error: Error) => void,
     listeners: ((html: HTMLElement) => Promisable<void>)[],
     wrapped: libWrapper.RegisterCallback
 ): Promise<JQuery> {
     const $html = await wrapped();
 
-    const html = htmlElement($html);
+    const html = $html[0];
 
-    for (const listener of listeners) {
-        await listener.call(this, html);
+    try {
+        for (const listener of listeners) {
+            await listener.call(this, html);
+        }
+    } catch (error) {
+        wrapperError(error);
     }
 
     return $html;

@@ -1,141 +1,138 @@
-<div class="tab spells-summary" data-group="spell-collections" data-tab="spells-summary">
-    <ol class="spell-list">
-        {{#each spells as |entry rank|}}
-        <li class="header-row">
-            <div class="item-name">
-                <h3>{{localize (lookup @root.labels rank)}}</h3>
+<ol class="spell-list">
+    {{#each spells as |entry rank|}}
+    <li class="header-row">
+        <div class="item-name">
+            <h3>{{localize (lookup @root.labels rank)}}</h3>
 
-                {{#if (or (eq rank 12) (and (eq rank 0) @root.hasFocusCantrip))}}
-                <span class="pips{{#if @root.isOwner}} focus-pool{{/if}}">
-                    {{#times @root.focusPool.max}}
-                    <i
-                        class="{{#if (gt @root.focusPool.value this)}}fa-solid fa-dot-circle{{else}}fa-regular fa-circle{{/if}}"></i>
-                    {{/times}}
-                </span>
-                {{/if}}
-            </div>
+            {{#if (or (eq rank 12) (and (eq rank 0) @root.hasFocusCantrip))}}
+            <span class="pips{{#if @root.isOwner}} focus-pool{{/if}}">
+                {{#times @root.focusPool.max}}
+                <i
+                    class="{{#if (gt @root.focusPool.value this)}}fa-solid fa-dot-circle{{else}}fa-regular fa-circle{{/if}}"></i>
+                {{/times}}
+            </span>
+            {{/if}}
+        </div>
 
-            <div class="category">
-                {{#if (eq rank 13)}}
-                {{localize 'PF2E.CastLabel'}}
-                {{else}}
-                {{localize 'PF2E.Category'}}
-                {{/if}}
-            </div>
-
-            <div class="uses">
-                {{#if (not (or (gt rank 11) (eq rank 0)))}}
-                {{localize "PF2E.SpellUsesLabel"}}
-                {{/if}}
-            </div>
-
-            <button type="button" class="cast-spell blue">
-                {{localize "PF2E.Item.Spell.Cast"}}
-            </button>
-
-            <div class="range">
-                {{#if (eq rank 13)}}
-                {{localize 'PF2E.Item.Spell.Rank.Label'}}
-                {{else}}
-                {{localize 'PF2E.TraitRange'}}
-                {{/if}}
-            </div>
-        </li>
-
-        {{#each entry as |spell|}}
-        <li class="spell{{#if spell.virtual}} virtual{{/if}}"
-            data-item-type="spell{{#if spell.virtual}}-slot-group{{/if}}"
-            data-item-id="{{spell.itemId}}" data-entry-id="{{spell.entryId}}"
-            data-cast-rank="{{spell.castRank}}" data-group-id="{{spell.groupId}}" {{#if
-            spell.isPrepared}}data-slot-id="{{spell.slotId}}" {{/if}} {{#if
-            spell.expended}}data-slot-expended{{/if}}>
-
-            <div class="item-name">
-                <a class="item-image framed" data-action="item-to-chat">
-                    <img class="item-icon" src="{{spell.img}}">
-                    <i class="fa-solid fa-message"></i>
-                </a>
-                <h4 class="name">
-                    <a data-action="toggle-summary">{{spell.name}}</a>
-                    {{{actionGlyph spell.action}}}
-                </h4>
-            </div>
-
-            <div class="category" data-tooltip="{{spell.entryTooltip}}" data-tooltip-direction="UP">
-                {{#if (eq rank 13)}}
-
-                {{spell.action}}
-
-                {{else}}
-
-                {{localize spell.category}}
-
-                {{#if spell.isBroken}}
-                <i class="fa-solid fa-link-slash broken"></i>
-                {{else if (and @root.isOwner (not spell.isCantrip) spell.isPrepared (not
-                spell.isFlexible))}}
-                <a data-action="toggle-slot-expended"
-                    data-tooltip="{{#if spell.expended}}PF2E.RestoreSpellTitle{{else}}PF2E.ExpendSpellTitle{{/if}}">
-                    <i
-                        class="fa-solid fa-fw fa-{{#if spell.expended}}plus{{else}}minus{{/if}}-square"></i>
-                </a>
-                {{/if}}
-
-                {{/if}}
-            </div>
-
-            <div class="uses">
-                {{#if (and spell.uses )}}
-
-                <span class="spell-slots-input">
-                    <input type="number" {{#if spell.isStaff}} data-action="update-staff-charges"
-                        {{else}} data-item-id="{{spell.uses.itemId}}"
-                        data-item-property="{{spell.uses.input}}" {{/if}}
-                        value="{{spell.uses.value}}" min="0" max="{{spell.uses.max}}"
-                        placeholder="0">
-                </span>
-
-                {{#if (and spell.uses.max (not spell.isStaff))}}
-                <span class="slash"> / </span>
-                <span class="spell-max-input">
-                    <input type="number" data-item-id="" data-item-property=""
-                        value="{{spell.uses.max}}" placeholder="0" disabled />
-                </span>
-                {{/if}}
-
-                {{#if @root.isOwner}}
-                <a {{#if (eq spell.uses.value spell.uses.max)}}class="disabled" {{/if}} {{#if
-                    spell.isStaff}} data-action="reset-staff-charges" {{else}}
-                    data-action="reset-spell-slots" data-item-id="{{spell.uses.itemId}}"
-                    data-group-id="{{spell.groupId}}" {{/if}}>
-                    <i class="fa-solid fa-redo"></i>
-                </a>
-                {{/if}}
-
-                {{/if}}
-            </div>
-
-            {{#if (eq spell.consumable.isEquipped false)}}
-            <button type="button" class="cast-spell blue" data-action="draw-item"
-                data-item-id="{{spell.consumable.id}}">{{localize
-                "PF2E.Actions.Interact.Draw.Title"}}</button>
+        <div class="category">
+            {{#if (eq rank 13)}}
+            {{localize 'PF2E.CastLabel'}}
             {{else}}
-            <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize
-                "PF2E.Item.Spell.Cast"}}</button>
+            {{localize 'PF2E.Category'}}
+            {{/if}}
+        </div>
+
+        <div class="uses">
+            {{#if (not (or (gt rank 11) (eq rank 0)))}}
+            {{localize "PF2E.SpellUsesLabel"}}
+            {{/if}}
+        </div>
+
+        <button type="button" class="cast-spell blue">
+            {{localize "PF2E.Item.Spell.Cast"}}
+        </button>
+
+        <div class="range">
+            {{#if (eq rank 13)}}
+            {{localize 'PF2E.Item.Spell.Rank.Label'}}
+            {{else}}
+            {{localize 'PF2E.TraitRange'}}
+            {{/if}}
+        </div>
+    </li>
+
+    {{#each entry as |spell|}}
+    <li class="spell{{#if spell.virtual}} virtual{{/if}}"
+        data-item-type="spell{{#if spell.virtual}}-slot-group{{/if}}"
+        data-item-id="{{spell.itemId}}" data-entry-id="{{spell.entryId}}"
+        data-cast-rank="{{spell.castRank}}" data-group-id="{{spell.groupId}}" {{#if
+        spell.isPrepared}}data-slot-id="{{spell.slotId}}" {{/if}} {{#if
+        spell.expended}}data-slot-expended{{/if}}>
+
+        <div class="item-name">
+            <a class="item-image framed" data-action="item-to-chat">
+                <img class="item-icon" src="{{spell.img}}">
+                <i class="fa-solid fa-message"></i>
+            </a>
+            <h4 class="name">
+                <a data-action="toggle-summary">{{spell.name}}</a>
+                {{{actionGlyph spell.action}}}
+            </h4>
+        </div>
+
+        <div class="category" data-tooltip="{{spell.entryTooltip}}" data-tooltip-direction="UP">
+            {{#if (eq rank 13)}}
+
+            {{spell.action}}
+
+            {{else}}
+
+            {{localize spell.category}}
+
+            {{#if spell.isBroken}}
+            <i class="fa-solid fa-link-slash broken"></i>
+            {{else if (and @root.isOwner (not spell.isCantrip) spell.isPrepared (not
+            spell.isFlexible))}}
+            <a data-action="toggle-slot-expended"
+                data-tooltip="{{#if spell.expended}}PF2E.RestoreSpellTitle{{else}}PF2E.ExpendSpellTitle{{/if}}">
+                <i
+                    class="fa-solid fa-fw fa-{{#if spell.expended}}plus{{else}}minus{{/if}}-square"></i>
+            </a>
             {{/if}}
 
+            {{/if}}
+        </div>
 
-            <div class="range">
-                {{#if (eq rank 13)}}
-                {{spell.rank}}<span></span>
-                {{else}}
-                {{{spell.range}}}
-                {{/if}}
-            </div>
+        <div class="uses">
+            {{#if (and spell.uses )}}
 
-            <div class="item-summary" hidden></div>
-        </li>
-        {{/each}}
-        {{/each}}
-    </ol>
-</div>
+            <span class="spell-slots-input">
+                <input type="number" {{#if spell.isStaff}} data-action="update-staff-charges"
+                    {{else}} data-item-id="{{spell.uses.itemId}}"
+                    data-item-property="{{spell.uses.input}}" {{/if}} value="{{spell.uses.value}}"
+                    min="0" max="{{spell.uses.max}}" placeholder="0">
+            </span>
+
+            {{#if (and spell.uses.max (not spell.isStaff))}}
+            <span class="slash"> / </span>
+            <span class="spell-max-input">
+                <input type="number" data-item-id="" data-item-property=""
+                    value="{{spell.uses.max}}" placeholder="0" disabled />
+            </span>
+            {{/if}}
+
+            {{#if @root.isOwner}}
+            <a {{#if (eq spell.uses.value spell.uses.max)}}class="disabled" {{/if}} {{#if
+                spell.isStaff}} data-action="reset-staff-charges" {{else}}
+                data-action="reset-spell-slots" data-item-id="{{spell.uses.itemId}}"
+                data-group-id="{{spell.groupId}}" {{/if}}>
+                <i class="fa-solid fa-redo"></i>
+            </a>
+            {{/if}}
+
+            {{/if}}
+        </div>
+
+        {{#if (eq spell.consumable.isEquipped false)}}
+        <button type="button" class="cast-spell blue" data-action="draw-item"
+            data-item-id="{{spell.consumable.id}}">{{localize
+            "PF2E.Actions.Interact.Draw.Title"}}</button>
+        {{else}}
+        <button type="button" class="cast-spell blue" data-action="cast-spell">{{localize
+            "PF2E.Item.Spell.Cast"}}</button>
+        {{/if}}
+
+
+        <div class="range">
+            {{#if (eq rank 13)}}
+            {{spell.rank}}<span></span>
+            {{else}}
+            {{{spell.range}}}
+            {{/if}}
+        </div>
+
+        <div class="item-summary" hidden></div>
+    </li>
+    {{/each}}
+    {{/each}}
+</ol>

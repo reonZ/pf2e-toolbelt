@@ -25,13 +25,14 @@ const { config, settings, hook } = createTool({
             listener: onUpdateCombat,
         },
     ],
+    init: setup,
 } as const);
 
 function setup() {
     hook.toggle(settings.force || settings.enabled);
 }
 
-function onUpdateCombat(combat: EncounterPF2e, data: CombatSource) {
+function onUpdateCombat(combat: EncounterPF2e, data: Partial<foundry.documents.CombatSource>) {
     if (!("turn" in data) && !("round" in data)) return;
 
     const user = game.user;

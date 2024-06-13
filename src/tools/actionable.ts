@@ -2,14 +2,12 @@ import {
     ErrorPF2e,
     addListener,
     addListenerAll,
-    elementData,
-    htmlElement,
-    isInstanceOf,
+    elementDataset,
+    htmlQuery,
     libWrapper,
-    querySelector,
     renderCharacterSheets,
     renderItemSheets,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -85,17 +83,15 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
     const actor = this.actor;
     const useButton = useButtonToolSetting.actions;
     const withMessage = settings.message;
-    const actionElements = html.querySelectorAll(
+    const actionElements = html.querySelectorAll<HTMLElement>(
         ".tab[data-tab='actions'] .actions-list:not(.heroActions-list):not(.strikes-list) .action[data-item-id]"
     );
 
     for (const actionElement of actionElements) {
-        const { itemId } = elementData(actionElement);
-        const item = actor.items.get(itemId);
-        if (!item?.isOfType("feat", "action") || item.system.selfEffect) continue;
-
+        const { itemId } = elementDataset(actionElement);
+        const item = actor.items.get(itemId) as FeatPF2e | AbilityItemPF2e | undefined;
         const macro = await getActionMacro(item);
-        if (!macro) continue;
+        if (!item || !macro) continue;
 
         const btn = createActionUseButton(item);
         btn.dataset.useActionMacro = "true";
@@ -136,7 +132,9 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
     );
 }
 
-async function getActionMacro(item: AbilityItemPF2e | FeatPF2e) {
+async function getActionMacro(item: Maybe<ItemPF2e>) {
+    if (!item?.isOfType("feat", "action") || item.system.selfEffect) return null;
+
     const uuid = getFlag<string>(item, "macro");
     return uuid ? fromUuid<Macro>(uuid) : null;
 }
@@ -155,13 +153,13 @@ async function actionSheetPF2eRenderInner(
         return $html;
     }
 
-    const html = htmlElement($html);
+    const html = $html[0];
     const label = localize("itemSheet.label");
-    const group = querySelector(html, "[data-drop-zone='self-applied-effect']");
+    const group = htmlQuery(html, "[data-drop-zone='self-applied-effect']");
     if (!group) return $html;
 
-    const labelEl = querySelector(group, ":scope > label");
-    const hintEl = querySelector(group, ".hint");
+    const labelEl = htmlQuery(group, ":scope > label");
+    const hintEl = htmlQuery(group, ".hint");
 
     if (labelEl) labelEl.innerText += ` / ${label}`;
     if (hintEl) hintEl.innerText += localize("itemSheet.hint");
@@ -174,7 +172,7 @@ async function actionSheetPF2eRenderInner(
     if (macro) {
         dropZone.outerHTML = await render("dropzone", { macro });
     } else {
-        const nameEl = querySelector(dropZone, ".name");
+        const nameEl = htmlQuery(dropZone, ".name");
         if (nameEl) nameEl.innerText += ` / ${label}`;
     }
 
@@ -196,8 +194,8 @@ function actionSheetPF2eActivateListeners(
         return;
     }
 
-    const html = htmlElement($html);
-    const group = querySelector(html, "[data-drop-zone='self-applied-effect']");
+    const html = $html[0];
+    const group = htmlQuery(html, "[data-drop-zone='self-applied-effect']");
     if (!group) return;
 
     addListener(group, "[data-action='open-macro-sheet']", async () => {

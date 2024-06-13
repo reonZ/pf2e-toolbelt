@@ -1,17 +1,16 @@
 import {
+    DEGREE_OF_SUCCESS_STRINGS,
     R,
     addListener,
     compareArrays,
-    createHTMLFromString,
+    createHTMLElement,
     getDamageRollClass,
-    htmlElement,
+    htmlQuery,
     latestChatMessages,
-    querySelector,
     refreshLatestMessages,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import { getMessageTargets, setTargetHelperFlagProperty } from "./targetHelper";
-import { DEGREE_OF_SUCCESS_STRINGS } from "pf2e-api/src/success";
 
 const { config, settings, hook, localize, getFlag, render, setFlagProperty } = createTool({
     name: "mergeDamage",
@@ -43,22 +42,25 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
     const actor = message.actor;
     if ((!game.user.isGM && !message.isAuthor) || !actor || !isDamageRoll(message)) return;
 
-    const html = htmlElement($html);
+    const html = $html[0];
     const merged = getFlag<boolean>(message, "merged");
-    const template = await render("buttons", { merged });
-    const buttons = createHTMLFromString(template);
     const targets = getTargets(message);
+
+    const buttonsElement = createHTMLElement("div", {
+        classes: ["pf2e-toolbelt-merge-buttons"],
+        innerHTML: await render("buttons", { merged }),
+    });
 
     if (merged) {
         html.classList.add("merged");
     }
 
-    querySelector(html, ".dice-result .dice-total")?.append(buttons);
+    htmlQuery(html, ".dice-result .dice-total")?.append(buttonsElement);
 
-    addListener(buttons, "[data-action='merge-damage']", (event) => {
+    addListener(buttonsElement, "[data-action='merge-damage']", (event) => {
         event.stopPropagation();
 
-        for (const { message: otherMessage } of latestChatMessages<ChatMessagePF2e>(5, message)) {
+        for (const { message: otherMessage } of latestChatMessages(5, message)) {
             if (otherMessage.actor !== actor || !isDamageRoll(otherMessage)) continue;
 
             const otherTargets = getTargets(otherMessage);
@@ -71,14 +73,14 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
         localize.warn("noMatch");
     });
 
-    addListener(buttons, "[data-action='split-damage']", async (event) => {
+    addListener(buttonsElement, "[data-action='split-damage']", async (event) => {
         event.stopPropagation();
 
         const sources = getFlag<MessageData[]>(message, "data")?.flatMap((data) => data.source);
 
         if (sources) {
             await message.delete();
-            ChatMessage.implementation.createDocuments(sources);
+            getDocumentClass("ChatMessage").createDocuments(sources);
         }
     });
 }
@@ -168,11 +170,10 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             group.terms = [group.terms[index]];
         }
 
-        const type = R.compact([
-            group.type,
-            group.persistent ? "persistent" : undefined,
-            ...group.materials,
-        ]).join(",");
+        const type = R.filter(
+            [group.type, group.persistent ? "persistent" : undefined, ...group.materials],
+            R.isTruthy
+        ).join(",");
 
         group.formula = `(${group.formulas.join(" + ")})[${type}]`;
         group.term = group.terms.length < 2 ? group.terms[0] : createTermGroup(group.terms);
@@ -190,6 +191,7 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             ignoredResistances: ignoredResistances,
             showBreakdown,
         },
+        ghost: true,
         dice: [],
         formula: `{${groupedInstances.map(({ formula }) => formula).join(", ")}}`,
         total: R.sumBy(groupedInstances, (x) => x.total),
@@ -205,11 +207,10 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
                     ({ formula, total, term, type, materials, persistent }) => ({
                         class: "DamageInstance",
                         options: {
-                            flavor: R.compact([
-                                type,
-                                persistent ? "persistent" : undefined,
-                                ...materials,
-                            ]).join(","),
+                            flavor: R.filter(
+                                [type, persistent ? "persistent" : undefined, ...materials],
+                                R.isTruthy
+                            ).join(","),
                         },
                         dice: [],
                         formula,
@@ -236,7 +237,7 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
         }
     }
 
-    const messageData: ChatMessageCreateData = {
+    const messageData: ChatMessagePF2eCreateData = {
         flavor: await render("merged", {
             groups,
             showBreakdown,
@@ -244,8 +245,9 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
         speaker: message.speaker,
         flags: {
             pf2e: {
+                // @ts-ignore
                 context: {
-                    options: R.uniq(data.flatMap(({ options }) => options)),
+                    options: R.unique(data.flatMap(({ options }) => options)),
                 },
             },
         },
@@ -258,10 +260,10 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
     setFlagProperty(messageData, "merged", true);
     setFlagProperty(messageData, "data", data);
 
-    ChatMessage.implementation.create(messageData);
+    getDocumentClass("ChatMessage").create(messageData);
 }
 
-function createTermGroup(terms: RollTermData[]): GroupingData {
+function createTermGroup(terms: RollTermData[]): GroupingData<ArithmeticExpressionData> {
     return {
         class: "Grouping",
         options: {},
@@ -280,12 +282,14 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
     const flag = getFlag<MessageData[]>(message, "data");
     if (flag) return flag;
 
-    const source = message.toObject() as PreCreate<ChatMessageSourceData>;
+    const source = message.toObject() as PreCreate<ChatMessageSourcePF2e>;
     delete source._id;
     delete source.timestamp;
 
-    const sourceFlag = source.flags!.pf2e as DamageDamageFlag;
-    const flavor = createHTMLFromString(message.flavor);
+    const sourceFlag = source.flags!.pf2e as Omit<ChatMessageFlagsPF2e, "context"> & {
+        context: Extract<ChatContextFlag, DamageDamageContextFlag | SpellCastContextFlag>;
+    };
+    const flavor = createHTMLElement("div", { innerHTML: message.flavor });
     const tags = flavor.querySelector(":scope > h4.action + .tags")?.outerHTML.trim() ?? "";
     const modifiers = flavor.querySelector(":scope > .tags.modifiers")?.outerHTML.trim() ?? "";
     const notes = flavor.querySelector(":scope > .notes")?.outerHTML.trim() ?? "";
@@ -294,8 +298,8 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
     return [
         {
             source,
-            name: sourceFlag.strike?.name ?? message.item!.name,
-            outcome: sourceFlag.context.outcome,
+            name: message.item!.name,
+            outcome: sourceFlag.context.outcome ?? null,
             options,
             modifiers,
             notes,
@@ -343,7 +347,7 @@ type MessageGroup = {
 };
 
 type MessageData = {
-    source: PreCreate<ChatMessageSourceData>;
+    source: PreCreate<ChatMessageSourcePF2e>;
     name: string;
     notes: string;
     outcome: DegreeOfSuccessString | null;

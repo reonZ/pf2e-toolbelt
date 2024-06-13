@@ -1,21 +1,26 @@
-import { MODULE, libWrapper, registerWrapper, unregisterWrapper } from "pf2e-api";
+import { libWrapper, registerWrapper, unregisterWrapper, wrapperError } from "foundry-pf2e";
 
 function createSharedWrapper<TListener extends (...args: any[]) => any>(
     path: string,
-    callback: (listeners: TListener[], wrapped: libWrapper.RegisterCallback, ...args: any[]) => any
+    callback: (
+        wrapperError: (error: Error) => void,
+        listeners: TListener[],
+        wrapped: libWrapper.RegisterCallback,
+        ...args: any[]
+    ) => any,
+    type: Exclude<libWrapper.RegisterType, "OVERRIDE"> = "WRAPPER"
 ) {
     let wrapperId: number | null = null;
     const listeners: Record<string, TListener> = {};
 
     const wrapper = function (this: any, wrapped: libWrapper.RegisterCallback, ...args: any[]) {
-        try {
-            return callback.call(this, Object.values(listeners), wrapped, ...args);
-        } catch (error) {
-            MODULE.error(`an error occured in the shared wrapper'\n${path}`, error);
-
-            const wrapFn = args.splice(0)[0] as Function;
-            return wrapFn(...args);
-        }
+        return callback.call(
+            this,
+            (error) => wrapperError(path, error),
+            Object.values(listeners),
+            wrapped,
+            ...args
+        );
     };
 
     return {
@@ -24,7 +29,7 @@ function createSharedWrapper<TListener extends (...args: any[]) => any>(
                 listeners[id] = callback;
             }
             if (wrapperId === null) {
-                wrapperId = registerWrapper(path, wrapper, "WRAPPER");
+                wrapperId = registerWrapper(path, wrapper, type);
             }
         },
         disable(id: string) {

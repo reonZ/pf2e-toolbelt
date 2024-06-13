@@ -1,4 +1,4 @@
-import { HANDWRAPS_SLUG, getEquippedHandwraps, htmlElement, libWrapper } from "pf2e-api";
+import { HANDWRAPS_SLUG, getEquippedHandwraps, libWrapper } from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
     ARMOR_PREPARE_BASE_DATA,
@@ -109,7 +109,7 @@ function isShieldWeapon(weapon: WeaponPF2e) {
     );
 }
 
-function isValidWeapon(weapon: WeaponPF2e) {
+function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>) {
     const traits = weapon._source.system.traits.value;
     const { group, category, slug } = weapon._source.system;
 
@@ -128,7 +128,7 @@ function isValidArmor(armor: ArmorPF2e) {
     return true;
 }
 
-function weaponPrepareBaseData(this: WeaponPF2e) {
+function weaponPrepareBaseData(this: WeaponPF2e<ActorPF2e>) {
     const actor = this.actor;
     if (!isValidActor(actor, true) || !isValidWeapon(this)) return;
 
@@ -150,7 +150,10 @@ function weaponPrepareBaseData(this: WeaponPF2e) {
     }
 }
 
-function weaponPrepareDerivedData(this: WeaponPF2e, wrapped: libWrapper.RegisterCallback) {
+function weaponPrepareDerivedData(
+    this: WeaponPF2e<ActorPF2e>,
+    wrapped: libWrapper.RegisterCallback
+) {
     wrapped();
 
     if (!isValidActor(this.actor) || this.isSpecific || !isValidWeapon(this)) return;
@@ -178,7 +181,7 @@ function weaponPrepareDerivedData(this: WeaponPF2e, wrapped: libWrapper.Register
     this.system.price.value = newPrice;
 }
 
-function armorPrepareBaseData(this: ArmorPF2e) {
+function armorPrepareBaseData(this: ArmorPF2e<ActorPF2e>) {
     const actor = this.actor;
 
     if (!isValidActor(actor, true) || !isValidArmor(this)) return;
@@ -198,7 +201,7 @@ function armorPrepareBaseData(this: ArmorPF2e) {
     }
 }
 
-function armorPrepareDerivedData(this: ArmorPF2e, wrapped: libWrapper.RegisterCallback) {
+function armorPrepareDerivedData(this: ArmorPF2e<ActorPF2e>, wrapped: libWrapper.RegisterCallback) {
     wrapped();
 
     if (!isValidActor(this.actor) || this.isSpecific || !isValidArmor(this)) return;
@@ -226,12 +229,15 @@ function armorPrepareDerivedData(this: ArmorPF2e, wrapped: libWrapper.RegisterCa
     this.system.price.value = newPrice;
 }
 
-function onRenderPhysicalItemSheetPF2e(sheet: ItemSheetPF2e, $html: JQuery) {
+function onRenderPhysicalItemSheetPF2e(
+    sheet: ItemSheetPF2e<PhysicalItemPF2e<ActorPF2e>>,
+    $html: JQuery
+) {
     const item = sheet.item;
 
     if (!item.isOfType("weapon", "armor") || !isValidActor(item.actor, true)) return;
 
-    const html = htmlElement($html);
+    const html = $html[0];
     const runesSection = html.querySelector(".material-runes");
     if (!runesSection) return;
 

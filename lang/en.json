@@ -205,10 +205,10 @@
             "error": {
                 "zero": "You cannot give an item you don't have yourself.",
                 "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
-                "withoutQty": "Giveth {item} to <strong>{target}</strong>.",
-                "noGM": "There is no GM online to trade."
+                "withoutQty": "Giveth {item} to <strong>{target}</strong>."
             },
             "subtitle": "Giveth Item",
+            "question": "How many items do you wish to giveth?",
             "trade": "{giver} giveth {quantity} × {item} to {recipient}."
         },
         "heroActions": {
@@ -260,7 +260,6 @@
                 "noAction": "The character doesn't have any Hero Action.",
                 "mustDiscard": "The character must discard {nb} actions to engage in a trade.",
                 "noOther": "There is no other character with Hero Actions available to trade with.",
-                "noGM": "There is no GM online to trade.",
                 "notGM": "You need to be a GM to give Hero Actions.",
                 "tradeError": "An error occured when trying to process the trade between <strong>{sender}</strong> and <strong>{receiver}</strong>."
             },
@@ -294,6 +293,7 @@
             }
         },
         "spellsSummary": {
+            "label": "Spell Summary",
             "staff": "Staff",
             "charges": "Charges"
         },
@@ -456,11 +456,8 @@
             },
             "buy": {
                 "refuse": "<strong>{actor}</strong> isn't interested in buying {quantity} <strong>{item}</strong>.",
-                "message": {
-                    "subtitle": "Buy Item",
-                    "content": "{buyer} buys {quantity} × {item} from {seller} for {price}gp."
-                },
-                "error": "An error occured when trying to process a trade request from <strong>{user}</strong>."
+                "error": "An error occured when trying to process a trade request from <strong>{user}</strong>.",
+                "question": "How many items do you wish to sell?"
             }
         },
         "actionable": {

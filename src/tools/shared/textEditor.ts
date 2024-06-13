@@ -1,4 +1,4 @@
-import { libWrapper } from "pf2e-api";
+import { libWrapper } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const TEXTEDITOR_ENRICH_HTML = "TextEditor.enrichHTML";
@@ -9,6 +9,7 @@ const textEditorWrappers = {
 
 async function textEditorEnrichHTML(
     this: TextEditor,
+    wrapperError: (error: Error) => void,
     listeners: ((enriched: string) => string)[],
     wrapped: libWrapper.RegisterCallback,
     content: string,
@@ -16,8 +17,12 @@ async function textEditorEnrichHTML(
 ): Promise<string> {
     let enriched = (await wrapped(content, options)) as string;
 
-    for (const listener of listeners) {
-        enriched = listener.call(this, enriched);
+    try {
+        for (const listener of listeners) {
+            enriched = listener.call(this, enriched);
+        }
+    } catch (error) {
+        wrapperError(error);
     }
 
     return enriched;

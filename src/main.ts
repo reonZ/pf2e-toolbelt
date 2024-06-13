@@ -1,24 +1,24 @@
-import { MODULE, userIsGM } from "pf2e-api";
+import { MODULE, userIsGM } from "foundry-pf2e";
 import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
+import { actionableTool } from "./tools/actionable";
 import { arpTool } from "./tools/arp";
+import { betterMerchantTool } from "./tools/betterMerchant";
 import { debugTool } from "./tools/debug";
 import { effectsPanelTool } from "./tools/effectsPanel";
 import { givethTool } from "./tools/giveth";
 import { heroActionsTool } from "./tools/heroActions";
+import { hideDamageTool } from "./tools/hideDamage";
+import { mergeDamageTool } from "./tools/mergeDamage";
 import { noBulkTool } from "./tools/noBulk";
-import { unidedTool } from "./tools/unided";
-import { untargetTool } from "./tools/untarget";
-import { templateHelperTool } from "./tools/templateHelper";
+import { ShareTool } from "./tools/share";
 import { spellsSummaryTool } from "./tools/spellsSummary";
 import { stancesTool } from "./tools/stances";
-import { ShareTool } from "./tools/share";
 import { targetHelperTool } from "./tools/targetHelper";
-import { mergeDamageTool } from "./tools/mergeDamage";
-import { hideDamageTool } from "./tools/hideDamage";
+import { templateHelperTool } from "./tools/templateHelper";
+import { unidedTool } from "./tools/unided";
+import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
-import { betterMerchantTool } from "./tools/betterMerchant";
-import { actionableTool } from "./tools/actionable";
 
 MODULE.register("pf2e-toolbelt", "PF2e Toolbelt");
 

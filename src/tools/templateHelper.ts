@@ -1,4 +1,4 @@
-import { getTemplateTokens, querySelector } from "pf2e-api";
+import { getTemplateTokens, htmlQuery } from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const { config, settings, hook, waitDialog } = createTool({
@@ -58,9 +58,9 @@ async function onCreateMeasuredTemplate(
     );
 
     if (html) {
-        const target = querySelector<HTMLInputElement>(html, "[name='targets']:checked")?.value;
-        const targetNeutral = querySelector<HTMLInputElement>(html, "[name='neutral']")?.checked;
-        const targetSelf = querySelector<HTMLInputElement>(html, "[name='self']")?.checked;
+        const target = htmlQuery<HTMLInputElement>(html, "[name='targets']:checked")?.value;
+        const targetNeutral = htmlQuery<HTMLInputElement>(html, "[name='neutral']")?.checked;
+        const targetSelf = htmlQuery<HTMLInputElement>(html, "[name='self']")?.checked;
         const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
         const opposition =
             alliance === "party" ? "opposition" : alliance === "opposition" ? "party" : null;

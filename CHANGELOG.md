@@ -1,3 +1,21 @@
+#
+
+-   this is a system `6.0.1` release
+-   lot of internal changes were made
+-   `Actionable`:
+    -   fixed not being able to drop an effect on the item sheet
+    -   fixed fringe issue preventing the interaction with the `Use Button` feature when both a macro and an effect existed
+-   `Better Merchant`:
+    -   the feature was reworked to be compatible with the latest changes
+-   `Giveth`:
+    -   the feature was reworked to be compatible with the latest changes
+-   `Hero Actions`:
+    -   now uses whisper for private message because of the v12 changes to private rolls
+-   `Merge Damages`:
+    -   fixed persistent damages being lost on merge
+-   `De-targeting`:
+    -   fixed the feature not starting on load
+
 # 2.5.0
 
 -   this is a `6.0.0-beta1` release

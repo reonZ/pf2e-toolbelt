@@ -1,4 +1,4 @@
-import { addListener, htmlElement } from "pf2e-api";
+import { addListener } from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const { config, settings, hooks } = createTool({
@@ -35,7 +35,7 @@ const { config, settings, hooks } = createTool({
 } as const);
 
 function onRender(app: FormApplication<FoundryDocument>, $html: JQuery) {
-    const html = htmlElement($html);
+    const html = $html[0];
 
     addListener(html, ".document-id-link", (event) => {
         if (!event.shiftKey) return;

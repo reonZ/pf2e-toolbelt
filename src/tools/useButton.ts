@@ -1,14 +1,13 @@
 import {
     addListenerAll,
-    closest,
     consumeItem,
-    createHTMLFromString,
-    elementData,
+    createHTMLElement,
+    elementDataset,
     getActionGlyph,
-    htmlElement,
+    htmlClosest,
     renderCharacterSheets,
     selfApplyEffectFromMessage,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import { getActionMacro } from "./actionable";
 import {
@@ -76,38 +75,39 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
     const actor = this.actor;
 
     if (settings.consumables) {
-        const consumableElements = html.querySelectorAll(
+        const consumableElements = html.querySelectorAll<HTMLElement>(
             ".tab[data-tab='inventory'] .inventory-list [data-item-types='consumable'] > [data-item-id]"
         );
         for (const consumableElement of consumableElements) {
-            const { itemId } = elementData(consumableElement);
+            const { itemId } = elementDataset(consumableElement);
             const item = actor.items.get(itemId);
             if (!item?.isOfType("consumable") || item.category === "ammo") continue;
 
             const [type, tooltip] =
                 item.uses.value < 1
-                    ? ["span", "PF2E.Item.Consumable.Uses.None"]
-                    : ["a", "PF2E.Action.Use"];
-            const template = `<${type} class="use-consumable" data-tooltip="${tooltip}">
-                <i class="fa-solid fa-play"></i>
-            </${type}>`;
+                    ? (["span", "PF2E.Item.Consumable.Uses.None"] as const)
+                    : (["a", "PF2E.Action.Use"] as const);
 
-            const btn = createHTMLFromString(template);
+            const btnElement = createHTMLElement(type, {
+                classes: ["use-consumable"],
+                dataset: { tooltip },
+                innerHTML: "<i class='fa-solid fa-play'></i>",
+            });
 
             if (item.uses.value) {
-                btn.dataset.action = "toolbelt-use-consumable";
+                btnElement.dataset.action = "toolbelt-use-consumable";
             }
 
-            consumableElement.querySelector(".item-controls")?.prepend(btn);
+            consumableElement.querySelector(".item-controls")?.prepend(btnElement);
         }
     }
 
     if (settings.actions) {
-        const actionElements = html.querySelectorAll(
+        const actionElements = html.querySelectorAll<HTMLElement>(
             ".tab[data-tab='actions'] .actions-list:not(.heroActions-list):not(.strikes-list) .action[data-item-id]"
         );
         for (const actionElement of actionElements) {
-            const { itemId } = elementData(actionElement);
+            const { itemId } = elementDataset(actionElement);
             const item = actor.items.get(itemId);
             if (
                 !item?.isOfType("feat", "action") ||
@@ -140,16 +140,16 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
 function createActionUseButton(item: AbilityItemPF2e | FeatPF2e) {
     const useLabel = game.i18n.localize("PF2E.Action.Use");
     const actionIcon = getActionGlyph(item.actionCost);
-    const template = `<button type="button" class="use-action">
-            <span>${useLabel}</span>
-            <span class="action-glyph">${actionIcon}</span>
-    </button>`;
-    return createHTMLFromString<HTMLButtonElement>(template);
+
+    return createHTMLElement("button", {
+        classes: ["use-action"],
+        innerHTML: `<span>${useLabel}</span><span class="action-glyph">${actionIcon}</span>`,
+    });
 }
 
 function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
-    const { itemId } = elementData(closest(btn, "[data-item-id]")!);
-    return actor.items.get<ItemPF2e<CharacterPF2e>>(itemId);
+    const { itemId } = elementDataset(htmlClosest(btn, "[data-item-id]")!);
+    return actor.items.get(itemId);
 }
 
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
@@ -191,7 +191,7 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
     const hookId = Hooks.on("renderChatMessage", (msg: ChatMessagePF2e, $html: JQuery) => {
         if (msg !== message) return;
 
-        const html = htmlElement($html);
+        const html = $html[0];
         Hooks.off("renderChatMessage", hookId);
         selfApplyEffectFromMessage(message, html);
     });

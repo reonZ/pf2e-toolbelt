@@ -1,13 +1,14 @@
 import {
     addListenerAll,
-    beforeHTMLFromString,
-    elementData,
+    createHTMLElement,
+    elementDataset,
     getItemWithSourceId,
     hasItemWithSourceId,
+    htmlQuery,
+    isInstanceOf,
     isOwner,
-    querySelector,
     renderCharacterSheets,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -121,13 +122,15 @@ async function characterSheetPF2eRenderInner(
     const stances = getStances(actor);
     if (!stances.length) return;
 
+    const dataset = canUseStances(actor) ? undefined : { tooltip: localize.path("sheet.noCombat") };
     const encounterTab = getEncounterTab(html);
-    const template = await render("sheet", {
-        inCombat: canUseStances(actor),
-        stances,
+    const sheetElement = createHTMLElement("div", {
+        dataset,
+        classes: ["pf2e-stances"],
+        innerHTML: await render("sheet", { stances }),
     });
 
-    beforeHTMLFromString(querySelector(encounterTab, "header"), template);
+    htmlQuery(encounterTab, "header")?.before(sheetElement);
 }
 
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
@@ -138,7 +141,7 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
     if (!encounterTab) return;
 
     addListenerAll(encounterTab, ".pf2e-stances .stance", (event, el) => {
-        const uuid = elementData(el).effectUuid;
+        const uuid = elementDataset(el).effectUuid;
         toggleStance(actor, uuid, event.ctrlKey);
     });
 }
@@ -196,7 +199,7 @@ async function onCreateCombatant(combatant: CombatantPF2e) {
     });
 
     const effectUUID = html
-        ? querySelector<HTMLInputElement>(html, "[name='stance']:checked")?.value
+        ? htmlQuery<HTMLInputElement>(html, "[name='stance']:checked")?.value
         : stances[0].effectUUID;
 
     if (!effectUUID) return;
@@ -230,8 +233,8 @@ function getStanceEffects(actor: CharacterPF2e) {
 }
 
 async function addStance(actor: CharacterPF2e, effectUUID: string) {
-    const effect = await fromUuid<ItemPF2e>(effectUUID);
-    if (!(effect instanceof Item) || !effect.isOfType("effect")) return;
+    const effect = await fromUuid(effectUUID);
+    if (!isInstanceOf(effect, "EffectPF2e")) return;
 
     const source = effect.toObject();
     foundry.utils.setProperty(source, "flags.core.sourceId", effectUUID);
@@ -246,7 +249,7 @@ function canUseStances(actor: CharacterPF2e) {
 }
 
 function getEncounterTab(html: HTMLElement) {
-    return querySelector(
+    return htmlQuery(
         html,
         ".sheet-content [data-tab=actions] .tab-content .actions-panels [data-tab=encounter]"
     );
@@ -265,7 +268,7 @@ function getStances(actor: CharacterPF2e) {
         if (!replacer && !extra && !isValidStance(feat)) continue;
 
         const effectUUID = replacer?.effect ?? extra?.effect ?? feat.system.selfEffect!.uuid;
-        const effect = fromUuidSync(effectUUID);
+        const effect = fromUuidSync<EffectPF2e | CompendiumIndexData>(effectUUID);
         if (!effect) continue;
 
         if (replacer?.replace) {
@@ -274,7 +277,7 @@ function getStances(actor: CharacterPF2e) {
 
         const existingEffect = getItemWithSourceId(actor, effectUUID, "effect");
         const foundAction =
-            (extra?.action && getItemWithSourceId<ItemPF2e>(actor, extra.action, "action")) || feat;
+            (extra?.action && getItemWithSourceId(actor, extra.action, "action")) || feat;
 
         stances.push({
             name: (replacer && fromUuidSync(replacer.replace)?.name) ?? feat.name,

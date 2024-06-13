@@ -1,17 +1,17 @@
 import {
-    MoveLootPopup,
+    TradePacket,
     createTradeMessage,
-    getDropTarget,
-    getHighestName,
-    hasGMOnline,
-    isPlayedActor,
-    transferItemToActor,
-} from "pf2e-api";
+    enactTradeRequest,
+    sendTradeRequest,
+    translateTradeData,
+} from "foundry-pf2e";
 import { createTool } from "../tool";
+import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
+import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
 
 const debouncedSetup = foundry.utils.debounce(setup, 1);
 
-const { config, localize, socket, settings, hook } = createTool({
+const { config, socket, settings, wrapper, hook, localize } = createTool({
     name: "giveth",
     settings: [
         {
@@ -24,129 +24,78 @@ const { config, localize, socket, settings, hook } = createTool({
             key: "message",
             type: Boolean,
             default: true,
-            onChange: debouncedSetup,
         },
     ],
     hooks: [
         {
-            event: "dropCanvasData",
-            listener: onDropCanvasData,
-            isUpstream: true,
+            event: "renderItemTransferDialog",
+            listener: onRenderItemTransferDialog,
         },
     ],
-    onSocket: giveth,
-    ready: debouncedSetup,
+    wrappers: [
+        {
+            path: ACTOR_TRANSFER_ITEM_TO_ACTOR,
+            callback: actorTransferItemToActor,
+        },
+    ],
+    onSocket: async (packet: TradePacket, userId: string) => {
+        const translated = translateTradeData(packet);
+        const enactedTradeData = await enactTradeRequest(translated);
+        if (enactedTradeData) {
+            createTradeMessage(
+                enactedTradeData,
+                { subtitle: localize.path("subtitle"), message: localize.path("trade") },
+                userId
+            );
+        }
+    },
+    ready: setup,
 } as const);
 
 function setup() {
     const isGM = game.user.isGM;
     const enabled = settings.enabled;
 
+    wrapper.toggle(!isGM && enabled);
     socket.toggle(isGM && enabled);
-    hook.toggle(!isGM && enabled && settings.message);
+    hook.toggle(!isGM && enabled);
 }
 
-function onDropCanvasData(canvas: Canvas, data: DropCanvasItemDataPF2e) {
-    if (data.type !== "Item" || !data.fromInventory || !data.uuid) {
-        return true;
-    }
+function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
+    const thisActor = app.item.actor;
+    const targetActor = app.options.targetActor;
 
-    const item = fromUuidSync<ItemPF2e>(data.uuid);
-    if (!item?.isOfType("physical")) return true;
+    if (
+        app.options.isPurchase ||
+        !thisActor?.isOfType("npc", "character") ||
+        !targetActor?.isOfType("npc", "character") ||
+        !targetActor.hasPlayerOwner ||
+        targetActor.isOwner
+    )
+        return;
 
-    const origin = item.actor;
-    if (!isValidActor(origin) || !origin.isOwner) return true;
-
-    const target = getDropTarget(canvas, data, (token) => {
-        const actor = token.actor as ActorPF2e | null;
-        return token.document.actorLink && isValidActor(actor, data.actorId);
-    })?.actor as ActorPF2e | undefined;
-
-    if (!target || target.isOwner) return true;
-
-    if (!hasGMOnline()) {
-        localize.error("error.noGM");
-        return true;
-    }
-
-    const quantity = item.quantity;
-
-    if (quantity < 1) {
-        localize.warn("error.zero");
-        return false;
-    }
-
-    const socketPacket: SocketPacket = {
-        itemId: item.id,
-        originId: origin.id,
-        targetId: target.id,
-    };
-
-    if (quantity === 1) {
-        socket.emit(socketPacket);
-        return false;
-    }
-
-    const stackable = !!target.inventory.findStackableItem(item._source);
-
-    new MoveLootPopup(
-        origin,
-        {
-            quantity: { max: quantity, default: quantity },
-            lockStack: !stackable,
-            isPurchase: false,
-        },
-        (quantity, newStack) => {
-            socketPacket.quantity = quantity;
-            socketPacket.newStack = newStack;
-            socket.emit(socketPacket);
-        }
-    ).render(true);
-
-    return false;
+    updateItemTransferDialog(app, $html, localize.path("subtitle"), localize.path("question"));
 }
 
-async function giveth(
-    { itemId, originId, targetId, newStack = false, quantity = 1 }: SocketPacket,
-    senderId: string
-) {
-    const origin = game.actors.get<ActorPF2e>(originId);
-    const target = game.actors.get<ActorPF2e>(targetId);
-    const item = origin?.inventory.get(itemId);
+async function actorTransferItemToActor(
+    this: ActorPF2e,
+    ...args: ActorTransferItemArgs
+): Promise<PhysicalItemPF2e<ActorPF2e> | null | undefined> {
+    const [targetActor, item, quantity] = args;
 
-    if (!origin || !target || !item || item.quantity < 1) return;
+    if (
+        !this.isOfType("npc", "character") ||
+        !targetActor.isOfType("npc", "character") ||
+        !targetActor.hasPlayerOwner ||
+        item.quantity < 1 ||
+        !this.isOwner ||
+        targetActor.isOwner
+    )
+        // we don't process anything, so we return undefined
+        return undefined;
 
-    const tradedQuantity = Math.min(quantity, item.quantity);
-    const newItem = await transferItemToActor(target, item, tradedQuantity, undefined, newStack);
-
-    if (!settings.message || !newItem) return;
-
-    const message = localize("trade", {
-        giver: getHighestName(origin),
-        quantity: tradedQuantity,
-        item: newItem.link,
-        recipient: getHighestName(target),
-    });
-
-    createTradeMessage(localize("subtitle"), message, origin, newItem, senderId);
+    sendTradeRequest(this, targetActor, item, { quantity }, socket);
+    return null;
 }
-
-function isValidActor<T extends ActorPF2e>(actor: T | null, excludeId?: string): actor is T {
-    return (
-        isPlayedActor(actor) &&
-        (!excludeId || actor.id !== excludeId) &&
-        actor.hasPlayerOwner &&
-        !actor.isToken &&
-        actor.isOfType("character", "npc", "vehicle")
-    );
-}
-
-type SocketPacket = {
-    originId: string;
-    targetId: string;
-    itemId: string;
-    quantity?: number;
-    newStack?: boolean;
-};
 
 export { config as givethTool };

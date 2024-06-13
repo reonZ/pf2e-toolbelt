@@ -1,4 +1,4 @@
-import { refreshLatestMessages } from "pf2e-api";
+import { refreshLatestMessages } from "foundry-pf2e";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 

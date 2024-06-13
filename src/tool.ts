@@ -1,7 +1,5 @@
 import {
-    MODULE,
     R,
-    RegisterSettingOptions,
     deleteInMemory,
     flagPath,
     getFlag,
@@ -9,7 +7,6 @@ import {
     getInMemory,
     getInMemoryAndSetIfNot,
     getSetting,
-    htmlElement,
     libWrapper,
     registerUpstreamHook,
     registerWrapper,
@@ -25,17 +22,19 @@ import {
     unregisterWrapper,
     unsetFlag,
     updateSourceFlag,
-} from "pf2e-api";
+} from "foundry-pf2e";
+import { actorWrappers } from "./tools/shared/actor";
 import { characterSheetWrappers } from "./tools/shared/characterSheet";
+import { chatMessageWrappers } from "./tools/shared/chatMessage";
 import { prepareDocumentWrappers } from "./tools/shared/prepareDocument";
 import { textEditorWrappers } from "./tools/shared/textEditor";
-import { chatMessageWrappers } from "./tools/shared/chatMessage";
 
 const sharedWrappers = {
     ...characterSheetWrappers,
     ...prepareDocumentWrappers,
     ...textEditorWrappers,
     ...chatMessageWrappers,
+    ...actorWrappers,
 };
 
 function createTool<TConfig extends ToolConfig>(config: TConfig) {
@@ -73,7 +72,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
     const waitDialog = async (
         template: string,
         dialogOptions: ToolWaitDialogOptions,
-        applicationOptions: ApplicationPositionOptions = {}
+        applicationOptions: Partial<RenderOptions> = {}
     ) => {
         const translate = localize.sub(template);
 
@@ -88,7 +87,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
                     yes: {
                         label: translate("yes"),
                         icon: `<i class="${dialogOptions.yes ?? "fa-solid fa-check"}"></i>`,
-                        callback: htmlElement,
+                        callback: ($html) => $html[0],
                     },
                     no: {
                         label: translate("no"),
@@ -97,7 +96,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
                     },
                 },
                 render: ($html) => {
-                    const html = htmlElement($html);
+                    const html = $html[0];
                     dialogOptions.onRender?.(html);
                 },
                 close: () => null,
@@ -173,27 +172,10 @@ function createToolWrappers(config: ToolConfig) {
         } else {
             let wrapperId: number | null = null;
 
-            const wrapped = function (this: any, ...args: any[]) {
-                try {
-                    return callback.call(this, ...args);
-                } catch (error) {
-                    MODULE.error(
-                        `an error occured in the tool '${config.name}'\nwrapper: ${path}`,
-                        error
-                    );
-
-                    if (type !== "OVERRIDE") {
-                        const wrapFn = args.splice(0)[0] as Function;
-                        return wrapFn(...args);
-                    }
-                }
-            };
-
             wrapper = {
                 activate() {
                     if (wrapperId === null) {
-                        // @ts-ignore
-                        wrapperId = registerWrapper(path, wrapped, type ?? "WRAPPER");
+                        wrapperId = registerWrapper(path, callback, type ?? "WRAPPER");
                     }
                 },
                 disable() {
@@ -220,7 +202,7 @@ function createToolWrappers(config: ToolConfig) {
     const wrappersObj = wrappers.every(
         (wrapper): wrapper is [string, ToolActivable] => !!wrapper[0]
     )
-        ? R.fromPairs(wrappers)
+        ? R.fromEntries(wrappers)
         : {};
 
     return {
@@ -277,7 +259,7 @@ function createToolHooks(config: ToolConfig) {
     const hooksMap = hooks.map(([event, hook]) => hook);
 
     return {
-        ...R.fromPairs(hooks),
+        ...R.fromEntries(hooks),
         activateAll() {
             for (const hook of hooksMap) {
                 hook.activate();
@@ -332,6 +314,32 @@ function createToolSocket(config: ToolConfig) {
     };
 }
 
+type RegisterSettingOptions<T extends string = string> = SettingOptions &
+    (
+        | {
+              type: StringConstructor;
+              choices?: Record<T, string> | T[] | ReadonlyArray<T>;
+              default: T | undefined;
+              onChange?: (value: T) => void;
+          }
+        | {
+              type: NumberConstructor;
+              default: number;
+              range?: { min: number; max: number; step: number };
+              onChange?: (value: number) => void;
+          }
+        | {
+              type: BooleanConstructor;
+              default: boolean;
+              onChange?: (value: boolean) => void;
+          }
+        | {
+              type: ArrayConstructor;
+              default: Array<any>;
+              onChange?: (value: Array<any>) => void;
+          }
+    );
+
 type ToolConfig = {
     name: string;
     settings: RegisterSettingOptions[];
@@ -376,7 +384,7 @@ type ToolObject<TConfig extends ToolConfig> = {
     waitDialog: (
         template: string,
         options: ToolWaitDialogOptions,
-        applicationOptions?: ApplicationPositionOptions
+        applicationOptions?: Partial<RenderOptions>
     ) => Promise<HTMLElement | null>;
     getFlag: typeof getFlag;
     setFlag: typeof setFlag;

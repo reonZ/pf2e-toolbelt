@@ -2,17 +2,17 @@ import {
     R,
     addListener,
     addListenerAll,
-    afterHTMLFromString,
-    appendHTMLFromString,
-    closest,
-    elementData,
+    createHTMLElement,
+    elementDataset,
+    getHighestName,
     getOwner,
     hasGMOnline,
-    querySelector,
-    querySelectorArray,
-    refreshApplication,
+    htmlClosest,
+    htmlQuery,
+    htmlQueryAll,
+    refreshApplicationHeight,
     renderCharacterSheets,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -163,16 +163,17 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
         isGM: game.user.isGM,
     });
 
-    const tab = querySelector(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
-    const attacks = querySelector(tab, ":scope > .strikes-list:not(.skill-action-list)");
+    const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
+    const attacks = htmlQuery(tab, ":scope > .strikes-list:not(.skill-action-list)");
 
-    afterHTMLFromString(attacks, template);
+    const sheetElement = createHTMLElement("div", { innerHTML: template });
+    attacks?.after(...sheetElement.children);
 }
 
 function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
-    const tab = querySelector(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
-    const list = querySelector(tab, ".heroActions-list");
+    const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
+    const list = htmlQuery(tab, ".heroActions-list");
     if (!list || !tab) return;
 
     addListener(tab, "[data-action='hero-actions-draw']", () => drawHeroActions(actor));
@@ -187,10 +188,10 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
         callback: (actor: CharacterPF2e, uuid: string, el: HTMLElement) => void
     ) => {
         addListenerAll(list, `[data-action="${action}"]`, (event: Event, el: HTMLElement) => {
-            const actionEl = closest(el, "[data-uuid]");
+            const actionEl = htmlClosest(el, "[data-uuid]");
             if (!actionEl) return;
 
-            const { uuid } = elementData(actionEl);
+            const { uuid } = elementDataset(actionEl);
             callback(actor, uuid, actionEl);
         });
     };
@@ -308,10 +309,10 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
         content: await TextEditor.enrichHTML(content),
         onRender: (html) => {
             addListenerAll(html, "[data-action='description']", async (event, el) => {
-                const action = closest(el, ".action");
+                const action = htmlClosest(el, ".action");
                 if (!action) return;
 
-                const { uuid } = elementData(action);
+                const { uuid } = elementDataset(action);
                 const entry = await fromUuid(uuid);
                 entry?.sheet.render(true);
             });
@@ -327,10 +328,7 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
     }
 
     if (isPrivate) {
-        packet.receiver.uuid = querySelector<HTMLInputElement>(
-            html,
-            "[name='action']:checked"
-        )!.value;
+        packet.receiver.uuid = htmlQuery<HTMLInputElement>(html, "[name='action']:checked")!.value;
     }
 
     if (game.user.isGM) {
@@ -348,7 +346,9 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     if (!isValidActor(actor)) return;
 
     if (!hasGMOnline()) {
-        localize.error("error.noGM");
+        game.i18n.format("PF2E.loot.GMSupervisionError", {
+            loot: getHighestName(actor),
+        });
         return;
     }
 
@@ -368,9 +368,10 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     }
 
     const isPrivate = settings.private;
-    const others = (game.actors as Actors<ActorPF2e>)
+    const others = game.actors
         .filter(
-            (x): x is CharacterPF2e => x !== actor && x.isOfType("character") && x.hasPlayerOwner
+            (x): x is CharacterPF2e<null> =>
+                x.isOfType("character") && x !== actor && x.hasPlayerOwner
         )
         .map((x) => ({
             name: x.name,
@@ -394,16 +395,14 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
                 rightEl.classList.toggle("selected", rightEl.dataset.targetId === targetId);
             }
 
-            if (app) {
-                refreshApplication(app);
-            }
+            refreshApplicationHeight(app);
         });
 
         addListenerAll(html, "[data-action='description']", async (event, el) => {
-            const action = closest(el, ".action");
+            const action = htmlClosest(el, ".action");
             if (!action) return;
 
-            const { uuid } = elementData(action);
+            const { uuid } = elementDataset(action);
             const entry = await fromUuid(uuid);
             entry?.sheet.render(true);
         });
@@ -424,14 +423,11 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
 
     if (html === null) return;
 
-    const targetId = querySelector<HTMLSelectElement>(html, ".header [name='target']")?.value;
-    const target = targetId ? (game.actors.get(targetId) as CharacterPF2e) : undefined;
-    if (!target) return;
+    const targetId = htmlQuery<HTMLSelectElement>(html, ".header [name='target']")?.value;
+    const target = targetId ? game.actors.get(targetId) : undefined;
+    if (!target?.isOfType("character")) return;
 
-    const actionUuid = querySelector<HTMLInputElement>(
-        html,
-        ".left [name='action']:checked"
-    )?.value;
+    const actionUuid = htmlQuery<HTMLInputElement>(html, ".left [name='action']:checked")?.value;
     const targetActionUUid = html.querySelector<HTMLInputElement>(
         `.right [name="action-${targetId}"]:checked`
     )?.value;
@@ -490,16 +486,17 @@ function exchangeHeroActions(trader1: ExchangeObj, trader2: ExchangeObj, senderI
 
 async function onExpandAction(actor: CharacterPF2e, uuid: string, actionEl: HTMLElement) {
     const duration = 0.4;
-    const summaryEl = querySelector(actionEl, ".item-summary")!;
+    const summaryEl = htmlQuery(actionEl, ".item-summary")!;
 
     if (!summaryEl.classList.contains("loaded")) {
         const details = await getHeroActionDetails(uuid);
         if (!details) return;
 
-        const text = await TextEditor.enrichHTML(details.description);
-        const descEl = querySelector(summaryEl, ".item-description");
+        const textElement = createHTMLElement("div", {
+            innerHTML: await TextEditor.enrichHTML(details.description),
+        });
 
-        appendHTMLFromString(descEl, text);
+        htmlQuery(summaryEl, ".item-description")?.append(textElement);
         summaryEl.classList.add("loaded");
     }
 
@@ -531,7 +528,7 @@ async function sendActionToChat(actor: CharacterPF2e, uuid: string) {
     const details = await getHeroActionDetails(uuid);
     if (!details) return;
 
-    ChatMessage.implementation.create({
+    getDocumentClass("ChatMessage").create({
         content: `<h3>${details.name}</h3>${details.description}`,
         speaker: ChatMessage.getSpeaker({ actor }),
     });
@@ -565,7 +562,7 @@ async function useHeroAction(actor: CharacterPF2e, uuid: string) {
 
     actor.update(updates);
 
-    ChatMessage.implementation.create({
+    getDocumentClass("ChatMessage").create({
         flavor: `<h4 class="action">${localize("message.used")}</h4>`,
         content: `<h3>${details.name}</h3>${details.description}`,
         speaker: ChatMessage.getSpeaker({ actor }),
@@ -573,7 +570,7 @@ async function useHeroAction(actor: CharacterPF2e, uuid: string) {
 }
 
 async function getHeroActionDetails(uuid: string) {
-    const document = await fromUuid<JournalEntry | JournalEntryPage>(uuid);
+    const document = await fromUuid<JournalEntry | JournalEntryPage<JournalEntry>>(uuid);
     if (!document) {
         localize.error("error.noDetails");
         return;
@@ -593,9 +590,9 @@ async function getHeroActionDetails(uuid: string) {
 }
 
 function onDiscardAction(actor: CharacterPF2e, uuid: string, el: HTMLElement) {
-    const parent = closest(el, ".actions-list")!;
-    const toDiscard = Number(elementData(parent).discard);
-    const discarded = querySelectorArray(parent, ".item.discarded").map((x) => elementData(x).uuid);
+    const parent = htmlClosest(el, ".actions-list")!;
+    const toDiscard = Number(elementDataset(parent).discard);
+    const discarded = htmlQueryAll(parent, ".item.discarded").map((x) => elementDataset(x).uuid);
 
     if (discarded.includes(uuid)) {
         el.classList.remove("discarded");
@@ -674,7 +671,7 @@ function createActionsMessage(
             <div>${translate("receive", { receive: links[1] })}</div>`
             : links.map((x) => `<div>${x}</div>`).join("");
 
-    const data: Partial<ChatMessageSourceData> = {
+    const data: Partial<ChatMessageSourcePF2e> = {
         flavor: `<h4 class="action">${translate(label, { nb: actions.length, name: other })}</h4>`,
         content,
         speaker: ChatMessage.getSpeaker({ actor }),
@@ -688,7 +685,7 @@ function createActionsMessage(
             .concat(senderId);
     }
 
-    ChatMessage.implementation.create(data);
+    getDocumentClass("ChatMessage").create(data);
 }
 
 async function drawHeroAction() {
@@ -768,7 +765,7 @@ async function getTableFromUuid(uuid: string) {
 }
 
 function getDefaultWorldTable() {
-    return game.tables.find((x) => x.getFlag("core", "sourceId") === TABLE_UUID);
+    return game.tables.find((x) => x._stats.compendiumSource === TABLE_UUID);
 }
 
 async function getDeckTable() {
@@ -828,10 +825,10 @@ async function giveHeroActions(actor: CharacterPF2e) {
         },
         onRender: (html) => {
             addListenerAll(html, "[data-action='expand']", (event, el) => {
-                const actionEl = closest(el, "[data-uuid]");
+                const actionEl = htmlClosest(el, "[data-uuid]");
                 if (!actionEl) return;
 
-                const { uuid } = elementData(actionEl);
+                const { uuid } = elementDataset(actionEl);
                 onExpandAction(actor, uuid, actionEl);
             });
         },
@@ -839,12 +836,12 @@ async function giveHeroActions(actor: CharacterPF2e) {
 
     if (!html) return;
 
-    const selected = querySelectorArray(html, "[name='action']:checked").map((el) => {
-        const parent = closest(el, ".action")!;
-        return elementData<{ uuid: string; name: string; key: string }>(parent);
+    const selected = htmlQueryAll(html, "[name='action']:checked").map((el) => {
+        const parent = htmlClosest(el, ".action")!;
+        return elementDataset<"uuid" | "name" | "key">(parent);
     });
-    const asDrawn = querySelector<HTMLInputElement>(html, "[name='drawn']")?.checked;
-    const withMessage = querySelector<HTMLInputElement>(html, "[name='message']")!.checked;
+    const asDrawn = htmlQuery<HTMLInputElement>(html, "[name='drawn']")?.checked;
+    const withMessage = htmlQuery<HTMLInputElement>(html, "[name='message']")!.checked;
     const tableUpdates = [];
 
     for (const { uuid, name, key } of selected) {
@@ -878,8 +875,8 @@ async function removeHeroActions() {
     const translate = localize.sub("removeActions");
 
     const onRender = (html: HTMLElement) => {
-        const allInput = querySelector<HTMLInputElement>(html, "[name='all']")!;
-        const actorInputs = querySelectorArray<HTMLInputElement>(html, "[name='actor']");
+        const allInput = htmlQuery<HTMLInputElement>(html, "[name='all']")!;
+        const actorInputs = htmlQueryAll<HTMLInputElement>(html, "[name='actor']");
 
         allInput.addEventListener("change", () => {
             const allChecked = allInput.checked;
@@ -918,9 +915,9 @@ async function removeHeroActions() {
     if (!html) return;
 
     const actors = R.pipe(
-        querySelectorArray<HTMLInputElement>(html, "[name='actor']:checked"),
-        R.map((input) => game.actors.get(input.value) as CharacterPF2e),
-        R.compact
+        htmlQueryAll<HTMLInputElement>(html, "[name='actor']:checked"),
+        R.map((input) => game.actors.get<CharacterPF2e<null>>(input.value)),
+        R.filter(R.isTruthy)
     );
 
     if (!actors.length) return;

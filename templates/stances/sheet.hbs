@@ -1,9 +1,6 @@
-<div class="pf2e-stances" {{#unless inCombat}}data-tooltip="{{i18n 'noCombat'}}" {{/unless}}>
-    {{#each stances as |stance|}}
-    <div class="stance{{#if stance.effectID}} active{{/if}}"
-        data-effect-uuid="{{stance.effectUUID}}">
-        <div class="img" style="background-image: url({{stance.img}});"></div>
-        <div class="name">{{stance.name}}</div>
-    </div>
-    {{/each}}
+{{#each stances as |stance|}}
+<div class="stance{{#if stance.effectID}} active{{/if}}" data-effect-uuid="{{stance.effectUUID}}">
+    <div class="img" style="background-image: url({{stance.img}});"></div>
+    <div class="name">{{stance.name}}</div>
 </div>
+{{/each}}

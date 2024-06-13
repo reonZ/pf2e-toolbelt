@@ -1,11 +1,10 @@
 import {
     addListener,
-    appendHTMLFromString,
-    closest,
-    elementData,
-    htmlElement,
-    querySelector,
-} from "pf2e-api";
+    createHTMLElement,
+    elementDataset,
+    htmlClosest,
+    htmlQuery,
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const debouncedSetup = foundry.utils.debounce(setup, 1);
@@ -34,7 +33,7 @@ const { localize, config, settings, hook } = createTool({
             listener: onRenderEffectsPanel,
         },
     ],
-    init: debouncedSetup,
+    init: setup,
 } as const);
 
 function setup() {
@@ -46,17 +45,14 @@ function onRenderEffectsPanel(panel: EffectsPanel, $html: JQuery) {
     const actor = panel.actor;
     if (!actor) return;
 
-    const html = htmlElement($html);
-    const effectsPanels = html.querySelectorAll(".effect-item[data-item-id]");
-    const removeRow = `<div>${localize("remove")}</div>`;
-    const editIcon = `<a data-action="edit" data-tooltip="PF2E.EditItemTitle">
-        <i class="fa-solid fa-fw fa-pencil"></i>
-    </a>`;
+    const html = $html[0];
+    const removeLabel = localize("remove");
+    const effectsPanels = html.querySelectorAll<HTMLElement>(".effect-item[data-item-id]");
 
     for (const effectsPanel of effectsPanels) {
-        const { itemId } = elementData(effectsPanel);
-        const effect = actor.items.get<EffectPF2e>(itemId);
-        if (!effect) continue;
+        const { itemId } = elementDataset(effectsPanel);
+        const effect = actor.items.get(itemId);
+        if (!effect?.isOfType("effect", "condition")) continue;
 
         if (
             settings.remove &&
@@ -64,10 +60,8 @@ function onRenderEffectsPanel(panel: EffectsPanel, $html: JQuery) {
             effect.badge &&
             effect.badge.type === "counter"
         ) {
-            appendHTMLFromString(
-                querySelector(effectsPanel, ".effect-info .instructions"),
-                removeRow
-            );
+            const removeElement = createHTMLElement("div", { innerHTML: removeLabel });
+            htmlQuery(effectsPanel, ".effect-info .instructions")?.append(removeElement);
 
             addListener(
                 effectsPanel,
@@ -83,13 +77,19 @@ function onRenderEffectsPanel(panel: EffectsPanel, $html: JQuery) {
             effect.isOfType("condition") &&
             effect.slug !== "persistent-damage"
         ) {
-            const h1 = querySelector(effectsPanel, ".effect-info > h1");
+            const h1 = htmlQuery(effectsPanel, ".effect-info > h1");
             if (!h1) continue;
 
-            appendHTMLFromString(h1, editIcon);
-            addListener(h1, "[data-action='edit']", (event, el) =>
-                onEditCondition(event, el, actor)
-            );
+            const editElement = createHTMLElement("a", {
+                innerHTML: "<i class='fa-solid fa-fw fa-pencil'></i>",
+                dataset: { tooltip: "PF2E.EditItemTitle" },
+            });
+
+            h1.append(editElement);
+
+            editElement.addEventListener("click", (event) => {
+                onEditCondition(event, editElement, actor);
+            });
         }
     }
 }
@@ -117,11 +117,11 @@ function onEditCondition(event: MouseEvent, el: HTMLElement, actor: ActorPF2e) {
 }
 
 function getEffect(target: HTMLElement, actor: ActorPF2e) {
-    const effectEl = closest(target, ".effect-item[data-item-id]");
+    const effectEl = htmlClosest(target, ".effect-item[data-item-id]");
     if (!effectEl) return;
 
-    const { itemId } = elementData(effectEl);
-    return actor.items.get<EffectPF2e>(itemId);
+    const { itemId } = elementDataset(effectEl);
+    return actor.items.get<EffectPF2e<ActorPF2e>>(itemId);
 }
 
 export { config as effectsPanelTool };

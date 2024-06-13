@@ -1,20 +1,17 @@
 import {
     BANDS_OF_FORCE_SLUGS,
     R,
-    SKILL_ABBREVIATIONS,
-    SKILL_DICTIONARY,
     SKILL_EXPANDED,
-    beforeHTMLFromString,
+    SKILL_SLUGS,
     calculateRemainingDuration,
+    createHTMLElement,
     getStatisticClass,
-    htmlElement,
+    htmlQuery,
     isInstanceOf,
     isPlayedActor,
     libWrapper,
-    querySelector,
     resetActors,
-    type BandsOfForceSlug,
-} from "pf2e-api";
+} from "foundry-pf2e";
 import { createTool } from "../tool";
 import { WEAPON_PREPARE_BASE_DATA } from "./shared/prepareDocument";
 
@@ -108,7 +105,7 @@ async function documentSheetRenderInner(
     ...args: any[]
 ): Promise<JQuery> {
     const $html = await wrapped(...args);
-    if (!game.user.isGM || !isInstanceOf<CreatureConfig>(this, "CreatureConfig")) return $html;
+    if (!game.user.isGM || !isInstanceOf(this, "CreatureConfig")) return $html;
 
     const actor = this.actor;
     if (!isPlayedActor(actor) || !actor.isOfType("character", "npc")) return $html;
@@ -117,8 +114,8 @@ async function documentSheetRenderInner(
 
     const masters = getSlaves(actor).length
         ? []
-        : (game.actors as Actors<ActorPF2e>)
-              .filter((x): x is CharacterPF2e => isValidMaster(x, actor.id))
+        : game.actors
+              .filter((x): x is CharacterPF2e<null> => isValidMaster(x, actor.id))
               .map((x) => ({ value: x.id, label: x.name }));
 
     const shareOptions = actor.isOfType("character") ? characterShareOptions : npcShareOptions;
@@ -129,7 +126,7 @@ async function documentSheetRenderInner(
         input: flagPath("config", group),
     }));
 
-    const html = htmlElement($html);
+    const html = $html[0];
     const template = await render("config", {
         masterInput: flagPath("config.master"),
         masters,
@@ -137,8 +134,10 @@ async function documentSheetRenderInner(
         groups,
     });
 
-    const btn = querySelector(html, ":scope > button[type='submit']");
-    beforeHTMLFromString(btn, template);
+    const configElements = createHTMLElement("div", { innerHTML: template });
+
+    const btnElement = htmlQuery(html, ":scope > button[type='submit']");
+    btnElement?.before(...configElements.children);
 
     return $html;
 }
@@ -189,7 +188,7 @@ async function combatResetActors(this: EncounterPF2e): Promise<void> {
 
             return [actor, familiar, ...slaves];
         }),
-        R.compact
+        R.filter(R.isTruthy)
     );
 
     resetActors(actors, { sheets: false, tokens: true });
@@ -245,7 +244,7 @@ async function combatantEndTurn(
     for (const slave of slaves) {
         if (!slave || slave.combatant) return;
 
-        const scene = game.scenes.get(this.sceneId) as ScenePF2e;
+        const scene = game.scenes.get(this.sceneId!);
         const token = slave.getDependentTokens({ linked: true, scenes: scene })[0];
 
         const activeConditions = slave.conditions.active;
@@ -360,8 +359,11 @@ function actorPrepareDerivedData(this: ActorPF2e, wrapped: libWrapper.RegisterCa
     const bracers = R.pipe(
         master.itemTypes.equipment,
         R.filter(
-            (item): item is EquipmentPF2e<CharacterPF2e> & { slug: BandsOfForceSlug } =>
-                BANDS_OF_FORCE_SLUGS.includes(item.slug as BandsOfForceSlug) && !!item.isInvested
+            (
+                item
+            ): item is EquipmentPF2e<CharacterPF2e> & {
+                slug: (typeof BANDS_OF_FORCE_SLUGS)[number];
+            } => BANDS_OF_FORCE_SLUGS.includes(item.slug) && !!item.isInvested
         ),
         R.sortBy([(item) => item.slug, "desc"]),
         R.first()
@@ -439,31 +441,31 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
     if (isCharacter && config.skills) {
         const Statistic = getStatisticClass(this.skills.acrobatics);
 
-        for (const shortForm of SKILL_ABBREVIATIONS) {
-            const longForm = SKILL_DICTIONARY[shortForm];
-            const masterSkill = master.skills[longForm];
-            const currentRank = this.skills[longForm].rank ?? 0;
+        for (const skillSlug of SKILL_SLUGS) {
+            const masterSkill = master.skills[skillSlug];
+            const currentRank = this.skills[skillSlug].rank ?? 0;
             if (currentRank > masterSkill.rank) continue;
 
-            const attribute = SKILL_EXPANDED[longForm].attribute;
+            const attribute = SKILL_EXPANDED[skillSlug].attribute;
             const statistic = new Statistic(this, {
-                slug: longForm,
-                label: CONFIG.PF2E.skillList[longForm] ?? longForm,
+                slug: skillSlug,
+                label: CONFIG.PF2E.skillList[skillSlug] ?? skillSlug,
                 attribute,
-                domains: [longForm, `${attribute}-based`, "skill-check", "all"],
+                domains: [skillSlug, `${attribute}-based`, "skill-check", "all"],
                 modifiers: [],
                 lore: false,
                 rank: masterSkill.rank,
                 check: { type: "skill-check" },
-            });
+            }) as CharacterSkill;
 
-            // @ts-ignore
-            this.skills[longForm] = statistic;
-            // @ts-ignore
-            this.system.skills[shortForm] = foundry.utils.mergeObject(statistic.getTraceData(), {
-                attribute,
-                rank: masterSkill.rank,
-            });
+            this.skills[skillSlug] = statistic;
+            this.system.skills[skillSlug] = foundry.utils.mergeObject(
+                statistic.getTraceData() as CharacterSkillData,
+                {
+                    attribute,
+                    rank: masterSkill.rank,
+                }
+            );
         }
     }
 }
@@ -484,8 +486,8 @@ function getMasterAndConfig(actor: ActorPF2e) {
 function getSlaves(actor: ActorPF2e, withConfig?: ConfigOption) {
     return R.pipe(
         getInMemory<string[]>(actor, "slaves") ?? [],
-        R.map((slaveUUID) => fromUuidSync<CompendiumCollectionIndex | FoundryDocument>(slaveUUID)),
-        R.compact,
+        R.map((slaveUUID) => fromUuidSync(slaveUUID)),
+        R.filter(R.isTruthy),
         R.filter(
             (slave): slave is ShareActor =>
                 isValidSlave(slave) && (!withConfig || !!getFlag(slave, "config", withConfig))
@@ -493,9 +495,9 @@ function getSlaves(actor: ActorPF2e, withConfig?: ConfigOption) {
     );
 }
 
-function isValidSlave(actor: FoundryDocument | CompendiumCollectionIndex): actor is ShareActor {
+function isValidSlave(actor: FoundryDocument | CompendiumIndexData): actor is ShareActor {
     return (
-        isInstanceOf<ActorPF2e>(actor, "ActorPF2e") &&
+        isInstanceOf(actor, "ActorPF2e") &&
         isPlayedActor(actor) &&
         actor.isOfType("character", "npc")
     );

@@ -1,67 +1,64 @@
-<div class="target-header" data-target-uuid="{{uuid}}">
-    <span class="name">
-        <i class="fa-{{ifThen isHidden 'thin' 'solid'}} fa-{{ifThen hasPlayerOwner 'person' 'ghost'}}"
-            {{#if isHidden}}data-tooltip="{{i18n.path 'hidden'}}" {{/if}}></i>
-        {{name}}
-    </span>
+<span class="name">
+    <i class="fa-{{ifThen isHidden 'thin' 'solid'}} fa-{{ifThen hasPlayerOwner 'person' 'ghost'}}"
+        {{#if isHidden}}data-tooltip="{{i18n.path 'hidden'}}" {{/if}}></i>
+    {{name}}
+</span>
 
-    <span class="controls">
-        {{#if save.result}}
+<span class="controls">
+    {{#if save.result}}
 
-        {{#if save.result.notes}}
-        <i class="fa-duotone fa-list-check list" data-tooltip="{{save.result.notes}}"></i>
-        {{/if}}
+    {{#if save.result.notes}}
+    <i class="fa-duotone fa-list-check list" data-tooltip="{{save.result.notes}}"></i>
+    {{/if}}
 
-        {{#if (and isOwner canReroll)}}
-        <a data-action="reroll-save" data-statistic="{{save.statistic}}"
-            data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
-            <i class="{{save.icon}}"></i>
-            <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
-                {{save.result.value}}
-            </span>
-            <i class="fa-solid fa-rotate rotate"></i>
-        </a>
-        {{else}}
-        <span data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
-            <i class="{{save.icon}}"></i>
-            {{#if canSeeResult}}
-            <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
-                {{save.result.value}}
-            </span>
-            <i class="{{rerolled.icon}} small"></i>
-            {{else}}
-            <i class="fa-solid fa-circle-question"></i>
-            {{/if}}
+    {{#if (and isOwner canReroll)}}
+    <a data-action="reroll-save" data-statistic="{{save.statistic}}"
+        data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
+        <i class="{{save.icon}}"></i>
+        <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
+            {{save.result.value}}
         </span>
-        {{/if}}
-
-        <hr>
-        {{else if save}}
-
-        {{#if isOwner}}
-        <a data-action="roll-save" data-statistic="{{save.statistic}}"
-            data-tooltip="{{save.tooltip}}">
-            <i class="{{save.icon}}"></i>
-            <i class="fa-solid fa-dice-d20 die"></i>
-        </a>
-        {{else}}
-        <span data-tooltip="{{save.tooltip}}">
-            <i class="{{save.icon}}"></i>
-            <i class="fa-regular fa-circle-question"></i>
+        <i class="fa-solid fa-rotate rotate"></i>
+    </a>
+    {{else}}
+    <span data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
+        <i class="{{save.icon}}"></i>
+        {{#if canSeeResult}}
+        <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
+            {{save.result.value}}
         </span>
-        {{/if}}
-
-        <hr>
-        {{/if}}
-
-        <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
-            <i class="fa-solid fa-fw fa-signal-stream"></i>
-        </a>
-
-        {{#if isGM}}
-        <a data-action="open-target-sheet" data-tooltip="{{i18n.path 'sheet'}}">
-            <i class="icon fa-solid fa-file"></i>
-        </a>
+        <i class="{{rerolled.icon}} small"></i>
+        {{else}}
+        <i class="fa-solid fa-circle-question"></i>
         {{/if}}
     </span>
-</div>
+    {{/if}}
+
+    <hr>
+    {{else if save}}
+
+    {{#if isOwner}}
+    <a data-action="roll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.tooltip}}">
+        <i class="{{save.icon}}"></i>
+        <i class="fa-solid fa-dice-d20 die"></i>
+    </a>
+    {{else}}
+    <span data-tooltip="{{save.tooltip}}">
+        <i class="{{save.icon}}"></i>
+        <i class="fa-regular fa-circle-question"></i>
+    </span>
+    {{/if}}
+
+    <hr>
+    {{/if}}
+
+    <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
+        <i class="fa-solid fa-fw fa-signal-stream"></i>
+    </a>
+
+    {{#if isGM}}
+    <a data-action="open-target-sheet" data-tooltip="{{i18n.path 'sheet'}}">
+        <i class="icon fa-solid fa-file"></i>
+    </a>
+    {{/if}}
+</span>
