@@ -1,0 +1,473 @@
+{
+    "pf2e-toolbelt": {
+        "settings": {
+            "requiresReload": "(Wymaga przeładowania)",
+            "actionable": {
+                "title": "Wykonalne akcje",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Dodaje możliwość powiązania makra z akcją postaci."
+                },
+                "message": {
+                    "name": "Wiadomość na czacie",
+                    "hint": "Podczas korzystania z makra akcji, opis akcji powinien być wysyłany na czat."
+                }
+            },
+            "arp": {
+                "title": "Automatyczna Progresja Run",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Czy twój świat powinien używać wariantu Automatycznej Progresji Run? Jest on niekompatybilny ze zwykłym wariantem ABP i wyłączy ustawienia wariantu systemu."
+                },
+                "force": {
+                    "name": "Wymuś aktualizację",
+                    "hint": "Gdy opcja ta jest włączona, runy będą zawsze aktualizowane w oparciu o poziom aktora. Gdy opcja ta jest wyłączona, aktualizowane będą tylko te runy, których wartość jest obecnie niższa niż powinna być dla danego poziomu."
+                }
+            },
+            "effectsPanel": {
+                "title": "Panel efektów",
+                "remove": {
+                    "name": "Skrót Usuń efekt",
+                    "hint": "Użycie kombinacji [Shift + kliknięcie prawym przyciskiem myszy] na ikonach efektów w panelu efektów natychmiast usunie wszystkie ich ładunki/liczniki/znaczniki."
+                },
+                "condition": {
+                    "name": "Ikona Karty stanu",
+                    "hint": "Dodaje dodatkową ikonę do stanów w panelu efektów, aby otworzyć ich kartę."
+                }
+            },
+            "giveth": {
+                "title": "Przekazywanie",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Czy świat powinien umożliwiać graczom przekazywanie przedmiotów innym graczom."
+                },
+                "message": {
+                    "name": "Wyślij wiadomość na czat",
+                    "hint": "Gdy przedmiot zostanie przekazany innemu aktorowi, wygenerowana zostanie wiadomość na czacie."
+                }
+            },
+            "heroActions": {
+                "title": "Akcje Heroiczne",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Jeśli twój świat korzysta z akcji Talii Punktów Bohaterstwa."
+                },
+                "table": {
+                    "name": "UUID tabeli",
+                    "hint": "Unikalny identyfikator tabeli, której chcesz użyć w swoim świecie. Aby uzyskać identyfikator UUID tabeli (w kompendium lub w katalogu tabel rzutów), wystarczy otworzyć tabelę i kliknąć prawym przyciskiem myszy na 📔 obok jej nazwy."
+                },
+                "trade": {
+                    "name": "Zezwól na wymianę",
+                    "hint": "Po włączeniu tej opcji postacie będą mogły wymieniać się między sobą akcjami."
+                },
+                "private": {
+                    "name": "Losuj prywatnie",
+                    "hint": "Po włączeniu tej opcji wygenerowana wiadomość na czacie będzie prywatna dla innych graczy."
+                },
+                "count": {
+                    "name": "Wariant Zestawu Heroicznego",
+                    "hint": "Jeśli 0, postacie mogą mieć tylko jedną akcję heroiczną na punkt bohaterstwa. W przeciwnym razie liczba akcji heroicznych zostanie oddzielona od liczby dostępnych punktów bohaterstwa, a postacie będą losować akcje heroiczne w zestawie."
+                }
+            },
+            "noBulk": {
+                "title": "Brak Masy",
+                "dropped": {
+                    "name": "Bez Masy upuszczonych przedmiotów",
+                    "hint": "Upuszczony sprzęt w ekwipunku aktora nie będzie uwzględniany przy obliczaniu wartości obciążenia."
+                },
+                "coins": {
+                    "name": "Monety bez ciężaru",
+                    "hint": "Monety nie mają wagi w ekwipunku."
+                }
+            },
+            "unided": {
+                "title": "Ustaw obraz Niezidentyfikowany",
+                "create": {
+                    "name": "Podczas tworzenia przedmiotu",
+                    "hint": "Automatycznie ustawia niezidentyfikowany obraz przedmiotów tak, aby był taki sam jak zwykły obraz, gdy przedmiot jest tworzony/importowany."
+                },
+                "update": {
+                    "name": "Podczas aktualizacji przedmiotu",
+                    "hint": "Automatycznie aktualizuj Niezidentyfikowany obraz po zaktualizowaniu zwykłego obrazu przedmiotu."
+                }
+            },
+            "untarget": {
+                "title": "Usuwanie celu",
+                "force": {
+                    "name": "Wymuszenie usunięcia celu",
+                    "hint": "Przymusowo usuwa cele wszystkich użytkowników przy zmianie tury/rundy."
+                },
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Usuwa wszystkie cele przy zmianie tury/rundy. To może zastąpić ustawienia \"Wymuszenie usunięcia celu\"."
+                }
+            },
+            "templateHelper": {
+                "title": "Pomocnik szablonów",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
+                },
+                "dismiss": {
+                    "name": "Automatyczne usuwanie",
+                    "hint": "Szablon zostanie usunięty z tablicy po ustawieniu wszystkich celów (lub jeśli zostanie anulowany). Osierocenie odnosi się do szablonów, które nie pochodzą z wiadomości czatu zaklęć.",
+                    "choices": {
+                        "disabled": "Wyłączone",
+                        "orphan": "Tylko osierocone",
+                        "all": "Wszystkie szablony"
+                    }
+                }
+            },
+            "spellsSummary": {
+                "title": "Podsumowanie zaklęć",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Oferuje możliwość przełączania się między zwykłą i alternatywną wersją zakładki rzucania zaklęć na karcie postaci w dowolnym momencie, klikając ponownie ikonę zakładki."
+                },
+                "sort": {
+                    "name": "Sortuj według kategorii",
+                    "hint": "Po włączeniu tej opcji zaklęcia w tabeli tej samej rangi będą najpierw sortowane według kategorii, a następnie alfabetycznie."
+                }
+            },
+            "stances": {
+                "title": "Postawy",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Dodaj przełączniki w karcie postaci, aby z łatwością zmieniać postawę. Usuwa również postawy na koniec spotkania."
+                }
+            },
+            "share": {
+                "title": "Współdzielone dane",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Aktorzy będą mogli łączyć/współdzielić swoje dane między sobą."
+                }
+            },
+            "targetHelper": {
+                "title": "Pomocnik celowania",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Włączono funkcję \"Pomocnik celowania\" na twoim świecie."
+                },
+                "addTargets": {
+                    "name": "Dodawanie celów do wiadomości",
+                    "hint": "Doda dodatkowe cele do wiadomości na czacie, w których można zadawać obrażenia i rzucać rzuty obronne."
+                },
+                "smallButtons": {
+                    "name": "Małe przyciski",
+                    "hint": "Zmniejsz rozmiar przycisków obrażeń dla dodatkowych celów."
+                }
+            },
+            "mergeDamage": {
+                "title": "Złącz obrażenia",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Dodano nową ikonę do wiadomości o obrażeniach, umożliwiając ich łączenie z innymi wiadomościami o obrażeniach."
+                }
+            },
+            "hideDamage": {
+                "title": "Ukrywanie obrażeń",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Ukryje przed graczami wartość wiadomości czatu o obrażeniach zadawanych przez stworzenia niebędące własnością gracza."
+                }
+            },
+            "useButton": {
+                "title": "Przycisk Użyj",
+                "actions": {
+                    "name": "Dodaj do Akcji",
+                    "hint": "Doda dodatkowy przycisk \"użyj\" do akcji, które mają zastosowania."
+                },
+                "consumables": {
+                    "name": "Dodaj do przedmiotów jednorazowych",
+                    "hint": "Doda dodatkowy przycisk \"użyj\" do przedmiotów jednorazowych."
+                },
+                "selfApplied": {
+                    "name": "Automatyczna aplikacja efektu",
+                    "hint": "Przycisk użycia dla efektu nakładanego na siebie spowoduje automatyczne nałożenie efektu."
+                }
+            },
+            "betterMerchant": {
+                "title": "Lepszy kupiec",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Dodawanie niestandardowych funkcji do domyślnego kupca systemowego."
+                }
+            }
+        },
+        "arp": {
+            "forceVariant": "Moduł <strong>PF2e Toolbelt</strong> wyłączył wariant systemu pf2e dla reguły ABP, aby działał poprawnie. Prawdopodobnie byłoby lepiej, gdybyś przeładował teraz świat."
+        },
+        "effectsPanel": {
+            "remove": "[Shift + kliknięcie prawym przyciskiem myszy] Usuń efekt"
+        },
+        "giveth": {
+            "error": {
+                "zero": "Nie możesz podarować przedmiotu, którego nie posiadasz.",
+                "withQty": "Przekazuje {qty} {item} do <strong>{target}</strong>.",
+                "withoutQty": "Przekazuje {item} do <strong>{target}</strong>.",
+                "noGM": "Nie ma żadnego MG online by handlować."
+            },
+            "subtitle": "Przekaż przedmiot",
+            "trade": "{giver} przekazuje {quantity} × {item} do {recipient}."
+        },
+        "heroActions": {
+            "sheet": {
+                "action": {
+                    "use": "Użyj",
+                    "discard": "Odrzuć"
+                },
+                "label": "Akcje Heroiczne",
+                "draw": "Losuj {nb}",
+                "redraw": "Przelosuj",
+                "trade": "Wymiana",
+                "give": "Przekaż"
+            },
+            "trade": {
+                "title": "Handluj Akcją Heroiczną",
+                "select": "Wybierz postać, z którą chcesz handlować",
+                "yes": "Wyślij",
+                "no": "Anuluj",
+                "request": {
+                    "title": "Akcja Heroiczna - Prośba o wymianę",
+                    "flavor": "Postać <strong>{sender} </strong> chce handlować z <strong>{receiver}</strong>",
+                    "give": "Oferuje: {give}",
+                    "want": "Potrzebuje: {want}",
+                    "yes": "Akceptuj",
+                    "no": "Odrzuć"
+                },
+                "rejected": "Handel pomiędzy <strong>{sender}</strong> i <strong>{receiver}</strong> została odrzucona."
+            },
+            "giveActions": {
+                "title": "Podaruj Akcję Heroiczną",
+                "yes": "Podaruj Akcje",
+                "no": "Anuluj",
+                "drawn": "Już wylosowana",
+                "asDrawn": "Ustaw jako wylosowany, gdy zostanie podarowany",
+                "withMessage": "Wygeneruj wiadomość czatu"
+            },
+            "removeActions": {
+                "title": "Usuń Akcje Heroiczne",
+                "all": "Wszystkie postacie",
+                "yes": "Usuń",
+                "no": "Anuluj",
+                "removed": "Akcje Heroiczne zostały usunięte z wybranych postaci."
+            },
+            "error": {
+                "onlyCharacter": "Akcje Heroiczne są kompatybilne tylko z aktorami postaci",
+                "notEnoughPoint": "Postać nie ma wystarczającej liczby punktów bohaterstwa",
+                "noDetails": "Nie udało się znaleźć szczegółów dotyczących tej Akcji Heroicznej.",
+                "noAction": "Postać nie ma żadnej Akcji Heroicznej.",
+                "mustDiscard": "Postać musi odrzucić {nb} akcji, aby związać się z handlem.",
+                "noOther": "Nie ma innej postaci z Akcjami Heroicznymi, z którą można by handlować.",
+                "noGM": "Nie ma żadnego MG online by handlować.",
+                "notGM": "Musisz być MG, aby przyznawać Akcje Heroiczne.",
+                "tradeError": "Wystąpił błąd podczas próby przetworzenia transakcji między <strong>{sender}</strong> i <strong>{receiver}</strong>."
+            },
+            "message": {
+                "drawn": "Wylosował ({nb}) Akcję Heroiczną",
+                "given": "Podarował ({nb}) Akcję Heroiczną",
+                "discarded": "Odrzucił ({nb}) Akcję Heroiczną",
+                "used": "Wydaje punkt bohaterstwa, aby użyć",
+                "exchanged": "Wymieniono Akcję Heroiczną z {name}",
+                "offer": "Oferowane: {offer}",
+                "receive": "Otrzymano: {receive}"
+            },
+            "table": {
+                "noDraw": "Z tabeli nie można było wylosować żadnych akcji.",
+                "notFound": "W tym świecie nie można znaleźć tabeli talii Punktów Bohaterstwa.",
+                "noFormula": "Tabela Talii Bohaterów nie ma formuły, powiedz swojemu MG, że coś schrzanił.",
+                "noFormulaCompendium": "Tabela Talii Bohaterów nie ma formuły i jest tabelą kompendium.",
+                "drawError": "Podczas losowania wystąpił błąd, najprawdopodobniej tabela zawiera niezgodne wyniki."
+            }
+        },
+        "templateHelper": {
+            "menu": {
+                "title": "Pomocnik szablonów",
+                "self": "Uwzględnij siebie",
+                "neutral": "Uwzględnij neutralne",
+                "enemies": "Wrogowie",
+                "allies": "Sojusznicy",
+                "all": "Oba",
+                "yes": "Cel",
+                "no": "Anuluj"
+            }
+        },
+        "spellsSummary": {
+            "staff": "Kostur",
+            "charges": "Ładunki"
+        },
+        "stances": {
+            "sheet": {
+                "noCombat": "Postawę można przyjąć tylko podczas spotkania bojowego"
+            },
+            "error": {
+                "noCombat": "Ta postać nie jest częścią spotkania."
+            },
+            "opening": {
+                "title": "Postawa Początkowa",
+                "select": "Wybierz postawę dla {name}",
+                "yes": "Postawa w górę!",
+                "no": "Anuluj"
+            }
+        },
+        "share": {
+            "config": {
+                "header": "Współdzielone dane",
+                "master": {
+                    "label": "Mistrz",
+                    "hint": "Wybierz mistrza, z którą ten aktor będzie udostępniać dane.",
+                    "disabled": "Ten aktor nie może mieć mistrza"
+                },
+                "health": {
+                    "label": "Pula zdrowia",
+                    "hint": "Dzieli się punktami zdrowia i staminy ze swoim mistrzem."
+                },
+                "turn": {
+                    "label": "Tura się zaczyna/kończy",
+                    "hint": "Za każdym razem, gdy tura mistrza się rozpocznie/zakończy, zdarzenia zostaną uruchomione również dla tego aktora, jeśli nie jest on częścią bieżącego spotkania."
+                },
+                "skills": {
+                    "label": "Biegłość w umiejętnościach",
+                    "hint": "Użyj biegłości z umiejętności mistrza."
+                },
+                "hero": {
+                    "label": "Punkty Bohaterstwa",
+                    "hint": "Użyj Punktów Bohaterstwa mistrza."
+                },
+                "weapon": {
+                    "label": "Runy broni",
+                    "hint": "Wykorzystaj zainwestowane przez mistrza runy podstawowe i runy właściwości."
+                },
+                "armor": {
+                    "label": "Runy pancerza",
+                    "hint": "Wykorzystaj zainwestowane przez mistrza runy mocy pancerza/osłony i odporności."
+                }
+            },
+            "skills": {
+                "modifier": "Biegłość mistrza"
+            }
+        },
+        "targetHelper": {
+            "unnamed": "Bez nazwy",
+            "tooltip": {
+                "adjustment": "Dostosowanie: {value}",
+                "dcWithValue": "ST {dc}",
+                "reroll": "Może przerzucić rzut obronny",
+                "result": {
+                    "format": "Wynik: {result}",
+                    "withOffset": "{success} przez {offset}",
+                    "withoutOffset": "{success}"
+                }
+            },
+            "header": {
+                "sheet": "Otwórz kartę",
+                "hidden": "Ukryte przed graczami"
+            },
+            "setTargets": "Wyznacz cele",
+            "toggleDamageRows": "Przełącz oryginalne przyciski obrażeń",
+            "context": {
+                "rollAll": "Rzuć wszystkie rzuty obronne"
+            },
+            "reroll": {
+                "title": "Przerzuć ponowny test rzutu obronnego",
+                "noPoints": "Potrzebujesz co najmniej 1 Punktu Bohaterstwa, aby wykonać przerzut.",
+                "yes": "Ponowny rzut",
+                "no": "Anuluj"
+            },
+            "drop": {
+                "unauth": "Możesz to zrobić tylko w wiadomościach, których jesteś autorem.",
+                "already": "Ta wiadomość ma już powiązany rzut obronny.",
+                "added": "Pomyślnie dodano rzut obronny do wiadomości."
+            }
+        },
+        "mergeDamage": {
+            "buttons": {
+                "split": "Powrót do oryginalnych wiadomości",
+                "merge": "Scal z poprzednią wiadomością o obrażeniach"
+            },
+            "noMatch": "Nie mogę znaleźć innego pasującego komunikatu o obrażeniach."
+        },
+        "betterMerchant": {
+            "sheet": {
+                "browser": "Z przeglądarki",
+                "filters": "Filtry przedmiotów",
+                "infiniteAll": {
+                    "label": "Nieskończone zapasy",
+                    "tooltip": "Kupcowi nigdy nie zabraknie przedmiotów do sprzedania (nie ma to żadnego wpływu na Skarby)"
+                },
+                "infiniteToggle": "Przełącz nieskończone zapasy"
+            },
+            "browserPull": {
+                "selected": "Wybrane",
+                "add": "Dodaj do kupca",
+                "all": "Wybierz wszystko",
+                "limit": "Osiągnąłeś limit!",
+                "wait": "Poczekaj na przetworzenie przedmiotów.",
+                "finished": "Zakończono dodawanie przedmiotów do aktora kupca.",
+                "owned": "Ten przedmiot znajduje się już w ekwipunku kupca",
+                "confirm": "<p>Czy na pewno chcesz dodać przedmiot(y) (wybrano): <strong>{nb}</strong>) do kupca?</p><p>Proces ten może potrwać kilka sekund w zależności od ilości przedmiotów.</p>"
+            },
+            "browserFilter": {
+                "create": "Utwórz Filtr {type}",
+                "edit": "Edytuj filtr {type} ",
+                "empty": "Nie ma sensu tworzyć filtra bez ... filtrów."
+            },
+            "filter": {
+                "buy": "Kupno",
+                "sell": "Sprzedaż"
+            },
+            "filters": {
+                "title": "{name} - Filtry przedmiotów",
+                "default": {
+                    "buy": "Domyślny zakup",
+                    "sell": "Domyślna sprzedaż"
+                },
+                "name": "Nazwa",
+                "type": "Typ",
+                "buy": "Filtry zakupu",
+                "sell": "Filtry sprzedaży",
+                "enabled": {
+                    "label": "Włączone",
+                    "tooltip": "Włącz filtr dla tego kupca"
+                },
+                "useDefault": {
+                    "label": "Użyj domyślnych funduszy",
+                    "tooltip": "Czy ten filtr powinien również używać domyślnych funduszy, jeśli nie, używana będzie tylko fundusze tego filtra"
+                },
+                "ratio": {
+                    "label": "Współczynnik ceny",
+                    "tooltip": "Współczynnik ceny dla tego filtra"
+                },
+                "purse": {
+                    "label": "Fundusze",
+                    "tooltip": {
+                        "buy": "Ilość złota do wydania na ten filtr (0 = brak pieniędzy na zakup, puste = nieskończone)<br><em>Uwaga: Nie będzie wyświetlać niczego mniejszego niż złoto, ale nadal będzie je śledzić.</em>",
+                        "sell": "Ilość złota, jaką ten filtr otrzymał do tej pory ze sprzedaży przedmiotów"
+                    }
+                },
+                "delete": {
+                    "title": "Usuń filtr",
+                    "content": "Czy na pewno chcesz usunąć filtr <strong>{name}</strong>?"
+                }
+            },
+            "sell": {
+                "refuse": "<strong>{actor}</strong> nie jest skłonny do odejścia od <strong>{item}</strong>."
+            },
+            "buy": {
+                "refuse": "<strong>{actor}</strong> nie jest zainteresowany kupnem {quantity} <strong>{item}</strong>.",
+                "message": {
+                    "subtitle": "Kup przedmiot",
+                    "content": "{buyer} kupił {quantity} × {item} od {seller} za {price}sz."
+                },
+                "error": "Wystąpił błąd podczas próby przetworzenia żądania transakcji od <strong>{user}</strong>."
+            }
+        },
+        "actionable": {
+            "itemSheet": {
+                "label": "Makro",
+                "hint": " lub makro, które zostanie wykonane, gdy ta akcja zostanie użyta"
+            }
+        }
+    }
+}
