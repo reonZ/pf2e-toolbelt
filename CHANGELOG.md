@@ -1,3 +1,7 @@
+# 2.6.1
+
+-   added Polish localization (thanks to [Lioheart](https://github.com/Lioheart))
+
 # 2.6.0
 
 -   this is a system `6.0.1` release
