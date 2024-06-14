@@ -1,3 +1,9 @@
+# 2.7.0
+
+-   added a new `Underground` feature:
+    -   it allows tokens with negative elevation to remain visible on the board
+    -   added a few client settings to customize the render of tokens that have a negative elevation
+
 # 2.6.1
 
 -   added Polish localization (thanks to [Lioheart](https://github.com/Lioheart))
