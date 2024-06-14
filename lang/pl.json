@@ -205,10 +205,10 @@
             "error": {
                 "zero": "Nie możesz podarować przedmiotu, którego nie posiadasz.",
                 "withQty": "Przekazuje {qty} {item} do <strong>{target}</strong>.",
-                "withoutQty": "Przekazuje {item} do <strong>{target}</strong>.",
-                "noGM": "Nie ma żadnego MG online by handlować."
+                "withoutQty": "Przekazuje {item} do <strong>{target}</strong>."
             },
             "subtitle": "Przekaż przedmiot",
+            "question": "Ile przedmiotów chcesz przekazać?",
             "trade": "{giver} przekazuje {quantity} × {item} do {recipient}."
         },
         "heroActions": {
@@ -260,7 +260,6 @@
                 "noAction": "Postać nie ma żadnej Akcji Heroicznej.",
                 "mustDiscard": "Postać musi odrzucić {nb} akcji, aby związać się z handlem.",
                 "noOther": "Nie ma innej postaci z Akcjami Heroicznymi, z którą można by handlować.",
-                "noGM": "Nie ma żadnego MG online by handlować.",
                 "notGM": "Musisz być MG, aby przyznawać Akcje Heroiczne.",
                 "tradeError": "Wystąpił błąd podczas próby przetworzenia transakcji między <strong>{sender}</strong> i <strong>{receiver}</strong>."
             },
@@ -294,6 +293,7 @@
             }
         },
         "spellsSummary": {
+            "label": "Podsumowanie zaklęcia",
             "staff": "Kostur",
             "charges": "Ładunki"
         },
@@ -456,11 +456,8 @@
             },
             "buy": {
                 "refuse": "<strong>{actor}</strong> nie jest zainteresowany kupnem {quantity} <strong>{item}</strong>.",
-                "message": {
-                    "subtitle": "Kup przedmiot",
-                    "content": "{buyer} kupił {quantity} × {item} od {seller} za {price}sz."
-                },
-                "error": "Wystąpił błąd podczas próby przetworzenia żądania transakcji od <strong>{user}</strong>."
+                "error": "Wystąpił błąd podczas próby przetworzenia żądania transakcji od <strong>{user}</strong>.",
+                "question": "Ile przedmiotów chcesz sprzedać?"
             }
         },
         "actionable": {
