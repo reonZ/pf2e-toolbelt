@@ -89,16 +89,6 @@ function tokenRefreshElevation(this: TokenPF2e, wrapped: libWrapper.RegisterCall
             this.elevationFilters.push(new PIXI.AlphaFilter(alpha));
         }
 
-        // if (mode !== "normal" || contrast > 0) {
-        //     const colorMatrix = new PIXI.ColorMatrixFilter();
-
-        //     if (contrast > 0) colorMatrix.contrast(contrast);
-        //     if (mode === "greyscale") colorMatrix.greyscale(0.5);
-        //     else if (mode === "sepia") colorMatrix.sepia();
-
-        //     this.elevationFilters.push(colorMatrix);
-        // }
-
         if (mode !== "normal") {
             const colorMatrix = new PIXI.ColorMatrixFilter();
             if (mode === "sepia") colorMatrix.sepia();
