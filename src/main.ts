@@ -19,6 +19,7 @@ import { templateHelperTool } from "./tools/templateHelper";
 import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
+import { undergroundTool } from "./tools/underground";
 
 MODULE.register("pf2e-toolbelt", "PF2e Toolbelt");
 
@@ -40,6 +41,7 @@ const TOOLS: ToolConfig[] = [
     stancesTool,
     targetHelperTool,
     templateHelperTool,
+    undergroundTool,
     useButtonTool,
 ];
 
