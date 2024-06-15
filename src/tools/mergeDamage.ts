@@ -298,7 +298,10 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
     return [
         {
             source,
-            name: message.item!.name,
+            name:
+                message.item?.name ??
+                flavor.querySelector<HTMLHeadElement>(":scope > h4.action")?.innerText.trim() ??
+                "unknown",
             outcome: sourceFlag.context.outcome ?? null,
             options,
             modifiers,
