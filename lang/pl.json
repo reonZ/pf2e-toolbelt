@@ -193,6 +193,30 @@
                     "name": "Włączone",
                     "hint": "Dodawanie niestandardowych funkcji do domyślnego kupca systemowego."
                 }
+            },
+            "underground": {
+                "title": "Pod ziemią",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Pozwoli tokenom z ujemną wysokością pozostać widocznymi na planszy."
+                },
+                "mode": {
+                    "name": "Zastosuj filtr",
+                    "hint": "Jakiego typu filtr należy zastosować do tokenów o wysokości poniżej 0.",
+                    "choices": {
+                        "normal": "Brak filtra",
+                        "greyscale": "Filtr skali szarości",
+                        "sepia": "Filtr sepii"
+                    }
+                },
+                "contrast": {
+                    "name": "Kontrast",
+                    "hint": "Wartość kontrastu, gdy token ma ujemną wysokość."
+                },
+                "alpha": {
+                    "name": "Przezroczystość",
+                    "hint": "Wartość przezroczystości, gdy token ma ujemną wysokość."
+                }
             }
         },
         "arp": {
