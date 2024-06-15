@@ -286,9 +286,10 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
     delete source._id;
     delete source.timestamp;
 
-    const sourceFlag = source.flags!.pf2e as Omit<ChatMessageFlagsPF2e, "context"> & {
-        context: Extract<ChatContextFlag, DamageDamageContextFlag | SpellCastContextFlag>;
+    const sourceFlag = source.flags!.pf2e as ChatMessageFlagsPF2e["pf2e"] & {
+        context: DamageDamageContextFlag | SpellCastContextFlag;
     };
+
     const flavor = createHTMLElement("div", { innerHTML: message.flavor });
     const tags = flavor.querySelector(":scope > h4.action + .tags")?.outerHTML.trim() ?? "";
     const modifiers = flavor.querySelector(":scope > .tags.modifiers")?.outerHTML.trim() ?? "";
@@ -299,6 +300,7 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
         {
             source,
             name:
+                sourceFlag.strike?.name ??
                 message.item?.name ??
                 flavor.querySelector<HTMLHeadElement>(":scope > h4.action")?.innerText.trim() ??
                 "unknown",
