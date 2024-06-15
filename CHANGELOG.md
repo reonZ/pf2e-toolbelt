@@ -1,3 +1,8 @@
+# 2.7.2
+
+-   `Merge Damages`:
+    -   fixed naming/merging issue with item-less strikes (such as unarmed attack)
+
 # 2.7.1
 
 -   `Merge Damages`:
