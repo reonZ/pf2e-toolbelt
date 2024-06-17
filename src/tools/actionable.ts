@@ -38,6 +38,9 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
             },
         },
     ],
+    api: {
+        getActionMacro,
+    },
     wrappers: [
         {
             path: CHARACTER_SHEET_RENDER_INNER,
