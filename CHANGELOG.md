@@ -1,3 +1,8 @@
+# 2.7.3
+
+-   `Actionable`:
+    -   exposes `getActionMacro` function to the API
+
 # 2.7.2
 
 -   `Merge Damages`:
