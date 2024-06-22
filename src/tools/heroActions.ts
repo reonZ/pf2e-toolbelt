@@ -266,7 +266,7 @@ function onTradeAccepted(packet: SocketPacket, senderId: string) {
     if (!data) return;
 
     const { sender, receiver } = data;
-    exchangeHeroActions(sender, receiver, senderId);
+    exchangeHeroActions(sender, receiver, senderId, packet.sender.id);
 }
 
 async function onTradeRequest(packet: SocketPacket, senderId: string) {
@@ -432,7 +432,7 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
         `.right [name="action-${targetId}"]:checked`
     )?.value;
 
-    if (!actionUuid || !targetActionUUid) return;
+    if (!actionUuid || (!isPrivate && !targetActionUUid)) return;
 
     if (target.isOwner && targetActionUUid) {
         const targetActions = others.find((x) => x.id === targetId)!.actions;
@@ -468,7 +468,12 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     });
 }
 
-function exchangeHeroActions(trader1: ExchangeObj, trader2: ExchangeObj, senderId?: string) {
+function exchangeHeroActions(
+    trader1: ExchangeObj,
+    trader2: ExchangeObj,
+    senderId?: string,
+    otherId?: string
+) {
     const trader1Action = trader1.actions.splice(trader1.index, 1)[0];
     const trader2Action = trader2.actions.splice(trader2.index, 1)[0];
 
@@ -480,6 +485,7 @@ function exchangeHeroActions(trader1: ExchangeObj, trader2: ExchangeObj, senderI
 
     createActionsMessage(trader1.actor, [trader1Action, trader2Action], "exchanged", {
         senderId,
+        otherId,
         other: trader2.actor.name,
     });
 }
@@ -661,7 +667,11 @@ function createActionsMessage(
     actor: CharacterPF2e,
     actions: HeroActionFlag[],
     label: "drawn" | "discarded" | "exchanged" | "given",
-    { senderId = game.user.id, other }: { senderId?: string; other?: string } = {}
+    {
+        senderId = game.user.id,
+        other,
+        otherId,
+    }: { senderId?: string; other?: string; otherId?: string } = {}
 ) {
     const links = actions.map(({ uuid }) => `@UUID[${uuid}]`);
     const translate = localize.sub("message");
@@ -683,6 +693,7 @@ function createActionsMessage(
             .filter((user) => user.isGM)
             .map((user) => user.id)
             .concat(senderId);
+        if (otherId) data.whisper.push(otherId);
     }
 
     getDocumentClass("ChatMessage").create(data);
@@ -732,7 +743,7 @@ async function drawHeroAction() {
         return;
     }
 
-    const name = await getLabelfromTableResult(draw, uuid);
+    const name = (await getLabelfromTableResult(draw, uuid)) ?? "";
     return { uuid, name };
 }
 
