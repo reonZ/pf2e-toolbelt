@@ -1,3 +1,8 @@
+# 2.7.4
+
+-   `Hero Actions`:
+    -   fixed private trade not working
+
 # 2.7.3
 
 -   `Actionable`:
