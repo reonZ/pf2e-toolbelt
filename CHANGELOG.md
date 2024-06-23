@@ -1,3 +1,8 @@
+# 2.7.5
+
+-   `Target Helper`:
+    -   fixed not being able to roll saves on spell cards
+
 # 2.7.4
 
 -   `Hero Actions`:

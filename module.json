@@ -17,11 +17,11 @@
         "maximum": "12"
     },
     "socket": true,
-    "version": "2.7.4",
+    "version": "2.7.5",
     "url": "https://github.com/reonZ/pf2e-toolbelt",
     "readme": "https://github.com/reonZ/pf2e-toolbelt/blob/master/README.md",
     "manifest": "https://raw.githubusercontent.com/reonZ/pf2e-toolbelt/master/module.json",
-    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/2.7.4/module.zip",
+    "download": "https://github.com/reonZ/pf2e-toolbelt/releases/download/2.7.5/module.zip",
     "changelog": "https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md",
     "bugs": "https://github.com/reonZ/pf2e-toolbelt/issues",
     "styles": [
@@ -34,7 +34,7 @@
                 "type": "system",
                 "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.json",
                 "compatibility": {
-                    "minimum": "6.0.1"
+                    "minimum": "6.0.4"
                 }
             }
         ],
