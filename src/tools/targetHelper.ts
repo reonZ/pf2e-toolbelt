@@ -660,9 +660,10 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
 
     const rowsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-targetRows"] });
 
-    for (const { template } of targets) {
+    for (const { template, uuid } of targets) {
         const hrElement = createHTMLElement("hr");
         const rowElement = createHTMLElement("div", {
+            dataset: { targetUuid: uuid },
             classes: ["target-header"],
             innerHTML: template,
         });
