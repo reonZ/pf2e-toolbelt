@@ -1,3 +1,8 @@
+# 2.7.6
+
+-   `Target Helper`:
+    -   fixed shift+click on a target damage button instead applying the damage to the selected token
+
 # 2.7.5
 
 -   `Target Helper`:
