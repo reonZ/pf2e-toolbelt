@@ -1,3 +1,8 @@
+# 2.7.7
+
+-   `Shared Data`:
+    -   fixed update on actors that share their health triggering an error to other players
+
 # 2.7.6
 
 -   `Target Helper`:
