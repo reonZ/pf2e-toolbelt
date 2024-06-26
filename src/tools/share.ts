@@ -282,7 +282,7 @@ function onDeleteActor(actor: ActorPF2e) {
 
 function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) {
     const isCharacter = actor.isOfType("character");
-    if (!actor.primaryUpdater || (!isCharacter && !actor.isOfType("npc"))) return;
+    if ((!isCharacter && !actor.isOfType("npc")) || actor.primaryUpdater !== game.user) return;
 
     const masterUpdate = getFlagProperty<string>(changed, "config.master");
     if (masterUpdate !== undefined) {
