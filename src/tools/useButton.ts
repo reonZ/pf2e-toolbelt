@@ -141,10 +141,13 @@ function createActionUseButton(item: AbilityItemPF2e | FeatPF2e) {
     const useLabel = game.i18n.localize("PF2E.Action.Use");
     const actionIcon = getActionGlyph(item.actionCost);
 
-    return createHTMLElement("button", {
+    const btn = createHTMLElement("button", {
         classes: ["use-action"],
         innerHTML: `<span>${useLabel}</span><span class="action-glyph">${actionIcon}</span>`,
     });
+    btn.type = "button";
+
+    return btn;
 }
 
 function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
