@@ -1,3 +1,8 @@
+# 2.7.9
+
+-   `Template Helper`:
+    -   fixed spell templates being removed even with the `Orphan Only` option selected
+
 # 2.7.8
 
 -   fixed buttons added by both `Actionable` and `Use Button` being considered as submit buttons and would trigger whenever the `Enter` key is being used in an input field on the sheet

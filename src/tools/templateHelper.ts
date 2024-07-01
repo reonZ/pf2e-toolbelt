@@ -92,12 +92,19 @@ async function onCreateMeasuredTemplate(
     const dismissSetting = settings.dismiss;
     if (dismissSetting === "disabled") return;
 
-    if (
-        dismissSetting === "all" ||
-        template.message?.getFlag("pf2e", "context.type") !== "spell-cast"
-    ) {
+    const message = template.message;
+    if (!message || dismissSetting === "all") {
         template.delete();
+        return;
     }
+
+    if (
+        message.getFlag("pf2e", "context.type") === "spell-cast" ||
+        message.getFlag("pf2e", "origin.type") === "spell"
+    )
+        return;
+
+    template.delete();
 }
 
 export { config as templateHelperTool };
