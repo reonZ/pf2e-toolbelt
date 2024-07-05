@@ -38,7 +38,7 @@ async function onCreateMeasuredTemplate(
     userId: string
 ) {
     const user = game.user;
-    if (user.id !== userId) return;
+    if (user.id !== userId || !canvas.grid.isSquare) return;
 
     const actor = template.actor;
     const self: Token | null | undefined = !actor
