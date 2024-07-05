@@ -1,3 +1,10 @@
+# 2.7.10
+
+-   `Better Merchant`
+    -   fix some trade messages having `undefined` names
+-   `Template Helper`:
+    -   prevent the popup from showing on scenes without a square grid
+
 # 2.7.9
 
 -   `Template Helper`:
