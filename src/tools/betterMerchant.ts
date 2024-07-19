@@ -234,15 +234,16 @@ async function actorTransferItemToActor(
 ): Promise<PhysicalItemPF2e | null | undefined> {
     const isGM = game.user.isGM;
     const [targetActor, item, quantity = 1] = args;
+    const isParty = this.isOfType("party");
+    const isCreature = this.isOfType("npc", "character");
 
     if (
         !targetActor.isOfType("loot") ||
         !targetActor.isMerchant ||
-        !this.isOwner ||
         (!isGM && targetActor.isOwner) ||
-        (this.isOfType("party") && !this.members.some((x) => x.hasPlayerOwner)) ||
-        !this.isOfType("npc", "character") ||
-        !this.hasPlayerOwner
+        (!isCreature && !isParty) ||
+        (isCreature && !this.isOwner && !this.hasPlayerOwner) ||
+        (isParty && !this.members.some((x) => x.hasPlayerOwner && x.isOwner))
     )
         // we don't process anything, so we return undefined
         return undefined;
@@ -291,7 +292,11 @@ async function buyItem(translated: TranslatedTradeData<PacketData>, senderId: st
     const filters = targetActor ? getFilters(targetActor as LootPF2e, "buy", true) : [];
     const filter = filters.find((x) => x.id === filterId);
 
-    if (!filter || !targetActor.isOfType("loot") || !sourceActor.isOfType("npc", "character")) {
+    if (
+        !filter ||
+        !targetActor.isOfType("loot") ||
+        !sourceActor.isOfType("npc", "character", "party")
+    ) {
         localize.error("buy.error", { user: game.users.get(senderId)?.name ?? "unknown" });
         return;
     }
