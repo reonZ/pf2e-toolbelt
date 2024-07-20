@@ -1,7 +1,6 @@
 import {
     BANDS_OF_FORCE_SLUGS,
     R,
-    SKILL_EXPANDED,
     SKILL_SLUGS,
     calculateRemainingDuration,
     createHTMLElement,
@@ -245,7 +244,10 @@ async function combatantEndTurn(
         if (!slave || slave.combatant) return;
 
         const scene = game.scenes.get(this.sceneId!);
-        const token = slave.getDependentTokens({ linked: true, scenes: scene })[0];
+        const token = slave.getDependentTokens({
+            linked: true,
+            scenes: scene ? [scene] : undefined,
+        })[0];
 
         const activeConditions = slave.conditions.active;
         for (const condition of activeConditions) {
@@ -446,10 +448,10 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
             const currentRank = this.skills[skillSlug].rank ?? 0;
             if (currentRank > masterSkill.rank) continue;
 
-            const attribute = SKILL_EXPANDED[skillSlug].attribute;
+            const attribute = CONFIG.PF2E.skills[skillSlug].attribute;
             const statistic = new Statistic(this, {
                 slug: skillSlug,
-                label: CONFIG.PF2E.skillList[skillSlug] ?? skillSlug,
+                label: CONFIG.PF2E.skills[skillSlug]?.label ?? skillSlug,
                 attribute,
                 domains: [skillSlug, `${attribute}-based`, "skill-check", "all"],
                 modifiers: [],
