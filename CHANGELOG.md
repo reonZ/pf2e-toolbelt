@@ -1,3 +1,15 @@
+# 2.8.0
+
+-   this is a system `6.1.0` release
+-   `Better Merchant`:
+    -   fixed party not being able to sell items
+-   `Hero Actions`:
+    -   fixed broken style in the sheet
+-   `Shared Data`:
+    -   fixed breaking changes with skills
+-   `Stances`:
+    -   now supports non-feat stances directly
+
 # 2.7.10
 
 -   `Better Merchant`
