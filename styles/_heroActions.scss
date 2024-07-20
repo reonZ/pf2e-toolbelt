@@ -29,9 +29,15 @@
                     "summary summary" auto;
 
                 .item-name {
+                    grid-area: icon-name;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.3em;
+
                     h4 {
                         white-space: nowrap;
                         cursor: pointer;
+                        margin: 0.1em 0 0 0;
 
                         &:hover {
                             color: var(--color-pf-primary);
