@@ -1,4 +1,5 @@
 import {
+    actorItems,
     addListenerAll,
     createHTMLElement,
     elementDataset,
@@ -32,13 +33,6 @@ const REPLACERS = new Map([
 ]);
 
 const EXTRAS = new Map([
-    [
-        "Compendium.pf2e.classfeatures.Item.09iL38CZZEa0q0Mt", // arcane cascade
-        {
-            effect: "Compendium.pf2e.feat-effects.Item.fsjO5oTKttsbpaKl",
-            action: "Compendium.pf2e.actionspf2e.Item.HbejhIywqIufrmVM",
-        },
-    ],
     [
         "Compendium.pf2e.feats-srd.Item.xQuNswWB3eg1UM28", // cobra envenom
         {
@@ -259,15 +253,15 @@ function getStances(actor: CharacterPF2e) {
     const stances: toolbelt.stances.StanceData[] = [];
     const replaced = new Set<string>();
 
-    for (const feat of actor.itemTypes.feat) {
-        const uuid = feat.sourceId;
+    for (const item of actorItems(actor, ["action", "feat"])) {
+        const uuid = item.sourceId;
         if (!uuid) continue;
 
         const replacer = REPLACERS.get(uuid);
         const extra = EXTRAS.get(uuid);
-        if (!replacer && !extra && !isValidStance(feat)) continue;
+        if (!replacer && !extra && !isValidStance(item)) continue;
 
-        const effectUUID = replacer?.effect ?? extra?.effect ?? feat.system.selfEffect!.uuid;
+        const effectUUID = replacer?.effect ?? extra?.effect ?? item.system.selfEffect!.uuid;
         const effect = fromUuidSync<EffectPF2e | CompendiumIndexData>(effectUUID);
         if (!effect) continue;
 
@@ -276,27 +270,25 @@ function getStances(actor: CharacterPF2e) {
         }
 
         const existingEffect = getItemWithSourceId(actor, effectUUID, "effect");
-        const foundAction =
-            (extra?.action && getItemWithSourceId(actor, extra.action, "action")) || feat;
 
         stances.push({
-            name: (replacer && fromUuidSync(replacer.replace)?.name) ?? feat.name,
-            itemName: feat.name,
+            name: (replacer && fromUuidSync(replacer.replace)?.name) ?? item.name,
+            itemName: item.name,
             uuid,
             img: effect.img,
             effectUUID,
             effectID: existingEffect?.id,
-            actionUUID: foundAction.sourceId!,
-            actionID: foundAction.id,
+            actionUUID: item.sourceId!,
+            actionID: item.id,
         });
     }
 
     return stances.filter(({ uuid }) => !replaced.has(uuid));
 }
 
-function isValidStance(stance: ItemPF2e): stance is FeatPF2e {
+function isValidStance(stance: ItemPF2e): stance is FeatPF2e | AbilityItemPF2e {
     return (
-        stance.isOfType("feat") &&
+        stance.isOfType("feat", "action") &&
         stance.system.traits.value.includes("stance") &&
         !!stance.system.selfEffect?.uuid
     );
