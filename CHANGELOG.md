@@ -1,3 +1,8 @@
+# 2.8.1
+
+-   `Shared Data`:
+    -   the `Turn Start/End` option now also triggers the system's hooks (a virtual combatant is created for that purpose)
+
 # 2.8.0
 
 -   this is a system `6.1.0` release
