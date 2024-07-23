@@ -4,6 +4,7 @@ import {
     SKILL_SLUGS,
     calculateRemainingDuration,
     createHTMLElement,
+    getFirstActiveToken,
     getStatisticClass,
     htmlQuery,
     isInstanceOf,
@@ -205,7 +206,7 @@ async function combatantStartTurn(
     const slaves = getSlaves(actor, "turn");
 
     for (const slave of slaves) {
-        if (!slave || slave.combatant) return;
+        if (!slave || slave.inCombat) return;
 
         const eventType = "turn-start";
         const slaveUpdates: Record<string, unknown> = {};
@@ -225,6 +226,9 @@ async function combatantStartTurn(
                 await effect.onEncounterEvent(eventType);
             }
         }
+
+        const combatant = createCombatant(slave, encounter);
+        Hooks.callAll("pf2e.startTurn", combatant, encounter, game.user.id);
     }
 }
 
@@ -241,7 +245,7 @@ async function combatantEndTurn(
     const slaves = getSlaves(actor, "turn");
 
     for (const slave of slaves) {
-        if (!slave || slave.combatant) return;
+        if (!slave || slave.inCombat) return;
 
         const scene = game.scenes.get(this.sceneId!);
         const token = slave.getDependentTokens({
@@ -265,7 +269,21 @@ async function combatantEndTurn(
                 await effect.onEncounterEvent(eventType);
             }
         }
+
+        const combatant = createCombatant(slave, encounter);
+        Hooks.callAll("pf2e.endTurn", combatant, encounter, game.user.id);
     }
+}
+
+function createCombatant(actor: ShareActor, encounter: EncounterPF2e) {
+    const scene = encounter.scene;
+    const CombatantPF2e = getDocumentClass("Combatant");
+    const token = getFirstActiveToken(actor, false, true, scene);
+
+    return new CombatantPF2e(
+        { tokenId: token?.id, actorId: actor.id, hidden: false, sceneId: scene.id },
+        { parent: encounter }
+    );
 }
 
 function onDeleteActor(actor: ActorPF2e) {
