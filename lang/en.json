@@ -54,7 +54,7 @@
                 },
                 "table": {
                     "name": "Table UUID",
-                    "hint": "Unique identifier of the table you want to use in your world. To get the UUID of a table (in a compendium or in the Rollable Tables directory), simply open the table and Right-Click on 📔 next to its name."
+                    "hint": "Unique identifier of the table you want to use in your world. To get the UUID of a table (in a compendium or in the Rollable Tables directory), simply open the table and Left-Click on 📔 next to its name."
                 },
                 "trade": {
                     "name": "Allow Trade",
