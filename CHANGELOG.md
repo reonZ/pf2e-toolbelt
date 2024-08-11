@@ -1,3 +1,13 @@
+# 2.8.2
+
+-   `Actionable`:
+    -   now provides the item as argument to the macro scope
+-   `Hero Actions`:
+    -   updated the setting hint for `Table UUID` to indicate the use of `Left Click` instead of `Right Click` now that foundry V12 changed those
+-   `Underground`:
+    -   fixed error when enabling/disabling the feature while no scene is currently active
+-   fixed language label issue for `Polish` language
+
 # 2.8.1
 
 -   `Shared Data`:
