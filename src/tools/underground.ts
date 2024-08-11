@@ -10,6 +10,7 @@ const { config, settings, wrapper } = createTool({
             default: false,
             onChange: (enabled) => {
                 wrapper.toggle(enabled);
+                if (!canvas.ready) return;
                 canvas.primary.background.elevation = enabled ? -Number.MAX_VALUE : 0;
             },
         },
