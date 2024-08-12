@@ -482,9 +482,23 @@ function onDragStart(event: DragEvent) {
     const dataset = elementDataset(target);
 
     if (
-        (!dataset.pf2Dc && !dataset.against) ||
+        (!dataset.pf2Dc && (!dataset.against || !dataset.itemUuid)) ||
         !SAVE_TYPES.includes(dataset.pf2Check as SaveType)
     ) {
+        event.preventDefault();
+        return;
+    }
+
+    const dc = (() => {
+        if (dataset.pf2Dc) return Number(dataset.pf2Dc);
+
+        const actor = fromUuidSync<ItemPF2e>(dataset.itemUuid)?.actor;
+        if (!(actor instanceof Actor)) return;
+
+        return actor.getStatistic(dataset.against)?.dc.value;
+    })();
+
+    if (dc == null || isNaN(dc)) {
         event.preventDefault();
         return;
     }
@@ -492,7 +506,7 @@ function onDragStart(event: DragEvent) {
     event.stopPropagation();
 
     const data: SaveDragData = {
-        dc: Number(dataset.pf2Dc),
+        dc,
         basic: false,
         statistic: dataset.pf2Check as SaveType,
         options: dataset.pf2RollOptions?.split(",").map((o) => o.trim()) ?? [],
@@ -548,7 +562,7 @@ function onChatMessageDrop(event: DragEvent) {
         basic,
         dc,
         statistic,
-    });
+    } satisfies MessageSaveFlag);
 
     setFlagProperty(updates, "rollOptions", [...options, ...traits]);
 
@@ -969,7 +983,6 @@ async function getMessageData(message: ChatMessagePF2e) {
 
     const user = game.user;
     const isGM = user.isGM;
-    const userId = user.id;
     const author = save?.author ? await fromUuid<ActorPF2e>(save.author) : undefined;
     const showDC = isGM || game.pf2e.settings.metagame.dcs || author?.hasPlayerOwner;
     const showBreakdowns = isGM || game.pf2e.settings.metagame.breakdowns;
