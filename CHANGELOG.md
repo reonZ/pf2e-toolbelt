@@ -1,3 +1,11 @@
+# 2.9.0
+
+-   this is a system `6.2.1` release
+-   `Target Helper`:
+    -   fixed not being able to use new inline checks from system `6.2`
+-   `Template Helper`:
+    -   you can now skip the feature by holding `Ctrl` when placing a template.
+
 # 2.8.2
 
 -   `Actionable`:
