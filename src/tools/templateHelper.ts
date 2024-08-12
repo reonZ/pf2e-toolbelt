@@ -1,4 +1,4 @@
-import { getTemplateTokens, htmlQuery } from "foundry-pf2e";
+import { getTemplateTokens, htmlQuery, isHoldingModifierKeys } from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const { config, settings, hook, waitDialog } = createTool({
@@ -38,7 +38,7 @@ async function onCreateMeasuredTemplate(
     userId: string
 ) {
     const user = game.user;
-    if (user.id !== userId || !canvas.grid.isSquare) return;
+    if (user.id !== userId || !canvas.grid.isSquare || isHoldingModifierKeys(["Control"])) return;
 
     const actor = template.actor;
     const self: Token | null | undefined = !actor
