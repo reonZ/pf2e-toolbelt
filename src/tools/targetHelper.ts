@@ -482,9 +482,8 @@ function onDragStart(event: DragEvent) {
     const dataset = elementDataset(target);
 
     if (
-        !dataset.pf2Dc ||
-        !SAVE_TYPES.includes(dataset.pf2Check as SaveType) ||
-        !["reflex", "will", "fortitude"].includes(dataset.pf2Check)
+        (!dataset.pf2Dc && !dataset.against) ||
+        !SAVE_TYPES.includes(dataset.pf2Check as SaveType)
     ) {
         event.preventDefault();
         return;
