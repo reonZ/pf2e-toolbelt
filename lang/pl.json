@@ -54,7 +54,7 @@
                 },
                 "table": {
                     "name": "UUID tabeli",
-                    "hint": "Unikalny identyfikator tabeli, której chcesz użyć w swoim świecie. Aby uzyskać identyfikator UUID tabeli (w kompendium lub w katalogu tabel rzutów), wystarczy otworzyć tabelę i kliknąć prawym przyciskiem myszy na 📔 obok jej nazwy."
+                    "hint": "Unikalny identyfikator tabeli, której chcesz użyć w swoim świecie. Aby uzyskać identyfikator UUID tabeli (w kompendium lub w katalogu tabel rzutów), wystarczy otworzyć tabelę i kliknąć lewym przyciskiem myszy na 📔 obok jej nazwy."
                 },
                 "trade": {
                     "name": "Zezwól na wymianę",
