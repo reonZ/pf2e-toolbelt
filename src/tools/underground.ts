@@ -1,7 +1,7 @@
 import { libWrapper } from "foundry-pf2e";
 import { createTool } from "../tool";
 
-const { config, settings, wrapper } = createTool({
+const { config, settings, wrapper, hook } = createTool({
     name: "underground",
     settings: [
         {
@@ -10,8 +10,11 @@ const { config, settings, wrapper } = createTool({
             default: false,
             onChange: (enabled) => {
                 wrapper.toggle(enabled);
-                if (!canvas.ready) return;
-                canvas.primary.background.elevation = enabled ? -Number.MAX_VALUE : 0;
+                hook.toggle(enabled);
+
+                if (canvas.ready) {
+                    canvas.primary.background.elevation = enabled ? -Number.MAX_VALUE : 0;
+                }
             },
         },
         {
@@ -59,16 +62,23 @@ const { config, settings, wrapper } = createTool({
             callback: tokenRefreshElevation,
         },
     ],
+    hooks: [
+        {
+            event: "drawPrimaryCanvasGroup",
+            listener: onDrawPrimaryCanvasGroup,
+        },
+    ],
     init: () => {
         if (!settings.enabled) return;
+
         wrapper.activate();
+        hook.activate();
     },
 } as const);
 
-Hooks.once("canvasReady", () => {
-    if (!settings.enabled) return;
+function onDrawPrimaryCanvasGroup() {
     canvas.primary.background.elevation = -Number.MAX_VALUE;
-});
+}
 
 function tokenRefreshElevation(this: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
     wrapped();
