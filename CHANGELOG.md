@@ -1,3 +1,8 @@
+# 2.9.2
+
+-   `Stances`:
+    -   fixed custom stances not working
+
 # 2.9.1
 
 -   `Underground`:
