@@ -11,6 +11,7 @@ import {
     elementDataset,
     enactTradeRequest,
     filterTraits,
+    getSourceId,
     htmlClosest,
     htmlQuery,
     libWrapper,
@@ -516,7 +517,7 @@ async function browserRenderInner(
 
         const oweditems = R.pipe(
             data.actor.inventory.contents,
-            R.map((item) => item.sourceId),
+            R.map((item) => getSourceId(item)),
             R.filter(R.isTruthy)
         );
 
