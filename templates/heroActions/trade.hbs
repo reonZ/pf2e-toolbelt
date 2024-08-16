@@ -1,8 +1,10 @@
-<div class="header">
+<div class="form-group">
     {{i18n 'select'}}
-    <select name="target" {{disabled (eq others.length 1)}}>
-        {{selectOptions others selected=others.[0].id valueAttr="id" labelAttr="name"}}
-    </select>
+    <div class="form-fields">
+        <select name="target" {{disabled (eq others.length 1)}}>
+            {{selectOptions others selected=others.[0].id valueAttr="id" labelAttr="name"}}
+        </select>
+    </div>
 </div>
 <div class="actions">
     <div class="left">

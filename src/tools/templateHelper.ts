@@ -45,7 +45,11 @@ async function onCreateMeasuredTemplate(
         ? undefined
         : actor.token?.object ?? actor.getActiveTokens()[0];
 
-    const html = await waitDialog(
+    const result = await waitDialog<{
+        targets: "all" | "enemies" | "allies";
+        self: boolean;
+        neutral: boolean;
+    }>(
         "menu",
         {
             title: template.item?.name,
@@ -54,13 +58,10 @@ async function onCreateMeasuredTemplate(
                 noSelf: !self,
             },
         },
-        { width: 300 }
+        { width: 270, animation: false }
     );
 
-    if (html) {
-        const target = htmlQuery<HTMLInputElement>(html, "[name='targets']:checked")?.value;
-        const targetNeutral = htmlQuery<HTMLInputElement>(html, "[name='neutral']")?.checked;
-        const targetSelf = htmlQuery<HTMLInputElement>(html, "[name='self']")?.checked;
+    if (result) {
         const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
         const opposition =
             alliance === "party" ? "opposition" : alliance === "opposition" ? "party" : null;
@@ -72,15 +73,15 @@ async function onCreateMeasuredTemplate(
                 return false;
             }
 
-            if (self && token === self) return targetSelf;
+            if (self && token === self) return result.self;
 
             const targetAlliance = actor.alliance;
-            if (targetAlliance === null) return targetNeutral;
+            if (targetAlliance === null) return result.neutral;
 
             return (
-                target === "all" ||
-                (target === "allies" && targetAlliance === alliance) ||
-                (target === "enemies" && targetAlliance === opposition)
+                result.targets === "all" ||
+                (result.targets === "allies" && targetAlliance === alliance) ||
+                (result.targets === "enemies" && targetAlliance === opposition)
             );
         });
 

@@ -155,7 +155,7 @@ async function onCreateCombatant(combatant: CombatantPF2e) {
         return;
     }
 
-    const html = await waitDialog("opening", {
+    const result = await waitDialog<{ stance: string }>("opening", {
         yes: "fa-solid fa-person-running",
         data: {
             stances,
@@ -163,12 +163,9 @@ async function onCreateCombatant(combatant: CombatantPF2e) {
         },
     });
 
-    const effectUUID = html
-        ? htmlQuery<HTMLInputElement>(html, "[name='stance']:checked")?.value
-        : stances[0].effectUUID;
-
-    if (!effectUUID) return;
-    addStance(actor, effectUUID);
+    if (result) {
+        addStance(actor, result.stance);
+    }
 }
 
 async function toggleStance(actor: CharacterPF2e, effectUUID: string, force?: boolean) {

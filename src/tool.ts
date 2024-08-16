@@ -1,4 +1,5 @@
 import {
+    DialogExtraOptions,
     R,
     deleteInMemory,
     flagPath,
@@ -22,6 +23,7 @@ import {
     unregisterWrapper,
     unsetFlag,
     updateSourceFlag,
+    waitDialog,
 } from "foundry-pf2e";
 import { actorWrappers } from "./tools/shared/actor";
 import { characterSheetWrappers } from "./tools/shared/characterSheet";
@@ -69,43 +71,39 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
 
     const localize = subLocalize(toolName);
 
-    const waitDialog = async (
+    const waitDialogTool = async (
         template: string,
         dialogOptions: ToolWaitDialogOptions,
-        applicationOptions: Partial<RenderOptions> = {}
+        extraOptions: Omit<DialogExtraOptions, "id"> = {}
     ) => {
         const translate = localize.sub(template);
 
         const data = dialogOptions.data ?? {};
         data.i18n ??= translate.i18n;
 
-        return Dialog.wait(
+        const result = await waitDialog(
             {
                 title: dialogOptions.title ?? translate("title"),
                 content: dialogOptions.content ?? (await render(`${toolName}/${template}`, data)),
-                buttons: {
-                    yes: {
-                        label: translate("yes"),
-                        icon: `<i class="${dialogOptions.yes ?? "fa-solid fa-check"}"></i>`,
-                        callback: ($html) => $html[0],
-                    },
-                    no: {
-                        label: translate("no"),
-                        icon: `<i class="${dialogOptions.no ?? "fa-solid fa-xmark"}"></i>`,
-                        callback: () => null,
-                    },
+                yes: {
+                    label: translate("yes"),
+                    icon: dialogOptions.yes ?? "fa-solid fa-check",
                 },
-                render: ($html) => {
-                    const html = $html[0];
+                no: {
+                    label: translate("no"),
+                    icon: dialogOptions.no ?? "fa-solid fa-xmark",
+                },
+                render: (event, html) => {
                     dialogOptions.onRender?.(html);
                 },
-                close: () => null,
             },
             {
-                ...applicationOptions,
+                ...extraOptions,
                 id: translate("dialog"),
             }
         );
+
+        return result || null;
     };
 
     return {
@@ -115,7 +113,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
         hooks,
         wrapper,
         wrappers,
-        waitDialog,
+        waitDialog: waitDialogTool,
         flagPath: (...path: string[]) => flagPath(toolName, ...path),
         getFlag: (doc: FoundryDocument, ...path: string[]) => getFlag(doc, toolName, ...path),
         setFlag: (doc: FoundryDocument, ...args: [...string[], unknown]) =>
@@ -381,11 +379,11 @@ type ToolObject<TConfig extends ToolConfig> = {
     localize: ReturnType<typeof subLocalize>;
     templatePath: typeof templatePath;
     render: typeof render;
-    waitDialog: (
+    waitDialog: <TResult extends Record<string, any>>(
         template: string,
         options: ToolWaitDialogOptions,
-        applicationOptions?: Partial<RenderOptions>
-    ) => Promise<HTMLElement | null>;
+        extraOption?: DialogExtraOptions
+    ) => Promise<TResult | null>;
     getFlag: typeof getFlag;
     setFlag: typeof setFlag;
     unsetFlag: typeof unsetFlag;

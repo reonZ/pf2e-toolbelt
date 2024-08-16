@@ -304,7 +304,7 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
         content += `<div>${give}</div><div>${want}</div>`;
     }
 
-    const html = await waitDialog("trade.request", {
+    const result = await waitDialog<{ action: string }>("trade.request", {
         yes: "fa-solid fa-handshake",
         content: await TextEditor.enrichHTML(content),
         onRender: (html) => {
@@ -319,7 +319,7 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
         },
     });
 
-    if (html === null) {
+    if (result === null) {
         socket.emit({
             ...packet,
             type: "trade-reject",
@@ -328,7 +328,7 @@ async function onTradeRequest(packet: SocketPacket, senderId: string) {
     }
 
     if (isPrivate) {
-        packet.receiver.uuid = htmlQuery<HTMLInputElement>(html, "[name='action']:checked")!.value;
+        packet.receiver.uuid = result.action;
     }
 
     if (game.user.isGM) {
@@ -408,7 +408,9 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
         });
     };
 
-    const html = await waitDialog(
+    const result = await waitDialog<
+        { target: string; action: string } & { [k in `action-${string}`]?: string }
+    >(
         "trade",
         {
             yes: "fa-duotone fa-share-from-square",
@@ -421,17 +423,14 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
         { width: 500 }
     );
 
-    if (html === null) return;
+    if (result === null) return;
 
-    const targetId = htmlQuery<HTMLSelectElement>(html, ".header [name='target']")?.value;
-    const target = targetId ? game.actors.get(targetId) : undefined;
+    const targetId = result.target;
+    const target = targetId ? game.actors.get(result.target) : undefined;
     if (!target?.isOfType("character")) return;
 
-    const actionUuid = htmlQuery<HTMLInputElement>(html, ".left [name='action']:checked")?.value;
-    const targetActionUUid = html.querySelector<HTMLInputElement>(
-        `.right [name="action-${targetId}"]:checked`
-    )?.value;
-
+    const actionUuid = result.action;
+    const targetActionUUid = result[`action-${targetId}`];
     if (!actionUuid || (!isPrivate && !targetActionUUid)) return;
 
     if (target.isOwner && targetActionUUid) {
@@ -812,26 +811,29 @@ async function giveHeroActions(actor: CharacterPF2e) {
     const isUnique = table.replacement === false;
     const actions = getHeroActions(actor);
 
-    const actionsList = (
-        await Promise.all(
-            table.results.map(async (result) => {
-                const uuid = documentUuidFromTableResult(result);
-                if (!uuid || actions.find((x) => x.uuid === uuid)) return;
+    const actionsList = await Promise.all(
+        table.results.map(async (result) => {
+            const uuid = documentUuidFromTableResult(result);
+            if (!uuid || actions.find((x) => x.uuid === uuid)) return;
 
-                return {
-                    key: result.id,
-                    uuid,
-                    name: await getLabelfromTableResult(result, uuid),
-                    drawn: isUnique && result.drawn,
-                };
-            })
-        )
-    ).filter(Boolean);
+            const name = (await getLabelfromTableResult(result, uuid)) ?? "";
 
-    const html = await waitDialog("giveActions", {
+            return {
+                name,
+                drawn: isUnique && result.drawn,
+                value: JSON.stringify({ uuid, name, key: result.id }),
+            };
+        })
+    );
+
+    const result = await waitDialog<{
+        drawn: boolean;
+        message: boolean;
+        action: ({ key: string; uuid: string; name: string } | null)[];
+    }>("giveActions", {
         yes: "fa-solid fa-gift",
         data: {
-            actions: actionsList,
+            actions: R.pipe(actionsList, R.filter(R.isTruthy), R.sortBy(R.prop("name"))),
             isUnique,
         },
         onRender: (html) => {
@@ -845,22 +847,17 @@ async function giveHeroActions(actor: CharacterPF2e) {
         },
     });
 
-    if (!html) return;
+    if (result === null) return;
 
-    const selected = htmlQueryAll(html, "[name='action']:checked").map((el) => {
-        const parent = htmlClosest(el, ".action")!;
-        return elementDataset<"uuid" | "name" | "key">(parent);
-    });
-    const asDrawn = htmlQuery<HTMLInputElement>(html, "[name='drawn']")?.checked;
-    const withMessage = htmlQuery<HTMLInputElement>(html, "[name='message']")!.checked;
+    const selected = R.filter(result.action, R.isTruthy);
     const tableUpdates = [];
 
     for (const { uuid, name, key } of selected) {
         actions.push({ uuid, name });
-        if (!asDrawn) continue;
+        if (!result.drawn) continue;
 
-        const result = table.results.get(key);
-        if (result && !result.drawn) tableUpdates.push(key);
+        const entry = table.results.get(key);
+        if (entry && !entry.drawn) tableUpdates.push(key);
     }
 
     if (tableUpdates.length) {
@@ -872,7 +869,7 @@ async function giveHeroActions(actor: CharacterPF2e) {
 
     setHeroActions(actor, actions);
 
-    if (withMessage) {
+    if (result.message) {
         createActionsMessage(actor, selected, "given");
     }
 }
@@ -915,7 +912,7 @@ async function removeHeroActions() {
         }
     };
 
-    const html = await waitDialog("removeActions", {
+    const result = await waitDialog<{ actor: (string | null)[] }>("removeActions", {
         yes: "fa-solid fa-trash",
         data: {
             actors: game.actors.filter((x) => x.type === "character"),
@@ -923,11 +920,12 @@ async function removeHeroActions() {
         onRender,
     });
 
-    if (!html) return;
+    if (result === null) return;
 
     const actors = R.pipe(
-        htmlQueryAll<HTMLInputElement>(html, "[name='actor']:checked"),
-        R.map((input) => game.actors.get<CharacterPF2e<null>>(input.value)),
+        result.actor,
+        R.filter(R.isTruthy),
+        R.map((id) => game.actors.get<CharacterPF2e<null>>(id)),
         R.filter(R.isTruthy)
     );
 

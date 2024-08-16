@@ -109,6 +109,8 @@
     }
 }
 
+$hover-color: #f54b4b;
+
 [id^="pf2e-toolbelt.heroActions.trade."] {
     .action {
         display: flex;
@@ -118,12 +120,12 @@
             cursor: help;
 
             &:hover {
-                color: var(--primary);
+                color: $hover-color;
             }
         }
 
         input {
-            margin-inline: 0.3em;
+            margin-inline: 0.5em 0.3em;
         }
     }
 }
@@ -144,8 +146,8 @@
             grid-template-columns: 1fr 40px 1fr;
             flex-basis: 93px;
             gap: 6px;
-            border-top: 1px solid var(--color-border-light-primary);
-            border-bottom: 1px solid var(--color-border-light-highlight);
+            border-top: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
             padding-block: var(--padding);
             margin-block: 0.5em;
 
@@ -168,8 +170,8 @@
                 align-items: center;
                 justify-content: center;
                 font-size: 2em;
-                border-left: 1px solid var(--color-border-light-primary);
-                border-right: 1px solid var(--color-border-light-highlight);
+                border-left: 1px solid var(--color-border);
+                border-right: 1px solid var(--color-border);
             }
 
             hr {
@@ -182,13 +184,7 @@
 
 [id="pf2e-toolbelt.heroActions.trade.request.dialog"] {
     .dialog-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3em;
-    }
-
-    .dialog-buttons {
-        margin-top: 0.5em;
+        gap: 0.5em;
     }
 }
 
@@ -199,16 +195,18 @@
 
     .window-content {
         padding: 0;
+
+        .dialog-form {
+            overflow: hidden;
+            gap: 0.5em;
+        }
     }
 
     .dialog-content {
         display: flex;
         flex-direction: column;
         overflow: hidden auto;
-
-        input[type="checkbox"] {
-            width: 1.2em;
-        }
+        gap: 0.5em;
 
         .actions {
             overflow-y: auto;
@@ -233,7 +231,7 @@
                 &::before {
                     content: "";
                     position: absolute;
-                    background: rgba(0, 0, 0, 0.1490196078);
+                    background: #ffffff12;
                     border-radius: 4px;
                     pointer-events: none;
                     top: -1px;
@@ -261,7 +259,7 @@
                 grid-area: item-name;
 
                 &:hover {
-                    color: var(--primary);
+                    color: $hover-color;
                 }
             }
 
@@ -292,6 +290,7 @@
             padding-inline: var(--padding);
 
             > div {
+                margin-top: 0.5em;
                 display: flex;
                 align-items: center;
                 flex-direction: row-reverse;
@@ -303,9 +302,9 @@
         }
     }
 
-    .dialog-buttons {
+    footer.form-footer {
         flex: 0;
-        padding: var(--padding);
+        padding: 0 var(--padding) var(--padding);
     }
 }
 
@@ -318,9 +317,5 @@
         .actor {
             margin-left: 1em;
         }
-    }
-
-    .dialog-buttons {
-        margin-top: 0.8em;
     }
 }

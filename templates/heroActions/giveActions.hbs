@@ -1,8 +1,8 @@
 <div class="actions">
     {{#each actions as |action|}}
-    <div class="action{{#if action.drawn}} drawn{{/if}}" data-uuid="{{action.uuid}}"
-        data-name="{{action.name}}" data-key="{{action.key}}">
-        <input class="item-select" type="checkbox" name="action">
+    <div class="action{{#if action.drawn}} drawn{{/if}}">
+        <input class="item-select" type="checkbox" name="action" value="{{action.value}}"
+            data-dtype="JSON">
         <span class="item-name" data-action="expand">{{action.name}}</span>
         <span class="item-drawn">
             {{#if action.drawn}}

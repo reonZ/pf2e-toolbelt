@@ -818,7 +818,7 @@ async function rerollSave(
     if (!flag?.roll || flag.rerolled) return;
 
     const content = R.pipe(
-        Object.entries(REROLL),
+        R.entries(REROLL),
         actor.isOfType("character") && actor.heroPoints.value > 0
             ? R.identity()
             : R.filter(([type]) => type !== "hero"),
@@ -835,18 +835,17 @@ async function rerollSave(
         R.join("")
     );
 
-    const html = await waitDialog("reroll", {
+    const result = await waitDialog<{ reroll: keyof typeof REROLL }>("reroll", {
         title: `${target.name} - ${localize("reroll.title")}`,
         content,
         yes: "fa-solid fa-rotate rotate",
     });
 
-    if (!html) return;
+    if (result === null) return;
 
-    const rerollElement = htmlQuery<HTMLInputElement>(html, "[name='reroll']:checked");
-    const reroll = rerollElement!.value as keyof typeof REROLL;
-    const isHeroReroll = reroll === "hero";
-    const keep = isHeroReroll ? "new" : reroll;
+    const reroll = result.reroll;
+    const isHeroReroll = result.reroll === "hero";
+    const keep = isHeroReroll ? "new" : result.reroll;
 
     if (isHeroReroll) {
         const { value, max } = (actor as CharacterPF2e).heroPoints;
