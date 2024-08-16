@@ -9,7 +9,8 @@ const { config, settings, wrapper } = createTool({
             key: "enabled",
             type: Boolean,
             default: false,
-            onChange: () => {
+            onChange: (enabled) => {
+                wrapper.toggle(enabled);
                 refreshLatestMessages(20);
             },
         },
