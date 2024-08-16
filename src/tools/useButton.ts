@@ -81,7 +81,8 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
         for (const consumableElement of consumableElements) {
             const { itemId } = elementDataset(consumableElement);
             const item = actor.items.get(itemId);
-            if (!item?.isOfType("consumable") || item.category === "ammo") continue;
+            if (!item?.isOfType("consumable") || !item.isIdentified || item.category === "ammo")
+                continue;
 
             const [type, tooltip] =
                 item.uses.value < 1
