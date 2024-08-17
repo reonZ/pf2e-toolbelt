@@ -91,25 +91,25 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
     const damageLabel = game.i18n.localize("PF2E.DamageRoll");
 
     for (const { name, notes, tags, modifiers, outcome } of data) {
-        groups[name] ??= {
+        const group = (groups[name] ??= {
             label: `${damageLabel}: ${name}`,
             tags,
             notes: [],
             results: [],
-        };
+        });
 
-        if (notes && !groups[name].notes.includes(notes)) {
-            groups[name].notes.push(notes);
+        if (notes && !group.notes.includes(notes)) {
+            group.notes.push(notes);
         }
 
-        const exists = groups[name].results.find(
+        const exists = group.results.find(
             (result) => result.outcome === outcome && result.modifiers === modifiers
         );
 
         if (exists) {
             exists.count++;
         } else {
-            groups[name].results.push({
+            group.results.push({
                 outcome,
                 modifiers,
                 label: game.i18n.localize(
