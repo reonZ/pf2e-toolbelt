@@ -922,7 +922,7 @@ async function rerollSave(
 
     if (keptRoll.options.keeleyAdd10) {
         data.modifiers.push({
-            label: localize("target.chat.save.reroll.keeley"),
+            label: localize("reroll.keeley"),
             modifier: 10,
         });
     }

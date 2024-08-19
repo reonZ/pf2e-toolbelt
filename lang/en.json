@@ -217,6 +217,21 @@
                     "name": "Opacity",
                     "hint": "Opacity value when the token has a negative elevation."
                 }
+            },
+            "identify": {
+                "title": "Identify",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Will help you manage unidentified items in your world, the items are pulled from the inventories of the party members."
+                },
+                "stash": {
+                    "name": "Add Party Stash",
+                    "hint": "Should the items in the party stash be added to the list to identify."
+                },
+                "delay": {
+                    "name": "24 Hours Delay",
+                    "hint": "When enabled, an actor will need to wait 24h after failling to identify an item before being able to make another attempt. Otherwise it will be reset on the next day date."
+                }
             }
         },
         "arp": {
@@ -397,7 +412,8 @@
                 "title": "Save Check Reroll",
                 "noPoints": "You need at least 1 Hero Point to Reroll.",
                 "yes": "Reroll",
-                "no": "Cancel"
+                "no": "Cancel",
+                "keeley": "Low Reroll"
             },
             "drop": {
                 "unauth": "You can only do that on messages you are the author of.",
@@ -488,6 +504,43 @@
             "itemSheet": {
                 "label": "Macro",
                 "hint": " or a macro that will be executed when this action is used"
+            }
+        },
+        "identify": {
+            "tracker": {
+                "title": "Item Identification Tracker",
+                "identified": "Already Identified",
+                "failed": {
+                    "daily": "Has failed to identify this item today",
+                    "delay": "Has failed to identify this item:<br>{hours}h remaining"
+                },
+                "known": {
+                    "full": "Already identified this item",
+                    "partial": "Has identified a similar item:<br>{item}",
+                    "recall": "Can use recall knowledge"
+                },
+                "auto": {
+                    "label": "Auto",
+                    "tooltip": "Automatically identify known items",
+                    "title": "Automatic Identification",
+                    "content": "Identify the items that are already known by the members of the party:<br><ul>{items}</ul>",
+                    "none": "There are no items to automatically identify"
+                },
+                "save": {
+                    "label": "Update",
+                    "tooltip": "Update current changes",
+                    "title": "Update Changes",
+                    "content": "Save the current changes and automatically identify the following item(s):<br><ul>{items}</ul>"
+                },
+                "reset": {
+                    "label": "Reset",
+                    "tooltip": "Revert current Changes"
+                },
+                "clock": {
+                    "forward": "Move time forward by 10 minutes",
+                    "backward": "Move time backward by 10 minutes",
+                    "open": "Open the world clock menu"
+                }
             }
         }
     }
