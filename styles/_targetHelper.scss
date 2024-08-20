@@ -131,7 +131,8 @@
                     }
 
                     .degree {
-                        font-size: 1.1em;
+                        font-size: 1.2em;
+                        line-height: 1;
 
                         &.show {
                             &.criticalSuccess {
@@ -153,6 +154,17 @@
                         }
                     }
 
+                    .observe,
+                    .reroll {
+                        margin-right: -0.1em;
+                    }
+
+                    .reroll {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.2em;
+                    }
+
                     i {
                         &.die {
                             font-size: 0.95em;
@@ -160,7 +172,6 @@
 
                         &.rotate {
                             font-size: 0.9em;
-                            margin-left: 1px;
                         }
 
                         &.small {
@@ -289,13 +300,34 @@
 }
 
 [role="tooltip"] {
-    .pf2e-toolbelt-target-save {
+    .pf2e-toolbelt-target-save,
+    .pf2e-toolbelt-target-mm {
         font-size: 0.9em;
         display: flex;
         flex-direction: column;
         align-items: start;
         gap: 0.2em;
+    }
 
+    .pf2e-toolbelt-target-mm {
+        .ESSENTIAL {
+            color: #15d315;
+        }
+
+        .HELPFUL {
+            color: #c4e52d;
+        }
+
+        .HARMFUL {
+            color: #fb3434;
+        }
+
+        .DETRIMENTAL {
+            color: #ff8e3e;
+        }
+    }
+
+    .pf2e-toolbelt-target-save {
         .result {
             i {
                 font-size: 0.8em;

@@ -783,6 +783,7 @@ async function rollSaves(
                             modifiers: modifiers
                                 .filter((modifier) => modifier.enabled)
                                 .map(({ label, modifier }) => ({ label, modifier })),
+                            significantModifiers: pf2eMm?.getSignificantModifiersOfMessage(msg),
                         };
 
                         updates[target.id] = data;
@@ -918,6 +919,7 @@ async function rerollSave(
         modifiers: foundry.utils.deepClone(flag.modifiers),
         notes: notes.map((note) => note.toObject()),
         rerolled: reroll,
+        significantModifiers: undefined,
     };
 
     if (keptRoll.options.keeleyAdd10) {
@@ -986,6 +988,13 @@ async function getMessageData(message: ChatMessagePF2e) {
     const showDC = isGM || game.pf2e.settings.metagame.dcs || author?.hasPlayerOwner;
     const showBreakdowns = isGM || game.pf2e.settings.metagame.breakdowns;
     const showResults = isGM || game.pf2e.settings.metagame.results;
+    const showSignificant =
+        showBreakdowns ||
+        (game.modules.get("pf2e-modifiers-matter")?.active &&
+            game.settings.get<boolean>(
+                "pf2e-modifiers-matter",
+                "always-show-highlights-to-everyone"
+            ));
 
     if (save) {
         const saveLabel = game.i18n.format("PF2E.SavingThrowWithName", {
@@ -1037,9 +1046,20 @@ async function getMessageData(message: ChatMessagePF2e) {
                         : undefined;
                 const isPrivate = !hasPlayerOwner && saveFlag.whispers.length;
                 const canSeeResult = isGM || !isPrivate;
+
                 const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
                 const notesList = RollNotePF2e.notesToHTML(notes);
                 notesList?.classList.add("pf2e-toolbelt-target-notes");
+
+                const significantList =
+                    isFriendly || showSignificant
+                        ? saveFlag.significantModifiers?.map(({ name, significance, value }) => {
+                              return `<div class="${significance}">${name} ${value}</div>`;
+                          })
+                        : undefined;
+                const significantModifiers = significantList?.length
+                    ? `<div class="pf2e-toolbelt-target-mm">${significantList.join("")}</div>`
+                    : undefined;
 
                 let result = "";
 
@@ -1064,6 +1084,7 @@ async function getMessageData(message: ChatMessagePF2e) {
                 return {
                     ...saveFlag,
                     notes: notesList?.outerHTML,
+                    significantModifiers,
                     canReroll,
                     isPrivate,
                     canSeeResult,
@@ -1181,6 +1202,7 @@ type MessageTargetSave = {
     dosAdjustments: DegreeAdjustmentsRecord | undefined;
     unadjustedOutcome?: DegreeOfSuccessString | null;
     modifiers: { label: string; modifier: number }[];
+    significantModifiers: modifiersMatter.SignificantModifier[] | undefined;
     rerolled?: keyof typeof REROLL;
 };
 
@@ -1193,10 +1215,11 @@ type MessageFlag = {
     applied?: Record<string, boolean[]>;
 };
 
-type TargetSaveResult = Omit<MessageTargetSave, "notes"> & {
+type TargetSaveResult = Omit<MessageTargetSave, "notes" | "significantModifiers"> & {
     canReroll: boolean;
     tooltip: string;
     notes: string | undefined;
+    significantModifiers: string | undefined;
 };
 
 type TargetSave = MessageSaveDataWithTooltip & {

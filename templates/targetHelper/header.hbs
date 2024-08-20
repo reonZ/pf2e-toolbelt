@@ -7,12 +7,17 @@
 <span class="controls">
     {{#if save.result}}
 
+    {{#if save.result.significantModifiers}}
+    <i class="fa-solid fa-lightbulb significant"
+        data-tooltip="{{save.result.significantModifiers}}"></i>
+    {{/if}}
+
     {{#if save.result.notes}}
     <i class="fa-duotone fa-list-check list" data-tooltip="{{save.result.notes}}"></i>
     {{/if}}
 
     {{#if (and isOwner canReroll)}}
-    <a data-action="reroll-save" data-statistic="{{save.statistic}}"
+    <a class="reroll" data-action="reroll-save" data-statistic="{{save.statistic}}"
         data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
         <i class="{{save.icon}}"></i>
         <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
@@ -21,7 +26,8 @@
         <i class="fa-solid fa-rotate rotate"></i>
     </a>
     {{else}}
-    <span data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
+    <span class="observe" data-tooltip="{{save.result.tooltip}}" {{#if
+        isPrivate}}data-visibility="gm" {{/if}}>
         <i class="{{save.icon}}"></i>
         {{#if canSeeResult}}
         <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
