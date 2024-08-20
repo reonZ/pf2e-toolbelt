@@ -619,6 +619,10 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                     break;
                 }
 
+                case "misidentify-item": {
+                    break;
+                }
+
                 case "send-to-chat": {
                     const item = await getItem();
                     item?.toMessage();
@@ -903,7 +907,8 @@ type TrackerEventAction =
     | "mystify-item"
     | "identify-item"
     | "send-to-chat"
-    | "post-skill-checks";
+    | "post-skill-checks"
+    | "misidentify-item";
 
 type SocketPacket = {
     itemUUID: ItemUUID;

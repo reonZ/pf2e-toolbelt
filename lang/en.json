@@ -516,6 +516,7 @@
                 "identified": "Already Identified",
                 "send-to-chat": "Send to Chat",
                 "request-checks": "Request Checks",
+                "misidentify": "Misidentify Item",
                 "failed": {
                     "daily": "Has failed to identify this item today",
                     "delay": "Has failed to identify this item:<br>{hours}h remaining"
