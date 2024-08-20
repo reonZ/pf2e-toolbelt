@@ -235,6 +235,10 @@
                 "playerRequest": {
                     "name": "Allow Player Request",
                     "hint": "Should players be able to request identification of items in character owned inventories."
+                },
+                "identifyPartials": {
+                    "name": "Auto Identify Similar Items",
+                    "hint": "Should 'similar' items also be identified when using the 'Automatically identify known items' option."
                 }
             }
         },

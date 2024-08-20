@@ -53,6 +53,12 @@ const { config, settings, localize, hook, socket, render, getFlag, flagPath } = 
             },
         },
         {
+            key: "identifyPartials",
+            type: Boolean,
+            default: true,
+            scope: "world",
+        },
+        {
             key: "playerRequest",
             type: Boolean,
             default: true,
@@ -171,7 +177,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
 
     #unlockedUUIDs: ItemUUID[] = [];
     #loading = false;
-    #knownUUIDs: ItemUUID[] = [];
+    #knownItems: { uuid: ItemUUID; partial: boolean }[] = [];
     #itemsUUIDs: ItemUUID[] = [];
     #removedFaillures: Record<string, Set<string>> = {};
     #updates: Record<string, Record<string, "success" | "fail">> = {};
@@ -232,7 +238,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
             this.#unlockedUUIDs.length > 0 && this.#unlockedUUIDs.length < items.length;
         const allItems = [...items, ...ghostItems];
 
-        this.#knownUUIDs = [];
+        this.#knownItems = [];
         this.#removedFaillures = {};
         this.#itemsUUIDs = allItems.map((item) => item.uuid);
 
@@ -315,7 +321,10 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                     })();
 
                     if (known !== false) {
-                        this.#knownUUIDs.push(itemUuid);
+                        this.#knownItems.push({
+                            uuid: itemUuid,
+                            partial: typeof known === "string",
+                        });
                     }
 
                     const canRecallKnowledge = (() => {
@@ -643,10 +652,16 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
     }
 
     async #identifyAll() {
+        const knownItems = settings.identifyPartials
+            ? this.#knownItems
+            : this.#knownItems.filter(({ partial }) => !partial);
+
+        const knownUUIDS = knownItems.map(({ uuid }) => uuid);
+
         const selectedList =
             this.#unlockedUUIDs.length > 0
-                ? R.intersection(this.#knownUUIDs, this.#unlockedUUIDs)
-                : this.#knownUUIDs;
+                ? R.intersection(knownUUIDS, this.#unlockedUUIDs)
+                : knownUUIDS;
 
         const items = R.pipe(
             await Promise.all(
