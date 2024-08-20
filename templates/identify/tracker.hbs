@@ -1,0 +1,119 @@
+<div class="content" style="--nb-actors: {{actors.length}};" data-tooltip-direction="UP"
+    data-tooltip-class="pf2e">
+    <div class="buttons">
+        <div class="top">
+            <button type="button" data-action="auto" data-tooltip="{{i18n.path 'auto.tooltip'}}">
+                {{i18n 'auto.label'}}
+            </button>
+            <button type="button" data-action="save" data-tooltip="{{i18n.path 'save.tooltip'}}">
+                {{i18n 'save.label'}}
+            </button>
+            <button type="button" data-action="reset" data-tooltip="{{i18n.path 'reset.tooltip'}}">
+                {{i18n 'reset.label'}}
+            </button>
+        </div>
+        <div class="bottom">
+            <button type="button" data-action="change-time" data-direction="-"
+                data-tooltip="{{i18n.path 'clock.backward'}}">
+                -10
+            </button>
+            <button type="button" class="clock" data-action="open-clock"
+                data-tooltip="{{i18n.path 'clock.open'}}">
+                {{date}} {{time}}
+            </button>
+            <button type="button" data-action="change-time" data-direction="+"
+                data-tooltip="{{i18n.path 'clock.forward'}}">
+                +10
+            </button>
+        </div>
+    </div>
+    <div class="actors">
+        {{#each actors as |actor|}}
+        <div class="actor highlight" data-tooltip="{{actor.name}}" data-actor-id="{{actor.id}}">
+            <img src="{{actor.img}}">
+        </div>
+        {{/each}}
+        <div></div>
+    </div>
+    <div class="items">
+        {{#each itemGroups as |itemGroup|}}
+        <div class="item-group">
+            {{itemGroup.label}}
+        </div>
+        <div></div>
+        {{#each itemGroup.items as |item|}}
+        <div class="item-img highlight {{item.css}}{{#if @first}} first-item{{/if}}"
+            data-item-uuid="{{item.uuid}}">
+            <img src="{{item.img}}">
+        </div>
+        <div class="item-details highlight {{item.css}}{{#if @first}} first-item{{/if}}"
+            data-item-uuid="{{item.uuid}}">
+            <div class="item-name">
+                {{item.name}}
+            </div>
+            <div class="item-controls">
+                <a data-action="open-actor-sheet" data-tooltip="{{item.owner.name}}"
+                    data-owner-id="{{item.owner.id}}">
+                    <i class="fa-solid fa-user"></i>
+                </a>
+                <a data-action="open-item-sheet" data-tooltip="PF2E.EditItemTitle">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+                {{#if item.isIdentified}}
+                <a data-action="mystify-item" data-tooltip="PF2E.identification.Mystify">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+                <a data-action="send-to-chat" data-tooltip="{{@root.i18n.path 'send-to-chat'}}">
+                    <i class="fa-solid fa-message"></i>
+                </a>
+                {{else}}
+                <a data-action="identify-item" data-tooltip="PF2E.identification.Identify">
+                    <i class="fa-regular fa-circle-question"></i>
+                </a>
+                <a data-action="post-skill-checks"
+                    data-tooltip="PF2E.identification.PostSkillsToChat">
+                    <i class="fa-solid fa-dice-d20"></i>
+                </a>
+                {{/if}}
+            </div>
+        </div>
+        {{#each item.actors as |actor|}}
+        <div class="item-actor highlight {{item.css}} {{actor.css}}{{#if @../first}} first-item{{/if}}{{#if @last}} last-cell{{/if}}"
+            data-item-uuid="{{item.uuid}}" data-actor-id="{{actor.id}}"
+            data-type="{{itemGroup.type}}" data-item-slug="{{item.itemSlug}}" {{#if
+            item.partialSlug}} data-partial-slug="{{item.partialSlug}}"
+            data-item-name="{{item.name}}" {{/if}} {{#if actor.update}}
+            data-update="{{actor.update}}" {{/if}}>
+            <div class="info" {{#if actor.tooltip}} data-tooltip="{{actor.tooltip}}" {{/if}}>
+                {{#if actor.failed}}
+                <i class="fail fa-solid fa-octagon-exclamation"></i>
+                {{else if (eq actor.known true)}}
+                <i class="success fa-solid fa-flask"></i>
+                {{else if actor.known}}
+                <i class="fa-light fa-flask"></i>
+                {{else if actor.canRecallKnowledge}}
+                <i class="fa-solid fa-book"></i>
+                {{else if actor.canToggle}}
+                <i class="question fa-solid fa-question"></i>
+                {{else if (and item.isIdentified @first)}}
+                <div class="identified-banner">{{@root.i18n 'identified'}}</div>
+                {{/if}}
+            </div>
+            <div class="update" {{#if actor.tooltip}} data-tooltip="{{actor.tooltip}}" {{/if}}>
+                <div class="fail">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+                <div class="success">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+        <div></div>
+        {{/each}}
+        {{/each}}
+    </div>
+</div>
+<div class="cover">
+    <div class="loader"></div>
+</div>

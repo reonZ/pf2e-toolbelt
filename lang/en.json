@@ -231,6 +231,10 @@
                 "delay": {
                     "name": "24 Hours Delay",
                     "hint": "When enabled, an actor will need to wait 24h after failling to identify an item before being able to make another attempt. Otherwise it will be reset on the next day date."
+                },
+                "playerRequest": {
+                    "name": "Allow Player Request",
+                    "hint": "Should players be able to request identification of items in character owned inventories."
                 }
             }
         },
@@ -510,6 +514,8 @@
             "tracker": {
                 "title": "Item Identification Tracker",
                 "identified": "Already Identified",
+                "send-to-chat": "Send to Chat",
+                "request-checks": "Request Checks",
                 "failed": {
                     "daily": "Has failed to identify this item today",
                     "delay": "Has failed to identify this item:<br>{hours}h remaining"
@@ -517,7 +523,7 @@
                 "known": {
                     "full": "Already identified this item",
                     "partial": "Has identified a similar item:<br>{item}",
-                    "recall": "Can use recall knowledge"
+                    "recall": "Can spend a single Recall Knowledge action<br>and automatically succeed"
                 },
                 "auto": {
                     "label": "Auto",
@@ -528,7 +534,7 @@
                 },
                 "save": {
                     "label": "Update",
-                    "tooltip": "Update current changes",
+                    "tooltip": "Update current changes and identify items",
                     "title": "Update Changes",
                     "content": "Save the current changes and automatically identify the following item(s):<br><ul>{items}</ul>"
                 },
@@ -541,6 +547,11 @@
                     "backward": "Move time backward by 10 minutes",
                     "open": "Open the world clock menu"
                 }
+            },
+            "request": {
+                "sent": "An item identification request has been sent to the GM.",
+                "request": "Requested an item identification for",
+                "proceed": "Would you like to proceed?"
             }
         }
     }
