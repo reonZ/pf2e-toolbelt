@@ -1,3 +1,28 @@
+# 2.10.0
+
+-   switched all dialogs used by the module to their ApplicationV2 version
+-   add a new `Identify` feature:
+    -   help manage the unidentified items from the party members' inventory (plus the party stash if enabled)
+    -   track the items that have been identified by the characters in the party
+    -   allow for fast and bundled identification
+    -   you can open the tracker window using the api function `game.modules.get("pf2e-toolbelt")?.api.identify.openTracker()`
+        -   best make a macro out of it
+    -   the `Identify Item` button/icon in the character sheet's inventory tab will now open the tracker window instead of the system's one
+        -   if the `Allow Player Request` setting is enabled, players will now have access to that button instead of it being GM only
+        -   sends a request for identification to the GM when used by a player
+-   `Hide Damage`:
+    -   fix `Enabled` setting not doing anything when changed until reload
+-   `Target Helper`:
+    -   add support for `PF2e Modifiers Matter`
+        -   modifiers which matter will be colored inside the save tooltip
+        -   the save icon will blink with the most important modifier color to notify the user
+        -   it respects the `Always show highlights to everyone` setting
+    -   fix localization of the `Keeley` low roll modifier
+-   `Template Helper`:
+    -   fix targeting of dead actors' tokens
+-   `Use Button`:
+    -   fix use button showing for unidentified consumables
+
 # 2.9.2
 
 -   `Stances`:
