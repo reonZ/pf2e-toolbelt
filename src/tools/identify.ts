@@ -177,7 +177,8 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         ["updateWorldTime", () => this.render()],
         ["updateActor", this.#onActorUpdate.bind(this)],
         ["updateItem", this.#onItemUpdate.bind(this)],
-        // TODO add delete/create variants
+        ["deleteItem", this.#onItemUpdate.bind(this)],
+        ["createItem", this.#onItemUpdate.bind(this)],
     ];
 
     #unlockedUUIDs: ItemUUID[] = [];
