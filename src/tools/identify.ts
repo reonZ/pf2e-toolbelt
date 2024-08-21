@@ -889,8 +889,6 @@ function openTracker(item?: ItemPF2e) {
         PF2eToolbeltIdentify.instance = new PF2eToolbeltIdentify(item);
         PF2eToolbeltIdentify.instance.render(true);
     }
-
-    return PF2eToolbeltIdentify.instance;
 }
 
 function getSpellList(actor: CharacterPF2e): SpellList {
