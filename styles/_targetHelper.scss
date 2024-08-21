@@ -300,34 +300,13 @@
 }
 
 [role="tooltip"] {
-    .pf2e-toolbelt-target-save,
-    .pf2e-toolbelt-target-mm {
+    .pf2e-toolbelt-target-save {
         font-size: 0.9em;
         display: flex;
         flex-direction: column;
         align-items: start;
         gap: 0.2em;
-    }
 
-    .pf2e-toolbelt-target-mm {
-        .ESSENTIAL {
-            color: #15d315;
-        }
-
-        .HELPFUL {
-            color: #c4e52d;
-        }
-
-        .HARMFUL {
-            color: #fb3434;
-        }
-
-        .DETRIMENTAL {
-            color: #ff8e3e;
-        }
-    }
-
-    .pf2e-toolbelt-target-save {
         .result {
             i {
                 font-size: 0.8em;
@@ -346,6 +325,22 @@
                     opacity: 0.8;
                 }
             }
+        }
+
+        .ESSENTIAL {
+            color: var(--pf2emm-color-essential);
+        }
+
+        .HELPFUL {
+            color: var(--pf2emm-color-helpful);
+        }
+
+        .HARMFUL {
+            color: var(--pf2emm-color-harmful);
+        }
+
+        .DETRIMENTAL {
+            color: var(--pf2emm-color-detrimental);
         }
     }
 

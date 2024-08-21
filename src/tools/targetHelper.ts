@@ -919,7 +919,10 @@ async function rerollSave(
         modifiers: foundry.utils.deepClone(flag.modifiers),
         notes: notes.map((note) => note.toObject()),
         rerolled: reroll,
-        significantModifiers: undefined,
+        significantModifiers: pf2eMm?.getSignificantModifiersOfMessage({
+            ...message,
+            rolls: [newRoll],
+        }),
     };
 
     if (keptRoll.options.keeleyAdd10) {
@@ -1032,7 +1035,7 @@ async function getMessageData(message: ChatMessagePF2e) {
                 canRollSave.push(tokenUUID);
             }
 
-            const targetSave = await (async () => {
+            const targetSave: TargetSaveResult | undefined = await (async () => {
                 if (!hasSave || !saveFlag) return;
 
                 const rerolled = saveFlag.rerolled;
@@ -1044,22 +1047,12 @@ async function getMessageData(message: ChatMessagePF2e) {
                     saveFlag.success !== saveFlag.unadjustedOutcome
                         ? saveFlag.dosAdjustments?.[saveFlag.unadjustedOutcome]?.label
                         : undefined;
-                const isPrivate = !hasPlayerOwner && saveFlag.whispers.length;
+                const isPrivate = !hasPlayerOwner && saveFlag.whispers.length > 0;
                 const canSeeResult = isGM || !isPrivate;
 
                 const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
                 const notesList = RollNotePF2e.notesToHTML(notes);
                 notesList?.classList.add("pf2e-toolbelt-target-notes");
-
-                const significantList =
-                    isFriendly || showSignificant
-                        ? saveFlag.significantModifiers?.map(({ name, significance, value }) => {
-                              return `<div class="${significance}">${name} ${value}</div>`;
-                          })
-                        : undefined;
-                const significantModifiers = significantList?.length
-                    ? `<div class="pf2e-toolbelt-target-mm">${significantList.join("")}</div>`
-                    : undefined;
 
                 let result = "";
 
@@ -1081,17 +1074,42 @@ async function getMessageData(message: ChatMessagePF2e) {
                     }
                 }
 
+                const significantList =
+                    foundry.utils.deepClone(saveFlag.significantModifiers) ?? [];
+
+                const modifiers =
+                    isFriendly || showBreakdowns
+                        ? saveFlag.modifiers.map(({ label, modifier }) => {
+                              const significant = significantList.findSplice(
+                                  ({ name, value }) => name === label && modifier === value
+                              );
+                              return {
+                                  name: label.replace(/(.+) \d+/, "$1"),
+                                  value: modifier,
+                                  css: significant?.significance ?? "NONE",
+                              };
+                          })
+                        : [];
+
+                const significantModifiers =
+                    isFriendly || showSignificant
+                        ? significantList.map(({ name, significance, value }) => ({
+                              name: name.replace(/(.+) \d+/, "$1"),
+                              value,
+                              css: significance,
+                          }))
+                        : [];
+
                 return {
                     ...saveFlag,
                     notes: notesList?.outerHTML,
-                    significantModifiers,
                     canReroll,
                     isPrivate,
                     canSeeResult,
                     tooltip: await render("tooltip", {
                         check: save.tooltipLabel,
                         result: result ? localize("tooltip.result.format", { result }) : undefined,
-                        modifiers: isFriendly || showBreakdowns ? saveFlag.modifiers : [],
+                        modifiers: modifiers.concat(significantModifiers),
                         adjustment,
                         canReroll,
                         rerolled: rerolled ? REROLL[rerolled] : undefined,
@@ -1215,11 +1233,12 @@ type MessageFlag = {
     applied?: Record<string, boolean[]>;
 };
 
-type TargetSaveResult = Omit<MessageTargetSave, "notes" | "significantModifiers"> & {
+type TargetSaveResult = Omit<MessageTargetSave, "notes"> & {
     canReroll: boolean;
     tooltip: string;
     notes: string | undefined;
-    significantModifiers: string | undefined;
+    isPrivate: boolean;
+    canSeeResult: boolean;
 };
 
 type TargetSave = MessageSaveDataWithTooltip & {
