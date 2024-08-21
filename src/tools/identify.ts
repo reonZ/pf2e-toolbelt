@@ -80,6 +80,7 @@ const { config, settings, localize, hook, socket, render, getFlag, flagPath } = 
     ],
     api: {
         openTracker,
+        requestIdentify,
     },
     onSocket: async (packet: SocketPacket, userId: string) => {
         if (game.user === game.users.activeGM) {
@@ -158,11 +159,15 @@ function onRenderCharacterSheetPF2e(sheet: CharacterSheetPF2e) {
             if (game.user.isGM) {
                 openTracker(item);
             } else {
-                localize.info("request.sent");
-                socket.emit({ itemUUID: item.uuid });
+                requestIdentify(item);
             }
         });
     }
+}
+
+function requestIdentify(item: ItemPF2e, skipNotify?: boolean) {
+    if (!skipNotify) localize.info("request.sent");
+    socket.emit({ itemUUID: item.uuid });
 }
 
 class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
