@@ -4,7 +4,8 @@
     {{name}}
 </span>
 
-<span class="controls">
+
+<span class="controls {{save.result.hasSignificantModifiers}}">
     {{#if save.result}}
 
     {{#if save.result.notes}}
@@ -14,7 +15,7 @@
     {{#if (and isOwner canReroll)}}
     <a class="reroll" data-action="reroll-save" data-statistic="{{save.statistic}}"
         data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
-        <i class="{{save.icon}}"></i>
+        <i class="save {{save.icon}}"></i>
         <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
             {{save.result.value}}
         </span>
@@ -23,7 +24,7 @@
     {{else}}
     <span class="observe" data-tooltip="{{save.result.tooltip}}" {{#if
         isPrivate}}data-visibility="gm" {{/if}}>
-        <i class="{{save.icon}}"></i>
+        <i class="save {{save.icon}}"></i>
         {{#if canSeeResult}}
         <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
             {{save.result.value}}
@@ -40,12 +41,12 @@
 
     {{#if isOwner}}
     <a data-action="roll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.tooltip}}">
-        <i class="{{save.icon}}"></i>
+        <i class="save {{save.icon}}"></i>
         <i class="fa-solid fa-dice-d20 die"></i>
     </a>
     {{else}}
     <span data-tooltip="{{save.tooltip}}">
-        <i class="{{save.icon}}"></i>
+        <i class="save {{save.icon}}"></i>
         <i class="fa-regular fa-circle-question"></i>
     </span>
     {{/if}}

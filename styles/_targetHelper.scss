@@ -154,12 +154,8 @@
                         }
                     }
 
-                    .observe,
                     .reroll {
                         margin-right: -0.1em;
-                    }
-
-                    .reroll {
                         display: flex;
                         align-items: center;
                         gap: 0.2em;
@@ -181,6 +177,38 @@
 
                         &.list {
                             font-size: 0.96em;
+                        }
+                    }
+
+                    &.has-significant-modifiers {
+                        &.ESSENTIAL {
+                            --significant-glow: var(--pf2emm-color-essential);
+                        }
+
+                        &.HELPFUL {
+                            --significant-glow: var(--pf2emm-color-helpful);
+                        }
+
+                        &.HARMFUL {
+                            --significant-glow: var(--pf2emm-color-harmful);
+                        }
+
+                        &.DETRIMENTAL {
+                            --significant-glow: var(--pf2emm-color-detrimental);
+                        }
+
+                        .save {
+                            animation: pf2e-toolbelt-blinking 0.4s infinite alternate;
+
+                            @keyframes pf2e-toolbelt-blinking {
+                                from {
+                                    text-shadow: 0 0 0 var(--significant-glow);
+                                }
+
+                                to {
+                                    text-shadow: 0 0 6px var(--significant-glow);
+                                }
+                            }
                         }
                     }
                 }

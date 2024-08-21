@@ -1077,6 +1077,15 @@ async function getMessageData(message: ChatMessagePF2e) {
                 const significantList =
                     foundry.utils.deepClone(saveFlag.significantModifiers) ?? [];
 
+                const hasSignificantModifiers = R.pipe(
+                    significantList,
+                    R.map(({ value, significance }) => ({
+                        value: Math.abs(value),
+                        css: significance,
+                    })),
+                    R.firstBy([R.prop("value"), "desc"])
+                )?.css;
+
                 const modifiers =
                     isFriendly || showBreakdowns
                         ? saveFlag.modifiers.map(({ label, modifier }) => {
@@ -1106,6 +1115,9 @@ async function getMessageData(message: ChatMessagePF2e) {
                     canReroll,
                     isPrivate,
                     canSeeResult,
+                    hasSignificantModifiers: hasSignificantModifiers
+                        ? `has-significant-modifiers ${hasSignificantModifiers}`
+                        : undefined,
                     tooltip: await render("tooltip", {
                         check: save.tooltipLabel,
                         result: result ? localize("tooltip.result.format", { result }) : undefined,
@@ -1239,6 +1251,7 @@ type TargetSaveResult = Omit<MessageTargetSave, "notes"> & {
     notes: string | undefined;
     isPrivate: boolean;
     canSeeResult: boolean;
+    hasSignificantModifiers: string | undefined;
 };
 
 type TargetSave = MessageSaveDataWithTooltip & {
