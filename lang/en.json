@@ -222,7 +222,7 @@
                 "title": "Identify",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Will help you manage unidentified items in your world, the items are pulled from the inventories of the party members."
+                    "hint": "Will help you manage unidentified items in your world and keep track of which items are identified."
                 },
                 "stash": {
                     "name": "Add Party Stash",
@@ -230,11 +230,11 @@
                 },
                 "delay": {
                     "name": "24 Hours Delay",
-                    "hint": "When enabled, an actor will need to wait 24h after failling to identify an item before being able to make another attempt. Otherwise it will be reset on the next day date."
+                    "hint": "When enabled, a character will need to wait 24h after failling to identify an item before being able to make another attempt. Otherwise it will be reset on the next day date."
                 },
                 "playerRequest": {
                     "name": "Allow Player Request",
-                    "hint": "Should players be able to request identification of items in character owned inventories."
+                    "hint": "Should players be able to request identification of items."
                 },
                 "identifyPartials": {
                     "name": "Auto Identify Similar Items",
