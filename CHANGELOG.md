@@ -1,3 +1,8 @@
+# 2.11.1
+
+-   `Target Helper`:
+    -   fix trying to access a missing global variable
+
 # 2.11.0
 
 -   `Identify`:
