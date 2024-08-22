@@ -15,11 +15,14 @@ import { createTool } from "../tool";
 
 const PARTIAL_SLUGH_REGEX = / ?\(.+\) ?/g;
 
+const EIDOLON_ICON = "fa-solid fa-alien";
+const COMPANION_ICON = "fa-solid fa-dog";
+
 const ACTOR_TYPE_ICONS: Record<ActorType, string> = {
     familiar: "fa-solid fa-bat",
     loot: "fa-solid fa-treasure-chest",
     vehicle: "fa-solid fa-wagon-covered",
-    npc: "fa-solid fa-user-alien",
+    npc: "fa-solid fa-ghost",
     character: "fa-solid fa-user",
     party: "fa-solid fa-users",
     army: "",
@@ -298,10 +301,10 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
             const ownerIcon = (() => {
                 if (itemActor.type !== "character") return ACTOR_TYPE_ICONS[itemActor.type];
                 const traits = itemActor.traits;
-                return itemActor.traits.has("eidolon")
-                    ? "fa-solid fa-alicorn"
-                    : itemActor.traits.has("minion")
-                    ? "fa-solid fa-dog"
+                return traits.has("eidolon")
+                    ? EIDOLON_ICON
+                    : traits.has("minion")
+                    ? COMPANION_ICON
                     : ACTOR_TYPE_ICONS.character;
             })();
 
