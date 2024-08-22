@@ -783,7 +783,8 @@ async function rollSaves(
                             modifiers: modifiers
                                 .filter((modifier) => modifier.enabled)
                                 .map(({ label, modifier }) => ({ label, modifier })),
-                            significantModifiers: pf2eMm?.getSignificantModifiersOfMessage(msg),
+                            significantModifiers:
+                                window.pf2eMm?.getSignificantModifiersOfMessage(msg),
                         };
 
                         updates[target.id] = data;
@@ -919,7 +920,7 @@ async function rerollSave(
         modifiers: foundry.utils.deepClone(flag.modifiers),
         notes: notes.map((note) => note.toObject()),
         rerolled: reroll,
-        significantModifiers: pf2eMm?.getSignificantModifiersOfMessage({
+        significantModifiers: window.pf2eMm?.getSignificantModifiersOfMessage({
             ...message,
             rolls: [newRoll],
         }),
