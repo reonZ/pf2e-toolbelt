@@ -163,8 +163,9 @@
             }
 
             .item-controls {
-                display: flex;
-                gap: 0.5em;
+                display: grid;
+                grid-template-columns: repeat(5, 1.6em);
+                justify-items: center;
             }
         }
 

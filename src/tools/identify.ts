@@ -15,6 +15,17 @@ import { createTool } from "../tool";
 
 const PARTIAL_SLUGH_REGEX = / ?\(.+\) ?/g;
 
+const ACTOR_TYPE_ICONS: Record<ActorType, string> = {
+    familiar: "fa-solid fa-bat",
+    loot: "fa-solid fa-treasure-chest",
+    vehicle: "fa-solid fa-wagon-covered",
+    npc: "fa-solid fa-user-alien",
+    character: "fa-solid fa-user",
+    party: "fa-solid fa-users",
+    army: "",
+    hazard: "",
+};
+
 const { config, settings, localize, hook, socket, render, getFlag, flagPath } = createTool({
     name: "identify",
     settings: [
@@ -74,8 +85,8 @@ const { config, settings, localize, hook, socket, render, getFlag, flagPath } = 
     ],
     hooks: [
         {
-            event: "renderCharacterSheetPF2e",
-            listener: onRenderCharacterSheetPF2e,
+            event: "renderActorSheetPF2e",
+            listener: onRenderActorSheetPF2e,
         },
     ],
     api: {
@@ -112,15 +123,15 @@ async function onRequestReceived(itemUUID: string, userId: string) {
     }
 }
 
-function onRenderCharacterSheetPF2e(sheet: CharacterSheetPF2e) {
+function onRenderActorSheetPF2e(sheet: ActorSheetPF2e) {
     const isGM = game.user.isGM;
     const actor = sheet.actor;
     if (!isGM && !actor.isOwner) return;
 
-    const tab = htmlQuery(sheet.element[0], ".tab.inventory");
-    if (!tab) return;
+    const listElement = htmlQuery(sheet.element[0], ".inventory-list");
+    if (!listElement) return;
 
-    const itemsElements = tab.querySelectorAll<HTMLLIElement>(
+    const itemsElements = listElement.querySelectorAll<HTMLLIElement>(
         "li[data-item-id],li[data-subitem-id]"
     );
 
@@ -203,23 +214,25 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
     async _prepareContext(options: TrackerRenderOptions): Promise<TrackerContext> {
         const party = game.actors.party;
         const members = party?.members ?? [];
-        const actors = members.filter((actor) => actor.isOfType("character"));
+        const characters = members.filter((actor) => actor.isOfType("character"));
         const identifications: Record<string, IdenfifiedFlag> = {};
         const spellLists: Record<string, SpellList> = {};
         const itemGroups: Partial<Record<PhysicalItemType, GroupItem[]>> = {};
-        const items: PhysicalItemPF2e<ActorPF2e>[] = R.pipe(
-            members,
-            R.flatMap((actor) => actor.inventory.contents),
-            R.filter((item) => !item.isIdentified)
-        );
+
         const useDelay = settings.delay;
         const worldClock = game.pf2e.worldClock;
         const worldTime = worldClock.worldTime;
         const DateTimeCls = worldTime.constructor as typeof DateTime;
 
-        for (const actor of actors) {
+        for (const actor of characters) {
             identifications[actor.id] = getFlag<IdenfifiedFlag>(actor, "identified") ?? {};
         }
+
+        const items: PhysicalItemPF2e<ActorPF2e>[] = R.pipe(
+            members,
+            R.flatMap((actor) => actor.inventory.contents),
+            R.filter((item) => !item.isIdentified)
+        );
 
         if (party && settings.stash) {
             items.push(...party.inventory.contents.filter((item) => !item.isIdentified));
@@ -228,21 +241,18 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         const ghostItems = R.pipe(
             await Promise.all(
                 R.pipe(
-                    this.#itemsUUIDs,
+                    [...this.#itemsUUIDs, ...this.#unlockedUUIDs],
+                    R.unique,
                     R.difference(items.map((item) => item.uuid)),
                     R.map((uuid) => fromUuid<PhysicalItemPF2e>(uuid))
                 )
             ),
             R.filter(R.isTruthy),
-            R.filter((item): item is PhysicalItemPF2e<ActorPF2e> => {
-                const actor = item.actor;
-                return actor === party || (!!actor && actors.includes(actor as CharacterPF2e));
-            })
+            R.filter((item) => this.isValidItem(item))
         );
 
-        const hasLockedItems =
-            this.#unlockedUUIDs.length > 0 && this.#unlockedUUIDs.length < items.length;
         const allItems = [...items, ...ghostItems];
+        const hasLockedItems = this.#unlockedUUIDs.length > 0;
 
         this.#knownItems = [];
         this.#removedFaillures = {};
@@ -250,6 +260,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
 
         for (const item of allItems) {
             const itemUuid = item.uuid;
+            const itemActor = item.actor;
             const itemIdentified = item.isIdentified;
             const data = item.system.identification.identified;
             const isConsumable = item.isOfType("consumable");
@@ -275,6 +286,22 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 isLocked && "locked",
             ];
 
+            const ownerIcon = (() => {
+                if (itemActor.type !== "character") return ACTOR_TYPE_ICONS[itemActor.type];
+                const traits = itemActor.traits;
+                return itemActor.traits.has("eidolon")
+                    ? "fa-solid fa-alicorn"
+                    : itemActor.traits.has("minion")
+                    ? "fa-solid fa-dog"
+                    : ACTOR_TYPE_ICONS.character;
+            })();
+
+            const owner = {
+                name: itemActor.name,
+                id: itemActor.id,
+                icon: ownerIcon,
+            };
+
             (itemGroups[item.type] ??= []).push({
                 itemSlug,
                 isLocked,
@@ -282,10 +309,10 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 img: data.img,
                 uuid: itemUuid,
                 name: data.name,
-                owner: item.actor,
+                owner,
                 css: itemClasses.join(" "),
                 isIdentified: itemIdentified,
-                actors: actors.map((actor): ItemActor | { id: string } => {
+                actors: characters.map((actor): ItemActor | { id: string } => {
                     const actorId = actor.id;
 
                     if (itemIdentified) return { id: actorId };
@@ -390,7 +417,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         return {
             time,
             date,
-            actors,
+            actors: characters,
             itemGroups: R.pipe(
                 R.entries(itemGroups),
                 R.map(([type, items]) => ({
@@ -450,17 +477,8 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         return super.render(options, _options);
     }
 
-    isValidItem(item?: ItemPF2e): item is PhysicalItemPF2e<CharacterPF2e> {
-        return item instanceof Item && item.isOfType("physical") && this.isValidActor(item.actor);
-    }
-
-    isValidActor(actor?: ActorPF2e | null): actor is CharacterPF2e {
-        if (!(actor instanceof Actor)) return false;
-
-        const party = game.actors.party;
-        const members = party?.members ?? [];
-
-        return actor === party || (actor.isOfType("character") && members.includes(actor));
+    isValidItem(item?: ItemPF2e): item is PhysicalItemPF2e<ActorPF2e> {
+        return item instanceof Item && item.isOfType("physical") && !!item.actor;
     }
 
     unlockItem(itemOrUUID: ItemPF2e | ItemUUID) {
@@ -471,18 +489,13 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 ? itemOrUUID.uuid
                 : undefined;
 
-        if (
-            !itemUUID ||
-            this.#unlockedUUIDs.includes(itemUUID) ||
-            !this.#itemsUUIDs.includes(itemUUID)
-        )
-            return;
+        if (!itemUUID || this.#unlockedUUIDs.includes(itemUUID)) return;
 
         const hadLockedItems = this.#unlockedUUIDs.length > 0;
 
         this.#unlockedUUIDs.push(itemUUID);
 
-        if (!hadLockedItems) {
+        if (!hadLockedItems || !this.#itemsUUIDs.includes(itemUUID)) {
             return this.render();
         }
 
@@ -577,7 +590,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
 
             const getItem = async () => {
                 const itemUuid = htmlClosest(el, "[data-item-uuid]")?.dataset.itemUuid;
-                return itemUuid ? await fromUuid<PhysicalItemPF2e<CreaturePF2e>>(itemUuid) : null;
+                return itemUuid ? await fromUuid<PhysicalItemPF2e<ActorPF2e>>(itemUuid) : null;
             };
 
             switch (action) {
@@ -671,9 +684,9 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
 
         const items = R.pipe(
             await Promise.all(
-                selectedList.map((itemUuid) => fromUuid<PhysicalItemPF2e<CreaturePF2e>>(itemUuid))
+                selectedList.map((itemUuid) => fromUuid<PhysicalItemPF2e<ActorPF2e>>(itemUuid))
             ),
-            R.filter((item): item is PhysicalItemPF2e<CreaturePF2e> => !!item && !item.isIdentified)
+            R.filter((item): item is PhysicalItemPF2e<ActorPF2e> => !!item && !item.isIdentified)
         );
 
         if (!items.length) {
@@ -701,10 +714,10 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         this.render();
     }
 
-    async #identifyList(items: PhysicalItemPF2e<CreaturePF2e>[]) {
+    async #identifyList(items: PhysicalItemPF2e<ActorPF2e>[]) {
         const actorsUpdates: Record<
             string,
-            { actor: CreaturePF2e; items: PhysicalItemPF2e<CreaturePF2e>[] }
+            { actor: ActorPF2e; items: PhysicalItemPF2e<ActorPF2e>[] }
         > = {};
 
         for (const item of items) {
@@ -730,8 +743,8 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
 
     async #saveChanges() {
         const actors: Record<string, ActorPF2e | undefined> = {};
-        const items: Record<string, PhysicalItemPF2e<CreaturePF2e> | null> = {};
-        const toIdentify: PhysicalItemPF2e<CreaturePF2e>[] = [];
+        const items: Record<string, PhysicalItemPF2e<ActorPF2e> | null> = {};
+        const toIdentify: PhysicalItemPF2e<ActorPF2e>[] = [];
         const identifyUpdates: Record<string, IdenfifiedFlag> = {};
         const failUpdates: Record<string, Record<string, FailedFlag>> = {};
         const updateElements = htmlQueryAll(this.element, "[data-update]");
@@ -746,7 +759,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         };
 
         const addFailedUpdate = (
-            item: PhysicalItemPF2e<CreaturePF2e>,
+            item: PhysicalItemPF2e<ActorPF2e>,
             actorId: string,
             remove: boolean
         ) => {
@@ -986,7 +999,7 @@ type GroupItem = {
     actors: (ItemActor | { id: string })[];
     isIdentified: boolean;
     partialSlug: string | undefined;
-    owner: { name: string; id: string };
+    owner: { name: string; id: string; icon: string };
 };
 
 type TrackerContext = {
