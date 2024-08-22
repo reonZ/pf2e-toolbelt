@@ -1,3 +1,12 @@
+# 2.11.0
+
+-   `Identify`:
+    -   updated settings hints
+    -   have different icons based on the item actor type
+    -   allow items from any type of actor to be identified using this feature
+        -   any item that is in an actor's inventory/stash will have its `Identify Item` button open the tracker
+        -   players can now also request an identification from any actor they have ownership or can usually update (e.g. loot, party, dead NPCs)
+
 # 2.10.0
 
 -   switched all dialogs used by the module to their ApplicationV2 version
