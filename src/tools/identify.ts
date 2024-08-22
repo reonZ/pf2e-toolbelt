@@ -124,9 +124,12 @@ async function onRequestReceived(itemUUID: string, userId: string) {
 }
 
 function onRenderActorSheetPF2e(sheet: ActorSheetPF2e) {
-    const isGM = game.user.isGM;
+    const user = game.user;
+    const isGM = user.isGM;
     const actor = sheet.actor;
-    if (!isGM && !actor.isOwner) return;
+
+    if (!isGM && actor.isOfType("loot") && actor.isMerchant) return;
+    if (!actor.canUserModify(user, "update")) return;
 
     const listElement = htmlQuery(sheet.element[0], ".inventory-list");
     if (!listElement) return;
@@ -140,7 +143,7 @@ function onRenderActorSheetPF2e(sheet: ActorSheetPF2e) {
         const realItemId = subitemId
             ? htmlClosest(itemElement, "[data-item-id]")?.dataset.itemId
             : itemId;
-        const realItem = actor.inventory.get(realItemId, { strict: true });
+        const realItem = (actor as ActorPF2e).inventory.get(realItemId, { strict: true });
         const item = subitemId ? realItem.subitems.get(subitemId, { strict: true }) : realItem;
 
         if (item.isIdentified) continue;
@@ -150,12 +153,6 @@ function onRenderActorSheetPF2e(sheet: ActorSheetPF2e) {
             systemToggle?.remove();
         }
 
-        const siblingElement = htmlQuery(
-            itemElement,
-            `[data-action="${isGM ? "edit-item" : "delete-item"}"]`
-        );
-        if (!siblingElement) continue;
-
         const toggleElement = createHTMLElement("a", {
             dataset: {
                 action: "pf2e-toobelt-identify",
@@ -164,7 +161,19 @@ function onRenderActorSheetPF2e(sheet: ActorSheetPF2e) {
             innerHTML: "<i class='fa-solid fa-question-circle fa-fw'></i>",
         });
 
-        siblingElement.before(toggleElement);
+        const dataElement = htmlQuery(itemElement, ".data");
+        if (!dataElement) return;
+
+        const siblingElement = htmlQuery(
+            dataElement,
+            `[data-action="${isGM ? "edit-item" : "delete-item"}"]`
+        );
+        if (siblingElement) {
+            siblingElement.before(toggleElement);
+        } else {
+            const imgElement = htmlQuery(dataElement, ".item-image");
+            imgElement?.after(toggleElement);
+        }
 
         toggleElement.addEventListener("click", () => {
             if (game.user.isGM) {
