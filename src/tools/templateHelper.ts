@@ -1,4 +1,4 @@
-import { getTemplateTokens, htmlQuery, isHoldingModifierKeys } from "foundry-pf2e";
+import { createDialogData, getTemplateTokens, isHoldingModifierKeys } from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const { config, settings, hook, waitDialog } = createTool({
@@ -49,6 +49,7 @@ async function onCreateMeasuredTemplate(
         targets: "all" | "enemies" | "allies";
         self: boolean;
         neutral: boolean;
+        event: PointerEvent | SubmitEvent;
     }>(
         "menu",
         {
@@ -56,6 +57,12 @@ async function onCreateMeasuredTemplate(
             yes: "fa-solid fa-bullseye-arrow",
             data: {
                 noSelf: !self,
+            },
+            callback: async (event, btn, html) => {
+                return {
+                    ...createDialogData(html),
+                    event,
+                };
             },
         },
         { width: 270, animation: false }
@@ -89,7 +96,10 @@ async function onCreateMeasuredTemplate(
             );
         });
 
-        const targetsIds = targets.map((token) => token.id);
+        const targetsIds = targets
+            .map((token) => token.id)
+            .concat("shiftKey" in result.event && result.event.shiftKey ? user.targets.ids : []);
+
         user.updateTokenTargets(targetsIds);
         user.broadcastActivity({ targets: targetsIds });
     }

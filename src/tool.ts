@@ -91,6 +91,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
                 yes: {
                     label: translate("yes"),
                     icon: dialogOptions.yes ?? "fa-solid fa-check",
+                    callback: dialogOptions.callback,
                 },
                 no: {
                     label: translate("no"),
@@ -376,6 +377,7 @@ type ToolConfig = {
 
 type ToolWaitDialogOptions = {
     onRender?: (html: HTMLElement) => void;
+    callback?: DialogV2ButtonCallback;
     yes?: string;
     no?: string;
     title?: string;
