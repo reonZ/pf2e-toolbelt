@@ -8,7 +8,7 @@
 -   `Stances`:
     -   fix character sheets not being refreshed when a combat ends
 -   `Template Helper`:
-    -   you can now hold `shift` when clicking the `Target` button to add the template targets to ones that already exist instead of replacing them
+    -   you can now hold `shift` when clicking the `🎯Target` button to add the template targets to ones that already exist instead of replacing them
 
 # 2.11.1
 
