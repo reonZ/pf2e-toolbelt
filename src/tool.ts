@@ -2,12 +2,14 @@ import {
     DialogExtraOptions,
     R,
     deleteInMemory,
+    error,
     flagPath,
     getFlag,
     getFlagProperty,
     getInMemory,
     getInMemoryAndSetIfNot,
     getSetting,
+    hasGMOnline,
     libWrapper,
     registerUpstreamHook,
     registerWrapper,
@@ -293,6 +295,11 @@ function createToolSocket(config: ToolConfig) {
 
     return {
         emit(packet: object) {
+            if (!hasGMOnline()) {
+                error("tool.noGM");
+                return;
+            }
+
             socketEmit({
                 ...packet,
                 __tool__: config.name,
