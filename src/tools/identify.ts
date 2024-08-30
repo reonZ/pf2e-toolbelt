@@ -571,7 +571,16 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
             }
         });
 
-        addListenerAll(html, ".item-actor.toggleable", "mousedown", (event, el) => {
+        addListenerAll(html, ".item-img, .item-details", (event, el) => {
+            const { itemUuid } = elementDataset<IdentifyCellData>(el);
+
+            if (el.classList.contains("locked")) {
+                this.unlockItem(itemUuid);
+                return;
+            }
+        });
+
+        addListenerAll(html, ".item-actor", "mousedown", (event, el) => {
             if (![0, 2].includes(event.button)) return;
 
             const { itemUuid, actorId } = elementDataset<IdentifyCellData>(el);
@@ -580,6 +589,8 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 this.unlockItem(itemUuid);
                 return;
             }
+
+            if (!el.classList.contains("toggleable")) return;
 
             const direction = event.button === 0 ? +1 : -1;
             const itemUpdate = (this.#updates[itemUuid] ??= {});
