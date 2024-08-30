@@ -1,3 +1,15 @@
+# 2.12.0
+
+-   this is a system `6.3.1` release
+-   add an error notification to features that require a GM to be online and none is found
+-   `Identify`:
+    -   no longer display the "Already Identified" banner
+    -   fix not being able to unlock a item row when clicking on its image, details or a cell that have a green vial
+-   `Stances`:
+    -   fix character sheets not being refreshed when a combat ends
+-   `Template Helper`:
+    -   you can now hold `shift` when clicking the `Target` button to add the template targets to ones that already exist instead of replacing them
+
 # 2.11.1
 
 -   `Target Helper`:
