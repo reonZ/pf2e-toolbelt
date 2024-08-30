@@ -22,6 +22,7 @@ import {
     templatePath,
     unregisterWrapper,
     unsetFlag,
+    unsetFlagProperty,
     updateSourceFlag,
     waitDialog,
 } from "foundry-pf2e";
@@ -125,6 +126,8 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
             getFlagProperty(obj, toolName, ...path),
         setFlagProperty: (obj: object, ...args: [...string[], any]) =>
             setFlagProperty(obj, toolName, ...args),
+        unsetFlagProperty: (obj: object, ...path: string[]) =>
+            unsetFlagProperty(obj, toolName, ...path),
         getInMemory: (obj: object, ...path: string[]) => getInMemory(obj, toolName, ...path),
         setInMemory: (obj: object, ...args: [...string[], unknown]) =>
             setInMemory(obj, toolName, ...args),
@@ -391,6 +394,7 @@ type ToolObject<TConfig extends ToolConfig> = {
     updateSourceFlag: typeof updateSourceFlag;
     getFlagProperty: typeof getFlagProperty;
     setFlagProperty: typeof setFlagProperty;
+    unsetFlagProperty: typeof unsetFlagProperty;
     getInMemory: typeof getInMemory;
     setInMemory: typeof setInMemory;
     getInMemoryAndSetIfNot: typeof getInMemoryAndSetIfNot;
