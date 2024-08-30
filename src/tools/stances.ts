@@ -52,6 +52,10 @@ const { config, settings, hooks, wrappers, localize, render, waitDialog } = crea
             event: "deleteCombatant",
             listener: onDeleteCombatant,
         },
+        {
+            event: "deleteCombat",
+            listener: onDeleteCombatant,
+        },
     ],
     wrappers: [
         {
@@ -128,7 +132,7 @@ function onPreDeleteCombatant(combatant: CombatantPF2e) {
     );
 }
 
-function onDeleteCombatant(combatant: CombatantPF2e) {
+function onDeleteCombatant() {
     renderCharacterSheets();
 }
 
