@@ -223,13 +223,13 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         }
     }
 
-    async _prepareContext(options: TrackerRenderOptions): Promise<TrackerContext> {
+    async _prepareContext(options: IdentifyRenderOptions): Promise<IdentifyContext> {
         const party = game.actors.party;
         const members = party?.members ?? [];
         const characters = members.filter((actor) => actor.isOfType("character"));
         const identifications: Record<string, IdenfifiedFlag> = {};
-        const spellLists: Record<string, SpellList> = {};
-        const itemGroups: Partial<Record<PhysicalItemType, GroupItem[]>> = {};
+        const spellLists: Record<string, IdentifySpellList> = {};
+        const itemGroups: Partial<Record<PhysicalItemType, IdentifyGroupItem[]>> = {};
 
         const useDelay = settings.delay;
         const worldClock = game.pf2e.worldClock;
@@ -289,7 +289,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 isConsumable && !scrollWandSpell
                     ? game.pf2e.system.sluggify(data.name.replaceAll(PARTIAL_SLUGH_REGEX, ""))
                     : undefined;
-            const fails = getFlag<FailedFlag>(item, "failed") ?? {};
+            const fails = getFlag<IdentifyFailedFlag>(item, "failed") ?? {};
             const isLocked =
                 !itemIdentified && hasLockedItems && !this.#unlockedUUIDs.includes(itemUuid);
 
@@ -442,17 +442,17 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         };
     }
 
-    _onFirstRender(context: ApplicationRenderContext, options: TrackerRenderOptions) {
+    _onFirstRender(context: ApplicationRenderContext, options: IdentifyRenderOptions) {
         for (const [event, callback] of this.#HOOKS) {
             Hooks.on(event, callback);
         }
     }
 
-    async _renderHTML(context: TrackerContext, options: TrackerRenderOptions) {
+    async _renderHTML(context: IdentifyContext, options: IdentifyRenderOptions) {
         return render("tracker", context);
     }
 
-    _replaceHTML(result: string, content: HTMLElement, options: TrackerRenderOptions) {
+    _replaceHTML(result: string, content: HTMLElement, options: IdentifyRenderOptions) {
         const prevChild = content.firstElementChild;
         const scrollEl = htmlQuery(prevChild, ".items");
         const scrollPos = scrollEl ? { left: scrollEl.scrollLeft, top: scrollEl.scrollTop } : null;
@@ -478,7 +478,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         }
     }
 
-    async render(options?: boolean | TrackerRenderOptions, _options?: ApplicationRenderOptions) {
+    async render(options?: boolean | IdentifyRenderOptions, _options?: ApplicationRenderOptions) {
         if (this.#loading) return this;
 
         if (typeof options === "object" && options.fullReset) {
@@ -574,7 +574,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         addListenerAll(html, ".item-actor.toggleable", "mousedown", (event, el) => {
             if (![0, 2].includes(event.button)) return;
 
-            const { itemUuid, actorId } = elementDataset<CellData>(el);
+            const { itemUuid, actorId } = elementDataset<IdentifyCellData>(el);
 
             if (el.classList.contains("locked")) {
                 this.unlockItem(itemUuid);
@@ -598,7 +598,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         });
 
         addListenerAll(html, "[data-action]", async (event, el) => {
-            const action = el.dataset.action as TrackerEventAction;
+            const action = el.dataset.action as IdentifyEventAction;
 
             const getItem = async () => {
                 const itemUuid = htmlClosest(el, "[data-item-uuid]")?.dataset.itemUuid;
@@ -758,7 +758,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         const items: Record<string, PhysicalItemPF2e<ActorPF2e> | null> = {};
         const toIdentify: PhysicalItemPF2e<ActorPF2e>[] = [];
         const identifyUpdates: Record<string, IdenfifiedFlag> = {};
-        const failUpdates: Record<string, Record<string, FailedFlag>> = {};
+        const failUpdates: Record<string, Record<string, IdentifyFailedFlag>> = {};
         const updateElements = htmlQueryAll(this.element, "[data-update]");
         const worldTime = game.pf2e.worldClock.worldTime.toString();
 
@@ -783,7 +783,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         await Promise.all(
             updateElements.map(async (updateElement) => {
                 const { actorId, itemUuid, update, type, itemSlug, itemName, partialSlug } =
-                    elementDataset<CellData>(updateElement);
+                    elementDataset<IdentifyCellData>(updateElement);
 
                 const item = await getItem(itemUuid);
                 const actor = getActor(actorId);
@@ -916,7 +916,7 @@ function openTracker(item?: ItemPF2e) {
     }
 }
 
-function getSpellList(actor: CharacterPF2e): SpellList {
+function getSpellList(actor: CharacterPF2e): IdentifySpellList {
     const traditions: Set<MagicTradition> = new Set();
     const known: Set<string> = new Set();
 
@@ -940,7 +940,7 @@ function getSpellList(actor: CharacterPF2e): SpellList {
     };
 }
 
-type TrackerEventAction =
+type IdentifyEventAction =
     | "auto"
     | "save"
     | "reset"
@@ -958,11 +958,11 @@ type SocketPacket = {
     itemUUID: ItemUUID;
 };
 
-type TrackerRenderOptions = ApplicationRenderOptions & {
+type IdentifyRenderOptions = ApplicationRenderOptions & {
     fullReset?: boolean;
 };
 
-type CellData = {
+type IdentifyCellData = {
     update: "fail" | "success";
     actorId: string;
     itemUuid: ItemUUID;
@@ -972,12 +972,12 @@ type CellData = {
     partialSlug?: string;
 };
 
-type SpellList = {
+type IdentifySpellList = {
     traditions: MagicTradition[];
     known: string[];
 };
 
-type FailedFlag = Record<string, string>;
+type IdentifyFailedFlag = Record<string, string>;
 
 type IdenfifiedFlag = Partial<
     Record<
@@ -1001,7 +1001,7 @@ type ItemActor = {
     update: "success" | "fail" | undefined;
 };
 
-type GroupItem = {
+type IdentifyGroupItem = {
     img: string;
     css: string;
     uuid: string;
@@ -1014,14 +1014,14 @@ type GroupItem = {
     owner: { name: string; id: string; icon: string };
 };
 
-type TrackerContext = {
+type IdentifyContext = {
     time: string;
     date: string;
     actors: CharacterPF2e[];
     itemGroups: {
         type: PhysicalItemType;
         label: string;
-        items: GroupItem[];
+        items: IdentifyGroupItem[];
     }[];
 };
 
