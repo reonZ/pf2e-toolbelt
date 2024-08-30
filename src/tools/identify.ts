@@ -442,7 +442,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         };
     }
 
-    protected _onFirstRender(context: ApplicationRenderContext, options: TrackerRenderOptions) {
+    _onFirstRender(context: ApplicationRenderContext, options: TrackerRenderOptions) {
         for (const [event, callback] of this.#HOOKS) {
             Hooks.on(event, callback);
         }
