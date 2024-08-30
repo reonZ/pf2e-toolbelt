@@ -98,8 +98,6 @@
                 <i class="fa-solid fa-book"></i>
                 {{else if actor.canToggle}}
                 <i class="question fa-solid fa-question"></i>
-                {{else if (and item.isIdentified @first)}}
-                <div class="identified-banner">{{@root.i18n 'identified'}}</div>
                 {{/if}}
             </div>
             <div class="update" {{#if actor.tooltip}} data-tooltip="{{actor.tooltip}}" {{/if}}>
