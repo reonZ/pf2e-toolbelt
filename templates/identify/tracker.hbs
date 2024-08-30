@@ -59,8 +59,9 @@
                 <a data-action="open-item-sheet" data-tooltip="PF2E.EditItemTitle">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </a>
-                <a data-action="misidentify-item" data-tooltip="Misidentify Item - Coming Soon™">
-                    <i class="fa-solid fa-masks-theater"></i>
+                <a data-action="misidentify-item" data-tooltip="{{@root.i18n.path 'misidentify'}}">
+                    <i class="{{ifThen item.isMisidentified 'fa-solid' 'fa-regular'}}
+                        fa-masks-theater"></i>
                 </a>
                 {{#if item.isIdentified}}
                 <a data-action="mystify-item" data-tooltip="PF2E.identification.Mystify">
