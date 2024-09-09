@@ -126,7 +126,8 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
             if (!item?.isOfType("action", "feat")) return;
 
             const macro = await getActionMacro(item);
-            macro?.execute({ actor, item });
+            const proceed = await macro?.execute({ actor, item });
+            if (proceed === false) return;
 
             if (!btn.dataset.skipMessage && !btn.dataset.toolbeltUse) {
                 item.toMessage(event);
