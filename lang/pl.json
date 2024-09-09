@@ -242,6 +242,9 @@
                 }
             }
         },
+        "tool": {
+            "noGM": "Nie ma żadnego MG połączonego z twoim światem, ta operacja nie może zostać przetworzona."
+        },
         "arp": {
             "forceVariant": "Moduł <strong>PF2e Toolbelt</strong> wyłączył wariant systemu pf2e dla reguły ABP, aby działał poprawnie. Prawdopodobnie byłoby lepiej, gdybyś przeładował teraz świat."
         },
@@ -520,7 +523,7 @@
                 "identified": "Już zidentyfikowano",
                 "send-to-chat": "Wyślij na czat",
                 "request-checks": "Żądanie testów",
-                "misidentify": "Błędna identyfikacja przedmiotu",
+                "misidentify": "Błędna identyfikacja przełącznika",
                 "failed": {
                     "daily": "Nie udało się zidentyfikować dzisiaj tego przedmiotu",
                     "delay": "Nie udało się zidentyfikować tego przedmiotu:<br>pozostało {hours} godz."
