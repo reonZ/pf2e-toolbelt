@@ -5,12 +5,14 @@ import {
     R,
     RollNotePF2e,
     SAVE_TYPES,
+    actorItems,
     addListener,
     addListenerAll,
     applyDamageFromMessage,
     createHTMLElement,
     elementDataset,
     extractNotes,
+    getChoiceSetSelection,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
@@ -22,6 +24,21 @@ import {
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 import { TEXTEDITOR_ENRICH_HTML } from "./shared/textEditor";
+
+const THIRD_PATH_TO_PERFECTION = "Compendium.pf2e.classfeatures.Item.haoTkr2U5k7kaAKN";
+
+const LEGENDARY_SAVES = [
+    "Compendium.pf2e.classfeatures.Item.TuL0UfqH14MtqYVh", // Greater Juggernaut
+    "Compendium.pf2e.classfeatures.Item.XFcCeBYqeXgfiA84", // Greater Dogged Will
+    "Compendium.pf2e.classfeatures.Item.rpLPCkTXCZlQ51SR", // Greater Natural Reflexes
+    "Compendium.pf2e.classfeatures.Item.BTpL6XvMk4jvVYYJ", // Greater Rogue Reflexes
+    "Compendium.pf2e.classfeatures.Item.syEkISIi0F9946zo", // Assured Evasion
+    "Compendium.pf2e.classfeatures.Item.Kj59CmXnMJDKXKWx", // Greater Mysterious Resolve
+    "Compendium.pf2e.classfeatures.Item.mRobjNNsABQdUUZq", // Greater Performer's Heart
+    "Compendium.pf2e.classfeatures.Item.Hw6Ji7Fgx0XkVkac", // Fortress of Will
+    "Compendium.pf2e.classfeatures.Item.5LOARurr4qWkfS9K", // Greater Resolve
+    "Compendium.pf2e.classfeatures.Item.i3qjbhL7uukg9I80", // Greater Kinetic Durability
+];
 
 const DAMAGE_MULTIPLIER = {
     "target-apply-healing": -1,
@@ -423,7 +440,7 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
 
     const rowsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-targetRows"] });
 
-    for (const { template, isOwner, save, uuid, applied } of data.targets) {
+    for (const { template, isOwner, save, uuid, applied, target } of data.targets) {
         const hrElement = createHTMLElement("hr");
         const rowElement = createHTMLElement("div", {
             dataset: { targetUuid: uuid },
@@ -451,7 +468,37 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
             );
 
             if (isBasic) {
-                clone.classList.add(save.result.success);
+                const success: DegreeOfSuccessString = (() => {
+                    const actor = target.actor;
+
+                    if (
+                        save.result.unadjustedOutcome !== "failure" ||
+                        !actor?.isOfType("character") ||
+                        actor.saves[save.statistic].rank !== 4
+                    )
+                        return save.result.success;
+
+                    for (const item of actorItems(actor, "feat")) {
+                        const sourceId = item.sourceId;
+                        if (!sourceId) continue;
+
+                        if (sourceId === THIRD_PATH_TO_PERFECTION) {
+                            const selection = getChoiceSetSelection(item, {
+                                flag: "pathToPerfection",
+                            });
+
+                            if (selection === save.statistic) {
+                                return "success";
+                            }
+                        } else if (LEGENDARY_SAVES.includes(sourceId)) {
+                            return "success";
+                        }
+                    }
+
+                    return save.result.success;
+                })();
+
+                clone.classList.add(success);
             }
 
             rowsWrapper.append(clone);
@@ -1127,7 +1174,7 @@ async function getMessageData(message: ChatMessagePF2e) {
                         canReroll,
                         rerolled: rerolled ? REROLL[rerolled] : undefined,
                     }),
-                };
+                } satisfies TargetSaveResult;
             })();
 
             const templateSave: TargetSave | undefined = save && {
