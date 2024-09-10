@@ -10,6 +10,7 @@ import {
     IdentifyItemPopup,
     promptDialog,
     R,
+    userIsActiveGM,
 } from "foundry-pf2e";
 import { createTool } from "../tool";
 
@@ -97,7 +98,7 @@ const { config, settings, localize, hook, socket, render, getFlag, flagPath } = 
         requestIdentify,
     },
     onSocket: async (packet: SocketPacket, userId: string) => {
-        if (game.user === game.users.activeGM) {
+        if (userIsActiveGM()) {
             onRequestReceived(packet.itemUUID, userId);
         }
     },

@@ -12,6 +12,7 @@ import {
     createHTMLElement,
     elementDataset,
     extractNotes,
+    getActiveModule,
     getChoiceSetSelection,
     htmlClosest,
     htmlQuery,
@@ -20,6 +21,7 @@ import {
     onClickShieldBlock,
     refreshLatestMessages,
     toggleOffShieldBlock,
+    userIsActiveGM,
 } from "foundry-pf2e";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
@@ -162,7 +164,7 @@ const {
         const enabled = settings.enabled;
         if (!enabled) return;
 
-        socket.toggle(isGM);
+        socket.toggle(isGM || !!getActiveModule("dice-so-nice"));
 
         hooks.getChatLogEntryContext.activate();
         hooks.preCreateChatMessage.activate();
@@ -176,10 +178,9 @@ const {
 } as const);
 
 function onSocket(packet: SocketPacket, senderId: string) {
-    if (game.user !== game.users.activeGM) return;
-
     switch (packet.type) {
         case "update-applied": {
+            if (!userIsActiveGM()) return;
             const message = game.messages.get(packet.message);
             message?.update(packet.updates);
             break;
@@ -189,6 +190,7 @@ function onSocket(packet: SocketPacket, senderId: string) {
             break;
         }
         case "update-save": {
+            if (!userIsActiveGM()) return;
             const message = game.messages.get(packet.message);
             if (message) {
                 setFlag(message, "saves", packet.updates);
@@ -1010,10 +1012,8 @@ async function roll3dDice(
             roll: roll.toJSON(),
             target: target?.uuid,
         });
-    } else if (self) {
-        if (!user.isGM && !target?.playersCanSeeName) {
-            roll.ghost = true;
-        }
+    } else if (self && !user.isGM && !target?.playersCanSeeName) {
+        roll.ghost = true;
     }
 
     return game.dice3d.showForRoll(roll, user, synchronize);
