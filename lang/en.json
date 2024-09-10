@@ -7,10 +7,6 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Adds a way to link a macro to a character action."
-                },
-                "message": {
-                    "name": "Chat Message",
-                    "hint": "When using an action macro, should the action's description be sent to chat."
                 }
             },
             "arp": {

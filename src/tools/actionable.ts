@@ -28,15 +28,6 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
                 renderItemSheets(["AbilitySheetPF2e", "FeatSheetPF2e"]);
             },
         },
-        {
-            key: "message",
-            type: Boolean,
-            default: true,
-            scope: "client",
-            onChange: () => {
-                renderCharacterSheets();
-            },
-        },
     ],
     api: {
         getActionMacro,
@@ -85,7 +76,6 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
 async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
     const useButton = useButtonToolSetting.actions;
-    const withMessage = settings.message;
     const actionElements = html.querySelectorAll<HTMLElement>(
         ".tab[data-tab='actions'] .actions-list:not(.heroActions-list):not(.strikes-list) .action[data-item-id]"
     );
@@ -98,10 +88,6 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
 
         const btn = createActionUseButton(item);
         btn.dataset.useActionMacro = "true";
-
-        if (!withMessage) {
-            btn.dataset.skipMessage = "true";
-        }
 
         if (useButton && item.frequency) {
             if (item.frequency.value >= 1) {
@@ -126,11 +112,11 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
             if (!item?.isOfType("action", "feat")) return;
 
             const macro = await getActionMacro(item);
-            const proceed = await macro?.execute({ actor, item });
-            if (proceed === false) return;
 
-            if (!btn.dataset.skipMessage && !btn.dataset.toolbeltUse) {
-                item.toMessage(event);
+            if (macro) {
+                macro.execute({ actor, item });
+            } else {
+                item.toMessage();
             }
         }
     );

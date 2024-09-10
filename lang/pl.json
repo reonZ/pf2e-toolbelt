@@ -7,10 +7,6 @@
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Dodaje możliwość powiązania makra z akcją postaci."
-                },
-                "message": {
-                    "name": "Wiadomość na czacie",
-                    "hint": "Podczas korzystania z makra akcji, opis akcji powinien być wysyłany na czat."
                 }
             },
             "arp": {
