@@ -6,23 +6,36 @@ import {
     addListener,
     addListenerAll,
     calculateItemPrice,
+    confirmDialog,
     createHTMLElement,
     createTradeMessage,
     elementDataset,
     enactTradeRequest,
+    error,
     filterTraits,
+    getHighestName,
+    hasGMOnline,
+    hasSufficientCoins,
     htmlClosest,
     htmlQuery,
+    htmlQueryInClosest,
+    isInstanceOf,
     libWrapper,
+    promptDialog,
+    renderActorSheets,
     sendTradeRequest,
+    toggleSummaryElement,
     translateTradeData,
+    userIsActiveGM,
     wrapperError,
 } from "foundry-pf2e";
 import { arrayIncludes } from "foundry-pf2e/src/utils";
 import { createTool } from "../tool";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
 
-const INFINITE = "∞";
+const INFINITY = "∞";
+
+const DEFAULT_SERVICE_ICON = "icons/commodities/currency/coins-plain-stack-gold.webp";
 
 const PULL_LIMIT = 100;
 
@@ -47,7 +60,7 @@ const {
     wrappers,
     localize,
     socket,
-    hook,
+    hooks,
     getFlag,
     setFlag,
     setFlagProperty,
@@ -57,6 +70,7 @@ const {
     setInMemory,
     deleteInMemory,
     templatePath,
+    waitDialog,
 } = createTool({
     name: "betterMerchant",
     settings: [
@@ -66,11 +80,23 @@ const {
             default: false,
             requiresReload: true,
         },
+        {
+            key: "servicesTop",
+            type: Boolean,
+            default: true,
+            onChange: () => {
+                renderActorSheets("LootSheetPF2e");
+            },
+        },
     ],
     hooks: [
         {
             event: "renderItemTransferDialog",
             listener: onRenderItemTransferDialog,
+        },
+        {
+            event: "createChatMessage",
+            listener: onCreateChatMessage,
         },
     ],
     wrappers: [
@@ -139,13 +165,16 @@ const {
     ready: (isGM) => {
         if (!settings.enabled) return;
 
-        hook.activate();
+        hooks.renderItemTransferDialog.activate();
+
         wrappers.lootSheetRenderInner.activate();
+        wrappers.lootSheetListeners.activate();
 
         if (isGM) {
             socket.activate();
 
-            wrappers.lootSheetListeners.activate();
+            hooks.createChatMessage.activate();
+
             wrappers.browserRenderInner.activate();
             wrappers.browserEquipmentTabRenderResults.activate();
             wrappers.browserListeners.activate();
@@ -153,6 +182,50 @@ const {
         }
     },
 } as const);
+
+async function onCreateChatMessage(message: ChatMessagePF2e) {
+    if (!userIsActiveGM()) return;
+
+    const serviceFlag = getFlag<ServiceMsgFlag>(message, "service");
+    if (serviceFlag) {
+        const errorUpdate = () => {
+            const msgContent = createHTMLElement("div", { innerHTML: message.content });
+            const cardContent = htmlQuery(msgContent, ".card-content") ?? msgContent;
+            const errorMsg = localize("service.error");
+
+            cardContent.innerHTML = `<p class="pf2e-toolbelt-service-error">${errorMsg}</p>`;
+            return message.update({ content: msgContent.innerHTML });
+        };
+
+        const buyer = await fromUuid(serviceFlag.buyerUUID);
+        const seller = await fromUuid(serviceFlag.sellerUUID);
+        if (!isInstanceOf(seller, "LootPF2e") || !isValidServiceBuyer(buyer)) {
+            return await errorUpdate();
+        }
+
+        const services = getServices(seller);
+        const service = services.find((service) => service.id === serviceFlag.serviceId);
+        if (!serviceCanBePurchased(service)) {
+            return await errorUpdate();
+        }
+
+        const price = getServicePrice(service);
+        const quantity = service.quantity ?? -1;
+
+        if (price.copperValue > 0) {
+            if (await buyer.inventory.removeCoins(price)) {
+                await seller.inventory.addCoins(price);
+            } else {
+                return await errorUpdate();
+            }
+        }
+
+        if (quantity > 0) {
+            service.quantity = quantity - 1;
+            await setServices(seller, services);
+        }
+    }
+}
 
 function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
     const thisActor = app.item.actor;
@@ -815,7 +888,7 @@ async function lootSheetPF2eRenderInner(
     wrapped: libWrapper.RegisterCallback,
     data: LootSheetDataPF2e
 ) {
-    const $html = await wrapped(data);
+    const $html = (await wrapped(data)) as JQuery;
 
     const actor = this.actor;
     if (!actor?.isMerchant) return $html;
@@ -823,6 +896,7 @@ async function lootSheetPF2eRenderInner(
     const isGM = game.user.isGM;
     const html = $html[0];
     const infiniteAll = getFlag<boolean>(actor, "infiniteAll");
+    const inventoryList = htmlQuery(html, ".sheet-body .inventory-list");
 
     if (isGM) {
         const sheetElement = createHTMLElement("div", {
@@ -835,11 +909,9 @@ async function lootSheetPF2eRenderInner(
     }
 
     const itemFilters = isGM ? getFilters(actor, "sell", true) : false;
-    const itemElements = html.querySelectorAll(
-        ".sheet-body .inventory-list .items > [data-item-id]"
-    );
+    const itemElements = inventoryList?.querySelectorAll<HTMLElement>(".items > [data-item-id]");
 
-    for (const itemElement of itemElements) {
+    for (const itemElement of itemElements ?? []) {
         const { itemId } = elementDataset(itemElement);
         const item = actor.items.get(itemId);
         if (!item) continue;
@@ -860,7 +932,7 @@ async function lootSheetPF2eRenderInner(
 
         if (infiniteAll) {
             const quantityElement = htmlQuery(itemElement, ".quantity");
-            if (quantityElement) quantityElement.innerHTML = INFINITE;
+            if (quantityElement) quantityElement.innerHTML = INFINITY;
         }
     }
 
@@ -870,12 +942,44 @@ async function lootSheetPF2eRenderInner(
 
         if (bulkElement) {
             bulkElement.innerHTML = game.i18n.format("PF2E.Actor.Inventory.TotalBulk", {
-                bulk: INFINITE,
+                bulk: INFINITY,
             });
         }
         if (wealthElement) {
-            wealthElement.innerHTML = INFINITE;
+            wealthElement.innerHTML = INFINITY;
         }
+    }
+
+    const servicesAll = getServices(actor);
+    const userServices = isGM
+        ? servicesAll
+        : servicesAll.filter((service) => !!serviceCanBePurchased(service));
+
+    if (isGM || userServices.length) {
+        return this.itemRenderer.saveAndRestoreState(async () => {
+            const services: ServiceData[] = [];
+
+            for (const service of userServices) {
+                const enrichedService = await enrichService(service);
+                services.push(enrichedService);
+            }
+
+            const servicesTemplate = await render("sheet-services", {
+                services,
+                infinity: INFINITY,
+                isGM,
+            });
+
+            const servicesElement = createHTMLElement("div", { innerHTML: servicesTemplate });
+
+            if (settings.servicesTop) {
+                inventoryList?.prepend(...servicesElement.children);
+            } else {
+                inventoryList?.append(...servicesElement.children);
+            }
+
+            return $html;
+        });
     }
 
     return $html;
@@ -892,21 +996,500 @@ function lootSheetPF2eActivateListeners(
     if (!actor?.isMerchant) return;
 
     const html = $html[0];
+
     const betterMenu = htmlQuery(html, ".better-merchant");
-    if (!betterMenu) return;
+    if (betterMenu) {
+        addListener(betterMenu, "[name='infiniteAll']", "change", (event, el: HTMLInputElement) => {
+            const value = el.checked;
+            setFlag(actor, "infiniteAll", value);
+        });
+    }
 
-    addListener(betterMenu, "[data-action='open-equipment-tab']", () => {
-        openEquipmentTab({ actor, type: "pull", owned: [] });
+    addListenerAll(html, "[data-better-action]:not(.disabled)", async (event, el) => {
+        const action = el.dataset.betterAction as LootSheetActionEvent;
+
+        switch (action) {
+            case "open-filters-menu": {
+                return new FiltersMenu(actor).render(true);
+            }
+
+            case "open-equipment-tab": {
+                return openEquipmentTab({ actor, type: "pull", owned: [] });
+            }
+
+            case "create-service": {
+                return addService(actor);
+            }
+
+            case "export-services": {
+                return exportServices(this.actor);
+            }
+
+            case "import-services": {
+                return importServices(this.actor);
+            }
+
+            case "edit-service": {
+                const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
+
+                if (serviceId) {
+                    editService(actor, serviceId);
+                }
+
+                break;
+            }
+
+            case "delete-service": {
+                const confirm = await confirmDialog({
+                    title: localize("service.delete.title"),
+                    content: localize("service.delete.msg"),
+                });
+                if (!confirm) return;
+
+                const services = getServices(actor).slice();
+                const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
+                services.findSplice((service) => service.id === serviceId);
+
+                return await setServices(this.actor, services);
+            }
+
+            case "toggle-service-summary": {
+                const summaryEl = htmlQueryInClosest(el, "[data-service-id]", ".item-summary");
+
+                if (summaryEl) {
+                    toggleSummaryElement(summaryEl);
+                }
+
+                break;
+            }
+
+            case "service-to-chat": {
+                const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
+                const service = serviceId ? getService(actor, serviceId) : undefined;
+                if (!service) return;
+
+                return await serviceMessage(actor, service, { token: this.token });
+            }
+
+            case "toggle-service-enabled": {
+                const services = getServices(actor).slice();
+                const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
+
+                const service = services.find((service) => service.id === serviceId);
+                if (!service) return;
+
+                service.enabled = !service.enabled;
+                return await setServices(this.actor, services);
+            }
+
+            case "buy-service":
+            case "give-service": {
+                const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
+
+                if (serviceId) {
+                    await sellService({ actor }, serviceId, {
+                        forceFree: action === "give-service",
+                    });
+                }
+
+                break;
+            }
+
+            case "decrease-service":
+            case "increase-service": {
+                const services = getServices(actor).slice();
+                const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
+
+                const service = services.find((service) => service.id === serviceId);
+                if (!service) return;
+
+                const current = service.quantity ?? -1;
+                const change = action === "increase-service" ? 1 : -1;
+
+                service.quantity = Math.max(current + change, -1);
+
+                return await setServices(actor, services);
+            }
+        }
+    });
+}
+
+function isValidServiceBuyer(actor: Maybe<ClientDocument>): actor is ActorPF2e {
+    return (
+        isInstanceOf(actor, "ActorPF2e") &&
+        actor.isOfType("npc", "character", "party") &&
+        actor.isOwner
+    );
+}
+
+async function sellService(
+    seller: TraderData,
+    serviceId: string,
+    { buyer, forceFree }: { buyer?: TraderData; forceFree?: boolean } = {}
+) {
+    if (!seller.actor?.isOfType("loot") || (buyer?.actor && !isValidServiceBuyer(buyer.actor)))
+        return;
+
+    if (!hasGMOnline()) {
+        return error("tool.noGM");
+    }
+
+    const service = getService(seller.actor, serviceId);
+    if (!service?.enabled) return;
+
+    if (!buyer) {
+        const selected = R.only(canvas.tokens.controlled);
+
+        if (isValidServiceBuyer(selected?.actor)) {
+            buyer = { actor: selected.actor, token: selected };
+        } else {
+            const character = game.user.character;
+
+            if (isValidServiceBuyer(character)) {
+                buyer = { actor: character };
+            }
+        }
+
+        if (!buyer) {
+            return localize.warn("service.noBuyer");
+        }
+    }
+
+    const notifyData = {
+        buyer: getHighestName(buyer.actor),
+        seller: getHighestName(seller.actor),
+    };
+
+    if (!forceFree && service.quantity === 0) {
+        return localize.warn("service.noStock", notifyData);
+    }
+
+    const price = getServicePrice(service);
+    const isFree = forceFree || price.copperValue <= 0;
+
+    if (!isFree && !hasSufficientCoins(buyer.actor, price)) {
+        return localize.warn("service.noFunds", notifyData);
+    }
+
+    const msgTrader = forceFree ? seller : buyer;
+    const msgOptions: ServiceMsgOptions = {
+        token: msgTrader.token,
+        tradeMsg: localize("service", forceFree ? "give" : "buy", notifyData),
+    };
+
+    if (!forceFree) {
+        msgOptions.flags = {
+            buyerUUID: buyer.actor.uuid,
+            sellerUUID: seller.actor.uuid,
+            serviceId: service.id,
+        };
+    }
+
+    return serviceMessage(msgTrader.actor, service, msgOptions);
+}
+
+function serviceCanBePurchased(service: Maybe<ServiceFlag>): service is ServiceFlag {
+    return !!service?.enabled && (service.quantity ?? -1) !== 0;
+}
+
+async function serviceMessage(
+    actor: ActorPF2e,
+    service: ServiceFlag,
+    { token, tradeMsg, flags }: ServiceMsgOptions = {}
+) {
+    token ??= actor.getActiveTokens(false, true).at(0);
+
+    const ChatMessagePF2e = getDocumentClass("ChatMessage");
+    const content = await render<ServiceCardData>("service-card", {
+        actor,
+        tokenId: token?.id,
+        service: await enrichService(service),
+        tradeMsg,
     });
 
-    addListener(betterMenu, "[data-action='open-filtes-menu']", () => {
-        new FiltersMenu(actor).render(true);
+    const msgData: ChatMessageCreateData<ChatMessagePF2e> = {
+        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+        content,
+        speaker: ChatMessagePF2e.getSpeaker({
+            actor: actor,
+            token,
+        }),
+    };
+
+    if (flags) {
+        setFlagProperty(msgData, "service", flags);
+    }
+
+    return ChatMessagePF2e.create(msgData);
+}
+
+async function exportServices(actor: LootPF2e, services: ServiceFlag[] = getServices(actor)) {
+    const contentServices = new Collection<ServiceExportData>();
+
+    for (const service of services) {
+        contentServices.set(service.id, {
+            id: service.id,
+            name: service.name ?? service.id,
+            json: JSON.stringify(service),
+        });
+    }
+
+    const onRender = (event: Event, html: HTMLDialogElement) => {
+        addListenerAll(html, "[data-action='copy-service']", (event, el) => {
+            const service = contentServices.get(el.dataset.serviceId ?? "");
+            if (service) {
+                game.clipboard.copyPlainText(service.json);
+                localize.info("service-export.copied", { name: service.name });
+            }
+        });
+
+        addListener(html, "[data-action='copy-all-service']", (event, el) => {
+            const list = contentServices.map((service) => service.json);
+            const text = `[${list.join(",")}]`;
+
+            game.clipboard.copyPlainText(text);
+            localize.info("service-export.copiedAll", { name: actor.name });
+        });
+    };
+
+    promptDialog({
+        title: localize("service-export.title", { name: actor.name }),
+        content: await render<ServicesExportRenderData>("service-export", {
+            services: contentServices,
+            hasMany: contentServices.size > 1,
+        }),
+        classes: ["pf2e-toolbelt-services-export"],
+        render: onRender,
+        label: localize("service-export.close"),
+    });
+}
+
+async function importServices(actor: LootPF2e) {
+    const result = await waitDialog<{ raw: string }>("service-import", {
+        title: localize("service-import.title", { name: actor.name }),
+        content: "<textarea></textarea>",
+        yes: "fa-solid fa-file-export",
+        callback: async (event, options, html) => {
+            return { raw: htmlQuery(html, "textarea")?.value ?? "{}" };
+        },
     });
 
-    addListener(betterMenu, "[name='infiniteAll']", "change", (event, el: HTMLInputElement) => {
-        const value = el.checked;
-        setFlag(actor, "infiniteAll", value);
-    });
+    if (!result?.raw.trim()) return;
+
+    try {
+        const parsed = JSON.parse(result.raw);
+        const toAdd = R.pipe(
+            Array.isArray(parsed) ? parsed : [parsed],
+            R.map((service) => createService(service))
+        );
+
+        if (!toAdd.length) return;
+
+        const services = getServices(actor);
+
+        services.push(...toAdd);
+        await setServices(actor, services);
+    } catch (err) {
+        localize.error("service-import.error");
+        console.error(err);
+    }
+}
+
+class ServiceMenu extends foundry.applications.api.ApplicationV2 {
+    #actor: LootPF2e;
+    #serviceId: string;
+
+    static DEFAULT_OPTIONS: PartialApplicationConfiguration = {
+        tag: "form",
+        position: {
+            width: 600,
+        },
+        form: {
+            handler: ServiceMenu.myFormHandler,
+            submitOnChange: true,
+            closeOnSubmit: false,
+        },
+        classes: ["pf2e-hud-service"],
+        actions: {
+            export: this.#export,
+        },
+    };
+
+    static async #export(this: ServiceMenu, event: PointerEvent, target: HTMLElement) {
+        const service = this.service;
+        if (!service) {
+            return localize.error("service.none");
+        }
+        exportServices(this.actor, [service]);
+    }
+
+    static async myFormHandler(
+        this: ServiceMenu,
+        event: SubmitEvent | Event,
+        form: HTMLFormElement,
+        formData: FormDataExtended
+    ) {
+        const actor = this.actor;
+        const formDataObject = formData.object as Omit<ServiceFlag, "price" | "img"> & {
+            price: string;
+        };
+
+        const data: ServiceFlag = {
+            ...formDataObject,
+            img: htmlQuery<HTMLImageElement>(form, ".image")?.dataset.src ?? DEFAULT_SERVICE_ICON,
+            price: game.pf2e.Coins.fromString(formDataObject.price),
+        };
+
+        const services = getServices(actor).slice();
+        services.findSplice((service) => service.id === this.#serviceId, data);
+
+        await setServices(this.actor, services);
+        this.render();
+    }
+
+    constructor(actor: LootPF2e, serviceId: string, options: PartialApplicationConfiguration = {}) {
+        options.window ??= {};
+        options.window.title = localize("service.title", { name: actor.name });
+
+        super(options);
+
+        this.#actor = actor;
+        this.#serviceId = serviceId;
+    }
+
+    get actor() {
+        return this.#actor;
+    }
+
+    get service() {
+        return getService(this.actor, this.#serviceId) ?? null;
+    }
+
+    async _renderFrame(options: ApplicationRenderOptions) {
+        const frame = await super._renderFrame(options);
+
+        const exportLabel = localize("service.export");
+        const exportBtn = `<button type="button" class="header-control fa-regular fa-file-export" 
+        data-action="export" data-tooltip="${exportLabel}" aria-label="${exportLabel}"></button>`;
+
+        this.window.close.insertAdjacentHTML("beforebegin", exportBtn);
+
+        return frame;
+    }
+
+    async _prepareContext(options: ServiceRenderOptions): Promise<ServiceContext> {
+        const service = this.service;
+        return {
+            service: service ? await enrichService(service) : null,
+        };
+    }
+
+    async _renderHTML(context: ServiceContext, options: ServiceRenderOptions) {
+        return render("service", context);
+    }
+
+    _onFirstRender(context: ServiceContext, options: ServiceRenderOptions) {
+        this.actor.apps[this.id] = this;
+    }
+
+    _onClose(options: ApplicationClosingOptions): void {
+        delete this.actor.apps[this.id];
+    }
+
+    _replaceHTML(result: string, content: HTMLElement, options: ServiceRenderOptions) {
+        content.innerHTML = result;
+        this.#activateListeners(content);
+    }
+
+    #activateListeners(html: HTMLElement) {
+        addListener(html, "[data-action='edit-image']", (event, el: HTMLImageElement) => {
+            const filePicker = new FilePicker({
+                current: el.dataset.src,
+                type: "image",
+                callback: (path) => {
+                    el.src = path;
+                    el.dataset.src = path;
+
+                    if (this.options.form?.submitOnChange) {
+                        const submitEvent = new SubmitEvent("submit");
+                        this.element.dispatchEvent(submitEvent);
+                    }
+                },
+            });
+
+            filePicker.browse();
+        });
+    }
+}
+
+async function addService(actor: LootPF2e) {
+    const services = getServices(actor).slice();
+    const service = createService(null);
+
+    services.push(service);
+
+    await setFlag(actor, "services", services);
+    editService(actor, service.id);
+}
+
+function createService(raw: any): ServiceFlag {
+    raw = R.isPlainObject(raw) ? raw : {};
+
+    const id = foundry.utils.randomID();
+
+    return {
+        id,
+        level: R.isNumber(raw.level) ? raw.level : 0,
+        name: (R.isString(raw.name) && raw.name) || id,
+        description: R.isString(raw.description) ? raw.description : "",
+        price: new game.pf2e.Coins(raw.price as any),
+        enabled: R.isBoolean(raw.enabled) ? raw.enabled : true,
+        img: R.isString(raw.img) ? raw.img : "",
+        quantity: R.isNumber(raw.quantity) ? raw.quantity : -1,
+    };
+}
+
+function editService(actor: LootPF2e, serviceId: string) {
+    const service = getService(actor, serviceId);
+    if (service) {
+        new ServiceMenu(actor, serviceId).render(true);
+    }
+}
+
+function getServices(actor: LootPF2e) {
+    return getFlag<ServiceFlag[]>(actor, "services") ?? [];
+}
+
+function getService(actor: LootPF2e, serviceId: string) {
+    return getServices(actor).find((service) => service.id === serviceId);
+}
+
+function getServicePrice(service: ServiceFlag) {
+    return new game.pf2e.Coins(service.price ?? {});
+}
+
+function setServices(actor: LootPF2e, services: ServiceFlag[]) {
+    return setFlag<ServiceFlag[]>(actor, "services", services);
+}
+
+async function enrichService(service: ServiceFlag): Promise<ServiceData> {
+    const quantity = service.quantity ?? -1;
+    const price = getServicePrice(service);
+    const description = service.description?.trim() ?? "";
+
+    return {
+        id: service.id,
+        name: service.name || service.id,
+        description,
+        enabled: service.enabled ?? true,
+        level: service.level ?? 0,
+        price,
+        quantity,
+        img: service.img?.trim() || DEFAULT_SERVICE_ICON,
+        enrichedDescription: description ? await TextEditor.enrichHTML(description) : "",
+        enrichedPrice: price.toString(),
+        isInfinite: quantity < 0,
+    };
 }
 
 class FiltersMenu extends Application {
@@ -937,7 +1520,7 @@ class FiltersMenu extends Application {
 
     async close(options?: { force?: boolean }) {
         await super.close(options);
-        delete this.actor.apps?.[this.appId];
+        delete this.actor.apps[this.appId];
     }
 
     getData() {
@@ -1166,6 +1749,22 @@ function clampPriceRatio(type: ItemFilterType, value: number | undefined) {
     return Math.clamp(value, RATIO[type].min, RATIO[type].max).toNearest(0.1, "floor");
 }
 
+type LootSheetActionEvent =
+    | "open-equipment-tab"
+    | "open-filters-menu"
+    | "create-service"
+    | "toggle-service-summary"
+    | "toggle-service-enabled"
+    | "edit-service"
+    | "delete-service"
+    | "buy-service"
+    | "give-service"
+    | "service-to-chat"
+    | "decrease-service"
+    | "increase-service"
+    | "export-services"
+    | "import-services";
+
 type PacketData = TradeData & {
     priceData: Coins;
     filterId: string;
@@ -1193,6 +1792,66 @@ type ItemFilterSell = ItemFilterBase & {};
 type ExtractedFilter<F extends ItemFilter = ItemFilter> = Omit<F, "ratio" | "purse"> & {
     ratio: number;
     purse: number;
+};
+
+type TraderData = {
+    actor: ActorPF2e;
+    token?: TokenPF2e;
+};
+
+type ServiceCardData = {
+    actor: ActorPF2e;
+    tokenId: string | undefined;
+    service: ServiceData;
+    tradeMsg?: string;
+};
+
+type ServiceExportData = {
+    id: string;
+    name: string;
+    json: string;
+};
+
+type ServicesExportRenderData = {
+    services: Iterable<ServiceExportData>;
+    hasMany: boolean;
+};
+
+type ServiceMsgFlag = {
+    buyerUUID: string;
+    sellerUUID: string;
+    serviceId: string;
+};
+
+type ServiceMsgOptions = {
+    token?: TokenPF2e | TokenDocumentPF2e | null;
+    tradeMsg?: string;
+    flags?: ServiceMsgFlag;
+};
+
+type ServiceData = Required<ServiceFlag> & {
+    enrichedDescription: string;
+    enrichedPrice: string;
+    isInfinite: boolean;
+};
+
+type ServiceFlag = {
+    id: string;
+    level?: number;
+    name?: string;
+    description?: string;
+    price?: Coins;
+    enabled?: boolean;
+    img?: string;
+    quantity?: number;
+};
+
+type ServiceRenderOptions = ApplicationRenderOptions & {
+    service: ServiceFlag | null;
+};
+
+type ServiceContext = {
+    service: ServiceData | null;
 };
 
 type BrowserData =

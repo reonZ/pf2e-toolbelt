@@ -1,6 +1,14 @@
-.app.sheet.loot {
-    .sheet-sidebar {
+.sheet.actor.loot form {
+    section.sheet-sidebar {
         .better-merchant {
+            > div {
+                margin-bottom: 0.3em;
+            }
+
+            .form-group {
+                padding-inline: 0.2em;
+            }
+
             label {
                 white-space: nowrap;
                 margin-left: 0.2em;
@@ -12,7 +20,7 @@
         }
     }
 
-    .sheet-body {
+    section.content .inventory .inventory-list {
         [data-item-id] {
             .price {
                 &.cheap {
@@ -23,6 +31,33 @@
                 &.expensive {
                     color: #7e1a1a;
                     text-shadow: 0 0 1px #c77a7a;
+                }
+            }
+        }
+
+        .services {
+            a.disabled {
+                opacity: 0.3;
+            }
+
+            .item-controls {
+                &.large {
+                    flex-basis: 6rem;
+                }
+
+                &:not(.large) {
+                    flex-basis: 2rem;
+                    justify-content: center;
+                }
+            }
+
+            &.items {
+                > li {
+                    min-height: 24px;
+
+                    .toggle-enabled {
+                        font-size: var(--font-size-15);
+                    }
                 }
             }
         }
@@ -169,6 +204,181 @@
                     background: #00000017;
                     pointer-events: none;
                 }
+            }
+        }
+    }
+}
+
+.application.pf2e-hud-service {
+    .window-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    .service {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        .header {
+            display: flex;
+            gap: 1em;
+
+            input[type="text"],
+            input[type="number"] {
+                padding-block: 0;
+                height: 1.8em;
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+                gap: 0.5em;
+
+                span {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.3em;
+                    white-space: nowrap;
+                }
+            }
+
+            .image {
+                cursor: pointer;
+                height: 6em;
+                border: 1px solid var(--color-border);
+            }
+
+            .data {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-evenly;
+
+                .row {
+                    display: flex;
+                    align-items: center;
+                    gap: 2em;
+
+                    .name,
+                    .enabled {
+                        flex: 1;
+                    }
+
+                    .level {
+                        input {
+                            width: 2em;
+                            text-align: center;
+                            padding-inline: 0;
+                        }
+                    }
+
+                    .price {
+                        input {
+                            width: 8em;
+                            text-align: end;
+                        }
+                    }
+
+                    .quantity {
+                        input {
+                            text-align: end;
+                            width: 3em;
+                        }
+                    }
+
+                    &.end {
+                        justify-content: flex-end;
+                    }
+                }
+            }
+        }
+
+        .editor {
+            border: 1px solid var(--color-border);
+            border-radius: 2px;
+
+            .editor-menu {
+                padding: 0 0.2em;
+                border-radius: 0;
+            }
+        }
+    }
+
+    .no-service {
+        text-align: center;
+        font-size: 1.5em;
+    }
+}
+
+.pf2e.chat-card.item-card {
+    &.pf2e-toolbelt-service {
+        > header {
+            border-bottom: var(--space-2) groove var(--color-text-light-0);
+        }
+    }
+
+    .pf2e-toolbelt-service-error {
+        color: #c11919;
+        text-align: center;
+        font-weight: bold;
+    }
+}
+
+[id="pf2e-toolbelt.betterMerchant.service-import.dialog"] {
+    textarea {
+        width: 500px;
+        height: 400px;
+        resize: none;
+        border-radius: 0;
+    }
+}
+
+.application.dialog {
+    .pf2e-toolbelt-services-export {
+        padding-inline: 0;
+
+        .dialog-form,
+        .dialog-content {
+            overflow: hidden;
+        }
+
+        .services {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            overflow: hidden auto;
+            padding-inline: 1em;
+
+            .service {
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0.5em;
+
+                    div {
+                        flex: 1;
+                    }
+                }
+
+                textarea {
+                    width: 500px;
+                    height: 120px;
+                    resize: none;
+                    border-radius: 0;
+                    overflow: hidden;
+                }
+            }
+        }
+
+        .form-footer,
+        .all-services {
+            padding-inline: 1em;
+
+            button {
+                height: calc(1.25 * var(--input-height));
             }
         }
     }

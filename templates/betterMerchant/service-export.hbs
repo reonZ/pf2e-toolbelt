@@ -1,0 +1,22 @@
+{{#if hasMany}}
+<div class="all-services">
+    <button type="button" data-action="copy-all-service">
+        <i class="fa-solid fa-copy"></i>
+        {{@root.i18n 'all'}}
+    </button>
+</div>
+{{/if}}
+
+<div class="services">
+    {{#each services as |service|}}
+    <div class="service">
+        <div class="header">
+            <div>{{service.name}}</div>
+            <a data-action="copy-service" data-service-id="{{service.id}}">
+                <i class="fa-solid fa-copy"></i>
+            </a>
+        </div>
+        <textarea readonly>{{service.json}}</textarea>
+    </div>
+    {{/each}}
+</div>
