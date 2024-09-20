@@ -1,3 +1,25 @@
+# 2.13.0
+
+-   `Actionable`:
+    -   add support for passive actions
+        -   a drop zone section has been added to passive actions (since they are not handled by the system self-applied feature)
+    -   remove the `Chat Message` setting
+        -   the macro should post the message if needed now that the `item` is passed as argument
+-   `Better Merchant`:
+    -   add a new `Services` feature
+        -   the GM can create simple services offered by the merchant to Character/NPC/Party actors
+        -   services consist mostly of a description, it can contain anything
+        -   services can be imported and exported individually or in bundle
+        -   players will only see services that are `enabled` and have a quantity other than `0`
+    -   add a `Services Above Items` world setting
+-   `Identify`:
+    -   remove the misidentify icon, after multiple (almost finished) attempts, i wasn't able to reach a state that was satisfactory
+-   `Target Helper`:
+    -   button highlighting for basic saves will now take into account legendary save features which halve the damage taken of a failure (e.g. `Greater Juggernaut`)
+-   `Use Button`:
+    -   no longer send the action description to chat if a macro is ran
+-   fix `Dice So Nice!` dice not showing for other clients when rolling saves
+
 # 2.12.0
 
 -   this is a system `6.3.1` release
