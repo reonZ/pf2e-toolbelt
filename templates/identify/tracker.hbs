@@ -2,27 +2,30 @@
     data-tooltip-class="pf2e">
     <div class="buttons">
         <div class="top">
-            <button type="button" data-action="auto" data-tooltip="{{i18n.path 'auto.tooltip'}}">
-                {{i18n 'auto.label'}}
+            <button type="button" data-action="auto"
+                data-tooltip="{{@root.i18n.path 'auto.tooltip'}}">
+                {{@root.i18n 'auto.label'}}
             </button>
-            <button type="button" data-action="save" data-tooltip="{{i18n.path 'save.tooltip'}}">
-                {{i18n 'save.label'}}
+            <button type="button" data-action="save"
+                data-tooltip="{{@root.i18n.path 'save.tooltip'}}">
+                {{@root.i18n 'save.label'}}
             </button>
-            <button type="button" data-action="reset" data-tooltip="{{i18n.path 'reset.tooltip'}}">
-                {{i18n 'reset.label'}}
+            <button type="button" data-action="reset"
+                data-tooltip="{{@root.i18n.path 'reset.tooltip'}}">
+                {{@root.i18n 'reset.label'}}
             </button>
         </div>
         <div class="bottom">
             <button type="button" data-action="change-time" data-direction="-"
-                data-tooltip="{{i18n.path 'clock.backward'}}">
+                data-tooltip="{{@root.i18n.path 'clock.backward'}}">
                 -10
             </button>
             <button type="button" class="clock" data-action="open-clock"
-                data-tooltip="{{i18n.path 'clock.open'}}">
+                data-tooltip="{{@root.i18n.path 'clock.open'}}">
                 {{date}} {{time}}
             </button>
             <button type="button" data-action="change-time" data-direction="+"
-                data-tooltip="{{i18n.path 'clock.forward'}}">
+                data-tooltip="{{@root.i18n.path 'clock.forward'}}">
                 +10
             </button>
         </div>

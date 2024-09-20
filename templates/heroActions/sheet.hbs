@@ -1,26 +1,26 @@
 <header class="heroActions-header">
-    {{i18n 'label'}}
+    {{@root.i18n 'label'}}
     {{#if isOwner}}
     <div class="controls">
         {{#if usesCount}}
         <button type="button" class="redraw" data-action="hero-actions-draw">
             <i class="fa-regular fa-cards-blank"></i>
-            {{i18n 'redraw'}}
+            {{@root.i18n 'redraw'}}
         </button>
         {{else if mustDraw}}
         <button type="button" class="draw" data-action="hero-actions-draw">
             <i class="fa-regular fa-cards-blank"></i>
-            {{i18n 'draw' nb=diff}}
+            {{@root.i18n 'draw' nb=diff}}
         </button>
         {{/if}}
         {{#if canTrade}}
         <button type="button" data-action="hero-actions-trade">
-            <i class="fas fa-right-left"></i> {{i18n 'trade'}}
+            <i class="fas fa-right-left"></i> {{@root.i18n 'trade'}}
         </button>
         {{/if}}
         {{#if isGM}}
         <button type="button" class="give" data-action="give-actions">
-            <i class="fa-solid fa-gift"></i> {{i18n 'give'}}
+            <i class="fa-solid fa-gift"></i> {{@root.i18n 'give'}}
         </button>
         {{/if}}
     </div>

@@ -1,7 +1,7 @@
 <div class="filters">
     <div class="buy">
         <h3>
-            {{i18n 'buy'}}
+            {{@root.i18n 'buy'}}
             <a data-action="add-filter" data-type="buy"><i class="fa-solid fa-plus"></i></a>
         </h3>
         {{#each buyFilters as |filter|}}
@@ -11,7 +11,7 @@
     <hr>
     <div class="sell">
         <h3>
-            {{i18n 'sell'}}
+            {{@root.i18n 'sell'}}
             <a data-action="add-filter" data-type="sell"><i class="fa-solid fa-plus"></i></a>
         </h3>
         {{#each sellFilters as |filter|}}

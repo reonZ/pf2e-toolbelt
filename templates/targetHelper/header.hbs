@@ -1,6 +1,6 @@
 <span class="name">
     <i class="fa-{{ifThen isHidden 'thin' 'solid'}} fa-{{ifThen hasPlayerOwner 'person' 'ghost'}}"
-        {{#if isHidden}}data-tooltip="{{i18n.path 'hidden'}}" {{/if}}></i>
+        {{#if isHidden}}data-tooltip="{{@root.i18n.path 'hidden'}}" {{/if}}></i>
     {{name}}
 </span>
 
@@ -59,7 +59,7 @@
     </a>
 
     {{#if isGM}}
-    <a data-action="open-target-sheet" data-tooltip="{{i18n.path 'sheet'}}">
+    <a data-action="open-target-sheet" data-tooltip="{{@root.i18n.path 'sheet'}}">
         <i class="icon fa-solid fa-file"></i>
     </a>
     {{/if}}

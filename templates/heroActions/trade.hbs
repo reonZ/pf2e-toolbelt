@@ -1,5 +1,5 @@
 <div class="form-group">
-    {{i18n 'select'}}
+    {{@root.i18n 'select'}}
     <div class="form-fields">
         <select name="target" {{disabled (eq others.length 1)}}>
             {{selectOptions others selected=others.[0].id valueAttr="id" labelAttr="name"}}

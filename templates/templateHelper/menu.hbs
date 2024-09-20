@@ -1,25 +1,25 @@
 <div class="left">
     <label>
         <input type="radio" name="targets" value="enemies">
-        {{i18n 'enemies'}}
+        {{@root.i18n 'enemies'}}
     </label>
     <label>
         <input type="radio" name="targets" value="allies">
-        {{i18n 'allies'}}
+        {{@root.i18n 'allies'}}
     </label>
     <label>
         <input type="radio" name="targets" value="all" checked>
-        {{i18n 'all'}}
+        {{@root.i18n 'all'}}
     </label>
 </div>
 
 <div class="right">
     <label>
         <input type="checkbox" name="self" {{disabled noSelf}} {{checked (not noSelf)}}>
-        {{i18n 'self'}}
+        {{@root.i18n 'self'}}
     </label>
     <label>
         <input type="checkbox" name="neutral" checked>
-        {{i18n 'neutral'}}
+        {{@root.i18n 'neutral'}}
     </label>
 </div>

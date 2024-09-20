@@ -1,12 +1,12 @@
-<h3>{{i18n "header"}}</h3>
+<h3>{{@root.i18n "header"}}</h3>
 <div class="form-group">
-    <label>{{i18n 'master.label'}}</label>
+    <label>{{@root.i18n 'master.label'}}</label>
     <select name="{{masterInput}}" {{#unless
-        masters.length}}data-tooltip="{{i18n.path 'master.disabled'}}" disabled{{/unless}}>
+        masters.length}}data-tooltip="{{@root.i18n.path 'master.disabled'}}" disabled{{/unless}}>
         <option value=""></option>
         {{selectOptions masters selected=masterId valueAttr="value" labelAttr="label"}}
     </select>
-    <p class="hint">{{i18n 'master.hint'}}</p>
+    <p class="hint">{{@root.i18n 'master.hint'}}</p>
 </div>
 {{#each groups as |group|}}
 <div class="form-group">
