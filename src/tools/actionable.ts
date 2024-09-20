@@ -4,6 +4,7 @@ import {
     addListenerAll,
     elementDataset,
     htmlQuery,
+    htmlQueryAll,
     libWrapper,
     renderCharacterSheets,
     renderItemSheets,
@@ -136,34 +137,46 @@ async function actionSheetPF2eRenderInner(
 ) {
     const $html = await wrapped(data);
     const item = this.item;
-    if (
-        item.system.actionType.value === "passive" ||
-        item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED
-    ) {
+    if (item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED) {
         return $html;
     }
 
     const html = $html[0];
-    const label = localize("itemSheet.label");
-    const group = htmlQuery(html, "[data-drop-zone='self-applied-effect']");
-    if (!group) return $html;
+    const tab = htmlQuery(html, ".tab[data-tab='details']");
+    if (!tab) return $html;
 
-    const labelEl = htmlQuery(group, ":scope > label");
-    const hintEl = htmlQuery(group, ".hint");
+    if (item.system.actionType.value === "passive") {
+        const sibling = htmlQueryAll(tab, ".form-group").at(-1);
+        if (!sibling) return $html;
 
-    if (labelEl) labelEl.innerText += ` / ${label}`;
-    if (hintEl) hintEl.innerText += localize("itemSheet.hint");
+        const macro = await getActionMacro(item);
 
-    const dropZone = group?.querySelector(".drop-zone.empty");
-    if (!dropZone) return $html;
+        const dropzone = macro ? await render("dropzone", { macro }) : null;
+        const zone = await render("macro-zone", { dropzone });
 
-    const macro = await getActionMacro(item);
-
-    if (macro) {
-        dropZone.outerHTML = await render("dropzone", { macro });
+        sibling.insertAdjacentHTML("beforebegin", zone);
     } else {
-        const nameEl = htmlQuery(dropZone, ".name");
-        if (nameEl) nameEl.innerText += ` / ${label}`;
+        const label = localize("itemSheet.label");
+        const group = htmlQuery(tab, "[data-drop-zone='self-applied-effect']");
+        if (!group) return $html;
+
+        const labelEl = htmlQuery(group, ":scope > label");
+        const hintEl = htmlQuery(group, ".hint");
+
+        if (labelEl) labelEl.innerText += ` / ${label}`;
+        if (hintEl) hintEl.innerText += localize("itemSheet.hint");
+
+        const dropZone = group?.querySelector(".drop-zone.empty");
+        if (!dropZone) return $html;
+
+        const macro = await getActionMacro(item);
+
+        if (macro) {
+            dropZone.outerHTML = await render("dropzone", { macro });
+        } else {
+            const nameEl = htmlQuery(dropZone, ".name");
+            if (nameEl) nameEl.innerText += ` / ${label}`;
+        }
     }
 
     return $html;
@@ -177,12 +190,7 @@ function actionSheetPF2eActivateListeners(
     wrapped($html);
 
     const item = this.item;
-    if (
-        item.system.actionType.value === "passive" ||
-        item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED
-    ) {
-        return;
-    }
+    if (item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED) return;
 
     const html = $html[0];
     const group = htmlQuery(html, "[data-drop-zone='self-applied-effect']");
@@ -199,9 +207,7 @@ function actionSheetPF2eActivateListeners(
 }
 
 async function actionSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
-    if (!this.isEditable || this.item.system.actionType.value === "passive") {
-        return;
-    }
+    if (!this.isEditable) return;
 
     const item = await (async (): Promise<ItemPF2e | Macro | null> => {
         try {

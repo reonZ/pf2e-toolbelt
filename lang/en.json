@@ -557,6 +557,11 @@
             "itemSheet": {
                 "label": "Macro",
                 "hint": " or a macro that will be executed when this action is used"
+            },
+            "macro-zone": {
+                "label": "Macro",
+                "drop": "Drop Macro",
+                "hint": "A macro that will be executed when this action is used"
             }
         },
         "identify": {

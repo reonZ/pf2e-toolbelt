@@ -1,0 +1,12 @@
+<div class="form-group" data-drop-zone="self-applied-effect">
+    <label>{{@root.i18n 'label'}}</label>
+    {{#if dropzone}}
+    {{{dropzone}}}
+    {{else}}
+    <div class="drop-zone empty">
+        <picture class="icon-placeholder"></picture>
+        <span class="name">{{@root.i18n 'drop'}}</span>
+    </div>
+    {{/if}}
+    <p class="hint">{{@root.i18n 'hint'}}</p>
+</div>
