@@ -182,7 +182,7 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
 
             item.update({ "system.frequency.value": value - 1 });
 
-            if (!btn.dataset.skipMessage && !item.system.selfEffect) {
+            if (!item.system.selfEffect && !btn.dataset.useActionMacro) {
                 item.toMessage(event);
             }
         }
