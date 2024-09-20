@@ -316,7 +316,7 @@ function createToolSocket(config: ToolConfig) {
             socketEnabled = false;
             socketOff(onSocket);
         },
-        toggle(enabled?: boolean) {
+        toggle(enabled: boolean) {
             if (enabled) this.activate();
             else this.disable();
         },
@@ -436,7 +436,7 @@ type ToolSocket<TConfig extends ToolConfig> = TConfig["onSocket"] extends (
               emit: (packet: P) => void;
               activate: () => void;
               disable: () => void;
-              toggle: (enabled?: boolean) => void;
+              toggle: (enabled: boolean) => void;
           };
       }
     : {};
