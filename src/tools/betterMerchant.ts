@@ -1317,10 +1317,13 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
 
     static async #export(this: ServiceMenu, event: PointerEvent, target: HTMLElement) {
         const service = this.service;
+
         if (!service) {
             return localize.error("service.none");
         }
-        exportServices(this.actor, [service]);
+
+        game.clipboard.copyPlainText(JSON.stringify(service));
+        localize.info("service-export.copied", { name: service.name ?? service.id });
     }
 
     static async myFormHandler(
