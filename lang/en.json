@@ -540,7 +540,7 @@
                 "delete": "Delete Service",
                 "enabled": "Toggle Service",
                 "give": "Free Service",
-                "buy": "Require Services",
+                "buy": "Request Service",
                 "export": "Export services",
                 "import": "Import Services"
             },
