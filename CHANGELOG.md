@@ -16,9 +16,9 @@
     -   remove the misidentify icon, after multiple (almost finished) attempts, i wasn't able to reach a state that was satisfactory
 -   `Target Helper`:
     -   button highlighting for basic saves will now take into account legendary save features which halve the damage taken of a failure (e.g. `Greater Juggernaut`)
+    -   fix `Dice So Nice!` dice not showing for other clients when rolling saves
 -   `Use Button`:
     -   no longer send the action description to chat if a macro is ran
--   fix `Dice So Nice!` dice not showing for other clients when rolling saves
 
 # 2.12.0
 
