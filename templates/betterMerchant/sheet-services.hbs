@@ -53,9 +53,11 @@
                 {{/if}}
             </span>
             <div class="item-controls{{#if @root.isGM}} large{{/if}}">
+                {{#if service.quantity}}
                 <a data-better-action="buy-service" data-tooltip="{{@root.i18n.path 'buy'}}">
                     <i class="fa-fw fa-solid fa-coins"></i>
                 </a>
+                {{/if}}
                 {{#if @root.isGM}}
                 <a data-better-action="give-service" data-tooltip="{{@root.i18n.path 'give'}}">
                     <i class="fa-fw fa-regular fa-hand-back-fist"></i>
