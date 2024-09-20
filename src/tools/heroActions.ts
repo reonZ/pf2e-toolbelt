@@ -12,6 +12,7 @@ import {
     htmlQueryAll,
     refreshApplicationHeight,
     renderCharacterSheets,
+    toggleSummaryElement,
 } from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
@@ -490,7 +491,6 @@ function exchangeHeroActions(
 }
 
 async function onExpandAction(actor: CharacterPF2e, uuid: string, actionEl: HTMLElement) {
-    const duration = 0.4;
     const summaryEl = htmlQuery(actionEl, ".item-summary")!;
 
     if (!summaryEl.classList.contains("loaded")) {
@@ -505,26 +505,7 @@ async function onExpandAction(actor: CharacterPF2e, uuid: string, actionEl: HTML
         summaryEl.classList.add("loaded");
     }
 
-    if (summaryEl.hidden) {
-        gsap.fromTo(
-            summaryEl,
-            { height: 0, opacity: 0, hidden: false },
-            { height: "auto", opacity: 1, duration }
-        );
-    } else {
-        gsap.to(summaryEl, {
-            height: 0,
-            duration,
-            opacity: 0,
-            paddingTop: 0,
-            paddingBottom: 0,
-            margin: 0,
-            clearProps: "all",
-            onComplete: () => {
-                summaryEl.hidden = true;
-            },
-        });
-    }
+    toggleSummaryElement(summaryEl);
 }
 
 async function sendActionToChat(actor: CharacterPF2e, uuid: string) {
