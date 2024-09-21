@@ -3,6 +3,7 @@ import {
     addListener,
     addListenerAll,
     elementDataset,
+    htmlClosest,
     htmlQuery,
     htmlQueryAll,
     libWrapper,
@@ -23,10 +24,10 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
             key: "enabled",
             type: Boolean,
             default: false,
-            onChange: (value) => {
+            onChange: (value: boolean) => {
                 wrappers.toggleAll(value);
                 renderCharacterSheets();
-                renderItemSheets(["AbilitySheetPF2e", "FeatSheetPF2e"]);
+                renderItemSheets(["AbilitySheetPF2e", "FeatSheetPF2e", "SpellSheetPF2E"]);
             },
         },
     ],
@@ -44,29 +45,41 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
         },
         {
             path: "CONFIG.Item.sheetClasses.action['pf2e.AbilitySheetPF2e'].cls.prototype._renderInner",
-            callback: actionSheetPF2eRenderInner,
+            callback: itemSheetPF2eRenderInner,
         },
         {
             path: "CONFIG.Item.sheetClasses.action['pf2e.AbilitySheetPF2e'].cls.prototype.activateListeners",
-            callback: actionSheetPF2eActivateListeners,
+            callback: itemSheetPF2eActivateListeners,
         },
         {
             path: "CONFIG.Item.sheetClasses.action['pf2e.AbilitySheetPF2e'].cls.prototype._onDrop",
-            callback: actionSheetPF2eOnDrop,
+            callback: itemSheetPF2eOnDrop,
             type: "OVERRIDE",
         },
         {
             path: "CONFIG.Item.sheetClasses.feat['pf2e.FeatSheetPF2e'].cls.prototype._renderInner",
-            callback: actionSheetPF2eRenderInner,
+            callback: itemSheetPF2eRenderInner,
         },
         {
             path: "CONFIG.Item.sheetClasses.feat['pf2e.FeatSheetPF2e'].cls.prototype.activateListeners",
-            callback: actionSheetPF2eActivateListeners,
+            callback: itemSheetPF2eActivateListeners,
         },
         {
             path: "CONFIG.Item.sheetClasses.feat['pf2e.FeatSheetPF2e'].cls.prototype._onDrop",
-            callback: actionSheetPF2eOnDrop,
+            callback: itemSheetPF2eOnDrop,
             type: "OVERRIDE",
+        },
+        {
+            path: "CONFIG.Item.sheetClasses.spell['pf2e.SpellSheetPF2e'].cls.prototype._renderInner",
+            callback: itemSheetPF2eRenderInner,
+        },
+        {
+            path: "CONFIG.Item.sheetClasses.spell['pf2e.SpellSheetPF2e'].cls.prototype.activateListeners",
+            callback: itemSheetPF2eActivateListeners,
+        },
+        {
+            path: "CONFIG.PF2E.Item.documentClasses.spellcastingEntry.prototype.cast",
+            callback: spellcastingEntryPF2eCast,
         },
     ],
     ready: () => {
@@ -124,14 +137,18 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
 }
 
 async function getActionMacro(item: Maybe<ItemPF2e>) {
-    if (!item?.isOfType("feat", "action") || item.system.selfEffect) return null;
+    if (!item) return null;
+
+    const isSpell = item.isOfType("spell");
+    const isAction = item.isOfType("feat", "action");
+    if (!isSpell && (!isAction || item.system.selfEffect)) return null;
 
     const uuid = getFlag<string>(item, "macro");
     return uuid ? fromUuid<Macro>(uuid) : null;
 }
 
-async function actionSheetPF2eRenderInner(
-    this: AbilitySheetPF2e | FeatSheetPF2e,
+async function itemSheetPF2eRenderInner(
+    this: AbilitySheetPF2e | FeatSheetPF2e | SpellSheetPF2e,
     wrapped: libWrapper.RegisterCallback,
     data: ActionSheetData | FeatSheetData
 ) {
@@ -145,14 +162,25 @@ async function actionSheetPF2eRenderInner(
     const tab = htmlQuery(html, ".tab[data-tab='details']");
     if (!tab) return $html;
 
-    if (item.system.actionType.value === "passive") {
+    const macro = await getActionMacro(item);
+
+    if (item.isOfType("spell")) {
+        const dropzone = macro ? await render("dropzone", { macro }) : null;
+        const zone = await render("macro-zone", {
+            dropzone,
+            type: game.i18n.localize("TYPES.Item.spell").toLowerCase(),
+        });
+
+        tab.insertAdjacentHTML("afterbegin", `<fieldset class="macro">${zone}</fieldset>`);
+    } else if (item.system.actionType.value === "passive") {
         const sibling = htmlQueryAll(tab, ".form-group").at(-1);
         if (!sibling) return $html;
 
-        const macro = await getActionMacro(item);
-
         const dropzone = macro ? await render("dropzone", { macro }) : null;
-        const zone = await render("macro-zone", { dropzone });
+        const zone = await render("macro-zone", {
+            dropzone,
+            type: game.i18n.localize("PF2E.ActionTypeAction").toLowerCase(),
+        });
 
         sibling.insertAdjacentHTML("beforebegin", zone);
     } else {
@@ -169,8 +197,6 @@ async function actionSheetPF2eRenderInner(
         const dropZone = group?.querySelector(".drop-zone.empty");
         if (!dropZone) return $html;
 
-        const macro = await getActionMacro(item);
-
         if (macro) {
             dropZone.outerHTML = await render("dropzone", { macro });
         } else {
@@ -182,8 +208,8 @@ async function actionSheetPF2eRenderInner(
     return $html;
 }
 
-function actionSheetPF2eActivateListeners(
-    this: AbilitySheetPF2e | FeatSheetPF2e,
+function itemSheetPF2eActivateListeners(
+    this: AbilitySheetPF2e | FeatSheetPF2e | SpellSheetPF2e,
     wrapped: libWrapper.RegisterCallback,
     $html: JQuery
 ) {
@@ -193,7 +219,8 @@ function actionSheetPF2eActivateListeners(
     if (item.permission <= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED) return;
 
     const html = $html[0];
-    const group = htmlQuery(html, "[data-drop-zone='self-applied-effect']");
+    const tab = htmlQuery(html, ".tab[data-tab='details']");
+    const group = htmlQuery(tab, "[data-drop-zone='self-applied-effect']");
     if (!group) return;
 
     addListener(group, "[data-action='open-macro-sheet']", async () => {
@@ -204,9 +231,46 @@ function actionSheetPF2eActivateListeners(
     addListener(group, "[data-action='delete-macro']", () => {
         unsetFlag(item, "macro");
     });
+
+    if (item.isOfType("spell")) {
+        const fieldset = htmlClosest(group, "fieldset.macro");
+        if (!fieldset) return;
+
+        fieldset.addEventListener("drop", (event) => spellSheetPF2eOnDrop(event, item));
+    }
 }
 
-async function actionSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
+async function spellSheetPF2eOnDrop(event: DragEvent, item: SpellPF2e) {
+    try {
+        const dataString = event.dataTransfer?.getData("text/plain");
+        const dropData = JSON.parse(dataString ?? "");
+
+        if (typeof dropData !== "object" || dropData.type !== "Macro") {
+            throw new Error();
+        }
+
+        const macro = (await getDocumentClass("Macro").fromDropData(dropData)) ?? null;
+        if (!macro) throw new Error();
+
+        await setFlag(item, "macro", macro.uuid);
+    } catch {
+        throw ErrorPF2e("Invalid item drop");
+    }
+}
+
+async function spellcastingEntryPF2eCast(
+    this: SpellcastingEntryPF2e,
+    wrapped: libWrapper.RegisterCallback,
+    spell: SpellPF2e<ActorPF2e>,
+    options?: CastOptions
+): Promise<void> {
+    await wrapped(spell, options);
+
+    const macro = await getActionMacro(spell);
+    macro?.execute({ actor: spell.actor, item: spell });
+}
+
+async function itemSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
     if (!this.isEditable) return;
 
     const item = await (async (): Promise<ItemPF2e | Macro | null> => {

@@ -6,7 +6,7 @@
                 "title": "Actionable",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Adds a way to link a macro to a character action."
+                    "hint": "Adds a way to link a macro to actions and spells."
                 }
             },
             "arp": {
@@ -561,7 +561,7 @@
             "macro-zone": {
                 "label": "Macro",
                 "drop": "Drop Macro",
-                "hint": "A macro that will be executed when this action is used"
+                "hint": "A macro that will be executed when this {type} is used"
             }
         },
         "identify": {
