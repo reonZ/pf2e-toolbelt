@@ -1,3 +1,19 @@
+# 2.14.0
+
+-   few updates of the settings descriptions
+-   `Actionable`:
+    -   add support for spells
+        -   a drop zone section has been added in the `Details` tab of the spell sheet
+        -   the macro is executed on `cast`
+        -   the spell is forwarded to the macro as the `item` parameter
+-   add `Better Browser` section:
+    -   add `Remove Bestiary Duplicates` world setting
+        -   it removes creatures from the original 3 `Pathfinder Bestiary` that have a version with the same name in the `Pathfinder Monster Core`
+        -   it only affects the displayed results in the compendium browser
+-   `Better Merchant`:
+    -   add a new line to the merchant sidebar menu to set the services ratio
+    -   you can now link a macro to be executed when the service is purchased/offered
+
 # 2.13.0
 
 -   `Actionable`:
@@ -6,7 +22,7 @@
     -   remove the `Chat Message` setting
         -   the macro should post the message if needed now that the `item` is passed as argument
 -   `Better Merchant`:
-    -   add a new `Services` feature
+    -   add `Services` feature
         -   the GM can create simple services offered by the merchant to Character/NPC/Party actors
         -   services consist mostly of a description, it can contain anything
         -   services can be imported and exported individually or in bundle
