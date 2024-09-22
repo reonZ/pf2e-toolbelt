@@ -34,7 +34,8 @@
                     </a>
                 </h4>
             </div>
-            <span class="price">{{service.enrichedPrice}}</span>
+            <span
+                class="price{{#if @root.isGM}} {{@root.css}}{{/if}}">{{service.enrichedPrice}}</span>
             <span class="quantity">
                 {{!-- decrease btn --}}
                 {{#if @root.isGM}}

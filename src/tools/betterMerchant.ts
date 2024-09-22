@@ -50,6 +50,11 @@ const RATIO = {
         max: 5,
         default: 1,
     },
+    services: {
+        min: 0,
+        max: 5,
+        default: 1,
+    },
 };
 
 const ITEM_PREPARE_DERIVED_DATA = "CONFIG.Item.documentClass.prototype.prepareDerivedData";
@@ -209,7 +214,7 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
             return await errorUpdate();
         }
 
-        const price = getServicePrice(service);
+        const price = getServicePrice(service, getServicesRatio(seller));
         const quantity = service.quantity ?? -1;
 
         if (price.copperValue > 0) {
@@ -895,7 +900,8 @@ async function lootSheetPF2eRenderInner(
 
     const isGM = game.user.isGM;
     const html = $html[0];
-    const infiniteAll = getFlag<boolean>(actor, "infiniteAll");
+    const infiniteAll = !!getFlag<boolean>(actor, "infiniteAll");
+    const servicesRatio = getServicesRatio(actor);
     const inventoryList = htmlQuery(html, ".sheet-body .inventory-list");
 
     if (isGM) {
@@ -903,6 +909,10 @@ async function lootSheetPF2eRenderInner(
             classes: ["gm-settings", "better-merchant"],
             innerHTML: await render("sheet", {
                 infiniteAll,
+                servicesRatio: {
+                    ...RATIO.services,
+                    value: servicesRatio,
+                },
             }),
         });
         htmlQuery(html, ".sheet-sidebar .image-container")?.after(sheetElement);
@@ -960,7 +970,7 @@ async function lootSheetPF2eRenderInner(
             const services: ServiceData[] = [];
 
             for (const service of userServices) {
-                const enrichedService = await enrichService(service);
+                const enrichedService = await enrichService(service, servicesRatio);
                 services.push(enrichedService);
             }
 
@@ -968,6 +978,7 @@ async function lootSheetPF2eRenderInner(
                 services,
                 infinity: INFINITY,
                 isGM,
+                css: servicesRatio > 1 ? "expensive" : servicesRatio < 1 ? "cheap" : "",
             });
 
             const servicesElement = createHTMLElement("div", { innerHTML: servicesTemplate });
@@ -1003,6 +1014,15 @@ function lootSheetPF2eActivateListeners(
             const value = el.checked;
             setFlag(actor, "infiniteAll", value);
         });
+
+        addListener(
+            betterMenu,
+            "[name='servicesRatio']",
+            "change",
+            (even, el: HTMLInputElement) => {
+                setFlag(actor, "servicesRatio", el.valueAsNumber);
+            }
+        );
     }
 
     addListenerAll(html, "[data-better-action]:not(.disabled)", async (event, el) => {
@@ -1068,7 +1088,7 @@ function lootSheetPF2eActivateListeners(
                 const service = serviceId ? getService(actor, serviceId) : undefined;
                 if (!service) return;
 
-                return await serviceMessage(actor, service, { token: this.token });
+                return await serviceMessage(actor, service, actor, { token: this.token });
             }
 
             case "toggle-service-enabled": {
@@ -1164,7 +1184,7 @@ async function sellService(
         return localize.warn("service.noStock", notifyData);
     }
 
-    const price = getServicePrice(service);
+    const price = getServicePrice(service, getServicesRatio(seller.actor));
     const isFree = forceFree || price.copperValue <= 0;
 
     if (!isFree && !hasSufficientCoins(buyer.actor, price)) {
@@ -1185,7 +1205,7 @@ async function sellService(
         };
     }
 
-    return serviceMessage(msgTrader.actor, service, msgOptions);
+    return serviceMessage(msgTrader.actor, service, seller.actor, msgOptions);
 }
 
 function serviceCanBePurchased(service: Maybe<ServiceFlag>): service is ServiceFlag {
@@ -1195,6 +1215,7 @@ function serviceCanBePurchased(service: Maybe<ServiceFlag>): service is ServiceF
 async function serviceMessage(
     actor: ActorPF2e,
     service: ServiceFlag,
+    seller: LootPF2e,
     { token, tradeMsg, flags }: ServiceMsgOptions = {}
 ) {
     token ??= actor.getActiveTokens(false, true).at(0);
@@ -1203,7 +1224,7 @@ async function serviceMessage(
     const content = await render<ServiceCardData>("service-card", {
         actor,
         tokenId: token?.id,
-        service: await enrichService(service),
+        service: await enrichService(service, getServicesRatio(seller)),
         tradeMsg,
     });
 
@@ -1467,17 +1488,26 @@ function getService(actor: LootPF2e, serviceId: string) {
     return getServices(actor).find((service) => service.id === serviceId);
 }
 
-function getServicePrice(service: ServiceFlag) {
-    return new game.pf2e.Coins(service.price ?? {});
+function getServicePrice(service: ServiceFlag, ratio: number = 1) {
+    const price = new game.pf2e.Coins(service.price ?? {});
+    return ratio === 1 ? price : price.scale(ratio);
 }
 
 function setServices(actor: LootPF2e, services: ServiceFlag[]) {
     return setFlag<ServiceFlag[]>(actor, "services", services);
 }
 
-async function enrichService(service: ServiceFlag): Promise<ServiceData> {
+function getServicesRatio(actor: LootPF2e) {
+    return Math.clamp(
+        getFlag<number>(actor, "servicesRatio") ?? RATIO.services.default,
+        RATIO.services.min,
+        RATIO.services.max
+    );
+}
+
+async function enrichService(service: ServiceFlag, ratio?: number): Promise<ServiceData> {
     const quantity = service.quantity ?? -1;
-    const price = getServicePrice(service);
+    const price = getServicePrice(service, ratio);
     const description = service.description?.trim() ?? "";
 
     return {

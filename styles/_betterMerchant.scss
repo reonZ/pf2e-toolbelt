@@ -1,4 +1,16 @@
 .sheet.actor.loot form {
+    .price {
+        &.cheap {
+            color: #0d5c10;
+            text-shadow: 0 0 1px #56d167;
+        }
+
+        &.expensive {
+            color: #7e1a1a;
+            text-shadow: 0 0 1px #c77a7a;
+        }
+    }
+
     section.sheet-sidebar {
         .better-merchant {
             > div {
@@ -17,24 +29,15 @@
             input[type="checkbox"] {
                 margin: 0;
             }
+
+            .services-ratio {
+                flex: 0 0 4ch;
+                text-align: center;
+            }
         }
     }
 
     section.content .inventory .inventory-list {
-        [data-item-id] {
-            .price {
-                &.cheap {
-                    color: #0d5c10;
-                    text-shadow: 0 0 1px #56d167;
-                }
-
-                &.expensive {
-                    color: #7e1a1a;
-                    text-shadow: 0 0 1px #c77a7a;
-                }
-            }
-        }
-
         .services {
             a.disabled {
                 opacity: 0.3;

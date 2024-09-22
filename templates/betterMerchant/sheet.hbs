@@ -18,3 +18,12 @@
     </label>
     <input type="checkbox" name="infiniteAll" {{checked infiniteAll}}>
 </div>
+<div class="form-group">
+    <label>
+        <span>{{@root.i18n 'servicesRatio.label'}}</span>
+        <i class="fa-solid fa-info-circle"
+            data-tooltip="{{@root.i18n.path 'servicesRatio.tooltip'}}"></i>
+    </label>
+    <input type="number" class="services-ratio" name="servicesRatio" value="{{servicesRatio.value}}"
+        min="{{servicesRatio.min}}" max="{{servicesRatio.max}}" step="0.1">
+</div>

@@ -454,7 +454,10 @@
                     "label": "Infinite Stocks",
                     "tooltip": "The merchant will never run out of items to sell (does nothing to Treasures)"
                 },
-                "infiniteToggle": "Toogle Infinite Stock"
+                "servicesRatio": {
+                    "label": "Services Ratio",
+                    "tooltip": "Price ratio for all the services on this merchant"
+                }
             },
             "browserPull": {
                 "selected": "Selected",
