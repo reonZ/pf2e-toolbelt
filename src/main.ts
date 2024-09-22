@@ -21,12 +21,14 @@ import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
 import { undergroundTool } from "./tools/underground";
 import { identifyTool } from "./tools/identify";
+import { betterBrowserTool } from "./tools/browser";
 
 MODULE.register("pf2e-toolbelt", "PF2e Toolbelt");
 
 const TOOLS: ToolConfig[] = [
     actionableTool,
     arpTool,
+    betterBrowserTool,
     betterMerchantTool,
     debugTool,
     untargetTool,
