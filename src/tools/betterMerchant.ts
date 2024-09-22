@@ -1,4 +1,5 @@
 import {
+    ErrorPF2e,
     R,
     TradeData,
     TradePacket,
@@ -210,25 +211,34 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
 
         const services = getServices(seller);
         const service = services.find((service) => service.id === serviceFlag.serviceId);
-        if (!serviceCanBePurchased(service)) {
+        if (!service) {
             return await errorUpdate();
         }
 
-        const price = getServicePrice(service, getServicesRatio(seller));
-        const quantity = service.quantity ?? -1;
-
-        if (price.copperValue > 0) {
-            if (await buyer.inventory.removeCoins(price)) {
-                await seller.inventory.addCoins(price);
-            } else {
+        if (!serviceFlag.forceFree) {
+            if (!serviceCanBePurchased(service)) {
                 return await errorUpdate();
+            }
+
+            const price = getServicePrice(service, getServicesRatio(seller));
+            const quantity = service.quantity ?? -1;
+
+            if (price.copperValue > 0) {
+                if (await buyer.inventory.removeCoins(price)) {
+                    await seller.inventory.addCoins(price);
+                } else {
+                    return await errorUpdate();
+                }
+            }
+
+            if (quantity > 0) {
+                service.quantity = quantity - 1;
+                await setServices(seller, services);
             }
         }
 
-        if (quantity > 0) {
-            service.quantity = quantity - 1;
-            await setServices(seller, services);
-        }
+        const macro = await getServiceMacro(service);
+        macro?.execute({ actor: buyer });
     }
 }
 
@@ -1070,7 +1080,7 @@ function lootSheetPF2eActivateListeners(
                 const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
                 services.findSplice((service) => service.id === serviceId);
 
-                return await setServices(this.actor, services);
+                return await setServices(actor, services);
             }
 
             case "toggle-service-summary": {
@@ -1099,7 +1109,7 @@ function lootSheetPF2eActivateListeners(
                 if (!service) return;
 
                 service.enabled = !service.enabled;
-                return await setServices(this.actor, services);
+                return await setServices(actor, services);
             }
 
             case "buy-service":
@@ -1145,7 +1155,7 @@ function isValidServiceBuyer(actor: Maybe<ClientDocument>): actor is ActorPF2e {
 async function sellService(
     seller: TraderData,
     serviceId: string,
-    { buyer, forceFree }: { buyer?: TraderData; forceFree?: boolean } = {}
+    { buyer, forceFree = false }: { buyer?: TraderData; forceFree?: boolean } = {}
 ) {
     if (!seller.actor?.isOfType("loot") || (buyer?.actor && !isValidServiceBuyer(buyer.actor)))
         return;
@@ -1195,21 +1205,19 @@ async function sellService(
     const msgOptions: ServiceMsgOptions = {
         token: msgTrader.token,
         tradeMsg: localize("service", forceFree ? "give" : "buy", notifyData),
-    };
-
-    if (!forceFree) {
-        msgOptions.flags = {
+        flags: {
             buyerUUID: buyer.actor.uuid,
             sellerUUID: seller.actor.uuid,
             serviceId: service.id,
-        };
-    }
+            forceFree,
+        },
+    };
 
     return serviceMessage(msgTrader.actor, service, seller.actor, msgOptions);
 }
 
-function serviceCanBePurchased(service: Maybe<ServiceFlag>): service is ServiceFlag {
-    return !!service?.enabled && (service.quantity ?? -1) !== 0;
+function serviceCanBePurchased(service: ServiceFlag): service is ServiceFlag {
+    return !!service.enabled && (service.quantity ?? -1) !== 0;
 }
 
 async function serviceMessage(
@@ -1365,10 +1373,9 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
         };
 
         const services = getServices(actor).slice();
-        services.findSplice((service) => service.id === this.#serviceId, data);
+        services.findSplice((service) => service.id === this.serviceId, data);
 
         await setServices(this.actor, services);
-        this.render();
     }
 
     constructor(actor: LootPF2e, serviceId: string, options: PartialApplicationConfiguration = {}) {
@@ -1385,8 +1392,12 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
         return this.#actor;
     }
 
+    get serviceId() {
+        return this.#serviceId;
+    }
+
     get service() {
-        return getService(this.actor, this.#serviceId) ?? null;
+        return getService(this.actor, this.serviceId) ?? null;
     }
 
     async _renderFrame(options: ApplicationRenderOptions) {
@@ -1426,22 +1437,77 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
     }
 
     #activateListeners(html: HTMLElement) {
-        addListener(html, "[data-action='edit-image']", (event, el: HTMLImageElement) => {
-            const filePicker = new FilePicker({
-                current: el.dataset.src,
-                type: "image",
-                callback: (path) => {
-                    el.src = path;
-                    el.dataset.src = path;
+        const service = this.service;
+        if (!service) return;
 
-                    if (this.options.form?.submitOnChange) {
-                        const submitEvent = new SubmitEvent("submit");
-                        this.element.dispatchEvent(submitEvent);
+        const submitOnChange = () => {
+            if (this.options.form?.submitOnChange) {
+                const submitEvent = new SubmitEvent("submit");
+                this.element.dispatchEvent(submitEvent);
+            }
+        };
+
+        addListenerAll(html, "[data-action]", async (event, el) => {
+            const action = el.dataset.action as ServiceEventAction;
+
+            switch (action) {
+                case "open-macros": {
+                    return ui.macros.renderPopout(true);
+                }
+
+                case "edit-image": {
+                    const img = el as HTMLImageElement;
+
+                    const filePicker = new FilePicker({
+                        current: img.dataset.src,
+                        type: "image",
+                        callback: (path) => {
+                            img.src = path;
+                            img.dataset.src = path;
+                            submitOnChange();
+                        },
+                    });
+
+                    return filePicker.browse();
+                }
+
+                case "delete-macro": {
+                    const macroInput = htmlQuery<HTMLInputElement>(html, "input[name='macroUUID']");
+                    if (macroInput) {
+                        macroInput.value = "";
+                        submitOnChange();
                     }
-                },
-            });
+                    break;
+                }
 
-            filePicker.browse();
+                case "open-macro-sheet": {
+                    const macro = await getServiceMacro(service);
+                    macro?.sheet.render(true);
+                    break;
+                }
+            }
+        });
+
+        addListener(html, ".service .header", "drop", async (event, el) => {
+            try {
+                const dataString = event.dataTransfer?.getData("text/plain");
+                const dropData = JSON.parse(dataString ?? "");
+
+                if (typeof dropData !== "object" || dropData.type !== "Macro") {
+                    throw new Error();
+                }
+
+                const macro = (await getDocumentClass("Macro").fromDropData(dropData)) ?? null;
+                if (!macro) throw new Error();
+
+                const macroInput = htmlQuery<HTMLInputElement>(html, "input[name='macroUUID']");
+                if (macroInput) {
+                    macroInput.value = macro.uuid;
+                    submitOnChange();
+                }
+            } catch {
+                throw ErrorPF2e("Invalid item drop");
+            }
         });
     }
 }
@@ -1456,7 +1522,7 @@ async function addService(actor: LootPF2e) {
     editService(actor, service.id);
 }
 
-function createService(raw: any): ServiceFlag {
+function createService(raw: any): Required<ServiceFlag> {
     raw = R.isPlainObject(raw) ? raw : {};
 
     const id = foundry.utils.randomID();
@@ -1470,6 +1536,7 @@ function createService(raw: any): ServiceFlag {
         enabled: R.isBoolean(raw.enabled) ? raw.enabled : true,
         img: R.isString(raw.img) ? raw.img : "",
         quantity: R.isNumber(raw.quantity) ? raw.quantity : -1,
+        macroUUID: R.isString(raw.macroUUID) ? raw.macroUUID : "",
     };
 }
 
@@ -1497,6 +1564,10 @@ function setServices(actor: LootPF2e, services: ServiceFlag[]) {
     return setFlag<ServiceFlag[]>(actor, "services", services);
 }
 
+async function getServiceMacro(service: ServiceFlag): Promise<MacroPF2e | null> {
+    return service.macroUUID?.trim() ? fromUuid<MacroPF2e>(service.macroUUID) : null;
+}
+
 function getServicesRatio(actor: LootPF2e) {
     return Math.clamp(
         getFlag<number>(actor, "servicesRatio") ?? RATIO.services.default,
@@ -1522,6 +1593,8 @@ async function enrichService(service: ServiceFlag, ratio?: number): Promise<Serv
         enrichedDescription: description ? await TextEditor.enrichHTML(description) : "",
         enrichedPrice: price.toString(),
         isInfinite: quantity < 0,
+        macroUUID: service.macroUUID ?? "",
+        macro: await getServiceMacro(service),
     };
 }
 
@@ -1782,6 +1855,8 @@ function clampPriceRatio(type: ItemFilterType, value: number | undefined) {
     return Math.clamp(value, RATIO[type].min, RATIO[type].max).toNearest(0.1, "floor");
 }
 
+type ServiceEventAction = "open-macros" | "edit-image" | "open-macro-sheet" | "delete-macro";
+
 type LootSheetActionEvent =
     | "open-equipment-tab"
     | "open-filters-menu"
@@ -1854,6 +1929,7 @@ type ServiceMsgFlag = {
     buyerUUID: string;
     sellerUUID: string;
     serviceId: string;
+    forceFree: boolean;
 };
 
 type ServiceMsgOptions = {
@@ -1866,6 +1942,7 @@ type ServiceData = Required<ServiceFlag> & {
     enrichedDescription: string;
     enrichedPrice: string;
     isInfinite: boolean;
+    macro: Macro | null;
 };
 
 type ServiceFlag = {
@@ -1877,6 +1954,7 @@ type ServiceFlag = {
     enabled?: boolean;
     img?: string;
     quantity?: number;
+    macroUUID?: string;
 };
 
 type ServiceRenderOptions = ApplicationRenderOptions & {

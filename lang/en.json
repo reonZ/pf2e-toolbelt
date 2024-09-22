@@ -517,6 +517,10 @@
                 "quantity": "Negative number for infinite stock",
                 "name": "Name",
                 "enabled": "Enabled",
+                "macro": {
+                    "label": "Macro Executed on Service",
+                    "drop": "Drop Macro"
+                },
                 "none": "Couldn't find the service",
                 "delete": {
                     "title": "Delete Service",
