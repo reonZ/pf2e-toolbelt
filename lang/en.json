@@ -35,7 +35,7 @@
                 "title": "Giveth",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Should your world allow your players actors to be able to give items to other player-owned actors."
+                    "hint": "Should your world allow your players actors to be able to give inventory items to other player-owned actors."
                 },
                 "message": {
                     "name": "Send Message to Chat",
