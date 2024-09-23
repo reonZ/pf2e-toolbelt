@@ -235,10 +235,13 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
                 service.quantity = quantity - 1;
                 await setServices(seller, services);
             }
-        }
 
-        const macro = await getServiceMacro(service);
-        macro?.execute({ actor: buyer });
+            const macro = await getServiceMacro(service)
+            macro?.execute({ buyer, seller, service: { id: service.id, level: service.level, name: service.name, price: price, quantity: quantity } });
+        } else {
+            const macro = await getServiceMacro(service)
+            macro?.execute({ buyer, seller, service: { id: service.id, level: service.level, name: service.name } });
+	}
     }
 }
 
