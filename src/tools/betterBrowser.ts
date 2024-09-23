@@ -1,5 +1,7 @@
-import { ErrorPF2e, htmlQuery, libWrapper } from "foundry-pf2e";
+import { ErrorPF2e } from "foundry-pf2e";
 import { createTool } from "../tool";
+
+const BESTIARY_SOURCES = ["pathfinder-bestiary", "pathfinder-bestiary-2", "pathfinder-bestiary-3"];
 
 const { config, settings, wrapper } = createTool({
     name: "betterBrowser",
@@ -58,7 +60,7 @@ function browserBestiaryTabGetIndexData(
     for (let i = start; i < limit - 1; i++) {
         const data = this.currentIndex[i];
 
-        if (!data.source.startsWith("pathfinder-bestiary")) {
+        if (!BESTIARY_SOURCES.includes(data.source)) {
             indexData.push(data);
             continue;
         }
