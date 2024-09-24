@@ -576,7 +576,8 @@
                 "label": "Macro",
                 "drop": "Drop Macro",
                 "hint": "A macro that will be executed when this {type} is used"
-            }
+            },
+            "cancelSpell": "<strong>{name}</strong> cast was cancelled by its macro."
         },
         "identify": {
             "tracker": {

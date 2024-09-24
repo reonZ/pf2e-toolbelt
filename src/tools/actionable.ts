@@ -80,6 +80,7 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
         {
             path: "CONFIG.PF2E.Item.documentClasses.spellcastingEntry.prototype.cast",
             callback: spellcastingEntryPF2eCast,
+            type: "MIXED",
         },
     ],
     ready: () => {
@@ -264,10 +265,17 @@ async function spellcastingEntryPF2eCast(
     spell: SpellPF2e<ActorPF2e>,
     options?: CastOptions
 ): Promise<void> {
-    await wrapped(spell, options);
-
     const macro = await getActionMacro(spell);
-    macro?.execute({ actor: spell.actor, item: spell });
+
+    if (macro) {
+        const value = await macro.execute({ actor: spell.actor, item: spell });
+
+        if (value === false) {
+            return localize.warn("cancelSpell", { name: spell.name });
+        }
+    }
+
+    wrapped(spell, options);
 }
 
 async function itemSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
