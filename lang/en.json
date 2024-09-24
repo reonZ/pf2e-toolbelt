@@ -559,7 +559,7 @@
                 "import": "Import Services"
             },
             "sell": {
-                "refuse": "<strong>{actor}</strong> isn't willing to depart willing to depart from <strong>{item}</strong>."
+                "refuse": "<strong>{actor}</strong> isn't willing to depart from <strong>{item}</strong>."
             },
             "buy": {
                 "refuse": "<strong>{actor}</strong> isn't interested in buying {quantity} <strong>{item}</strong>.",
