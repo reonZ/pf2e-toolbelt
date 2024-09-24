@@ -576,7 +576,8 @@
                 "label": "Makro",
                 "drop": "Upuść makro",
                 "hint": "Makro, które zostanie wykonane, gdy ten {type} zostanie użyty"
-            }
+            },
+            "cancelSpell": "<strong>{name}</strong> został anulowany przez jego makro."
         },
         "identify": {
             "tracker": {
