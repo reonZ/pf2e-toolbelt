@@ -1,5 +1,6 @@
 import {
     ErrorPF2e,
+    R,
     addListener,
     addListenerAll,
     elementDataset,
@@ -268,10 +269,17 @@ async function spellcastingEntryPF2eCast(
     const macro = await getActionMacro(spell);
 
     if (macro) {
-        const value = await macro.execute({ actor: spell.actor, item: spell });
+        const value = (await macro.execute({ actor: spell.actor, item: spell })) as SpellMacroValue;
 
         if (value === false) {
             return localize.warn("cancelSpell", { name: spell.name });
+        } else if (R.isObjectType<SpellMacroValue>(value)) {
+            if (value.skipNotification) {
+                return;
+            } else if (typeof value.customNotification === "string") {
+                ui.notifications.warn(value.customNotification);
+                return;
+            }
         }
     }
 
@@ -309,5 +317,7 @@ async function itemSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event
         throw ErrorPF2e("Invalid item drop");
     }
 }
+
+type SpellMacroValue = false | { skipNotification?: boolean; customNotification?: string };
 
 export { config as actionableTool, getActionMacro };
