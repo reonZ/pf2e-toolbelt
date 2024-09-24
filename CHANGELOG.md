@@ -1,3 +1,10 @@
+# 2.15.0
+
+-   `Actionable`:
+    -   spell macros will now cancel the spell cast if it returns `false`
+-   `Better Merchant`:
+    -   service macros will now be provided more parameters, see [here](https://github.com/reonZ/pf2e-toolbelt/wiki/Better-Merchant#service-macro) for more details
+
 # 2.14.0
 
 -   few updates of the settings descriptions
