@@ -215,12 +215,20 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
             return await errorUpdate();
         }
 
+        const serviceRatio = getServicesRatio(seller);
+        const originalPrice = getServicePrice(service);
+        const usedPrice = serviceFlag.forceFree
+            ? null
+            : serviceRatio === 1
+            ? originalPrice
+            : originalPrice.scale(serviceRatio);
+
         if (!serviceFlag.forceFree) {
             if (!serviceCanBePurchased(service)) {
                 return await errorUpdate();
             }
 
-            const price = getServicePrice(service, getServicesRatio(seller));
+            const price = usedPrice!;
             const quantity = service.quantity ?? -1;
 
             if (price.copperValue > 0) {
@@ -238,7 +246,19 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
         }
 
         const macro = await getServiceMacro(service);
-        macro?.execute({ actor: buyer });
+        macro?.execute({
+            actor: buyer,
+            service: {
+                seller,
+                usedPrice,
+                serviceRatio,
+                originalPrice,
+                name: service.name ?? service.id,
+                level: service.level ?? 0,
+                quantity: service.quantity ?? -1,
+                forceFree: serviceFlag.forceFree,
+            },
+        } satisfies ServiceMacroData);
     }
 }
 
@@ -1963,6 +1983,20 @@ type ServiceRenderOptions = ApplicationRenderOptions & {
 
 type ServiceContext = {
     service: ServiceData | null;
+};
+
+type ServiceMacroData = {
+    actor: ActorPF2e;
+    service: {
+        seller: LootPF2e;
+        usedPrice: CoinsPF2e | null;
+        serviceRatio: number;
+        originalPrice: CoinsPF2e;
+        name: string;
+        level: number;
+        quantity: number;
+        forceFree: boolean;
+    };
 };
 
 type BrowserData =
