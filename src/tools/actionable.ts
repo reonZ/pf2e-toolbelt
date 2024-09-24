@@ -269,7 +269,11 @@ async function spellcastingEntryPF2eCast(
     const macro = await getActionMacro(spell);
 
     if (macro) {
-        const value = (await macro.execute({ actor: spell.actor, item: spell })) as SpellMacroValue;
+        const value = (await macro.execute({
+            actor: spell.actor,
+            item: spell,
+            options,
+        })) as SpellMacroValue;
 
         if (value === false) {
             return localize.warn("cancelSpell", { name: spell.name });
