@@ -1,3 +1,8 @@
+# 2.15.1
+
+-   `Actionable`:
+    -   spell macros can also return an object containing `customNotification` or `skipNotification` to cancel the cast
+
 # 2.15.0
 
 -   `Actionable`:
