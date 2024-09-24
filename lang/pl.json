@@ -6,7 +6,7 @@
                 "title": "Wykonalne akcje",
                 "enabled": {
                     "name": "Włączone",
-                    "hint": "Dodaje możliwość powiązania makra z akcją postaci."
+                    "hint": "Dodaje możliwość powiązania makra z akcjami i zaklęciami. Przeciągnij i upuść makro w zakładce szczegółów karty akcji/zaklęcia."
                 }
             },
             "arp": {
@@ -35,7 +35,7 @@
                 "title": "Przekazywanie",
                 "enabled": {
                     "name": "Włączone",
-                    "hint": "Czy świat powinien umożliwiać graczom przekazywanie przedmiotów innym graczom."
+                    "hint": "Czy świat powinien umożliwiać graczom przekazywanie przedmiotów z ekwipunku innym graczom."
                 },
                 "message": {
                     "name": "Wyślij wiadomość na czat",
@@ -188,6 +188,10 @@
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Dodawanie niestandardowych funkcji do domyślnego kupca systemowego."
+                },
+                "servicesTop": {
+                    "name": "Usługi powyżej przedmiotów",
+                    "hint": "Usługi powinny być wyświetlane nad listą przedmiotów na karcie."
                 }
             },
             "underground": {
@@ -235,6 +239,13 @@
                 "identifyPartials": {
                     "name": "Automatyczna identyfikacja podobnych przedmiotów",
                     "hint": "Czy „podobne” przedmioty powinny być również identyfikowane podczas korzystania z opcji „Automatycznie identyfikuj znane przedmioty”."
+                }
+            },
+            "betterBrowser": {
+                "title": "Lepsza wyszukiwarka",
+                "noDuplicates": {
+                    "name": "Usuń duplikaty bestiariusza",
+                    "hint": "Usunie stworzenia z oryginalnych trzech „Pathfinder Bestiary”, które mają wersję o tej samej nazwie w „Pathfinder Monster Core”."
                 }
             }
         },
@@ -443,7 +454,10 @@
                     "label": "Nieskończone zapasy",
                     "tooltip": "Kupcowi nigdy nie zabraknie przedmiotów do sprzedania (nie ma to żadnego wpływu na Skarby)"
                 },
-                "infiniteToggle": "Przełącz nieskończone zapasy"
+                "servicesRatio": {
+                    "label": "Współczynnik usług",
+                    "tooltip": "Stosunek cen wszystkich usług tego sprzedawcy"
+                }
             },
             "browserPull": {
                 "selected": "Wybrane",
@@ -465,7 +479,7 @@
                 "sell": "Sprzedaż"
             },
             "filters": {
-                "title": "{name} - Filtry przedmiotów",
+                "title": "Filtry przedmiotów - {name}",
                 "default": {
                     "buy": "Domyślny zakup",
                     "sell": "Domyślna sprzedaż"
@@ -498,6 +512,52 @@
                     "content": "Czy na pewno chcesz usunąć filtr <strong>{name}</strong>?"
                 }
             },
+            "service": {
+                "title": "Usługa - {name}",
+                "quantity": "Liczba ujemna dla nieskończonych zasobów",
+                "name": "Nazwa",
+                "enabled": "Włączone",
+                "macro": {
+                    "label": "Makro wykonywane w usłudze",
+                    "drop": "Upuść makro"
+                },
+                "none": "Nie udało się znaleźć usługi",
+                "delete": {
+                    "title": "Usuń usługę",
+                    "msg": "Czy na pewno chcesz usunąć tę usługę?"
+                },
+                "give": "<strong>{seller}</strong> oferuje swoje usługi <strong>{buyer}</strong> bezpłatnie.",
+                "buy": "<strong>{buyer}</strong> wynajął usługi od <strong>{seller}</strong>.",
+                "noBuyer": "Musisz wybrać jedną postać/postać niezależną/drużynę jako cel usługi.",
+                "noFunds": "<strong>{buyer}</strong> nie ma funduszy, aby wynająć usługi od <strong>{seller}</strong>.",
+                "noStock": "<strong>{seller}</strong> nie oferuje już tej usługi.",
+                "error": "Wystąpił błąd podczas próby przetworzenia żądania usługi",
+                "export": "Eksport usługi"
+            },
+            "service-export": {
+                "title": "Eksport usług - {name}",
+                "copied": "Usługa <strong>{name}</strong> została skopiowana do schowka.",
+                "copiedAll": "Usługi <strong>{name}</strong> zostały skopiowane do schowka.",
+                "all": "Skopiuj wszystkie usługi",
+                "close": "Zamknij"
+            },
+            "service-import": {
+                "title": "Import usług - {name}",
+                "yes": "Importuj",
+                "no": "Anuluj",
+                "error": "Wystąpił błąd podczas próby zaimportowania usług."
+            },
+            "sheet-services": {
+                "label": "Usługi",
+                "add": "Dodaj usługę",
+                "edit": "Edytuj usługę",
+                "delete": "Usuń usługę",
+                "enabled": "Przełącz usługę",
+                "give": "Darmowa usługa",
+                "buy": "Zamów usługę",
+                "export": "Eksportuj usługi",
+                "import": "Importuj usługi"
+            },
             "sell": {
                 "refuse": "<strong>{actor}</strong> nie jest skłonny do odejścia od <strong>{item}</strong>."
             },
@@ -511,6 +571,11 @@
             "itemSheet": {
                 "label": "Makro",
                 "hint": " lub makro, które zostanie wykonane, gdy ta akcja zostanie użyta"
+            },
+            "macro-zone": {
+                "label": "Makro",
+                "drop": "Upuść makro",
+                "hint": "Makro, które zostanie wykonane, gdy ten {type} zostanie użyty"
             }
         },
         "identify": {
