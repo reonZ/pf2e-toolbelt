@@ -264,7 +264,7 @@ async function spellcastingEntryPF2eCast(
     this: SpellcastingEntryPF2e,
     wrapped: libWrapper.RegisterCallback,
     spell: SpellPF2e<ActorPF2e>,
-    options?: CastOptions
+    options: CastOptions = {}
 ): Promise<void> {
     const macro = await getActionMacro(spell);
 
