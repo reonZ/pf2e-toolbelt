@@ -1,3 +1,10 @@
+# 2.15.2
+
+-   `Actionable`:
+    -   forward cast `options` to the spell macros (containing cast `rank` and more)
+-   `Better Merchant`:
+    -   fix sell refusal message
+
 # 2.15.1
 
 -   `Actionable`:
