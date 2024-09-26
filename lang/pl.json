@@ -559,7 +559,7 @@
                 "import": "Importuj usługi"
             },
             "sell": {
-                "refuse": "<strong>{actor}</strong> nie jest skłonny do odejścia od <strong>{item}</strong>."
+                "refuse": "<strong>{actor}</strong> nie jest skłonny odejść od <strong>{item}</strong>."
             },
             "buy": {
                 "refuse": "<strong>{actor}</strong> nie jest zainteresowany kupnem {quantity} <strong>{item}</strong>.",
