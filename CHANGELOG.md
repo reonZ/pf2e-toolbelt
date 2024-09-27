@@ -1,3 +1,11 @@
+# 2.16.0
+
+-   this is a system `6.4.1` release
+-   `Actionable`:
+    -   make sure the spell macro `options` parameter always has a reference, so the macro can change its data in all use case
+-   `Target Helper`:
+    -   add support for the new ally/enemy roll option to damage-taken
+
 # 2.15.2
 
 -   `Actionable`:
