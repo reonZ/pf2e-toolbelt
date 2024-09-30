@@ -200,7 +200,7 @@ function onSocket(packet: SocketPacket, senderId: string) {
     }
 }
 
-const INLINE_CHECK_REGEX = /(class="inline-check[\w0-9 -]*")/g;
+const INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
 function textEditorEnrichHTML(this: TextEditor, enriched: string) {
     return enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
 }
@@ -582,11 +582,13 @@ function onDragStart(event: DragEvent) {
 }
 
 function onChatMessageDrop(event: DragEvent) {
-    const target = (event.target as HTMLElement)?.closest<HTMLLIElement>("li.chat-message");
+    const target = htmlClosest<HTMLLIElement>(event.target, "li.chat-message");
     if (!target) return;
 
     const data = TextEditor.getDragEventData(event);
     if (!data) return;
+
+    console.log(data);
 
     const { type, dc, basic, options, statistic, traits } = data as SaveDragData;
     if (type !== `${MODULE.id}-check-roll`) return;
