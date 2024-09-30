@@ -15,6 +15,7 @@
         .card-buttons {
             .pf2e-toolbelt-target-wrapper {
                 display: flex;
+                gap: 3px;
 
                 .pf2e-toolbelt-target-setTargets {
                     display: flex;
@@ -66,6 +67,19 @@
                             }
                         }
                     }
+                }
+            }
+        }
+
+        .chat-card {
+            footer {
+                > span:last-of-type {
+                    border-right: none;
+                    padding-right: 0;
+                }
+
+                .pf2e-toolbelt-target-setTargets {
+                    float: right;
                 }
             }
         }
@@ -304,6 +318,14 @@
                     button {
                         filter: blur(1px);
                     }
+                }
+            }
+
+            &:not(.pf2e-toolbelt-target-damage) {
+                hr:first-child {
+                    margin-block-start: 4px;
+                    border-top: none;
+                    border-bottom: var(--space-2) groove var(--color-text-light-0);
                 }
             }
         }

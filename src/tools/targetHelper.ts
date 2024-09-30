@@ -224,8 +224,12 @@ function isRegenMessage(message: ChatMessagePF2e) {
 function isDamageMessage(
     message: ChatMessagePF2e
 ): message is ChatMessagePF2e & { rolls: Rolled<DamageRoll>[] } {
-    message.rolls;
     return message.isDamageRoll;
+}
+
+function isActionMessage(message: ChatMessagePF2e) {
+    const type = message.getFlag<string>("pf2e", "origin.type");
+    return !!type && ["feat", "action"].includes(type);
 }
 
 function isDamageSpell(spell: SpellPF2e | undefined) {
@@ -284,16 +288,18 @@ function onGetChatLogEntryContext($html: JQuery, data: EntryContextOption[]) {
 
 function onPreCreateChatMessage(message: ChatMessagePF2e) {
     const isDamage = isDamageMessage(message) && !isPersistentDamageMessage(message);
+    const isAction = !isDamage && isActionMessage(message);
     const item = message.item;
     const isSpell = item?.isOfType("spell");
-    if (!isDamage && !isSpell) return;
+    if (!isDamage && !isSpell && !isAction) return;
 
     const token = message.token;
     const actor = token?.actor;
-    const updates: Pairs<MessageFlag> = [];
     const save = isSpell ? item.system.defense?.save : undefined;
 
     if (!isDamage && isSpell && !save) return;
+
+    const updates: Pairs<MessageFlag> = [];
 
     if (!getMessageTargets(message).length) {
         if (isDamage && isRegenMessage(message)) {
@@ -345,11 +351,15 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
     if (!this.isContentVisible) return;
 
     deleteInMemory(this, "canRollSave");
-    deleteInMemory(this, "canApplyDamage");
 
     if (isDamageMessage(this)) {
         if (isPersistentDamageMessage(this)) return;
         await damageChatMessageGetHTML(this, html);
+        return;
+    }
+
+    if (isActionMessage(this)) {
+        await actionChatMessageGetHtml(this, html);
         return;
     }
 
@@ -370,6 +380,28 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
             });
         });
     }
+}
+
+async function actionChatMessageGetHtml(message: ChatMessagePF2e, html: HTMLElement) {
+    const msgContent = htmlQuery(html, ".message-content");
+    const chatCard = htmlQuery(msgContent, ".chat-card");
+    if (!msgContent || !chatCard) return;
+
+    html.addEventListener("drop", onChatMessageDrop);
+
+    const data = await getMessageData(message, true);
+    if (!data) return;
+
+    let footer = htmlQuery(chatCard, "footer");
+    if (!footer) {
+        footer = document.createElement("footer");
+        chatCard.append(footer);
+    }
+
+    const setTargetsBtn = createSetTargetsBtn(message, true);
+    footer.append(setTargetsBtn);
+
+    addSaveHeaders(data, message, msgContent);
 }
 
 async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
@@ -440,7 +472,9 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         return clone;
     });
 
-    const rowsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-targetRows"] });
+    const rowsWrapper = createHTMLElement("div", {
+        classes: ["pf2e-toolbelt-target-targetRows", "pf2e-toolbelt-target-damage"],
+    });
 
     for (const { template, isOwner, save, uuid, applied, target } of data.targets) {
         const hrElement = createHTMLElement("hr");
@@ -588,14 +622,16 @@ function onChatMessageDrop(event: DragEvent) {
     const data = TextEditor.getDragEventData(event);
     if (!data) return;
 
-    console.log(data);
-
     const { type, dc, basic, options, statistic, traits } = data as SaveDragData;
     if (type !== `${MODULE.id}-check-roll`) return;
 
     const messageId = target.dataset.messageId;
     const message = messageId ? (game.messages.get(messageId) as ChatMessagePF2e) : undefined;
-    if (!message || !message.isDamageRoll) return;
+    if (!message) return;
+
+    const isDamage = isDamageMessage(message);
+    const isAction = !isDamage && isActionMessage(message);
+    if (!isDamage && !isAction) return;
 
     if (!game.user.isGM && !message.isAuthor) {
         localize.warn("drop.unauth");
@@ -701,24 +737,7 @@ function isBasicSave(
     return !!(save?.result && save.basic);
 }
 
-async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
-    const data = await getMessageData(message);
-    if (!data?.save) return;
-
-    const msgContent = htmlQuery(html, ".message-content");
-    if (!msgContent) return;
-
-    const cardBtns = msgContent?.querySelector<HTMLElement>(".card-buttons");
-    const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
-
-    if (saveBtn && (game.user.isGM || message.isAuthor)) {
-        const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
-        const setTargetsBtn = createSetTargetsBtn(message);
-
-        wrapper.append(setTargetsBtn, saveBtn);
-        cardBtns!.prepend(wrapper);
-    }
-
+function addSaveHeaders(data: MessageData, message: ChatMessagePF2e, afterElement: HTMLElement) {
     const { targets, save } = data;
     if (!targets.length) return;
 
@@ -736,20 +755,41 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
         rowsWrapper.append(rowElement);
     }
 
-    msgContent.after(rowsWrapper);
+    afterElement.after(rowsWrapper);
 
     addHeaderListeners(message, rowsWrapper, save);
 }
 
-function createSetTargetsBtn(message: ChatMessagePF2e) {
-    const btnElement = createHTMLElement("button", {
+async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
+    const data = await getMessageData(message);
+    if (!data?.save) return;
+
+    const msgContent = htmlQuery(html, ".message-content");
+    if (!msgContent) return;
+
+    const cardBtns = msgContent.querySelector<HTMLElement>(".card-buttons");
+    const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
+
+    if (saveBtn && (game.user.isGM || message.isAuthor)) {
+        const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
+        const setTargetsBtn = createSetTargetsBtn(message);
+
+        wrapper.append(setTargetsBtn, saveBtn);
+        cardBtns!.prepend(wrapper);
+    }
+
+    addSaveHeaders(data, message, msgContent);
+}
+
+function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
+    const btnElement = createHTMLElement(isAnchor ? "a" : "button", {
         classes: ["pf2e-toolbelt-target-setTargets"],
         dataset: { action: "set-targets" },
         innerHTML: "<i class='fa-solid fa-bullseye-arrow'></i>",
     });
 
     btnElement.title = localize("setTargets");
-    btnElement.addEventListener("click", (event) => onSetTargets(event, message));
+    btnElement.addEventListener("click", (event) => onSetTargets(event as MouseEvent, message));
 
     return btnElement;
 }
@@ -1030,9 +1070,14 @@ async function onSetTargets(event: MouseEvent, message: ChatMessagePF2e) {
     requestAnimationFrame(() => ui.chat.scrollBottom({ popout: true, waitImages: true }));
 }
 
-async function getMessageData(message: ChatMessagePF2e) {
-    const targetsFlag = getMessageTargets(message);
+async function getMessageData(
+    message: ChatMessagePF2e,
+    onlyWithSave = false
+): Promise<MessageData | undefined> {
     const save = getSaveFlag(message) as MessageSaveDataWithTooltip | undefined;
+    if (onlyWithSave && !save) return;
+
+    const targetsFlag = getMessageTargets(message);
     if (!targetsFlag.length && !save) return;
 
     const user = game.user;
@@ -1061,8 +1106,6 @@ async function getMessageData(message: ChatMessagePF2e) {
     }
 
     const canRollSave: string[] = [];
-    const canApplyDamage: string[] = [];
-
     const allTargets = await Promise.all(
         targetsFlag.map(async (tokenUUID) => {
             const target = await fromUuid(tokenUUID);
@@ -1211,12 +1254,11 @@ async function getMessageData(message: ChatMessagePF2e) {
                     canSeeResult: targetSave?.canSeeResult,
                     rerolled: targetSave?.rerolled ? REROLL[targetSave.rerolled] : undefined,
                 }),
-            };
+            } satisfies MessageDataTarget;
         })
     );
 
     setInMemory(message, "canRollSave", canRollSave);
-    setInMemory(message, "canApplyDamage", canApplyDamage);
 
     const targets = R.filter(allTargets, R.isTruthy);
 
@@ -1230,7 +1272,12 @@ async function getMessageData(message: ChatMessagePF2e) {
         );
     }
 
-    return { targets, save, isRegen: getFlag(message, "isRegen") };
+    return {
+        targets,
+        save,
+        canRollSave,
+        isRegen: !!getFlag<boolean>(message, "isRegen"),
+    };
 }
 
 function getSaveFlag(message: ChatMessagePF2e): MessageSaveData | undefined {
@@ -1332,6 +1379,24 @@ type SaveDragData = {
     type: `${typeof MODULE.id}-check-roll`;
     options: string[];
     traits: string[];
+};
+
+type MessageDataTarget = {
+    isOwner: boolean;
+    canSeeName: boolean;
+    hasPlayerOwner: boolean;
+    uuid: string;
+    target: TokenDocumentPF2e;
+    applied: boolean[];
+    save: TargetSave | undefined;
+    template: string;
+};
+
+type MessageData = {
+    targets: MessageDataTarget[];
+    save: MessageSaveDataWithTooltip | undefined;
+    canRollSave: string[];
+    isRegen: boolean;
 };
 
 export {
