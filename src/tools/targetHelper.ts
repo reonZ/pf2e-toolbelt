@@ -84,7 +84,7 @@ const debouncedRefreshMessages = foundry.utils.debounce(() => refreshLatestMessa
 const {
     config,
     settings,
-    hooks,
+    hook,
     wrappers,
     localize,
     socket,
@@ -142,10 +142,6 @@ const {
             event: "preCreateChatMessage",
             listener: onPreCreateChatMessage,
         },
-        {
-            event: "getChatLogEntryContext",
-            listener: onGetChatLogEntryContext,
-        },
     ],
     wrappers: [
         {
@@ -166,8 +162,7 @@ const {
 
         socket.toggle(isGM || !!getActiveModule("dice-so-nice"));
 
-        hooks.getChatLogEntryContext.activate();
-        hooks.preCreateChatMessage.activate();
+        hook.activate();
 
         if (settings.addTargets) {
             wrappers.enrichHTML.activate();
@@ -246,44 +241,6 @@ function getCurrentTargets(): string[] {
         R.filter((target) => !!target.actor?.isOfType("creature", "hazard", "vehicle")),
         R.map((target) => target.document.uuid)
     );
-}
-
-function onGetChatLogEntryContext($html: JQuery, data: EntryContextOption[]) {
-    const getMessageData = (html: JQuery) => {
-        const messageId = html.data("messageId");
-        const message = game.messages.get(messageId) as ChatMessagePF2e;
-        if (!message) return;
-
-        return {
-            message,
-            canRollSave: getInMemory<string[]>(message, "canRollSave"),
-        };
-    };
-
-    data.unshift({
-        icon: '<i class="fa-solid fa-dice-d20"></i>',
-        name: localize.path("context.rollAll"),
-        condition: (html) => {
-            const data = getMessageData(html);
-            return !!data?.canRollSave?.length;
-        },
-        callback: async (html) => {
-            const { canRollSave, message } = getMessageData(html) ?? {};
-            if (!message || !canRollSave?.length) return;
-
-            const save = getSaveFlag(message);
-            if (!save) return;
-
-            const promisedTargets = await Promise.all(canRollSave.map((uuid) => fromUuid(uuid)));
-
-            const targets = promisedTargets.filter((token): token is TokenDocumentPF2e =>
-                isValidToken(token)
-            );
-            if (!targets.length) return;
-
-            rollSaves(new MouseEvent("click"), message, save, targets);
-        },
-    });
 }
 
 function onPreCreateChatMessage(message: ChatMessagePF2e) {
@@ -392,14 +349,33 @@ async function actionChatMessageGetHtml(message: ChatMessagePF2e, html: HTMLElem
     const data = await getMessageData(message, true);
     if (!data) return;
 
+    const isGM = game.user.isGM;
+    const isAuthor = message.isAuthor;
+
+    if (!data.targets.length && !isGM && !isAuthor) return;
+
     let footer = htmlQuery(chatCard, "footer");
     if (!footer) {
-        footer = document.createElement("footer");
+        const actionLabel = game.i18n.localize("TYPES.Item.action");
+
+        footer = createHTMLElement("footer", {
+            innerHTML: `<span>${actionLabel}</span>`,
+        });
+
         chatCard.append(footer);
     }
 
-    const setTargetsBtn = createSetTargetsBtn(message, true);
-    footer.append(setTargetsBtn);
+    if (isGM || isAuthor) {
+        const setTargetsBtn = createSetTargetsBtn(message, true);
+        footer.append(setTargetsBtn);
+    }
+
+    if (isGM) {
+        const rollSavesBtn = createRollSavesBtn(message, true);
+        if (rollSavesBtn) {
+            footer.append(rollSavesBtn);
+        }
+    }
 
     addSaveHeaders(data, message, msgContent);
 }
@@ -413,19 +389,14 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
     if (!damageRows.length || !diceTotalElement) return;
 
     const data = await getMessageData(message);
+    const hasTargets = !!data?.targets.length;
+    const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
 
     html.addEventListener("drop", onChatMessageDrop);
 
-    const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
-
     diceTotalElement.append(wrapper);
 
-    if (game.user.isGM || message.isAuthor) {
-        const setTargetsBtn = createSetTargetsBtn(message);
-        wrapper.append(setTargetsBtn);
-    }
-
-    if (data?.targets.length) {
+    if (hasTargets) {
         const toggleBtn = createHTMLElement("button", {
             classes: ["pf2e-toolbelt-target-toggleDamageRows"],
             innerHTML: `<i class="fa-solid fa-plus expand"></i><i class="fa-solid fa-minus collapse"></i>`,
@@ -447,9 +418,23 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         }
 
         wrapper.append(toggleBtn);
-    } else {
-        return;
     }
+
+    const isGM = game.user.isGM;
+
+    if (isGM || message.isAuthor) {
+        const setTargetsBtn = createSetTargetsBtn(message);
+        wrapper.append(setTargetsBtn);
+    }
+
+    if (isGM) {
+        const rollSavesBtn = createRollSavesBtn(message);
+        if (rollSavesBtn) {
+            wrapper.append(rollSavesBtn);
+        }
+    }
+
+    if (!hasTargets) return;
 
     const smallButtons = settings.smallButtons;
     const clonedDamageRows = damageRows.map((el) => {
@@ -767,18 +752,58 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
 
-    const cardBtns = msgContent.querySelector<HTMLElement>(".card-buttons");
-    const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
+    const isGM = game.user.isGM;
 
-    if (saveBtn && (game.user.isGM || message.isAuthor)) {
-        const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
-        const setTargetsBtn = createSetTargetsBtn(message);
+    if (isGM || message.isAuthor) {
+        const cardBtns = msgContent.querySelector<HTMLElement>(".card-buttons");
+        const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
 
-        wrapper.append(setTargetsBtn, saveBtn);
-        cardBtns!.prepend(wrapper);
+        if (cardBtns && saveBtn) {
+            const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
+
+            const setTargetsBtn = createSetTargetsBtn(message);
+            wrapper.append(setTargetsBtn, saveBtn);
+
+            if (isGM) {
+                const rollSavesBtn = createRollSavesBtn(message);
+                if (rollSavesBtn) {
+                    wrapper.append(rollSavesBtn);
+                }
+            }
+
+            cardBtns.prepend(wrapper);
+        }
     }
 
     addSaveHeaders(data, message, msgContent);
+}
+
+function createRollSavesBtn(message: ChatMessagePF2e, isAnchor = false) {
+    const save = getSaveFlag(message);
+    const canRollSave = getInMemory<string[]>(message, "canRollSave");
+    if (!save || !canRollSave?.length) return;
+
+    const btnElement = createHTMLElement(isAnchor ? "a" : "button", {
+        classes: ["pf2e-toolbelt-target-rollSaves"],
+        dataset: { action: "roll-saves" },
+        innerHTML: "<i class='fa-duotone fa-solid fa-dice-d20'></i>",
+    });
+
+    btnElement.title = localize("rollSaves");
+    btnElement.addEventListener("click", async (event) => {
+        event.stopPropagation();
+
+        const targets = R.pipe(
+            await Promise.all(canRollSave.map((uuid) => fromUuid(uuid))),
+            R.filter((token) => isValidToken(token))
+        );
+
+        if (targets.length) {
+            rollSaves(event as MouseEvent, message, save, targets);
+        }
+    });
+
+    return btnElement;
 }
 
 function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
@@ -789,7 +814,14 @@ function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
     });
 
     btnElement.title = localize("setTargets");
-    btnElement.addEventListener("click", (event) => onSetTargets(event as MouseEvent, message));
+    btnElement.addEventListener("click", async (event) => {
+        event.stopPropagation();
+
+        const targets = getCurrentTargets();
+
+        await setFlag(message, "targets", targets);
+        requestAnimationFrame(() => ui.chat.scrollBottom({ popout: true, waitImages: true }));
+    });
 
     return btnElement;
 }
@@ -1059,15 +1091,6 @@ async function roll3dDice(
     }
 
     return game.dice3d.showForRoll(roll, user, synchronize);
-}
-
-async function onSetTargets(event: MouseEvent, message: ChatMessagePF2e) {
-    event.stopPropagation();
-
-    const targets = getCurrentTargets();
-
-    await setFlag(message, "targets", targets);
-    requestAnimationFrame(() => ui.chat.scrollBottom({ popout: true, waitImages: true }));
 }
 
 async function getMessageData(

@@ -421,11 +421,9 @@
                 "sheet": "Open Sheet",
                 "hidden": "Hidden From Players"
             },
+            "rollSaves": "Roll Saves",
             "setTargets": "Set targets",
             "toggleDamageRows": "Toggle original damage buttons",
-            "context": {
-                "rollAll": "Roll All Saves"
-            },
             "reroll": {
                 "title": "Save Check Reroll",
                 "noPoints": "You need at least 1 Hero Point to Reroll.",

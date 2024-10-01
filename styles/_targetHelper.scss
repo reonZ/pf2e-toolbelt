@@ -15,8 +15,9 @@
         .card-buttons {
             .pf2e-toolbelt-target-wrapper {
                 display: flex;
-                gap: 3px;
+                gap: 2px;
 
+                .pf2e-toolbelt-target-rollSaves,
                 .pf2e-toolbelt-target-setTargets {
                     display: flex;
                     align-items: center;
@@ -40,6 +41,7 @@
 
                     display: flex;
 
+                    .pf2e-toolbelt-target-rollSaves,
                     .pf2e-toolbelt-target-setTargets,
                     .pf2e-toolbelt-target-toggleDamageRows {
                         width: 22px;
@@ -78,8 +80,13 @@
                     padding-right: 0;
                 }
 
+                .pf2e-toolbelt-target-rollSaves,
                 .pf2e-toolbelt-target-setTargets {
                     float: right;
+                }
+
+                .pf2e-toolbelt-target-setTargets {
+                    margin-left: 0.3em;
                 }
             }
         }
