@@ -307,8 +307,6 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
 async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
     if (!this.isContentVisible) return;
 
-    deleteInMemory(this, "canRollSave");
-
     if (isDamageMessage(this)) {
         if (isPersistentDamageMessage(this)) return;
         await damageChatMessageGetHTML(this, html);
@@ -371,7 +369,7 @@ async function actionChatMessageGetHtml(message: ChatMessagePF2e, html: HTMLElem
     }
 
     if (isGM) {
-        const rollSavesBtn = createRollSavesBtn(message, true);
+        const rollSavesBtn = createRollSavesBtn(message, data, true);
         if (rollSavesBtn) {
             footer.append(rollSavesBtn);
         }
@@ -427,8 +425,8 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         wrapper.append(setTargetsBtn);
     }
 
-    if (isGM) {
-        const rollSavesBtn = createRollSavesBtn(message);
+    if (isGM && data) {
+        const rollSavesBtn = createRollSavesBtn(message, data);
         if (rollSavesBtn) {
             wrapper.append(rollSavesBtn);
         }
@@ -765,7 +763,7 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
             wrapper.append(setTargetsBtn, saveBtn);
 
             if (isGM) {
-                const rollSavesBtn = createRollSavesBtn(message);
+                const rollSavesBtn = createRollSavesBtn(message, data);
                 if (rollSavesBtn) {
                     wrapper.append(rollSavesBtn);
                 }
@@ -778,9 +776,8 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
     addSaveHeaders(data, message, msgContent);
 }
 
-function createRollSavesBtn(message: ChatMessagePF2e, isAnchor = false) {
-    const save = getSaveFlag(message);
-    const canRollSave = getInMemory<string[]>(message, "canRollSave");
+function createRollSavesBtn(message: ChatMessagePF2e, data: MessageData, isAnchor = false) {
+    const { save, canRollSave } = data;
     if (!save || !canRollSave?.length) return;
 
     const btnElement = createHTMLElement(isAnchor ? "a" : "button", {
@@ -1280,8 +1277,6 @@ async function getMessageData(
             } satisfies MessageDataTarget;
         })
     );
-
-    setInMemory(message, "canRollSave", canRollSave);
 
     const targets = R.filter(allTargets, R.isTruthy);
 
