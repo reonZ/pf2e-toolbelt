@@ -421,7 +421,7 @@
                 "sheet": "Open Sheet",
                 "hidden": "Hidden From Players"
             },
-            "rollSaves": "Roll Saves",
+            "rollSaves": "Roll NPC Saves",
             "setTargets": "Set targets",
             "toggleDamageRows": "Toggle original damage buttons",
             "reroll": {
@@ -435,6 +435,10 @@
                 "unauth": "You can only do that on messages you are the author of.",
                 "already": "This message already has a save check linked to it.",
                 "added": "You have successfully added a save to the message."
+            },
+            "check-card": {
+                "check": "{type} Check",
+                "basicCheck": "basic {type} Check"
             }
         },
         "mergeDamage": {

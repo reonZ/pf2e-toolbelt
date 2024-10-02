@@ -74,6 +74,13 @@
         }
 
         .chat-card {
+            &.pf2e-toolbelt-target-check {
+                .tags.paizo-style.empty {
+                    padding: 0;
+                    margin-top: calc(var(--space-3) * -1);
+                }
+            }
+
             footer {
                 > span:last-of-type {
                     border-right: none;
