@@ -421,11 +421,9 @@
                 "sheet": "Otwórz kartę",
                 "hidden": "Ukryte przed graczami"
             },
+            "rollSaves": "Rzuć rzuty obronne BN-ów",
             "setTargets": "Wyznacz cele",
             "toggleDamageRows": "Przełącz oryginalne przyciski obrażeń",
-            "context": {
-                "rollAll": "Rzuć wszystkie rzuty obronne"
-            },
             "reroll": {
                 "title": "Przerzuć ponowny test rzutu obronnego",
                 "noPoints": "Potrzebujesz co najmniej 1 Punktu Bohaterstwa, aby wykonać przerzut.",
@@ -437,6 +435,10 @@
                 "unauth": "Możesz to zrobić tylko w wiadomościach, których jesteś autorem.",
                 "already": "Ta wiadomość ma już powiązany rzut obronny.",
                 "added": "Pomyślnie dodano rzut obronny do wiadomości."
+            },
+            "check-card": {
+                "check": "Test {type}",
+                "basicCheck": "Podstawowy test {type}"
             }
         },
         "mergeDamage": {
