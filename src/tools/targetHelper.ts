@@ -463,26 +463,26 @@ async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) 
     const canRollSaves = userCanRollSaves(data);
     const canObserve = canObserveActor(message.actor, true);
     const item = canObserve ? message.item : null;
-    const saveLabel = firstElementWithText(msgContent.lastElementChild);
     const flavor = htmlQuery(html, ".message-header .flavor-text");
+    const saveLabel = firstElementWithText(msgContent.lastElementChild);
     const label =
         firstElementWithText(flavor) ?? firstElementWithText(msgContent.firstElementChild);
 
     flavor?.remove();
 
+    link.classList.add("hidden");
+
     msgContent.innerHTML = await render("check-card", {
         item,
-        save: {
-            label: saveLabel?.outerHTML || "",
-            dc: data.save.dc,
-            type: data.save.statistic,
-        },
         isOwner,
         canRollSaves,
-        label: label?.outerHTML || "",
         speaker: message.speaker,
+        label: label?.outerHTML || "",
+        save: saveLabel?.outerHTML || "",
         traits: item ? getItemChatTraits(item) : undefined,
     });
+
+    msgContent.prepend(link);
 
     const setTargetsBtn = htmlQuery(msgContent, "[data-action='set-targets']");
     if (setTargetsBtn) {
@@ -498,7 +498,18 @@ async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) 
 
     addSaveHeaders(data, message, msgContent);
 
-    // TODO add listener for regular save btn
+    const fakeCheckBtn = htmlQuery<HTMLButtonElement>(
+        msgContent,
+        "[data-action='roll-fake-check']"
+    );
+    if (fakeCheckBtn) {
+        fakeCheckBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            const clickEvent = new MouseEvent("click", event);
+            link.dispatchEvent(clickEvent);
+        });
+    }
 }
 
 async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {

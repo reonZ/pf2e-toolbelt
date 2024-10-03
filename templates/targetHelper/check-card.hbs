@@ -1,3 +1,4 @@
+{{{link}}}
 <div class="pf2e chat-card item-card pf2e-toolbelt-target-check" {{#if speaker.actor}}
     data-actor-id="{{speaker.actor}}" {{/if}} {{#if item}} data-item-id="{{item.id}}" {{/if}} {{#if
     speaker.token}}data-token-id="{{speaker.token}}" {{/if}}>
@@ -28,10 +29,7 @@
                 <i class="fa-solid fa-bullseye-arrow"></i>
             </button>
             {{/if}}
-            <button type="button" data-action="spell-save" data-save="{{save.type}}"
-                data-dc="{{save.dc}}">
-                {{{save.label}}}
-            </button>
+            <button type="button" data-action="roll-fake-check">{{{save}}}</button>
             {{#if canRollSaves}}
             <button class="pf2e-toolbelt-target-rollSaves" data-action="roll-saves"
                 title="{{rollSaves}}">
