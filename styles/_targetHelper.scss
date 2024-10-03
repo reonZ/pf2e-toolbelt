@@ -75,9 +75,13 @@
 
         .chat-card {
             &.pf2e-toolbelt-target-check {
-                .tags.paizo-style.empty {
-                    padding: 0;
-                    margin-top: calc(var(--space-3) * -1);
+                .tags.paizo-style {
+                    padding: 0 0 var(--space-2) 0;
+
+                    &.empty {
+                        padding: 0;
+                        margin-top: calc(var(--space-3) * -1);
+                    }
                 }
             }
 

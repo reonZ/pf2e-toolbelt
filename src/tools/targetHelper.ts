@@ -9,9 +9,11 @@ import {
     addListener,
     addListenerAll,
     applyDamageFromMessage,
+    canObserveActor,
     createHTMLElement,
     elementDataset,
     extractNotes,
+    firstElementWithText,
     getActiveModule,
     getChoiceSetSelection,
     getItemChatTraits,
@@ -20,13 +22,19 @@ import {
     htmlQueryAll,
     isInstanceOf,
     onClickShieldBlock,
+    parseInlineParams,
     refreshLatestMessages,
+    splitListString,
     toggleOffShieldBlock,
     userIsActiveGM,
 } from "foundry-pf2e";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 import { TEXTEDITOR_ENRICH_HTML } from "./shared/textEditor";
+
+const REPOST_CHECK_MESSAGE_REGEX =
+    /^(?:<span data-visibility="[\w]+">.+?<\/span> ?)?(<a class="inline-check.+?<\/a>)$/;
+const PROMPT_CHECK_MESSAGE_REGEX = /^(?:<p>)?@Check\[([^\]]+)\](?:{([^}]+)})?(?:<\/p>)?$/;
 
 const THIRD_PATH_TO_PERFECTION = "Compendium.pf2e.classfeatures.Item.haoTkr2U5k7kaAKN";
 
@@ -179,7 +187,7 @@ function onSocket(packet: SocketPacket, senderId: string) {
             break;
         }
         case "dice-so-nice": {
-            roll3dDice(packet.roll, packet.target, true);
+            roll3dDice(packet.roll, packet.target, packet.private, true);
             break;
         }
         case "update-save": {
@@ -229,17 +237,6 @@ function isDamageSpell(spell: SpellPF2e | undefined) {
     return !!spell && spell.damageKinds.size > 0;
 }
 
-const CHECK_MESSAGE_REGEX =
-    /^<span data-visibility="[\w]+">.+?<\/span> ?(<a class="inline-check.+?<\/a>)$/;
-function isCheckMessage(message: ChatMessagePF2e, html?: HTMLElement) {
-    const match = message.content.match(CHECK_MESSAGE_REGEX);
-    if (!match) return false;
-
-    const tmp = createHTMLElement("div", { innerHTML: match[1] });
-    const link = tmp.firstChild;
-    return isValidCheckLink(link) ? link : null;
-}
-
 function getMessageFlag<TFlag extends keyof MessageFlag>(message: ChatMessagePF2e, flag: TFlag) {
     return getFlag<MessageFlag[TFlag]>(message, flag);
 }
@@ -256,13 +253,52 @@ function getCurrentTargets(): string[] {
     );
 }
 
+function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
+    const promptMatch = message.content.match(PROMPT_CHECK_MESSAGE_REGEX);
+    if (promptMatch) {
+        const [_match, paramString, inlineLabel] = promptMatch;
+        const rawParams = parseInlineParams(paramString, { first: "type" });
+        if (!rawParams) return null;
+
+        const statistic = rawParams.type?.trim();
+        const dc = Number(rawParams.dc);
+        if (!SAVE_TYPES.includes(statistic) || isNaN(dc)) return null;
+
+        const basic = "basic" in rawParams;
+        const options = [
+            ...(basic ? ["damaging-effect"] : []),
+            ...splitListString(rawParams.options ?? ""),
+        ]
+            .filter(R.isTruthy)
+            .sort();
+
+        return {
+            dc,
+            basic,
+            options,
+            statistic,
+            traits: splitListString(rawParams.traits ?? ""),
+        } satisfies SaveLinkData;
+    }
+
+    const repostMatch = message.content.match(REPOST_CHECK_MESSAGE_REGEX);
+    if (repostMatch) {
+        const tmp = createHTMLElement("div", { innerHTML: repostMatch[1] });
+        const link = tmp.firstChild;
+
+        return isValidCheckLink(link) ? getSaveLinkData(link) : null;
+    }
+
+    return null;
+}
+
 function onPreCreateChatMessage(message: ChatMessagePF2e) {
     const isDamage = isDamageMessage(message) && !isPersistentDamageMessage(message);
-    const checkLink = !isDamage && isCheckMessage(message);
-    const isAction = !isDamage && !checkLink && isActionMessage(message);
+    const checkLinkData = !isDamage ? getCheckLinkData(message) : null;
+    const isAction = !isDamage && !checkLinkData && isActionMessage(message);
     const item = message.item;
     const isSpell = item?.isOfType("spell") && !message.isCheckRoll;
-    if (!isDamage && !isSpell && !isAction && !checkLink) return;
+    if (!isDamage && !isSpell && !isAction && !checkLinkData) return;
 
     const token = message.token;
     const actor = token?.actor;
@@ -276,7 +312,7 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
         ? isDamageSpell(item)
             ? "spell-damage"
             : "spell-save"
-        : checkLink
+        : checkLinkData
         ? "check"
         : "action";
 
@@ -323,15 +359,11 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
         }
     }
 
-    if (checkLink) {
-        const saveData = getSaveLinkData(checkLink);
+    if (checkLinkData) {
+        const { basic, dc, options, statistic, traits } = checkLinkData;
 
-        if (saveData) {
-            const { basic, dc, options, statistic, traits } = saveData;
-
-            updates.push(["save", { basic, dc, statistic, author: actor?.uuid }]);
-            updates.push(["rollOptions", [...options, ...traits]]);
-        }
+        updates.push(["save", { basic, dc, statistic, author: actor?.uuid }]);
+        updates.push(["rollOptions", [...options, ...traits]]);
     }
 
     updateSourceFlag(message, Object.fromEntries(updates));
@@ -421,39 +453,33 @@ async function actionChatMessageGetHtml(message: ChatMessagePF2e, html: HTMLElem
 
 async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
     const msgContent = htmlQuery(html, ".message-content");
-    if (!msgContent) return;
+    const link = htmlQuery(msgContent, "a");
+    if (!msgContent || !link) return;
 
     const data = await getMessageData(message);
     if (!data?.save) return;
 
     const isOwner = game.user.isGM || message.isAuthor;
     const canRollSaves = userCanRollSaves(data);
-    const label = msgContent.firstElementChild as HTMLElement;
-    const link = msgContent.lastElementChild as HTMLAnchorElement;
-    const isBasic = data.save.basic;
-    const isSecret = label === link;
-    const item = isSecret ? undefined : message.item;
+    const canObserve = canObserveActor(message.actor, true);
+    const item = canObserve ? message.item : null;
+    const saveLabel = firstElementWithText(msgContent.lastElementChild);
+    const flavor = htmlQuery(html, ".message-header .flavor-text");
+    const label =
+        firstElementWithText(flavor) ?? firstElementWithText(msgContent.firstElementChild);
 
-    const saveType = game.i18n.localize(data.save.label);
-    const saveLabel = isSecret
-        ? localize("check-card", isBasic ? "basicCheck" : "check", {
-              type: saveType,
-          })
-        : game.i18n.format(isBasic ? "PF2E.SaveDCLabelBasic" : "PF2E.SaveDCLabel", {
-              dc: data.save.dc,
-              type: saveType,
-          });
+    flavor?.remove();
 
     msgContent.innerHTML = await render("check-card", {
         item,
         save: {
-            label: saveLabel,
+            label: saveLabel?.outerHTML || "",
             dc: data.save.dc,
             type: data.save.statistic,
         },
         isOwner,
         canRollSaves,
-        label: label.innerText,
+        label: label?.outerHTML || "",
         speaker: message.speaker,
         traits: item ? getItemChatTraits(item) : undefined,
     });
@@ -659,7 +685,6 @@ function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): Sa
         statistic: dataset.pf2Check as SaveType,
         options: dataset.pf2RollOptions?.split(",").map((o) => o.trim()) ?? [],
         traits: dataset.pf2Traits?.split(",").map((o) => o.trim()) ?? [],
-        type: `${MODULE.id}-check-roll`,
     };
 
     if (dataset.isBasic == null) {
@@ -693,7 +718,13 @@ function onDragStart(event: DragEvent) {
 
     event.stopPropagation();
 
-    dataTransfer.setData("text/plain", JSON.stringify(saveData));
+    dataTransfer.setData(
+        "text/plain",
+        JSON.stringify({
+            ...saveData,
+            type: `${MODULE.id}-check-roll`,
+        } satisfies SaveDragData)
+    );
 }
 
 function onChatMessageDrop(event: DragEvent) {
@@ -703,7 +734,7 @@ function onChatMessageDrop(event: DragEvent) {
     const data = TextEditor.getDragEventData(event);
     if (!data) return;
 
-    const { type, dc, basic, options, statistic, traits } = data as SaveLinkData;
+    const { type, dc, basic, options, statistic, traits } = data as SaveDragData;
     if (type !== `${MODULE.id}-check-roll`) return;
 
     const messageId = target.dataset.messageId;
@@ -711,7 +742,8 @@ function onChatMessageDrop(event: DragEvent) {
     if (!message) return;
 
     const isDamage = isDamageMessage(message);
-    const isAction = !isDamage && isActionMessage(message) && !isCheckMessage(message);
+    const isAction =
+        !isDamage && isActionMessage(message) && !message.content.match(REPOST_CHECK_MESSAGE_REGEX);
     if (!isDamage && !isAction) return;
 
     if (!game.user.isGM && !message.isAuthor) {
@@ -1000,12 +1032,16 @@ async function rollSaves(
                     extraRollOptions: rollOptions,
                     createMessage: false,
                     callback: async (roll, success, msg) => {
-                        await roll3dDice(roll, target);
+                        const isPrivate =
+                            msg.whisper.filter((userId) => game.users.get(userId)?.isGM).length > 0;
+
+                        await roll3dDice(roll, target, isPrivate, false);
 
                         const context = msg.getFlag<CheckContextChatFlag>("pf2e", "context")!;
                         const modifiers = msg.getFlag<RawModifier[]>("pf2e", "modifiers")!;
+
                         const data: MessageTargetSave = {
-                            whispers: msg.whisper.filter((userId) => game.users.get(userId)?.isGM),
+                            private: isPrivate,
                             value: roll.total,
                             die: (roll.terms[0] as foundry.dice.terms.NumericTerm).total,
                             success: success!,
@@ -1116,7 +1152,7 @@ async function rerollSave(
     );
 
     const newRoll = await unevaluatedNewRoll.evaluate();
-    await roll3dDice(newRoll, target);
+    await roll3dDice(newRoll, target, flag.private, false);
 
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(flag.roll), newRoll, isHeroReroll, keep);
 
@@ -1152,7 +1188,7 @@ async function rerollSave(
             }) ?? [];
 
     const data: MessageTargetSave = {
-        whispers: flag.whispers,
+        private: flag.private,
         value: keptRoll.total,
         die: (keptRoll.terms[0] as foundry.dice.terms.NumericTerm).total,
         success: outcome,
@@ -1188,7 +1224,8 @@ async function rerollSave(
 async function roll3dDice(
     roll: Rolled<CheckRoll> | RollJSON,
     target: Maybe<TokenDocumentPF2e> | string,
-    self = false
+    isPrivate: boolean,
+    self: boolean
 ) {
     if (!game.dice3d) return;
 
@@ -1203,12 +1240,23 @@ async function roll3dDice(
             type: "dice-so-nice",
             roll: roll.toJSON(),
             target: target?.uuid,
+            private: isPrivate,
         });
-    } else if (self && !user.isGM && !target?.playersCanSeeName) {
+    } else if (
+        self &&
+        !user.isGM &&
+        showGhostDiceOnPrivate() &&
+        (!target?.playersCanSeeName || isPrivate)
+    ) {
         roll.ghost = true;
     }
 
     return game.dice3d.showForRoll(roll, user, synchronize);
+}
+
+function showGhostDiceOnPrivate() {
+    const dsn = getActiveModule("dice-so-nice");
+    return !!dsn && dsn.getSetting<"0" | "1" | "2">("showGhostDice") !== "0";
 }
 
 async function getMessageData(
@@ -1281,7 +1329,7 @@ async function getMessageData(
                     saveFlag.success !== saveFlag.unadjustedOutcome
                         ? saveFlag.dosAdjustments?.[saveFlag.unadjustedOutcome]?.label
                         : undefined;
-                const isPrivate = !hasPlayerOwner && saveFlag.whispers.length > 0;
+                const isPrivate = saveFlag.private && !hasPlayerOwner;
                 const canSeeResult = isGM || !isPrivate;
 
                 const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
@@ -1461,7 +1509,7 @@ type MessageSaveFlag = {
 type MessageDataWithSave = Omit<MessageData, "save"> & { save: MessageSaveDataWithTooltip };
 
 type MessageTargetSave = {
-    whispers: string[];
+    private: boolean;
     value: number;
     die: number;
     success: DegreeOfSuccessString;
@@ -1515,6 +1563,7 @@ type SocketPacket =
           type: "dice-so-nice";
           roll: RollJSON;
           target: string | undefined;
+          private: boolean;
       }
     | {
           type: "update-save";
@@ -1528,6 +1577,9 @@ type SaveLinkData = {
     statistic: SaveType;
     options: string[];
     traits: string[];
+};
+
+type SaveDragData = SaveLinkData & {
     type: `${typeof MODULE.id}-check-roll`;
 };
 
