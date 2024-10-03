@@ -24,6 +24,7 @@ import {
     onClickShieldBlock,
     parseInlineParams,
     refreshLatestMessages,
+    setControlled,
     splitListString,
     toggleOffShieldBlock,
     userIsActiveGM,
@@ -457,7 +458,7 @@ async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) 
     if (!msgContent || !link) return;
 
     const data = await getMessageData(message);
-    if (!data?.save) return;
+    if (!dataHasSave(data)) return;
 
     const isOwner = game.user.isGM || message.isAuthor;
     const canRollSaves = userCanRollSaves(data);
@@ -498,17 +499,9 @@ async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) 
 
     addSaveHeaders(data, message, msgContent);
 
-    const fakeCheckBtn = htmlQuery<HTMLButtonElement>(
-        msgContent,
-        "[data-action='roll-fake-check']"
-    );
-    if (fakeCheckBtn) {
-        fakeCheckBtn.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            const clickEvent = new MouseEvent("click", event);
-            link.dispatchEvent(clickEvent);
-        });
+    const fakeBtn = htmlQuery<HTMLButtonElement>(msgContent, "[data-action='roll-fake-check']");
+    if (fakeBtn) {
+        linkSaveBtns(link, fakeBtn, message, data);
     }
 }
 
@@ -886,37 +879,92 @@ function addSaveHeaders(data: MessageData, message: ChatMessagePF2e, afterElemen
 
 async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
     const data = await getMessageData(message);
-    if (!data?.save) return;
+    if (!dataHasSave(data)) return;
 
     const msgContent = htmlQuery(html, ".message-content");
-    if (!msgContent) return;
+    const cardBtns = htmlQuery(msgContent, ".card-buttons");
+    const saveBtn = htmlQuery<HTMLButtonElement>(cardBtns, "[data-action='spell-save']");
+    if (!msgContent || !cardBtns || !saveBtn) return;
 
-    const isGM = game.user.isGM;
+    const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
 
-    if (isGM || message.isAuthor) {
-        const cardBtns = msgContent.querySelector<HTMLElement>(".card-buttons");
-        const saveBtn = cardBtns?.querySelector<HTMLButtonElement>("[data-action='spell-save']");
+    saveBtn.classList.add("hidden");
 
-        if (cardBtns && saveBtn) {
-            const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-wrapper"] });
+    const fakeBtn = createHTMLElement("button", {
+        innerHTML: saveBtn.innerHTML,
+        dataset: {
+            ownerTitle: saveBtn.dataset.ownerTitle,
+        },
+    });
 
-            const setTargetsBtn = createSetTargetsBtn(message);
-            wrapper.append(setTargetsBtn, saveBtn);
+    fakeBtn.title = saveBtn.title;
 
-            const rollSavesBtn = createRollSavesBtn(message, data);
-            if (rollSavesBtn) {
-                wrapper.append(rollSavesBtn);
-            }
+    linkSaveBtns(saveBtn, fakeBtn, message, data);
 
-            cardBtns.prepend(wrapper);
+    wrapper.append(saveBtn, fakeBtn);
+
+    if (game.user.isGM || message.isAuthor) {
+        const setTargetsBtn = createSetTargetsBtn(message);
+        wrapper.prepend(setTargetsBtn);
+
+        const rollSavesBtn = createRollSavesBtn(message, data);
+        if (rollSavesBtn) {
+            wrapper.append(rollSavesBtn);
         }
     }
+
+    cardBtns.prepend(wrapper);
 
     addSaveHeaders(data, message, msgContent);
 }
 
+function linkSaveBtns(
+    realBtn: HTMLButtonElement | HTMLAnchorElement,
+    fakeBtn: HTMLButtonElement | HTMLAnchorElement,
+    message: ChatMessagePF2e,
+    data: MessageDataWithSave
+) {
+    const msgSaves = getMessageFlag(message, "saves") ?? {};
+    const allTargets = data.targets.map((target) => target.uuid);
+
+    fakeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const selected = game.user.getActiveTokens();
+        const targets: TokenDocumentPF2e[] = [];
+        const remainSelected: TokenDocumentPF2e[] = [];
+        const clickEvent = new MouseEvent("click", event);
+
+        for (var i = selected.length - 1; i >= 0; i--) {
+            const token = selected[i];
+
+            if (!(token.id in msgSaves) && allTargets.includes(token.uuid)) {
+                targets.push(token);
+            } else {
+                remainSelected.push(token);
+            }
+        }
+
+        if (remainSelected.length) {
+            setControlled(remainSelected);
+        }
+
+        if (remainSelected.length || !targets.length) {
+            realBtn.dispatchEvent(clickEvent);
+        }
+
+        if (targets.length) {
+            rollSaves(event as MouseEvent, message, data.save, targets);
+        }
+    });
+}
+
+function dataHasSave(data: Maybe<MessageData>): data is MessageDataWithSave {
+    return !!data && "save" in data;
+}
+
 function userCanRollSaves(data: Maybe<MessageData>): data is MessageDataWithSave {
-    return game.user.isGM && !!data?.save && data.canRollSave.length > 0;
+    return dataHasSave(data) && game.user.isGM && data.canRollSave.length > 0;
 }
 
 function createRollSavesBtn(message: ChatMessagePF2e, data: Maybe<MessageData>, isAnchor = false) {
@@ -1019,9 +1067,12 @@ async function rollSaves(
 ) {
     const user = game.user;
     const updates: Record<string, MessageTargetSave> = {};
+    const msgSaves = getMessageFlag(message, "saves") ?? {};
 
     await Promise.all(
         targets.map((target) => {
+            if (target.id in msgSaves) return;
+
             const actor = target.actor as CreaturePF2e;
             if (!actor) return;
 
