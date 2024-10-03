@@ -1,7 +1,11 @@
 import { ErrorPF2e } from "foundry-pf2e";
 import { createTool } from "../tool";
 
-const BESTIARY_SOURCES = ["pathfinder-bestiary", "pathfinder-bestiary-2", "pathfinder-bestiary-3"];
+const BESTIARY_SOURCES = [
+    "pathfinder-bestiary",
+    "pathfinder-bestiary-2",
+    "pathfinder-bestiary-3",
+] as const;
 
 const { config, settings, wrapper } = createTool({
     name: "betterBrowser",
@@ -50,14 +54,14 @@ function browserBestiaryTabGetIndexData(
 
     this.totalItemCount = this.currentIndex.length;
 
-    const limit = Math.min(this.currentIndex.length, start + this.scrollLimit + 1);
+    const limit = Math.min(this.currentIndex.length, start + this.scrollLimit);
     const indexData: CompendiumBrowserBestiaryTabIndexData[] = [];
 
     const getName = (entry: CompendiumBrowserBestiaryTabIndexData) => {
         return entry.originalName ?? entry.name;
     };
 
-    for (let i = start; i < limit - 1; i++) {
+    for (let i = start; i < limit; i++) {
         const data = this.currentIndex[i];
 
         if (!BESTIARY_SOURCES.includes(data.source)) {
@@ -67,7 +71,11 @@ function browserBestiaryTabGetIndexData(
 
         const nextData = this.currentIndex[i + 1];
 
-        if (nextData.source !== "pathfinder-monster-core" || getName(data) !== getName(nextData)) {
+        if (
+            !nextData ||
+            nextData.source !== "pathfinder-monster-core" ||
+            getName(data) !== getName(nextData)
+        ) {
             indexData.push(data);
         }
     }
