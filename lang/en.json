@@ -625,6 +625,9 @@
                 "request": "Requested an item identification for",
                 "proceed": "Would you like to proceed?"
             }
+        },
+        "hideDamage": {
+            "reveal": "Reveal damage to players"
         }
     }
 }

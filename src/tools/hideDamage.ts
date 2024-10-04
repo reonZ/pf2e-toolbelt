@@ -1,8 +1,8 @@
-import { refreshLatestMessages } from "foundry-pf2e";
+import { htmlQuery, refreshLatestMessages } from "foundry-pf2e";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 
-const { config, settings, wrapper } = createTool({
+const { config, settings, wrapper, localize, getFlag, setFlag } = createTool({
     name: "hideDamage",
     settings: [
         {
@@ -33,14 +33,24 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
     const actor = this.actor;
     if (!actor || actor.hasPlayerOwner) return;
 
+    const revealed = getFlag<boolean>(this, "revealed");
+    if (revealed) return;
+
     const isGM = game.user.isGM;
-    const diceTotalElement = html.querySelector(".dice-result .dice-total");
-    const totalElement = diceTotalElement?.querySelector<HTMLElement>(":scope > .total");
-    const instancesElement = diceTotalElement?.querySelector<HTMLElement>(":scope > .instances");
+    const diceTotalElement = htmlQuery(html, ".dice-result .dice-total");
+    const totalElement = htmlQuery(diceTotalElement, ":scope > .total");
+    const instancesElement = htmlQuery(diceTotalElement, ":scope > .instances");
 
     if (totalElement) {
         if (isGM) {
             totalElement.dataset.visibility = "gm";
+            totalElement.dataset.tooltip = localize("reveal");
+            totalElement.classList.add("clickable");
+
+            totalElement.addEventListener("click", (event) => {
+                event.preventDefault();
+                setFlag(this, "revealed", true);
+            });
         } else {
             totalElement.innerText = "???";
         }
