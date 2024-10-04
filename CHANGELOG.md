@@ -5,9 +5,7 @@
 -   `Target Helper`:
     -   clicking the message save button will now first try to roll the inline save for the selected tokens instead of rolling a regular system save
         -   this works for both spell and prompted check messages
-        -   this gives an alternative to clicking the small inline save icons and take care of airhead players clicking the BIG button like moths drawn to the flame
         -   if more than one token is selected, it will roll for each one of them that is a target of the message (and hasn't rolled its save yet) and roll regular system saves for the other ones
-        -   if no token is selected, the user's associated actor will be used
         -   if the token of a target that has already rolled its save is selected, a regular system save will be rolled instead
 
 # 2.17.0
