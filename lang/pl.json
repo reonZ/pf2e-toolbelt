@@ -625,6 +625,9 @@
                 "request": "Poproszono o identyfikację przedmiotu dla",
                 "proceed": "Czy chcesz kontynuować?"
             }
+        },
+        "hideDamage": {
+            "reveal": "Ujawnij obrażenia zadane graczom"
         }
     }
 }
