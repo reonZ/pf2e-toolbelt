@@ -10,6 +10,8 @@
             -   if you want to keep the saves from `Target Helper` for instance
         -   an merged/injected message cannot inject its damage into another but can still merge to or be merged with
         -   a message can be injected more than once
+-   `Target Damage`:
+    -   slightly increase the size of icons and text for the header of extra rows
 
 # 2.18.0
 
