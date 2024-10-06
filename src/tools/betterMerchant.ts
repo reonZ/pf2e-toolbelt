@@ -452,7 +452,7 @@ function itemPrepareDerivedData(this: ItemPF2e, wrapped: libWrapper.RegisterCall
         deleteInMemory(this);
 
         const infinite = getFlag<boolean>(actor, "infiniteAll");
-        const itemFilter = testItem(actor, this, "sell");
+        const itemFilter = testItem(actor, this, "sell", this.system.price.per);
 
         if (infinite) {
             this.system.quantity = 9999;
