@@ -1,3 +1,16 @@
+# 2.19.0
+
+-   `Better Merchant`:
+    -   fix incorrect modified price for items that come in bundle (such as arrows)
+-   `Merged Damage`:
+    -   increase the size of the icons added to damage messages
+    -   add a new `Inject Damage` feature/icon to damage messages
+        -   as opposed to `Merge Damage`, it will leave the previous message intact and only inject damage instances to it
+        -   useful when only extra damage is added and/or when you want to keep the "identity" of the message
+            -   if you want to keep the saves from `Target Helper` for instance
+        -   an merged/injected message cannot inject its damage into another but can still merge to or be merged with
+        -   a message can be injected more than once
+
 # 2.18.0
 
 -   `Hide Damage`:
