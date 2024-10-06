@@ -444,9 +444,11 @@
         "mergeDamage": {
             "buttons": {
                 "split": "Split back to original messages",
-                "merge": "Merge with previous damage message"
+                "merge": "Merge with previous damage message",
+                "inject": "Inject damage to previous message"
             },
-            "noMatch": "Counldn't find another matching damage message."
+            "injected": "Damage was injected into this message",
+            "noMatch": "Couldn't find another matching damage message."
         },
         "betterMerchant": {
             "sheet": {

@@ -395,7 +395,7 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
         case "spell-damage": {
             addListener(html, "[data-action='spell-damage']", () => {
                 const messageId = this.id;
-                const save = getFlag<MessageSaveFlag>(this, "save");
+                const save = getMessageFlag(this, "save");
                 if (!save) return;
 
                 Hooks.once("preCreateChatMessage", (message: ChatMessage) => {
@@ -1325,7 +1325,7 @@ async function getMessageData(
     message: ChatMessagePF2e,
     onlyWithSave = false
 ): Promise<MessageData | undefined> {
-    const save = getSaveFlag(message) as MessageSaveDataWithTooltip | undefined;
+    const save = getSaveData(message) as MessageSaveDataWithTooltip | undefined;
     if (onlyWithSave && !save) return;
 
     const targetsFlag = getMessageTargets(message);
@@ -1529,7 +1529,7 @@ async function getMessageData(
     };
 }
 
-function getSaveFlag(message: ChatMessagePF2e): MessageSaveData | undefined {
+function getSaveData(message: ChatMessagePF2e): MessageSaveData | undefined {
     const flag = getMessageFlag(message, "save");
     if (!flag) return;
 

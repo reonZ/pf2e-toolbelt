@@ -1,7 +1,7 @@
 import {
     DEGREE_OF_SUCCESS_STRINGS,
     R,
-    addListener,
+    addListenerAll,
     compareArrays,
     createHTMLElement,
     getDamageRollClass,
@@ -43,7 +43,8 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
     if ((!game.user.isGM && !message.isAuthor) || !actor || !isDamageRoll(message)) return;
 
     const html = $html[0];
-    const merged = getFlag<boolean>(message, "merged");
+    const injected = getFlag<boolean>(message, "injected");
+    const merged = injected || getFlag<boolean>(message, "merged");
     const targets = getTargets(message);
 
     const buttonsElement = createHTMLElement("div", {
@@ -51,75 +52,54 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
         innerHTML: await render("buttons", { merged }),
     });
 
-    if (merged) {
-        html.classList.add("merged");
-    }
-
     htmlQuery(html, ".dice-result .dice-total")?.append(buttonsElement);
 
-    addListener(buttonsElement, "[data-action='merge-damage']", (event) => {
+    if (injected) {
+        htmlQuery(html, ".message-header .flavor-text .action")?.insertAdjacentHTML(
+            "afterbegin",
+            `<i class="fa-solid fa-syringe" title="${localize("injected")}"></i> `
+        );
+    }
+
+    type EventAction = "merge-damage" | "split-damage" | "inject-damage";
+
+    addListenerAll(buttonsElement, "[data-action]", async (event, el) => {
         event.stopPropagation();
 
-        for (const { message: otherMessage } of latestChatMessages(5, message)) {
-            if (otherMessage.actor !== actor || !isDamageRoll(otherMessage)) continue;
+        const action = el.dataset.action as EventAction;
 
-            const otherTargets = getTargets(otherMessage);
-            if (!compareArrays(targets, otherTargets)) continue;
+        switch (action) {
+            case "merge-damage":
+            case "inject-damage": {
+                for (const { message: otherMessage } of latestChatMessages(5, message)) {
+                    if (otherMessage.actor !== actor || !isDamageRoll(otherMessage)) continue;
 
-            mergeDamages(message, otherMessage);
-            return;
-        }
+                    const otherTargets = getTargets(otherMessage);
+                    if (compareArrays(targets, otherTargets)) {
+                        if (action === "merge-damage") {
+                            return mergeDamages(message, otherMessage);
+                        } else {
+                            return injectDamage(message, otherMessage);
+                        }
+                    }
+                }
+                return localize.warn("noMatch");
+            }
 
-        localize.warn("noMatch");
-    });
-
-    addListener(buttonsElement, "[data-action='split-damage']", async (event) => {
-        event.stopPropagation();
-
-        const sources = getFlag<MessageData[]>(message, "data")?.flatMap((data) => data.source);
-
-        if (sources) {
-            await message.delete();
-            getDocumentClass("ChatMessage").createDocuments(sources);
+            case "split-damage": {
+                const flag = getFlag<MessageData[]>(message, "data");
+                const sources = flag?.flatMap((data) => data.source);
+                if (sources) {
+                    await message.delete();
+                    getDocumentClass("ChatMessage").createDocuments(sources);
+                }
+                break;
+            }
         }
     });
 }
 
-async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessagePF2e) {
-    const groups: Record<string, MessageGroup> = {};
-    const data = getMessageData(otherMessage).concat(getMessageData(message));
-    const damageLabel = game.i18n.localize("PF2E.DamageRoll");
-
-    for (const { name, notes, tags, modifiers, outcome } of data) {
-        const group = (groups[name] ??= {
-            label: `${damageLabel}: ${name}`,
-            tags,
-            notes: [],
-            results: [],
-        });
-
-        if (notes && !group.notes.includes(notes)) {
-            group.notes.push(notes);
-        }
-
-        const exists = group.results.find(
-            (result) => result.outcome === outcome && result.modifiers === modifiers
-        );
-
-        if (exists) {
-            exists.count++;
-        } else {
-            group.results.push({
-                outcome,
-                modifiers,
-                label: game.i18n.localize(
-                    `PF2E.Check.Result.Degree.Attack.${outcome ?? DEGREE_OF_SUCCESS_STRINGS[2]}`
-                ),
-                count: 1,
-            });
-        }
-    }
-
+function groupRolls(message: ChatMessagePF2e, otherMessage: ChatMessagePF2e) {
     const groupedInstances: GroupedInstance[] = [];
     const messageRoll = message.rolls[0] as Rolled<DamageRoll>;
     const otherRoll = otherMessage.rolls[0] as Rolled<DamageRoll>;
@@ -227,8 +207,6 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
         ],
     };
 
-    await ChatMessage.deleteDocuments([message.id, otherMessage.id]);
-
     const rolls: RollJSON[] = [roll];
 
     for (const msg of [otherMessage, message]) {
@@ -236,6 +214,75 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             rolls.push(...msg.rolls.slice(1).map((roll) => roll.toJSON()));
         }
     }
+
+    return { rolls, showBreakdown };
+}
+
+function setMessageUpdateFlags(
+    update: Record<string, unknown>,
+    message: ChatMessagePF2e,
+    data: MessageData[],
+    injected: boolean
+) {
+    setTargetHelperFlagProperty(update, "targets", getTargets(message));
+
+    setFlagProperty(update, "type", "damage-roll");
+    setFlagProperty(update, injected ? "injected" : "merged", true);
+    setFlagProperty(update, "data", data);
+}
+
+async function injectDamage(message: ChatMessagePF2e, otherMessage: ChatMessagePF2e) {
+    const { rolls } = groupRolls(otherMessage, message);
+    const data = getMessageData(otherMessage).concat(getMessageData(message));
+
+    await message.delete();
+
+    const update = { rolls };
+
+    setMessageUpdateFlags(update, otherMessage, data, true);
+    setFlagProperty(update, "injected", true);
+
+    otherMessage.update(update);
+}
+
+async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessagePF2e) {
+    const groups: Record<string, MessageGroup> = {};
+    const data = getMessageData(otherMessage).concat(getMessageData(message));
+    const damageLabel = game.i18n.localize("PF2E.DamageRoll");
+
+    for (const { name, notes, tags, modifiers, outcome } of data) {
+        const group = (groups[name] ??= {
+            label: `${damageLabel}: ${name}`,
+            tags,
+            notes: [],
+            results: [],
+        });
+
+        if (notes && !group.notes.includes(notes)) {
+            group.notes.push(notes);
+        }
+
+        const exists = group.results.find(
+            (result) => result.outcome === outcome && result.modifiers === modifiers
+        );
+
+        if (exists) {
+            exists.count++;
+        } else {
+            group.results.push({
+                outcome,
+                modifiers,
+                label: game.i18n.localize(
+                    `PF2E.Check.Result.Degree.Attack.${outcome ?? DEGREE_OF_SUCCESS_STRINGS[2]}`
+                ),
+                count: 1,
+            });
+        }
+    }
+
+    const { rolls, showBreakdown } = groupRolls(message, otherMessage);
+
+    await ChatMessage.deleteDocuments([message.id, otherMessage.id]);
 
     const messageData: ChatMessagePF2eCreateData = {
         flavor: await render("merged", {
@@ -254,11 +301,7 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
         rolls,
     };
 
-    setTargetHelperFlagProperty(messageData, "targets", getTargets(message));
-
-    setFlagProperty(messageData, "type", "damage-roll");
-    setFlagProperty(messageData, "merged", true);
-    setFlagProperty(messageData, "data", data);
+    setMessageUpdateFlags(messageData, message, data, false);
 
     getDocumentClass("ChatMessage").create(messageData);
 }
