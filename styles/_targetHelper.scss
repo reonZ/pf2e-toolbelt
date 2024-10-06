@@ -112,7 +112,6 @@
                 align-items: center;
                 justify-content: space-between;
                 padding-right: 0.5em;
-                font-size: 0.9em;
                 gap: 0.5em;
                 height: 1.3em;
 
@@ -133,15 +132,7 @@
 
                         &.fa-person {
                             font-size: 1.1em;
-                        }
-
-                        &.fa-eye-slash {
-                            font-size: 0.9em;
-                            margin-bottom: 1px;
-                        }
-
-                        &.fa-ghost {
-                            font-size: 0.95em;
+                            margin-top: -1px;
                         }
                     }
                 }
