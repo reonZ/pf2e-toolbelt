@@ -444,9 +444,11 @@
         "mergeDamage": {
             "buttons": {
                 "split": "Powrót do oryginalnych wiadomości",
-                "merge": "Scal z poprzednią wiadomością o obrażeniach"
+                "merge": "Scal z poprzednią wiadomością o obrażeniach",
+                "inject": "Wstaw obrażenia do poprzedniej wiadomości"
             },
-            "noMatch": "Nie mogę znaleźć innego pasującego komunikatu o obrażeniach."
+            "injected": "Obrażenia zostały wstawione do tej wiadomości",
+            "noMatch": "Nie znaleziono innego pasującego komunikatu o obrażeniach."
         },
         "betterMerchant": {
             "sheet": {
