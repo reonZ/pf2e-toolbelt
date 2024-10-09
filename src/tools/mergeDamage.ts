@@ -33,7 +33,9 @@ const { config, settings, hook, localize, getFlag, render, setFlagProperty } = c
         },
     ],
     init: () => {
-        hook.toggle(settings.enabled);
+        if (!settings.enabled) return;
+
+        hook.activate();
         refreshLatestMessages(20);
     },
 } as const);
