@@ -13,50 +13,53 @@ import {
 import { createTool } from "../tool";
 import { getMessageTargets, setTargetHelperFlagProperty } from "./targetHelper";
 
-const { config, settings, hooks, localize, getFlag, render, setFlagProperty } = createTool({
-    name: "mergeDamage",
-    settings: [
-        {
-            key: "enabled",
-            type: Boolean,
-            default: false,
-            scope: "client",
-            onChange: (value: boolean) => {
-                hooks.renderChatMessage.toggle(value);
-                hooks.diceSoNiceMessageProcessed.toggle(value && !!getActiveModule("dice-so-nice"));
-                refreshLatestMessages(20);
+const { config, settings, hooks, localize, getFlag, render, setFlagProperty, deleteFlagProperty } =
+    createTool({
+        name: "mergeDamage",
+        settings: [
+            {
+                key: "enabled",
+                type: Boolean,
+                default: false,
+                scope: "client",
+                onChange: (value: boolean) => {
+                    hooks.renderChatMessage.toggle(value);
+                    hooks.diceSoNiceMessageProcessed.toggle(
+                        value && !!getActiveModule("dice-so-nice")
+                    );
+                    refreshLatestMessages(20);
+                },
             },
-        },
-    ],
-    hooks: [
-        {
-            event: "renderChatMessage",
-            listener: onRenderChatMessage,
-        },
-        {
-            event: "diceSoNiceMessageProcessed",
-            listener: onDiceSoNiceMessageProcessed,
-        },
-    ],
-    init: () => {
-        if (!settings.enabled) return;
+        ],
+        hooks: [
+            {
+                event: "renderChatMessage",
+                listener: onRenderChatMessage,
+            },
+            {
+                event: "diceSoNiceMessageProcessed",
+                listener: onDiceSoNiceMessageProcessed,
+            },
+        ],
+        init: () => {
+            if (!settings.enabled) return;
 
-        hooks.renderChatMessage.activate();
+            hooks.renderChatMessage.activate();
 
-        if (getActiveModule("dice-so-nice")) {
-            hooks.diceSoNiceMessageProcessed.activate();
-        }
+            if (getActiveModule("dice-so-nice")) {
+                hooks.diceSoNiceMessageProcessed.activate();
+            }
 
-        refreshLatestMessages(20);
-    },
-} as const);
+            refreshLatestMessages(20);
+        },
+    } as const);
 
 function onDiceSoNiceMessageProcessed(
     messageId: string,
     interception: { willTrigger3DRoll: boolean }
 ) {
     const message = game.messages.get(messageId);
-    if (!message || !getFlag(message, "merged")) return;
+    if (!message || (!getFlag(message, "merged") && !getFlag(message, "splitted"))) return;
 
     interception.willTrigger3DRoll = false;
 }
@@ -111,11 +114,20 @@ async function onRenderChatMessage(message: ChatMessagePF2e, $html: JQuery) {
 
             case "split-damage": {
                 const flag = getFlag<MessageData[]>(message, "data");
-                const sources = flag?.flatMap((data) => data.source);
-                if (sources) {
+                const sources = flag?.flatMap((data) => {
+                    const source = data.source;
+
+                    source.sound = null;
+                    setFlagProperty(source, "splitted", true);
+
+                    return source;
+                });
+
+                if (sources?.length) {
                     await message.delete();
                     getDocumentClass("ChatMessage").createDocuments(sources);
                 }
+
                 break;
             }
         }
@@ -349,8 +361,10 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
     if (flag) return flag;
 
     const source = message.toObject() as PreCreate<ChatMessageSourcePF2e>;
+
     delete source._id;
     delete source.timestamp;
+    deleteFlagProperty(source, "splitted");
 
     const sourceFlag = source.flags!.pf2e as ChatMessageFlagsPF2e["pf2e"] & {
         context: DamageDamageContextFlag | SpellCastContextFlag;

@@ -1,6 +1,7 @@
 import {
     DialogExtraOptions,
     R,
+    deleteFlagProperty,
     deleteInMemory,
     error,
     flagPath,
@@ -129,6 +130,8 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
             getFlagProperty(obj, toolName, ...path),
         setFlagProperty: (obj: object, ...args: [...string[], any]) =>
             setFlagProperty(obj, toolName, ...args),
+        deleteFlagProperty: (obj: object, ...path: string[]) =>
+            deleteFlagProperty(obj, toolName, ...path),
         unsetFlagProperty: (obj: object, ...path: string[]) =>
             unsetFlagProperty(obj, toolName, ...path),
         getInMemory: (obj: object, ...path: string[]) => getInMemory(obj, toolName, ...path),
@@ -403,6 +406,7 @@ type ToolObject<TConfig extends ToolConfig> = {
     updateSourceFlag: typeof updateSourceFlag;
     getFlagProperty: typeof getFlagProperty;
     setFlagProperty: typeof setFlagProperty;
+    deleteFlagProperty: typeof deleteFlagProperty;
     unsetFlagProperty: typeof unsetFlagProperty;
     getInMemory: typeof getInMemory;
     setInMemory: typeof setInMemory;
