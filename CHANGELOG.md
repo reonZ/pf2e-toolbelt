@@ -1,6 +1,6 @@
 # 2.20.0
 
--   `Merged Damage`:
+-   `Merge Damages`:
     -   no longer emit dice roll sound when merging or splitting messages
     -   no longer roll 3D dice when merging or splitting messages
         -   you need to update `Dice So Nice` to version `5.1.2`
@@ -12,10 +12,10 @@
 
 -   `Better Merchant`:
     -   fix incorrect modified price for items that come in bundle (such as arrows)
--   `Merged Damage`:
+-   `Merge Damages`:
     -   increase the size of the icons added to damage messages
     -   add a new `Inject Damage` feature/icon to damage messages
-        -   as opposed to `Merge Damage`, it will leave the previous message intact and only inject damage instances to it
+        -   as opposed to `Merge Damages`, it will leave the previous message intact and only inject damage instances to it
         -   useful when only extra damage is added and/or when you want to keep the "identity" of the message
             -   if you want to keep the saves from `Target Helper` for instance
         -   an merged/injected message cannot inject its damage into another but can still merge to or be merged with
@@ -309,12 +309,12 @@
 
 # 2.4.3
 
--   `Merge Damage`:
+-   `Merge Damages`:
     -   avoid `null` degree of success for merged damages
 
 # 2.4.2
 
--   `Merge Damage`:
+-   `Merge Damages`:
     -   make sure long instances of damage do not stretch the message outside of its bounds
 
 # 2.4.1
@@ -671,7 +671,7 @@
     -   icons representing owned and unowned targets have been added before their name (a special icon is shown for targets that are "hidden" from players)
     -   respects all 3 metagame settings `Show Check DCs`, `Show Check Outcomes` and `Show Roll Breakdowns`
     -   only the last 10 messages in the chat will be processed on reload
--   `Merge Damage` updates:
+-   `Merge Damages` updates:
     -   fixed issue with damage traits not working once merged (such as `Holy`)
 
 # 1.34.0
@@ -726,7 +726,7 @@
     -   fixed overall broken styling
 -   `Multi Cast` updates:
     -   updated to use the new system data
--   `Merge Damage` updates:
+-   `Merge Damages` updates:
     -   fixed error with formulas with hyphened damage types, the error wasn't preventing the feature from working but was still an eyesore in the console
 -   added a new `Inventory` client setting:
     -   this is a work in progress and is more of a gimmick than an actual useful feature
@@ -877,7 +877,7 @@
     -   remade the tooltip showing when hovering over a save, it now gives a lot more information
     -   characters can now reroll save checks using hero points
         -   if you have `PF2e Workbench` active and its setting `Keeley's Hero Point Rule` enabled, the same implementation of the rule will be used
--   `Merge Damage` updates:
+-   `Merge Damages` updates:
     -   persistent damages will no longer stack with each other, the one with the highest mean will be chosen
     -   fixed targets being re-created for the purpose of displaying them in the damage chat message of `Target Token Helper`
 
@@ -970,7 +970,7 @@
 
 -   fixed not being able to use `Multi Cast`
 -   fixed `Multi Cast` not properly using heightened damages
--   fixed item traits not being provided to the `Merge Damage` chat message, sadly, the only way of doing it is to merge the traits of all the original chat messages, which could result in occasional false positives when using different weapons
+-   fixed item traits not being provided to the `Merge Damages` chat message, sadly, the only way of doing it is to merge the traits of all the original chat messages, which could result in occasional false positives when using different weapons
 
 # 1.13.0
 
@@ -1008,7 +1008,7 @@
 
 # 1.10.1
 
--   prevent `Dice so Nice` from rolling the dice on `Merge Damage`
+-   prevent `Dice so Nice` from rolling the dice on `Merge Damages`
 
 # 1.10.0
 
@@ -1017,7 +1017,7 @@
 
 # 1.9.1
 
--   fixed traits not showing up in `Merge Damage` chat message
+-   fixed traits not showing up in `Merge Damages` chat message
 
 # 1.9.0
 
@@ -1038,7 +1038,7 @@
 
 # 1.8.1
 
--   fixed error with `Merge Damage`
+-   fixed error with `Merge Damages`
 
 # 1.8.0
 
@@ -1051,7 +1051,7 @@
 # 1.7.0
 
 -   this is a `5.7.0` release
--   reworked the `Merge Damage` feature
+-   reworked the `Merge Damages` feature
     -   you can now merge damages from any source as long the messages have the same originating actor and the same target
     -   improved the newly created merged damage chat message, showing all the different damage sources and their outcomes
     -   added a new `Split back to original messages` icon on merged damage messages which reverts the merging process
@@ -1072,7 +1072,7 @@
 
 # 1.5.5
 
--   the `Merge Damage` icon will now move itself next to the `PF2e Target Damage` collapse/expand button when present
+-   the `Merge Damages` icon will now move itself next to the `PF2e Target Damage` collapse/expand button when present
     -   firefox users will have to enable the `:has` feature for it to work because firefox still hasn't made it core
 
 # 1.5.4
@@ -1115,13 +1115,13 @@
 
 # 1.2.1
 
--   `Multi-Cast` button and `Merge Damage` icon will only be shown if you are the author of the message (or the GM)
+-   `Multi-Cast` button and `Merge Damages` icon will only be shown if you are the author of the message (or the GM)
 
 # 1.2.0
 
 -   completely remove event hook when both `Remove Effect Shortcut` & `Condition Sheet Icon` are disabled
 -   added `Multi-Cast` setting, it adds a new damage button for spells to directly roll multiple instances of the spell in one roll
--   added `Merge Damage` setting which allows you to merge multiple damage roll messages into a single one, useful for actions that require you to add the damage before applying `weakness` and `resistance`
+-   added `Merge Damages` setting which allows you to merge multiple damage roll messages into a single one, useful for actions that require you to add the damage before applying `weakness` and `resistance`
     -   the module will look at the 5 messages above it to find a matching message
     -   the other message needs to have been initiated from the same `Item` (and therefore `Actor`)
     -   the other message needs to have the same target (or both no target)
