@@ -1,3 +1,13 @@
+# 2.20.0
+
+-   `Merged Damage`:
+    -   no longer emit dice roll sound when merging or splitting messages
+    -   no longer roll 3D dice when merging or splitting messages
+        -   you need to update `Dice So Nice` to version `5.1.2`
+    -   fix parsing of the messages on load when the feature is disabled
+-   `Target Helper`:
+    -   skip manual dice roll input when re-rolling a private save
+
 # 2.19.0
 
 -   `Better Merchant`:
@@ -10,7 +20,7 @@
             -   if you want to keep the saves from `Target Helper` for instance
         -   an merged/injected message cannot inject its damage into another but can still merge to or be merged with
         -   a message can be injected more than once
--   `Target Damage`:
+-   `Target Helper`:
     -   slightly increase the size of icons and text for the header of extra rows
 
 # 2.18.0
