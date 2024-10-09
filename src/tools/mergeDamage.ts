@@ -321,6 +321,7 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             },
         },
         rolls,
+        sound: null,
     };
 
     setMessageUpdateFlags(messageData, message, data);
