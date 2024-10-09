@@ -1213,7 +1213,7 @@ async function rerollSave(
         keep
     );
 
-    const newRoll = await unevaluatedNewRoll.evaluate();
+    const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !flag.private });
     await roll3dDice(newRoll, target, flag.private, false);
 
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(flag.roll), newRoll, isHeroReroll, keep);
