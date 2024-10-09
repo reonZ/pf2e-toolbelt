@@ -24,9 +24,6 @@ const { config, settings, hooks, localize, getFlag, render, setFlagProperty, del
                 scope: "client",
                 onChange: (value: boolean) => {
                     hooks.renderChatMessage.toggle(value);
-                    hooks.diceSoNiceMessageProcessed.toggle(
-                        value && !!getActiveModule("dice-so-nice")
-                    );
                     refreshLatestMessages(20);
                 },
             },
@@ -42,15 +39,14 @@ const { config, settings, hooks, localize, getFlag, render, setFlagProperty, del
             },
         ],
         init: () => {
-            if (!settings.enabled) return;
-
-            hooks.renderChatMessage.activate();
-
             if (getActiveModule("dice-so-nice")) {
                 hooks.diceSoNiceMessageProcessed.activate();
             }
 
-            refreshLatestMessages(20);
+            if (settings.enabled) {
+                hooks.renderChatMessage.activate();
+                refreshLatestMessages(20);
+            }
         },
     } as const);
 
