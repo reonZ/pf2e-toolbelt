@@ -370,8 +370,8 @@
                     "hint": "Dzieli się punktami zdrowia i staminy ze swoim mistrzem."
                 },
                 "turn": {
-                    "label": "Tura się zaczyna/kończy",
-                    "hint": "Za każdym razem, gdy tura mistrza się rozpocznie/zakończy, zdarzenia zostaną uruchomione również dla tego aktora, jeśli nie jest on częścią bieżącego spotkania."
+                    "label": "Czas wydarzeń",
+                    "hint": "Za każdym razem, gdy tura mistrza rozpocznie się/zakończy, nastąpi zmiana inicjatywy lub nocny odpoczynek, wydarzenia te zostaną również uruchomione dla tego aktora."
                 },
                 "skills": {
                     "label": "Biegłość w umiejętnościach",
