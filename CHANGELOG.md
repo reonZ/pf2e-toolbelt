@@ -1,3 +1,22 @@
+# 2.21.0
+
+-   this is a system `6.5.0` update
+-   use `string#replace` instead of `string#replaceAll` for compatibility with older browsers
+-   `Actionable`:
+    -   made the necessary changes to work with the new system frequency handling
+    -   actions are no longer prevented from being used when no use remain (following the system workflow)
+-   `Automatic Rune Progression`:
+    -   add support for all types of handwraps now that the system recognize them
+-   `Better Browser`:
+    -   remove the `Remove Bestiary Duplicates` setting/feature now that duplicate monsters have been removed from the system
+-   `Share Data`:
+    -   replace `Turn Start/End` with `Time Events`
+        -   it now handles turn start/end, initiative change and rest-for-the-night
+        -   it now handles frequency recharge (doesn't work with frequency of `turn`)
+-   `Use Button`:
+    -   remove the `Add To Actions` setting/feature now that the system handles it
+    -   fix `Auto Self-Applied` message update
+
 # 2.20.0
 
 -   `Merge Damages`:
