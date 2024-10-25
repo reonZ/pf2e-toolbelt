@@ -236,13 +236,6 @@
                     "name": "Automatyczna identyfikacja podobnych przedmiotów",
                     "hint": "Czy „podobne” przedmioty powinny być również identyfikowane podczas korzystania z opcji „Automatycznie identyfikuj znane przedmioty”."
                 }
-            },
-            "betterBrowser": {
-                "title": "Lepsza wyszukiwarka",
-                "noDuplicates": {
-                    "name": "Usuń duplikaty bestiariusza",
-                    "hint": "Usunie stworzenia z oryginalnych trzech „Pathfinder Bestiary”, które mają wersję o tej samej nazwie w „Pathfinder Monster Core”."
-                }
             }
         },
         "tool": {

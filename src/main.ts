@@ -3,7 +3,6 @@ import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";
 import { arpTool } from "./tools/arp";
-import { betterBrowserTool } from "./tools/betterBrowser";
 import { betterMerchantTool } from "./tools/betterMerchant";
 import { debugTool } from "./tools/debug";
 import { effectsPanelTool } from "./tools/effectsPanel";
@@ -28,7 +27,6 @@ MODULE.register("pf2e-toolbelt", "PF2e Toolbelt");
 const TOOLS: ToolConfig[] = [
     actionableTool,
     arpTool,
-    betterBrowserTool,
     betterMerchantTool,
     debugTool,
     untargetTool,

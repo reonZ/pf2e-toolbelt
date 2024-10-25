@@ -236,13 +236,6 @@
                     "name": "Auto Identify Similar Items",
                     "hint": "Should 'similar' items also be identified when using the 'Automatically identify known items' option."
                 }
-            },
-            "betterBrowser": {
-                "title": "Better Browser",
-                "noDuplicates": {
-                    "name": "Remove Bestiary Duplicates",
-                    "hint": "Will remove creatures from the original 3 'Pathfinder Bestiary' that have a version with the same name in the 'Pathfinder Monster Core'."
-                }
             }
         },
         "tool": {
