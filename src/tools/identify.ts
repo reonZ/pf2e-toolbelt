@@ -255,7 +255,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
             await Promise.all(
                 R.pipe(
                     [...this.#itemsUUIDs, ...this.#unlockedUUIDs],
-                    R.unique,
+                    R.unique(),
                     R.difference(items.map((item) => item.uuid)),
                     R.map((uuid) => fromUuid<PhysicalItemPF2e>(uuid))
                 )
@@ -288,7 +288,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 : item.slug ?? game.pf2e.system.sluggify(data.name);
             const partialSlug =
                 isConsumable && !scrollWandSpell
-                    ? game.pf2e.system.sluggify(data.name.replaceAll(PARTIAL_SLUGH_REGEX, ""))
+                    ? game.pf2e.system.sluggify(data.name.replace(PARTIAL_SLUGH_REGEX, ""))
                     : undefined;
             const fails = getFlag<IdentifyFailedFlag>(item, "failed") ?? {};
             const isLocked =
