@@ -3,7 +3,6 @@ import {
     consumeItem,
     createHTMLElement,
     elementDataset,
-    getActionGlyph,
     htmlClosest,
     renderCharacterSheets,
     selfApplyEffectFromMessage,
@@ -92,19 +91,6 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
     }
 }
 
-function createActionUseButton(item: AbilityItemPF2e | FeatPF2e) {
-    const useLabel = game.i18n.localize("PF2E.Action.Use");
-    const actionIcon = getActionGlyph(item.actionCost);
-
-    const btn = createHTMLElement("button", {
-        classes: ["use-action"],
-        innerHTML: `<span>${useLabel}</span><span class="action-glyph">${actionIcon}</span>`,
-    });
-    btn.type = "button";
-
-    return btn;
-}
-
 function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
     const { itemId } = elementDataset(htmlClosest(btn, "[data-item-id]")!);
     return actor.items.get(itemId);
@@ -137,9 +123,4 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
     });
 }
 
-export {
-    createActionUseButton,
-    getItemFromActionButton,
-    config as useButtonTool,
-    settings as useButtonToolSetting,
-};
+export { getItemFromActionButton, config as useButtonTool, settings as useButtonToolSetting };

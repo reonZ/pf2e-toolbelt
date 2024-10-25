@@ -3,7 +3,9 @@ import {
     R,
     addListener,
     addListenerAll,
+    createHTMLElement,
     elementDataset,
+    getActionGlyph,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
@@ -16,7 +18,7 @@ import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
     CHARACTER_SHEET_RENDER_INNER,
 } from "./shared/characterSheet";
-import { createActionUseButton, getItemFromActionButton, useButtonToolSetting } from "./useButton";
+import { getItemFromActionButton } from "./useButton";
 
 const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, render } = createTool({
     name: "actionable",
@@ -91,7 +93,7 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
 
 async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
     const actor = this.actor;
-    const useButton = useButtonToolSetting.actions;
+    const useLabel = game.i18n.localize("PF2E.Action.Use");
     const actionElements = html.querySelectorAll<HTMLElement>(
         ".tab[data-tab='actions'] .actions-list:not(.heroActions-list):not(.strikes-list) .action[data-item-id]"
     );
@@ -102,18 +104,20 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
         const macro = await getActionMacro(item);
         if (!item || !macro) continue;
 
-        const btn = createActionUseButton(item);
-        btn.dataset.useActionMacro = "true";
+        const actionIcon = getActionGlyph(item.actionCost);
+        const btn = createHTMLElement("button", {
+            classes: ["use-action"],
+            dataset: { useActionMacro: "true" },
+            innerHTML: `<span>${useLabel}</span><span class="action-glyph">${actionIcon}</span>`,
+        });
 
-        if (useButton && item.frequency) {
-            if (item.frequency.value >= 1) {
-                btn.dataset.toolbeltUse = "true";
-            } else {
-                btn.disabled = true;
-            }
+        btn.type = "button";
+
+        if (item.frequency) {
+            actionElement.querySelector("[data-action='use-action']")?.replaceWith(btn);
+        } else {
+            actionElement.querySelector(".button-group")?.append(btn);
         }
-
-        actionElement.querySelector(".button-group")?.append(btn);
     }
 }
 
@@ -127,12 +131,21 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
             const item = getItemFromActionButton(actor, btn);
             if (!item?.isOfType("action", "feat")) return;
 
+            if (item.system.frequency) {
+                if (item.system.frequency.value > 0) {
+                    if (item.system.frequency && item.system.frequency.value > 0) {
+                        const newValue = item.system.frequency.value - 1;
+                        await item.update({ "system.frequency.value": newValue });
+                    }
+                }
+            }
+
             const macro = await getActionMacro(item);
 
             if (macro) {
-                macro.execute({ actor, item });
+                await macro.execute({ actor, item });
             } else {
-                item.toMessage();
+                await item.toMessage();
             }
         }
     );
