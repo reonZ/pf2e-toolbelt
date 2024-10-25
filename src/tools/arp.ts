@@ -110,17 +110,20 @@ function isShieldWeapon(weapon: WeaponPF2e) {
 }
 
 function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>) {
-    const traits = weapon._source.system.traits.value;
-    const { group, category, slug } = weapon._source.system;
+    const { group, category, slug, traits } = weapon._source.system;
 
-    if (category === "unarmed" && slug !== HANDWRAPS_SLUG) {
+    if (
+        category === "unarmed" &&
+        slug !== HANDWRAPS_SLUG &&
+        !traits.otherTags.includes(HANDWRAPS_SLUG)
+    ) {
         return !!getEquippedHandwraps(weapon.actor);
     }
 
     return (
         (group !== "shield" || isShieldWeapon(weapon)) &&
-        !traits.includes("alchemical") &&
-        !traits.includes("bomb")
+        !traits.value.includes("alchemical") &&
+        !traits.value.includes("bomb")
     );
 }
 
