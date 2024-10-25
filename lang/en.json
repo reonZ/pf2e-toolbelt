@@ -370,8 +370,8 @@
                     "hint": "Share health & stamina points with its master."
                 },
                 "turn": {
-                    "label": "Turn Start/End",
-                    "hint": "Whenever the master's turn starts/ends, the events will also be triggered for this actor if it isn't part of the current encounter."
+                    "label": "Time Events",
+                    "hint": "Whenever the master's turn starts/ends, initiative changes or rest for the night, the events will also be triggered for this actor."
                 },
                 "skills": {
                     "label": "Skills Proficiencies",

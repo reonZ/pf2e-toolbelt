@@ -67,6 +67,14 @@ const {
             callback: combatantEndTurn,
         },
         {
+            path: "CONFIG.Combatant.documentClass.prototype._onUpdate",
+            callback: combatantOnUpdate,
+        },
+        {
+            path: "game.pf2e.actions.restForTheNight",
+            callback: restForTheNight,
+        },
+        {
             path: "CONFIG.Combat.documentClass.prototype.resetActors",
             callback: combatResetActors,
             type: "OVERRIDE",
@@ -206,7 +214,7 @@ async function combatantStartTurn(
     const slaves = getSlaves(actor, "turn");
 
     for (const slave of slaves) {
-        if (!slave || slave.inCombat) return;
+        if (slave.inCombat) return;
 
         const eventType = "turn-start";
         const slaveUpdates: Record<string, unknown> = {};
@@ -215,7 +223,8 @@ async function combatantStartTurn(
             await rule.onUpdateEncounter?.({ event: eventType, actorUpdates: slaveUpdates });
         }
 
-        await slave?.update(slaveUpdates);
+        await slave.update(slaveUpdates);
+        await slave.recharge({ duration: "round" });
 
         for (const effect of slave.itemTypes.effect) {
             await effect.onEncounterEvent(eventType);
@@ -245,7 +254,7 @@ async function combatantEndTurn(
     const slaves = getSlaves(actor, "turn");
 
     for (const slave of slaves) {
-        if (!slave || slave.inCombat) return;
+        if (slave.inCombat) return;
 
         const scene = game.scenes.get(this.sceneId!);
         const token = slave.getDependentTokens({
@@ -273,6 +282,68 @@ async function combatantEndTurn(
         const combatant = createCombatant(slave, encounter);
         Hooks.callAll("pf2e.endTurn", combatant, encounter, game.user.id);
     }
+}
+
+function combatantOnUpdate(
+    this: CombatantPF2e,
+    wrapped: libWrapper.RegisterCallback,
+    changed: DeepPartial<CombatantSource>,
+    operation: DatabaseUpdateOperation<EncounterPF2e>,
+    userId: string
+): void {
+    wrapped(changed, operation, userId);
+
+    if (typeof changed.initiative !== "number" || userId !== game.user.id) return;
+
+    const actor = this.actor;
+    if (!actor?.isOfType("character", "npc")) return;
+
+    Promise.resolve().then(async (): Promise<void> => {
+        const slaves = getSlaves(actor, "turn");
+
+        for (const slave of slaves) {
+            if (slave.inCombat) return;
+
+            const eventType = "initiative-roll";
+            const slaveUpdates: Record<string, unknown> = {};
+
+            for (const rule of slave?.rules ?? []) {
+                await rule.onUpdateEncounter?.({ event: eventType, actorUpdates: slaveUpdates });
+            }
+
+            await slave.update(slaveUpdates);
+
+            for (const effect of slave.itemTypes.effect) {
+                await effect.onEncounterEvent(eventType);
+            }
+        }
+    });
+}
+
+async function restForTheNight(
+    wrapped: libWrapper.RegisterCallback,
+    options: RestForTheNightOptions
+): Promise<ChatMessagePF2e[]> {
+    const actors = options.actors instanceof Actor ? [options.actors] : options.actors;
+    if (!Array.isArray(actors)) {
+        return wrapped(options);
+    }
+
+    options.actors = actors.slice();
+
+    for (const actor of actors ?? []) {
+        if (!actor.isOfType("character", "npc")) continue;
+
+        const slaves = getSlaves(actor, "turn");
+
+        for (const slave of slaves) {
+            if (!actors.includes(slave)) {
+                options.actors.push(slave);
+            }
+        }
+    }
+
+    return wrapped(options);
 }
 
 function createCombatant(actor: ShareActor, encounter: EncounterPF2e) {
