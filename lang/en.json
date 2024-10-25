@@ -170,10 +170,6 @@
             },
             "useButton": {
                 "title": "Use Button",
-                "actions": {
-                    "name": "Add To Actions",
-                    "hint": "Will add an extra 'use' button to action that have uses."
-                },
                 "consumables": {
                     "name": "Add To Consumables",
                     "hint": "Will add an extra 'use' button to consumables."

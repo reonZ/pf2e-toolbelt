@@ -170,10 +170,6 @@
             },
             "useButton": {
                 "title": "Przycisk Użyj",
-                "actions": {
-                    "name": "Dodaj do Akcji",
-                    "hint": "Doda dodatkowy przycisk \"użyj\" do akcji, które mają zastosowania."
-                },
                 "consumables": {
                     "name": "Dodaj do przedmiotów jednorazowych",
                     "hint": "Doda dodatkowy przycisk \"użyj\" do przedmiotów jednorazowych."
