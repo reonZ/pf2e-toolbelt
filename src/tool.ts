@@ -11,7 +11,6 @@ import {
     getInMemoryAndSetIfNot,
     getSetting,
     hasGMOnline,
-    libWrapper,
     registerUpstreamHook,
     registerWrapper,
     render,

@@ -1,4 +1,3 @@
-import { libWrapper } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const CHATMESSAGE_GET_HTML = "ChatMessage.prototype.getHTML";

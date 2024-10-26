@@ -21,7 +21,6 @@ import {
     htmlQuery,
     htmlQueryInClosest,
     isInstanceOf,
-    libWrapper,
     promptDialog,
     renderActorSheets,
     sendTradeRequest,

@@ -1,4 +1,4 @@
-import { HANDWRAPS_SLUG, getEquippedHandwraps, libWrapper } from "foundry-pf2e";
+import { HANDWRAPS_SLUG, getEquippedHandwraps } from "foundry-pf2e";
 import { createTool } from "../tool";
 import {
     ARMOR_PREPARE_BASE_DATA,

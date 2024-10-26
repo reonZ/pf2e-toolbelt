@@ -1,4 +1,4 @@
-import { libWrapper, wrapperError } from "foundry-pf2e";
+import { wrapperError } from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =

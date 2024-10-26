@@ -1,4 +1,3 @@
-import { libWrapper } from "foundry-pf2e";
 import { createTool } from "../tool";
 
 const { config, settings, wrapper, hook } = createTool({

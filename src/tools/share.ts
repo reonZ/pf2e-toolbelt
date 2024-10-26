@@ -9,7 +9,6 @@ import {
     htmlQuery,
     isInstanceOf,
     isPlayedActor,
-    libWrapper,
     resetActors,
 } from "foundry-pf2e";
 import { createTool } from "../tool";

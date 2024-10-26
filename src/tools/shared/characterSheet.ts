@@ -1,4 +1,4 @@
-import { isPlayedActor, libWrapper } from "foundry-pf2e";
+import { isPlayedActor } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const CHARACTER_SHEET_RENDER_INNER =

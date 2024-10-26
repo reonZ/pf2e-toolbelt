@@ -1,4 +1,3 @@
-import { libWrapper } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const TEXTEDITOR_ENRICH_HTML = "TextEditor.enrichHTML";

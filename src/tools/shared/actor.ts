@@ -1,4 +1,3 @@
-import { libWrapper } from "foundry-pf2e";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const ACTOR_TRANSFER_ITEM_TO_ACTOR = "CONFIG.Actor.documentClass.prototype.transferItemToActor";

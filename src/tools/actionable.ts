@@ -9,7 +9,6 @@ import {
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
-    libWrapper,
     renderCharacterSheets,
     renderItemSheets,
 } from "foundry-pf2e";
