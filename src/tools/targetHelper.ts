@@ -687,8 +687,8 @@ function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): Sa
         dc,
         basic: false,
         statistic: dataset.pf2Check as SaveType,
-        options: dataset.pf2RollOptions?.split(",").map((o) => o.trim()) ?? [],
-        traits: dataset.pf2Traits?.split(",").map((o) => o.trim()) ?? [],
+        options: splitListString(dataset.pf2RollOptions ?? ""),
+        traits: splitListString(dataset.pf2Traits ?? ""),
     };
 
     if (dataset.isBasic == null) {
