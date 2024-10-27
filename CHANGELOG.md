@@ -1,3 +1,10 @@
+# 2.21.1
+
+-   `Target Helper`:
+    -   small improvement to header styling
+    -   fix origin actor pointing to the wrong actor for saves
+    -   fix adjustment not always showing in the save tooltip
+
 # 2.21.0
 
 -   this is a system `6.5.0` update
