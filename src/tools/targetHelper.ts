@@ -1089,7 +1089,7 @@ async function rollSaves(
                     event,
                     dc: { value: dc },
                     item,
-                    origin: actor,
+                    origin: message.actor,
                     skipDialog,
                     extraRollOptions: rollOptions,
                     createMessage: false,
@@ -1385,14 +1385,30 @@ async function getMessageData(
                 const rerolled = saveFlag.rerolled;
                 const canReroll = hasSave && isOwner && !rerolled;
                 const offset = saveFlag.value - save.dc;
-                const adjustment =
-                    (isFriendly || showBreakdowns) &&
-                    saveFlag.unadjustedOutcome &&
-                    saveFlag.success !== saveFlag.unadjustedOutcome
-                        ? saveFlag.dosAdjustments?.[saveFlag.unadjustedOutcome]?.label
-                        : undefined;
                 const isPrivate = saveFlag.private && !hasPlayerOwner;
                 const canSeeResult = isGM || !isPrivate;
+
+                const adjustment = (() => {
+                    if (
+                        (!isFriendly && !showBreakdowns) ||
+                        !saveFlag.unadjustedOutcome ||
+                        !saveFlag.dosAdjustments ||
+                        saveFlag.success === saveFlag.unadjustedOutcome
+                    )
+                        return;
+
+                    const adjustments = R.filter(
+                        [
+                            saveFlag.dosAdjustments[saveFlag.unadjustedOutcome]?.label,
+                            saveFlag.dosAdjustments.all?.label,
+                        ],
+                        R.isTruthy
+                    );
+
+                    return adjustments.length
+                        ? adjustments.map((x) => game.i18n.localize(x)).join(", ")
+                        : undefined;
+                })();
 
                 const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
                 const notesList = RollNotePF2e.notesToHTML(notes);
