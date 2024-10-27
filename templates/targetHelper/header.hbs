@@ -16,9 +16,8 @@
     <a class="reroll" data-action="reroll-save" data-statistic="{{save.statistic}}"
         data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
         <i class="save {{save.icon}}"></i>
-        <span class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">
-            {{save.result.value}}
-        </span>
+        <span
+            class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">{{save.result.value}}</span>
         <i class="fa-solid fa-rotate rotate"></i>
     </a>
     {{else}}

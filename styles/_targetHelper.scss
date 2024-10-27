@@ -177,13 +177,6 @@
                         }
                     }
 
-                    .reroll {
-                        margin-right: -0.1em;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.2em;
-                    }
-
                     i {
                         &.die {
                             font-size: 0.95em;
@@ -191,6 +184,10 @@
 
                         &.rotate {
                             font-size: 0.9em;
+                        }
+
+                        &.fa-dice {
+                            margin-left: -0.25em;
                         }
 
                         &.small {
