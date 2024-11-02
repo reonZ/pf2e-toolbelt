@@ -75,7 +75,8 @@
                     <i class="fa-solid fa-message"></i>
                 </a>
                 {{else}}
-                <a data-action="identify-item" data-tooltip="PF2E.identification.Identify">
+                <a data-action="identify-item" data-tooltip="{{item.identifyTooltip}}"
+                    data-tooltip-class="pf2e pf2e-toolbelt-identify">
                     <i class="fa-regular fa-circle-question"></i>
                 </a>
                 <a data-action="post-skill-checks"

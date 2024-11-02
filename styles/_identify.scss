@@ -299,3 +299,17 @@
         flex: 1;
     }
 }
+
+#tooltip[role="tooltip"] {
+    &.pf2e-toolbelt-identify {
+        h3 {
+            font-size: revert;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.2em 0.5em;
+        }
+    }
+}

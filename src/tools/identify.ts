@@ -4,6 +4,7 @@ import {
     createHTMLElement,
     DateTime,
     elementDataset,
+    getItemIdentificationDCs,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
@@ -315,7 +316,39 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 icon: ownerIcon,
             };
 
-            (itemGroups[item.type] ??= []).push({
+            const identifyTooltip = await (async () => {
+                if (itemIdentified) return;
+
+                const dcs = getItemIdentificationDCs(item);
+                const tmp = await renderTemplate(
+                    "systems/pf2e/templates/actors/identify-item.hbs",
+                    {
+                        dcs,
+                        isMagic: item.isMagical,
+                        isAlchemical: item.isAlchemical,
+                    }
+                );
+
+                const element = createHTMLElement("div", { innerHTML: tmp });
+                const rows = element.querySelectorAll("tr");
+
+                let tooltip = `<h3>${game.i18n.localize("PF2E.identification.Identify")}</h3>`;
+                tooltip += `<div class="grid">`;
+
+                for (const row of rows) {
+                    const skill = htmlQuery(row, "th")?.innerText;
+                    const dc = htmlQuery(row, "td")?.innerText;
+
+                    tooltip += `<div>${skill}</div><div>${dc}</div>`;
+                }
+
+                tooltip += "</div>";
+
+                return tooltip;
+            })();
+
+            const itemGroup = (itemGroups[item.type] ??= []);
+            itemGroup.push({
                 itemSlug,
                 isLocked,
                 partialSlug,
@@ -323,6 +356,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 uuid: itemUuid,
                 name: data.name,
                 owner,
+                identifyTooltip,
                 css: itemClasses.join(" "),
                 isIdentified: itemIdentified,
                 actors: characters.map((actor): ItemActor | { id: string } => {
@@ -1024,6 +1058,7 @@ type IdentifyGroupItem = {
     isIdentified: boolean;
     partialSlug: string | undefined;
     owner: { name: string; id: string; icon: string };
+    identifyTooltip: string | undefined;
 };
 
 type IdentifyContext = {
