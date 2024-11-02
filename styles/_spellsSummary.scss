@@ -74,6 +74,10 @@
                                 margin-right: 0.7em;
                             }
                         }
+
+                        &.virtual {
+                            backdrop-filter: blur(8px) hue-rotate(210deg) saturate(2);
+                        }
                     }
                 }
             }

@@ -42,8 +42,8 @@
     </li>
 
     {{#each entry as |spell|}}
-    <li class="spell{{#if spell.virtual}} virtual{{/if}}"
-        data-item-type="spell{{#if spell.virtual}}-slot-group{{/if}}"
+    <li class="spell{{#if spell.isVirtual}} virtual{{/if}}"
+        data-item-type="spell{{#if spell.isVirtual}}-slot-group{{/if}}"
         data-item-id="{{spell.itemId}}" data-entry-id="{{spell.entryId}}"
         data-cast-rank="{{spell.castRank}}" data-group-id="{{spell.groupId}}" {{#if
         spell.isPrepared}}data-slot-id="{{spell.slotId}}" {{/if}} {{#if
