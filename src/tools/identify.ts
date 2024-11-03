@@ -323,7 +323,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 const tmp = await renderTemplate(
                     "systems/pf2e/templates/actors/identify-item.hbs",
                     {
-                        dcs,
+                        dcs: "dc" in dcs ? { crafting: dcs.dc } : dcs,
                         isMagic: item.isMagical,
                         isAlchemical: item.isAlchemical,
                     }
