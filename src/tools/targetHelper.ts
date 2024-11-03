@@ -343,7 +343,8 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
                 !roll.options.splashOnly &&
                 roll.options.damage?.modifiers?.some(
                     (modifier) =>
-                        "damageCategory" in modifier && modifier.damageCategory === "splash"
+                        ("category" in modifier && modifier.category === "splash") ||
+                        ("damageCategory" in modifier && modifier.damageCategory === "splash")
                 )
         );
 
