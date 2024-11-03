@@ -537,8 +537,11 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
     if (!msgContent) return;
 
     const damageRows = htmlQueryAll(msgContent, ".damage-application");
-    const diceTotalElement = msgContent.querySelectorAll(".dice-result .dice-total");
-    if (!damageRows.length || !diceTotalElement.length) return;
+    const diceTotalElements = msgContent.querySelectorAll(".dice-result .dice-total");
+    const wrappersParents = diceTotalElements.length
+        ? diceTotalElements
+        : msgContent.querySelectorAll(".dice-result .dice-formula");
+    if (!damageRows.length && !wrappersParents.length) return;
 
     const data = await getMessageData(message);
     const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
@@ -581,7 +584,7 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
 
             setSplashTargetBtn.title = localize("setSplashTargets");
 
-            diceTotalElement[splashIndex]?.append(splashWrapper);
+            wrappersParents[splashIndex].append(splashWrapper);
 
             splashWrapper.append(setSplashTargetBtn);
             addSetTargetsListener(setSplashTargetBtn, message, "splashTargets");
@@ -593,10 +596,10 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         wrapper.append(rollSavesBtn);
     }
 
-    diceTotalElement[0].append(wrapper);
+    wrappersParents[0].append(wrapper);
 
     if (hasSplashDamage) {
-        diceTotalElement[splashIndex].append(splashWrapper);
+        wrappersParents[splashIndex].append(splashWrapper);
     }
 
     if (!hasTargets && !hasSplashTargets) return;
