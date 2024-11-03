@@ -55,6 +55,12 @@
                         }
                     }
 
+                    .pf2e-toolbelt-target-setTargets {
+                        &.splash-targets {
+                            color: #3b3b3b;
+                        }
+                    }
+
                     .pf2e-toolbelt-target-toggleDamageRows {
                         &.expanded {
                             .expand {

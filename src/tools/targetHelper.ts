@@ -24,9 +24,11 @@ import {
     onClickShieldBlock,
     parseInlineParams,
     refreshLatestMessages,
+    removeIndexFromArray,
     setControlled,
     splitListString,
     toggleOffShieldBlock,
+    updateFlag,
     userIsActiveGM,
 } from "foundry-pf2e";
 import { createTool } from "../tool";
@@ -506,51 +508,84 @@ async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) 
     }
 }
 
+function createDamageToggleBtn(damageRows: HTMLElement[]) {
+    const toggleBtn = createHTMLElement("button", {
+        classes: ["pf2e-toolbelt-target-toggleDamageRows"],
+        innerHTML: `<i class="fa-solid fa-plus expand"></i><i class="fa-solid fa-minus collapse"></i>`,
+    });
+
+    toggleBtn.title = localize("toggleDamageRows");
+    toggleBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+
+        toggleBtn.classList.toggle("expanded");
+
+        for (const damageRow of damageRows) {
+            damageRow.classList.toggle("hidden");
+        }
+    });
+
+    for (const damageRow of damageRows) {
+        damageRow.classList.add("hidden");
+    }
+
+    return toggleBtn;
+}
+
 async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
 
     const damageRows = htmlQueryAll(msgContent, ".damage-application");
-    const diceTotalElement = htmlQuery(msgContent, ".dice-result .dice-total");
-    if (!damageRows.length || !diceTotalElement) return;
+    const diceTotalElement = msgContent.querySelectorAll(".dice-result .dice-total");
+    if (!damageRows.length || !diceTotalElement.length) return;
 
     const data = await getMessageData(message);
-    const hasTargets = !!data?.targets.length;
     const wrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
+    const splashWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
 
     html.addEventListener("drop", onChatMessageDrop);
 
-    diceTotalElement.append(wrapper);
+    const splashIndex = data?.splashIndex ?? -1;
+    const hasSplashTargets = data?.hasSplashTargets;
+    const hasSplashDamage = splashIndex > -1;
+    const hasTargets = data?.hasTargets;
 
     if (hasTargets) {
-        const toggleBtn = createHTMLElement("button", {
-            classes: ["pf2e-toolbelt-target-toggleDamageRows"],
-            innerHTML: `<i class="fa-solid fa-plus expand"></i><i class="fa-solid fa-minus collapse"></i>`,
-        });
-
-        toggleBtn.title = localize("toggleDamageRows");
-        toggleBtn.addEventListener("click", (event) => {
-            event.stopPropagation();
-
-            toggleBtn.classList.toggle("expanded");
-
-            for (const damageRow of damageRows) {
-                damageRow.classList.toggle("hidden");
-            }
-        });
-
-        for (const damageRow of damageRows) {
-            damageRow.classList.add("hidden");
-        }
+        const rows = removeIndexFromArray(damageRows, splashIndex);
+        const toggleBtn = createDamageToggleBtn(rows);
 
         wrapper.append(toggleBtn);
+    }
+
+    if (hasSplashDamage && (hasTargets || hasSplashTargets)) {
+        const row = damageRows[splashIndex];
+        const toggleBtn = createDamageToggleBtn([row]);
+
+        splashWrapper.append(toggleBtn);
     }
 
     const isGM = game.user.isGM;
 
     if (isGM || message.isAuthor) {
         const setTargetsBtn = createSetTargetsBtn(message);
+
         wrapper.append(setTargetsBtn);
+
+        if (hasSplashDamage) {
+            const setSplashTargetBtn = createHTMLElement("button", {
+                classes: ["pf2e-toolbelt-target-setTargets", "splash-targets"],
+                dataset: { action: "set-splash-targets" },
+                innerHTML: "<i class='fa-solid fa-burst'></i>",
+            });
+
+            setSplashTargetBtn.title = localize("setSplashTargets");
+
+            diceTotalElement[splashIndex]?.append(splashWrapper);
+
+            splashWrapper.append(setSplashTargetBtn);
+            addSetTargetsListener(setSplashTargetBtn, message, "splashTargets");
+        }
     }
 
     const rollSavesBtn = createRollSavesBtn(message, data);
@@ -558,7 +593,13 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         wrapper.append(rollSavesBtn);
     }
 
-    if (!hasTargets) return;
+    diceTotalElement[0].append(wrapper);
+
+    if (hasSplashDamage) {
+        diceTotalElement[splashIndex].append(splashWrapper);
+    }
+
+    if (!hasTargets && !hasSplashTargets) return;
 
     const smallButtons = settings.smallButtons;
     const clonedDamageRows = damageRows.map((el) => {
@@ -585,7 +626,7 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         classes: ["pf2e-toolbelt-target-targetRows", "pf2e-toolbelt-target-damage"],
     });
 
-    for (const { template, isOwner, save, uuid, applied, target } of data.targets) {
+    for (const { template, isOwner, save, uuid, applied, target, isSplashTarget } of data.targets) {
         const hrElement = createHTMLElement("hr");
         const rowElement = createHTMLElement("div", {
             dataset: { targetUuid: uuid },
@@ -601,6 +642,8 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         const isBasic = isBasicSave(save);
 
         for (let i = 0; i < clonedDamageRows.length; i++) {
+            if (isSplashTarget && i !== data.splashIndex) continue;
+
             const clonedDamageRow = clonedDamageRows[i];
             const clone = clonedDamageRow.cloneNode(true) as HTMLElement;
 
@@ -1003,13 +1046,29 @@ function addRollSavesListener(
     });
 }
 
-function addSetTargetsListener(el: HTMLElement, message: ChatMessagePF2e) {
+function addSetTargetsListener(
+    el: HTMLElement,
+    message: ChatMessagePF2e,
+    targetKey: "targets" | "splashTargets" = "targets"
+) {
     el.addEventListener("click", async (event) => {
         event.stopPropagation();
 
         const targets = getCurrentTargets();
+        const updates = {
+            targetHelper: {
+                [targetKey]: targets,
+            },
+        };
 
-        await setFlag(message, "targets", targets);
+        const otherKey = targetKey === "splashTargets" ? "targets" : "splashTargets";
+        const otherTargets = getMessageFlag(message, otherKey)?.slice();
+
+        if (otherTargets) {
+            updates.targetHelper[otherKey] = otherTargets.filter((uuid) => !targets.includes(uuid));
+        }
+
+        await updateFlag(message, updates);
         requestAnimationFrame(() => ui.chat.scrollBottom({ popout: true, waitImages: true }));
     });
 }
@@ -1330,7 +1389,11 @@ async function getMessageData(
     if (onlyWithSave && !save) return;
 
     const targetsFlag = getMessageTargets(message);
-    if (!targetsFlag.length && !save) return;
+    const splashIndex = getMessageFlag(message, "splashIndex") ?? -1;
+    const splashTargetsFLag = (getMessageFlag(message, "splashTargets") ?? []).filter(
+        (uuid) => !targetsFlag.includes(uuid)
+    );
+    if (!targetsFlag.length && !splashTargetsFLag.length && !save && splashIndex === -1) return;
 
     const user = game.user;
     const isGM = user.isGM;
@@ -1357,174 +1420,194 @@ async function getMessageData(
         });
     }
 
+    let hasTargets = false;
+    let hasSplashTargets = false;
+
     const canRollSave: string[] = [];
+    const allTargetsFlags = [
+        ["target", targetsFlag],
+        ["splash", splashTargetsFLag],
+    ] as const;
+
     const allTargets = await Promise.all(
-        targetsFlag.map(async (tokenUUID) => {
-            const target = await fromUuid(tokenUUID);
-            if (!isValidToken(target)) return;
+        allTargetsFlags.flatMap(([type, uuids]) =>
+            uuids.map(async (tokenUUID) => {
+                const target = await fromUuid(tokenUUID);
+                if (!isValidToken(target)) return;
 
-            const targetId = target.id;
-            const targetActor = target.actor as CreaturePF2e;
-            if (!targetActor) return;
+                const targetId = target.id;
+                const targetActor = target.actor as CreaturePF2e;
+                if (!targetActor) return;
 
-            const isHidden = target.hidden || targetActor.hasCondition("unnoticed", "undetected");
-            if (!isGM && isHidden) return;
+                const isHidden =
+                    target.hidden || targetActor.hasCondition("unnoticed", "undetected");
+                if (!isGM && isHidden) return;
 
-            const isOwner = targetActor.isOwner;
-            const hasPlayerOwner = targetActor.hasPlayerOwner;
-            const isFriendly = isOwner || hasPlayerOwner;
-            const hasSave = save && !!targetActor.saves?.[save.statistic];
-            const saveFlag = getTargetSave(message, targetId);
+                const isOwner = targetActor.isOwner;
+                const hasPlayerOwner = targetActor.hasPlayerOwner;
+                const isFriendly = isOwner || hasPlayerOwner;
+                const hasSave = save && !!targetActor.saves?.[save.statistic];
+                const saveFlag = getTargetSave(message, targetId);
 
-            if (hasSave && !hasPlayerOwner && !saveFlag) {
-                canRollSave.push(tokenUUID);
-            }
-
-            const targetSave: TargetSaveResult | undefined = await (async () => {
-                if (!hasSave || !saveFlag) return;
-
-                const rerolled = saveFlag.rerolled;
-                const canReroll = hasSave && isOwner && !rerolled;
-                const offset = saveFlag.value - save.dc;
-                const isPrivate = saveFlag.private && !hasPlayerOwner;
-                const canSeeResult = isGM || !isPrivate;
-
-                const adjustment = (() => {
-                    if (
-                        (!isFriendly && !showBreakdowns) ||
-                        !saveFlag.unadjustedOutcome ||
-                        !saveFlag.dosAdjustments ||
-                        saveFlag.success === saveFlag.unadjustedOutcome
-                    )
-                        return;
-
-                    const adjustments = R.filter(
-                        [
-                            saveFlag.dosAdjustments[saveFlag.unadjustedOutcome]?.label,
-                            saveFlag.dosAdjustments.all?.label,
-                        ],
-                        R.isTruthy
-                    );
-
-                    return adjustments.length
-                        ? adjustments.map((x) => game.i18n.localize(x)).join(", ")
-                        : undefined;
-                })();
-
-                const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
-                const notesList = RollNotePF2e.notesToHTML(notes);
-                notesList?.classList.add("pf2e-toolbelt-target-notes");
-
-                let result = "";
-
-                if (canSeeResult) {
-                    if (isFriendly || showBreakdowns) {
-                        result += `(<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}) `;
-                    }
-
-                    if (isFriendly || showResults) {
-                        result += localize(
-                            `tooltip.result.${showDC ? "withOffset" : "withoutOffset"}`,
-                            {
-                                success: game.i18n.localize(
-                                    `PF2E.Check.Result.Degree.Check.${saveFlag.success}`
-                                ),
-                                offset: offset >= 0 ? `+${offset}` : offset,
-                            }
-                        );
-                    }
+                if (hasSave && !hasPlayerOwner && !saveFlag) {
+                    canRollSave.push(tokenUUID);
                 }
 
-                const significantList =
-                    foundry.utils.deepClone(saveFlag.significantModifiers) ?? [];
+                const targetSave: TargetSaveResult | undefined = await (async () => {
+                    if (!hasSave || !saveFlag) return;
 
-                const hasSignificantModifiers = R.pipe(
-                    significantList,
-                    R.map(({ value, significance }) => ({
-                        value: Math.abs(value),
-                        css: significance,
-                    })),
-                    R.firstBy([R.prop("value"), "desc"])
-                )?.css;
+                    const rerolled = saveFlag.rerolled;
+                    const canReroll = hasSave && isOwner && !rerolled;
+                    const offset = saveFlag.value - save.dc;
+                    const isPrivate = saveFlag.private && !hasPlayerOwner;
+                    const canSeeResult = isGM || !isPrivate;
 
-                const modifiers =
-                    isFriendly || showBreakdowns
-                        ? saveFlag.modifiers.map(({ label, modifier }) => {
-                              const significant = significantList.findSplice(
-                                  ({ name, value }) => name === label && modifier === value
-                              );
-                              return {
-                                  name: label.replace(/(.+) \d+/, "$1"),
-                                  value: modifier,
-                                  css: significant?.significance ?? "NONE",
-                              };
-                          })
-                        : [];
+                    const adjustment = (() => {
+                        if (
+                            (!isFriendly && !showBreakdowns) ||
+                            !saveFlag.unadjustedOutcome ||
+                            !saveFlag.dosAdjustments ||
+                            saveFlag.success === saveFlag.unadjustedOutcome
+                        )
+                            return;
 
-                const significantModifiers =
-                    isFriendly || showSignificant
-                        ? significantList.map(({ name, significance, value }) => ({
-                              name: name.replace(/(.+) \d+/, "$1"),
-                              value,
-                              css: significance,
-                          }))
-                        : [];
+                        const adjustments = R.filter(
+                            [
+                                saveFlag.dosAdjustments[saveFlag.unadjustedOutcome]?.label,
+                                saveFlag.dosAdjustments.all?.label,
+                            ],
+                            R.isTruthy
+                        );
+
+                        return adjustments.length
+                            ? adjustments.map((x) => game.i18n.localize(x)).join(", ")
+                            : undefined;
+                    })();
+
+                    const notes = saveFlag.notes.map((note) => new RollNotePF2e(note));
+                    const notesList = RollNotePF2e.notesToHTML(notes);
+                    notesList?.classList.add("pf2e-toolbelt-target-notes");
+
+                    let result = "";
+
+                    if (canSeeResult) {
+                        if (isFriendly || showBreakdowns) {
+                            result += `(<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}) `;
+                        }
+
+                        if (isFriendly || showResults) {
+                            result += localize(
+                                `tooltip.result.${showDC ? "withOffset" : "withoutOffset"}`,
+                                {
+                                    success: game.i18n.localize(
+                                        `PF2E.Check.Result.Degree.Check.${saveFlag.success}`
+                                    ),
+                                    offset: offset >= 0 ? `+${offset}` : offset,
+                                }
+                            );
+                        }
+                    }
+
+                    const significantList =
+                        foundry.utils.deepClone(saveFlag.significantModifiers) ?? [];
+
+                    const hasSignificantModifiers = R.pipe(
+                        significantList,
+                        R.map(({ value, significance }) => ({
+                            value: Math.abs(value),
+                            css: significance,
+                        })),
+                        R.firstBy([R.prop("value"), "desc"])
+                    )?.css;
+
+                    const modifiers =
+                        isFriendly || showBreakdowns
+                            ? saveFlag.modifiers.map(({ label, modifier }) => {
+                                  const significant = significantList.findSplice(
+                                      ({ name, value }) => name === label && modifier === value
+                                  );
+                                  return {
+                                      name: label.replace(/(.+) \d+/, "$1"),
+                                      value: modifier,
+                                      css: significant?.significance ?? "NONE",
+                                  };
+                              })
+                            : [];
+
+                    const significantModifiers =
+                        isFriendly || showSignificant
+                            ? significantList.map(({ name, significance, value }) => ({
+                                  name: name.replace(/(.+) \d+/, "$1"),
+                                  value,
+                                  css: significance,
+                              }))
+                            : [];
+
+                    return {
+                        ...saveFlag,
+                        notes: notesList?.outerHTML,
+                        canReroll,
+                        isPrivate,
+                        canSeeResult,
+                        hasSignificantModifiers: hasSignificantModifiers
+                            ? `has-significant-modifiers ${hasSignificantModifiers}`
+                            : undefined,
+                        tooltip: await render("tooltip", {
+                            check: save.tooltipLabel,
+                            result: result
+                                ? localize("tooltip.result.format", { result })
+                                : undefined,
+                            modifiers: modifiers.concat(significantModifiers),
+                            adjustment,
+                            canReroll,
+                            rerolled: rerolled ? REROLL[rerolled] : undefined,
+                        }),
+                    } satisfies TargetSaveResult;
+                })();
+
+                const templateSave: TargetSave | undefined = save && {
+                    ...save,
+                    result: targetSave,
+                };
+
+                const canSeeName =
+                    isGM || !game.pf2e.settings.tokens.nameVisibility || target.playersCanSeeName;
+                const name = canSeeName ? target.name : localize("unnamed");
+
+                const applied = getAppliedDamage(message, targetId);
+
+                if (type === "splash") {
+                    hasSplashTargets ||= true;
+                } else {
+                    hasTargets ||= true;
+                }
 
                 return {
-                    ...saveFlag,
-                    notes: notesList?.outerHTML,
-                    canReroll,
-                    isPrivate,
-                    canSeeResult,
-                    hasSignificantModifiers: hasSignificantModifiers
-                        ? `has-significant-modifiers ${hasSignificantModifiers}`
-                        : undefined,
-                    tooltip: await render("tooltip", {
-                        check: save.tooltipLabel,
-                        result: result ? localize("tooltip.result.format", { result }) : undefined,
-                        modifiers: modifiers.concat(significantModifiers),
-                        adjustment,
-                        canReroll,
-                        rerolled: rerolled ? REROLL[rerolled] : undefined,
-                    }),
-                } satisfies TargetSaveResult;
-            })();
-
-            const templateSave: TargetSave | undefined = save && {
-                ...save,
-                result: targetSave,
-            };
-
-            const canSeeName =
-                isGM || !game.pf2e.settings.tokens.nameVisibility || target.playersCanSeeName;
-            const name = canSeeName ? target.name : localize("unnamed");
-
-            const applied = getAppliedDamage(message, targetId);
-
-            return {
-                isOwner,
-                canSeeName,
-                hasPlayerOwner,
-                uuid: tokenUUID,
-                target,
-                applied,
-                save: templateSave,
-                template: await render("header", {
-                    name,
-                    isGM,
                     isOwner,
+                    canSeeName,
                     hasPlayerOwner,
-                    isHidden,
-                    showSuccess: isFriendly || showResults,
-                    messageSave: templateSave,
-                    save: hasSave && templateSave,
-                    canReroll: targetSave?.canReroll,
-                    isPrivate: isGM && targetSave?.isPrivate,
-                    canSeeResult: targetSave?.canSeeResult,
-                    rerolled: targetSave?.rerolled ? REROLL[targetSave.rerolled] : undefined,
-                }),
-            } satisfies MessageDataTarget;
-        })
+                    uuid: tokenUUID,
+                    target,
+                    applied,
+                    save: templateSave,
+                    isSplashTarget: type === "splash",
+                    template: await render("header", {
+                        name,
+                        isGM,
+                        isOwner,
+                        hasPlayerOwner,
+                        isHidden,
+                        showSuccess: isFriendly || showResults,
+                        messageSave: templateSave,
+                        save: hasSave && templateSave,
+                        canReroll: targetSave?.canReroll,
+                        isPrivate: isGM && targetSave?.isPrivate,
+                        canSeeResult: targetSave?.canSeeResult,
+                        rerolled: targetSave?.rerolled ? REROLL[targetSave.rerolled] : undefined,
+                    }),
+                } satisfies MessageDataTarget;
+            })
+        )
     );
 
     const targets = R.filter(allTargets, R.isTruthy);
@@ -1543,6 +1626,9 @@ async function getMessageData(
         targets,
         save,
         canRollSave,
+        hasTargets,
+        hasSplashTargets,
+        splashIndex,
         isRegen: !!getMessageFlag(message, "isRegen"),
     };
 }
@@ -1620,6 +1706,7 @@ type MessageFlag = {
     isRegen?: boolean;
     applied?: Record<string, boolean[]>;
     rollOptions?: string[];
+    splashTargets?: string[];
 };
 
 type CheckLinkData = { pf2Check: SaveType } & (
@@ -1678,6 +1765,7 @@ type MessageDataTarget = {
     target: TokenDocumentPF2e;
     applied: boolean[];
     save: TargetSave | undefined;
+    isSplashTarget: boolean;
     template: string;
 };
 
@@ -1686,6 +1774,9 @@ type MessageData = {
     save: MessageSaveDataWithTooltip | undefined;
     canRollSave: string[];
     isRegen: boolean;
+    hasTargets: boolean;
+    hasSplashTargets: boolean;
+    splashIndex: number;
 };
 
 export {

@@ -413,6 +413,7 @@
             },
             "rollSaves": "Roll NPC Saves",
             "setTargets": "Set targets",
+            "setSplashTargets": "Set Splash targets",
             "toggleDamageRows": "Toggle original damage buttons",
             "reroll": {
                 "title": "Save Check Reroll",
