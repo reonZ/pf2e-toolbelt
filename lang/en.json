@@ -408,7 +408,8 @@
             },
             "header": {
                 "sheet": "Open Sheet",
-                "hidden": "Hidden From Players"
+                "hidden": "Hidden From Players",
+                "noSave": "This actor cannot roll {save} checks"
             },
             "rollSaves": "Roll NPC Saves",
             "setTargets": "Set targets",

@@ -1515,6 +1515,7 @@ async function getMessageData(
                     hasPlayerOwner,
                     isHidden,
                     showSuccess: isFriendly || showResults,
+                    messageSave: templateSave,
                     save: hasSave && templateSave,
                     canReroll: targetSave?.canReroll,
                     isPrivate: isGM && targetSave?.isPrivate,
@@ -1556,7 +1557,14 @@ function getSaveData(message: ChatMessagePF2e): MessageSaveData | undefined {
 }
 
 function isValidToken(doc: Maybe<ClientDocument>): doc is TokenDocumentPF2e {
-    return isInstanceOf(doc, "TokenDocumentPF2e") && !!doc.actor?.isOfType("creature");
+    if (!isInstanceOf(doc, "TokenDocumentPF2e")) return false;
+
+    const actor = doc.actor;
+    return (
+        !!actor &&
+        (actor.isOfType("creature", "vehicle") ||
+            (actor.isOfType("hazard") && !!actor.hitPoints?.max))
+    );
 }
 
 type TargetButtonAction =

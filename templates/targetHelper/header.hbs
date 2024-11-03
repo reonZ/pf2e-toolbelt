@@ -6,12 +6,12 @@
 
 
 <span class="controls {{save.result.hasSignificantModifiers}}">
+    {{!-- actor has save result --}}
     {{#if save.result}}
-
     {{#if save.result.notes}}
     <i class="fa-duotone fa-list-check list" data-tooltip="{{save.result.notes}}"></i>
     {{/if}}
-
+    {{!-- can reroll --}}
     {{#if (and isOwner canReroll)}}
     <a class="reroll" data-action="reroll-save" data-statistic="{{save.statistic}}"
         data-tooltip="{{save.result.tooltip}}" {{#if isPrivate}}data-visibility="gm" {{/if}}>
@@ -20,6 +20,7 @@
             class="degree {{#if showSuccess}}show{{/if}} {{save.result.success}}">{{save.result.value}}</span>
         <i class="fa-solid fa-rotate rotate"></i>
     </a>
+    {{!-- can not reroll --}}
     {{else}}
     <span class="observe" data-tooltip="{{save.result.tooltip}}" {{#if
         isPrivate}}data-visibility="gm" {{/if}}>
@@ -33,11 +34,11 @@
         <i class="fa-solid fa-circle-question"></i>
         {{/if}}
     </span>
+    {{!-- end can reroll --}}
     {{/if}}
-
     <hr>
+    {{!-- actor has save but no result --}}
     {{else if save}}
-
     {{#if isOwner}}
     <a data-action="roll-save" data-statistic="{{save.statistic}}" data-tooltip="{{save.tooltip}}">
         <i class="save {{save.icon}}"></i>
@@ -49,14 +50,19 @@
         <i class="fa-regular fa-circle-question"></i>
     </span>
     {{/if}}
-
     <hr>
+    {{!-- actor has no save but message does --}}
+    {{else if messageSave}}
+    <span data-tooltip="{{@root.i18n 'noSave' save=messageSave.statistic}}">
+        <i class="save {{messageSave.icon}}"></i>
+        <i class="fa-solid fa-ban"></i>
+    </span>
+    <hr>
+    {{!-- end of has save --}}
     {{/if}}
-
     <a data-action="ping-target" data-tooltip="COMBAT.PingCombatant">
         <i class="fa-solid fa-fw fa-signal-stream"></i>
     </a>
-
     {{#if isGM}}
     <a data-action="open-target-sheet" data-tooltip="{{@root.i18n.path 'sheet'}}">
         <i class="icon fa-solid fa-file"></i>
