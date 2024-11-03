@@ -408,7 +408,8 @@
             },
             "header": {
                 "sheet": "Otwórz kartę",
-                "hidden": "Ukryte przed graczami"
+                "hidden": "Ukryte przed graczami",
+                "noSave": "Ten aktor nie może rzucać testów {save}"
             },
             "rollSaves": "Rzuć rzuty obronne BN-ów",
             "setTargets": "Wyznacz cele",
