@@ -413,6 +413,7 @@
             },
             "rollSaves": "Rzuć rzuty obronne BN-ów",
             "setTargets": "Wyznacz cele",
+            "setSplashTargets": "Wyznacz cele rozprysku",
             "toggleDamageRows": "Przełącz oryginalne przyciski obrażeń",
             "reroll": {
                 "title": "Przerzuć ponowny test rzutu obronnego",
