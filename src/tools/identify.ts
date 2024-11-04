@@ -319,13 +319,14 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
             const identifyTooltip = await (async () => {
                 if (itemIdentified) return;
 
+                const isAlchemical = item.isAlchemical;
                 const dcs = getItemIdentificationDCs(item);
                 const tmp = await renderTemplate(
                     "systems/pf2e/templates/actors/identify-item.hbs",
                     {
-                        dcs: "dc" in dcs ? { crafting: dcs.dc } : dcs,
+                        dcs: !isAlchemical && "crafting" in dcs ? { dc: dcs.crafting } : dcs,
                         isMagic: item.isMagical,
-                        isAlchemical: item.isAlchemical,
+                        isAlchemical,
                     }
                 );
 
