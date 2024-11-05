@@ -752,6 +752,8 @@ async function addChatMessageListeners(
         });
 
         targetElement.addEventListener("dragleave", (event) => {
+            const relatedTarget = event.relatedTarget as HTMLElement | null;
+            if (relatedTarget && targetElement.contains(relatedTarget)) return;
             targetElement.classList.remove("highlight");
         });
 
