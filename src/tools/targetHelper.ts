@@ -724,8 +724,7 @@ async function addChatMessageListeners(
             async (event) => {
                 if (!canvas.ready) return;
 
-                const uuid = htmlClosest(event.target, "[data-target-uuid]")?.dataset.targetUuid;
-                const token = (await fromUuid<TokenDocumentPF2e>(uuid ?? ""))?.object;
+                const token = target?.object;
 
                 if (token?.isVisible && !token.controlled) {
                     token.emitHoverIn(event);
@@ -739,10 +738,7 @@ async function addChatMessageListeners(
             async (event) => {
                 if (!canvas.ready) return;
 
-                const uuid = htmlClosest(event.target, "[data-target-uuid]")?.dataset.targetUuid;
-                const token = (await fromUuid<TokenDocumentPF2e>(uuid ?? ""))?.object;
-
-                token?.emitHoverOut(event);
+                target?.object?.emitHoverOut(event);
             },
             true
         );
