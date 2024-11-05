@@ -452,7 +452,7 @@ async function actionChatMessageGetHtml(message: ChatMessagePF2e, html: HTMLElem
         footer.append(rollSavesBtn);
     }
 
-    addSaveHeaders(data, message, msgContent);
+    addSaveHeaders(data, message, msgContent, html);
 }
 
 async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
@@ -500,7 +500,7 @@ async function checkMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) 
         }
     }
 
-    addSaveHeaders(data, message, msgContent);
+    addSaveHeaders(data, message, msgContent, html);
 
     const fakeBtn = htmlQuery<HTMLButtonElement>(msgContent, "[data-action='roll-fake-check']");
     if (fakeBtn) {
@@ -699,9 +699,50 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
     msgContent.after(rowsWrapper);
 
     addHeaderListeners(message, rowsWrapper, data.save);
+    addChatMessageHoverListener(html);
 
     addListenerAll(rowsWrapper, "[data-action^='target-']", (event, btn: HTMLButtonElement) =>
         onTargetButton(event, btn, message)
+    );
+}
+
+function addChatMessageHoverListener(html: HTMLElement) {
+    html.addEventListener(
+        "mouseenter",
+        async (event) => {
+            event.stopPropagation();
+
+            if (!canvas.ready) return;
+
+            const uuid = htmlClosest(event.target, "[data-target-uuid]")?.dataset.targetUuid;
+            const token = (await fromUuid<TokenDocumentPF2e>(uuid ?? ""))?.object;
+
+            if (token?.isVisible && !token.controlled) {
+                html.dataset.currentTarget = uuid;
+                token.emitHoverIn(event);
+            }
+        },
+        true
+    );
+
+    html.addEventListener(
+        "mouseleave",
+        async (event) => {
+            if (!canvas.ready) return;
+
+            event.stopPropagation();
+
+            const target = event.target as HTMLElement;
+
+            if (target.classList.contains("pf2e-toolbelt-target-targetRows")) {
+                const uuid = html.dataset.currentTarget;
+                if (!uuid) return;
+
+                const token = (await fromUuid<TokenDocumentPF2e>(uuid))?.object;
+                token?.emitHoverOut(event);
+            }
+        },
+        true
     );
 }
 
@@ -901,7 +942,12 @@ function isBasicSave(
     return !!(save?.result && save.basic);
 }
 
-function addSaveHeaders(data: MessageData, message: ChatMessagePF2e, afterElement: HTMLElement) {
+function addSaveHeaders(
+    data: MessageData,
+    message: ChatMessagePF2e,
+    afterElement: HTMLElement,
+    html: HTMLElement
+) {
     const { targets, save } = data;
     if (!targets.length) return;
 
@@ -922,6 +968,7 @@ function addSaveHeaders(data: MessageData, message: ChatMessagePF2e, afterElemen
     afterElement.after(rowsWrapper);
 
     addHeaderListeners(message, rowsWrapper, save);
+    addChatMessageHoverListener(html);
 }
 
 async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
@@ -962,7 +1009,7 @@ async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLEleme
 
     cardBtns.prepend(wrapper);
 
-    addSaveHeaders(data, message, msgContent);
+    addSaveHeaders(data, message, msgContent, html);
 }
 
 function linkSaveBtns(
