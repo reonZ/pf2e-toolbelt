@@ -403,7 +403,7 @@
                 }
             },
             "header": {
-                "select": "Wyznacz cel",
+                "select": "Wybierz cel<br>[Dwukrotne kliknięcie] Otwórz kartę",
                 "hidden": "Ukryte przed graczami",
                 "noSave": "Ten aktor nie może rzucać testów {save}"
             },
