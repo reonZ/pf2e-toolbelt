@@ -407,6 +407,7 @@
                 }
             },
             "header": {
+                "select": "Wyznacz cel",
                 "hidden": "Ukryte przed graczami",
                 "noSave": "Ten aktor nie może rzucać testów {save}"
             },
