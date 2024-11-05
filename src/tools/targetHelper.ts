@@ -698,7 +698,7 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
 
     msgContent.after(rowsWrapper);
 
-    addChatMessageListeners(message, html, rowsWrapper, data.save);
+    addChatMessageListeners(message, rowsWrapper, data.save);
 
     addListenerAll(rowsWrapper, "[data-action^='target-']", (event, btn: HTMLButtonElement) =>
         onTargetButton(event, btn, message)
@@ -708,48 +708,9 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
 let lastClickTime = Date.now();
 async function addChatMessageListeners(
     message: ChatMessagePF2e,
-    html: HTMLElement,
     wrapper: HTMLElement,
     save: MessageSaveDataWithTooltip | undefined
 ) {
-    html.addEventListener(
-        "mouseenter",
-        async (event) => {
-            event.stopPropagation();
-
-            if (!canvas.ready) return;
-
-            const uuid = htmlClosest(event.target, "[data-target-uuid]")?.dataset.targetUuid;
-            const token = (await fromUuid<TokenDocumentPF2e>(uuid ?? ""))?.object;
-
-            if (token?.isVisible && !token.controlled) {
-                html.dataset.currentTarget = uuid;
-                token.emitHoverIn(event);
-            }
-        },
-        true
-    );
-
-    html.addEventListener(
-        "mouseleave",
-        async (event) => {
-            if (!canvas.ready) return;
-
-            event.stopPropagation();
-
-            const target = event.target as HTMLElement;
-
-            if (target.classList.contains("pf2e-toolbelt-target-targetRows")) {
-                const uuid = html.dataset.currentTarget;
-                if (!uuid) return;
-
-                const token = (await fromUuid<TokenDocumentPF2e>(uuid))?.object;
-                token?.emitHoverOut(event);
-            }
-        },
-        true
-    );
-
     const targetElements = wrapper.querySelectorAll<HTMLElement>(
         ".target-header[data-target-uuid]"
     );
@@ -757,6 +718,34 @@ async function addChatMessageListeners(
         const { targetUuid } = elementDataset(targetElement);
         const target = await fromUuid(targetUuid);
         if (!isValidToken(target)) continue;
+
+        targetElement.addEventListener(
+            "mouseenter",
+            async (event) => {
+                if (!canvas.ready) return;
+
+                const uuid = htmlClosest(event.target, "[data-target-uuid]")?.dataset.targetUuid;
+                const token = (await fromUuid<TokenDocumentPF2e>(uuid ?? ""))?.object;
+
+                if (token?.isVisible && !token.controlled) {
+                    token.emitHoverIn(event);
+                }
+            },
+            true
+        );
+
+        targetElement.addEventListener(
+            "mouseleave",
+            async (event) => {
+                if (!canvas.ready) return;
+
+                const uuid = htmlClosest(event.target, "[data-target-uuid]")?.dataset.targetUuid;
+                const token = (await fromUuid<TokenDocumentPF2e>(uuid ?? ""))?.object;
+
+                token?.emitHoverOut(event);
+            },
+            true
+        );
 
         targetElement.addEventListener("dragenter", (event) => {
             targetElement.classList.add("highlight");
@@ -1021,7 +1010,7 @@ function addSaveHeaders(
 
     afterElement.after(rowsWrapper);
 
-    addChatMessageListeners(message, html, rowsWrapper, save);
+    addChatMessageListeners(message, rowsWrapper, save);
 }
 
 async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
