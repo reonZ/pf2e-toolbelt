@@ -698,15 +698,20 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
 
     msgContent.after(rowsWrapper);
 
-    addHeaderListeners(message, rowsWrapper, data.save);
-    addChatMessageHoverListener(html);
+    addChatMessageListeners(message, html, rowsWrapper, data.save);
 
     addListenerAll(rowsWrapper, "[data-action^='target-']", (event, btn: HTMLButtonElement) =>
         onTargetButton(event, btn, message)
     );
 }
 
-function addChatMessageHoverListener(html: HTMLElement) {
+let lastClickTime = Date.now();
+async function addChatMessageListeners(
+    message: ChatMessagePF2e,
+    html: HTMLElement,
+    wrapper: HTMLElement,
+    save: MessageSaveDataWithTooltip | undefined
+) {
     html.addEventListener(
         "mouseenter",
         async (event) => {
@@ -744,6 +749,55 @@ function addChatMessageHoverListener(html: HTMLElement) {
         },
         true
     );
+
+    const targetElements = wrapper.querySelectorAll<HTMLElement>(
+        ".target-header[data-target-uuid]"
+    );
+    for (const targetElement of targetElements) {
+        const { targetUuid } = elementDataset(targetElement);
+        const target = await fromUuid(targetUuid);
+        if (!isValidToken(target)) continue;
+
+        targetElement.addEventListener("dragenter", (event) => {
+            targetElement.classList.add("highlight");
+        });
+
+        targetElement.addEventListener("dragleave", (event) => {
+            targetElement.classList.remove("highlight");
+        });
+
+        targetElement.addEventListener("drop", (event) => {
+            targetElement.classList.remove("highlight");
+            target.actor?.sheet._onDrop(event);
+        });
+
+        addListener(targetElement, "[data-action='ping-target']", () => {
+            canvas.ping(target.center);
+        });
+
+        addListener(targetElement, "[data-action='select-target']", (event) => {
+            const now = Date.now();
+            const dt = now - lastClickTime;
+
+            lastClickTime = now;
+
+            if (dt <= 250) {
+                return target.actor?.sheet.render(true);
+            }
+
+            target.object?.control({ releaseOthers: true });
+        });
+
+        if (save) {
+            addListener(targetElement, "[data-action='roll-save']", (event) => {
+                rollSaves(event, message, save, [target]);
+            });
+
+            addListener(targetElement, "[data-action='reroll-save']", (event) => {
+                rerollSave(event, message, save, target);
+            });
+        }
+    }
 }
 
 function isValidCheckLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorElement & {
@@ -967,8 +1021,7 @@ function addSaveHeaders(
 
     afterElement.after(rowsWrapper);
 
-    addHeaderListeners(message, rowsWrapper, save);
-    addChatMessageHoverListener(html);
+    addChatMessageListeners(message, html, rowsWrapper, save);
 }
 
 async function spellChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElement) {
@@ -1135,48 +1188,6 @@ function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
     addSetTargetsListener(btnElement, message);
 
     return btnElement;
-}
-
-let lastClickTime = Date.now();
-async function addHeaderListeners(
-    message: ChatMessagePF2e,
-    html: HTMLElement,
-    save?: MessageSaveDataWithTooltip
-) {
-    const targetElements = html.querySelectorAll<HTMLElement>("[data-target-uuid]");
-
-    for (const targetElement of targetElements) {
-        const { targetUuid } = elementDataset(targetElement);
-        const target = await fromUuid(targetUuid);
-        if (!isValidToken(target)) continue;
-
-        addListener(targetElement, "[data-action='ping-target']", () => {
-            canvas.ping(target.center);
-        });
-
-        addListener(targetElement, "[data-action='select-target']", (event) => {
-            const now = Date.now();
-            const dt = now - lastClickTime;
-
-            lastClickTime = now;
-
-            if (dt <= 250) {
-                return target.actor?.sheet.render(true);
-            }
-
-            target.object?.control({ releaseOthers: true });
-        });
-
-        if (save) {
-            addListener(targetElement, "[data-action='roll-save']", (event) => {
-                rollSaves(event, message, save, [target]);
-            });
-
-            addListener(targetElement, "[data-action='reroll-save']", (event) => {
-                rerollSave(event, message, save, target);
-            });
-        }
-    }
 }
 
 async function rollSaves(
