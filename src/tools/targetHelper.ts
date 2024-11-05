@@ -1137,6 +1137,7 @@ function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
     return btnElement;
 }
 
+let lastClickTime = Date.now();
 async function addHeaderListeners(
     message: ChatMessagePF2e,
     html: HTMLElement,
@@ -1154,6 +1155,15 @@ async function addHeaderListeners(
         });
 
         addListener(targetElement, "[data-action='select-target']", (event) => {
+            const now = Date.now();
+            const dt = now - lastClickTime;
+
+            lastClickTime = now;
+
+            if (dt <= 250) {
+                return target.actor?.sheet.render(true);
+            }
+
             target.object?.control({ releaseOthers: true });
         });
 

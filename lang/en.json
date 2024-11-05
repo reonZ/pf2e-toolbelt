@@ -407,7 +407,7 @@
                 }
             },
             "header": {
-                "select": "Select Target",
+                "select": "Select Target<br>[Double Click] Open Sheet",
                 "hidden": "Hidden From Players",
                 "noSave": "This actor cannot roll {save} checks"
             },
