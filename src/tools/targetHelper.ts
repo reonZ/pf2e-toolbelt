@@ -711,6 +711,18 @@ async function addChatMessageListeners(
     wrapper: HTMLElement,
     save: MessageSaveDataWithTooltip | undefined
 ) {
+    const emitTokenHover = (event: MouseEvent, target: TokenDocumentPF2e, hover: boolean) => {
+        if (!canvas.ready) return;
+
+        const token = target?.object;
+
+        if (hover && token?.isVisible && !token.controlled) {
+            token.emitHoverIn(event);
+        } else if (!hover) {
+            target?.object?.emitHoverOut(event);
+        }
+    };
+
     const targetElements = wrapper.querySelectorAll<HTMLElement>(
         ".target-header[data-target-uuid]"
     );
@@ -719,38 +731,25 @@ async function addChatMessageListeners(
         const target = await fromUuid(targetUuid);
         if (!isValidToken(target)) continue;
 
-        targetElement.addEventListener(
-            "mouseenter",
-            async (event) => {
-                if (!canvas.ready) return;
+        targetElement.addEventListener("mouseenter", async (event) => {
+            emitTokenHover(event, target, true);
+        });
 
-                const token = target?.object;
-
-                if (token?.isVisible && !token.controlled) {
-                    token.emitHoverIn(event);
-                }
-            },
-            true
-        );
-
-        targetElement.addEventListener(
-            "mouseleave",
-            async (event) => {
-                if (!canvas.ready) return;
-
-                target?.object?.emitHoverOut(event);
-            },
-            true
-        );
+        targetElement.addEventListener("mouseleave", async (event) => {
+            emitTokenHover(event, target, false);
+        });
 
         targetElement.addEventListener("dragenter", (event) => {
             targetElement.classList.add("highlight");
+            emitTokenHover(event, target, true);
         });
 
         targetElement.addEventListener("dragleave", (event) => {
             const relatedTarget = event.relatedTarget as HTMLElement | null;
             if (relatedTarget && targetElement.contains(relatedTarget)) return;
+
             targetElement.classList.remove("highlight");
+            emitTokenHover(event, target, false);
         });
 
         targetElement.addEventListener("drop", (event) => {
