@@ -1153,8 +1153,8 @@ async function addHeaderListeners(
             canvas.ping(target.center);
         });
 
-        addListener(targetElement, "[data-action='open-target-sheet']", () => {
-            target.actor?.sheet.render(true);
+        addListener(targetElement, "[data-action='select-target']", (event) => {
+            target.object?.control({ releaseOthers: true });
         });
 
         if (save) {

@@ -407,7 +407,7 @@
                 }
             },
             "header": {
-                "sheet": "Open Sheet",
+                "select": "Select Target",
                 "hidden": "Hidden From Players",
                 "noSave": "This actor cannot roll {save} checks"
             },
