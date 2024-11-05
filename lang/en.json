@@ -25,10 +25,6 @@
                 "remove": {
                     "name": "Remove-Effect Shortcut",
                     "hint": "Using [Shift + Right Click] on effect icons in the effects-panel will instantly remove all their charges/counters/badges."
-                },
-                "condition": {
-                    "name": "Condition-Sheet Icon",
-                    "hint": "Adds an extra icon to conditions in the effects-panel to open their sheet."
                 }
             },
             "giveth": {
