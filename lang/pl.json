@@ -240,9 +240,6 @@
         "arp": {
             "forceVariant": "Moduł <strong>PF2e Toolbelt</strong> wyłączył wariant systemu pf2e dla reguły ABP, aby działał poprawnie. Prawdopodobnie byłoby lepiej, gdybyś przeładował teraz świat."
         },
-        "effectsPanel": {
-            "remove": "[Shift + kliknięcie prawym przyciskiem myszy] Usuń efekt"
-        },
         "giveth": {
             "error": {
                 "zero": "Nie możesz podarować przedmiotu, którego nie posiadasz.",

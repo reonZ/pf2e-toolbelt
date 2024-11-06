@@ -240,9 +240,6 @@
         "arp": {
             "forceVariant": "The module <strong>PF2e Toolbelt</strong> disabled the pf2e system variant ABP rule to work properly. It would probably be better if you reloaded the world now."
         },
-        "effectsPanel": {
-            "remove": "[Shift + Right Click] Remove effect"
-        },
         "giveth": {
             "error": {
                 "zero": "You cannot give an item you don't have yourself.",
