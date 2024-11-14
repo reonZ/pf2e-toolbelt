@@ -1,3 +1,11 @@
+# 2.22.1
+
+-   expose the whole toolbelt API & more to `game.toolbelt`
+-   `Shared Data`:
+    -   add bunch of functions to the tool api
+-   `Target Helper`:
+    -   fix missing item traits for dropped & reposted saves
+
 # 2.22.0
 
 -   `Effects Panel`:
