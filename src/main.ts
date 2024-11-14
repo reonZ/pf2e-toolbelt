@@ -1,4 +1,4 @@
-import { MODULE, userIsGM } from "foundry-pf2e";
+import { getSetting, MODULE, userIsGM } from "foundry-pf2e";
 import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";
@@ -62,6 +62,34 @@ Hooks.once("init", () => {
             module.api[name] = api;
         }
     }
+
+    // @ts-ignore
+    game.toolbelt = Object.defineProperties(
+        {},
+        {
+            api: {
+                value: module.api,
+                writable: false,
+                configurable: false,
+                enumerable: false,
+            },
+            active: {
+                get: function () {
+                    return MODULE.current.active;
+                },
+                configurable: false,
+                enumerable: false,
+            },
+            getToolSetting: {
+                value: function (name: string, setting: string) {
+                    return this.active ? getSetting(`${name}.${setting}`) : undefined;
+                },
+                writable: false,
+                configurable: false,
+                enumerable: false,
+            },
+        }
+    );
 });
 
 Hooks.once("ready", () => {
