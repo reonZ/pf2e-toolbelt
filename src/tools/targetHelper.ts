@@ -365,12 +365,17 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
 
     if (checkLinkData) {
         const { basic, dc, options, statistic, traits } = checkLinkData;
+        const rollOptions = generateRollOptions(options, traits);
 
         updates.push(["save", { basic, dc, statistic, author: actor?.uuid }]);
-        updates.push(["rollOptions", [...options, ...traits]]);
+        updates.push(["rollOptions", rollOptions]);
     }
 
     updateSourceFlag(message, Object.fromEntries(updates));
+}
+
+function generateRollOptions(options: string[], traits: string[]) {
+    return [...options, ...traits, ...traits.map((trait) => `item:trait:${trait}`)];
 }
 
 async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
@@ -843,6 +848,7 @@ function onDragStart(event: DragEvent) {
     if (!dataTransfer || !isValidCheckLink(target)) return;
 
     const saveData = getSaveLinkData(target);
+    console.log(saveData);
     if (saveData === null) {
         event.preventDefault();
         return;
@@ -896,7 +902,8 @@ function onChatMessageDrop(event: DragEvent) {
         statistic,
     } satisfies MessageSaveFlag);
 
-    setFlagProperty(updates, "rollOptions", [...options, ...traits]);
+    const rollOptions = generateRollOptions(options, traits);
+    setFlagProperty(updates, "rollOptions", rollOptions);
 
     message.update(updates);
 
