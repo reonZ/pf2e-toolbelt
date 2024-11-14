@@ -98,6 +98,13 @@ const {
             listener: onDeleteActor,
         },
     ],
+    api: {
+        getMaster,
+        getMasterAndConfig,
+        getSlaves,
+        isValidSlave,
+        isValidMaster,
+    },
     init: (isGM) => {
         const enabled = settings.enabled;
 
