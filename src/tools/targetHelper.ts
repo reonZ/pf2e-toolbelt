@@ -25,6 +25,7 @@ import {
     parseInlineParams,
     refreshLatestMessages,
     removeIndexFromArray,
+    resolveDocument,
     setControlled,
     splitListString,
     toggleOffShieldBlock,
@@ -103,6 +104,7 @@ const {
     render,
     getFlag,
     setFlag,
+    getToolFlag,
     updateSourceFlag,
     setFlagProperty,
     waitDialog,
@@ -280,6 +282,7 @@ function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
             basic,
             options,
             statistic,
+            item: undefined,
             traits: splitListString(rawParams.traits ?? ""),
         } satisfies SaveLinkData;
     }
@@ -364,18 +367,20 @@ function onPreCreateChatMessage(message: ChatMessagePF2e) {
     }
 
     if (checkLinkData) {
-        const { basic, dc, options, statistic, traits } = checkLinkData;
-        const rollOptions = generateRollOptions(options, traits);
+        const { basic, dc, options, statistic, traits, item } = checkLinkData;
 
-        updates.push(["save", { basic, dc, statistic, author: actor?.uuid }]);
-        updates.push(["rollOptions", rollOptions]);
+        updates.push(
+            ["save", { basic, dc, statistic, author: actor?.uuid }],
+            ["options", options],
+            ["traits", traits]
+        );
+
+        if (item) {
+            updates.push(["item", item]);
+        }
     }
 
     updateSourceFlag(message, Object.fromEntries(updates));
-}
-
-function generateRollOptions(options: string[], traits: string[]) {
-    return [...options, ...traits, ...traits.map((trait) => `item:trait:${trait}`)];
 }
 
 async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
@@ -816,9 +821,25 @@ function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): Sa
 
     if (dc == null || isNaN(dc)) return null;
 
+    const parent = resolveDocument(el);
+
+    const item = (() => {
+        const itemFromDoc = isInstanceOf(parent, "ItemPF2e")
+            ? parent
+            : isInstanceOf(parent, "ChatMessagePF2e")
+            ? parent.item
+            : null;
+
+        return itemFromDoc?.isOfType("action", "feat", "campaignFeature") ||
+            !itemFromDoc?.isOfType("weapon")
+            ? itemFromDoc
+            : null;
+    })();
+
     const data: SaveLinkData = {
         dc,
         basic: false,
+        item: item?.uuid,
         statistic: dataset.pf2Check as SaveType,
         options: splitListString(dataset.pf2RollOptions ?? ""),
         traits: splitListString(dataset.pf2Traits ?? ""),
@@ -848,7 +869,6 @@ function onDragStart(event: DragEvent) {
     if (!dataTransfer || !isValidCheckLink(target)) return;
 
     const saveData = getSaveLinkData(target);
-    console.log(saveData);
     if (saveData === null) {
         event.preventDefault();
         return;
@@ -869,10 +889,10 @@ function onChatMessageDrop(event: DragEvent) {
     const target = htmlClosest<HTMLLIElement>(event.target, "li.chat-message");
     if (!target) return;
 
-    const data = TextEditor.getDragEventData(event);
+    const data = TextEditor.getDragEventData(event) as SaveDragData | undefined;
     if (!data) return;
 
-    const { type, dc, basic, options, statistic, traits } = data as SaveDragData;
+    const { type, dc, basic, options, statistic, traits, item } = data;
     if (type !== `${MODULE.id}-check-roll`) return;
 
     const messageId = target.dataset.messageId;
@@ -902,8 +922,12 @@ function onChatMessageDrop(event: DragEvent) {
         statistic,
     } satisfies MessageSaveFlag);
 
-    const rollOptions = generateRollOptions(options, traits);
-    setFlagProperty(updates, "rollOptions", rollOptions);
+    setFlagProperty(updates, "options", options);
+    setFlagProperty(updates, "traits", traits);
+
+    if (item) {
+        setFlagProperty(updates, "item", item);
+    }
 
     message.update(updates);
 
@@ -1183,15 +1207,38 @@ function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
     return btnElement;
 }
 
+function getExtraRollOptions(msgFlag: MessageFlag) {
+    const maybeTraits = msgFlag.traits ?? [];
+    const additionalTraits = maybeTraits.filter(
+        (t): t is AbilityTrait => t in CONFIG.PF2E.actionTraits
+    );
+
+    return R.unique(
+        [maybeTraits, additionalTraits.map((t) => `item:trait:${t}`), msgFlag.options ?? []].flat()
+    );
+}
+
 async function rollSaves(
     event: MouseEvent,
     message: ChatMessagePF2e,
     { dc, statistic }: MessageSaveData,
     targets: TokenDocumentPF2e[]
 ) {
+    const msgFlag = getToolFlag<MessageFlag>(message) ?? {};
+    const msgSaves = (msgFlag.saves = {});
+
     const user = game.user;
+    const msgActor = message.actor;
     const updates: Record<string, MessageTargetSave> = {};
-    const msgSaves = getMessageFlag(message, "saves") ?? {};
+
+    const item = await (async () => {
+        if (!msgFlag.item) return message.item;
+
+        const item = await fromUuid<ItemPF2e<any>>(msgFlag.item);
+        return item instanceof Item && item.actor ? item : message.item;
+    })();
+
+    const extraRollOptions = getExtraRollOptions(msgFlag);
 
     await Promise.all(
         targets.map((target) => {
@@ -1203,8 +1250,6 @@ async function rollSaves(
             const save = actor.saves[statistic];
             if (!save) return;
 
-            const item = message.item;
-            const rollOptions = getMessageFlag(message, "rollOptions");
             const skipDefault = !user.settings.showCheckDialogs;
             const skipDialog = targets.length > 1 || (event.shiftKey ? !skipDefault : skipDefault);
 
@@ -1213,9 +1258,9 @@ async function rollSaves(
                     event,
                     dc: { value: dc },
                     item,
-                    origin: message.actor,
+                    origin: msgActor,
                     skipDialog,
-                    extraRollOptions: rollOptions,
+                    extraRollOptions,
                     createMessage: false,
                     callback: async (roll, success, msg) => {
                         const isPrivate =
@@ -1353,8 +1398,10 @@ async function rerollSave(
         keptRoll.options.degreeOfSuccess = success.value;
     }
 
+    const msgFlag = getToolFlag<MessageFlag>(message) ?? {};
+    const extraRollOptions = getExtraRollOptions(msgFlag);
+
     const domains = actor.saves[statistic].domains;
-    const rollOptions = getMessageFlag(message, "rollOptions") ?? [];
     const outcome = DEGREE_OF_SUCCESS_STRINGS[keptRoll.degreeOfSuccess!];
     const actorNotes = [...extractNotes(actor.synthetics.rollNotes, domains)];
     const notes =
@@ -1363,7 +1410,7 @@ async function rerollSave(
             .filter((note) => {
                 if (
                     !note.predicate.test([
-                        ...rollOptions,
+                        ...extraRollOptions,
                         ...(note.rule?.item.getRollOptions("parent") ?? []),
                     ])
                 ) {
@@ -1769,7 +1816,9 @@ type MessageFlag = {
     splashIndex?: number;
     isRegen?: boolean;
     applied?: Record<string, boolean[]>;
-    rollOptions?: string[];
+    options?: string[];
+    traits?: string[];
+    item?: ItemUUID;
     splashTargets?: string[];
 };
 
@@ -1815,6 +1864,7 @@ type SaveLinkData = {
     statistic: SaveType;
     options: string[];
     traits: string[];
+    item: ItemUUID | undefined;
 };
 
 type SaveDragData = SaveLinkData & {

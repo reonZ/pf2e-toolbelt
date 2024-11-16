@@ -9,6 +9,7 @@ import {
     getFlagProperty,
     getInMemory,
     getInMemoryAndSetIfNot,
+    getModuleFlag,
     getSetting,
     hasGMOnline,
     registerUpstreamHook,
@@ -122,6 +123,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
         getFlag: (doc: FoundryDocument, ...path: string[]) => getFlag(doc, toolName, ...path),
         setFlag: (doc: FoundryDocument, ...args: [...string[], unknown]) =>
             setFlag(doc, toolName, ...args),
+        getToolFlag: (doc: FoundryDocument) => getFlag(doc, toolName),
         unsetFlag: (doc: FoundryDocument, ...path: string[]) => unsetFlag(doc, toolName, ...path),
         updateSourceFlag: (doc: FoundryDocument, ...args: [...string[], any]) =>
             updateSourceFlag(doc, toolName, ...args),
@@ -400,6 +402,7 @@ type ToolObject<TConfig extends ToolConfig> = {
     ) => Promise<TResult | null>;
     getFlag: typeof getFlag;
     setFlag: typeof setFlag;
+    getToolFlag: typeof getModuleFlag;
     unsetFlag: typeof unsetFlag;
     flagPath: typeof flagPath;
     updateSourceFlag: typeof updateSourceFlag;
