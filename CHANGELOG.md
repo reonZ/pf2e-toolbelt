@@ -1,3 +1,8 @@
+# 2.22.2
+
+-   `Target Helper`:
+    -   improve roll options generation for target inline saves
+
 # 2.22.1
 
 -   expose the whole toolbelt API & more to `game.toolbelt`
