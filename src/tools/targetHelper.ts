@@ -1508,6 +1508,8 @@ async function getMessageData(
 
     const user = game.user;
     const isGM = user.isGM;
+    const originActor = message.actor;
+    const isOriginFriendly = !originActor || originActor.isOwner || originActor.hasPlayerOwner;
     const author = save?.author ? await fromUuid<ActorPF2e>(save.author) : undefined;
     const showDC = isGM || game.pf2e.settings.metagame.dcs || author?.hasPlayerOwner;
     const showBreakdowns = isGM || game.pf2e.settings.metagame.breakdowns;
@@ -1556,7 +1558,7 @@ async function getMessageData(
 
                 const isOwner = targetActor.isOwner;
                 const hasPlayerOwner = targetActor.hasPlayerOwner;
-                const isFriendly = isOwner || hasPlayerOwner;
+                const isTargetFriendly = isOwner || hasPlayerOwner;
                 const hasSave = save && !!targetActor.saves?.[save.statistic];
                 const saveFlag = getTargetSave(message, targetId);
 
@@ -1575,7 +1577,7 @@ async function getMessageData(
 
                     const adjustment = (() => {
                         if (
-                            (!isFriendly && !showBreakdowns) ||
+                            (!isTargetFriendly && !showBreakdowns) ||
                             !saveFlag.unadjustedOutcome ||
                             !saveFlag.dosAdjustments ||
                             saveFlag.success === saveFlag.unadjustedOutcome
@@ -1602,11 +1604,11 @@ async function getMessageData(
                     let result = "";
 
                     if (canSeeResult) {
-                        if (isFriendly || showBreakdowns) {
+                        if (showBreakdowns || isTargetFriendly) {
                             result += `(<i class="fa-solid fa-dice-d20"></i> ${saveFlag.die}) `;
                         }
 
-                        if (isFriendly || showResults) {
+                        if (showResults || isOriginFriendly) {
                             result += localize(
                                 `tooltip.result.${showDC ? "withOffset" : "withoutOffset"}`,
                                 {
@@ -1632,7 +1634,7 @@ async function getMessageData(
                     )?.css;
 
                     const modifiers =
-                        isFriendly || showBreakdowns
+                        showBreakdowns || isTargetFriendly
                             ? saveFlag.modifiers.map(({ label, modifier }) => {
                                   const significant = significantList.findSplice(
                                       ({ name, value }) => name === label && modifier === value
@@ -1646,7 +1648,7 @@ async function getMessageData(
                             : [];
 
                     const significantModifiers =
-                        isFriendly || showSignificant
+                        showSignificant || isTargetFriendly
                             ? significantList.map(({ name, significance, value }) => ({
                                   name: name.replace(/(.+) \d+/, "$1"),
                                   value,
@@ -1708,7 +1710,7 @@ async function getMessageData(
                         isOwner,
                         hasPlayerOwner,
                         isHidden,
-                        showSuccess: isFriendly || showResults,
+                        showSuccess: showResults || isOriginFriendly,
                         messageSave: templateSave,
                         save: hasSave && templateSave,
                         canReroll: targetSave?.canReroll,
