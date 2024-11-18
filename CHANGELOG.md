@@ -1,3 +1,9 @@
+# 2.22.3
+
+-   `Target Helper`:
+    -   fix save result generated for un-observable origin actors
+        -   this impact the tooltip & the degree of success buttons color
+
 # 2.22.2
 
 -   `Target Helper`:
