@@ -1,7 +1,12 @@
+# 2.22.4
+
+-   `Target Helper`:
+    -   fix damage buttons being highlighted or blurred even when the `Show Check Outcomes` metagame setting is disabled
+
 # 2.22.3
 
 -   `Target Helper`:
-    -   fix save result generated for un-observable origin actors
+    -   fix save result generated for unobservable origin actors
         -   this impact the tooltip & the degree of success buttons color
 
 # 2.22.2
