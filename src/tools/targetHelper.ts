@@ -635,6 +635,14 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
         return clone;
     });
 
+    const originActor = message.actor;
+    const showResults =
+        isGM ||
+        game.pf2e.settings.metagame.results ||
+        !originActor ||
+        originActor.isOwner ||
+        originActor.hasPlayerOwner;
+
     const rowsWrapper = createHTMLElement("div", {
         classes: ["pf2e-toolbelt-target-targetRows", "pf2e-toolbelt-target-damage"],
     });
@@ -665,7 +673,8 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
 
             clone.classList.toggle(
                 "applied",
-                !!applied[i] || (isBasic && save.result.success === "criticalSuccess")
+                !!applied[i] ||
+                    (isBasic && save.result.success === "criticalSuccess" && showResults)
             );
 
             if (isBasic) {
@@ -699,7 +708,9 @@ async function damageChatMessageGetHTML(message: ChatMessagePF2e, html: HTMLElem
                     return save.result.success;
                 })();
 
-                clone.classList.add(success);
+                if (showResults) {
+                    clone.classList.add(success);
+                }
             }
 
             rowsWrapper.append(clone);
