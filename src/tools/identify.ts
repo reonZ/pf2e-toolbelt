@@ -967,7 +967,7 @@ function getSpellList(actor: CharacterPF2e): IdentifySpellList {
     const traditions: Set<MagicTradition> = new Set();
     const known: Set<string> = new Set();
 
-    for (const entry of actor.spellcasting.regular) {
+    for (const entry of actor.spellcasting.spellcastingFeatures) {
         const tradition = entry.tradition;
 
         if (tradition) {
