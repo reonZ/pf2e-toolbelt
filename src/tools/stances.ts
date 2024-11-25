@@ -1,4 +1,8 @@
 import {
+    CharacterPF2e,
+    CharacterSheetData,
+    CharacterSheetPF2e,
+    CombatantPF2e,
     addListenerAll,
     addStance,
     canUseStances,
@@ -12,7 +16,7 @@ import {
     isValidStance,
     renderCharacterSheets,
     toggleStance as toggleActorStance,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -81,7 +85,7 @@ const { config, settings, hooks, wrappers, localize, render, waitDialog } = crea
 } as const);
 
 async function characterSheetPF2eRenderInner(
-    this: CharacterSheetPF2e,
+    this: CharacterSheetPF2e<CharacterPF2e>,
     html: HTMLElement,
     data: CharacterSheetData
 ) {
@@ -102,7 +106,10 @@ async function characterSheetPF2eRenderInner(
     htmlQuery(encounterTab, "header")?.before(sheetElement);
 }
 
-function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
+function characterSheetPF2eActivateListeners(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
     if (!actor.isOwner) return;
 

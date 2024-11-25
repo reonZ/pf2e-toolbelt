@@ -1,4 +1,14 @@
-import { HANDWRAPS_SLUG, getEquippedHandwraps } from "foundry-pf2e";
+import {
+    ActorPF2e,
+    ArmorPF2e,
+    HANDWRAPS_SLUG,
+    ItemSheetPF2e,
+    PhysicalItemPF2e,
+    WeaponPF2e,
+    ZeroToFour,
+    ZeroToThree,
+    getEquippedHandwraps,
+} from "module-helpers";
 import { createTool } from "../tool";
 import {
     ARMOR_PREPARE_BASE_DATA,
@@ -79,6 +89,7 @@ const WEAPON_STRIKING_PRICE = {
     1: 65,
     2: 1065,
     3: 31065,
+    4: 31065,
 };
 
 const ARMOR_POTENCY_PRICE = {
@@ -92,6 +103,7 @@ const ARMOR_RESILIENCY_PRICE = {
     1: 340,
     2: 3440,
     3: 49440,
+    4: 49440,
 };
 
 function isValidActor(actor: ActorPF2e, isCharacter = false) {

@@ -1,4 +1,4 @@
-import { htmlQuery, refreshLatestMessages } from "foundry-pf2e";
+import { ChatMessagePF2e, htmlQuery, refreshLatestMessages } from "module-helpers";
 import { createTool } from "../tool";
 import { CHATMESSAGE_GET_HTML } from "./shared/chatMessage";
 

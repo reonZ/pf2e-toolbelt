@@ -1,3 +1,4 @@
+import { ChatMessagePF2e } from "module-helpers";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const CHATMESSAGE_GET_HTML = "ChatMessage.prototype.getHTML";

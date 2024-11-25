@@ -1,4 +1,4 @@
-import { htmlQuery, refreshApplicationHeight } from "foundry-pf2e";
+import { htmlQuery, ItemTransferDialog, refreshApplicationHeight } from "module-helpers";
 
 function updateItemTransferDialog(
     app: ItemTransferDialog,

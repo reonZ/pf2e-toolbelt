@@ -1,4 +1,4 @@
-import { wrapperError } from "foundry-pf2e";
+import { ActorPF2e, Bulk, InventoryBulk, TreasurePF2e, wrapperError } from "module-helpers";
 import { createTool } from "../tool";
 
 const ACTOR_PREPARE_EMBEDDED_DOCUMENTS =

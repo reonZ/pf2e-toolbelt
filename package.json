@@ -18,6 +18,6 @@
         "typescript": "5.3.3"
     },
     "dependencies": {
-        "foundry-pf2e": "github:reonZ/foundry-pf2e"
+        "module-helpers": "github:reonZ/module-helpers"
     }
 }

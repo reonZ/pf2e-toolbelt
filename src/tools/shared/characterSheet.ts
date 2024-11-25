@@ -1,4 +1,9 @@
-import { isPlayedActor } from "foundry-pf2e";
+import {
+    CharacterPF2e,
+    CharacterSheetData,
+    CharacterSheetPF2e,
+    isPlayedActor,
+} from "module-helpers";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const CHARACTER_SHEET_RENDER_INNER =
@@ -18,7 +23,7 @@ const characterSheetWrappers = {
 };
 
 async function characterSheetPF2eRenderInner(
-    this: CharacterSheetPF2e,
+    this: CharacterSheetPF2e<CharacterPF2e>,
     wrapperError: (error: Error) => void,
     listeners: ((html: HTMLElement, data: CharacterSheetData) => Promise<void>)[],
     wrapped: libWrapper.RegisterCallback,
@@ -41,7 +46,7 @@ async function characterSheetPF2eRenderInner(
 }
 
 function characterSheetPF2eActivateListeners(
-    this: CharacterSheetPF2e,
+    this: CharacterSheetPF2e<CharacterPF2e>,
     wrapperError: (error: Error) => void,
     listeners: ((html: HTMLElement) => void)[],
     wrapped: libWrapper.RegisterCallback,
@@ -62,7 +67,7 @@ function characterSheetPF2eActivateListeners(
     }
 }
 
-function hasValidCharacter(sheet: CharacterSheetPF2e) {
+function hasValidCharacter(sheet: CharacterSheetPF2e<CharacterPF2e>) {
     const actor = sheet.actor;
     return isPlayedActor(actor) && actor.permission > CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED;
 }

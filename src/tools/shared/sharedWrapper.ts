@@ -1,4 +1,4 @@
-import { registerWrapper, unregisterWrapper, wrapperError } from "foundry-pf2e";
+import { registerWrapper, unregisterWrapper, wrapperError } from "module-helpers";
 
 function createSharedWrapper<TListener extends (...args: any[]) => any>(
     path: string,

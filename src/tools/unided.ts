@@ -1,3 +1,4 @@
+import { ItemPF2e, ItemSourcePF2e } from "module-helpers";
 import { createTool } from "../tool";
 
 const { config, settings, hooks } = createTool({

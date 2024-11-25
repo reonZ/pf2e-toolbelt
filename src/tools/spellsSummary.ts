@@ -1,4 +1,7 @@
 import {
+    CharacterPF2e,
+    CharacterSheetData,
+    CharacterSheetPF2e,
     addListener,
     addListenerAll,
     createHTMLElement,
@@ -6,7 +9,7 @@ import {
     getSummarizedSpellsDataForRender,
     htmlQuery,
     renderCharacterSheets,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -50,7 +53,7 @@ const { config, settings, wrappers, localize, render } = createTool({
 } as const);
 
 async function characterSheetPF2eRenderInner(
-    this: CharacterSheetPF2e,
+    this: CharacterSheetPF2e<CharacterPF2e>,
     html: HTMLElement,
     data: CharacterSheetData
 ) {
@@ -85,7 +88,10 @@ async function characterSheetPF2eRenderInner(
     htmlQuery(spellcastingTab, ".tab[data-tab='known-spells']")?.before(tabElement);
 }
 
-function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
+function characterSheetPF2eActivateListeners(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
 
     addListener(html, "nav.sheet-navigation .item[data-tab='spellcasting']", (event, el) =>
@@ -114,7 +120,11 @@ function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTM
     });
 }
 
-function toggleSpellcastingTab(this: CharacterSheetPF2e, html: HTMLElement, navIcon: HTMLElement) {
+function toggleSpellcastingTab(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement,
+    navIcon: HTMLElement
+) {
     if (!navIcon.classList.contains("active")) return;
 
     const spellcastingTab = getSpellcastingTab(html);

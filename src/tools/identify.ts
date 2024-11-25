@@ -1,7 +1,16 @@
 import {
+    ActorPF2e,
+    ActorSheetPF2e,
+    ActorType,
     addListenerAll,
+    ApplicationClosingOptions,
+    ApplicationConfiguration,
+    ApplicationRenderContext,
+    ApplicationRenderOptions,
+    CharacterPF2e,
     confirmDialog,
     createHTMLElement,
+    CreaturePF2e,
     DateTime,
     elementDataset,
     getItemIdentificationDCs,
@@ -9,10 +18,15 @@ import {
     htmlQuery,
     htmlQueryAll,
     IdentifyItemPopup,
+    ItemPF2e,
+    MagicTradition,
+    PhysicalItemPF2e,
+    PhysicalItemType,
     promptDialog,
     R,
     userIsActiveGM,
-} from "foundry-pf2e";
+    WorldClock,
+} from "module-helpers";
 import { createTool } from "../tool";
 
 const PARTIAL_SLUGH_REGEX = / ?\(.+\) ?/g;
@@ -128,13 +142,13 @@ async function onRequestReceived(itemUUID: string, userId: string) {
     }
 }
 
-function onRenderActorSheetPF2e(sheet: ActorSheetPF2e) {
+function onRenderActorSheetPF2e(sheet: ActorSheetPF2e<ActorPF2e>) {
     const user = game.user;
     const isGM = user.isGM;
     const actor = sheet.actor;
 
     if (!isGM && actor.isOfType("loot") && actor.isMerchant) return;
-    if (!actor.canUserModify(user, "update")) return;
+    if (!(actor as Actor).canUserModify(user, "update")) return;
 
     const listElement = htmlQuery(sheet.element[0], ".inventory-list");
     if (!listElement) return;
@@ -198,7 +212,7 @@ function requestIdentify(item: ItemPF2e, skipNotify?: boolean) {
 class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
     static instance: PF2eToolbeltIdentify | null = null;
 
-    #HOOKS: [string, HookCallback][] = [
+    #HOOKS: [string, HookCallback<any>][] = [
         ["updateWorldTime", () => this.render()],
         ["updateActor", this.#onActorUpdate.bind(this)],
         ["updateItem", this.#onItemUpdate.bind(this)],
@@ -213,7 +227,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
     #removedFaillures: Record<string, Set<string>> = {};
     #updates: Record<string, Record<string, "success" | "fail">> = {};
 
-    constructor(item?: ItemPF2e, options: PartialApplicationConfiguration = {}) {
+    constructor(item?: ItemPF2e, options: DeepPartial<ApplicationConfiguration> = {}) {
         options.id = localize("tracker");
         options.window ??= {};
         options.window.title = localize("tracker.title");
@@ -228,7 +242,9 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
     async _prepareContext(options: IdentifyRenderOptions): Promise<IdentifyContext> {
         const party = game.actors.party;
         const members = party?.members ?? [];
-        const characters = members.filter((actor) => actor.isOfType("character"));
+        const characters = members.filter((actor): actor is CharacterPF2e =>
+            actor.isOfType("character")
+        );
         const identifications: Record<string, IdenfifiedFlag> = {};
         const spellLists: Record<string, IdentifySpellList> = {};
         const itemGroups: Partial<Record<PhysicalItemType, IdentifyGroupItem[]>> = {};
@@ -258,7 +274,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                     [...this.#itemsUUIDs, ...this.#unlockedUUIDs],
                     R.unique(),
                     R.difference(items.map((item) => item.uuid)),
-                    R.map((uuid) => fromUuid<PhysicalItemPF2e>(uuid))
+                    R.map((uuid) => fromUuid<PhysicalItemPF2e<ActorPF2e>>(uuid))
                 )
             ),
             R.filter(R.isTruthy),
@@ -301,8 +317,11 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
             ];
 
             const ownerIcon = (() => {
-                if (itemActor.type !== "character") return ACTOR_TYPE_ICONS[itemActor.type];
+                const actorType = itemActor.type as ActorType;
+                if (actorType !== "character") return ACTOR_TYPE_ICONS[actorType];
+
                 const traits = itemActor.traits;
+
                 return traits.has("eidolon")
                     ? EIDOLON_ICON
                     : traits.has("minion")
@@ -348,7 +367,9 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 return tooltip;
             })();
 
-            const itemGroup = (itemGroups[item.type] ??= []);
+            const itemType = item.type as PhysicalItemType;
+            const itemGroup = (itemGroups[itemType] ??= []);
+
             itemGroup.push({
                 itemSlug,
                 isLocked,
@@ -384,7 +405,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                     const known = (() => {
                         if (failed) return false;
 
-                        const identification = identifications[actorId]?.[item.type] ?? [];
+                        const identification = identifications[actorId]?.[itemType] ?? [];
                         const full = identification.find((x) => x.itemSlug === itemSlug);
 
                         if (full) return true;
@@ -677,6 +698,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                     const direction = el.dataset.direction as "+" | "-";
                     const WorldClockCls = game.pf2e.worldClock.constructor as typeof WorldClock;
                     const worldTime = game.pf2e.worldClock.worldTime;
+                    // @ts-expect-error
                     const increment = WorldClockCls.calculateIncrement(worldTime, "600", direction);
                     if (increment !== 0) game.time.advance(increment);
                     break;

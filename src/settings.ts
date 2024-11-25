@@ -5,7 +5,7 @@ import {
     htmlQuery,
     localize,
     registerSetting,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { ToolConfig } from "./tool";
 
 const firstSettings: { tool: string; key: string }[] = [];

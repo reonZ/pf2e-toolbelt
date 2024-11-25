@@ -1,10 +1,13 @@
 import {
+    ActorPF2e,
+    ItemTransferDialog,
+    PhysicalItemPF2e,
     TradePacket,
     createTradeMessage,
     enactTradeRequest,
     sendTradeRequest,
     translateTradeData,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";

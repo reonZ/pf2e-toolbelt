@@ -1,4 +1,4 @@
-import { getSetting, MODULE, userIsGM } from "foundry-pf2e";
+import { getSetting, MODULE, userIsGM } from "module-helpers";
 import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";

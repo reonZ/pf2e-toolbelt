@@ -1,4 +1,9 @@
-import { createDialogData, getTemplateTokens, isHoldingModifierKeys } from "foundry-pf2e";
+import {
+    MeasuredTemplateDocumentPF2e,
+    createFormData,
+    getTemplateTokens,
+    isHoldingModifierKeys,
+} from "module-helpers";
 import { createTool } from "../tool";
 
 const { config, settings, hook, waitDialog } = createTool({
@@ -60,7 +65,7 @@ async function onCreateMeasuredTemplate(
             },
             callback: async (event, btn, html) => {
                 return {
-                    ...createDialogData(html),
+                    ...createFormData(html),
                     event,
                 };
             },

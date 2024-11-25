@@ -1,4 +1,11 @@
-import { addListener, elementDataset, htmlClosest } from "foundry-pf2e";
+import {
+    ActorPF2e,
+    EffectPF2e,
+    EffectsPanel,
+    addListener,
+    elementDataset,
+    htmlClosest,
+} from "module-helpers";
 import { createTool } from "../tool";
 
 const { config, settings, hook } = createTool({
@@ -27,6 +34,7 @@ const { config, settings, hook } = createTool({
 } as const);
 
 function onRenderEffectsPanel(panel: EffectsPanel, $html: JQuery) {
+    // @ts-expect-error
     const actor = panel.actor;
     if (!actor) return;
 

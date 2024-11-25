@@ -1,4 +1,8 @@
 import {
+    ActorPF2e,
+    CharacterPF2e,
+    CharacterSheetPF2e,
+    ChatMessageSourcePF2e,
     R,
     addListener,
     addListenerAll,
@@ -13,7 +17,7 @@ import {
     refreshApplicationHeight,
     renderCharacterSheets,
     toggleSummaryElement,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -143,7 +147,10 @@ function usesCountVariant() {
     return settings.count > 0;
 }
 
-async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
+async function characterSheetPF2eRenderInner(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
     const actions = getHeroActions(actor);
     const usesCount = usesCountVariant();
@@ -171,7 +178,10 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
     attacks?.after(...sheetElement.children);
 }
 
-function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
+function characterSheetPF2eActivateListeners(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
     const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
     const list = htmlQuery(tab, ".heroActions-list");
@@ -727,7 +737,7 @@ async function drawHeroAction() {
     return { uuid, name };
 }
 
-async function getLabelfromTableResult(result: TableResult, uuid: string) {
+async function getLabelfromTableResult(result: TableResult<RollTable>, uuid: string) {
     if (result.type !== CONST.TABLE_RESULT_TYPES.TEXT) {
         return result.text;
     }
@@ -736,7 +746,7 @@ async function getLabelfromTableResult(result: TableResult, uuid: string) {
     return label ?? (uuid && (await fromUuid(uuid))?.name);
 }
 
-function documentUuidFromTableResult(result: TableResult) {
+function documentUuidFromTableResult(result: TableResult<RollTable>) {
     if (result.type === CONST.TABLE_RESULT_TYPES.TEXT) {
         return /@UUID\[([\w\.-]+)\]/.exec(result.text)?.[1];
     }
@@ -759,7 +769,7 @@ function getDefaultWorldTable() {
     return game.tables.find((x) => x._stats.compendiumSource === TABLE_UUID);
 }
 
-async function getDeckTable() {
+async function getDeckTable(): Promise<RollTable | undefined> {
     return (
         (await getTableFromUuid(settings.table)) ??
         getDefaultWorldTable() ??

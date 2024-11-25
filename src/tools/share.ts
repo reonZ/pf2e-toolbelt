@@ -1,7 +1,23 @@
 import {
+    ActionDefaultOptions,
+    ActorSourcePF2e,
     BANDS_OF_FORCE_SLUGS,
+    CharacterAttributes,
+    CharacterPF2e,
+    CharacterSkill,
+    CharacterSkillData,
+    ChatMessagePF2e,
+    CombatantPF2e,
+    DeferredValueParams,
+    EffectPF2e,
+    EncounterPF2e,
+    EquipmentPF2e,
+    ModifierPF2e,
+    NPCPF2e,
     R,
     SKILL_SLUGS,
+    ValueAndMax,
+    WeaponPF2e,
     calculateRemainingDuration,
     createHTMLElement,
     getFirstActiveToken,
@@ -10,9 +26,10 @@ import {
     isInstanceOf,
     isPlayedActor,
     resetActors,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import { WEAPON_PREPARE_BASE_DATA } from "./shared/prepareDocument";
+import { ActorPF2e } from "module-helpers";
 
 const characterShareOptions = ["health", "turn", "skills", "hero", "weapon", "armor"] as const;
 const npcShareOptions = ["health", "turn", "armor"] as const;
@@ -293,7 +310,7 @@ async function combatantEndTurn(
 function combatantOnUpdate(
     this: CombatantPF2e,
     wrapped: libWrapper.RegisterCallback,
-    changed: DeepPartial<CombatantSource>,
+    changed: DeepPartial<Combatant["_source"]>,
     operation: DatabaseUpdateOperation<EncounterPF2e>,
     userId: string
 ): void {
@@ -328,7 +345,7 @@ function combatantOnUpdate(
 
 async function restForTheNight(
     wrapped: libWrapper.RegisterCallback,
-    options: RestForTheNightOptions
+    options: ActionDefaultOptions
 ): Promise<ChatMessagePF2e[]> {
     const actors = options.actors instanceof Actor ? [options.actors] : options.actors;
     if (!Array.isArray(actors)) {
@@ -396,20 +413,18 @@ function onUpdateActor(actor: ActorPF2e, changed: DeepPartial<ActorSourcePF2e>) 
     const { master, config } = data;
 
     if (config.health) {
-        const update = foundry.utils.getProperty<CharacterHitPoints>(
-            changed,
-            "system.attributes.hp"
-        );
+        const update = foundry.utils.getProperty(changed, "system.attributes.hp") as
+            | CharacterAttributes["hp"]
+            | undefined;
         if (update) {
             master.update({ "system.attributes.hp": foundry.utils.deepClone(update) });
         }
     }
 
     if (isCharacter && config.hero) {
-        const update = foundry.utils.getProperty<ValueAndMax>(
-            changed,
-            "system.resources.heroPoints"
-        );
+        const update = foundry.utils.getProperty(changed, "system.resources.heroPoints") as
+            | ValueAndMax
+            | undefined;
         if (update) {
             master.update({ "system.resources.heroPoints": foundry.utils.deepClone(update) });
         }
@@ -460,7 +475,7 @@ function actorPrepareDerivedData(this: ActorPF2e, wrapped: libWrapper.RegisterCa
                 item
             ): item is EquipmentPF2e<CharacterPF2e> & {
                 slug: (typeof BANDS_OF_FORCE_SLUGS)[number];
-            } => BANDS_OF_FORCE_SLUGS.includes(item.slug) && !!item.isInvested
+            } => BANDS_OF_FORCE_SLUGS.includes(item.slug as any) && !!item.isInvested
         ),
         R.sortBy([(item) => item.slug, "desc"]),
         R.first()
@@ -553,7 +568,7 @@ function actorPrepareData(this: ActorPF2e, wrapped: libWrapper.RegisterCallback)
                 lore: false,
                 rank: masterSkill.rank,
                 check: { type: "skill-check" },
-            }) as CharacterSkill;
+            }) as CharacterSkill<CharacterPF2e>;
 
             this.skills[skillSlug] = statistic;
             this.system.skills[skillSlug] = foundry.utils.mergeObject(
@@ -592,7 +607,7 @@ function getSlaves(actor: ActorPF2e, withConfig?: ConfigOption) {
     );
 }
 
-function isValidSlave(actor: FoundryDocument | CompendiumIndexData): actor is ShareActor {
+function isValidSlave(actor: ClientDocument | CompendiumIndexData): actor is ShareActor {
     return (
         isInstanceOf(actor, "ActorPF2e") &&
         isPlayedActor(actor) &&

@@ -1,11 +1,30 @@
 import {
+    ActorPF2e,
+    ApplicationClosingOptions,
+    ApplicationConfiguration,
+    ApplicationRenderOptions,
+    ChatMessagePF2e,
+    Coins,
+    CoinsPF2e,
+    CompendiumBrowser,
+    CompendiumBrowserEquipmentTab,
+    EquipmentFilters,
     ErrorPF2e,
+    ItemPF2e,
+    ItemTransferDialog,
+    LootPF2e,
+    LootSheetPF2e,
+    MacroPF2e,
+    PhysicalItemPF2e,
     R,
+    TokenDocumentPF2e,
+    TokenPF2e,
     TradeData,
     TradePacket,
     TranslatedTradeData,
     addListener,
     addListenerAll,
+    arrayIncludes,
     calculateItemPrice,
     confirmDialog,
     createHTMLElement,
@@ -28,8 +47,7 @@ import {
     translateTradeData,
     userIsActiveGM,
     wrapperError,
-} from "foundry-pf2e";
-import { arrayIncludes } from "foundry-pf2e/src/utils";
+} from "module-helpers";
 import { createTool } from "../tool";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
 
@@ -199,19 +217,19 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
             const errorMsg = localize("service.error");
 
             cardContent.innerHTML = `<p class="pf2e-toolbelt-service-error">${errorMsg}</p>`;
-            return message.update({ content: msgContent.innerHTML });
+            message.update({ content: msgContent.innerHTML });
         };
 
         const buyer = await fromUuid(serviceFlag.buyerUUID);
         const seller = await fromUuid(serviceFlag.sellerUUID);
         if (!isInstanceOf(seller, "LootPF2e") || !isValidServiceBuyer(buyer)) {
-            return await errorUpdate();
+            return errorUpdate();
         }
 
         const services = getServices(seller);
         const service = services.find((service) => service.id === serviceFlag.serviceId);
         if (!service) {
-            return await errorUpdate();
+            return errorUpdate();
         }
 
         const serviceRatio = getServicesRatio(seller);
@@ -224,7 +242,7 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
 
         if (!serviceFlag.forceFree) {
             if (!serviceCanBePurchased(service)) {
-                return await errorUpdate();
+                return errorUpdate();
             }
 
             const price = usedPrice!;
@@ -647,9 +665,11 @@ async function browserRenderInner(
 }
 
 function fillSelection(tab: CompendiumBrowserEquipmentTab, selection: string[], owned?: string[]) {
+    // @ts-expect-error
     owned ??= getInMemory<string[]>(tab.browser, "owned") ?? [];
     selection.length = 0;
 
+    // @ts-expect-error
     for (const { uuid } of tab.currentIndex) {
         if (owned.includes(uuid)) continue;
         selection.push(uuid);
@@ -733,6 +753,7 @@ function updateBrowser(selection: string[], skipAll = false) {
 
     const tab = game.pf2e.compendiumBrowser.tabs.equipment;
     const selected = selection.length;
+    // @ts-expect-error
     const total = tab.currentIndex.length;
     const isAtLimit = selected >= PULL_LIMIT;
     const reachedLimit = localize("browserPull.limit");
@@ -918,7 +939,7 @@ function browserActivateListeners(
 }
 
 async function lootSheetPF2eRenderInner(
-    this: LootSheetPF2e,
+    this: LootSheetPF2e<LootPF2e>,
     wrapped: libWrapper.RegisterCallback,
     data: LootSheetDataPF2e
 ) {
@@ -1026,7 +1047,7 @@ async function lootSheetPF2eRenderInner(
 }
 
 function lootSheetPF2eActivateListeners(
-    this: LootSheetPF2e,
+    this: LootSheetPF2e<LootPF2e>,
     wrapped: libWrapper.RegisterCallback,
     $html: JQuery
 ) {
@@ -1260,7 +1281,7 @@ async function serviceMessage(
         content,
         speaker: ChatMessagePF2e.getSpeaker({
             actor: actor,
-            token,
+            token: token instanceof Token ? token.document : token,
         }),
     };
 
@@ -1347,7 +1368,7 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
     #actor: LootPF2e;
     #serviceId: string;
 
-    static DEFAULT_OPTIONS: PartialApplicationConfiguration = {
+    static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
         tag: "form",
         position: {
             width: 600,
@@ -1397,7 +1418,11 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
         await setServices(this.actor, services);
     }
 
-    constructor(actor: LootPF2e, serviceId: string, options: PartialApplicationConfiguration = {}) {
+    constructor(
+        actor: LootPF2e,
+        serviceId: string,
+        options: DeepPartial<ApplicationConfiguration> = {}
+    ) {
         options.window ??= {};
         options.window.title = localize("service.title", { name: actor.name });
 

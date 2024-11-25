@@ -1,3 +1,4 @@
+import { ActorPF2e, PhysicalItemPF2e } from "module-helpers";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const ACTOR_TRANSFER_ITEM_TO_ACTOR = "CONFIG.Actor.documentClass.prototype.transferItemToActor";
@@ -23,7 +24,7 @@ async function actorTransferItemToActor(
         for (const listener of listeners) {
             const item = await listener.apply(this, args);
             /**
-             * if undefined anything but undefined is returned, it means
+             * if anything but undefined is returned, it means
              * we processed the item and should stop there
              */
             if (item !== undefined) return item;

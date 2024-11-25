@@ -1,3 +1,4 @@
+import { TokenPF2e } from "module-helpers";
 import { createTool } from "../tool";
 
 const { config, settings, wrapper, hook } = createTool({
@@ -85,7 +86,7 @@ function tokenRefreshElevation(this: TokenPF2e, wrapped: libWrapper.RegisterCall
     const elevation = this.document.elevation;
 
     for (const filter of this.elevationFilters ?? []) {
-        this.mesh.filters?.findSplice((f) => f === filter);
+        this.mesh?.filters?.findSplice((f) => f === filter);
     }
 
     if (elevation < 0) {
@@ -112,7 +113,7 @@ function tokenRefreshElevation(this: TokenPF2e, wrapped: libWrapper.RegisterCall
             this.elevationFilters.push(colorMatrix);
         }
 
-        if (this.elevationFilters.length) {
+        if (this.mesh && this.elevationFilters.length) {
             this.mesh.filters ??= [];
             this.mesh.filters.push(...this.elevationFilters);
         }

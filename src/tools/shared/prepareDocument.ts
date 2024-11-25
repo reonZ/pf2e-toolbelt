@@ -1,3 +1,4 @@
+import { ArmorPF2e, WeaponPF2e } from "module-helpers";
 import { createSharedWrapper } from "./sharedWrapper";
 
 const WEAPON_PREPARE_BASE_DATA =
@@ -19,7 +20,7 @@ const prepareDocumentWrappers = {
     ),
 };
 
-function prepareBaseData<T extends FoundryDocument>(
+function prepareBaseData<T extends ClientDocument>(
     this: T,
     wrapperError: (error: Error) => void,
     listeners: (() => void)[],

@@ -28,7 +28,7 @@ import {
     unsetFlagProperty,
     updateSourceFlag,
     waitDialog,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { actorWrappers } from "./tools/shared/actor";
 import { characterSheetWrappers } from "./tools/shared/characterSheet";
 import { chatMessageWrappers } from "./tools/shared/chatMessage";
@@ -120,12 +120,12 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
         wrappers,
         waitDialog: waitDialogTool,
         flagPath: (...path: string[]) => flagPath(toolName, ...path),
-        getFlag: (doc: FoundryDocument, ...path: string[]) => getFlag(doc, toolName, ...path),
-        setFlag: (doc: FoundryDocument, ...args: [...string[], unknown]) =>
+        getFlag: (doc: ClientDocument, ...path: string[]) => getFlag(doc, toolName, ...path),
+        setFlag: (doc: ClientDocument, ...args: [...string[], unknown]) =>
             setFlag(doc, toolName, ...args),
-        getToolFlag: (doc: FoundryDocument) => getFlag(doc, toolName),
-        unsetFlag: (doc: FoundryDocument, ...path: string[]) => unsetFlag(doc, toolName, ...path),
-        updateSourceFlag: (doc: FoundryDocument, ...args: [...string[], any]) =>
+        getToolFlag: (doc: ClientDocument) => getFlag(doc, toolName),
+        unsetFlag: (doc: ClientDocument, ...path: string[]) => unsetFlag(doc, toolName, ...path),
+        updateSourceFlag: (doc: ClientDocument, ...args: [...string[], any]) =>
             updateSourceFlag(doc, toolName, ...args),
         getFlagProperty: (obj: object, ...path: string[]) =>
             getFlagProperty(obj, toolName, ...path),
@@ -381,7 +381,7 @@ type ToolConfig = {
 
 type ToolWaitDialogOptions = {
     onRender?: (html: HTMLElement) => void;
-    callback?: DialogV2ButtonCallback;
+    callback?: foundry.applications.api.DialogV2ButtonCallback;
     yes?: string;
     no?: string;
     title?: string;
@@ -431,7 +431,7 @@ type ToolSettings<TConfig extends ToolConfig> = TConfig["settings"] extends {
       }
     : never;
 
-type ToolHook = { event: string; listener: HookCallback; isUpstream?: boolean };
+type ToolHook = { event: string; listener: HookCallback<any>; isUpstream?: boolean };
 
 type ToolSocket<TConfig extends ToolConfig> = TConfig["onSocket"] extends (
     packet: infer P extends Record<string, any>,

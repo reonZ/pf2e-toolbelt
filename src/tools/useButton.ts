@@ -1,4 +1,7 @@
 import {
+    CharacterPF2e,
+    CharacterSheetPF2e,
+    ChatMessagePF2e,
     addListenerAll,
     consumeItem,
     createHTMLElement,
@@ -6,7 +9,7 @@ import {
     htmlClosest,
     renderCharacterSheets,
     selfApplyEffectFromMessage,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -58,7 +61,10 @@ const { config, settings, hook, wrappers } = createTool({
     },
 } as const);
 
-async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
+async function characterSheetPF2eRenderInner(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     if (!this.isEditable) return;
 
     const actor = this.actor;
@@ -96,7 +102,10 @@ function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
     return actor.items.get(itemId);
 }
 
-function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
+function characterSheetPF2eActivateListeners(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
 
     addListenerAll(

@@ -1,6 +1,18 @@
 import {
+    AbilityItemPF2e,
+    AbilitySheetPF2e,
+    ActorPF2e,
+    CastOptions,
+    CharacterPF2e,
+    CharacterSheetPF2e,
     ErrorPF2e,
+    FeatPF2e,
+    FeatSheetPF2e,
+    ItemPF2e,
     R,
+    SpellPF2e,
+    SpellSheetPF2e,
+    SpellcastingEntryPF2e,
     addListener,
     addListenerAll,
     createHTMLElement,
@@ -11,7 +23,7 @@ import {
     htmlQueryAll,
     renderCharacterSheets,
     renderItemSheets,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import {
     CHARACTER_SHEET_ACTIVATE_LISTENERS,
@@ -90,7 +102,10 @@ const { config, settings, localize, wrappers, getFlag, setFlag, unsetFlag, rende
     },
 } as const);
 
-async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTMLElement) {
+async function characterSheetPF2eRenderInner(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
     const useLabel = game.i18n.localize("PF2E.Action.Use");
     const actionElements = html.querySelectorAll<HTMLElement>(
@@ -120,7 +135,10 @@ async function characterSheetPF2eRenderInner(this: CharacterSheetPF2e, html: HTM
     }
 }
 
-function characterSheetPF2eActivateListeners(this: CharacterSheetPF2e, html: HTMLElement) {
+function characterSheetPF2eActivateListeners(
+    this: CharacterSheetPF2e<CharacterPF2e>,
+    html: HTMLElement
+) {
     const actor = this.actor;
 
     addListenerAll(
@@ -164,7 +182,7 @@ async function getActionMacro(item: Maybe<ItemPF2e>) {
 async function itemSheetPF2eRenderInner(
     this: AbilitySheetPF2e | FeatSheetPF2e | SpellSheetPF2e,
     wrapped: libWrapper.RegisterCallback,
-    data: ActionSheetData | FeatSheetData
+    data: ActionSheetData | ActorSheetData<ActorPF2e>
 ) {
     const $html = await wrapped(data);
     const item = this.item;

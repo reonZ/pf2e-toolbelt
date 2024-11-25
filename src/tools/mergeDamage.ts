@@ -1,5 +1,16 @@
 import {
+    ArithmeticExpression,
+    ChatMessageFlagsPF2e,
+    ChatMessagePF2e,
+    ChatMessageSourcePF2e,
     DEGREE_OF_SUCCESS_STRINGS,
+    DamageDamageContextFlag,
+    DamageInstance,
+    DamageRoll,
+    DamageType,
+    DegreeOfSuccessString,
+    GroupingData,
+    MaterialDamageEffect,
     R,
     addListenerAll,
     compareArrays,
@@ -9,7 +20,7 @@ import {
     htmlQuery,
     latestChatMessages,
     refreshLatestMessages,
-} from "foundry-pf2e";
+} from "module-helpers";
 import { createTool } from "../tool";
 import { getMessageTargets, setTargetHelperFlagProperty } from "./targetHelper";
 
@@ -191,8 +202,8 @@ function groupRolls(message: ChatMessagePF2e, otherMessage: ChatMessagePF2e) {
     }
 
     const showBreakdown = messageRoll.options.showBreakdown && otherRoll.options.showBreakdown;
-    const ignoredResistances = (messageRoll.options.ignoredResistances ?? []).concat(
-        otherRoll.options.ignoredResistances ?? []
+    const ignoredResistances = ((messageRoll.options.ignoredResistances ?? []) as string[]).concat(
+        (otherRoll.options.ignoredResistances ?? []) as string[]
     );
 
     const roll = {
@@ -337,7 +348,9 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
     getDocumentClass("ChatMessage").create(messageData);
 }
 
-function createTermGroup(terms: RollTermData[]): GroupingData<ArithmeticExpressionData> {
+function createTermGroup(
+    terms: RollTermData[]
+): RollTermData & { class?: "Grouping"; term: ReturnType<ArithmeticExpression["toJSON"]> } {
     return {
         class: "Grouping",
         options: {},
@@ -364,6 +377,13 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
 
     const sourceFlag = source.flags!.pf2e as ChatMessageFlagsPF2e["pf2e"] & {
         context: DamageDamageContextFlag | SpellCastContextFlag;
+        strike?: {
+            actor: string;
+            index: number;
+            damaging: boolean;
+            name: string;
+            altUsage: null;
+        };
     };
 
     const flavor = createHTMLElement("div", { innerHTML: message.flavor });
@@ -400,7 +420,7 @@ function getTargets(message: ChatMessagePF2e) {
     const targets = getMessageTargets(message);
     if (targets.length) return targets;
 
-    const target = message.getFlag<string>("pf2e", "context.target.token");
+    const target = message.getFlag("pf2e", "context.target.token") as string | undefined;
     return target ? [target] : [];
 }
 

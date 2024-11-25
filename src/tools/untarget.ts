@@ -1,3 +1,4 @@
+import { EncounterPF2e } from "module-helpers";
 import { createTool } from "../tool";
 
 const debouncedSetup = foundry.utils.debounce(setup, 1);
