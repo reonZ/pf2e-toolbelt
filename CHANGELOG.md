@@ -1,3 +1,9 @@
+# 2.23.0
+
+-   `Identify`:
+    -   fix spellcasting entries other than prepared & spontaneous being used to check if a character can use recall knowledge to identify a scroll/wand
+-   some internal changes
+
 # 2.22.4
 
 -   `Target Helper`:
