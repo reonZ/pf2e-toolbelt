@@ -34,8 +34,7 @@ const { config, settings, hook } = createTool({
 } as const);
 
 function onRenderEffectsPanel(panel: EffectsPanel, $html: JQuery) {
-    // @ts-expect-error
-    const actor = panel.actor;
+    const actor = /** private */ panel["actor"];
     if (!actor) return;
 
     const html = $html[0];

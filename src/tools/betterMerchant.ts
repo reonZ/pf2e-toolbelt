@@ -665,12 +665,10 @@ async function browserRenderInner(
 }
 
 function fillSelection(tab: CompendiumBrowserEquipmentTab, selection: string[], owned?: string[]) {
-    // @ts-expect-error
-    owned ??= getInMemory<string[]>(tab.browser, "owned") ?? [];
+    owned ??= getInMemory<string[]>(/** protected */ tab["browser"], "owned") ?? [];
     selection.length = 0;
 
-    // @ts-expect-error
-    for (const { uuid } of tab.currentIndex) {
+    for (const { uuid } of /** protected */ tab["currentIndex"]) {
         if (owned.includes(uuid)) continue;
         selection.push(uuid);
         if (selection.length >= PULL_LIMIT) break;
@@ -753,8 +751,7 @@ function updateBrowser(selection: string[], skipAll = false) {
 
     const tab = game.pf2e.compendiumBrowser.tabs.equipment;
     const selected = selection.length;
-    // @ts-expect-error
-    const total = tab.currentIndex.length;
+    const total = /** protected */ tab["currentIndex"].length;
     const isAtLimit = selected >= PULL_LIMIT;
     const reachedLimit = localize("browserPull.limit");
     const numbers = listButtons.querySelectorAll(":scope > div span");

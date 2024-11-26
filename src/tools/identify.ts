@@ -698,9 +698,17 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                     const direction = el.dataset.direction as "+" | "-";
                     const WorldClockCls = game.pf2e.worldClock.constructor as typeof WorldClock;
                     const worldTime = game.pf2e.worldClock.worldTime;
-                    // @ts-expect-error
-                    const increment = WorldClockCls.calculateIncrement(worldTime, "600", direction);
-                    if (increment !== 0) game.time.advance(increment);
+
+                    const increment = /** private */ WorldClockCls["calculateIncrement"](
+                        worldTime,
+                        "600",
+                        direction
+                    );
+
+                    if (increment !== 0) {
+                        game.time.advance(increment);
+                    }
+
                     break;
                 }
 
