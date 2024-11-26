@@ -142,12 +142,10 @@ const {
                 const addTargets = settings.enabled && value;
 
                 if (addTargets) {
-                    wrappers.enrichHTML.activate();
-                    wrappers.messageGetHTML.activate();
+                    wrappers.activateAll();
                     document.body.addEventListener("dragstart", onDragStart, true);
                 } else {
-                    wrappers.enrichHTML.disable();
-                    wrappers.messageGetHTML.disable();
+                    wrappers.disableAll();
                     document.body.removeEventListener("dragstart", onDragStart, true);
                 }
 
@@ -192,8 +190,7 @@ const {
         hook.activate();
 
         if (settings.addTargets) {
-            wrappers.enrichHTML.activate();
-            wrappers.messageGetHTML.activate();
+            wrappers.activateAll();
             document.body.addEventListener("dragstart", onDragStart, true);
         }
     },
