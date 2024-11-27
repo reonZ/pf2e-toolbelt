@@ -671,7 +671,7 @@ function createActionsMessage(
             <div>${translate("receive", { receive: links[1] })}</div>`
             : links.map((x) => `<div>${x}</div>`).join("");
 
-    const data: Partial<ChatMessageSourcePF2e> = {
+    const data: PreCreate<ChatMessageSourcePF2e> = {
         flavor: `<h4 class="action">${translate(label, { nb: actions.length, name: other })}</h4>`,
         content,
         speaker: ChatMessage.getSpeaker({ actor }),
