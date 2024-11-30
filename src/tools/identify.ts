@@ -3,6 +3,7 @@ import {
     ActorSheetPF2e,
     ActorType,
     addListenerAll,
+    advanceTime,
     ApplicationClosingOptions,
     ApplicationConfiguration,
     ApplicationRenderContext,
@@ -25,7 +26,6 @@ import {
     promptDialog,
     R,
     userIsActiveGM,
-    WorldClock,
 } from "module-helpers";
 import { createTool } from "../tool";
 
@@ -687,19 +687,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
 
                 case "change-time": {
                     const direction = el.dataset.direction as "+" | "-";
-                    const WorldClockCls = game.pf2e.worldClock.constructor as typeof WorldClock;
-                    const worldTime = game.pf2e.worldClock.worldTime;
-
-                    const increment = /** private */ WorldClockCls["calculateIncrement"](
-                        worldTime,
-                        "600",
-                        direction
-                    );
-
-                    if (increment !== 0) {
-                        game.time.advance(increment);
-                    }
-
+                    advanceTime("600", direction);
                     break;
                 }
 
