@@ -252,7 +252,6 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         const useDelay = settings.delay;
         const worldClock = game.pf2e.worldClock;
         const worldTime = worldClock.worldTime;
-        const DateTimeCls = worldTime.constructor as typeof DateTime;
 
         for (const actor of characters) {
             identifications[actor.id] = getFlag<IdenfifiedFlag>(actor, "identified") ?? {};
@@ -390,7 +389,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                         const fail = fails[actorId];
                         if (!fail) return 0;
 
-                        const failTime = DateTimeCls.fromISO(fail);
+                        const failTime = DateTime.fromISO(fail);
                         const diffTime = worldTime.diff(failTime, useDelay ? "hours" : "days");
                         const removeFail = useDelay ? diffTime.hours >= 24 : diffTime.days >= 1;
 
@@ -479,9 +478,9 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         const time =
             worldClock.timeConvention === 24
                 ? worldTime.toFormat("HH:mm")
-                : worldTime.toLocaleString(DateTimeCls.TIME_SIMPLE);
+                : worldTime.toLocaleString(DateTime.TIME_SIMPLE);
 
-        const date = worldTime.toLocaleString(DateTimeCls.DATE_SHORT);
+        const date = worldTime.toLocaleString(DateTime.DATE_SHORT);
 
         return {
             time,
