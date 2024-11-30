@@ -10,10 +10,10 @@ import {
     CharacterPF2e,
     confirmDialog,
     createHTMLElement,
-    CreaturePF2e,
     DateTime,
     elementDataset,
     getItemIdentificationDCs,
+    getShortDateTime,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
@@ -250,8 +250,7 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
         const itemGroups: Partial<Record<PhysicalItemType, IdentifyGroupItem[]>> = {};
 
         const useDelay = settings.delay;
-        const worldClock = game.pf2e.worldClock;
-        const worldTime = worldClock.worldTime;
+        const { worldTime, date, time } = getShortDateTime();
 
         for (const actor of characters) {
             identifications[actor.id] = getFlag<IdenfifiedFlag>(actor, "identified") ?? {};
@@ -474,13 +473,6 @@ class PF2eToolbeltIdentify extends foundry.applications.api.ApplicationV2 {
                 }),
             });
         }
-
-        const time =
-            worldClock.timeConvention === 24
-                ? worldTime.toFormat("HH:mm")
-                : worldTime.toLocaleString(DateTime.TIME_SIMPLE);
-
-        const date = worldTime.toLocaleString(DateTime.DATE_SHORT);
 
         return {
             time,
