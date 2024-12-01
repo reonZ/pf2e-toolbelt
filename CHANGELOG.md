@@ -1,3 +1,8 @@
+# 2.23.1
+
+-   `Identify`:
+    -   fix date year value when not using the `Unthemed (Gregorian Calendar)`
+
 # 2.23.0
 
 -   `Identify`:
