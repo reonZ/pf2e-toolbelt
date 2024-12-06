@@ -184,6 +184,18 @@
                 "servicesTop": {
                     "name": "Services Above Items",
                     "hint": "Should services be displayed above the items list in the sheet."
+                },
+                "buyMax": {
+                    "name": "Buy Max Ratio",
+                    "hint": "The maximum ratio value for buy filters."
+                },
+                "sellMax": {
+                    "name": "Sell Max Ratio",
+                    "hint": "The maximum ratio value for sell filters."
+                },
+                "servicesMax": {
+                    "name": "Service Max Ratio",
+                    "hint": "The maximum ratio value for services."
                 }
             },
             "underground": {

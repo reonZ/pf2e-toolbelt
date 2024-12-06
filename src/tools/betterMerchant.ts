@@ -42,6 +42,7 @@ import {
     isInstanceOf,
     promptDialog,
     renderActorSheets,
+    renderApplication,
     sendTradeRequest,
     toggleSummaryElement,
     translateTradeData,
@@ -109,6 +110,48 @@ const {
             default: true,
             onChange: () => {
                 renderActorSheets("LootSheetPF2e");
+            },
+        },
+        {
+            key: "buyMax",
+            type: Number,
+            default: RATIO.buy.max,
+            range: {
+                min: 0,
+                max: 9,
+                step: 1,
+            },
+            onChange: () => {
+                renderActorSheets("LootSheetPF2e");
+                renderApplication("FiltersMenu");
+            },
+        },
+        {
+            key: "sellMax",
+            type: Number,
+            default: RATIO.sell.max,
+            range: {
+                min: 0,
+                max: 9,
+                step: 1,
+            },
+            onChange: () => {
+                renderActorSheets("LootSheetPF2e");
+                renderApplication("FiltersMenu");
+            },
+        },
+        {
+            key: "servicesMax",
+            type: Number,
+            default: RATIO.services.max,
+            range: {
+                min: 0,
+                max: 9,
+                step: 1,
+            },
+            onChange: () => {
+                renderActorSheets("LootSheetPF2e");
+                renderApplication("FiltersMenu");
             },
         },
     ],
@@ -958,6 +1001,7 @@ async function lootSheetPF2eRenderInner(
                 infiniteAll,
                 servicesRatio: {
                     ...RATIO.services,
+                    max: settings.servicesMax,
                     value: servicesRatio,
                 },
             }),
@@ -1613,7 +1657,7 @@ function getServicesRatio(actor: LootPF2e) {
     return Math.clamp(
         getFlag<number>(actor, "servicesRatio") ?? RATIO.services.default,
         RATIO.services.min,
-        RATIO.services.max
+        settings.servicesMax
     ).toNearest(0.01, "floor");
 }
 
@@ -1695,7 +1739,12 @@ class FiltersMenu extends Application {
             i18n: translate.i18n,
             buyFilters: buyFilters.map(templateFilter(buyFilters)),
             sellFilters: sellFilters.map(templateFilter(sellFilters)),
-            ratios: RATIO,
+            ratios: R.mapValues(RATIO, (ratio, type) => {
+                return {
+                    ...ratio,
+                    max: settings[`${type}Max`],
+                };
+            }),
         };
     }
 
@@ -1893,7 +1942,7 @@ function setFilters<
 
 function clampPriceRatio(type: ItemFilterType, value: number | undefined) {
     if (typeof value !== "number") return RATIO[type].default;
-    return Math.clamp(value, RATIO[type].min, RATIO[type].max).toNearest(0.01, "floor");
+    return Math.clamp(value, RATIO[type].min, settings[`${type}Max`]).toNearest(0.01, "floor");
 }
 
 type ServiceEventAction = "open-macros" | "edit-image" | "open-macro-sheet" | "delete-macro";
