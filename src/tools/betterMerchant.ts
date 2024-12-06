@@ -1614,7 +1614,7 @@ function getServicesRatio(actor: LootPF2e) {
         getFlag<number>(actor, "servicesRatio") ?? RATIO.services.default,
         RATIO.services.min,
         RATIO.services.max
-    );
+    ).toNearest(0.01, "floor");
 }
 
 async function enrichService(service: ServiceFlag, ratio?: number): Promise<ServiceData> {
@@ -1893,7 +1893,7 @@ function setFilters<
 
 function clampPriceRatio(type: ItemFilterType, value: number | undefined) {
     if (typeof value !== "number") return RATIO[type].default;
-    return Math.clamp(value, RATIO[type].min, RATIO[type].max).toNearest(0.1, "floor");
+    return Math.clamp(value, RATIO[type].min, RATIO[type].max).toNearest(0.01, "floor");
 }
 
 type ServiceEventAction = "open-macros" | "edit-image" | "open-macro-sheet" | "delete-macro";

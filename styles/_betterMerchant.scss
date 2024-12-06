@@ -31,8 +31,8 @@
             }
 
             .services-ratio {
-                flex: 0 0 4ch;
-                text-align: center;
+                flex: 0 0 5ch;
+                text-align: right;
             }
         }
     }
@@ -165,8 +165,8 @@
                 }
 
                 &[name="ratio"] {
-                    width: 4ch;
-                    text-align: center;
+                    width: 5ch;
+                    text-align: right;
                 }
 
                 &[name="purse"] {
