@@ -1513,7 +1513,17 @@ async function roll3dDice(
         roll.ghost = true;
     }
 
-    return game.dice3d.showForRoll(roll, user, synchronize);
+    const speaker = ChatMessage.getSpeaker({ token: target });
+
+    return game.dice3d.showForRoll(
+        roll,
+        user,
+        synchronize,
+        undefined,
+        undefined,
+        undefined,
+        speaker
+    );
 }
 
 function showGhostDiceOnPrivate() {
