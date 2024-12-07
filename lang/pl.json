@@ -184,6 +184,18 @@
                 "servicesTop": {
                     "name": "Usługi powyżej przedmiotów",
                     "hint": "Usługi powinny być wyświetlane nad listą przedmiotów na karcie."
+                },
+                "buyMax": {
+                    "name": "Maks. filtr kupna",
+                    "hint": "Maksymalna wartość współczynnika dla filtrów kupna."
+                },
+                "sellMax": {
+                    "name": "Maks. filtr sprzedaży",
+                    "hint": "Maksymalna wartość współczynnika dla filtrów sprzedaży."
+                },
+                "servicesMax": {
+                    "name": "Maks. filtr usług",
+                    "hint": "Maksymalna wartość współczynnika dla usług."
                 }
             },
             "underground": {
