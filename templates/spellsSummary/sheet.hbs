@@ -5,7 +5,8 @@
             <h3>{{localize (lookup @root.labels rank)}}</h3>
 
             {{#if (or (eq rank 12) (and (eq rank 0) @root.hasFocusCantrip))}}
-            <span class="pips{{#if @root.isOwner}} focus-pool{{/if}}">
+            <span class="pips{{#if @root.isOwner}} focus-pool{{/if}}" data-action="adjust-resource"
+                data-resource="focus">
                 {{#times @root.focusPool.max}}
                 <i
                     class="{{#if (gt @root.focusPool.value this)}}fa-solid fa-dot-circle{{else}}fa-regular fa-circle{{/if}}"></i>
