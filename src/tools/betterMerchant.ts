@@ -34,6 +34,7 @@ import {
     error,
     filterTraits,
     getHighestName,
+    getInputValue,
     hasGMOnline,
     hasSufficientCoins,
     htmlClosest,
@@ -1785,12 +1786,7 @@ class FiltersMenu extends Application {
             if (!filter) return;
 
             const key = el.name;
-            const value =
-                el.type === "checkbox"
-                    ? el.checked
-                    : el.type === "number"
-                    ? el.valueAsNumber
-                    : el.value.trim();
+            const value = getInputValue(el);
 
             foundry.utils.setProperty(filter, key, value);
             setFilters(this.actor, type, itemFilters);
