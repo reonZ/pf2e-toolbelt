@@ -1,5 +1,11 @@
 {
     "pf2e-toolbelt": {
+        "SHARED": {
+            "spellcasting": {
+                "staff": "Staff",
+                "charges": "Charges"
+            }
+        },
         "settings": {
             "requiresReload": "(Requires Reload)",
             "actionable": {
@@ -344,9 +350,7 @@
             }
         },
         "spellsSummary": {
-            "label": "Spell Summary",
-            "staff": "Staff",
-            "charges": "Charges"
+            "label": "Spell Summary"
         },
         "stances": {
             "sheet": {

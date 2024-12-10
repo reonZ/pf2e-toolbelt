@@ -60,15 +60,7 @@ async function characterSheetPF2eRenderInner(
     const actor = this.actor;
 
     const entries = Object.values(data.spellCollectionGroups).flat();
-    const summarizedData = await getSummarizedSpellsDataForRender(
-        actor,
-        settings.sort,
-        {
-            staff: localize.path("staff"),
-            charges: localize.path("charges"),
-        },
-        entries
-    );
+    const summarizedData = await getSummarizedSpellsDataForRender(actor, settings.sort, entries);
 
     const spellcastingTab = getSpellcastingTab(html);
     const dataset = { tab: "spells-summary", group: "spell-collections" };

@@ -1,5 +1,11 @@
 {
     "pf2e-toolbelt": {
+        "SHARED": {
+            "spellcasting": {
+                "staff": "Kostur",
+                "charges": "Ładunki"
+            }
+        },
         "settings": {
             "requiresReload": "(Wymaga przeładowania)",
             "actionable": {
@@ -344,9 +350,7 @@
             }
         },
         "spellsSummary": {
-            "label": "Podsumowanie zaklęcia",
-            "staff": "Kostur",
-            "charges": "Ładunki"
+            "label": "Podsumowanie zaklęcia"
         },
         "stances": {
             "sheet": {
