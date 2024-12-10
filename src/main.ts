@@ -22,7 +22,7 @@ import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
 
-MODULE.register("pf2e-toolbelt", "PF2e Toolbelt");
+MODULE.register("pf2e-toolbelt");
 
 const TOOLS: ToolConfig[] = [
     actionableTool,
