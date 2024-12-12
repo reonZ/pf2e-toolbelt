@@ -1,3 +1,16 @@
+# 2.24.0
+
+-   if you use the `PF2e Dailies` module, make sure to update it to version `3.15.0`
+-   `Better Merchant`:
+    -   add `Buy Max Ratio`, `Sell Max Ratio` and `Service Max Ratio` settings
+    -   allow 2 decimals to filter and service ratios
+-   `Spells Summary`:
+    -   hide non-primary vessel spells from the list
+    -   fix background color for signature spells
+    -   fix not being able to modify the focus points
+-   `Target Helper`:
+    -   add `speaker` argument to `Dice So Nice!` call
+
 # 2.23.1
 
 -   `Identify`:
