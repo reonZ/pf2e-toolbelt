@@ -97,11 +97,6 @@ async function characterSheetPF2eRenderInner(
     }
 }
 
-function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
-    const { itemId } = elementDataset(htmlClosest(btn, "[data-item-id]")!);
-    return actor.items.get(itemId);
-}
-
 function characterSheetPF2eActivateListeners(
     this: CharacterSheetPF2e<CharacterPF2e>,
     html: HTMLElement
@@ -130,6 +125,11 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
         Hooks.off("renderChatMessage", hookId);
         selfApplyEffectFromMessage(message, html);
     });
+}
+
+function getItemFromActionButton(actor: CharacterPF2e, btn: HTMLButtonElement) {
+    const { itemId } = elementDataset(htmlClosest(btn, "[data-item-id]")!);
+    return actor.items.get(itemId);
 }
 
 export { getItemFromActionButton, config as useButtonTool, settings as useButtonToolSetting };

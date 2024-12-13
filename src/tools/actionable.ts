@@ -168,17 +168,6 @@ function characterSheetPF2eActivateListeners(
     );
 }
 
-async function getActionMacro(item: Maybe<ItemPF2e>) {
-    if (!item) return null;
-
-    const isSpell = item.isOfType("spell");
-    const isAction = item.isOfType("feat", "action");
-    if (!isSpell && (!isAction || item.system.selfEffect)) return null;
-
-    const uuid = getFlag<string>(item, "macro");
-    return uuid ? fromUuid<Macro>(uuid) : null;
-}
-
 async function itemSheetPF2eRenderInner(
     this: AbilitySheetPF2e | FeatSheetPF2e | SpellSheetPF2e,
     wrapped: libWrapper.RegisterCallback,
@@ -350,6 +339,17 @@ async function itemSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event
     } else {
         throw ErrorPF2e("Invalid item drop");
     }
+}
+
+async function getActionMacro(item: Maybe<ItemPF2e>) {
+    if (!item) return null;
+
+    const isSpell = item.isOfType("spell");
+    const isAction = item.isOfType("feat", "action");
+    if (!isSpell && (!isAction || item.system.selfEffect || item.crafting)) return null;
+
+    const uuid = getFlag<string>(item, "macro");
+    return uuid ? fromUuid<Macro>(uuid) : null;
 }
 
 type SpellMacroValue = false | { skipNotification?: boolean; customNotification?: string };
