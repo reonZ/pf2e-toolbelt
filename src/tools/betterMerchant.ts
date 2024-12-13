@@ -167,11 +167,11 @@ const {
         },
     ],
     wrappers: [
-        {
-            key: "actorTransferItem",
-            path: "CONFIG.Actor.documentClass.prototype.transferItemToActor",
-            callback: actorTransferItemToActor,
-        },
+        // {
+        //     key: "actorTransferItem",
+        //     path: "CONFIG.Actor.documentClass.prototype.transferItemToActor",
+        //     callback: actorTransferItemToActor,
+        // },
         {
             key: "lootSheetRenderInner",
             path: "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype._renderInner",
@@ -182,32 +182,32 @@ const {
             path: "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.activateListeners",
             callback: lootSheetPF2eActivateListeners,
         },
-        {
-            key: "lootActorTransfer",
-            path: "CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor",
-            callback: lootActorTransferItemToActor,
-            type: "OVERRIDE",
-        },
-        {
-            key: "browserRenderInner",
-            path: "game.pf2e.compendiumBrowser.constructor.prototype._renderInner",
-            callback: browserRenderInner,
-        },
-        {
-            key: "browserEquipmentTabRenderResults",
-            path: "game.pf2e.compendiumBrowser.tabs.equipment.constructor.prototype.renderResults",
-            callback: browserEquipmentTabRenderResults,
-        },
-        {
-            key: "browserListeners",
-            path: "game.pf2e.compendiumBrowser.constructor.prototype.activateListeners",
-            callback: browserActivateListeners,
-        },
-        {
-            key: "browserClose",
-            path: "game.pf2e.compendiumBrowser.constructor.prototype.close",
-            callback: browserClose,
-        },
+        // {
+        //     key: "lootActorTransfer",
+        //     path: "CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor",
+        //     callback: lootActorTransferItemToActor,
+        //     type: "OVERRIDE",
+        // },
+        // {
+        //     key: "browserRenderInner",
+        //     path: "game.pf2e.compendiumBrowser.constructor.prototype._renderInner",
+        //     callback: browserRenderInner,
+        // },
+        // {
+        //     key: "browserEquipmentTabRenderResults",
+        //     path: "game.pf2e.compendiumBrowser.tabs.equipment.constructor.prototype.renderResults",
+        //     callback: browserEquipmentTabRenderResults,
+        // },
+        // {
+        //     key: "browserListeners",
+        //     path: "game.pf2e.compendiumBrowser.constructor.prototype.activateListeners",
+        //     callback: browserActivateListeners,
+        // },
+        // {
+        //     key: "browserClose",
+        //     path: "game.pf2e.compendiumBrowser.constructor.prototype.close",
+        //     callback: browserClose,
+        // },
         {
             key: "itemDerivedData",
             path: ITEM_PREPARE_DERIVED_DATA,
@@ -226,8 +226,8 @@ const {
         if (!settings.enabled) return;
 
         wrappers.itemDerivedData.activate();
-        wrappers.actorTransferItem.activate();
-        wrappers.lootActorTransfer.activate();
+        // wrappers.actorTransferItem.activate();
+        // wrappers.lootActorTransfer.activate();
     },
     ready: (isGM) => {
         if (!settings.enabled) return;
@@ -242,10 +242,10 @@ const {
 
             hooks.createChatMessage.activate();
 
-            wrappers.browserRenderInner.activate();
-            wrappers.browserEquipmentTabRenderResults.activate();
-            wrappers.browserListeners.activate();
-            wrappers.browserClose.activate();
+            // wrappers.browserRenderInner.activate();
+            // wrappers.browserEquipmentTabRenderResults.activate();
+            // wrappers.browserListeners.activate();
+            // wrappers.browserClose.activate();
         }
     },
 } as const);
@@ -513,16 +513,16 @@ function itemPrepareDerivedData(this: ItemPF2e, wrapped: libWrapper.RegisterCall
         deleteInMemory(this);
 
         const infinite = getFlag<boolean>(actor, "infiniteAll");
-        const itemFilter = testItem(actor, this, "sell", this.system.price.per);
+        // const itemFilter = testItem(actor, this, "sell", this.system.price.per);
 
         if (infinite) {
             this.system.quantity = 9999;
         }
 
-        if (itemFilter && itemFilter.filter.ratio !== 1) {
-            this.system.price.value = itemFilter.price;
-            setInMemory(this, "filter", itemFilter.filter.id);
-        }
+        // if (itemFilter && itemFilter.filter.ratio !== 1) {
+        //     this.system.price.value = itemFilter.price;
+        //     setInMemory(this, "filter", itemFilter.filter.id);
+        // }
     } catch (error) {
         wrapperError(ITEM_PREPARE_DERIVED_DATA, error);
     }
