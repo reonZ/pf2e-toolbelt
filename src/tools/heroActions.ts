@@ -152,6 +152,8 @@ async function characterSheetPF2eRenderInner(
     html: HTMLElement
 ) {
     const actor = this.actor;
+    if (!actor.heroPoints.max) return;
+
     const actions = getHeroActions(actor);
     const usesCount = usesCountVariant();
     const heroPoints = actor.heroPoints.value;
@@ -183,6 +185,8 @@ function characterSheetPF2eActivateListeners(
     html: HTMLElement
 ) {
     const actor = this.actor;
+    if (!actor.heroPoints.max) return;
+
     const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
     const list = htmlQuery(tab, ".heroActions-list");
     if (!list || !tab) return;
@@ -382,7 +386,7 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     const others = game.actors
         .filter(
             (x): x is CharacterPF2e<null> =>
-                x.isOfType("character") && x !== actor && x.hasPlayerOwner
+                x.isOfType("character") && x !== actor && x.hasPlayerOwner && !!x.heroPoints.max
         )
         .map((x) => ({
             name: x.name,
