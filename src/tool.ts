@@ -29,6 +29,7 @@ import {
     updateSourceFlag,
     waitDialog,
 } from "module-helpers";
+import { ModuleMigration } from "module-helpers/dist/migration";
 import { actorWrappers } from "./tools/shared/actor";
 import { characterSheetWrappers } from "./tools/shared/characterSheet";
 import { chatMessageWrappers } from "./tools/shared/chatMessage";
@@ -375,6 +376,7 @@ type ToolConfig = {
           }
     )[];
     api?: Record<string, Function>;
+    migrations?: ModuleMigration[];
     init?: (isGM: boolean) => void;
     ready?: (isGM: boolean) => void;
 };

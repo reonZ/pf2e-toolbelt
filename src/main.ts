@@ -1,4 +1,4 @@
-import { getSetting, MODULE, userIsGM } from "module-helpers";
+import { getSetting, MODULE, R, userIsGM } from "module-helpers";
 import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";
@@ -21,6 +21,7 @@ import { undergroundTool } from "./tools/underground";
 import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
+import { ModuleMigration } from "module-helpers/dist/migration";
 
 MODULE.register("pf2e-toolbelt");
 
@@ -46,6 +47,46 @@ const TOOLS: ToolConfig[] = [
     undergroundTool,
     useButtonTool,
 ];
+
+{
+    const migrations = R.pipe(
+        TOOLS,
+        R.flatMap((tool) => tool.migrations ?? []),
+        R.groupBy(R.prop("version"))
+    );
+
+    for (const [version, entries] of R.entries(migrations)) {
+        if (!entries.length) continue;
+
+        const migration: Omit<ModuleMigration, "module"> = {
+            version: Number(version),
+        };
+
+        for (const functionName of ["migrateActor", "migrateUser"] as const) {
+            const migrateFunctions = R.pipe(
+                entries,
+                R.map((entry) => entry[functionName]),
+                R.filter(R.isTruthy)
+            );
+
+            if (!migrateFunctions.length) continue;
+
+            migration[functionName] = async (source) => {
+                let migrated = false;
+
+                for (const migrateFunction of migrateFunctions) {
+                    if (await migrateFunction(source as any)) {
+                        migrated = true;
+                    }
+                }
+
+                return migrated;
+            };
+        }
+
+        MODULE.registerMigration(migration);
+    }
+}
 
 Hooks.once("init", () => {
     const isGM = userIsGM();

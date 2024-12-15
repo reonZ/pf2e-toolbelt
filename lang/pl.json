@@ -1,6 +1,27 @@
 {
     "pf2e-toolbelt": {
         "SHARED": {
+            "migration": {
+                "warning": {
+                    "title": "Migracja modułu",
+                    "start": "Rozpoczęcie migracji",
+                    "cancel": "Anuluj",
+                    "content": {
+                        "modules": "Następujące moduły mogą wymagać migracji danych:",
+                        "wait": "Jeśli system przeprowadza migrację własnych danych, należy poczekać przed jej rozpoczęciem"
+                    }
+                },
+                "summary": {
+                    "title": "Podsumowanie migracji",
+                    "content": "Następujące dokumenty zostały zmigrowane",
+                    "nothing": "Żaden dokument nie wymagał migracji."
+                },
+                "error": {
+                    "actors": "Wystąpił błąd podczas migracji danych aktorów świata.",
+                    "token": "Wystąpił błąd podczas migracji danych dla aktora tokenu {uuid}.",
+                    "users": "Wystąpił błąd podczas migracji danych użytkowników."
+                }
+            },
             "spellcasting": {
                 "staff": "Kostur",
                 "charges": "Ładunki"
