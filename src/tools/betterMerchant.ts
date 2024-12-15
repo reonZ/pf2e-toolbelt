@@ -53,6 +53,7 @@ import {
 } from "module-helpers";
 import { createTool } from "../tool";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
+import { ModuleMigration } from "module-helpers/dist/migration";
 
 const INFINITY = "∞";
 
@@ -79,6 +80,94 @@ const RATIO = {
 };
 
 const ITEM_PREPARE_DERIVED_DATA = "CONFIG.Item.documentClass.prototype.prepareDerivedData";
+
+const MIGRATION_225: ModuleMigration = {
+    version: 2.25,
+    migrateActor: (actorSource) => {
+        if (actorSource.type !== "loot") return false;
+
+        const flag = getFlagProperty(actorSource);
+        if (!R.isPlainObject(flag) || !R.isPlainObject(flag.filters)) return false;
+
+        const setCheckbox = (
+            checkbox: Partial<{
+                options: Record<string, { selected: boolean }>;
+                selected: string[];
+            }>
+        ) => {
+            if (!R.isArray(checkbox.selected)) return;
+
+            checkbox.options ??= {};
+
+            for (const selection of checkbox.selected) {
+                checkbox.options[selection] ??= { selected: true };
+            }
+
+            return checkbox;
+        };
+
+        for (const type of ["buy", "sell"]) {
+            const typeFilters = flag.filters[type];
+            if (!R.isArray(typeFilters)) {
+                flag.filters[`-=${type}`] = true;
+                continue;
+            }
+
+            flag.filters[type] = R.pipe(
+                foundry.utils.deepClone(typeFilters),
+                R.filter(
+                    (typeFilters): typeFilters is { filter: { [k: string]: unknown } } =>
+                        R.isPlainObject(typeFilters) && R.isPlainObject(typeFilters.filter)
+                ),
+                R.map((typeFilter) => {
+                    const filter = typeFilter.filter;
+
+                    if ("order" in filter) {
+                        delete filter.order;
+                    }
+
+                    if (R.isPlainObject(filter.checkboxes)) {
+                        if (R.isPlainObject(filter.checkboxes.source)) {
+                            filter.source = setCheckbox(filter.checkboxes.source);
+                            delete filter.checkboxes.source;
+                        }
+
+                        for (const checkbox of Object.values(filter.checkboxes)) {
+                            setCheckbox(checkbox as any);
+                        }
+                    }
+
+                    if (R.isPlainObject(filter.multiselects)) {
+                        if ("traits" in filter.multiselects) {
+                            filter.traits = filter.multiselects.traits;
+                        }
+                        delete filter.multiselects;
+                    }
+
+                    if (R.isPlainObject(filter.sliders)) {
+                        if (
+                            R.isPlainObject(filter.sliders.level) &&
+                            R.isPlainObject(filter.sliders.level.values)
+                        ) {
+                            const level = filter.sliders.level.values;
+
+                            filter.level = {
+                                changed: true,
+                                from: level.min ?? 0,
+                                to: level.max ?? 20,
+                            };
+                        }
+                        delete filter.sliders;
+                    }
+
+                    return typeFilter;
+                })
+            );
+        }
+
+        return true;
+    },
+};
 
 const {
     config,
@@ -209,95 +298,7 @@ const {
         testItem,
         compareItemWithFilter,
     },
-    migrations: [
-        {
-            version: 2.25,
-            migrateActor: (actorSource) => {
-                if (actorSource.type !== "loot") return false;
-
-                const flag = getFlagProperty(actorSource);
-                if (!R.isPlainObject(flag) || !R.isPlainObject(flag.filters)) return false;
-
-                const setCheckbox = (
-                    checkbox: Partial<{
-                        options: Record<string, { selected: boolean }>;
-                        selected: string[];
-                    }>
-                ) => {
-                    if (!R.isArray(checkbox.selected)) return;
-
-                    checkbox.options ??= {};
-
-                    for (const selection of checkbox.selected) {
-                        checkbox.options[selection] ??= { selected: true };
-                    }
-
-                    return checkbox;
-                };
-
-                for (const type of ["buy", "sell"]) {
-                    const typeFilters = flag.filters[type];
-                    if (!R.isArray(typeFilters)) {
-                        flag.filters[`-=${type}`] = true;
-                        continue;
-                    }
-
-                    flag.filters[type] = R.pipe(
-                        foundry.utils.deepClone(typeFilters),
-                        R.filter(
-                            (typeFilters): typeFilters is { filter: { [k: string]: unknown } } =>
-                                R.isPlainObject(typeFilters) && R.isPlainObject(typeFilters.filter)
-                        ),
-                        R.map((typeFilter) => {
-                            const filter = typeFilter.filter;
-
-                            if ("order" in filter) {
-                                delete filter.order;
-                            }
-
-                            if (R.isPlainObject(filter.checkboxes)) {
-                                if (R.isPlainObject(filter.checkboxes.source)) {
-                                    filter.source = setCheckbox(filter.checkboxes.source);
-                                    delete filter.checkboxes.source;
-                                }
-
-                                for (const checkbox of Object.values(filter.checkboxes)) {
-                                    setCheckbox(checkbox as any);
-                                }
-                            }
-
-                            if (R.isPlainObject(filter.multiselects)) {
-                                if ("traits" in filter.multiselects) {
-                                    filter.traits = filter.multiselects.traits;
-                                }
-                                delete filter.multiselects;
-                            }
-
-                            if (R.isPlainObject(filter.sliders)) {
-                                if (
-                                    R.isPlainObject(filter.sliders.level) &&
-                                    R.isPlainObject(filter.sliders.level.values)
-                                ) {
-                                    const level = filter.sliders.level.values;
-
-                                    filter.level = {
-                                        changed: true,
-                                        from: level.min ?? 0,
-                                        to: level.max ?? 20,
-                                    };
-                                }
-                                delete filter.sliders;
-                            }
-
-                            return typeFilter;
-                        })
-                    );
-                }
-
-                return true;
-            },
-        },
-    ],
+    migrations: [MIGRATION_225],
     onSocket: (packet: TradePacket<PacketData>, userId: string) => {
         const translated = translateTradeData(packet);
         buyItem(translated, userId);
