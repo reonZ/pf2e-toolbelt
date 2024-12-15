@@ -1,8 +1,29 @@
-<div>{{@root.i18n 'selected'}}: <span>0</span>/<span>0</span></div>
-<button type='button' data-action="add-to-merchant">
-    {{@root.i18n 'add'}}
-</button>
-<label>
-    {{@root.i18n 'all'}}
-    <input type='checkbox' data-action="toggle-select-all">
-</label>
+<div class="header">
+    <div>{{@root.i18n 'selected'}}: <span class="count">0</span>/{{results.length}}</div>
+    <button type='button' data-action="add-to-merchant">
+        {{@root.i18n 'add'}}
+    </button>
+    <a data-action="toggle-all">{{@root.i18n 'all'}}</a>
+</div>
+<ul class="items" data-tooltip-class="pf2e">
+    {{#each results as |item|}}
+    <li class="item">
+        <img src="{{item.img}}">
+        <a class="name" data-action="open-sheet">{{item.name}}</a>
+        <div class="tags paizo-style">
+            {{#if (ne item.rarity 'common')}}
+            <span class="tag rarity {{item.rarity}}" data-tooltip="PF2E.Rarity">
+                {{item.rarity}}
+            </span>
+            {{/if}}
+        </div>
+        <div class="price" data-tooltip="PF2E.PriceLabel">{{item.price}}</div>
+        <div class="level" data-tooltip="PF2E.LevelLabel">{{item.level}}</div>
+        {{#if (includes @root.owned item.uuid)}}
+        <i class="owned fa-solid fa-box" data-tooltip="{{@root.i18n.path 'owned'}}"></i>
+        {{else}}
+        <input type="checkbox" name="selected-item" data-uuid="{{item.uuid}}">
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>

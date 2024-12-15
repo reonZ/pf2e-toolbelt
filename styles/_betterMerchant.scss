@@ -67,50 +67,12 @@
     }
 }
 
-#compendium-browser .window-content .content-box.toolbelt-merchant {
-    & > nav {
-        display: none;
-    }
-
-    & > section.content {
-        height: 100%;
-
-        .tab[data-tab="equipment"] {
-            .list-buttons {
-                width: auto;
-                column-gap: 2em;
-                right: 30px;
-
-                > label,
-                > div {
-                    display: flex;
-                    align-items: center;
-                    white-space: nowrap;
-                    font-weight: bold;
-                    gap: 0.3em;
-
-                    input[type="checkbox"] {
-                        margin: 0;
-                        flex: 0 14px;
-                    }
-                }
-            }
-
-            ul.result-list {
-                height: calc(100% - 24px);
-
-                .item {
-                    > input[type="checkbox"],
-                    > i {
-                        margin: 0 0.5em;
-                        flex: 0 14px;
-                    }
-
-                    > i {
-                        cursor: default;
-                    }
-                }
-            }
+#compendium-browser.toolbelt-merchant {
+    .window-header {
+        .header-button {
+            margin-right: 2em;
+            line-height: 1.4;
+            width: fit-content;
         }
     }
 }
@@ -206,6 +168,94 @@
                     inset: -0.5em -4px 0px -4px;
                     background: #00000017;
                     pointer-events: none;
+                }
+            }
+        }
+    }
+}
+
+.application.pf2e-hud-browserPull {
+    max-height: 80%;
+
+    .window-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        padding-inline: 0;
+        padding-top: 0.5em;
+
+        .header {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            align-items: center;
+            justify-content: end;
+            gap: 2em;
+            padding-inline: 1em 2em;
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid var(--color-border);
+
+            > div {
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+            }
+        }
+
+        .items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            padding-inline: 1em;
+            overflow-y: auto;
+
+            .item {
+                display: grid;
+                grid-template-columns: 2.4em 1fr 9em 5em 1.5em 2.4em;
+                align-items: center;
+                justify-items: center;
+                gap: 0.25rem;
+                margin: 0;
+                padding-left: 0.4em;
+                padding-inline: 0.2em;
+
+                &:nth-child(odd) {
+                    background-color: var(--color-dark-2);
+                }
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.25);
+                }
+
+                img {
+                    height: 2.286em;
+                }
+
+                .name {
+                    justify-self: start;
+                }
+
+                .tags,
+                .price,
+                .level {
+                    height: 100%;
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .price {
+                    justify-content: end;
+                    margin-right: 0.65em;
+                }
+
+                .tags,
+                .level {
+                    justify-content: center;
+                }
+
+                .owned {
+                    font-size: 1.3em;
+                    margin-right: 0.1em;
                 }
             }
         }

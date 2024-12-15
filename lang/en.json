@@ -464,9 +464,10 @@
                 }
             },
             "browserPull": {
+                "title": "Add Items - {name}",
                 "selected": "Selected",
                 "add": "Add To Merchant",
-                "all": "Select All",
+                "all": "Toggle All",
                 "limit": "You have reached the limit!",
                 "wait": "Please wait for the items to be processed.",
                 "finished": "Items have finished being added to the merchant actor.",

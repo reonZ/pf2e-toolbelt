@@ -2,12 +2,12 @@ import {
     ActorPF2e,
     ApplicationClosingOptions,
     ApplicationConfiguration,
+    ApplicationRenderContext,
     ApplicationRenderOptions,
     ChatMessagePF2e,
     Coins,
     CoinsPF2e,
     CompendiumBrowser,
-    CompendiumBrowserEquipmentTab,
     EquipmentFilters,
     ErrorPF2e,
     ItemPF2e,
@@ -188,11 +188,11 @@ const {
         //     callback: lootActorTransferItemToActor,
         //     type: "OVERRIDE",
         // },
-        // {
-        //     key: "browserRenderInner",
-        //     path: "game.pf2e.compendiumBrowser.constructor.prototype._renderInner",
-        //     callback: browserRenderInner,
-        // },
+        {
+            key: "browserOnFirstRender",
+            path: "game.pf2e.compendiumBrowser.constructor.prototype._onFirstRender",
+            callback: browserOnFirstRender,
+        },
         // {
         //     key: "browserEquipmentTabRenderResults",
         //     path: "game.pf2e.compendiumBrowser.tabs.equipment.constructor.prototype.renderResults",
@@ -203,11 +203,11 @@ const {
         //     path: "game.pf2e.compendiumBrowser.constructor.prototype.activateListeners",
         //     callback: browserActivateListeners,
         // },
-        // {
-        //     key: "browserClose",
-        //     path: "game.pf2e.compendiumBrowser.constructor.prototype.close",
-        //     callback: browserClose,
-        // },
+        {
+            key: "browserOnClose",
+            path: "game.pf2e.compendiumBrowser.constructor.prototype._onClose",
+            callback: browserOnClose,
+        },
         {
             key: "itemDerivedData",
             path: ITEM_PREPARE_DERIVED_DATA,
@@ -242,10 +242,8 @@ const {
 
             hooks.createChatMessage.activate();
 
-            // wrappers.browserRenderInner.activate();
-            // wrappers.browserEquipmentTabRenderResults.activate();
-            // wrappers.browserListeners.activate();
-            // wrappers.browserClose.activate();
+            wrappers.browserOnFirstRender.activate();
+            wrappers.browserOnClose.activate();
         }
     },
 } as const);
@@ -647,335 +645,208 @@ function compareItemWithFilter(item: PhysicalItemPF2e, filter: Partial<Equipment
     return true;
 }
 
-async function browserClose(
+async function browserOnClose(
     this: CompendiumBrowser,
     wrapped: libWrapper.RegisterCallback,
-    options: any
+    ...args: any[]
 ) {
     deleteInMemory(this);
-    wrapped(options);
+    wrapped(...args);
 }
 
-async function browserRenderInner(
+function browserOnFirstRender(
     this: CompendiumBrowser,
     wrapped: libWrapper.RegisterCallback,
-    sheetData: CompendiumBrowserSheetData
+    ...args: any[]
 ) {
-    const $html = await wrapped(sheetData);
+    wrapped(...args);
 
     const data = getInMemory<BrowserData>(this);
-    if (!data?.actor.isMerchant) return $html;
+    if (!data?.actor.isMerchant) return;
 
-    const html = $html[0];
-    const listButtons = htmlQuery(html, "section.content .tab[data-tab='equipment'] .list-buttons");
-    if (!listButtons) return $html;
+    const html = this.element;
+    const controls = htmlQuery(html, ".window-header [data-action='toggleControls']");
 
-    html.classList.add("toolbelt-merchant");
+    (async () => {
+        html.classList.add("toolbelt-merchant");
+        htmlQuery(html, ".window-content .tabs")?.remove();
 
-    for (const button of listButtons.querySelectorAll("button")) {
-        button.remove();
-    }
+        if (data.type === "pull") {
+            const btn = createHTMLElement("button", {
+                classes: ["header-button"],
+                innerHTML: localize("browserPull.add"),
+            });
 
-    if (data.type === "pull") {
-        const pullElements = createHTMLElement("div", {
-            innerHTML: await render("browserPull", {}),
-        });
+            btn.addEventListener("click", (event) => {
+                this.close();
+                new BrowserPullMenu(data.actor, this.tabs.equipment.results).render(true);
+            });
 
-        listButtons.append(...pullElements.children);
+            controls?.replaceWith(btn);
+        } else {
+        }
+    })();
+}
 
-        const oweditems = R.pipe(
-            data.actor.inventory.contents,
+class BrowserPullMenu extends foundry.applications.api.ApplicationV2 {
+    #actor: LootPF2e;
+    #owned: string[];
+    #selection: string[] = [];
+    #results: CompendiumBrowserIndexData[];
+
+    static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
+        position: {
+            width: 600,
+        },
+        classes: ["pf2e-hud-browserPull"],
+    };
+
+    constructor(
+        actor: LootPF2e,
+        results: CompendiumBrowserIndexData[],
+        options: DeepPartial<ApplicationConfiguration> = {}
+    ) {
+        options.window ??= {};
+        options.window.title = localize("browserPull.title", { name: actor.name });
+
+        super(options);
+
+        this.#actor = actor;
+        this.#results = results;
+
+        this.#owned = R.pipe(
+            actor.inventory.contents,
             R.map((item) => item.sourceId),
             R.filter(R.isTruthy)
         );
 
-        deleteInMemory(this, "selection");
-        setInMemory(this, "owned", oweditems);
-    } else {
-        const typeLabel = localize("filter", data.filterType);
-        const label = localize("browserFilter", data.edit ? "edit" : "create", { type: typeLabel });
+        this.#selectToLimit();
+    }
 
-        const button = createHTMLElement("button", {
-            innerHTML: label,
-            dataset: {
-                action: "validate-filter",
-            },
+    get selected() {
+        return this.#selection.length;
+    }
+
+    async _prepareContext(options: ApplicationRenderOptions): Promise<BrowserPullMenuContext> {
+        return {
+            owned: this.#owned,
+            results: this.#results,
+        };
+    }
+
+    _renderHTML(
+        context: ApplicationRenderContext,
+        options: ApplicationRenderOptions
+    ): Promise<string> {
+        return render("browserPull", context);
+    }
+
+    protected _onFirstRender(context: object, options: ApplicationRenderOptions): void {
+        this.#updateCheckboxes();
+    }
+
+    _replaceHTML(result: string, content: HTMLElement, options: ApplicationRenderOptions): void {
+        content.innerHTML = result;
+        this.#activateListeners(content);
+    }
+
+    #updateCheckboxes() {
+        const itemsUl = htmlQuery(this.element, "ul");
+        const countEl = htmlQuery(this.element, ".header .count");
+        if (!itemsUl || !countEl) return;
+
+        const selected = this.selected;
+        const isAtLimit = selected >= PULL_LIMIT;
+
+        // count
+
+        countEl.textContent = String(selected);
+
+        // select inputs
+
+        let element: Element;
+        const iterator = document.createNodeIterator(itemsUl, NodeFilter.SHOW_ELEMENT);
+
+        while ((element = iterator.nextNode() as Element)) {
+            if (!(element instanceof HTMLInputElement)) continue;
+
+            const checked = this.#selection.includes(element.dataset.uuid!);
+
+            element.checked = checked;
+            element.disabled = !checked && isAtLimit;
+        }
+    }
+
+    #selectToLimit() {
+        this.#selection.length = 0;
+
+        for (const { uuid } of this.#results) {
+            if (this.#owned.includes(uuid)) continue;
+            this.#selection.push(uuid);
+            if (this.#selection.length >= PULL_LIMIT) break;
+        }
+    }
+
+    #activateListeners(html: HTMLElement) {
+        addListener(html, "[data-action='toggle-all']", () => {
+            if (this.selected === 0) {
+                this.#selectToLimit();
+            } else {
+                this.#selection.length = 0;
+            }
+
+            this.#updateCheckboxes();
         });
 
-        listButtons.append(button);
+        addListener(html, "[data-action='add-to-merchant']", () => {
+            this.#addToMerchant();
+            this.close();
+        });
+
+        addListenerAll(html, "[name='selected-item']", "change", (event, el: HTMLInputElement) => {
+            const uuid = el.dataset.uuid!;
+
+            if (el.checked) {
+                this.#selection.push(uuid);
+            } else {
+                this.#selection.findSplice((x) => x === uuid);
+            }
+
+            this.#updateCheckboxes();
+        });
     }
 
-    return $html;
-}
+    async #addToMerchant() {
+        const selection = this.#selection.slice();
+        if (selection.length === 0) return;
 
-function fillSelection(tab: CompendiumBrowserEquipmentTab, selection: string[], owned?: string[]) {
-    owned ??= getInMemory<string[]>(/** protected */ tab["browser"], "owned") ?? [];
-    selection.length = 0;
+        const actor = this.#actor;
+        const message = localize("browserPull.confirm", { nb: selection.length });
+        const confirm = await confirmDialog({
+            title: `${localize("sheet.browser")} - ${actor.name}`,
+            content: `<div style="margin-bottom: 0.5em;">${message}</div>`,
+        });
+        if (!confirm) return;
 
-    for (const { uuid } of /** protected */ tab["currentIndex"]) {
-        if (owned.includes(uuid)) continue;
-        selection.push(uuid);
-        if (selection.length >= PULL_LIMIT) break;
-    }
+        const groups: string[][] = [];
 
-    return selection;
-}
-
-async function browserEquipmentTabRenderResults(
-    this: CompendiumBrowserEquipmentTab,
-    wrapped: libWrapper.RegisterCallback,
-    start: number
-): Promise<HTMLLIElement[]> {
-    const browser = this.browser;
-    const itemElements = (await wrapped(start)) as HTMLLIElement[];
-    const data = getInMemory<BrowserData>(browser);
-    if (!data || !data.actor.isMerchant) return itemElements;
-
-    for (const itemElement of itemElements) {
-        for (const a of itemElement.querySelectorAll(":scope > a")) {
-            a.remove();
-        }
-    }
-
-    if (data.type !== "pull") return itemElements;
-
-    const selection = getInMemoryAndSetIfNot(browser, "selection", () => {
-        const selection = fillSelection(this, [], data.owned);
-        updateBrowser(selection);
-        return selection;
-    });
-
-    const isAtLimit =
-        selection.length >= PULL_LIMIT
-            ? `data-tooltip="${localize("browserPull.limit")}" disabled`
-            : "";
-
-    const ownedStr = localize("browserPull.owned");
-    const isOwned = `<i class="fa-solid fa-box" data-tooltip="${ownedStr}"></i>`;
-
-    for (const itemElement of itemElements) {
-        const { entryUuid } = elementDataset(itemElement);
-
-        if (data.owned.includes(entryUuid)) {
-            itemElement.insertAdjacentHTML("beforeend", isOwned);
-            continue;
+        while (selection.length) {
+            const uuids = selection.splice(0, 10);
+            groups.push(uuids);
         }
 
-        const checked = selection.includes(entryUuid) ? "checked" : "";
-        itemElement.insertAdjacentHTML(
-            "beforeend",
-            `<input type='checkbox' data-uuid="${entryUuid}" 
-			${checked} ${!checked ? isAtLimit : ""}>`
+        await Promise.all(
+            groups.map(async (uuids) => {
+                const sources = R.pipe(
+                    await Promise.all(uuids.map((uuid) => fromUuid<ItemPF2e>(uuid))),
+                    R.filter((item): item is PhysicalItemPF2e => !!item?.isOfType("physical")),
+                    R.map((item) => item.toObject())
+                );
+                return actor.createEmbeddedDocuments("Item", sources);
+            })
         );
 
-        const checkbox = itemElement.querySelector("input");
-        checkbox?.addEventListener("change", () => {
-            if (checkbox.checked) {
-                selection.push(entryUuid);
-            } else {
-                const index = selection.indexOf(entryUuid);
-                selection.splice(index, 1);
-            }
-            updateBrowser(selection);
-        });
-    }
-
-    return itemElements;
-}
-
-function updateBrowser(selection: string[], skipAll = false) {
-    const browserApp = document.getElementById("compendium-browser");
-    const browserTab = browserApp?.querySelector(
-        ".content-box.toolbelt-merchant .content .tab[data-tab=equipment]"
-    );
-    if (!browserTab) return;
-
-    const listButtons = htmlQuery(browserTab, ".list-buttons");
-    if (!listButtons) return;
-
-    const tab = game.pf2e.compendiumBrowser.tabs.equipment;
-    const selected = selection.length;
-    const total = /** protected */ tab["currentIndex"].length;
-    const isAtLimit = selected >= PULL_LIMIT;
-    const reachedLimit = localize("browserPull.limit");
-    const numbers = listButtons.querySelectorAll(":scope > div span");
-    const checkboxes = browserTab.querySelectorAll<HTMLInputElement>(".result-list .item input");
-
-    if (numbers.length) {
-        numbers[0].textContent = String(selected);
-        numbers[1].textContent = String(total);
-    }
-
-    if (!skipAll) {
-        const checkbox = listButtons.querySelector<HTMLInputElement>(":scope > label input");
-        if (checkbox) {
-            if (selected === 0) {
-                checkbox.indeterminate = false;
-                checkbox.checked = false;
-            } else if (isAtLimit || selected >= total) {
-                checkbox.indeterminate = false;
-                checkbox.checked = true;
-            } else {
-                checkbox.indeterminate = true;
-                checkbox.checked = true;
-            }
-        }
-    }
-
-    htmlQuery<HTMLButtonElement>(listButtons, "button")!.disabled = selected === 0;
-
-    for (const checkbox of checkboxes) {
-        const checked = checkbox.checked;
-        const disabled = !checked && isAtLimit;
-
-        checkbox.disabled = disabled;
-        checkbox.dataset.tooltip = disabled ? reachedLimit : "";
-    }
-}
-
-function browserActivateListeners(
-    this: CompendiumBrowser,
-    wrapped: libWrapper.RegisterCallback,
-    $html: JQuery
-) {
-    wrapped($html);
-
-    const data = getInMemory<BrowserData>(this);
-    if (!data?.actor?.isMerchant) return;
-
-    const html = $html[0];
-    const tabEl = htmlQuery(html, "section.content .tab[data-tab='equipment']");
-    const listButtons = htmlQuery(tabEl, ".list-buttons");
-    if (!listButtons) return;
-
-    const actor = data.actor;
-    const browser = this;
-    const tab = browser.tabs.equipment;
-
-    if (data.type === "pull") {
-        addListener(listButtons, "[data-action='add-to-merchant']", async () => {
-            const selection = getInMemory<string[]>(browser, "selection") ?? [];
-            const message = localize("browserPull.confirm", { nb: selection.length });
-            const confirm = await Dialog.confirm({
-                title: `${localize("sheet.browser")} - ${actor.name}`,
-                content: `<div style="margin-bottom: 0.5em;">${message}</div>`,
-            });
-            if (!confirm) return;
-
-            localize.info("browserPull.wait");
-            browser.close();
-
-            const items = R.pipe(
-                await Promise.all(selection.map((uuid) => fromUuid<PhysicalItemPF2e>(uuid))),
-                R.filter(R.isTruthy),
-                R.map((item) => item.toObject())
-            );
-
-            if (items.length) {
-                await actor.createEmbeddedDocuments("Item", items);
-            }
-
-            localize.info("browserPull.finished");
-        });
-
-        addListener(
-            listButtons,
-            "[data-action='toggle-select-all']",
-            (event, el: HTMLInputElement) => {
-                const checkAll = el.checked;
-                const selection = getInMemory<string[]>(browser, "selection") ?? [];
-
-                if (checkAll) {
-                    fillSelection(tab, selection);
-                } else {
-                    selection.length = 0;
-                }
-
-                const checkboxes = tabEl!.querySelectorAll<HTMLInputElement>(".item input");
-                for (const checkbox of checkboxes) {
-                    const { uuid } = elementDataset(checkbox);
-                    checkbox.checked = selection.includes(uuid);
-                }
-
-                updateBrowser(selection, false);
-            }
-        );
-    } else {
-        addListener(listButtons, "[data-action='validate-filter']", async () => {
-            const filterData = tab.filterData;
-            const defaultData = await tab.getFilterData();
-            const extractedData: Partial<EquipmentFilters> = {};
-            const search = filterData.search.text.trim();
-
-            if (search) {
-                foundry.utils.setProperty(extractedData, "search.text", search);
-            }
-
-            for (const type of ["checkboxes", "multiselects"] as const) {
-                for (const [category, data] of Object.entries(filterData[type])) {
-                    if (!data.selected.length) continue;
-
-                    const path = `${type}.${category}`;
-
-                    foundry.utils.setProperty(extractedData, `${path}.selected`, data.selected);
-
-                    if ("conjunction" in data) {
-                        foundry.utils.setProperty(
-                            extractedData,
-                            `${path}.conjunction`,
-                            data.conjunction
-                        );
-                    }
-                }
-            }
-
-            for (const type of ["ranges", "sliders"] as const) {
-                const defaultType = defaultData[type];
-
-                for (const [category, data] of Object.entries(filterData[type])) {
-                    // @ts-ignore
-                    const defaultCategory = defaultType[category];
-                    if (foundry.utils.objectsEqual(data.values, defaultCategory.values)) continue;
-
-                    foundry.utils.setProperty(
-                        extractedData,
-                        `${type}.${category}.values`,
-                        data.values
-                    );
-                }
-            }
-
-            if (foundry.utils.isEmpty(extractedData)) {
-                localize.warn("browserFilter.empty");
-                return;
-            }
-
-            browser.close();
-
-            const filters = getFilters(actor, data.filterType, false) as ItemFilterBase[];
-
-            if (data.edit) {
-                const itemFilter = filters.find((x) => x.id === data.edit);
-
-                if (itemFilter) {
-                    itemFilter.filter = extractedData;
-                    setFilters(actor, data.filterType, filters);
-                    return;
-                }
-            }
-
-            const id = foundry.utils.randomID();
-            const itemFilter: ItemFilter = {
-                id,
-                name: id,
-                enabled: true,
-                filter: extractedData,
-                useDefault: true,
-            };
-
-            filters.unshift(itemFilter);
-            setFilters(actor, data.filterType, filters);
-        });
+        localize.info("browserPull.finished");
     }
 }
 
@@ -2063,6 +1934,11 @@ type ServiceMacroData = {
         quantity: number;
         forceFree: boolean;
     };
+};
+
+type BrowserPullMenuContext = {
+    owned: string[];
+    results: CompendiumBrowserIndexData[];
 };
 
 type BrowserData =
