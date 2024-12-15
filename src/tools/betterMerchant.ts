@@ -8,6 +8,7 @@ import {
     Coins,
     CoinsPF2e,
     CompendiumBrowser,
+    CompendiumBrowserIndexData,
     EquipmentFilters,
     ErrorPF2e,
     ItemPF2e,
@@ -32,7 +33,6 @@ import {
     elementDataset,
     enactTradeRequest,
     error,
-    filterTraits,
     getHighestName,
     getInputValue,
     hasGMOnline,
@@ -90,8 +90,8 @@ const {
     setFlag,
     setFlagProperty,
     render,
+    getFlagProperty,
     getInMemory,
-    getInMemoryAndSetIfNot,
     setInMemory,
     deleteInMemory,
     templatePath,
@@ -167,11 +167,11 @@ const {
         },
     ],
     wrappers: [
-        // {
-        //     key: "actorTransferItem",
-        //     path: "CONFIG.Actor.documentClass.prototype.transferItemToActor",
-        //     callback: actorTransferItemToActor,
-        // },
+        {
+            key: "actorTransferItem",
+            path: "CONFIG.Actor.documentClass.prototype.transferItemToActor",
+            callback: actorTransferItemToActor,
+        },
         {
             key: "lootSheetRenderInner",
             path: "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype._renderInner",
@@ -182,27 +182,17 @@ const {
             path: "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.activateListeners",
             callback: lootSheetPF2eActivateListeners,
         },
-        // {
-        //     key: "lootActorTransfer",
-        //     path: "CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor",
-        //     callback: lootActorTransferItemToActor,
-        //     type: "OVERRIDE",
-        // },
+        {
+            key: "lootActorTransfer",
+            path: "CONFIG.PF2E.Actor.documentClasses.loot.prototype.transferItemToActor",
+            callback: lootActorTransferItemToActor,
+            type: "OVERRIDE",
+        },
         {
             key: "browserOnFirstRender",
             path: "game.pf2e.compendiumBrowser.constructor.prototype._onFirstRender",
             callback: browserOnFirstRender,
         },
-        // {
-        //     key: "browserEquipmentTabRenderResults",
-        //     path: "game.pf2e.compendiumBrowser.tabs.equipment.constructor.prototype.renderResults",
-        //     callback: browserEquipmentTabRenderResults,
-        // },
-        // {
-        //     key: "browserListeners",
-        //     path: "game.pf2e.compendiumBrowser.constructor.prototype.activateListeners",
-        //     callback: browserActivateListeners,
-        // },
         {
             key: "browserOnClose",
             path: "game.pf2e.compendiumBrowser.constructor.prototype._onClose",
@@ -218,6 +208,70 @@ const {
         testItem,
         compareItemWithFilter,
     },
+    migrations: [
+        {
+            version: 2.25,
+            migrateActor: (actorSource) => {
+                if (actorSource.type !== "loot") return false;
+
+                const flag = getFlagProperty(actorSource);
+                if (!R.isPlainObject(flag) || !R.isPlainObject(flag.filters)) return false;
+
+                for (const type of ["buy", "sell"]) {
+                    if (!R.isArray(flag.filters[type])) {
+                        flag.filters[`-=${type}`] = true;
+                        continue;
+                    }
+
+                    flag.filters[type] = R.pipe(
+                        foundry.utils.deepClone(flag.filters[type]),
+                        R.filter(
+                            (typeFilters): typeFilters is { filter: { [k: string]: unknown } } =>
+                                R.isPlainObject(typeFilters) && R.isPlainObject(typeFilters.filter)
+                        ),
+                        R.map((typeFilter) => {
+                            const filter = typeFilter.filter;
+
+                            if (
+                                R.isPlainObject(filter.checkboxes) &&
+                                "source" in filter.checkboxes
+                            ) {
+                                filter.source = filter.checkboxes.source;
+                                delete filter.checkboxes.source;
+                            }
+
+                            if (R.isPlainObject(filter.multiselects)) {
+                                if ("traits" in filter.multiselects) {
+                                    filter.traits = filter.multiselects.traits;
+                                }
+                                delete filter.multiselects;
+                            }
+
+                            if (R.isPlainObject(filter.sliders)) {
+                                if (
+                                    R.isPlainObject(filter.sliders.level) &&
+                                    R.isPlainObject(filter.sliders.level.values)
+                                ) {
+                                    const level = filter.sliders.level.values;
+
+                                    filter.level = {
+                                        changed: true,
+                                        from: level.min ?? 0,
+                                        to: level.max ?? 20,
+                                    };
+                                }
+                                delete filter.sliders;
+                            }
+
+                            return typeFilter;
+                        })
+                    );
+                }
+
+                return true;
+            },
+        },
+    ],
     onSocket: (packet: TradePacket<PacketData>, userId: string) => {
         const translated = translateTradeData(packet);
         buyItem(translated, userId);
@@ -226,8 +280,8 @@ const {
         if (!settings.enabled) return;
 
         wrappers.itemDerivedData.activate();
-        // wrappers.actorTransferItem.activate();
-        // wrappers.lootActorTransfer.activate();
+        wrappers.actorTransferItem.activate();
+        wrappers.lootActorTransfer.activate();
     },
     ready: (isGM) => {
         if (!settings.enabled) return;
@@ -511,16 +565,16 @@ function itemPrepareDerivedData(this: ItemPF2e, wrapped: libWrapper.RegisterCall
         deleteInMemory(this);
 
         const infinite = getFlag<boolean>(actor, "infiniteAll");
-        // const itemFilter = testItem(actor, this, "sell", this.system.price.per);
+        const itemFilter = testItem(actor, this, "sell", this.system.price.per);
 
         if (infinite) {
             this.system.quantity = 9999;
         }
 
-        // if (itemFilter && itemFilter.filter.ratio !== 1) {
-        //     this.system.price.value = itemFilter.price;
-        //     setInMemory(this, "filter", itemFilter.filter.id);
-        // }
+        if (itemFilter && itemFilter.filter.ratio !== 1) {
+            this.system.price.value = itemFilter.price;
+            setInMemory(this, "filter", itemFilter.filter.id);
+        }
     } catch (error) {
         wrapperError(ITEM_PREPARE_DERIVED_DATA, error);
     }
@@ -549,7 +603,8 @@ function testItem(actor: LootPF2e, item: PhysicalItemPF2e, type: ItemFilterType,
 
     if (!defaultFilter.enabled) return;
 
-    const price = calculateItemPrice(item, quantity, defaultFilter.ratio);
+    const ratio = type === "buy" && item.isOfType("treasure") ? 1 : defaultFilter.ratio;
+    const price = calculateItemPrice(item, quantity, ratio);
     if (type === "buy" && defaultFilter.purse < price.goldValue) return;
 
     return { price, filter: defaultFilter };
@@ -574,71 +629,58 @@ function compareItemWithFilter(item: PhysicalItemPF2e, filter: Partial<Equipment
         if (!nameChecks) return false;
     }
 
-    const { checkboxes, multiselects, ranges, sliders } = filter;
+    const { checkboxes, ranges, source, traits, level } = filter;
 
     // Level
     const itemLevel = item.level;
-    if (
-        sliders?.level &&
-        (itemLevel < sliders.level.values.min || itemLevel > sliders.level.values.max)
-    ) {
+    if (level && (itemLevel < level.from || itemLevel > level.to)) {
         return false;
     }
 
     // Price
+    const filterPrice = ranges?.price?.values;
     const priceInCopper = item.price.value.copperValue;
-    if (
-        ranges?.price &&
-        (priceInCopper < ranges.price.values.min || priceInCopper > ranges.price.values.max)
-    ) {
+    if (filterPrice && (priceInCopper < filterPrice.min || priceInCopper > filterPrice.max)) {
         return false;
     }
 
     // Item type
-    const itemTypes = checkboxes?.itemTypes?.selected;
-    if (itemTypes && itemTypes.length > 0 && !itemTypes.includes(item.type)) {
+    const filterItemTypes = checkboxes?.itemTypes?.selected;
+    if (filterItemTypes?.length && !filterItemTypes.includes(item.type)) {
         return false;
     }
 
     const itemCategory = "category" in item ? (item.category as string) : "";
     const itemGroup = "group" in item ? (item.group as string) : "";
+    const tab = game.pf2e.compendiumBrowser.tabs.equipment;
 
     // Armor
-    const armorTypes = checkboxes?.armorTypes?.selected;
-    if (
-        armorTypes &&
-        armorTypes.length > 0 &&
-        !arrayIncludes(armorTypes, [itemCategory, itemGroup])
-    ) {
+    const filterArmorTypes = checkboxes?.armorTypes?.selected;
+    if (filterArmorTypes?.length && !arrayIncludes(filterArmorTypes, [itemCategory, itemGroup])) {
         return false;
     }
 
     // Weapon categories
-    const weaponTypes = checkboxes?.weaponTypes?.selected;
-    if (
-        weaponTypes &&
-        weaponTypes.length > 0 &&
-        !arrayIncludes(weaponTypes, [itemCategory, itemGroup])
-    ) {
+    const filterWeaponTypes = checkboxes?.weaponTypes?.selected;
+    if (filterWeaponTypes?.length && !arrayIncludes(filterWeaponTypes, [itemCategory, itemGroup])) {
         return false;
     }
 
     // Traits
-    const traits = multiselects?.traits;
-    if (traits && !filterTraits([...item.traits], traits.selected, traits.conjunction)) {
+    if (traits && !tab.filterTraits([...item.traits], traits.selected, traits.conjunction)) {
         return false;
     }
 
     // Source
+    const filterSource = source?.selected;
     const itemSource = game.pf2e.system.sluggify(item.system.publication?.title ?? "").trim();
-    const sources = checkboxes?.source?.selected;
-    if (sources && sources.length > 0 && !sources.includes(itemSource)) {
+    if (filterSource?.length && !filterSource.includes(itemSource)) {
         return false;
     }
 
     // Rarity
-    const rarities = checkboxes?.rarity?.selected;
-    if (rarities && rarities.length > 0 && !rarities.includes(item.rarity)) {
+    const filterRarity = checkboxes?.rarity?.selected;
+    if (filterRarity?.length && !filterRarity.includes(item.rarity)) {
         return false;
     }
 
@@ -667,24 +709,57 @@ function browserOnFirstRender(
     const html = this.element;
     const controls = htmlQuery(html, ".window-header [data-action='toggleControls']");
 
+    html.classList.add("toolbelt-merchant");
+
     (async () => {
-        html.classList.add("toolbelt-merchant");
-        htmlQuery(html, ".window-content .tabs")?.remove();
+        const label =
+            data.type === "pull"
+                ? localize("browserPull.add")
+                : localize("browserFilter", data.edit ? "edit" : "create", {
+                      type: localize("filter", data.filterType),
+                  });
 
-        if (data.type === "pull") {
-            const btn = createHTMLElement("button", {
-                classes: ["header-button"],
-                innerHTML: localize("browserPull.add"),
-            });
+        const btn = createHTMLElement("button", {
+            classes: ["header-button"],
+            innerHTML: label,
+        });
 
-            btn.addEventListener("click", (event) => {
-                this.close();
-                new BrowserPullMenu(data.actor, this.tabs.equipment.results).render(true);
-            });
+        btn.addEventListener("click", async (event) => {
+            this.close();
 
-            controls?.replaceWith(btn);
-        } else {
-        }
+            const tab = this.tabs.equipment;
+
+            if (data.type === "pull") {
+                new BrowserPullMenu(data.actor, tab.results).render(true);
+            } else {
+                const filters = getFilters(data.actor, data.filterType, false) as ItemFilterBase[];
+                const filter = foundry.utils.diffObject(await tab.getFilterData(), tab.filterData);
+
+                if (data.edit) {
+                    const itemFilter = filters.find((x) => x.id === data.edit);
+
+                    if (itemFilter) {
+                        itemFilter.filter = filter;
+                        setFilters(data.actor, data.filterType, filters);
+                        return;
+                    }
+                }
+
+                const id = foundry.utils.randomID();
+                const itemFilter: ItemFilter = {
+                    id,
+                    name: id,
+                    enabled: true,
+                    filter,
+                    useDefault: true,
+                };
+
+                filters.unshift(itemFilter);
+                setFilters(data.actor, data.filterType, filters);
+            }
+        });
+
+        controls?.replaceWith(btn);
     })();
 }
 
@@ -997,7 +1072,7 @@ function lootSheetPF2eActivateListeners(
             }
 
             case "open-equipment-tab": {
-                return openEquipmentTab({ actor, type: "pull", owned: [] });
+                return openEquipmentTab({ actor, type: "pull" });
             }
 
             case "create-service": {
@@ -1748,7 +1823,11 @@ async function openEquipmentTab(data: BrowserData, filters?: EquipmentFilters) {
 
     deleteInMemory(browser);
     setInMemory(browser, data);
-    tab.open(filters ?? (await tab.getFilterData()));
+
+    browser.openTab("equipment", {
+        filter: filters ?? (await tab.getFilterData()),
+        hideNavigation: true,
+    });
 }
 
 function getFilters<
@@ -1945,7 +2024,6 @@ type BrowserData =
     | {
           type: "pull";
           actor: LootPF2e;
-          owned: string[];
       }
     | {
           type: "filter";
