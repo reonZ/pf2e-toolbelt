@@ -33,6 +33,7 @@ import {
     elementDataset,
     enactTradeRequest,
     error,
+    filterTraits,
     getHighestName,
     getInputValue,
     hasGMOnline,
@@ -217,14 +218,32 @@ const {
                 const flag = getFlagProperty(actorSource);
                 if (!R.isPlainObject(flag) || !R.isPlainObject(flag.filters)) return false;
 
+                const setCheckbox = (
+                    checkbox: Partial<{
+                        options: Record<string, { selected: boolean }>;
+                        selected: string[];
+                    }>
+                ) => {
+                    if (!R.isArray(checkbox.selected)) return;
+
+                    checkbox.options ??= {};
+
+                    for (const selection of checkbox.selected) {
+                        checkbox.options[selection] ??= { selected: true };
+                    }
+
+                    return checkbox;
+                };
+
                 for (const type of ["buy", "sell"]) {
-                    if (!R.isArray(flag.filters[type])) {
+                    const typeFilters = flag.filters[type];
+                    if (!R.isArray(typeFilters)) {
                         flag.filters[`-=${type}`] = true;
                         continue;
                     }
 
                     flag.filters[type] = R.pipe(
-                        foundry.utils.deepClone(flag.filters[type]),
+                        foundry.utils.deepClone(typeFilters),
                         R.filter(
                             (typeFilters): typeFilters is { filter: { [k: string]: unknown } } =>
                                 R.isPlainObject(typeFilters) && R.isPlainObject(typeFilters.filter)
@@ -232,12 +251,19 @@ const {
                         R.map((typeFilter) => {
                             const filter = typeFilter.filter;
 
-                            if (
-                                R.isPlainObject(filter.checkboxes) &&
-                                "source" in filter.checkboxes
-                            ) {
-                                filter.source = filter.checkboxes.source;
-                                delete filter.checkboxes.source;
+                            if ("order" in filter) {
+                                delete filter.order;
+                            }
+
+                            if (R.isPlainObject(filter.checkboxes)) {
+                                if (R.isPlainObject(filter.checkboxes.source)) {
+                                    filter.source = setCheckbox(filter.checkboxes.source);
+                                    delete filter.checkboxes.source;
+                                }
+
+                                for (const checkbox of Object.values(filter.checkboxes)) {
+                                    setCheckbox(checkbox as any);
+                                }
                             }
 
                             if (R.isPlainObject(filter.multiselects)) {
@@ -652,7 +678,6 @@ function compareItemWithFilter(item: PhysicalItemPF2e, filter: Partial<Equipment
 
     const itemCategory = "category" in item ? (item.category as string) : "";
     const itemGroup = "group" in item ? (item.group as string) : "";
-    const tab = game.pf2e.compendiumBrowser.tabs.equipment;
 
     // Armor
     const filterArmorTypes = checkboxes?.armorTypes?.selected;
@@ -667,7 +692,7 @@ function compareItemWithFilter(item: PhysicalItemPF2e, filter: Partial<Equipment
     }
 
     // Traits
-    if (traits && !tab.filterTraits([...item.traits], traits.selected, traits.conjunction)) {
+    if (traits && !filterTraits([...item.traits], traits.selected, traits.conjunction)) {
         return false;
     }
 
@@ -733,7 +758,12 @@ function browserOnFirstRender(
                 new BrowserPullMenu(data.actor, tab.results).render(true);
             } else {
                 const filters = getFilters(data.actor, data.filterType, false) as ItemFilterBase[];
-                const filter = foundry.utils.diffObject(await tab.getFilterData(), tab.filterData);
+                const filter: Partial<EquipmentFilters> = foundry.utils.diffObject(
+                    await tab.getFilterData(),
+                    tab.filterData
+                );
+
+                delete filter.order;
 
                 if (data.edit) {
                     const itemFilter = filters.find((x) => x.id === data.edit);
@@ -1630,46 +1660,32 @@ async function enrichService(service: ServiceFlag, ratio?: number): Promise<Serv
     };
 }
 
-class FiltersMenu extends Application {
-    actor: LootPF2e;
+class FiltersMenu extends foundry.applications.api.ApplicationV2 {
+    #actor: LootPF2e;
 
-    constructor(actor: LootPF2e) {
-        super();
+    static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
+        classes: ["pf2e-hud-filters"],
+    };
 
-        this.actor = actor;
+    constructor(actor: LootPF2e, options: DeepPartial<ApplicationConfiguration> = {}) {
+        options.window ??= {};
+        options.window.title = localize("filters.title", actor);
+
+        super(options);
+
+        this.#actor = actor;
+
+        actor.apps[this.appId] = this;
     }
 
-    get id() {
-        return localize("filters.app");
-    }
-
-    get title() {
-        return localize("filters.title", this.actor);
-    }
-
-    get template() {
-        return templatePath("filters");
-    }
-
-    render(force?: boolean, options?: RenderOptions): this {
-        this.actor.apps[this.appId] = this;
-        return super.render(force, options);
-    }
-
-    async close(options?: { force?: boolean }) {
-        await super.close(options);
-        delete this.actor.apps[this.appId];
-    }
-
-    getData() {
-        const actor = this.actor;
-        const translate = localize.sub("filters");
+    async _prepareContext(options: ApplicationRenderOptions): Promise<FiltersMenuContext> {
+        const actor = this.#actor;
         const buyFilters = getFilters(actor, "buy", true);
         const sellFilters = getFilters(actor, "sell", true);
 
         const templateFilter = (filters: ExtractedFilter[]) => {
             const limit = filters.length - 1;
-            return (filter: ExtractedFilter, index: number) => ({
+            return (filter: ExtractedFilter, index: number): TemplateFilter => ({
                 ...filter,
                 purse:
                     filter.purse === Infinity
@@ -1683,7 +1699,6 @@ class FiltersMenu extends Application {
         };
 
         return {
-            i18n: translate.i18n,
             buyFilters: buyFilters.map(templateFilter(buyFilters)),
             sellFilters: sellFilters.map(templateFilter(sellFilters)),
             ratios: R.mapValues(RATIO, (ratio, type) => {
@@ -1695,28 +1710,33 @@ class FiltersMenu extends Application {
         };
     }
 
-    activateListeners($html: JQuery<HTMLElement>) {
-        const html = $html[0];
+    _renderHTML(
+        context: ApplicationRenderContext,
+        options: ApplicationRenderOptions
+    ): Promise<string> {
+        return render("filters", context);
+    }
+
+    _replaceHTML(result: string, content: HTMLElement, options: ApplicationRenderOptions): void {
+        content.innerHTML = result;
+        this.#activateListeners(content);
+    }
+
+    _onClose() {
+        delete this.#actor.apps[this.appId];
+    }
+
+    #activateListeners(html: HTMLElement) {
         const browser = game.pf2e.compendiumBrowser;
         const tab = browser.tabs.equipment;
-
-        addListenerAll(html, "[data-action='add-filter']", (even, el) => {
-            const { type } = elementDataset<{ type: ItemFilterType }>(el);
-            openEquipmentTab({
-                actor: this.actor,
-                type: "filter",
-                filterType: type,
-                edit: false,
-            });
-        });
+        const actor = this.#actor;
 
         const getItemData = (el: HTMLElement) => {
-            const data = elementDataset<{ id: string; type: ItemFilterType }>(
-                htmlClosest(el, "[data-id]")!
-            );
+            const parent = htmlClosest(el, "[data-id]");
+            const data = elementDataset<{ id: string; type: ItemFilterType }>(parent);
             const { type, id } = data;
 
-            const itemFilters = getFilters(this.actor, type, true);
+            const itemFilters = getFilters(actor, type, true);
             const filterIndex = itemFilters.findIndex((x) => x.id === id);
 
             return {
@@ -1725,6 +1745,90 @@ class FiltersMenu extends Application {
                 filterIndex,
             };
         };
+
+        addListenerAll(html, "[data-action", async (even, el) => {
+            const action = el.dataset.action as FiltersMenuEventAction;
+
+            switch (action) {
+                case "add-filter": {
+                    const { type } = elementDataset<{ type: ItemFilterType }>(el);
+                    openEquipmentTab({ actor, type: "filter", filterType: type, edit: false });
+                    break;
+                }
+
+                case "move-filter": {
+                    const { itemFilters, filterIndex, type } = getItemData(el);
+                    const { direction } = elementDataset<{ direction: "up" | "down" }>(el);
+                    const newIndex = direction === "up" ? filterIndex - 1 : filterIndex + 1;
+
+                    if (newIndex < 0 || newIndex >= itemFilters.length) return;
+
+                    const newFilters = R.swapIndices(itemFilters, filterIndex, newIndex);
+                    setFilters(actor, type, newFilters);
+                    break;
+                }
+
+                case "delete-filter": {
+                    const { type, filterIndex, itemFilters } = getItemData(el);
+                    if (filterIndex === -1) return;
+
+                    const filter = itemFilters.at(filterIndex);
+                    const confirm = await confirmDialog({
+                        title: localize("filters.delete.title"),
+                        content: localize("filters.delete.content", {
+                            name: filter!.name || filter!.id,
+                        }),
+                    });
+
+                    if (confirm) {
+                        itemFilters.splice(filterIndex, 1);
+                        setFilters(actor, type, itemFilters);
+                    }
+                    break;
+                }
+
+                case "edit-filter": {
+                    const { type, id, filterIndex, itemFilters } = getItemData(el);
+                    const defaultData = await tab.getFilterData();
+                    const itemFilter = itemFilters.at(filterIndex)?.filter;
+                    if (!itemFilter) return;
+
+                    const filter = foundry.utils.mergeObject(defaultData, itemFilter);
+
+                    if (itemFilter.ranges) {
+                        for (const range of Object.values(filter.ranges)) {
+                            range.isExpanded = true;
+                        }
+                    }
+
+                    if (itemFilter.level) {
+                        filter.level.isExpanded = true;
+                    }
+
+                    if (itemFilter.source) {
+                        filter.source.isExpanded = true;
+                    }
+
+                    for (const key of Object.keys(itemFilter.checkboxes ?? {})) {
+                        const checkbox = filter.checkboxes[key as keyof typeof filter.checkboxes];
+                        if (checkbox) {
+                            checkbox.isExpanded = true;
+                        }
+                    }
+
+                    openEquipmentTab(
+                        {
+                            actor: actor,
+                            type: "filter",
+                            filterType: type,
+                            edit: id,
+                        },
+                        filter
+                    );
+                    break;
+                }
+            }
+        });
 
         addListenerAll(html, "input", "change", (event, el: HTMLInputElement) => {
             const { itemFilters, filterIndex, type } = getItemData(el);
@@ -1735,84 +1839,13 @@ class FiltersMenu extends Application {
             const value = getInputValue(el);
 
             foundry.utils.setProperty(filter, key, value);
-            setFilters(this.actor, type, itemFilters);
+            setFilters(actor, type, itemFilters);
         });
 
         addListenerAll(html, "input[type='text'], input[type='number']", "keydown", (event, el) => {
             if (event.key === "Enter") {
                 el.blur();
             }
-        });
-
-        addListenerAll(html, "[data-action='move-filter']", (event, el) => {
-            const { itemFilters, filterIndex, type } = getItemData(el);
-            const { direction } = elementDataset<{ direction: "up" | "down" }>(el);
-            const newIndex = direction === "up" ? filterIndex - 1 : filterIndex + 1;
-
-            if (newIndex < 0 || newIndex >= itemFilters.length) return;
-
-            const newFilters = R.swapIndices(itemFilters, filterIndex, newIndex);
-            setFilters(this.actor, type, newFilters);
-        });
-
-        addListenerAll(html, "[data-action='delete-filter']", async (event, el) => {
-            const { type, filterIndex, itemFilters } = getItemData(el);
-            if (filterIndex === -1) return;
-
-            const filter = itemFilters.at(filterIndex);
-            const confirm = await Dialog.confirm({
-                title: localize("filters.delete.title"),
-                content: localize("filters.delete.content", { name: filter!.name || filter!.id }),
-            });
-
-            if (confirm) {
-                itemFilters.splice(filterIndex, 1);
-                setFilters(this.actor, type, itemFilters);
-            }
-        });
-
-        addListenerAll(html, "[data-action='edit-filter']", async (event, el) => {
-            const { type, id, filterIndex, itemFilters } = getItemData(el);
-            const defaultData = await tab.getFilterData();
-            const itemFilter = itemFilters.at(filterIndex)?.filter;
-            if (!itemFilter) return;
-
-            const filter = foundry.utils.mergeObject(defaultData, itemFilter);
-
-            if (itemFilter.ranges) {
-                for (const key in itemFilter.ranges) {
-                    const range = filter.ranges[key as keyof EquipmentFilters["ranges"]];
-                    range.isExpanded = true;
-                }
-            }
-
-            if (itemFilter.sliders) {
-                for (const key in itemFilter.sliders) {
-                    const slider = filter.sliders[key as keyof EquipmentFilters["sliders"]];
-                    slider.isExpanded = true;
-                }
-            }
-
-            if (itemFilter.checkboxes) {
-                for (const key in itemFilter.checkboxes) {
-                    const checkbox = filter.checkboxes[key as keyof EquipmentFilters["checkboxes"]];
-
-                    checkbox.isExpanded = true;
-                    for (const selected of checkbox.selected) {
-                        checkbox.options[selected].selected = true;
-                    }
-                }
-            }
-
-            openEquipmentTab(
-                {
-                    actor: this.actor,
-                    type: "filter",
-                    filterType: type,
-                    edit: id,
-                },
-                filter
-            );
         });
     }
 }
@@ -1892,6 +1925,8 @@ function clampPriceRatio(type: ItemFilterType, value: number | undefined) {
 }
 
 type ServiceEventAction = "open-macros" | "edit-image" | "open-macro-sheet" | "delete-macro";
+
+type FiltersMenuEventAction = "add-filter" | "move-filter" | "delete-filter" | "edit-filter";
 
 type LootSheetActionEvent =
     | "open-equipment-tab"
@@ -2018,6 +2053,18 @@ type ServiceMacroData = {
 type BrowserPullMenuContext = {
     owned: string[];
     results: CompendiumBrowserIndexData[];
+};
+
+type FiltersMenuContext = {
+    buyFilters: TemplateFilter[];
+    sellFilters: TemplateFilter[];
+    ratios: typeof RATIO;
+};
+
+type TemplateFilter = Omit<ExtractedFilter, "purse"> & {
+    purse: number | undefined;
+    cannotUp: boolean;
+    cannotDown: boolean;
 };
 
 type BrowserData =

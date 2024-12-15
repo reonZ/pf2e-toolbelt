@@ -524,7 +524,8 @@
                 },
                 "ratio": {
                     "label": "Price Ratio",
-                    "tooltip": "Price ratio for this filter"
+                    "tooltip": "Price ratio for this filter",
+                    "treasure": "Treasures reaching this filter will always be bought for 100% of their price"
                 },
                 "purse": {
                     "label": "Gold Purse",

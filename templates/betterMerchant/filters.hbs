@@ -1,4 +1,4 @@
-<div class="filters">
+<div class="filters" data-tooltip-class="pf2e">
     <div class="buy">
         <h3>
             {{@root.i18n 'buy'}}
@@ -21,31 +21,33 @@
 </div>
 
 {{#*inline "filter"}}
-<div class="filter" data-type="{{type}}" data-id="{{filter.id}}">
+<fieldset class="filter" data-type="{{type}}" data-id="{{filter.id}}">
     <div class="group">
         <label>
             {{@root.i18n 'name'}}
             <input type="text" name="name" value="{{filter.name}}" {{disabled filter.locked}}>
         </label>
         <div class="controls">
-            {{#if filter.cannotUp}}
-            <span>
-                <i class="fa-solid fa-caret-up"></i>
-            </span>
-            {{else}}
-            <a data-action="move-filter" data-direction="up">
-                <i class="fa-solid fa-caret-up"></i>
-            </a>
-            {{/if}}
-            {{#if filter.cannotDown}}
-            <span>
-                <i class="fa-solid fa-caret-down"></i>
-            </span>
-            {{else}}
-            <a data-action="move-filter" data-direction="down">
-                <i class="fa-solid fa-caret-down"></i>
-            </a>
-            {{/if}}
+            <div class="carets">
+                {{#if filter.cannotUp}}
+                <span>
+                    <i class="fa-solid fa-caret-up"></i>
+                </span>
+                {{else}}
+                <a data-action="move-filter" data-direction="up">
+                    <i class="fa-solid fa-caret-up"></i>
+                </a>
+                {{/if}}
+                {{#if filter.cannotDown}}
+                <span>
+                    <i class="fa-solid fa-caret-down"></i>
+                </span>
+                {{else}}
+                <a data-action="move-filter" data-direction="down">
+                    <i class="fa-solid fa-caret-down"></i>
+                </a>
+                {{/if}}
+            </div>
             {{#if filter.locked}}
             <span>
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -80,6 +82,10 @@
             {{@root.i18n 'ratio.label'}}
             <input type="number" name="ratio" value="{{filter.ratio}}" {{#with (lookup @root.ratios
                 type)}} min="{{min}}" max="{{max}}" step="0.1" {{/with}}>
+            {{#if (and (eq type 'buy') filter.locked)}}
+            <i class="fa-solid fa-coin treasure"
+                data-tooltip="{{@root.i18n.path 'ratio.treasure'}}"></i>
+            {{/if}}
         </label>
         <label data-tooltip="{{@root.i18n.path (concat 'purse.tooltip.' type)}}">
             {{@root.i18n 'purse.label'}}
@@ -87,5 +93,5 @@
                 (eq type 'sell' )}}>
         </label>
     </div>
-</div>
+</fieldset>
 {{/inline}}

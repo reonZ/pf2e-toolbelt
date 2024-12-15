@@ -77,36 +77,45 @@
     }
 }
 
-[id="pf2e-toolbelt.betterMerchant.filters.app"] {
-    height: 500px;
-    min-width: 520px;
+.application.pf2e-hud-filters {
+    min-width: 600px;
+    min-height: 500px;
+    max-height: 80%;
 
     .filters {
+        flex: 1;
         display: grid;
         grid-template-columns: 1fr auto 1fr;
-        gap: 8px;
+        gap: 1em;
 
         > hr {
             width: 0;
             border: none;
-            border-left: 1px solid var(--color-border-light-primary);
-            border-right: 1px solid var(--color-border-light-highlight);
             height: 100%;
             margin: 0;
+            border-right: 1px solid var(--color-border);
         }
 
         h3 {
             display: flex;
             justify-content: space-between;
+            margin-bottom: 0.5em;
+            font-size: 1.6em;
+
+            i {
+                font-size: 0.9em;
+            }
         }
 
         .filter {
             white-space: nowrap;
             display: flex;
             flex-direction: column;
-            gap: 0.3em;
-            padding-bottom: 0.5em;
-            margin-bottom: 0.5em;
+            gap: 0.5em;
+            margin-bottom: 1em;
+            border-color: var(--color-fieldset-border);
+            border-radius: 8px;
+            padding: 0.4em 0.5em;
 
             label {
                 display: flex;
@@ -118,12 +127,11 @@
             input {
                 &[type="text"],
                 &[type="number"] {
-                    height: 1.4em;
+                    height: 1.6em;
                 }
 
                 &[type="checkbox"] {
                     margin: 0;
-                    height: 1.2em;
                 }
 
                 &[name="ratio"] {
@@ -139,35 +147,31 @@
 
             .group {
                 display: flex;
-                gap: 0.5em;
+                gap: 1em;
                 justify-content: space-between;
+            }
+
+            .treasure {
+                font-size: 1.2em;
             }
 
             .controls {
                 display: flex;
                 flex-wrap: nowrap;
                 align-items: center;
-                gap: 4px;
+                gap: 0.6em;
 
-                > span {
-                    color: rgba(0, 0, 0, 0.5);
+                span {
+                    color: var(--color-disabled);
                 }
 
-                .fa-caret-up,
-                .fa-caret-down {
+                .carets {
                     font-size: 1.5em;
-                }
-            }
-
-            &:nth-of-type(even) {
-                position: relative;
-
-                &::before {
-                    content: "";
-                    position: absolute;
-                    inset: -0.5em -4px 0px -4px;
-                    background: #00000017;
-                    pointer-events: none;
+                    display: flex;
+                    flex-wrap: nowrap;
+                    align-items: center;
+                    gap: 0.3em;
+                    margin-right: 0.1em;
                 }
             }
         }
