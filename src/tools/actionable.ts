@@ -23,6 +23,7 @@ import {
     htmlQueryAll,
     renderCharacterSheets,
     renderItemSheets,
+    useAction,
 } from "module-helpers";
 import { createTool } from "../tool";
 import {
@@ -146,23 +147,8 @@ function characterSheetPF2eActivateListeners(
         ".use-action[data-use-action-macro='true']",
         async (event, btn: HTMLButtonElement) => {
             const item = getItemFromActionButton(actor, btn);
-            if (!item?.isOfType("action", "feat")) return;
-
-            if (item.system.frequency) {
-                if (item.system.frequency.value > 0) {
-                    if (item.system.frequency && item.system.frequency.value > 0) {
-                        const newValue = item.system.frequency.value - 1;
-                        await item.update({ "system.frequency.value": newValue });
-                    }
-                }
-            }
-
-            const macro = await getActionMacro(item);
-
-            if (macro) {
-                await macro.execute({ actor, item });
-            } else {
-                await item.toMessage();
+            if (item) {
+                useAction(item);
             }
         }
     );
