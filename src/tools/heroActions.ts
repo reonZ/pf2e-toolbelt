@@ -9,6 +9,7 @@ import {
     createHTMLElement,
     elementDataset,
     getHighestName,
+    getMythicOrHeroPoints,
     getOwner,
     hasGMOnline,
     htmlClosest,
@@ -152,11 +153,9 @@ async function characterSheetPF2eRenderInner(
     html: HTMLElement
 ) {
     const actor = this.actor;
-    if (!actor.heroPoints.max) return;
-
     const actions = getHeroActions(actor);
     const usesCount = usesCountVariant();
-    const heroPoints = actor.heroPoints.value;
+    const heroPoints = getMythicOrHeroPoints(actor).value;
     const diff = heroPoints - actions.length;
     const mustDiscard = !usesCount && diff < 0;
     const mustDraw = !usesCount && diff > 0;
@@ -185,8 +184,6 @@ function characterSheetPF2eActivateListeners(
     html: HTMLElement
 ) {
     const actor = this.actor;
-    if (!actor.heroPoints.max) return;
-
     const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
     const list = htmlQuery(tab, ".heroActions-list");
     if (!list || !tab) return;
@@ -374,7 +371,7 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
         return;
     }
 
-    const heroPoints = actor.heroPoints.value;
+    const heroPoints = getMythicOrHeroPoints(actor).value;
     const usesCount = usesCountVariant();
 
     if (!usesCount && heroPoints < actions.length) {
@@ -386,7 +383,7 @@ async function tradeHeroAction(actor: CharacterPF2e, app?: Application) {
     const others = game.actors
         .filter(
             (x): x is CharacterPF2e<null> =>
-                x.isOfType("character") && x !== actor && x.hasPlayerOwner && !!x.heroPoints.max
+                x.isOfType("character") && x !== actor && x.hasPlayerOwner
         )
         .map((x) => ({
             name: x.name,
@@ -537,7 +534,8 @@ async function sendActionToChat(actor: CharacterPF2e, uuid: string) {
 async function useHeroAction(actor: CharacterPF2e, uuid: string) {
     if (!isValidActor(actor)) return;
 
-    const points = actor.heroPoints.value;
+    const resource = getMythicOrHeroPoints(actor);
+    const points = resource.value;
     if (points < 1) {
         localize.warn("error.notEnoughPoint");
         return;
@@ -554,7 +552,7 @@ async function useHeroAction(actor: CharacterPF2e, uuid: string) {
 
     const updates = setFlagProperty(
         {
-            "system.resources.heroPoints.value": points - 1,
+            [`system.resources.${resource.name}.value`]: points - 1,
         },
         "actions",
         actions
@@ -562,8 +560,11 @@ async function useHeroAction(actor: CharacterPF2e, uuid: string) {
 
     actor.update(updates);
 
+    const type = localize("message.used", resource.name);
+    const flavorText = localize("message.used.message", { type });
+
     getDocumentClass("ChatMessage").create({
-        flavor: `<h4 class="action">${localize("message.used")}</h4>`,
+        flavor: `<h4 class="action">${flavorText}</h4>`,
         content: `<h3>${details.name}</h3>${details.description}`,
         speaker: ChatMessage.getSpeaker({ actor }),
     });
@@ -634,7 +635,7 @@ async function drawHeroActions(actor: CharacterPF2e) {
     const count = settings.count;
     const usesCount = count > 0;
     const actions = usesCount ? [] : getHeroActions(actor);
-    const nb = count || actor.heroPoints.value - actions.length;
+    const nb = count || getMythicOrHeroPoints(actor).value - actions.length;
 
     if (nb <= 0) {
         localize.warn("error.notEnoughPoint");

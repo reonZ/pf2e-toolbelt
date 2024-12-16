@@ -345,7 +345,11 @@
                 "drawn": "Has Drawn ({nb}) Hero Action",
                 "given": "Was given ({nb}) Hero Action",
                 "discarded": "Has Discarded ({nb}) Hero Action",
-                "used": "Spends a Hero Point to use",
+                "used": {
+                    "heroPoints": "Hero Point",
+                    "mythicPoints": "Mythic Point",
+                    "message": "Spends a {type} to use"
+                },
                 "exchanged": "Traded a Hero Action with {name}",
                 "offer": "Offered: {offer}",
                 "receive": "Received: {receive}"
