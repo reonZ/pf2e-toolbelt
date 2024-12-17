@@ -274,7 +274,7 @@ function getCurrentTargets(): string[] {
 function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
     const promptMatch = message.content.match(PROMPT_CHECK_MESSAGE_REGEX);
     if (promptMatch) {
-        const [_match, paramString, inlineLabel] = promptMatch;
+        const [_match, paramString] = promptMatch;
         const rawParams = parseInlineParams(paramString, { first: "type" });
         if (!rawParams) return null;
 

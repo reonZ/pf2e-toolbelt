@@ -63,6 +63,15 @@
                 "message": {
                     "name": "Send Message to Chat",
                     "hint": "When an item is given to another actor, a chat message will be generated."
+                },
+                "effect": {
+                    "name": "Include Effects/Conditions",
+                    "hint": "Should players also be able to drop effects & conditions onto actors they do not own.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "ally": "Allies Only",
+                        "all": "All Actors"
+                    }
                 }
             },
             "heroActions": {

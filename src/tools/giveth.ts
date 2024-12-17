@@ -1,16 +1,20 @@
 import {
     ActorPF2e,
+    ActorSheetPF2e,
+    DropCanvasItemDataPF2e,
+    ItemPF2e,
     ItemTransferDialog,
     PhysicalItemPF2e,
     TradePacket,
     createCallOrEmit,
     giveItemToActor,
+    isFriendActor,
 } from "module-helpers";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
 
-const { config, socket, settings, wrapper, hook, localize } = createTool({
+const { config, socket, settings, wrappers, hook, localize } = createTool({
     name: "giveth",
     settings: [
         {
@@ -20,11 +24,17 @@ const { config, socket, settings, wrapper, hook, localize } = createTool({
             onChange: (enabled: boolean) => {
                 const isGM = game.user.isGM;
 
-                wrapper.toggle(!isGM && enabled);
+                wrappers.toggleAll(!isGM && enabled);
 
                 socket.toggle(isGM && enabled);
                 hook.toggle(!isGM && enabled);
             },
+        },
+        {
+            key: "effect",
+            type: String,
+            choices: ["disabled", "ally", "all"],
+            default: "ally",
         },
         {
             key: "message",
@@ -44,16 +54,31 @@ const { config, socket, settings, wrapper, hook, localize } = createTool({
             path: ACTOR_TRANSFER_ITEM_TO_ACTOR,
             callback: actorTransferItemToActor,
         },
+        {
+            path: "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._handleDroppedItem",
+            callback: actorSheetHandleDroppedItem,
+            type: "MIXED",
+        },
+        {
+            path: "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype._handleDroppedItem",
+            callback: actorSheetHandleDroppedItem,
+            type: "MIXED",
+        },
     ],
-    onSocket: async (packet: TradePacket<"trade">, userId: string) => {
-        if (packet.type === "trade") {
-            tradeRequest(packet, userId);
+    onSocket: async (packet: GivethPacket, userId: string) => {
+        switch (packet.type) {
+            case "trade":
+                tradeRequest(packet, userId);
+                break;
+            case "effect":
+                giveEffectRequest(packet, userId);
+                break;
         }
     },
     ready: (isGM) => {
         if (!settings.enabled) return;
 
-        wrapper.toggle(!isGM);
+        wrappers.toggleAll(!isGM);
 
         socket.toggle(isGM);
         hook.toggle(!isGM);
@@ -61,6 +86,37 @@ const { config, socket, settings, wrapper, hook, localize } = createTool({
 } as const);
 
 const tradeRequest = createCallOrEmit("trade", giveItemToActor, socket);
+const giveEffectRequest = createCallOrEmit("effect", giveEffectToActor, socket);
+
+async function actorSheetHandleDroppedItem(
+    this: ActorSheetPF2e<ActorPF2e>,
+    wrapped: libWrapper.RegisterCallback,
+    event: DragEvent,
+    item: ItemPF2e,
+    data: DropCanvasItemDataPF2e
+): Promise<ItemPF2e[]> {
+    const actor = this.actor;
+
+    if (
+        !item.isOfType("condition", "effect") ||
+        actor.isOwner ||
+        settings.effect === "disabled" ||
+        (settings.effect === "ally" && !isFriendActor(actor))
+    ) {
+        return wrapped(event, item, data);
+    }
+
+    giveEffectRequest({ data, actor });
+    return [item];
+}
+
+function giveEffectToActor({ data, actor }: { data: DropCanvasItemDataPF2e; actor: ActorPF2e }) {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData("text/plain", JSON.stringify(data));
+
+    const event = new DragEvent("drop", { dataTransfer });
+    actor.sheet._onDrop(event);
+}
 
 function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
     const thisActor = app.item.actor;
@@ -104,5 +160,9 @@ async function actorTransferItemToActor(
     });
     return null;
 }
+
+type GivethPacket =
+    | TradePacket<"trade">
+    | { type: "effect"; data: DropCanvasItemDataPF2e; actor: string };
 
 export { config as givethTool };
