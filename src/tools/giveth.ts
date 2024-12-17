@@ -3,16 +3,12 @@ import {
     ItemTransferDialog,
     PhysicalItemPF2e,
     TradePacket,
-    createTradeMessage,
-    enactTradeRequest,
-    sendTradeRequest,
-    translateTradeData,
+    createCallOrEmit,
+    giveItemToActor,
 } from "module-helpers";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
-
-const debouncedSetup = foundry.utils.debounce(setup, 1);
 
 const { config, socket, settings, wrapper, hook, localize } = createTool({
     name: "giveth",
@@ -21,7 +17,14 @@ const { config, socket, settings, wrapper, hook, localize } = createTool({
             key: "enabled",
             type: Boolean,
             default: false,
-            onChange: debouncedSetup,
+            onChange: (enabled: boolean) => {
+                const isGM = game.user.isGM;
+
+                wrapper.toggle(!isGM && enabled);
+
+                socket.toggle(isGM && enabled);
+                hook.toggle(!isGM && enabled);
+            },
         },
         {
             key: "message",
@@ -37,32 +40,27 @@ const { config, socket, settings, wrapper, hook, localize } = createTool({
     ],
     wrappers: [
         {
+            key: "actorTransferItemToActor",
             path: ACTOR_TRANSFER_ITEM_TO_ACTOR,
             callback: actorTransferItemToActor,
         },
     ],
-    onSocket: async (packet: TradePacket, userId: string) => {
-        const translated = translateTradeData(packet);
-        const enactedTradeData = await enactTradeRequest(translated);
-        if (enactedTradeData) {
-            createTradeMessage(
-                enactedTradeData,
-                { subtitle: localize.path("subtitle"), message: localize.path("trade") },
-                userId
-            );
+    onSocket: async (packet: TradePacket<"trade">, userId: string) => {
+        if (packet.type === "trade") {
+            tradeRequest(packet, userId);
         }
     },
-    ready: setup,
+    ready: (isGM) => {
+        if (!settings.enabled) return;
+
+        wrapper.toggle(!isGM);
+
+        socket.toggle(isGM);
+        hook.toggle(!isGM);
+    },
 } as const);
 
-function setup() {
-    const isGM = game.user.isGM;
-    const enabled = settings.enabled;
-
-    wrapper.toggle(!isGM && enabled);
-    socket.toggle(isGM && enabled);
-    hook.toggle(!isGM && enabled);
-}
+const tradeRequest = createCallOrEmit("trade", giveItemToActor, socket);
 
 function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
     const thisActor = app.item.actor;
@@ -84,20 +82,26 @@ async function actorTransferItemToActor(
     this: ActorPF2e,
     ...args: ActorTransferItemArgs
 ): Promise<PhysicalItemPF2e<ActorPF2e> | null | undefined> {
-    const [targetActor, item, quantity] = args;
+    const [target, item, quantity] = args;
 
     if (
         !this.isOfType("npc", "character") ||
-        !targetActor.isOfType("npc", "character") ||
-        !targetActor.hasPlayerOwner ||
+        !target.isOfType("npc", "character") ||
+        !target.hasPlayerOwner ||
         item.quantity < 1 ||
         !this.isOwner ||
-        targetActor.isOwner
+        target.isOwner
     )
         // we don't process anything, so we return undefined
         return undefined;
 
-    sendTradeRequest(this, targetActor, item, { quantity }, socket);
+    tradeRequest({
+        item,
+        quantity,
+        target,
+        origin: this,
+        message: { subtitle: localize.path("subtitle"), message: localize.path("trade") },
+    });
     return null;
 }
 

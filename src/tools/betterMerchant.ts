@@ -22,20 +22,20 @@ import {
     TokenPF2e,
     TradeData,
     TradePacket,
-    TranslatedTradeData,
     addListener,
     addListenerAll,
     arrayIncludes,
     calculateItemPrice,
     confirmDialog,
+    createCallOrEmit,
     createHTMLElement,
     createTradeMessage,
     elementDataset,
-    enactTradeRequest,
     error,
     filterTraits,
     getHighestName,
     getInputValue,
+    giveItemToActor,
     hasGMOnline,
     hasSufficientCoins,
     htmlClosest,
@@ -45,9 +45,7 @@ import {
     promptDialog,
     renderActorSheets,
     renderApplication,
-    sendTradeRequest,
     toggleSummaryElement,
-    translateTradeData,
     userIsActiveGM,
     wrapperError,
 } from "module-helpers";
@@ -184,7 +182,6 @@ const {
     getInMemory,
     setInMemory,
     deleteInMemory,
-    templatePath,
     waitDialog,
 } = createTool({
     name: "betterMerchant",
@@ -299,9 +296,10 @@ const {
         compareItemWithFilter,
     },
     migrations: [MIGRATION_225],
-    onSocket: (packet: TradePacket<PacketData>, userId: string) => {
-        const translated = translateTradeData(packet);
-        buyItem(translated, userId);
+    onSocket: (packet: TradePacket<"trade", BuyItemData>, userId: string) => {
+        if (packet.type === "trade") {
+            tradeRequest(packet);
+        }
     },
     init: () => {
         if (!settings.enabled) return;
@@ -328,6 +326,8 @@ const {
         }
     },
 } as const);
+
+const tradeRequest = createCallOrEmit("trade", buyItem, socket);
 
 async function onCreateChatMessage(message: ChatMessagePF2e) {
     if (!userIsActiveGM()) return;
@@ -481,14 +481,14 @@ async function actorTransferItemToActor(
     ...args: ActorTransferItemArgs
 ): Promise<PhysicalItemPF2e | null | undefined> {
     const isGM = game.user.isGM;
-    const [targetActor, item, quantity = 1] = args;
+    const [target, item, quantity = 1] = args;
     const isParty = this.isOfType("party");
     const isCreature = this.isOfType("npc", "character");
 
     if (
-        !targetActor.isOfType("loot") ||
-        !targetActor.isMerchant ||
-        (!isGM && targetActor.isOwner) ||
+        !target.isOfType("loot") ||
+        !target.isMerchant ||
+        (!isGM && target.isOwner) ||
         (!isCreature && !isParty) ||
         (isCreature && !this.isOwner && !this.hasPlayerOwner) ||
         (isParty && !this.members.some((x) => x.hasPlayerOwner && x.isOwner))
@@ -497,55 +497,39 @@ async function actorTransferItemToActor(
         return undefined;
 
     const realQuantity = Math.min(quantity, item.quantity);
-    const itemFilter = testItem(targetActor, item, "buy", realQuantity);
+    const itemFilter = testItem(target, item, "buy", realQuantity);
 
     if (!itemFilter) {
         localize.warn("buy.refuse", {
-            actor: targetActor.name,
+            actor: target.name,
             item: item.name,
             quantity: realQuantity === 1 ? "" : `x${realQuantity}`,
         });
         return null;
     }
 
-    if (isGM) {
-        return buyItem(
-            {
-                sourceActor: this,
-                targetActor,
-                sourceItem: item,
-                quantity,
-                filterId: itemFilter.filter.id,
-                priceData: itemFilter.price.toObject(),
-            },
-            game.user.id
-        );
-    } else {
-        sendTradeRequest(
-            this,
-            targetActor,
-            item,
-            { quantity, filterId: itemFilter.filter.id, priceData: itemFilter.price.toObject() },
-            socket
-        );
-        return null;
-    }
+    tradeRequest({
+        item,
+        origin: this,
+        target,
+        quantity,
+        filterId: itemFilter.filter.id,
+        priceData: itemFilter.price.toObject(),
+    });
+
+    return null;
 }
 
-async function buyItem(translated: TranslatedTradeData<PacketData>, senderId: string) {
-    const enacted = await enactTradeRequest(translated);
-    if (!enacted) return null;
+async function buyItem(data: BuyItemData, userId: string) {
+    const newItem = await giveItemToActor(data, userId);
+    if (!newItem) return null;
 
-    const { filterId, priceData, sourceActor, targetActor, newItem } = enacted;
-    const filters = targetActor ? getFilters(targetActor as LootPF2e, "buy", true) : [];
+    const { filterId, priceData, target, origin, quantity = 1 } = data;
+    const filters = target ? getFilters(target as LootPF2e, "buy", true) : [];
     const filter = filters.find((x) => x.id === filterId);
 
-    if (
-        !filter ||
-        !targetActor.isOfType("loot") ||
-        !sourceActor.isOfType("npc", "character", "party")
-    ) {
-        localize.error("buy.error", { user: game.users.get(senderId)?.name ?? "unknown" });
+    if (!filter || !target.isOfType("loot") || !origin.isOfType("npc", "character", "party")) {
+        localize.error("buy.error", { user: game.users.get(userId)?.name ?? "unknown" });
         return;
     }
 
@@ -565,16 +549,17 @@ async function buyItem(translated: TranslatedTradeData<PacketData>, senderId: st
         setFlagProperty(updates, "filters.buy", filters);
     }
 
-    await targetActor.update(updates);
-    await sourceActor.inventory.addCoins(price);
+    await target.update(updates);
+    await origin.inventory.addCoins(price);
 
     createTradeMessage(
-        enacted,
-        {
-            message: "PF2E.loot.SellMessage",
-            subtitle: "PF2E.loot.SellSubtitle",
-        },
-        senderId
+        origin,
+        target,
+        newItem,
+        quantity,
+        "PF2E.loot.SellSubtitle",
+        "PF2E.loot.SellMessage",
+        userId
     );
 
     return newItem;
@@ -1945,10 +1930,7 @@ type LootSheetActionEvent =
     | "export-services"
     | "import-services";
 
-type PacketData = TradeData & {
-    priceData: Coins;
-    filterId: string;
-};
+type BuyItemData = TradeData & { filterId: string; priceData: Coins };
 
 type ItemFilterType = "buy" | "sell";
 
