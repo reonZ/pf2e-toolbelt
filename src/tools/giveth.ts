@@ -14,6 +14,8 @@ import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
 
+const debouncedSetup = foundry.utils.debounce(setup, 1);
+
 const { config, socket, settings, wrappers, hook, localize } = createTool({
     name: "giveth",
     settings: [
@@ -21,20 +23,14 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
             key: "enabled",
             type: Boolean,
             default: false,
-            onChange: (enabled: boolean) => {
-                const isGM = game.user.isGM;
-
-                wrappers.toggleAll(!isGM && enabled);
-
-                socket.toggle(isGM && enabled);
-                hook.toggle(!isGM && enabled);
-            },
+            onChange: debouncedSetup,
         },
         {
             key: "effect",
             type: String,
             choices: ["disabled", "ally", "all"],
             default: "ally",
+            onChange: debouncedSetup,
         },
         {
             key: "message",
@@ -55,12 +51,20 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
             callback: actorTransferItemToActor,
         },
         {
+            key: "characterSheetHandleDroppedItem",
             path: "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._handleDroppedItem",
             callback: actorSheetHandleDroppedItem,
             type: "MIXED",
         },
         {
+            key: "npcSheetHandleDroppedItem",
             path: "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype._handleDroppedItem",
+            callback: actorSheetHandleDroppedItem,
+            type: "MIXED",
+        },
+        {
+            key: "familiarSheetHandleDroppedItem",
+            path: "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype._handleDroppedItem",
             callback: actorSheetHandleDroppedItem,
             type: "MIXED",
         },
@@ -75,15 +79,23 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
                 break;
         }
     },
-    ready: (isGM) => {
-        if (!settings.enabled) return;
-
-        wrappers.toggleAll(!isGM);
-
-        socket.toggle(isGM);
-        hook.toggle(!isGM);
-    },
+    ready: setup,
 } as const);
+
+function setup() {
+    const isGM = game.user.isGM;
+    const enabled = settings.enabled;
+    const effect = settings.effect;
+
+    socket.toggle(enabled && isGM);
+
+    hook.toggle(enabled && effect && !isGM);
+
+    wrappers.actorTransferItemToActor.toggle(enabled && !isGM);
+    wrappers.npcSheetHandleDroppedItem.toggle(enabled && effect && !isGM);
+    wrappers.familiarSheetHandleDroppedItem.toggle(enabled && effect && !isGM);
+    wrappers.characterSheetHandleDroppedItem.toggle(enabled && effect && !isGM);
+}
 
 const tradeRequest = createCallOrEmit("trade", giveItemToActor, socket);
 const giveEffectRequest = createCallOrEmit("effect", giveEffectToActor, socket);
