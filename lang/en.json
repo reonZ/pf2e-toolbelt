@@ -62,7 +62,7 @@
                 },
                 "message": {
                     "name": "Send Message to Chat",
-                    "hint": "When an item is given to another actor or dropped on the canvas, a chat message will be generated."
+                    "hint": "When an item is given to another actor, a chat message will be generated."
                 },
                 "effect": {
                     "name": "Include Effects/Conditions",
@@ -286,6 +286,10 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Allow users to drop items on the canvas by holding the [Ctrl] key."
+                },
+                "removeOnEmpty": {
+                    "name": "Remove on Empty",
+                    "hint": "Should the token & actor be removed when there are no more items."
                 }
             }
         },
