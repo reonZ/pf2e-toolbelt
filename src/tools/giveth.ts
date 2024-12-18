@@ -82,6 +82,9 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
     ready: setup,
 } as const);
 
+const tradeRequest = createCallOrEmit("trade", giveItemToActor, socket);
+const giveEffectRequest = createCallOrEmit("effect", giveEffectToActor, socket);
+
 function setup() {
     const isGM = game.user.isGM;
     const enabled = settings.enabled;
@@ -96,9 +99,6 @@ function setup() {
     wrappers.familiarSheetHandleDroppedItem.toggle(enabled && effect && !isGM);
     wrappers.characterSheetHandleDroppedItem.toggle(enabled && effect && !isGM);
 }
-
-const tradeRequest = createCallOrEmit("trade", giveItemToActor, socket);
-const giveEffectRequest = createCallOrEmit("effect", giveEffectToActor, socket);
 
 async function actorSheetHandleDroppedItem(
     this: ActorSheetPF2e<ActorPF2e>,

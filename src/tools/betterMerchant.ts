@@ -333,73 +333,73 @@ async function onCreateChatMessage(message: ChatMessagePF2e) {
     if (!userIsActiveGM()) return;
 
     const serviceFlag = getFlag<ServiceMsgFlag>(message, "service");
-    if (serviceFlag) {
-        const errorUpdate = () => {
-            const msgContent = createHTMLElement("div", { innerHTML: message.content });
-            const cardContent = htmlQuery(msgContent, ".card-content") ?? msgContent;
-            const errorMsg = localize("service.error");
+    if (!serviceFlag) return;
 
-            cardContent.innerHTML = `<p class="pf2e-toolbelt-service-error">${errorMsg}</p>`;
-            message.update({ content: msgContent.innerHTML });
-        };
+    const errorUpdate = () => {
+        const msgContent = createHTMLElement("div", { innerHTML: message.content });
+        const cardContent = htmlQuery(msgContent, ".card-content") ?? msgContent;
+        const errorMsg = localize("service.error");
 
-        const buyer = await fromUuid(serviceFlag.buyerUUID);
-        const seller = await fromUuid(serviceFlag.sellerUUID);
-        if (!isInstanceOf(seller, "LootPF2e") || !isValidServiceBuyer(buyer)) {
-            return errorUpdate();
-        }
+        cardContent.innerHTML = `<p class="pf2e-toolbelt-service-error">${errorMsg}</p>`;
+        message.update({ content: msgContent.innerHTML });
+    };
 
-        const services = getServices(seller);
-        const service = services.find((service) => service.id === serviceFlag.serviceId);
-        if (!service) {
-            return errorUpdate();
-        }
-
-        const serviceRatio = getServicesRatio(seller);
-        const originalPrice = getServicePrice(service);
-        const usedPrice = serviceFlag.forceFree
-            ? null
-            : serviceRatio === 1
-            ? originalPrice
-            : originalPrice.scale(serviceRatio);
-
-        if (!serviceFlag.forceFree) {
-            if (!serviceCanBePurchased(service)) {
-                return errorUpdate();
-            }
-
-            const price = usedPrice!;
-            const quantity = service.quantity ?? -1;
-
-            if (price.copperValue > 0) {
-                if (await buyer.inventory.removeCoins(price)) {
-                    await seller.inventory.addCoins(price);
-                } else {
-                    return await errorUpdate();
-                }
-            }
-
-            if (quantity > 0) {
-                service.quantity = quantity - 1;
-                await setServices(seller, services);
-            }
-        }
-
-        const macro = await getServiceMacro(service);
-        macro?.execute({
-            actor: buyer,
-            service: {
-                seller,
-                usedPrice,
-                serviceRatio,
-                originalPrice,
-                name: service.name ?? service.id,
-                level: service.level ?? 0,
-                quantity: service.quantity ?? -1,
-                forceFree: serviceFlag.forceFree,
-            },
-        } satisfies ServiceMacroData);
+    const buyer = await fromUuid(serviceFlag.buyerUUID);
+    const seller = await fromUuid(serviceFlag.sellerUUID);
+    if (!isInstanceOf(seller, "LootPF2e") || !isValidServiceBuyer(buyer)) {
+        return errorUpdate();
     }
+
+    const services = getServices(seller);
+    const service = services.find((service) => service.id === serviceFlag.serviceId);
+    if (!service) {
+        return errorUpdate();
+    }
+
+    const serviceRatio = getServicesRatio(seller);
+    const originalPrice = getServicePrice(service);
+    const usedPrice = serviceFlag.forceFree
+        ? null
+        : serviceRatio === 1
+        ? originalPrice
+        : originalPrice.scale(serviceRatio);
+
+    if (!serviceFlag.forceFree) {
+        if (!serviceCanBePurchased(service)) {
+            return errorUpdate();
+        }
+
+        const price = usedPrice!;
+        const quantity = service.quantity ?? -1;
+
+        if (price.copperValue > 0) {
+            if (await buyer.inventory.removeCoins(price)) {
+                await seller.inventory.addCoins(price);
+            } else {
+                return await errorUpdate();
+            }
+        }
+
+        if (quantity > 0) {
+            service.quantity = quantity - 1;
+            await setServices(seller, services);
+        }
+    }
+
+    const macro = await getServiceMacro(service);
+    macro?.execute({
+        actor: buyer,
+        service: {
+            seller,
+            usedPrice,
+            serviceRatio,
+            originalPrice,
+            name: service.name ?? service.id,
+            level: service.level ?? 0,
+            quantity: service.quantity ?? -1,
+            forceFree: serviceFlag.forceFree,
+        },
+    } satisfies ServiceMacroData);
 }
 
 function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
