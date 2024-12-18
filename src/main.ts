@@ -22,6 +22,7 @@ import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
 import { ModuleMigration } from "module-helpers/dist/migration";
+import { dropethTool } from "./tools/dropeth";
 
 MODULE.register("pf2e-toolbelt");
 
@@ -31,6 +32,7 @@ const TOOLS: ToolConfig[] = [
     betterMerchantTool,
     debugTool,
     untargetTool,
+    dropethTool,
     effectsPanelTool,
     givethTool,
     heroActionsTool,
