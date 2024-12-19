@@ -108,7 +108,12 @@ function onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData) {
             return;
         }
 
-        const initData = await initiateTransfer({ item });
+        const initData = await initiateTransfer({
+            item,
+            title: localize("dialog.title"),
+            prompt: localize("dialog.prompt"),
+        });
+
         if (initData) {
             options.quantity = initData.quantity;
             droppethRequest(options);
@@ -147,7 +152,10 @@ function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.Regi
 
 async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: string) {
     const scene = canvas.scene;
-    if (!scene) return;
+    if (!scene) {
+        localize.error("error.no-scene");
+        return;
+    }
 
     const withContent = globalSetting("withContent");
     const transferData = await getTransferData({
@@ -156,7 +164,10 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         withContent,
     });
 
-    if (!transferData) return;
+    if (!transferData) {
+        localize.error("error.unknown");
+        return;
+    }
 
     const folder =
         game.folders.getName("__Droppeth") ??
@@ -170,7 +181,7 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         type: "loot",
         name,
         folder: folder?.id,
-        items: transferData.itemSources,
+        items: [transferData.itemSource, ...transferData.contentSources],
         img,
         ownership: { default: CONST.USER_ROLES.ASSISTANT },
     };
@@ -181,8 +192,13 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
     const actor = (await getDocumentClass("Actor").create(actorSource, {
         keepEmbeddedIds: true,
     })) as LootPF2e | undefined;
-    const mainItem = actor?.inventory.find((x) => x.id === item.id);
-    if (!actor || !mainItem) return;
+    const mainItem = actor?.inventory.find((x) => x.id === transferData.itemSource._id);
+
+    if (!actor || !mainItem) {
+        localize.error("error.unknown");
+        await actor?.delete();
+        return;
+    }
 
     const tokenSource: DeepPartial<TokenDocumentPF2e["_source"]> = {
         _id: tokenId,
@@ -213,8 +229,8 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
     tokenDocument.updateSource(position);
 
     if (!canvas.dimensions.rect.contains(tokenDocument.x, tokenDocument.y)) {
-        await actor.delete();
         localize.error("error.out-of-bounds");
+        await actor.delete();
         return;
     }
 
@@ -241,7 +257,10 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         cost: 0,
         userId,
         subtitle: localize("message.subtitle"),
-        message: localize.path("message.content", actor.inventory.size > 1 ? "container" : "item"),
+        message: localize.path(
+            "message.content",
+            transferData.contentSources.length ? "container" : "item"
+        ),
     });
 }
 
@@ -290,6 +309,6 @@ type DroppethOptions = {
     quantity?: number;
 };
 
-type DroppethPacket = ExtractSocketOptions<DroppethOptions> & { type: "drop" };
+type DroppethPacket = ExtractSocketOptions<"drop", DroppethOptions>;
 
 export { config as droppethTool };
