@@ -25,7 +25,8 @@
             "spellcasting": {
                 "staff": "Staff",
                 "charges": "Charges"
-            }
+            },
+            "sending": "Sending"
         },
         "settings": {
             "requiresReload": "(Requires Reload)",
