@@ -552,15 +552,15 @@ async function buyItem(data: BuyItemData, userId: string) {
     await target.update(updates);
     await origin.inventory.addCoins(price);
 
-    createTradeMessage(
+    createTradeMessage({
         origin,
         target,
-        newItem,
+        item: newItem,
         quantity,
-        "PF2E.loot.SellSubtitle",
-        "PF2E.loot.SellMessage",
-        userId
-    );
+        subtitle: "PF2E.loot.SellSubtitle",
+        message: "PF2E.loot.SellMessage",
+        userId,
+    });
 
     return newItem;
 }
