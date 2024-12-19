@@ -91,17 +91,31 @@ const droppethRequest = createCallOrEmit("drop", droppethItem, socket);
 
 function onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData) {
     if (
-        data.type === "Item" &&
-        R.isString(data.uuid) &&
-        game.keyboard.isModifierActive("Control")
-    ) {
-        const item = fromUuidSync<ItemPF2e>(data.uuid);
-        if (item && itemIsOfType(item, "physical")) {
-            onDroppethData(item, data.x, data.y);
-            return false;
+        data.type !== "Item" ||
+        !R.isString(data.uuid) ||
+        !game.keyboard.isModifierActive("Control")
+    )
+        return true;
+
+    const item = fromUuidSync<ItemPF2e>(data.uuid);
+    if (!item || !itemIsOfType(item, "physical")) return true;
+
+    (async () => {
+        const options: Omit<DroppethPacket, "type"> = { item: item.uuid, x: data.x, y: data.y };
+
+        if (!(item instanceof Item) || item.pack) {
+            droppethRequest(options);
+            return;
         }
-    }
-    return true;
+
+        const initData = await initiateTransfer({ item });
+        if (initData) {
+            options.quantity = initData.quantity;
+            droppethRequest(options);
+        }
+    })();
+
+    return false;
 }
 
 function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -229,21 +243,6 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         subtitle: localize("message.subtitle"),
         message: localize.path("message.content", actor.inventory.size > 1 ? "container" : "item"),
     });
-}
-
-async function onDroppethData(item: PhysicalItemPF2e | CompendiumIndexData, x: number, y: number) {
-    const options: Omit<DroppethPacket, "type"> = { item: item.uuid, x, y };
-
-    if (!(item instanceof Item) || item.pack) {
-        droppethRequest(options);
-        return;
-    }
-
-    const data = await initiateTransfer({ item });
-    if (data) {
-        options.quantity = data.quantity;
-        droppethRequest(options);
-    }
 }
 
 function onPreDeleteToken(token: TokenDocumentPF2e) {
