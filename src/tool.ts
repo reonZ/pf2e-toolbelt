@@ -158,7 +158,7 @@ function createToolWrappers(config: ToolConfig) {
 
     const wrappers: [string | undefined, ToolActivable][] = [];
 
-    for (const { key, type, path, callback } of config.wrappers) {
+    for (const { key, type, path, priority, callback } of config.wrappers) {
         let wrapper: ToolActivable;
 
         if (path in sharedWrappers) {
@@ -167,7 +167,7 @@ function createToolWrappers(config: ToolConfig) {
             wrapper = {
                 activate() {
                     //@ts-ignore
-                    sharedWrappers[path].activate(wrapperId, callback);
+                    sharedWrappers[path].activate(wrapperId, callback, priority);
                 },
                 disable() {
                     //@ts-ignore
@@ -175,7 +175,7 @@ function createToolWrappers(config: ToolConfig) {
                 },
                 toggle(enabled: boolean) {
                     //@ts-ignore
-                    sharedWrappers[path].toggle(wrapperId, callback, enabled);
+                    sharedWrappers[path].toggle(wrapperId, callback, enabled, priority);
                 },
             };
         } else {
@@ -363,6 +363,7 @@ type ToolConfig = {
         | {
               key?: string;
               path: string;
+              priority?: never;
               callback: libWrapper.RegisterCallback;
               type?: libWrapper.RegisterType;
           }
@@ -370,6 +371,7 @@ type ToolConfig = {
               key?: string;
               path: keyof typeof sharedWrappers;
               type?: never;
+              priority?: number;
               callback: Parameters<
                   (typeof sharedWrappers)[keyof typeof sharedWrappers]["activate"]
               >[1];
