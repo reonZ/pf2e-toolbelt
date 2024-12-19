@@ -317,21 +317,33 @@
             "error": {
                 "zero": "You cannot give an item you don't have yourself.",
                 "withQty": "Giveth {qty} {item} to <strong>{target}</strong>.",
-                "withoutQty": "Giveth {item} to <strong>{target}</strong>."
+                "withoutQty": "Giveth {item} to <strong>{target}</strong>.",
+                "unknown": "Something went wrong when trying to give the selected item(s)."
             },
-            "subtitle": "Giveth Item",
-            "question": "How many items do you wish to giveth?",
-            "trade": "{source} giveth {quantity} × {item} to {target}."
+            "dialog": {
+                "title": "Giveth Items",
+                "prompt": "How many items do you wish to giveth?"
+            },
+            "message": {
+                "subtitle": "Giveth Items",
+                "content": {
+                    "item": "{source} giveth {quantity} × {item} to {target}.",
+                    "container": "{source} giveth {item} and all its content to {target}."
+                }
+            }
         },
         "droppeth": {
             "dialog": {
-                "title": "Droppeth Item"
+                "title": "Droppeth Items",
+                "prompt": "How many items do you wish to droppeth?"
             },
             "error": {
-                "out-of-bounds": "Couldn't create a token at this location"
+                "out-of-bounds": "Couldn't create a token at this location.",
+                "unknown": "Something went wrong when trying to drop selected item(s).",
+                "no-scene": "There is no scene available."
             },
             "message": {
-                "subtitle": "Droppeth Item",
+                "subtitle": "Droppeth Items",
                 "content": {
                     "item": "{source} droppeth {quantity} × {item} on the ground.",
                     "container": "{source} droppeth {item} and all its content."

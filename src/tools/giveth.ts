@@ -2,14 +2,18 @@ import {
     ActorPF2e,
     ActorSheetPF2e,
     DropCanvasItemDataPF2e,
+    ExtractSocketOptions,
     ItemPF2e,
     ItemTransferDialog,
     PhysicalItemPF2e,
-    TradePacket,
+    addItemsToActor,
     createCallOrEmit,
-    giveItemToActor,
+    createTransferMessage,
+    getTransferData,
     isFriendActor,
+    updateTransferSource,
 } from "module-helpers";
+import { globalSetting } from "../settings";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
@@ -72,7 +76,7 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
     onSocket: async (packet: GivethPacket, userId: string) => {
         switch (packet.type) {
             case "trade":
-                tradeRequest(packet, userId);
+                giveItemRequest(packet, userId);
                 break;
             case "effect":
                 giveEffectRequest(packet, userId);
@@ -82,7 +86,7 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
     ready: setup,
 } as const);
 
-const tradeRequest = createCallOrEmit("trade", giveItemToActor, socket);
+const giveItemRequest = createCallOrEmit("trade", givethItem, socket);
 const giveEffectRequest = createCallOrEmit("effect", giveEffectToActor, socket);
 
 function setup() {
@@ -112,7 +116,6 @@ async function actorSheetHandleDroppedItem(
     if (
         !item.isOfType("condition", "effect") ||
         actor.isOwner ||
-        settings.effect === "disabled" ||
         (settings.effect === "ally" && !isFriendActor(actor))
     ) {
         return wrapped(event, item, data);
@@ -122,7 +125,7 @@ async function actorSheetHandleDroppedItem(
     return [item];
 }
 
-function giveEffectToActor({ data, actor }: { data: DropCanvasItemDataPF2e; actor: ActorPF2e }) {
+function giveEffectToActor({ data, actor }: GiveEffectOptions) {
     const dataTransfer = new DataTransfer();
     dataTransfer.setData("text/plain", JSON.stringify(data));
 
@@ -143,38 +146,92 @@ function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
     )
         return;
 
-    updateItemTransferDialog(app, $html, localize.path("subtitle"), localize.path("question"));
+    updateItemTransferDialog(
+        app,
+        $html,
+        localize.path("dialog.title"),
+        localize.path("dialog.prompt")
+    );
 }
 
 async function actorTransferItemToActor(
     this: ActorPF2e,
     ...args: ActorTransferItemArgs
 ): Promise<PhysicalItemPF2e<ActorPF2e> | null | undefined> {
-    const [target, item, quantity] = args;
+    const [targetActor, item, quantity, _containerId, newStack] = args;
 
     if (
-        !this.isOfType("npc", "character") ||
-        !target.isOfType("npc", "character") ||
-        !target.hasPlayerOwner ||
-        item.quantity < 1 ||
-        !this.isOwner ||
-        target.isOwner
-    )
-        // we don't process anything, so we return undefined
-        return undefined;
-
-    tradeRequest({
-        item,
-        quantity,
-        target,
-        origin: this,
-        message: { subtitle: localize.path("subtitle"), message: localize.path("trade") },
-    });
-    return null;
+        this.isOfType("npc", "character") &&
+        targetActor.isOfType("npc", "character") &&
+        targetActor.hasPlayerOwner &&
+        item.quantity >= 1 &&
+        this.isOwner &&
+        !targetActor.isOwner
+    ) {
+        giveItemRequest({ item, targetActor, quantity, newStack });
+        // we return null to signal we took over the process
+        return null;
+    }
 }
 
+async function givethItem(
+    { item, quantity, targetActor, newStack }: GiveItemOptions,
+    userId: string
+) {
+    const withContent = globalSetting("withContent");
+    const transferData = await getTransferData({
+        item,
+        quantity,
+        withContent,
+    });
+
+    if (!transferData) {
+        localize.error("error.unknown");
+        return;
+    }
+
+    const items = await addItemsToActor({
+        ...transferData,
+        targetActor,
+        newStack,
+    });
+
+    if (!items) {
+        localize.error("error.unknown");
+        return;
+    }
+
+    await updateTransferSource({
+        item,
+        quantity: transferData.quantity,
+        withContent,
+    });
+
+    createTransferMessage({
+        sourceActor: item.actor,
+        targetActor,
+        item: items.item,
+        quantity: transferData.quantity,
+        userId,
+        subtitle: localize("message.subtitle"),
+        message: localize.path(
+            "message.content",
+            transferData.contentSources.length ? "container" : "item"
+        ),
+    });
+}
+
+type GiveEffectOptions = { data: DropCanvasItemDataPF2e; actor: ActorPF2e };
+
+type GiveItemOptions = {
+    item: PhysicalItemPF2e<ActorPF2e>;
+    targetActor: ActorPF2e;
+    quantity: number;
+    newStack?: boolean;
+};
+
 type GivethPacket =
-    | TradePacket<"trade">
-    | { type: "effect"; data: DropCanvasItemDataPF2e; actor: string };
+    | ExtractSocketOptions<"trade", GiveItemOptions>
+    | ExtractSocketOptions<"effect", GiveEffectOptions>;
 
 export { config as givethTool };
