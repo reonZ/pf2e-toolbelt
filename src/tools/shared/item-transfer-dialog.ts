@@ -3,27 +3,35 @@ import { htmlQuery, ItemTransferDialog, refreshApplicationHeight } from "module-
 function updateItemTransferDialog(
     app: ItemTransferDialog,
     $html: JQuery,
-    subtitle: string,
-    message: string
+    title: string,
+    prompt: string,
+    noStack?: boolean
 ) {
     const html = $html[0];
 
     const titleElement = htmlQuery(html, ":scope > header h4");
     if (titleElement) {
-        titleElement.innerText = game.i18n.localize(subtitle);
+        titleElement.innerText = game.i18n.localize(title);
     }
 
     const buttonElement = htmlQuery(html, "form button");
     if (buttonElement) {
-        buttonElement.innerText = game.i18n.localize(subtitle);
+        buttonElement.innerText = game.i18n.localize(title);
     }
 
     const questionElement = htmlQuery(html, "form > label");
     if (questionElement) {
-        questionElement.innerText = game.i18n.localize(message);
+        questionElement.innerText = game.i18n.localize(prompt);
     }
 
-    htmlQuery(html, "[name='newStack']")?.remove();
+    if (noStack) {
+        const input = htmlQuery(html, "[name='newStack']");
+
+        if (input) {
+            input.previousElementSibling?.remove();
+            input.remove();
+        }
+    }
 
     refreshApplicationHeight(app);
 }

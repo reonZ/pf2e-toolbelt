@@ -416,7 +416,13 @@ function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
     )
         return;
 
-    updateItemTransferDialog(app, $html, "PF2E.loot.SellSubtitle", localize.path("buy.question"));
+    updateItemTransferDialog(
+        app,
+        $html,
+        "PF2E.loot.SellSubtitle",
+        localize.path("buy.question"),
+        true
+    );
 }
 
 /**
