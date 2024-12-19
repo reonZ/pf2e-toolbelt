@@ -18,7 +18,7 @@ import {
     updateTransferSource,
 } from "module-helpers";
 import { createTool } from "../tool";
-import { globalSetting } from "../settings";
+import { globalSettings } from "../global";
 
 const DEFAULT_IMG = "systems/pf2e/icons/default-icons/backpack.svg";
 
@@ -157,7 +157,7 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         return;
     }
 
-    const withContent = globalSetting("withContent");
+    const withContent = globalSettings.withContent;
     const transferData = await getTransferData({
         item,
         quantity,

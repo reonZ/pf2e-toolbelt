@@ -31,6 +31,7 @@
         "settings": {
             "requiresReload": "(Requires Reload)",
             "global": {
+                "title": "Global",
                 "withContent": {
                     "name": "With Container Content",
                     "hint": "When a container is moved from one actor to another, should its content go with it."

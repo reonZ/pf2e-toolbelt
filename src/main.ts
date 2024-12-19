@@ -1,5 +1,5 @@
 import { getSetting, MODULE, R, userIsGM } from "module-helpers";
-import { onRenderSettingsConfig, registerGlobalSettings, registerToolsSettings } from "./settings";
+import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";
 import { arpTool } from "./tools/arp";
@@ -23,10 +23,12 @@ import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
 import { ModuleMigration } from "module-helpers/dist/migration";
 import { droppethTool } from "./tools/droppeth";
+import { GlobalTool } from "./global";
 
 MODULE.register("pf2e-toolbelt");
 
 const TOOLS: ToolConfig[] = [
+    GlobalTool,
     actionableTool,
     arpTool,
     betterMerchantTool,
@@ -93,7 +95,6 @@ const TOOLS: ToolConfig[] = [
 Hooks.once("init", () => {
     const isGM = userIsGM();
 
-    registerGlobalSettings();
     registerToolsSettings(TOOLS, isGM);
 
     const module = MODULE.current;

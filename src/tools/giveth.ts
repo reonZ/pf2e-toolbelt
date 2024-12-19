@@ -13,10 +13,10 @@ import {
     isFriendActor,
     updateTransferSource,
 } from "module-helpers";
-import { globalSetting } from "../settings";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
+import { globalSettings } from "../global";
 
 const debouncedSetup = foundry.utils.debounce(setup, 1);
 
@@ -178,7 +178,7 @@ async function givethItem(
     { item, quantity, targetActor, newStack }: GiveItemOptions,
     userId: string
 ) {
-    const withContent = globalSetting("withContent");
+    const withContent = globalSettings.withContent;
     const transferData = await getTransferData({
         item,
         quantity,
