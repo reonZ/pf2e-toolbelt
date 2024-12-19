@@ -19,66 +19,62 @@ import {
 } from "module-helpers";
 import { createTool } from "../tool";
 import { globalSetting } from "../settings";
+import { dropCanvasDataHook } from "./shared/drop-canvas-data";
 
 const DEFAULT_IMG = "systems/pf2e/icons/default-icons/backpack.svg";
 
 const debouncedSetup = foundry.utils.debounce(setup, 1);
 
-const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProperty } = createTool(
-    {
-        name: "droppeth",
-        settings: [
-            {
-                key: "enabled",
-                type: Boolean,
-                default: false,
-                onChange: debouncedSetup,
-            },
-            {
-                key: "removeOnEmpty",
-                type: Boolean,
-                default: true,
-                onChange: debouncedSetup,
-            },
-            {
-                key: "light",
-                type: Boolean,
-                default: true,
-            },
-            {
-                key: "message",
-                type: Boolean,
-                default: true,
-            },
-        ],
-        hooks: [
-            {
-                event: "dropCanvasData",
-                listener: onDropCanvasData,
-                isUpstream: true,
-            },
-            {
-                event: "preDeleteToken",
-                listener: onPreDeleteToken,
-            },
-        ],
-        wrappers: [
-            {
-                key: "actorOnEmbeddedDocumentChange",
-                path: "CONFIG.Actor.documentClass.prototype._onEmbeddedDocumentChange",
-                callback: actorOnEmbeddedDocumentChange,
-            },
-        ],
-        onSocket: async (packet: DroppethPacket, userId: string) => {
-            switch (packet.type) {
-                case "drop":
-                    droppethRequest(packet, userId);
-                    break;
-            }
+dropCanvasDataHook.register("droppeth", onDropCanvasData);
+
+const { config, settings, hook, wrapper, socket, localize, getFlag, setFlagProperty } = createTool({
+    name: "droppeth",
+    settings: [
+        {
+            key: "enabled",
+            type: Boolean,
+            default: false,
+            onChange: debouncedSetup,
         },
-        ready: setup,
-    } as const
-);
+        {
+            key: "removeOnEmpty",
+            type: Boolean,
+            default: true,
+            onChange: debouncedSetup,
+        },
+        {
+            key: "light",
+            type: Boolean,
+            default: true,
+        },
+        {
+            key: "message",
+            type: Boolean,
+            default: true,
+        },
+    ],
+    hooks: [
+        {
+            event: "preDeleteToken",
+            listener: onPreDeleteToken,
+        },
+    ],
+    wrappers: [
+        {
+            key: "actorOnEmbeddedDocumentChange",
+            path: "CONFIG.Actor.documentClass.prototype._onEmbeddedDocumentChange",
+            callback: actorOnEmbeddedDocumentChange,
+        },
+    ],
+    onSocket: async (packet: DroppethPacket, userId: string) => {
+        switch (packet.type) {
+            case "drop":
+                droppethRequest(packet, userId);
+                break;
+        }
+    },
+    ready: setup,
+} as const);
 
 const droppethRequest = createCallOrEmit("drop", droppethItem, socket);
 
@@ -89,8 +85,19 @@ function setup() {
 
     wrapper.toggle(enabled && settings.removeOnEmpty);
 
-    hooks.dropCanvasData.toggle(enabled);
-    hooks.preDeleteToken.toggle(enabled);
+    hook.toggle(enabled);
+    dropCanvasDataHook.toggle("droppeth", enabled);
+}
+
+function onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData) {
+    if (R.isString(data.uuid) && game.keyboard.isModifierActive("Control")) {
+        const item = fromUuidSync<ItemPF2e>(data.uuid);
+        if (item && itemIsOfType(item, "physical")) {
+            onDroppethData(item, data.x, data.y);
+            return false;
+        }
+    }
+    return true;
 }
 
 function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -218,21 +225,6 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         subtitle: localize("message.subtitle"),
         message: localize.path("message.content", actor.inventory.size > 1 ? "container" : "item"),
     });
-}
-
-function onDropCanvasData(_canvas: CanvasPF2e, data: DropCanvasData) {
-    if (
-        data.type === "Item" &&
-        R.isString(data.uuid) &&
-        game.keyboard.isModifierActive("Control")
-    ) {
-        const item = fromUuidSync<ItemPF2e>(data.uuid);
-        if (item && itemIsOfType(item, "physical")) {
-            onDroppethData(item, data.x, data.y);
-            return false;
-        }
-    }
-    return true;
 }
 
 async function onDroppethData(item: PhysicalItemPF2e | CompendiumIndexData, x: number, y: number) {
