@@ -44,7 +44,7 @@ function registerGlobalSettings() {
     registerSetting({
         key: "global.withContent",
         type: Boolean,
-        default: true,
+        default: false,
         onChange: setupWithContent,
     });
 }
