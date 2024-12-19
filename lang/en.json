@@ -312,6 +312,13 @@
         "tool": {
             "noGM": "There is no GM connected to your world, this operation cannot be processed."
         },
+        "global": {
+            "withContent": {
+                "error": {
+                    "unknown": "An error occured while trying to transfer the container."
+                }
+            }
+        },
         "arp": {
             "forceVariant": "The module <strong>PF2e Toolbelt</strong> disabled the pf2e system variant ABP rule to work properly. It would probably be better if you reloaded the world now."
         },

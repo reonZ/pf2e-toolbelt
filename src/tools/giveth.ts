@@ -179,33 +179,21 @@ async function givethItem(
     userId: string
 ) {
     const withContent = globalSettings.withContent;
-    const transferData = await getTransferData({
-        item,
-        quantity,
-        withContent,
-    });
+    const transferData = await getTransferData({ item, quantity, withContent });
 
     if (!transferData) {
         localize.error("error.unknown");
         return;
     }
 
-    const items = await addItemsToActor({
-        ...transferData,
-        targetActor,
-        newStack,
-    });
+    const items = await addItemsToActor({ ...transferData, targetActor, newStack });
 
     if (!items) {
         localize.error("error.unknown");
         return;
     }
 
-    await updateTransferSource({
-        item,
-        quantity: transferData.quantity,
-        withContent,
-    });
+    await updateTransferSource({ item, quantity: transferData.quantity, withContent });
 
     createTransferMessage({
         sourceActor: item.actor,

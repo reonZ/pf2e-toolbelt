@@ -6,7 +6,8 @@
     -   if the system is migrating data, make sure to wait until it is done before starting
 -   add new/first `With Container Content` global setting
     -   when enabled, moving a container to another actor will be accompagned by its entire content
--   add `Doppeth` section:
+    -   will not interfere with any transation related to merchants
+-   add `Droppeth` section:
     -   this new feature allows any user to drop items directly onto the ground by holding the `[Ctrl]` key before starting to drag
     -   a `Loot` actor & token are automatically created to host the dropped item
     -   whenever only one item is present in the loot actor, its name and image will be used for the actor
@@ -27,7 +28,7 @@
 -   `Giveth` rework:
     -   add new `Include Effects/Conditions` world setting
         -   allows players to drop effects & conditions onto actors they do not own
-    -   allow creating new stack when giving items
+    -   allow creating new stacks when giving items
 -   `Hero Actions`:
     -   allow the use of `Mythic Points` instead of `Hero Points`
 
