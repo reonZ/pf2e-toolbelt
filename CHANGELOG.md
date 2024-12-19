@@ -1,3 +1,36 @@
+#
+
+-   this is a system `6.8.0` release
+-   the module now uses a migration manager
+    -   the main GM will be asked to migrate on load
+    -   if the system is migrating data, make sure to wait until it is done before starting
+-   add new/first `With Container Content` global setting
+    -   when enabled, moving a container to another actor will be accompagned by its entire content
+-   add `Doppeth` section:
+    -   this new feature allows any user to drop items directly onto the ground by holding the `[Ctrl]` key before starting to drag
+    -   a `Loot` actor & token are automatically created to host the dropped item
+    -   whenever only one item is present in the loot actor, its name and image will be used for the actor
+    -   if more items are added later on to the loot actor, a generic name & image will be used instead
+    -   if the only present item is a source of light, the actor will emit said light until the item is removed or more are added
+    -   you can also drop items directly from the sidebar or the compendium (no quantity window will be shown for those though)
+-   `Actionable`:
+    -   update to be compatible with the new crafting actions
+    -   you cannot add a macro to an action that is associated with crafting
+-   `Better Merchant`:
+    -   update filters to be compatible with the new compendium browser
+    -   switched the `Filters Menu` to `ApplicationV2`
+    -   merchants now always buy treasures for 100% of their price if they reach the default filter
+    -   the items selection of `From Merchant` cannot be done directly in the compendium browser anymore
+        -   that step has been moved after you setup the browser filters and click on `Add To Merchant`
+        -   a new window will allow you to select which items you want to add
+        -   items creation is now done in batch of 10 at a time
+-   `Giveth` rework:
+    -   add new `Include Effects/Conditions` world setting
+        -   allows players to drop effects & conditions onto actors they do not own
+    -   allow creating new stack when giving items
+-   `Hero Actions`:
+    -   allow the use of `Mythic Points` instead of `Hero Points`
+
 # 2.24.0
 
 -   if you use the `PF2e Dailies` module, make sure to update it to version `3.15.0`

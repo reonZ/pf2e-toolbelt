@@ -9,6 +9,8 @@
         "emitDecoratorMetadata": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
+        "noUnusedParameters": false,
+        "noUnusedLocals": true,
         "noFallthroughCasesInSwitch": true,
         "strictFunctionTypes": true,
         "strictNullChecks": true,
