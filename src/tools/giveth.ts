@@ -88,11 +88,11 @@ const giveEffectRequest = createCallOrEmit("effect", giveEffectToActor, socket);
 function setup() {
     const isGM = game.user.isGM;
     const enabled = settings.enabled;
-    const effect = settings.effect;
+    const effect = settings.effect !== "disabled";
 
     socket.toggle(enabled && isGM);
 
-    hook.toggle(enabled && effect && !isGM);
+    hook.toggle(enabled && !isGM);
 
     wrappers.actorTransferItemToActor.toggle(enabled && !isGM);
     wrappers.npcSheetHandleDroppedItem.toggle(enabled && effect && !isGM);
