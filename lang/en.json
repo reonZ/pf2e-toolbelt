@@ -322,11 +322,11 @@
                 "unknown": "Something went wrong when trying to give the selected item(s)."
             },
             "dialog": {
-                "title": "Giveth Items",
+                "title": "Giveth Item",
                 "prompt": "How many items do you wish to giveth?"
             },
             "message": {
-                "subtitle": "Giveth Items",
+                "subtitle": "Giveth Item",
                 "content": {
                     "item": "{source} giveth {quantity} × {item} to {target}.",
                     "container": "{source} giveth {item} and all its content to {target}."
@@ -335,7 +335,7 @@
         },
         "droppeth": {
             "dialog": {
-                "title": "Droppeth Items",
+                "title": "Droppeth Item",
                 "prompt": "How many items do you wish to droppeth?"
             },
             "error": {
@@ -344,7 +344,7 @@
                 "no-scene": "There is no scene available."
             },
             "message": {
-                "subtitle": "Droppeth Items",
+                "subtitle": "Droppeth Item",
                 "content": {
                     "item": "{source} droppeth {quantity} × {item} on the ground.",
                     "container": "{source} droppeth {item} and all its content."
