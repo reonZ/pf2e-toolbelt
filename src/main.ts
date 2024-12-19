@@ -1,5 +1,5 @@
 import { getSetting, MODULE, R, userIsGM } from "module-helpers";
-import { onRenderSettingsConfig, registerToolsSettings } from "./settings";
+import { onRenderSettingsConfig, registerGlobalSettings, registerToolsSettings } from "./settings";
 import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";
 import { arpTool } from "./tools/arp";
@@ -93,6 +93,7 @@ const TOOLS: ToolConfig[] = [
 Hooks.once("init", () => {
     const isGM = userIsGM();
 
+    registerGlobalSettings();
     registerToolsSettings(TOOLS, isGM);
 
     const module = MODULE.current;

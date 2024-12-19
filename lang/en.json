@@ -29,6 +29,12 @@
         },
         "settings": {
             "requiresReload": "(Requires Reload)",
+            "global": {
+                "withContent": {
+                    "name": "With Container Content",
+                    "hint": "When a container is moved from one actor to another, should its content go with it."
+                }
+            },
             "actionable": {
                 "title": "Actionable",
                 "enabled": {
@@ -72,6 +78,25 @@
                         "ally": "Allies Only",
                         "all": "All Actors"
                     }
+                }
+            },
+            "droppeth": {
+                "title": "Droppeth",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Allow users to drop items on the canvas by holding the [Ctrl] key."
+                },
+                "removeOnEmpty": {
+                    "name": "Remove on Empty",
+                    "hint": "Should the token & actor be removed when there are no more items."
+                },
+                "light": {
+                    "name": "Light Source",
+                    "hint": "Should the dropped item emit light. It will only be the case if a single item is present in the loot actor."
+                },
+                "message": {
+                    "name": "Send Message to Chat",
+                    "hint": "When items are dropped from an actor, a chat message will be generated."
                 }
             },
             "heroActions": {
@@ -280,25 +305,6 @@
                     "name": "Auto Identify Similar Items",
                     "hint": "Should 'similar' items also be identified when using the 'Automatically identify known items' option."
                 }
-            },
-            "droppeth": {
-                "title": "Droppeth",
-                "enabled": {
-                    "name": "Enabled",
-                    "hint": "Allow users to drop items on the canvas by holding the [Ctrl] key."
-                },
-                "removeOnEmpty": {
-                    "name": "Remove on Empty",
-                    "hint": "Should the token & actor be removed when there are no more items."
-                },
-                "light": {
-                    "name": "Light Source",
-                    "hint": "Should the dropped item emit light. It will only be the case if a single item is present in the loot actor."
-                },
-                "message": {
-                    "name": "Send Message to Chat",
-                    "hint": "When items are dropped from an actor, a chat message will be generated."
-                }
             }
         },
         "tool": {
@@ -315,7 +321,22 @@
             },
             "subtitle": "Giveth Item",
             "question": "How many items do you wish to giveth?",
-            "trade": "{giver} giveth {quantity} × {item} to {recipient}."
+            "trade": "{source} giveth {quantity} × {item} to {target}."
+        },
+        "droppeth": {
+            "dialog": {
+                "title": "Droppeth Item"
+            },
+            "error": {
+                "out-of-bounds": "Couldn't create a token at this location"
+            },
+            "message": {
+                "subtitle": "Droppeth Item",
+                "content": {
+                    "item": "{source} droppeth {quantity} × {item} on the ground.",
+                    "container": "{source} droppeth {item} and all its content."
+                }
+            }
         },
         "heroActions": {
             "sheet": {
@@ -685,21 +706,6 @@
         },
         "hideDamage": {
             "reveal": "Reveal damage to players"
-        },
-        "droppeth": {
-            "dialog": {
-                "title": "Droppeth Item"
-            },
-            "error": {
-                "out-of-bounds": "Couldn't create a token at this location"
-            },
-            "message": {
-                "subtitle": "Droppeth Item",
-                "content": {
-                    "item": "{giver} droppeth {quantity} × {item} on the ground.",
-                    "bag": "{giver} droppeth some items on the ground."
-                }
-            }
         }
     }
 }

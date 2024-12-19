@@ -2,6 +2,7 @@ import {
     MODULE,
     createHTMLElement,
     elementDataset,
+    getSetting,
     htmlQuery,
     localize,
     registerSetting,
@@ -39,6 +40,19 @@ function onRenderSettingsConfig(app: SettingsConfig, $html: JQuery) {
     }
 }
 
+function registerGlobalSettings() {
+    registerSetting({
+        key: "global.withContent",
+        type: Boolean,
+        default: true,
+        onChange: setupWithContent,
+    });
+}
+
+function setupWithContent(enabled: boolean) {
+    // TODO
+}
+
 function registerToolsSettings(tools: ToolConfig[], isGM: boolean) {
     for (const { name, settings } of tools) {
         for (const setting of settings) {
@@ -59,4 +73,12 @@ function registerToolsSettings(tools: ToolConfig[], isGM: boolean) {
     }
 }
 
-export { onRenderSettingsConfig, registerToolsSettings };
+function globalSetting<K extends keyof GlobalSettings>(key: K) {
+    return getSetting<GlobalSettings[K]>(`global.${key}`);
+}
+
+type GlobalSettings = {
+    withContent: boolean;
+};
+
+export { globalSetting, onRenderSettingsConfig, registerGlobalSettings, registerToolsSettings };

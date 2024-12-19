@@ -2,21 +2,23 @@ import {
     ActorPF2e,
     ActorSourcePF2e,
     CanvasPF2e,
+    ExtractSocketOptions,
     ItemPF2e,
     LootPF2e,
     PhysicalItemPF2e,
     R,
     TokenDocumentPF2e,
     TokenLightRuleElement,
-    addListener,
     createCallOrEmit,
-    createTradeMessage,
-    htmlQuery,
-    isInstanceOf,
+    createTransferMessage,
+    getTransferData,
+    initiateTransfer,
     isPrimaryUpdater,
     itemIsOfType,
+    updateTransferSource,
 } from "module-helpers";
 import { createTool } from "../tool";
+import { globalSetting } from "../settings";
 
 const DEFAULT_IMG = "systems/pf2e/icons/default-icons/backpack.svg";
 
@@ -83,6 +85,8 @@ const droppethRequest = createCallOrEmit("drop", droppethItem, socket);
 function setup() {
     const enabled = settings.enabled;
 
+    socket.toggle(enabled && game.user.isGM);
+
     wrapper.toggle(enabled && settings.removeOnEmpty);
 
     hooks.dropCanvasData.toggle(enabled);
@@ -116,30 +120,18 @@ function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.Regi
     })();
 }
 
-async function droppethItem(options: DroppethOptions, userId: string) {
+async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: string) {
     const scene = canvas.scene;
     if (!scene) return;
 
-    const items = R.pipe(
-        await Promise.all(options.items.map((uuid) => fromUuid(uuid))),
-        R.filter(
-            (item): item is PhysicalItemPF2e =>
-                isInstanceOf(item, "ItemPF2e") && item.isOfType("physical")
-        )
-    );
+    const withContent = globalSetting("withContent");
+    const transferData = await getTransferData({
+        item,
+        quantity,
+        withContent,
+    });
 
-    if (!items.length) return;
-
-    const onlyItem = R.only(items);
-    const sourceActor = items[0].actor;
-    const itemSources = items.map((item) => item.toObject());
-
-    if (onlyItem && R.isNumber(options.quantity)) {
-        options.quantity = Math.min(onlyItem.quantity, options.quantity);
-        if (options.quantity <= 0) return;
-
-        itemSources[0].system.quantity = options.quantity;
-    }
+    if (!transferData) return;
 
     const folder =
         game.folders.getName("__Droppeth") ??
@@ -147,13 +139,13 @@ async function droppethItem(options: DroppethOptions, userId: string) {
 
     const tokenId = foundry.utils.randomID();
     const tokenUuid = `${scene.uuid}.Token.${tokenId}`;
-    const { name, img } = onlyItem ?? getDefaultData();
+    const { name, img } = item;
 
     const actorSource: PreCreate<ActorSourcePF2e> = {
         type: "loot",
         name,
         folder: folder?.id,
-        items: itemSources,
+        items: transferData.itemSources,
         img,
         ownership: { default: CONST.USER_ROLES.ASSISTANT },
     };
@@ -161,8 +153,11 @@ async function droppethItem(options: DroppethOptions, userId: string) {
     setFlagProperty(actorSource, "temporary", true);
     setFlagProperty(actorSource, "tokenUuid", tokenUuid);
 
-    const actor = (await getDocumentClass("Actor").create(actorSource)) as LootPF2e | undefined;
-    if (!actor) return;
+    const actor = (await getDocumentClass("Actor").create(actorSource, {
+        keepEmbeddedIds: true,
+    })) as LootPF2e | undefined;
+    const mainItem = actor?.inventory.find((x) => x.id === item.id);
+    if (!actor || !mainItem) return;
 
     const tokenSource: DeepPartial<TokenDocumentPF2e["_source"]> = {
         _id: tokenId,
@@ -174,20 +169,19 @@ async function droppethItem(options: DroppethOptions, userId: string) {
         ring: { enabled: false },
     };
 
-    if (onlyItem && settings.light) {
-        tokenSource.light = getLightSource(onlyItem);
+    if (settings.light) {
+        tokenSource.light = getLightSource(item);
     }
 
     const tokenDocument = await actor.getTokenDocument(tokenSource, { parent: scene });
-
     const token = canvas.tokens.createObject(
         // @ts-expect-error
         tokenDocument
     );
 
     let position = token.getCenterPoint({ x: 0, y: 0 });
-    position.x = options.x - position.x;
-    position.y = options.y - position.y;
+    position.x = x - position.x;
+    position.y = y - position.y;
     position = token.getSnappedPosition(position);
 
     token.destroy({ children: true });
@@ -200,43 +194,29 @@ async function droppethItem(options: DroppethOptions, userId: string) {
     }
 
     canvas.tokens.activate();
-
     await getDocumentClass("Token").create(
         // @ts-expect-error
         tokenDocument,
         { parent: canvas.scene, keepId: true }
     );
 
-    // no source actor so no need to update anything
-    if (!sourceActor) return;
+    // no source actor so no update required, also no message needed
+    if (!item.actor) return;
 
-    if (onlyItem && R.isNumber(options.quantity)) {
-        const newQuantity = onlyItem.quantity - options.quantity;
+    await updateTransferSource({
+        item,
+        quantity: transferData.quantity,
+        withContent,
+    });
 
-        if (newQuantity <= 0) {
-            await onlyItem.delete();
-        } else {
-            await onlyItem.update({ "system.quantity": newQuantity });
-        }
-    } else {
-        const ids = items.map((item) => item.id);
-
-        if (ids) {
-            await sourceActor.deleteEmbeddedDocuments("Item", ids);
-        }
-    }
-
-    if (!settings.message) return;
-
-    createTradeMessage({
-        origin: sourceActor,
+    createTransferMessage({
+        sourceActor: item.actor,
+        item: mainItem,
+        quantity: transferData.quantity,
         cost: 0,
-        item: onlyItem ? actor.inventory.contents[0] : undefined,
-        imgPath: DEFAULT_IMG,
-        quantity: options.quantity ?? 1,
         userId,
         subtitle: localize("message.subtitle"),
-        message: localize.path("message.content", onlyItem ? "item" : "bag"),
+        message: localize.path("message.content", actor.inventory.size > 1 ? "container" : "item"),
     });
 }
 
@@ -248,76 +228,26 @@ function onDropCanvasData(_canvas: CanvasPF2e, data: DropCanvasData) {
     ) {
         const item = fromUuidSync<ItemPF2e>(data.uuid);
         if (item && itemIsOfType(item, "physical")) {
-            onDroppeth(item, data.x, data.y);
+            onDroppethData(item, data.x, data.y);
             return false;
         }
     }
     return true;
 }
 
-async function onDroppeth(item: PhysicalItemPF2e | CompendiumIndexData, x: number, y: number) {
-    const options: DroppethOptions = { items: [item.uuid], x, y };
+async function onDroppethData(item: PhysicalItemPF2e | CompendiumIndexData, x: number, y: number) {
+    const options: Omit<DroppethPacket, "type"> = { item: item.uuid, x, y };
 
     if (!(item instanceof Item) || item.pack) {
         droppethRequest(options);
         return;
     }
 
-    if (item.quantity > 1) {
-        const label = localize("dialog.title");
-        const quantity = await Dialog.wait(
-            {
-                title: label,
-                content: await renderTemplate(
-                    "systems/pf2e/templates/popups/item-transfer-dialog.hbs",
-                    {
-                        prompt: game.i18n.localize("PF2E.loot.MoveLootMessage"),
-                        quantity: item.quantity,
-                        lockStack: true,
-                        item,
-                    }
-                ),
-                buttons: {
-                    yes: {
-                        label,
-                        icon: "<i class='fa-regular fa-save'></i>",
-                        callback: ($html) => {
-                            const html = $html instanceof HTMLElement ? $html : $html[0];
-                            return (
-                                htmlQuery<HTMLInputElement>(html, "input[name='quantity']")
-                                    ?.valueAsNumber ?? 1
-                            );
-                        },
-                    },
-                },
-                close: () => null,
-                render: ($html) => {
-                    const html = $html instanceof HTMLElement ? $html : $html[0];
-
-                    htmlQuery(html, ".dialog-content .dialog-buttons")?.remove();
-
-                    addListener(
-                        html,
-                        "input",
-                        "keydown",
-                        (event, el) => {
-                            if (event.key === "Enter") {
-                                htmlQuery(html.nextElementSibling, "button")?.click();
-                            }
-                        },
-                        true
-                    );
-                },
-            },
-            { classes: ["dialog", "item-transfer"] }
-        );
-
-        if (!R.isNumber(quantity) || quantity <= 0) return;
-
-        options.quantity = quantity;
+    const data = await initiateTransfer({ item });
+    if (data) {
+        options.quantity = data.quantity;
+        droppethRequest(options);
     }
-
-    droppethRequest(options);
 }
 
 function onPreDeleteToken(token: TokenDocumentPF2e) {
@@ -359,12 +289,12 @@ function getDefaultData() {
 }
 
 type DroppethOptions = {
-    items: string[];
+    item: PhysicalItemPF2e;
     x: number;
     y: number;
     quantity?: number;
 };
 
-type DroppethPacket = DroppethOptions & { type: "drop" };
+type DroppethPacket = ExtractSocketOptions<DroppethOptions> & { type: "drop" };
 
 export { config as droppethTool };
