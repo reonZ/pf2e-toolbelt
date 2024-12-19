@@ -11,6 +11,7 @@ import {
     CompendiumBrowserIndexData,
     EquipmentFilters,
     ErrorPF2e,
+    ExtractSocketOptions,
     ItemPF2e,
     ItemTransferDialog,
     LootPF2e,
@@ -20,8 +21,7 @@ import {
     R,
     TokenDocumentPF2e,
     TokenPF2e,
-    TradeData,
-    TradePacket,
+    addItemsToActor,
     addListener,
     addListenerAll,
     arrayIncludes,
@@ -29,13 +29,13 @@ import {
     confirmDialog,
     createCallOrEmit,
     createHTMLElement,
-    createTradeMessage,
+    createTransferMessage,
     elementDataset,
     error,
     filterTraits,
     getHighestName,
     getInputValue,
-    giveItemToActor,
+    getTransferData,
     hasGMOnline,
     hasSufficientCoins,
     htmlClosest,
@@ -46,12 +46,13 @@ import {
     renderActorSheets,
     renderApplication,
     toggleSummaryElement,
+    updateTransferSource,
     userIsActiveGM,
     wrapperError,
 } from "module-helpers";
+import { ModuleMigration } from "module-helpers/dist/migration";
 import { createTool } from "../tool";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
-import { ModuleMigration } from "module-helpers/dist/migration";
 
 const INFINITY = "∞";
 
@@ -296,8 +297,8 @@ const {
         compareItemWithFilter,
     },
     migrations: [MIGRATION_225],
-    onSocket: (packet: TradePacket<"trade", BuyItemData>, userId: string) => {
-        if (packet.type === "trade") {
+    onSocket: (packet: BetterMerchantPacket, userId: string) => {
+        if (packet.type === "buy") {
             tradeRequest(packet);
         }
     },
@@ -327,7 +328,7 @@ const {
     },
 } as const);
 
-const tradeRequest = createCallOrEmit("trade", buyItem, socket);
+const tradeRequest = createCallOrEmit("buy", buyItem, socket);
 
 async function onCreateChatMessage(message: ChatMessagePF2e) {
     if (!userIsActiveGM()) return;
@@ -487,14 +488,14 @@ async function actorTransferItemToActor(
     ...args: ActorTransferItemArgs
 ): Promise<PhysicalItemPF2e | null | undefined> {
     const isGM = game.user.isGM;
-    const [target, item, quantity = 1] = args;
+    const [targetActor, item, quantity = 1] = args;
     const isParty = this.isOfType("party");
     const isCreature = this.isOfType("npc", "character");
 
     if (
-        !target.isOfType("loot") ||
-        !target.isMerchant ||
-        (!isGM && target.isOwner) ||
+        !targetActor.isOfType("loot") ||
+        !targetActor.isMerchant ||
+        (!isGM && targetActor.isOwner) ||
         (!isCreature && !isParty) ||
         (isCreature && !this.isOwner && !this.hasPlayerOwner) ||
         (isParty && !this.members.some((x) => x.hasPlayerOwner && x.isOwner))
@@ -503,41 +504,61 @@ async function actorTransferItemToActor(
         return undefined;
 
     const realQuantity = Math.min(quantity, item.quantity);
-    const itemFilter = testItem(target, item, "buy", realQuantity);
+    const itemFilter = testItem(targetActor, item, "buy", realQuantity);
 
     if (!itemFilter) {
         localize.warn("buy.refuse", {
-            actor: target.name,
+            actor: targetActor.name,
             item: item.name,
             quantity: realQuantity === 1 ? "" : `x${realQuantity}`,
         });
-        return null;
+    } else {
+        tradeRequest({
+            item,
+            targetActor,
+            quantity,
+            filterId: itemFilter.filter.id,
+            priceData: itemFilter.price.toObject(),
+        });
     }
 
-    tradeRequest({
-        item,
-        origin: this,
-        target,
-        quantity,
-        filterId: itemFilter.filter.id,
-        priceData: itemFilter.price.toObject(),
-    });
-
+    // we return null to signal we take over the process of the item transfer
     return null;
 }
 
-async function buyItem(data: BuyItemData, userId: string) {
-    const newItem = await giveItemToActor(data, userId);
-    if (!newItem) return null;
+async function buyItem(
+    { filterId, item, priceData, targetActor, quantity }: BuyItemOptions,
+    userId: string
+) {
+    const sendError = () => {
+        localize.error("buy.error", { user: game.users.get(userId)?.name ?? "unknown" });
+    };
 
-    const { filterId, priceData, target, origin, quantity = 1 } = data;
-    const filters = target ? getFilters(target as LootPF2e, "buy", true) : [];
+    const sourceActor = item.actor;
+    const filters = targetActor ? getFilters(targetActor as LootPF2e, "buy", true) : [];
     const filter = filters.find((x) => x.id === filterId);
 
-    if (!filter || !target.isOfType("loot") || !origin.isOfType("npc", "character", "party")) {
-        localize.error("buy.error", { user: game.users.get(userId)?.name ?? "unknown" });
-        return;
+    if (
+        !filter ||
+        !targetActor.isOfType("loot") ||
+        !sourceActor.isOfType("npc", "character", "party")
+    ) {
+        return sendError();
     }
+
+    const transferData = await getTransferData({ item, quantity });
+
+    if (!transferData) {
+        return sendError();
+    }
+
+    const items = await addItemsToActor({ ...transferData, targetActor });
+
+    if (!items) {
+        return sendError();
+    }
+
+    await updateTransferSource({ item, quantity: transferData.quantity });
 
     const updates = {};
     const defaultFilter = filters.pop()!;
@@ -555,20 +576,18 @@ async function buyItem(data: BuyItemData, userId: string) {
         setFlagProperty(updates, "filters.buy", filters);
     }
 
-    await target.update(updates);
-    await origin.inventory.addCoins(price);
+    await targetActor.update(updates);
+    await sourceActor.inventory.addCoins(price);
 
-    createTradeMessage({
-        origin,
-        target,
-        item: newItem,
-        quantity,
-        subtitle: "PF2E.loot.SellSubtitle",
-        message: "PF2E.loot.SellMessage",
+    createTransferMessage({
+        item: items.item,
+        sourceActor: item.actor,
+        targetActor,
+        quantity: transferData.quantity,
         userId,
+        subtitle: game.i18n.localize("PF2E.loot.SellSubtitle"),
+        message: "PF2E.loot.SellMessage",
     });
-
-    return newItem;
 }
 
 function itemPrepareDerivedData(this: ItemPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -1203,9 +1222,9 @@ function isValidServiceBuyer(actor: Maybe<ClientDocument>): actor is ActorPF2e {
 }
 
 async function sellService(
-    seller: TraderData,
+    seller: ServiceTradeData,
     serviceId: string,
-    { buyer, forceFree = false }: { buyer?: TraderData; forceFree?: boolean } = {}
+    { buyer, forceFree = false }: { buyer?: ServiceTradeData; forceFree?: boolean } = {}
 ) {
     if (!seller.actor?.isOfType("loot") || (buyer?.actor && !isValidServiceBuyer(buyer.actor)))
         return;
@@ -1936,8 +1955,6 @@ type LootSheetActionEvent =
     | "export-services"
     | "import-services";
 
-type BuyItemData = TradeData & { filterId: string; priceData: Coins };
-
 type ItemFilterType = "buy" | "sell";
 
 type ItemFilter = ItemFilterBuy | ItemFilterSell;
@@ -1962,7 +1979,7 @@ type ExtractedFilter<F extends ItemFilter = ItemFilter> = Omit<F, "ratio" | "pur
     purse: number;
 };
 
-type TraderData = {
+type ServiceTradeData = {
     actor: ActorPF2e;
     token?: TokenPF2e;
 };
@@ -2055,6 +2072,16 @@ type TemplateFilter = Omit<ExtractedFilter, "purse"> & {
     cannotUp: boolean;
     cannotDown: boolean;
 };
+
+type BuyItemOptions = {
+    filterId: string;
+    priceData: Coins;
+    targetActor: LootPF2e;
+    item: PhysicalItemPF2e<ActorPF2e>;
+    quantity: number;
+};
+
+type BetterMerchantPacket = ExtractSocketOptions<"buy", BuyItemOptions>;
 
 type BrowserData =
     | {
