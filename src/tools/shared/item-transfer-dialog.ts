@@ -23,7 +23,7 @@ function updateItemTransferDialog(
         questionElement.innerText = game.i18n.localize(message);
     }
 
-    htmlQuery(html, "[name='newStack']")?.parentElement?.remove();
+    htmlQuery(html, "[name='newStack']")?.remove();
 
     refreshApplicationHeight(app);
 }
