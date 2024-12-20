@@ -126,7 +126,7 @@ function onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData) {
 function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.RegisterCallback) {
     wrapped();
 
-    if (!isDroppethActor(this, true)) return;
+    if (!isPrimaryUpdater(this) || !isDroppethActor(this)) return;
 
     (async () => {
         const token = await getDroppethToken(this);
@@ -150,6 +150,13 @@ function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.Regi
     })();
 }
 
+function getDroppethFolder() {
+    return (
+        game.folders.getName("__Droppeth") ??
+        getDocumentClass("Folder").create({ name: "__Droppeth", type: "Actor" })
+    );
+}
+
 async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: string) {
     const scene = canvas.scene;
     if (!scene) {
@@ -169,9 +176,7 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         return;
     }
 
-    const folder =
-        game.folders.getName("__Droppeth") ??
-        (await getDocumentClass("Folder").create({ name: "__Droppeth", type: "Actor" }));
+    const folder = await getDroppethFolder();
 
     const tokenId = foundry.utils.randomID();
     const tokenUuid = `${scene.uuid}.Token.${tokenId}`;
@@ -266,22 +271,18 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
     });
 }
 
-function onPreDeleteToken(token: TokenDocumentPF2e) {
-    const actor = isDroppethToken(token);
+async function onPreDeleteToken(token: TokenDocumentPF2e) {
+    const actor = getDroppethActor(token);
     actor?.delete();
 }
 
-function isDroppethToken(token: TokenDocumentPF2e, primaryOnly?: boolean) {
+function getDroppethActor(token: TokenDocumentPF2e) {
     const actor = token.actor;
-    return isDroppethActor(actor, primaryOnly) ? actor : null;
+    return isDroppethActor(actor) ? actor : null;
 }
 
-function isDroppethActor(actor: Maybe<ActorPF2e>, primaryOnly?: boolean): actor is LootPF2e {
-    return (
-        !!actor?.isOfType("loot") &&
-        !!getFlag(actor, "temporary") &&
-        (!primaryOnly || isPrimaryUpdater(actor))
-    );
+function isDroppethActor(actor: Maybe<ActorPF2e>): actor is LootPF2e {
+    return !!actor?.isOfType("loot") && !!getFlag(actor, "temporary");
 }
 
 function getDroppethToken(actor: LootPF2e) {
