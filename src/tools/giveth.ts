@@ -13,10 +13,10 @@ import {
     isFriendActor,
     updateTransferSource,
 } from "module-helpers";
+import { globalSettings } from "../global";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";
-import { globalSettings } from "../global";
 
 const debouncedSetup = foundry.utils.debounce(setup, 1);
 
@@ -73,6 +73,9 @@ const { config, socket, settings, wrappers, hook, localize } = createTool({
             type: "MIXED",
         },
     ],
+    api: {
+        canDropEffectOnActor,
+    },
     onSocket: async (packet: GivethPacket, userId: string) => {
         switch (packet.type) {
             case "trade":
@@ -123,6 +126,14 @@ async function actorSheetHandleDroppedItem(
 
     giveEffectRequest({ data, actor });
     return [item];
+}
+
+function canDropEffectOnActor(item: ItemPF2e, actor: ActorPF2e) {
+    if (!item.isOfType("condition", "effect")) return false;
+    if (actor.isOwner) return true;
+
+    const setting = settings.effect;
+    return setting === "all" || (setting === "ally" && isFriendActor(actor));
 }
 
 function giveEffectToActor({ data, actor }: GiveEffectOptions) {
@@ -209,7 +220,10 @@ async function givethItem(
     });
 }
 
-type GiveEffectOptions = { data: DropCanvasItemDataPF2e; actor: ActorPF2e };
+type GiveEffectOptions = {
+    data: DropCanvasItemDataPF2e;
+    actor: ActorPF2e;
+};
 
 type GiveItemOptions = {
     item: PhysicalItemPF2e<ActorPF2e>;
