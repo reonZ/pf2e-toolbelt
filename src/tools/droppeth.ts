@@ -250,6 +250,8 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         withContent,
     });
 
+    if (!settings.message) return;
+
     createTransferMessage({
         sourceActor: item.actor,
         item: mainItem,

@@ -206,6 +206,8 @@ async function givethItem(
 
     await updateTransferSource({ item, quantity: transferData.quantity, withContent });
 
+    if (!settings.message) return;
+
     createTransferMessage({
         sourceActor: item.actor,
         targetActor,
