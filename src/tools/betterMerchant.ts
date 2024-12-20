@@ -31,12 +31,10 @@ import {
     createHTMLElement,
     createTransferMessage,
     elementDataset,
-    error,
     filterTraits,
     getHighestName,
     getInputValue,
     getTransferData,
-    hasGMOnline,
     hasSufficientCoins,
     htmlClosest,
     htmlQuery,
@@ -47,7 +45,6 @@ import {
     renderApplication,
     toggleSummaryElement,
     updateTransferSource,
-    userIsActiveGM,
     wrapperError,
 } from "module-helpers";
 import { ModuleMigration } from "module-helpers/dist/migration";
@@ -174,7 +171,7 @@ const {
     wrappers,
     localize,
     socket,
-    hooks,
+    hook,
     getFlag,
     setFlag,
     setFlagProperty,
@@ -249,10 +246,6 @@ const {
             event: "renderItemTransferDialog",
             listener: onRenderItemTransferDialog,
         },
-        {
-            event: "createChatMessage",
-            listener: onCreateChatMessage,
-        },
     ],
     wrappers: [
         {
@@ -298,8 +291,13 @@ const {
     },
     migrations: [MIGRATION_225],
     onSocket: (packet: BetterMerchantPacket, userId: string) => {
-        if (packet.type === "buy") {
-            tradeRequest(packet);
+        switch (packet.type) {
+            case "buy":
+                tradeRequest(packet);
+                break;
+            case "service":
+                serviceRequest(packet);
+                break;
         }
     },
     init: () => {
@@ -312,15 +310,13 @@ const {
     ready: (isGM) => {
         if (!settings.enabled) return;
 
-        hooks.renderItemTransferDialog.activate();
+        hook.activate();
 
         wrappers.lootSheetRenderInner.activate();
         wrappers.lootSheetListeners.activate();
 
         if (isGM) {
             socket.activate();
-
-            hooks.createChatMessage.activate();
 
             wrappers.browserOnFirstRender.activate();
             wrappers.browserOnClose.activate();
@@ -329,79 +325,7 @@ const {
 } as const);
 
 const tradeRequest = createCallOrEmit("buy", buyItem, socket);
-
-async function onCreateChatMessage(message: ChatMessagePF2e) {
-    if (!userIsActiveGM()) return;
-
-    const serviceFlag = getFlag<ServiceMsgFlag>(message, "service");
-    if (!serviceFlag) return;
-
-    const errorUpdate = () => {
-        const msgContent = createHTMLElement("div", { innerHTML: message.content });
-        const cardContent = htmlQuery(msgContent, ".card-content") ?? msgContent;
-        const errorMsg = localize("service.error");
-
-        cardContent.innerHTML = `<p class="pf2e-toolbelt-service-error">${errorMsg}</p>`;
-        message.update({ content: msgContent.innerHTML });
-    };
-
-    const buyer = await fromUuid(serviceFlag.buyerUUID);
-    const seller = await fromUuid(serviceFlag.sellerUUID);
-    if (!isInstanceOf(seller, "LootPF2e") || !isValidServiceBuyer(buyer)) {
-        return errorUpdate();
-    }
-
-    const services = getServices(seller);
-    const service = services.find((service) => service.id === serviceFlag.serviceId);
-    if (!service) {
-        return errorUpdate();
-    }
-
-    const serviceRatio = getServicesRatio(seller);
-    const originalPrice = getServicePrice(service);
-    const usedPrice = serviceFlag.forceFree
-        ? null
-        : serviceRatio === 1
-        ? originalPrice
-        : originalPrice.scale(serviceRatio);
-
-    if (!serviceFlag.forceFree) {
-        if (!serviceCanBePurchased(service)) {
-            return errorUpdate();
-        }
-
-        const price = usedPrice!;
-        const quantity = service.quantity ?? -1;
-
-        if (price.copperValue > 0) {
-            if (await buyer.inventory.removeCoins(price)) {
-                await seller.inventory.addCoins(price);
-            } else {
-                return await errorUpdate();
-            }
-        }
-
-        if (quantity > 0) {
-            service.quantity = quantity - 1;
-            await setServices(seller, services);
-        }
-    }
-
-    const macro = await getServiceMacro(service);
-    macro?.execute({
-        actor: buyer,
-        service: {
-            seller,
-            usedPrice,
-            serviceRatio,
-            originalPrice,
-            name: service.name ?? service.id,
-            level: service.level ?? 0,
-            quantity: service.quantity ?? -1,
-            forceFree: serviceFlag.forceFree,
-        },
-    } satisfies ServiceMacroData);
-}
+const serviceRequest = createCallOrEmit("service", sellService, socket);
 
 function onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
     const thisActor = app.item.actor;
@@ -1186,9 +1110,7 @@ function lootSheetPF2eActivateListeners(
                 const serviceId = htmlClosest(el, "[data-service-id]")?.dataset.serviceId;
 
                 if (serviceId) {
-                    await sellService({ actor }, serviceId, {
-                        forceFree: action === "give-service",
-                    });
+                    onBuyService({ actor }, serviceId, action === "give-service");
                 }
 
                 break;
@@ -1221,37 +1143,28 @@ function isValidServiceBuyer(actor: Maybe<ClientDocument>): actor is ActorPF2e {
     );
 }
 
-async function sellService(
-    seller: ServiceTradeData,
-    serviceId: string,
-    { buyer, forceFree = false }: { buyer?: ServiceTradeData; forceFree?: boolean } = {}
-) {
-    if (!seller.actor?.isOfType("loot") || (buyer?.actor && !isValidServiceBuyer(buyer.actor)))
-        return;
-
-    if (!hasGMOnline()) {
-        return error("tool.noGM");
-    }
+async function onBuyService(seller: ServiceTradeData, serviceId: string, forceFree: boolean) {
+    if (!seller.actor?.isOfType("loot")) return;
 
     const service = getService(seller.actor, serviceId);
     if (!service?.enabled) return;
 
-    if (!buyer) {
+    const buyer: ServiceTradeData | undefined = (() => {
         const selected = R.only(canvas.tokens.controlled);
 
         if (isValidServiceBuyer(selected?.actor)) {
-            buyer = { actor: selected.actor, token: selected };
+            return { actor: selected.actor, token: selected };
         } else {
             const character = game.user.character;
 
             if (isValidServiceBuyer(character)) {
-                buyer = { actor: character };
+                return { actor: character };
             }
         }
+    })();
 
-        if (!buyer) {
-            return localize.warn("service.noBuyer");
-        }
+    if (!buyer) {
+        return localize.warn("service.noBuyer");
     }
 
     const notifyData = {
@@ -1270,30 +1183,97 @@ async function sellService(
         return localize.warn("service.noFunds", notifyData);
     }
 
-    const msgTrader = forceFree ? seller : buyer;
-    const msgOptions: ServiceMsgOptions = {
-        token: msgTrader.token,
-        tradeMsg: localize("service", forceFree ? "give" : "buy", notifyData),
-        flags: {
-            buyerUUID: buyer.actor.uuid,
-            sellerUUID: seller.actor.uuid,
-            serviceId: service.id,
-            forceFree,
-        },
-    };
+    const trader = forceFree ? seller : buyer;
 
-    return serviceMessage(msgTrader.actor, service, seller.actor, msgOptions);
+    serviceRequest({
+        forceFree,
+        serviceId,
+        traderActor: trader.actor,
+        traderToken: trader.token,
+        sellerActor: seller.actor,
+    });
 }
 
-function serviceCanBePurchased(service: ServiceFlag): service is ServiceFlag {
-    return !!service.enabled && (service.quantity ?? -1) !== 0;
+async function sellService(
+    { traderActor, traderToken, sellerActor, serviceId, forceFree }: ServiceOptions,
+    userId: string
+) {
+    const sendError = () => {
+        localize.error("service.error");
+    };
+
+    if (!sellerActor.isOfType("loot") || !isValidServiceBuyer(traderActor)) {
+        return sendError();
+    }
+
+    const services = getServices(sellerActor);
+    const service = services.find((service) => service.id === serviceId);
+    if (!service) {
+        return sendError();
+    }
+
+    const serviceRatio = getServicesRatio(sellerActor);
+    const originalPrice = getServicePrice(service);
+    const usedPrice = forceFree
+        ? null
+        : serviceRatio === 1
+        ? originalPrice
+        : originalPrice.scale(serviceRatio);
+
+    if (!forceFree) {
+        if (!serviceCanBePurchased(service)) {
+            return sendError();
+        }
+
+        const price = usedPrice!;
+        const quantity = service.quantity ?? -1;
+
+        if (price.copperValue > 0) {
+            if (await traderActor.inventory.removeCoins(price)) {
+                await sellerActor.inventory.addCoins(price);
+            } else {
+                return sendError();
+            }
+        }
+
+        if (quantity > 0) {
+            service.quantity = quantity - 1;
+            await setServices(sellerActor, services);
+        }
+    }
+
+    const macro = await getServiceMacro(service);
+    macro?.execute({
+        actor: traderActor,
+        service: {
+            seller: sellerActor,
+            usedPrice,
+            serviceRatio,
+            originalPrice,
+            name: service.name ?? service.id,
+            level: service.level ?? 0,
+            quantity: service.quantity ?? -1,
+            forceFree: forceFree,
+        },
+    } satisfies ServiceMacroData);
+
+    const msgOptions: ServiceMsgOptions = {
+        token: traderToken,
+        tradeMsg: localize("service", forceFree ? "give" : "buy", {
+            buyer: getHighestName(traderActor),
+            seller: getHighestName(sellerActor),
+        }),
+        userId,
+    };
+
+    return serviceMessage(traderActor, service, sellerActor, msgOptions);
 }
 
 async function serviceMessage(
     actor: ActorPF2e,
     service: ServiceFlag,
     seller: LootPF2e,
-    { token, tradeMsg, flags }: ServiceMsgOptions = {}
+    { token, tradeMsg, userId }: ServiceMsgOptions = {}
 ) {
     token ??= actor.getActiveTokens(false, true).at(0);
 
@@ -1306,6 +1286,7 @@ async function serviceMessage(
     });
 
     const msgData: ChatMessageCreateData<ChatMessagePF2e> = {
+        author: userId ?? game.user.id,
         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
         content,
         speaker: ChatMessagePF2e.getSpeaker({
@@ -1314,11 +1295,11 @@ async function serviceMessage(
         }),
     };
 
-    if (flags) {
-        setFlagProperty(msgData, "service", flags);
-    }
-
     return ChatMessagePF2e.create(msgData);
+}
+
+function serviceCanBePurchased(service: ServiceFlag): service is ServiceFlag {
+    return !!service.enabled && (service.quantity ?? -1) !== 0;
 }
 
 async function exportServices(actor: LootPF2e, services: ServiceFlag[] = getServices(actor)) {
@@ -2002,17 +1983,10 @@ type ServicesExportRenderData = {
     hasMany: boolean;
 };
 
-type ServiceMsgFlag = {
-    buyerUUID: string;
-    sellerUUID: string;
-    serviceId: string;
-    forceFree: boolean;
-};
-
 type ServiceMsgOptions = {
     token?: TokenPF2e | TokenDocumentPF2e | null;
     tradeMsg?: string;
-    flags?: ServiceMsgFlag;
+    userId?: string;
 };
 
 type ServiceData = Required<ServiceFlag> & {
@@ -2081,7 +2055,17 @@ type BuyItemOptions = {
     quantity: number;
 };
 
-type BetterMerchantPacket = ExtractSocketOptions<"buy", BuyItemOptions>;
+type ServiceOptions = {
+    traderActor: ActorPF2e;
+    traderToken?: TokenPF2e | TokenDocumentPF2e;
+    sellerActor: LootPF2e;
+    serviceId: string;
+    forceFree: boolean;
+};
+
+type BetterMerchantPacket =
+    | ExtractSocketOptions<"buy", BuyItemOptions>
+    | ExtractSocketOptions<"service", ServiceOptions>;
 
 type BrowserData =
     | {
