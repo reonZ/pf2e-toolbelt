@@ -1,4 +1,4 @@
-#
+# 2.25.0
 
 -   this is a system `6.8.0` release
 -   the module now uses a migration manager
