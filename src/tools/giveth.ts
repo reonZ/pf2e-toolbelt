@@ -13,7 +13,7 @@ import {
     isFriendActor,
     updateTransferSource,
 } from "module-helpers";
-import { globalSettings } from "../global";
+import { globalSettings } from "./global";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 import { updateItemTransferDialog } from "./shared/item-transfer-dialog";

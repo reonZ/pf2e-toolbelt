@@ -18,7 +18,7 @@ import {
     updateTransferSource,
 } from "module-helpers";
 import { createTool } from "../tool";
-import { globalSettings } from "../global";
+import { globalSettings } from "./global";
 
 const DEFAULT_IMG = "systems/pf2e/icons/default-icons/backpack.svg";
 

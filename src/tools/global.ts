@@ -6,8 +6,8 @@ import {
     getTransferData,
     updateTransferSource,
 } from "module-helpers";
-import { createTool } from "./tool";
-import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./tools/shared/actor";
+import { createTool } from "../tool";
+import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 
 const { config, settings, wrapper, localize } = createTool({
     name: "global",
