@@ -70,6 +70,11 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
                 callback: actorOnEmbeddedDocumentChange,
             },
         ],
+        api: {
+            droppethRequest: (...args: Parameters<typeof droppethRequest>) => {
+                droppethRequest(...args);
+            },
+        },
         onSocket: async (packet: DroppethPacket, userId: string) => {
             switch (packet.type) {
                 case "drop":
