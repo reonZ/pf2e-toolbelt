@@ -25,10 +25,18 @@
             "spellcasting": {
                 "staff": "Kostur",
                 "charges": "Ładunki"
-            }
+            },
+            "sending": "Wysyłanie"
         },
         "settings": {
             "requiresReload": "(Wymaga przeładowania)",
+            "global": {
+                "title": "Ogólny",
+                "withContent": {
+                    "name": "Z zawartością pojemnika",
+                    "hint": "Kiedy pojemnik jest przenoszony z jednego aktora do drugiego, jego zawartość powinna być przenoszona razem z nim."
+                }
+            },
             "actionable": {
                 "title": "Wykonalne akcje",
                 "enabled": {
@@ -63,6 +71,34 @@
                 "message": {
                     "name": "Wyślij wiadomość na czat",
                     "hint": "Gdy przedmiot zostanie przekazany innemu aktorowi, wygenerowana zostanie wiadomość na czacie."
+                },
+                "effect": {
+                    "name": "Uwzględnienie efektów/stanów",
+                    "hint": "Czy gracze powinni mieć również możliwość zrzucania efektów i stanów na aktorów, których nie posiadają.",
+                    "choices": {
+                        "disabled": "Wyłączone",
+                        "ally": "Tylko sojusznicy",
+                        "all": "Wszyscy aktorzy"
+                    }
+                }
+            },
+            "droppeth": {
+                "title": "Upuszczanie",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Umożliwienie użytkownikom upuszczania elementów na płótnie poprzez przytrzymanie klawisza [Ctrl]."
+                },
+                "removeOnEmpty": {
+                    "name": "Usuń przy pustym",
+                    "hint": "Czy token i aktor powinni zostać usunięci, gdy nie ma już żadnych przedmiotów."
+                },
+                "light": {
+                    "name": "Źródło światła",
+                    "hint": "Czy upuszczony przedmiot powinien emitować światło. Będzie to miało miejsce tylko wtedy, gdy w aktorze łupów znajduje się pojedynczy przedmiot."
+                },
+                "message": {
+                    "name": "Wyślij wiadomość na czat",
+                    "hint": "Gdy przedmioty zostaną upuszczone przez aktora, zostanie wygenerowana wiadomość na czacie."
                 }
             },
             "heroActions": {
@@ -276,6 +312,13 @@
         "tool": {
             "noGM": "Nie ma żadnego MG połączonego z twoim światem, ta operacja nie może zostać przetworzona."
         },
+        "global": {
+            "withContent": {
+                "error": {
+                    "unknown": "Wystąpił błąd podczas próby przeniesienia pojemnika."
+                }
+            }
+        },
         "arp": {
             "forceVariant": "Moduł <strong>PF2e Toolbelt</strong> wyłączył wariant systemu pf2e dla reguły ABP, aby działał poprawnie. Prawdopodobnie byłoby lepiej, gdybyś przeładował teraz świat."
         },
@@ -283,11 +326,38 @@
             "error": {
                 "zero": "Nie możesz podarować przedmiotu, którego nie posiadasz.",
                 "withQty": "Przekazuje {qty} {item} do <strong>{target}</strong>.",
-                "withoutQty": "Przekazuje {item} do <strong>{target}</strong>."
+                "withoutQty": "Przekazuje {item} do <strong>{target}</strong>.",
+                "unknown": "Coś poszło nie tak podczas próby przekazania wybranych przedmiotów."
             },
-            "subtitle": "Przekaż przedmiot",
-            "question": "Ile przedmiotów chcesz przekazać?",
-            "trade": "{giver} przekazuje {quantity} × {item} do {recipient}."
+            "dialog": {
+                "title": "Przekaż przedmiot",
+                "prompt": "Ile przedmiotów chcesz przekazać?"
+            },
+            "message": {
+                "subtitle": "Przekaż przedmiot",
+                "content": {
+                    "item": "{source} przekazuje {quantity} × {item} do {target}.",
+                    "container": "{source} przekazuje {item} i całą jego zawartość do {target}."
+                }
+            }
+        },
+        "droppeth": {
+            "dialog": {
+                "title": "Upuszczanie przedmiotu",
+                "prompt": "Ile przedmiotów chcesz upuścić?"
+            },
+            "error": {
+                "out-of-bounds": "Nie można utworzyć tokena w tej lokalizacji.",
+                "unknown": "Coś poszło nie tak podczas próby upuszczenia wybranych przedmiotów.",
+                "no-scene": "Nie jest dostępna żadna scena."
+            },
+            "message": {
+                "subtitle": "Upuszczanie przedmiotu",
+                "content": {
+                    "item": "Upuszczono {quantity} × {item} na ziemię przez {source}.",
+                    "container": "Upuszczono {item} i całą jego zawartość przez {source}."
+                }
+            }
         },
         "heroActions": {
             "sheet": {
@@ -345,7 +415,11 @@
                 "drawn": "Wylosował ({nb}) Akcję Heroiczną",
                 "given": "Podarował ({nb}) Akcję Heroiczną",
                 "discarded": "Odrzucił ({nb}) Akcję Heroiczną",
-                "used": "Wydaje punkt bohaterstwa, aby użyć",
+                "used": {
+                    "heroPoints": "Punkt Bohaterstwa",
+                    "mythicPoints": "Punkt Mityczny",
+                    "message": "Wydaje {type} na użycie"
+                },
                 "exchanged": "Wymieniono Akcję Heroiczną z {name}",
                 "offer": "Oferowane: {offer}",
                 "receive": "Otrzymano: {receive}"
@@ -485,9 +559,10 @@
                 }
             },
             "browserPull": {
+                "title": "Dodaj przedmioty - {name}",
                 "selected": "Wybrane",
                 "add": "Dodaj do kupca",
-                "all": "Wybierz wszystko",
+                "all": "Przełącz wszystkie",
                 "limit": "Osiągnąłeś limit!",
                 "wait": "Poczekaj na przetworzenie przedmiotów.",
                 "finished": "Zakończono dodawanie przedmiotów do aktora kupca.",
@@ -523,7 +598,8 @@
                 },
                 "ratio": {
                     "label": "Współczynnik ceny",
-                    "tooltip": "Współczynnik ceny dla tego filtra"
+                    "tooltip": "Współczynnik ceny dla tego filtra",
+                    "treasure": "Skarby przechodzące przez ten filtr będą zawsze kupowane za 100% ich ceny"
                 },
                 "purse": {
                     "label": "Fundusze",
