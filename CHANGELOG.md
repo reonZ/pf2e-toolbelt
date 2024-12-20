@@ -5,8 +5,8 @@
     -   the main GM will be asked to migrate on load
     -   if the system is migrating data, make sure to wait until it is done before starting
 -   add new/first `With Container Content` global setting
-    -   when enabled, moving a container to another actor will be accompagned by its entire content
-    -   will not interfere with any transation related to merchants
+    -   when enabled, moving a container to another actor will be accompanied by its entire content
+    -   will not interfere with any transaction related to merchants
 -   add `Droppeth` section:
     -   this new feature allows any user to drop items directly onto the ground by holding the `[Ctrl]` key before starting to drag
     -   a `Loot` actor & token are automatically created to host the dropped item
