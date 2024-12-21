@@ -141,7 +141,11 @@ function actorOnEmbeddedDocumentChange(this: ActorPF2e, wrapped: libWrapper.Regi
             return;
         }
 
-        const onlyItem = R.only(this.inventory.contents);
+        const onlyItem = R.pipe(
+            this.inventory.contents,
+            R.filter((item) => !item.isInContainer),
+            R.only()
+        );
         const { img, name } = onlyItem ?? getDefaultData();
 
         const tokenUpdate: Record<string, any> = { "texture.src": img, name };
