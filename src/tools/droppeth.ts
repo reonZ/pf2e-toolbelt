@@ -193,7 +193,6 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         folder: folder?.id,
         items: [transferData.itemSource, ...transferData.contentSources],
         img,
-        ownership: { default: CONST.USER_ROLES.ASSISTANT },
     };
 
     setFlagProperty(actorSource, "temporary", true);
