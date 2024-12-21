@@ -1,3 +1,9 @@
+# 2.25.1
+
+-   `Global`:
+    -   fix players not being able to transfer a container and its content to a `loot` actor
+    -   fix duplicating items when a player would transfer a container and its content out of a `loot` actor
+
 # 2.25.0
 
 -   this is a system `6.8.0` release
