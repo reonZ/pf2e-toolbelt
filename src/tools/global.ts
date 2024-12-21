@@ -1,15 +1,18 @@
 import {
     ActorPF2e,
     ContainerPF2e,
+    ExtractSocketOptions,
     PhysicalItemPF2e,
     addItemsToActor,
+    createCallOrEmit,
     getTransferData,
     updateTransferSource,
+    userIsGM,
 } from "module-helpers";
 import { createTool } from "../tool";
 import { ACTOR_TRANSFER_ITEM_TO_ACTOR } from "./shared/actor";
 
-const { config, settings, wrapper, localize } = createTool({
+const { config, settings, wrapper, localize, socket } = createTool({
     name: "global",
     settings: [
         {
@@ -17,7 +20,7 @@ const { config, settings, wrapper, localize } = createTool({
             type: Boolean,
             default: false,
             onChange: (value: boolean) => {
-                wrapper.toggle(value);
+                setup();
             },
         },
     ],
@@ -29,16 +32,33 @@ const { config, settings, wrapper, localize } = createTool({
             priority: -100,
         },
     ],
-    init: () => {
-        wrapper.toggle(settings.withContent);
+    onSocket: async (packet: GlobalPack, userId: string) => {
+        switch (packet.type) {
+            case "withContent":
+                withContentRequest(packet, userId);
+                break;
+        }
     },
+    init: setup,
 } as const);
+
+const withContentRequest = createCallOrEmit("withContent", withContent, socket);
+
+function setup() {
+    const isGM = userIsGM();
+    const withContent = settings.withContent;
+
+    wrapper.toggle(withContent);
+    socket.toggle(withContent && isGM);
+}
 
 async function actorTransferItemToActor(
     this: ActorPF2e,
     ...args: ActorTransferItemArgs
 ): Promise<PhysicalItemPF2e<ActorPF2e> | null | undefined> {
     const [targetActor, item] = args;
+    const isLoot = this.isOfType("loot");
+    const targetIsLoot = targetActor.isOfType("loot");
 
     if (
         item.isOfType("backpack") &&
@@ -46,22 +66,21 @@ async function actorTransferItemToActor(
         item.contents.size > 0 &&
         this.canUserModify(game.user, "update") &&
         targetActor.canUserModify(game.user, "update") &&
-        (!this.isOfType("loot") || !this.isMerchant) &&
-        (!targetActor.isOfType("loot") || !targetActor.isMerchant)
+        (!isLoot || !this.isMerchant) &&
+        (!targetIsLoot || !targetActor.isMerchant)
     ) {
-        giveItem({ item, targetActor });
+        if (!game.user.isGM && (isLoot || targetIsLoot)) {
+            withContentRequest({ item, targetActor });
+        } else {
+            withContent({ item, targetActor });
+        }
+
         // we return null to signal we took over the process
         return null;
     }
 }
 
-async function giveItem({
-    item,
-    targetActor,
-}: {
-    item: ContainerPF2e<ActorPF2e>;
-    targetActor: ActorPF2e;
-}) {
+async function withContent({ item, targetActor }: WithContentOptions) {
     const transferData = await getTransferData({ item, quantity: 1, withContent: true });
 
     if (!transferData) {
@@ -78,5 +97,12 @@ async function giveItem({
 
     await updateTransferSource({ item, quantity: 1, withContent: true });
 }
+
+type WithContentOptions = {
+    item: ContainerPF2e<ActorPF2e>;
+    targetActor: ActorPF2e;
+};
+
+type GlobalPack = ExtractSocketOptions<"withContent", WithContentOptions>;
 
 export { config as GlobalTool, settings as globalSettings };
