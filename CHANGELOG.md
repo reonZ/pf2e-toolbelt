@@ -1,3 +1,10 @@
+# 2.25.2
+
+-   `Droppeth`:
+    -   only count root items (exclude items inside containers) when it comes to check if a single item exists in a droppeth actor's inventory
+-   `Stances`:
+    -   always removes old stances before adding the new one (or non at all)
+
 # 2.25.1
 
 -   `Global`:
