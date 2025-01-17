@@ -1316,6 +1316,13 @@ async function rollSaves(
 
                         updates[target.id] = data;
 
+                        Hooks.callAll("pf2e-toolbelt.rollSave", {
+                            roll,
+                            message,
+                            target,
+                            data,
+                        } satisfies RollSaveHook);
+
                         resolve();
                     },
                 } satisfies StatisticRollParameters & { event: Event };
@@ -1471,6 +1478,15 @@ async function rerollSave(
             modifier: 10,
         });
     }
+
+    Hooks.callAll("pf2e-toolbelt.rerollSave", {
+        oldRoll,
+        newRoll,
+        keptRoll,
+        message,
+        target,
+        data,
+    } satisfies RerollSaveHook);
 
     if (game.user.isGM || message.isAuthor) {
         setFlag(message, "saves", target.id, data);
@@ -1932,6 +1948,22 @@ type MessageData = {
     hasTargets: boolean;
     hasSplashTargets: boolean;
     splashIndex: number;
+};
+
+type RollSaveHook = {
+    roll: Rolled<CheckRoll>;
+    message: ChatMessagePF2e;
+    target: TokenDocumentPF2e;
+    data: MessageTargetSave;
+};
+
+type RerollSaveHook = {
+    oldRoll: Rolled<CheckRoll>;
+    newRoll: Rolled<CheckRoll>;
+    keptRoll: Rolled<CheckRoll>;
+    message: ChatMessagePF2e;
+    target: TokenDocumentPF2e;
+    data: MessageTargetSave;
 };
 
 export {
