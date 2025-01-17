@@ -1,3 +1,10 @@
+# 2.26.0
+
+-   `Use Button`:
+    -   add an extra flavor text for consumables `use` to make it more obvious
+-   `Target Helper`:
+    -   add two custom hooks when a save is rolled/rerolled
+
 # 2.25.2
 
 -   `Droppeth`:
