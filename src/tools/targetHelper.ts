@@ -1319,6 +1319,7 @@ async function rollSaves(
                         Hooks.callAll("pf2e-toolbelt.rollSave", {
                             roll,
                             message,
+                            rollMessage: msg,
                             target,
                             data,
                         } satisfies RollSaveHook);
@@ -1953,6 +1954,7 @@ type MessageData = {
 type RollSaveHook = {
     roll: Rolled<CheckRoll>;
     message: ChatMessagePF2e;
+    rollMessage: ChatMessagePF2e;
     target: TokenDocumentPF2e;
     data: MessageTargetSave;
 };
