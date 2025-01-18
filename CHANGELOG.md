@@ -1,3 +1,8 @@
+# 2.26.1
+
+-   `Target Helper`:
+    -   add the roll message in the `pf2e-toolbelt.rollSave` hook
+
 # 2.26.0
 
 -   `Use Button`:
