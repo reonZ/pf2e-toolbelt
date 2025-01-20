@@ -1,3 +1,8 @@
+# 2.26.2
+
+-   `Target Helper`:
+    -   fix dropped inline checks not accounting for `adjustment`
+
 # 2.26.1
 
 -   `Target Helper`:
