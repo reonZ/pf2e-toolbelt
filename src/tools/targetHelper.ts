@@ -824,8 +824,11 @@ function isValidCheckLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorEle
     dataset: CheckLinkData;
 } {
     if (!(el instanceof HTMLAnchorElement) || !el.classList.contains("inline-check")) return false;
-    const { pf2Dc, against, itemUuid, pf2Check } = el.dataset;
-    return (!!pf2Dc || !!(against && itemUuid)) && SAVE_TYPES.includes(pf2Check as SaveType);
+    const { pf2Dc, against, itemUuid, pf2Check, rollerRole } = el.dataset;
+    return (
+        ((rollerRole !== "origin" && !!pf2Dc) || !!(against && itemUuid)) &&
+        SAVE_TYPES.includes(pf2Check as SaveType)
+    );
 }
 
 let BASIC_SAVE_REGEX: RegExp;
@@ -833,14 +836,17 @@ function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): Sa
     const dataset = el.dataset;
 
     const dc = (() => {
+        const adjustment = Number(dataset.pf2Adjustment) || 0;
+
         if ("pf2Dc" in dataset) {
-            return Number(dataset.pf2Dc);
+            return Number(dataset.pf2Dc) + adjustment;
         }
 
         const actor = fromUuidSync<ItemPF2e>(dataset.itemUuid)?.actor;
-        if (!actor) return;
+        const statisticDc = actor?.getStatistic(dataset.against)?.dc.value;
+        if (!statisticDc) return;
 
-        return actor.getStatistic(dataset.against)?.dc.value;
+        return statisticDc + adjustment;
     })();
 
     if (dc == null || isNaN(dc)) return null;
@@ -864,7 +870,7 @@ function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): Sa
         dc,
         basic: false,
         item: item?.uuid,
-        statistic: dataset.pf2Check as SaveType,
+        statistic: dataset.pf2Check,
         options: splitListString(dataset.pf2RollOptions ?? ""),
         traits: splitListString(dataset.pf2Traits ?? ""),
     };
@@ -1880,10 +1886,13 @@ type MessageFlag = {
     splashTargets?: string[];
 };
 
-type CheckLinkData = { pf2Check: SaveType } & (
-    | { against: string; itemUuid: string }
-    | { pf2Dc: StringNumber }
-);
+type CheckLinkData = {
+    pf2Check: SaveType;
+    pf2Adjustment?: StringNumber;
+    pf2RollOptions?: string;
+    pf2Traits?: string;
+    isBasic?: boolean;
+} & ({ against: string; itemUuid: string } | { pf2Dc: StringNumber });
 
 type TargetSaveResult = Omit<MessageTargetSave, "notes"> & {
     canReroll: boolean;
