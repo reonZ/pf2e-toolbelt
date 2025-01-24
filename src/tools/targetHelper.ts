@@ -1,5 +1,4 @@
 import {
-    AbilityTrait,
     ActorPF2e,
     CharacterPF2e,
     ChatMessagePF2e,
@@ -32,6 +31,7 @@ import {
     firstElementWithText,
     getActiveModule,
     getChoiceSetSelection,
+    getExtraRollOptions,
     getItemChatTraits,
     htmlClosest,
     htmlQuery,
@@ -1238,17 +1238,6 @@ function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
     addSetTargetsListener(btnElement, message);
 
     return btnElement;
-}
-
-function getExtraRollOptions(msgFlag: MessageFlag) {
-    const maybeTraits = msgFlag.traits ?? [];
-    const additionalTraits = maybeTraits.filter(
-        (t): t is AbilityTrait => t in CONFIG.PF2E.actionTraits
-    );
-
-    return R.unique(
-        [maybeTraits, additionalTraits.map((t) => `item:trait:${t}`), msgFlag.options ?? []].flat()
-    );
 }
 
 async function rollSaves(
