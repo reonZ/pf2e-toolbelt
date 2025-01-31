@@ -1,3 +1,9 @@
+# 2.27.0
+
+-   this is a system `6.8.5` update
+-   `No Bulk`:
+    -   fix actor breaking error du to latest system changes
+
 # 2.26.2
 
 -   `Target Helper`:
