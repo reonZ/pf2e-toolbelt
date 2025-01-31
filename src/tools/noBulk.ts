@@ -55,7 +55,7 @@ function actorPrepareEmbeddedDocuments(this: ActorPF2e, wrapped: libWrapper.Regi
                         (item) =>
                             !item.isInContainer && item.system.equipped.carryType !== "dropped"
                     ),
-                    this.actor.size
+                    this.actor
                 );
 
                 return _value;
