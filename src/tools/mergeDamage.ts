@@ -18,6 +18,7 @@ import {
     getActiveModule,
     getDamageRollClass,
     htmlQuery,
+    htmlQueryAll,
     latestChatMessages,
     refreshLatestMessages,
 } from "module-helpers";
@@ -299,8 +300,9 @@ async function mergeDamages(message: ChatMessagePF2e, otherMessage: ChatMessageP
             results: [],
         });
 
-        if (notes && !group.notes.includes(notes)) {
-            group.notes.push(notes);
+        for (const note of notes) {
+            if (group.notes.includes(note)) continue;
+            group.notes.push(note);
         }
 
         const exists = group.results.find(
@@ -389,8 +391,10 @@ function getMessageData(message: ChatMessagePF2e): MessageData[] {
     const flavor = createHTMLElement("div", { innerHTML: message.flavor });
     const tags = flavor.querySelector(":scope > h4.action + .tags")?.outerHTML.trim() ?? "";
     const modifiers = flavor.querySelector(":scope > .tags.modifiers")?.outerHTML.trim() ?? "";
-    const notes = flavor.querySelector(":scope > .notes")?.outerHTML.trim() ?? "";
     const options = sourceFlag.context.options.filter((option) => /^(item|self):/.test(option));
+    const notes = htmlQueryAll(flavor, ":scope > .notes > .roll-note").map((x) =>
+        x.outerHTML.trim()
+    );
 
     return [
         {
@@ -450,7 +454,7 @@ type MessageGroup = {
 type MessageData = {
     source: PreCreate<ChatMessageSourcePF2e>;
     name: string;
-    notes: string;
+    notes: string[];
     outcome: DegreeOfSuccessString | null;
     options: string[];
     modifiers: string;

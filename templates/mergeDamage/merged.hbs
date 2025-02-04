@@ -14,7 +14,13 @@
         </h4>
         {{{result.modifiers}}}
         {{/each}}
-        {{{group.notes}}}
+        {{#if group.notes.length}}
+        <ul class="notes">
+            {{#each group.notes as |note|}}
+            {{{note}}}
+            {{/each}}
+        </ul>
+        {{/if}}
     </div>
 </div>
 {{/each}}
