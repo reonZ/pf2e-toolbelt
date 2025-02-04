@@ -738,7 +738,7 @@ class BrowserPullMenu extends foundry.applications.api.ApplicationV2 {
         position: {
             width: 600,
         },
-        classes: ["pf2e-hud-browserPull"],
+        classes: ["pf2e-toolbelt-better-merchant-browserPull"],
     };
 
     constructor(
@@ -1388,7 +1388,7 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
             submitOnChange: true,
             closeOnSubmit: false,
         },
-        classes: ["pf2e-hud-service"],
+        classes: ["pf2e-toolbelt-better-merchant-service"],
         actions: {
             export: this.#export,
         },
@@ -1656,7 +1656,7 @@ class FiltersMenu extends foundry.applications.api.ApplicationV2 {
     #actor: LootPF2e;
 
     static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
-        classes: ["pf2e-hud-filters"],
+        classes: ["pf2e-toolbelt-better-merchant-filters"],
     };
 
     constructor(actor: LootPF2e, options: DeepPartial<ApplicationConfiguration> = {}) {
