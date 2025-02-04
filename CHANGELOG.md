@@ -1,8 +1,23 @@
+# 2.28.0
+
+-   `Droppeth`:
+    -   add `Droppeth Modifier` keybind
+        -   allow you to change the key that needs to be held to drop an item on the ground
+-   `Merge Damages`:
+    -   significantly improve the handling of damage notes
+        -   it should now avoid duplication of notes even in more complex cases
+        -   improve styling of notes in chat message
+        -   fix awkward "comma" character sometimes showing between notes
+-   `Target Helper`:
+    -   remove the select icon from target headers
+        -   clicking on the target header replace that functionality (double click to open the sheet included)
+        -   players can now also use it
+
 # 2.27.0
 
 -   this is a system `6.8.5` update
 -   `No Bulk`:
-    -   fix actor breaking error du to latest system changes
+    -   fix actor breaking error due to latest system changes
 
 # 2.26.2
 
