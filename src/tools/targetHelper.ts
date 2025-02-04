@@ -791,11 +791,7 @@ async function addChatMessageListeners(
             target.actor?.sheet._onDrop(event);
         });
 
-        addListener(targetElement, "[data-action='ping-target']", () => {
-            canvas.ping(target.center);
-        });
-
-        addListener(targetElement, "[data-action='select-target']", (event) => {
+        targetElement.addEventListener("click", () => {
             const now = Date.now();
             const dt = now - lastClickTime;
 
@@ -808,12 +804,19 @@ async function addChatMessageListeners(
             target.object?.control({ releaseOthers: true });
         });
 
+        addListener(targetElement, "[data-action='ping-target']", (event) => {
+            event.stopPropagation();
+            canvas.ping(target.center);
+        });
+
         if (save) {
             addListener(targetElement, "[data-action='roll-save']", (event) => {
+                event.stopPropagation();
                 rollSaves(event, message, save, [target]);
             });
 
             addListener(targetElement, "[data-action='reroll-save']", (event) => {
+                event.stopPropagation();
                 rerollSave(event, message, save, target);
             });
         }
