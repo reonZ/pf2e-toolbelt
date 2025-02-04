@@ -28,6 +28,14 @@
             },
             "sending": "Sending"
         },
+        "keybindings": {
+            "droppeth": {
+                "droppeth": {
+                    "name": "Droppeth Modifier",
+                    "hint": "Key held when dropping an item on the ground."
+                }
+            }
+        },
         "settings": {
             "requiresReload": "(Requires Reload)",
             "global": {

@@ -377,6 +377,7 @@ type ToolConfig = {
               >[1];
           }
     )[];
+    keybinds?: KeybindingActionConfig[];
     api?: Record<string, Function>;
     migrations?: ModuleMigration[];
     init?: (isGM: boolean) => void;

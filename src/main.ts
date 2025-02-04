@@ -95,6 +95,17 @@ const TOOLS: ToolConfig[] = [
 Hooks.once("init", () => {
     const isGM = userIsGM();
 
+    for (const { name: toolName, keybinds } of TOOLS) {
+        for (const keybind of keybinds ?? []) {
+            const name = keybind.name;
+            game.keybindings.register(MODULE.id, name, {
+                ...keybind,
+                name: MODULE.path("keybindings", toolName, name, "name"),
+                hint: MODULE.path("keybindings", toolName, name, "hint"),
+            });
+        }
+    }
+
     registerToolsSettings(TOOLS, isGM);
 
     const module = MODULE.current;

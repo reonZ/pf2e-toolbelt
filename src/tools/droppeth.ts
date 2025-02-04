@@ -20,6 +20,8 @@ import {
 import { createTool } from "../tool";
 import { globalSettings } from "./global";
 
+let DROPPETH = false;
+
 const DEFAULT_IMG = "systems/pf2e/icons/default-icons/backpack.svg";
 
 const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProperty } = createTool(
@@ -70,6 +72,18 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
                 callback: actorOnEmbeddedDocumentChange,
             },
         ],
+        keybinds: [
+            {
+                name: "droppeth",
+                editable: [{ key: "ControlLeft", modifiers: [] }],
+                onDown: () => {
+                    DROPPETH = true;
+                },
+                onUp: () => {
+                    DROPPETH = false;
+                },
+            },
+        ],
         api: {
             droppethRequest: (...args: Parameters<typeof droppethRequest>) => {
                 droppethRequest(...args);
@@ -95,12 +109,7 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
 const droppethRequest = createCallOrEmit("drop", droppethItem, socket);
 
 function onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData) {
-    if (
-        data.type !== "Item" ||
-        !R.isString(data.uuid) ||
-        !game.keyboard.isModifierActive("Control")
-    )
-        return true;
+    if (!DROPPETH || data.type !== "Item" || !R.isString(data.uuid)) return true;
 
     const item = fromUuidSync<ItemPF2e>(data.uuid);
     if (!item || !itemIsOfType(item, "physical")) return true;
