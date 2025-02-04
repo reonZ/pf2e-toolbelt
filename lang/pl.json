@@ -28,6 +28,14 @@
             },
             "sending": "Wysyłanie"
         },
+        "keybindings": {
+            "droppeth": {
+                "droppeth": {
+                    "name": "Upuszczanie modyfikatora",
+                    "hint": "Przytrzymywany klawisz podczas upuszczania przedmiotu na ziemię."
+                }
+            }
+        },
         "settings": {
             "requiresReload": "(Wymaga przeładowania)",
             "global": {
