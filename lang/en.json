@@ -751,7 +751,7 @@
         },
         "conditionManager": {
             "manager": {
-                "title": "{name} - Condition Manager",
+                "title": "Condition Manager - {name}",
                 "add": "Create",
                 "cancel": "Cancel"
             }

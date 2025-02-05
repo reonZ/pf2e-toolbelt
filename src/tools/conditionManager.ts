@@ -54,7 +54,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     #actor: ActorPF2e;
     #condition: ConditionPF2e;
     #data: ConditionManagerData;
-    #counter: number;
+    #counter: { value: number; default: number } | undefined;
 
     static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
         classes: ["pf2e-toolbelt-condition-manager"],
@@ -65,13 +65,14 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         options: DeepPartial<ApplicationConfiguration> = {}
     ) {
         options.window ??= {};
-        options.window.title = localize("manager.title", { name: condition.name });
+        options.window.title = localize("manager.title", { name: condition._source.name });
 
         super(options);
 
         this.#actor = condition.actor;
+
         this.#condition = condition.clone();
-        this.#counter = condition.system.value.isValued ? condition.system.value.value ?? 1 : 0;
+
         this.#data = {
             unidentified: false,
             duration: {
@@ -80,6 +81,13 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                 value: 1,
             },
         };
+
+        this.#counter = condition.system.value.isValued
+            ? {
+                  value: condition.system.value.value ?? 1,
+                  default: condition.system.value.value ?? 1,
+              }
+            : undefined;
     }
 
     async close(options: ApplicationClosingOptions = {}): Promise<this> {
@@ -125,12 +133,12 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             inMemoryOnly: true,
         };
 
-        if (condition.system.value.isValued && this.#counter > 1) {
+        if (this.#counter && this.#counter.value > 1) {
             rule.alterations = [
                 {
                     mode: "override",
                     property: "badge-value",
-                    value: this.#counter,
+                    value: this.#counter.value,
                 },
             ];
         }
@@ -181,7 +189,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             "[name='system.duration.value']",
             "change",
             (event, el: HTMLInputElement) => {
-                this.#data.duration.value = Math.max(el.valueAsNumber, 0);
+                this.#data.duration.value = Math.max(el.valueAsNumber || 0, 0);
                 this.render();
             }
         );
@@ -200,7 +208,12 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             "[name='system.badge.value']",
             "change",
             (event, el: HTMLInputElement) => {
-                this.#counter = Math.max(el.valueAsNumber, 1);
+                const value = el.valueAsNumber;
+
+                this.#counter!.value = isNaN(value)
+                    ? this.#counter!.default
+                    : Math.max(el.valueAsNumber, 1);
+
                 this.render();
             }
         );
@@ -235,7 +248,7 @@ type ConditionManagerContext = {
     isGM: boolean;
     data: ConditionManagerData;
     timeUnits: typeof CONFIG.PF2E.timeUnits;
-    counter: number | null;
+    counter: { value: number; default: number } | undefined;
     expiryOptions: {
         value: string;
         label: string;

@@ -3,7 +3,8 @@
     <div class="form-group">
         <label>{{localize 'PF2E.Item.Effect.Badge.Type.counter'}}</label>
         <div class="form-fields">
-            <input type="number" name="system.badge.value" value="{{counter}}" />
+            <input type="number" name="system.badge.value" value="{{counter.value}}"
+                placeholder="{{counter.default}}" />
         </div>
     </div>
     {{/if}}
