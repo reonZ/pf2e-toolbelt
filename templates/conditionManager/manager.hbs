@@ -1,4 +1,12 @@
 <div class="standard-form">
+    {{#if counter}}
+    <div class="form-group">
+        <label>{{localize 'PF2E.Item.Effect.Badge.Type.counter'}}</label>
+        <div class="form-fields">
+            <input type="number" name="system.badge.value" value="{{counter}}" />
+        </div>
+    </div>
+    {{/if}}
     <div class="form-group">
         <label>{{localize "PF2E.Time.Duration"}}</label>
         {{> systems/pf2e/templates/items/partials/duration.hbs base="system.duration"

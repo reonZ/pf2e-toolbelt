@@ -54,6 +54,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     #actor: ActorPF2e;
     #condition: ConditionPF2e;
     #data: ConditionManagerData;
+    #counter: number;
 
     static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
         classes: ["pf2e-toolbelt-condition-manager"],
@@ -70,6 +71,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 
         this.#actor = condition.actor;
         this.#condition = condition.clone();
+        this.#counter = condition.system.value.isValued ? condition.system.value.value ?? 1 : 0;
         this.#data = {
             unidentified: false,
             duration: {
@@ -90,6 +92,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             isGM: game.user.isGM,
             data: this.#data,
             timeUnits: CONFIG.PF2E.timeUnits,
+            counter: this.#counter,
             expiryOptions: [
                 { value: "turn-start", label: "PF2E.Item.Effect.Expiry.StartOfTurn" },
                 { value: "turn-end", label: "PF2E.Item.Effect.Expiry.EndOfTurn" },
@@ -122,12 +125,12 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             inMemoryOnly: true,
         };
 
-        if (condition.system.value.isValued && condition.system.value.value > 1) {
+        if (condition.system.value.isValued && this.#counter > 1) {
             rule.alterations = [
                 {
                     mode: "override",
                     property: "badge-value",
-                    value: condition.system.value.value,
+                    value: this.#counter,
                 },
             ];
         }
@@ -178,7 +181,8 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             "[name='system.duration.value']",
             "change",
             (event, el: HTMLInputElement) => {
-                this.#data.duration.value = el.valueAsNumber;
+                this.#data.duration.value = Math.max(el.valueAsNumber, 0);
+                this.render();
             }
         );
 
@@ -188,6 +192,16 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             "change",
             (event, el: HTMLInputElement) => {
                 this.#data.unidentified = el.checked;
+            }
+        );
+
+        addListener(
+            html,
+            "[name='system.badge.value']",
+            "change",
+            (event, el: HTMLInputElement) => {
+                this.#counter = Math.max(el.valueAsNumber, 1);
+                this.render();
             }
         );
 
@@ -221,6 +235,7 @@ type ConditionManagerContext = {
     isGM: boolean;
     data: ConditionManagerData;
     timeUnits: typeof CONFIG.PF2E.timeUnits;
+    counter: number | null;
     expiryOptions: {
         value: string;
         label: string;
