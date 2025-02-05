@@ -1,3 +1,10 @@
+# 2.29.0
+
+-   add new `Condition Manager` feature
+    -   to use it, you need to setup a key to hold it while adding a condition to an actor
+    -   a condition manager popup will show and let you set up a duration, expiration anf if the effect is unidentified (GM only)
+    -   an effect handling the condition will be created in its place to handle those options
+
 # 2.28.0
 
 -   `Droppeth`:
