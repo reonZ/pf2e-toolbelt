@@ -24,6 +24,7 @@ import { undergroundTool } from "./tools/underground";
 import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
+import { conditionManager } from "./tools/conditionManager";
 
 MODULE.register("pf2e-toolbelt");
 
@@ -32,6 +33,7 @@ const TOOLS: ToolConfig[] = [
     actionableTool,
     arpTool,
     betterMerchantTool,
+    conditionManager,
     debugTool,
     untargetTool,
     droppethTool,
