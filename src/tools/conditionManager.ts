@@ -234,7 +234,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 }
 
 function onPreCreateItem(item: ItemPF2e<ActorPF2e>) {
-    if (!MANAGE || !item.isOfType("condition") || !item.actor) return;
+    if (!MANAGE || !item.isOfType("condition") || !item.actor || item.system.persistent) return;
     new ConditionManager(item).render(true);
     return false;
 }
