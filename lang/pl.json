@@ -34,6 +34,12 @@
                     "name": "Upuszczanie modyfikatora",
                     "hint": "Przytrzymywany klawisz podczas upuszczania przedmiotu na ziemię."
                 }
+            },
+            "conditionManager": {
+                "manage": {
+                    "name": "Zarządzanie stanem",
+                    "hint": "Klawisz przytrzymywany podczas porzucania stanu w celu zarządzania jego czasem trwania."
+                }
             }
         },
         "settings": {
@@ -314,6 +320,13 @@
                 "identifyPartials": {
                     "name": "Automatyczna identyfikacja podobnych przedmiotów",
                     "hint": "Czy „podobne” przedmioty powinny być również identyfikowane podczas korzystania z opcji „Automatycznie identyfikuj znane przedmioty”."
+                }
+            },
+            "conditionManager": {
+                "title": "Menedżer stanów",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Pozwala zamienić zwykły stan w kombinację efekt+stan z czasem trwania."
                 }
             }
         },
@@ -735,6 +748,13 @@
         },
         "hideDamage": {
             "reveal": "Ujawnij obrażenia zadane graczom"
+        },
+        "conditionManager": {
+            "manager": {
+                "title": "Menedżer stanów - {name}",
+                "add": "Utwórz",
+                "cancel": "Anuluj"
+            }
         }
     }
 }
