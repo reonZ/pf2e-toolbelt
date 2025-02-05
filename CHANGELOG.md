@@ -1,3 +1,10 @@
+# 2.29.1
+
+-   `Condition Manager`:
+    -   set default options to `1` `Rounds` instead of `Unlimited`
+    -   add `Counter` row to manually change its value before applying the condition if needed
+    -   small improvements to the number fields to avoid invalid entries
+
 # 2.29.0
 
 -   add new `Condition Manager` feature
