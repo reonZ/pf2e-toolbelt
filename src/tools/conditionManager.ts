@@ -73,9 +73,9 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         this.#data = {
             unidentified: false,
             duration: {
-                expiry: null,
-                unit: "unlimited",
-                value: -1,
+                expiry: "turn-start",
+                unit: "rounds",
+                value: 1,
             },
         };
     }
