@@ -3,12 +3,13 @@ import {
     ApplicationClosingOptions,
     ApplicationConfiguration,
     ApplicationRenderOptions,
+    CombatantPF2e,
     ConditionPF2e,
     DurationData,
-    EffectContextData,
     EffectSource,
     GrantItemSource,
     ItemPF2e,
+    R,
     addListener,
     addListenerAll,
 } from "module-helpers";
@@ -53,7 +54,7 @@ const { config, settings, hook, localize, render } = createTool({
 
 class ConditionManager extends foundry.applications.api.ApplicationV2 {
     #actor: ActorPF2e;
-    #origin: { context: EffectContextData; value: boolean } | null;
+    #origin: CombatantPF2e | null;
     #counter: { value: number; default: number } | undefined;
     #rule: GrantItemSource & { alterations: any[] };
     #effect: PreCreate<EffectSource> & {
@@ -101,7 +102,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                 tokenIcon: { show: false },
                 unidentified: false,
                 duration: {
-                    expiry: "turn-start",
+                    expiry: "turn-end",
                     unit: "rounds",
                     value: 1,
                 },
@@ -109,25 +110,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             },
         };
 
-        const origin = this.#actor.combatant?.encounter.combatant;
-        const originActorUUID = origin?.actor?.uuid;
-
-        this.#origin =
-            originActorUUID && originActorUUID !== this.#actor.uuid
-                ? {
-                      context: {
-                          origin: {
-                              actor: originActorUUID,
-                              token: origin.token?.uuid ?? null,
-                              item: null,
-                              spellcasting: null,
-                          },
-                          roll: null,
-                          target: null,
-                      },
-                      value: true,
-                  }
-                : null;
+        this.#origin = this.#actor.combatant;
 
         this.#counter = condition.system.value.isValued
             ? {
@@ -147,10 +130,18 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     }
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<ConditionManagerContext> {
+        const combatants = R.pipe(
+            this.#origin?.encounter?.combatants.contents ?? [],
+            R.filter((combatant) => !!combatant.actor),
+            R.map((combatant) => {
+                return { value: combatant.id, label: combatant.name };
+            })
+        );
+
         return {
             isGM: game.user.isGM,
             data: this.system,
-            origin: this.#origin?.value ?? null,
+            origin: combatants ? { combatants, selected: this.#origin!.id } : null,
             timeUnits: CONFIG.PF2E.timeUnits,
             counter: this.#counter,
             expiryOptions: [
@@ -183,8 +174,17 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             });
         }
 
-        if (this.#origin?.value) {
-            this.system.context = this.#origin.context;
+        if (this.#origin) {
+            this.system.context = {
+                origin: {
+                    actor: this.#origin.actor!.uuid,
+                    token: this.#origin.token?.uuid ?? null,
+                    item: null,
+                    spellcasting: null,
+                },
+                roll: null,
+                target: null,
+            };
         }
 
         this.#actor.createEmbeddedDocuments("Item", [this.#effect]);
@@ -210,8 +210,8 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         addListenerAll(html, "[name]", "change", (event, el: HTMLInputElement) => {
             switch (el.name as EventChangeName) {
                 case "origin": {
-                    this.#origin!.value = el.checked;
-                    return;
+                    this.#origin = this.#origin?.encounter?.combatants.get(el.value) ?? null;
+                    break;
                 }
 
                 case "system.badge.value": {
@@ -221,7 +221,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                         ? this.#counter!.default
                         : Math.max(el.valueAsNumber, 1);
 
-                    return this.render();
+                    break;
                 }
 
                 case "system.duration.unit": {
@@ -232,24 +232,26 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                     this.system.duration.value = isUnit ? 1 : -1;
                     this.system.duration.expiry = isUnit ? "turn-start" : null;
 
-                    return this.render();
+                    break;
                 }
 
                 case "system.duration.expiry": {
                     this.system.duration.expiry = el.value as DurationData["expiry"];
-                    return;
+                    break;
                 }
 
                 case "system.duration.value": {
                     this.system.duration.value = Math.max(el.valueAsNumber || 0, 0);
-                    return this.render();
+                    break;
                 }
 
                 case "system.unidentified": {
                     this.system.unidentified = el.checked;
-                    return;
+                    break;
                 }
             }
+
+            this.render();
         });
 
         addListenerAll(html, "[data-action]", (event, el) => {
@@ -289,7 +291,7 @@ type ConditionManagerData = {
 type ConditionManagerContext = {
     isGM: boolean;
     data: ConditionManagerData;
-    origin: boolean | null;
+    origin: { combatants: { value: string; label: string }[]; selected: string } | null;
     timeUnits: typeof CONFIG.PF2E.timeUnits;
     counter: { value: number; default: number } | undefined;
     expiryOptions: {
