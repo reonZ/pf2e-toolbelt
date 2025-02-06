@@ -1,8 +1,17 @@
+# 2.30.0
+
+-   `Condition Manager`:
+    -   add `Current Combatant is Origin?` row
+        -   this will add the current combatant as the origin of the effect
+        -   will only show if the receiving actor is in combat and isn't the current combatant
+    -   fix persistent-damage conditions not working with the manager
+
 # 2.29.1
 
 -   `Condition Manager`:
     -   set default options to `1` `Rounds` instead of `Unlimited`
     -   add `Counter` row to manually change its value before applying the condition if needed
+        -   won't show for conditions that can't have counter
     -   small improvements to the number fields to avoid invalid entries
 
 # 2.29.0
