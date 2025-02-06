@@ -23,6 +23,14 @@
         </div>
     </div>
     {{/unless}}
+    {{#unless (eq origin null)}}
+    <div class="form-group">
+        <label>{{@root.i18n 'origin'}}</label>
+        <div class="form-fields">
+            <input type="checkbox" name="origin" {{checked origin}} />
+        </div>
+    </div>
+    {{/unless}}
     {{#if isGM}}
     <div class="form-group">
         <label>{{localize "PF2E.Item.Effect.Unidentified"}}</label>

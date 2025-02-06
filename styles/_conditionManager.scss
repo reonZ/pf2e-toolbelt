@@ -8,4 +8,10 @@
         max-width: 3em;
         text-align: right;
     }
+
+    .form-group {
+        .form-fields:has(input[type="checkbox"]) {
+            flex: 0;
+        }
+    }
 }

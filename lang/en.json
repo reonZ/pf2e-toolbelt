@@ -753,7 +753,8 @@
             "manager": {
                 "title": "Condition Manager - {name}",
                 "add": "Create",
-                "cancel": "Cancel"
+                "cancel": "Cancel",
+                "origin": "Current Combatant is Origin?"
             }
         }
     }
