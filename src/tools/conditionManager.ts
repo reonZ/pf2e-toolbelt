@@ -53,9 +53,9 @@ const { config, settings, hook, localize, render } = createTool({
 
 class ConditionManager extends foundry.applications.api.ApplicationV2 {
     #actor: ActorPF2e;
-    #condition: ConditionPF2e;
     #origin: { context: EffectContextData; value: boolean } | null;
     #counter: { value: number; default: number } | undefined;
+    #rule: GrantItemSource & { alterations: any[] };
     #effect: PreCreate<EffectSource> & {
         system: { unidentified: boolean; duration: DurationData };
     };
@@ -74,7 +74,24 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         super(options);
 
         this.#actor = condition.actor;
-        this.#condition = condition.clone();
+
+        this.#rule = {
+            key: "GrantItem",
+            uuid: condition.sourceId,
+            onDeleteActions: {
+                grantee: "restrict",
+            },
+            inMemoryOnly: true,
+            alterations: [],
+        };
+
+        if (condition._source.system.persistent) {
+            this.#rule.alterations.push({
+                mode: "override",
+                property: "persistent-damage",
+                value: condition._source.system.persistent,
+            });
+        }
 
         this.#effect = {
             type: "effect",
@@ -88,6 +105,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                     unit: "rounds",
                     value: 1,
                 },
+                rules: [this.#rule],
             },
         };
 
@@ -157,31 +175,17 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     }
 
     #createEffect() {
-        const condition = this.#condition;
-        const rule: GrantItemSource = {
-            key: "GrantItem",
-            uuid: condition.sourceId,
-            onDeleteActions: {
-                grantee: "restrict",
-            },
-            inMemoryOnly: true,
-        };
-
         if (this.#counter && this.#counter.value > 1) {
-            rule.alterations = [
-                {
-                    mode: "override",
-                    property: "badge-value",
-                    value: this.#counter.value,
-                },
-            ];
+            this.#rule.alterations.push({
+                mode: "override",
+                property: "badge-value",
+                value: this.#counter.value,
+            });
         }
 
         if (this.#origin?.value) {
             this.system.context = this.#origin.context;
         }
-
-        this.system.rules = [rule];
 
         this.#actor.createEmbeddedDocuments("Item", [this.#effect]);
     }
@@ -264,7 +268,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 }
 
 function onPreCreateItem(item: ItemPF2e<ActorPF2e>) {
-    if (!MANAGE || !item.isOfType("condition") || !item.actor || item.system.persistent) return;
+    if (!MANAGE || !item.isOfType("condition") || !item.actor) return;
     new ConditionManager(item).render(true);
     return false;
 }
