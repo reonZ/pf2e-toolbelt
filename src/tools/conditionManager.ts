@@ -102,7 +102,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                 tokenIcon: { show: false },
                 unidentified: false,
                 duration: {
-                    expiry: "turn-end",
+                    expiry: "turn-start",
                     unit: "rounds",
                     value: 1,
                 },
