@@ -1,3 +1,10 @@
+# 2.30.1
+
+-   `Condition Manager`:
+    -   change the default `Expire On` to be `End of Turn` as this is the default behavior of conditions
+    -   replace the `Current Combatant is Origin?` checkbox with a `Origin` select
+        -   you can pick any combatant from the combat
+
 # 2.30.0
 
 -   `Condition Manager`:
