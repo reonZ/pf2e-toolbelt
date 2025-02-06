@@ -141,7 +141,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         return {
             isGM: game.user.isGM,
             data: this.system,
-            origin: combatants ? { combatants, selected: this.#origin!.id } : null,
+            origin: combatants.length ? { combatants, selected: this.#origin!.id } : null,
             timeUnits: CONFIG.PF2E.timeUnits,
             counter: this.#counter,
             expiryOptions: [
