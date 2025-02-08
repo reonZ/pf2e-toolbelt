@@ -753,7 +753,8 @@
             "manager": {
                 "title": "Menedżer stanów - {name}",
                 "add": "Utwórz",
-                "cancel": "Anuluj"
+                "cancel": "Anuluj",
+                "origin": "Oryginalne"
             }
         }
     }
