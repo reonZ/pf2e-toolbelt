@@ -1,3 +1,8 @@
+# 2.30.2
+
+-   `Condition Manager`:
+    -   revert latest default change of `Expire On`
+
 # 2.30.1
 
 -   `Condition Manager`:
