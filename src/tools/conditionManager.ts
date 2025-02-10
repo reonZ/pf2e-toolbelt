@@ -82,7 +82,6 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             onDeleteActions: {
                 grantee: "restrict",
             },
-            inMemoryOnly: true,
             alterations: [],
         };
 
@@ -112,12 +111,14 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 
         this.#origin = this.#actor.combatant;
 
-        this.#counter = condition.system.value.isValued
-            ? {
-                  value: condition.system.value.value ?? 1,
-                  default: condition.system.value.value ?? 1,
-              }
-            : undefined;
+        if (condition.system.value.isValued) {
+            this.#rule.inMemoryOnly = true;
+
+            this.#counter = {
+                value: condition.system.value.value ?? 1,
+                default: condition.system.value.value ?? 1,
+            };
+        }
     }
 
     get system() {
