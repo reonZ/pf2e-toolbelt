@@ -1,3 +1,9 @@
+# 2.30.3
+
+-   `Condition Manager`:
+    -   fix adding a condition that also add other conditions preventing from closing the character sheet
+        -   this is actually a system bug, not related to the module itself
+
 # 2.30.2
 
 -   `Condition Manager`:
