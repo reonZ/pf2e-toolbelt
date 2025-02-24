@@ -1,3 +1,20 @@
+# 2.31.0
+
+-   add new `Rolls Tracker` feature:
+    -   you can access its interface by clicking on the control button added to the left UI part
+        -   the interface offers different filter options
+        -   you can select multiple users/actors using the `[shift]` key
+    -   encounters are automatically registered when one begins
+    -   the GM can `pause` the whole feature at any time
+    -   the GM can create `sessions`
+        -   they allow grouping of data in a controlled amount of time
+        -   players will not see any new recorded data while a session is active
+        -   everything will be available to players when the session ends
+    -   the GM can `clear` recorded data
+        -   a date can be provided to only delete data prior to it
+    -   all the GM specific actions can be accessed via the API
+        -   the `clear` action can receive a `days` argument to delete everything older than `x` allowing some automation if needed
+
 # 2.30.3
 
 -   `Condition Manager`:
