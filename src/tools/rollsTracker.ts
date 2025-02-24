@@ -27,23 +27,106 @@ import { RerollSaveHook, RollSaveHook } from "./targetHelper";
 
 const FILTERS = ["all", "time", "session", "encounter"] as const;
 
-const MODES = [
-    {
-        type: "d20",
-        labels: ["bottom"],
-        entries: R.times(20, (x) => x + 1),
-        values: (selected) => {
-            return R.pipe(
-                R.range(0, 20),
-                R.map((face) =>
-                    selected.map(
-                        ({ rolls }) => rolls.filter((d20) => d20.value === face + 1).length
-                    )
-                )
-            );
+const MODES: RollsMode[] = [];
+
+function prepareModes() {
+    MODES.push(
+        createRollMode("all"),
+        createRollMode("attack-roll"),
+        {
+            type: "attack-roll-outcome",
+            entries: () => {
+                return DEGREE_OF_SUCCESS_STRINGS.map((x) =>
+                    game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${x}`)
+                );
+            },
+            rolls: (rolls) => {
+                return rolls.filter((roll) => roll.type === "attack-roll" && !!roll.outcome);
+            },
+            values: (rolls) => {
+                return R.pipe(
+                    R.range(0, 4),
+                    R.map((i) => {
+                        const outcome = DEGREE_OF_SUCCESS_STRINGS[i];
+                        return rolls.filter((roll) => {
+                            return roll.outcome === outcome;
+                        }).length;
+                    })
+                );
+            },
         },
-    },
-] as const satisfies RollsMode[];
+        createRollMode("saving-throw"),
+        {
+            type: "saving-throw-outcome",
+            entries: () => {
+                const outcomes = DEGREE_OF_SUCCESS_STRINGS.map((x) =>
+                    game.i18n.localize(`PF2E.Check.Result.Degree.Check.${x}`)
+                );
+                return R.times(3, () => outcomes).flat();
+            },
+            rolls: (rolls) => {
+                return rolls.filter(
+                    (roll) => roll.type === "saving-throw" && !!roll.modifier && !!roll.outcome
+                );
+            },
+            values: (rolls) => {
+                return R.pipe(
+                    ["fortitude", "reflex", "will"] as const,
+                    R.flatMap((save) => {
+                        return R.pipe(
+                            R.range(0, 4),
+                            R.map((i) => {
+                                const outcome = DEGREE_OF_SUCCESS_STRINGS[i];
+                                return rolls.filter((roll) => {
+                                    return roll.modifier === save && roll.outcome === outcome;
+                                }).length;
+                            })
+                        );
+                    })
+                );
+            },
+        },
+        createRollMode("skill-check"),
+        ...(["1", "2"] as const).map((index): RollsMode => {
+            const skills = (() => {
+                const skills = R.entries(CONFIG.PF2E.skills);
+                const half = Math.ceil(skills.length / 2);
+                return index === "1"
+                    ? R.take(skills, half)
+                    : R.takeLast(skills, skills.length - half);
+            })();
+
+            const slugs = skills.map(([slug]) => slug) as string[];
+
+            return {
+                type: `skill-check-${index}`,
+                entries: () => {
+                    return skills.map(([_, { label }]) => game.i18n.localize(label));
+                },
+                rolls: (rolls) => {
+                    return rolls.filter((roll) => {
+                        return (
+                            roll.type === "skill-check" &&
+                            roll.modifier &&
+                            slugs.includes(roll.modifier)
+                        );
+                    });
+                },
+                values: (rolls) => {
+                    return R.pipe(
+                        slugs,
+                        R.flatMap((slug) => {
+                            return rolls.filter((roll) => roll.modifier === slug).length;
+                        })
+                    );
+                },
+            };
+        }),
+        createRollMode("perception-check"),
+        createRollMode("initiative"),
+        createRollMode("flat-check")
+    );
+}
 
 const {
     config,
@@ -133,13 +216,15 @@ const {
         if (isGM) {
             Hooks.on("combatStart", onCombatStart);
         }
+
+        prepareModes();
     },
 } as const);
 
 class RollsTracker extends foundry.applications.api.ApplicationV2 {
     static #instance: RollsTracker | undefined;
 
-    #mode: ModeType = "d20";
+    #mode: ModeType = "all";
     #filter: ModeFilter = "all";
     #list: HTMLElement | null = null;
     #selections: string[];
@@ -199,7 +284,10 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
             const rolls = this.getUserRolls(user);
 
             if (selectIndex >= 0) {
-                selected[selectIndex] = { user, rolls };
+                selected[selectIndex] = {
+                    user,
+                    rolls: mode.rolls(rolls),
+                };
             }
 
             const actors = R.filter(
@@ -227,7 +315,7 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
                     selected[selectIndex] = {
                         user,
                         actor,
-                        rolls: rolls.filter((roll) => roll.actor === actorId),
+                        rolls: mode.rolls(rolls.filter((roll) => roll.actor === actorId)),
                     };
                 }
             }
@@ -240,19 +328,35 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
             });
         }
 
-        const values = mode.values(selected);
+        const labels = (
+            localize.ifExist("tracker.mode", mode.type, "bottom") ?? localize("tracker.bottom")
+        ).split("|");
+
+        const entries = mode.entries().map((value, index, entries) => {
+            return {
+                value,
+                marker: !!index && index % (entries.length / labels.length) === 0,
+            };
+        });
+
+        const values = selected.map(({ rolls }) => mode.values(rolls));
         const valuesMax = R.firstBy(values.flat(), [R.identity(), "desc"]) ?? 0;
         const max = Math.max(6 * Math.ceil(valuesMax / 6), 6);
 
-        const left: YAbsis = {
-            label: localize("tracker", mode.type, "left"),
-            entries: R.times(6, (x) => ((x + 1) * max) / 6).reverse(),
-        };
+        const groups: ContextGroupEntry[][] = [];
 
-        const bottom: XAbsis = {
-            labels: mode.labels.map((label) => localize("tracker", mode.type, label)),
-            entries: mode.entries,
-        };
+        for (let i = 0; i < entries.length; i++) {
+            const group: ContextGroupEntry[] = (groups[i] = []);
+
+            for (let j = 0; j < values.length; j++) {
+                const value = values[j][i];
+
+                group[j] = {
+                    value,
+                    ratio: (value / max) * 100,
+                };
+            }
+        }
 
         const stats: RollStats[] = selected.map(({ rolls, actor, user }): RollStats => {
             const values = rolls.map(({ value }) => value);
@@ -280,15 +384,6 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
             };
         });
 
-        const groups = values.map((entries) => {
-            return entries.map((value) => {
-                return {
-                    value,
-                    ratio: (value / max) * 100,
-                };
-            });
-        });
-
         return {
             list,
             inSession: !!settings.session,
@@ -298,14 +393,14 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
             filter: this.#filter,
             modes: MODES.map(({ type }) => ({
                 value: type,
-                label: localize("tracker.mode", type),
+                label: localize("tracker.mode", type, "label"),
             })),
             filters: FILTERS.map((value) => ({
                 value,
                 label: localize("tracker.filter", value),
             })),
-            bottom,
-            left,
+            bottom: { labels, entries },
+            left: R.times(6, (x) => ((x + 1) * max) / 6).reverse(),
             stats,
             groups,
             selected: selected.length,
@@ -544,7 +639,13 @@ function onToolbeltSave({ rollMessage }: RollSaveHook) {
     onCreateMessage(rollMessage, {}, game.userId);
 }
 
+function canRecord() {
+    return MODULE.isDebug || game.users.filter((user) => user.active).length > 1;
+}
+
 function onToolbeltRerollSave({ newRoll, data, target }: RerollSaveHook) {
+    if (!canRecord()) return;
+
     const value = newRoll.dice[0]?.total;
     if (!R.isNumber(value)) return;
 
@@ -561,21 +662,21 @@ function onToolbeltRerollSave({ newRoll, data, target }: RerollSaveHook) {
         outcome: success != null ? DEGREE_OF_SUCCESS_STRINGS[success] : undefined,
         session: settings.session ?? undefined,
         isReroll: true,
+        modifier: data.statistic,
     });
 }
 
 function onCreateMessage(message: ChatMessagePF2e, data: object, userId: string) {
-    if (game.userId !== userId || (game.users.size === 1 && !MODULE.isDebug)) return;
+    if (game.userId !== userId || !canRecord()) return;
 
-    const value = message.rolls[0]?.dice[0]?.total;
-    if (!R.isNumber(value)) return;
-
-    const context = message.getFlag("pf2e", "context") as Maybe<ChatContextFlag>;
-    if (!context) return;
+    const die = message.rolls[0]?.dice[0];
+    const value = die?.total;
+    if (!die || die.faces !== 20 || !R.isNumber(value)) return;
 
     const user = game.user;
+    const context = message.getFlag("pf2e", "context") as Maybe<ChatContextFlag>;
 
-    if (isCheckContextFlag(context)) {
+    if (context && isCheckContextFlag(context)) {
         if (!user.isGM && context.rollMode === "selfroll") return;
 
         addRoll(user, {
@@ -588,8 +689,30 @@ function onCreateMessage(message: ChatMessagePF2e, data: object, userId: string)
             outcome: context.outcome ?? undefined,
             session: settings.session ?? undefined,
             isReroll: context.isReroll || undefined,
+            modifier: message.getFlag("pf2e", "modifierName") as string | undefined,
         });
-    } else if (context.type === "damage-roll") {
+    } else if (context?.type === "damage-roll") {
+    } else if (message.rolls.length === 1 && message.rolls[0].dice.length === 1) {
+        if (
+            !user.isGM &&
+            !message.blind &&
+            message.whisper.length === 1 &&
+            message.whisper[0] === user.id
+        )
+            return;
+
+        addRoll(user, {
+            value,
+            time: Date.now(),
+            type: "roll",
+            isPrivate: message.blind || message.whisper.length > 0,
+            encounter: game.combat?.id,
+            actor: message.actor?.id ?? undefined,
+            outcome: undefined,
+            session: settings.session ?? undefined,
+            isReroll: undefined,
+            modifier: undefined,
+        });
     }
 }
 
@@ -749,12 +872,32 @@ function createEndOfDayDate() {
     return date;
 }
 
+function createRollMode<T extends CheckType | "all">(type: T) {
+    return {
+        type,
+        entries: () => {
+            return R.times(20, (x) => String(x + 1));
+        },
+        rolls: (rolls) => {
+            return type === "all" ? rolls : rolls.filter((roll) => roll.type === type);
+        },
+        values: (rolls) => {
+            return R.pipe(
+                R.range(0, 20),
+                R.map((face) => {
+                    return rolls.filter((roll) => roll.value === face + 1).length;
+                })
+            );
+        },
+    } as const satisfies RollsMode;
+}
+
 type OptionSelectName = "mode" | "filter" | "session" | "encounter";
 type OptionDateName = "time-from" | "time-to";
 type ControlAction = "play" | "pause" | "end" | "start" | "delete";
 
-type ModeType = (typeof MODES)[number]["type"];
-type ModeFilter = (typeof FILTERS)[number];
+type ModeType = string | "all";
+type ModeFilter = string | "all";
 type ModeTime = { from: number; to: number };
 
 type TimedEventEntry = {
@@ -766,21 +909,22 @@ type RollsSelected = { user: UserPF2e; actor?: ActorPF2e; rolls: UserRoll[] };
 
 type RollsMode = {
     type: string;
-    labels: string[];
-    entries: number[];
-    values: (selected: RollsSelected[]) => number[][];
+    entries: () => string[];
+    rolls: (rolls: UserRoll[]) => UserRoll[];
+    values: (rolls: UserRoll[]) => number[];
 };
 
 type UserRoll = {
     time: number;
-    actor?: string;
+    actor: string | undefined;
     value: number;
-    type: CheckType;
-    isPrivate?: boolean;
-    isReroll?: boolean;
-    outcome?: DegreeOfSuccessString;
-    encounter?: string;
-    session?: string;
+    type: CheckType | "roll";
+    isPrivate: boolean | undefined;
+    isReroll: boolean | undefined;
+    outcome: DegreeOfSuccessString | undefined;
+    encounter: string | undefined;
+    session: string | undefined;
+    modifier: string | undefined;
 };
 
 type ListSelection = {
@@ -793,13 +937,8 @@ type ListUser = ListSelection & {
     actors: ListSelection[];
 };
 
-type YAbsis = {
-    entries: number[];
-    label: string;
-};
-
-type XAbsis = {
-    entries: number[];
+type Absis = {
+    entries: { value: string; marker: boolean }[];
     labels: string[];
 };
 
@@ -815,6 +954,8 @@ type RollsUserSettings = {
     rolls: UserRoll[];
 };
 
+type ContextGroupEntry = { value: number; ratio: number };
+
 type RollsTrackerContext = {
     isGM: boolean;
     isPaused: boolean;
@@ -824,9 +965,9 @@ type RollsTrackerContext = {
     modes: SelectOptions<ModeType>;
     filters: SelectOptions<ModeFilter>;
     list: ListUser[];
-    bottom: XAbsis;
-    left: YAbsis;
-    groups: { value: number; ratio: number }[][];
+    bottom: Absis;
+    left: number[];
+    groups: ContextGroupEntry[][];
     selected: number;
     stats: RollStats[];
     time: { from: string; to: string };

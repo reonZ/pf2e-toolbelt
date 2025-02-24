@@ -767,11 +767,49 @@
         "rollsTracker": {
             "tracker": {
                 "title": "Rolls Tracker",
+                "left": "Number of Rolls",
+                "bottom": "Roll Value",
                 "mode": {
-                    "d20": "All Checks"
+                    "all": {
+                        "label": "All Checks"
+                    },
+                    "attack-roll": {
+                        "label": "Attack Rolls"
+                    },
+                    "attack-roll-outcome": {
+                        "label": "Attack Outcomes",
+                        "bottom": "Roll Outcome"
+                    },
+                    "saving-throw": {
+                        "label": "Save Checks"
+                    },
+                    "saving-throw-outcome": {
+                        "label": "Save Outcomes",
+                        "bottom": "Fortitude|Reflex|Will"
+                    },
+                    "flat-check": {
+                        "label": "Flat-Checks"
+                    },
+                    "skill-check": {
+                        "label": "Skill Checks"
+                    },
+                    "skill-check-1": {
+                        "label": "Skills (First Half)",
+                        "bottom": "Skill Check"
+                    },
+                    "skill-check-2": {
+                        "label": "Skills (Second Half)",
+                        "bottom": "Skill Check"
+                    },
+                    "perception-check": {
+                        "label": "Perception Checks"
+                    },
+                    "initiative": {
+                        "label": "initiative Checks"
+                    }
                 },
                 "filter": {
-                    "all": "All Rolls",
+                    "all": "All Time",
                     "time": "Time Range",
                     "session": "Session",
                     "encounter": "Encounter"
@@ -803,10 +841,6 @@
                     "mean": "Mean",
                     "median": "Median",
                     "mode": "Mode"
-                },
-                "d20": {
-                    "left": "Number of Rolls",
-                    "bottom": "Roll Value"
                 }
             },
             "clear": {

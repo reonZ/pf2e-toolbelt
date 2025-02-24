@@ -97,33 +97,34 @@
     </div>
     <div class="graph"
         style="--rows: {{left.entries.length}}; --columns: {{bottom.entries.length}};">
+        <div class="left">
+            {{@root.i18n 'left'}}
+        </div>
         <div class="yAbsis">
-            {{#each left.entries as |y|}}
+            {{#each left as |entry|}}
             <div class="section">
-                <div class="value">{{y}}</div>
+                <div class="value">{{entry}}</div>
+                <div class="fake">{{entry}}</div>
             </div>
             {{/each}}
             <div class="section zero">
                 <div class="value">0</div>
             </div>
         </div>
-        <div class="xAbsis">
-            {{#each bottom.entries as |x|}}
-            <div class="section">
-                <div class="value">{{x}}</div>
-            </div>
-            {{/each}}
-        </div>
-        <div class="left">
-            {{left.label}}
-        </div>
         <div class="bottom">
             {{#each bottom.labels as |label|}}
             <span>{{label}}</span>
             {{/each}}
         </div>
+        <div class="xAbsis">
+            {{#each bottom.entries as |entry|}}
+            <div class="section{{#if entry.marker}} marker{{/if}}">
+                <div class="value">{{entry.value}}</div>
+            </div>
+            {{/each}}
+        </div>
         <div class="grid">
-            {{#each left.entries}}
+            {{#each left}}
             <div class="section"></div>
             {{/each}}
         </div>

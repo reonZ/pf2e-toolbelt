@@ -5,6 +5,7 @@ import type { ToolConfig } from "./tool";
 import { actionableTool } from "./tools/actionable";
 import { arpTool } from "./tools/arp";
 import { betterMerchantTool } from "./tools/betterMerchant";
+import { conditionManager } from "./tools/conditionManager";
 import { debugTool } from "./tools/debug";
 import { droppethTool } from "./tools/droppeth";
 import { effectsPanelTool } from "./tools/effectsPanel";
@@ -15,6 +16,7 @@ import { hideDamageTool } from "./tools/hideDamage";
 import { identifyTool } from "./tools/identify";
 import { mergeDamageTool } from "./tools/mergeDamage";
 import { noBulkTool } from "./tools/noBulk";
+import { rollsTrackerTool } from "./tools/rollsTracker";
 import { ShareTool } from "./tools/share";
 import { spellsSummaryTool } from "./tools/spellsSummary";
 import { stancesTool } from "./tools/stances";
@@ -24,8 +26,6 @@ import { undergroundTool } from "./tools/underground";
 import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
-import { conditionManager } from "./tools/conditionManager";
-import { rollsTrackerTool } from "./tools/rollsTracker";
 
 MODULE.register("pf2e-toolbelt");
 

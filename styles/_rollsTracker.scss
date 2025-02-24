@@ -188,7 +188,7 @@
             width: 100%;
             display: grid;
             grid-template-rows: 1fr auto auto;
-            grid-template-columns: auto 3ch 1fr;
+            grid-template-columns: auto auto 1fr;
 
             .left,
             .bottom {
@@ -209,6 +209,9 @@
                 grid-row: 3;
                 grid-column: 3;
                 margin-top: 6px;
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: 1fr;
             }
 
             .yAbsis,
@@ -228,11 +231,15 @@
                     position: relative;
                     display: flex;
                     justify-content: flex-end;
-                    padding-right: 1.5ch;
+                    padding-right: 10px;
 
                     .value {
                         transform: translateY(-50%);
                         position: absolute;
+                    }
+
+                    .fake {
+                        opacity: 0;
                     }
 
                     &.zero {
@@ -267,7 +274,8 @@
 
             .grid,
             .center,
-            .xAbsis {
+            .xAbsis,
+            .bottom {
                 margin-left: -1px;
             }
 
@@ -324,6 +332,11 @@
                     position: relative;
                     display: flex;
                     justify-content: center;
+                    align-items: center;
+
+                    .value {
+                        text-align: center;
+                    }
 
                     &::after {
                         @include border(right);
@@ -333,6 +346,12 @@
                         top: 0;
                         left: 0;
                         height: 4px;
+                    }
+
+                    &.marker {
+                        &:after {
+                            height: 400px;
+                        }
                     }
                 }
             }
@@ -358,7 +377,7 @@ body.theme-light {
         --select-4: #d040d0;
 
         --list-highlight: #00000029;
-        --columns-background: #00000003;
+        --columns-background: #0000000a;
         --column-highlight: #0000001c;
 
         .body .graph .center .section .value:hover {

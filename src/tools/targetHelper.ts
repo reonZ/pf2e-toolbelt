@@ -1299,6 +1299,7 @@ async function rollSaves(
                         const data: MessageTargetSave = {
                             private: isPrivate,
                             value: roll.total,
+                            statistic,
                             die: (roll.terms[0] as foundry.dice.terms.NumericTerm).total,
                             success: success!,
                             roll: JSON.stringify(roll.toJSON()),
@@ -1458,6 +1459,7 @@ async function rerollSave(
     const data: MessageTargetSave = {
         private: flag.private,
         value: keptRoll.total,
+        statistic: flag.statistic,
         die: (keptRoll.terms[0] as foundry.dice.terms.NumericTerm).total,
         success: outcome,
         roll: JSON.stringify(keptRoll.toJSON()),
@@ -1860,6 +1862,7 @@ type MessageTargetSave = {
     modifiers: { label: string; modifier: number }[];
     significantModifiers: modifiersMatter.SignificantModifier[] | undefined;
     rerolled?: keyof typeof REROLL;
+    statistic: SaveType;
 };
 
 type TargetMessageType = "damage" | "spell-damage" | "spell-save" | "action" | "check";
