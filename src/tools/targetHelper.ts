@@ -1974,3 +1974,5 @@ export {
     setFlagProperty as setTargetHelperFlagProperty,
     config as targetHelperTool,
 };
+
+export type { RerollSaveHook, RollSaveHook };

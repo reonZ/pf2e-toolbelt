@@ -25,6 +25,7 @@ import { unidedTool } from "./tools/unided";
 import { untargetTool } from "./tools/untarget";
 import { useButtonTool } from "./tools/useButton";
 import { conditionManager } from "./tools/conditionManager";
+import { rollsTrackerTool } from "./tools/rollsTracker";
 
 MODULE.register("pf2e-toolbelt");
 
@@ -44,6 +45,7 @@ const TOOLS: ToolConfig[] = [
     identifyTool,
     mergeDamageTool,
     noBulkTool,
+    rollsTrackerTool,
     ShareTool,
     unidedTool,
     spellsSummaryTool,

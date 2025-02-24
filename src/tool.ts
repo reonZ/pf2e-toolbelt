@@ -18,6 +18,7 @@ import {
     setFlag,
     setFlagProperty,
     setInMemory,
+    setSetting,
     socketEmit,
     socketOff,
     socketOn,
@@ -120,6 +121,7 @@ function createTool<TConfig extends ToolConfig>(config: TConfig) {
         wrapper,
         wrappers,
         waitDialog: waitDialogTool,
+        setSetting: (key: string, value: any) => setSetting(`${toolName}.${key}`, value),
         flagPath: (...path: string[]) => flagPath(toolName, ...path),
         getFlag: (doc: ClientDocument, ...path: string[]) => getFlag(doc, toolName, ...path),
         setFlag: (doc: ClientDocument, ...args: [...string[], unknown]) =>
@@ -352,6 +354,11 @@ type RegisterSettingOptions<T extends string = string> = SettingOptions &
               default: Array<any>;
               onChange?: (value: Array<any>) => void;
           }
+        | {
+              type: ObjectConstructor;
+              default: {};
+              onChange?: (value: Record<string, any>) => void;
+          }
     );
 
 type ToolConfig = {
@@ -420,6 +427,13 @@ type ToolObject<TConfig extends ToolConfig> = {
     getInMemoryAndSetIfNot: typeof getInMemoryAndSetIfNot;
     deleteInMemory: typeof deleteInMemory;
     settings: ToolSettings<TConfig>;
+    setSetting: <
+        TKey extends TConfig["settings"][number]["key"],
+        TValue extends ToolSettings<TConfig>[TKey]
+    >(
+        key: TKey,
+        value: TValue | undefined | null
+    ) => Promise<TValue>;
 } & ToolSocket<TConfig> &
     ToolHooks<TConfig> &
     ToolWrappers<TConfig>;

@@ -328,6 +328,13 @@
                     "name": "Enabled",
                     "hint": "Let you turn a regular condition into an effet+condition combo with duration."
                 }
+            },
+            "rollsTracker": {
+                "title": "Rolls Tracker",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Track rolls to see if you are really that unlucky."
+                }
             }
         },
         "tool": {
@@ -755,6 +762,68 @@
                 "add": "Create",
                 "cancel": "Cancel",
                 "origin": "Origin"
+            }
+        },
+        "rollsTracker": {
+            "tracker": {
+                "title": "Rolls Tracker",
+                "mode": {
+                    "d20": "All Checks"
+                },
+                "filter": {
+                    "all": "All Rolls",
+                    "time": "Time Range",
+                    "session": "Session",
+                    "encounter": "Encounter"
+                },
+                "options": {
+                    "from": "From",
+                    "to": "To"
+                },
+                "controls": {
+                    "play": "Resume Recording",
+                    "pause": "Pause Recording",
+                    "start": "Start Session",
+                    "end": "End Session",
+                    "delete": "Clear Records",
+                    "session": "Players will not see any new result until the session ends"
+                },
+                "info": {
+                    "paused": {
+                        "label": "Recording is Paused",
+                        "tooltip": "No roll is being recorded in your world"
+                    },
+                    "session": {
+                        "label": "Currently in Session",
+                        "tooltip": "No new result will be shown until the current session is over"
+                    }
+                },
+                "stats": {
+                    "total": "Nb Rolls",
+                    "mean": "Mean",
+                    "median": "Median",
+                    "mode": "Mode"
+                },
+                "d20": {
+                    "left": "Number of Rolls",
+                    "bottom": "Roll Value"
+                }
+            },
+            "clear": {
+                "title": "Clear Records",
+                "hint": "Do you want to clear any record up to this date?",
+                "yes": "Clear",
+                "no": "Cancel"
+            },
+            "confirm": {
+                "start": "New Session <strong>{time}</strong> has started.",
+                "end": "Session <strong>{time}</strong> has ended.",
+                "pause": "Rolls recording has been paused.",
+                "play": "Rolls recording has resumed.",
+                "delete": {
+                    "all": "Records have been cleared.",
+                    "before": "Records before <strong>{time}</strong> have been cleared."
+                }
             }
         }
     }
