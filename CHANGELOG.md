@@ -14,6 +14,7 @@
         -   a date can be provided to only delete data prior to it
     -   all the GM specific actions can be accessed via the API
         -   the `clear` action can receive a `days` argument to delete everything older than `x` allowing some automation if needed
+    -   no rolls are recorded when a single user is logged in unless you enable the debug mode `CONFIG.debug.modules = true`
 
 # 2.30.3
 
