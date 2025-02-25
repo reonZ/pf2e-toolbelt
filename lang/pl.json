@@ -328,6 +328,13 @@
                     "name": "Włączone",
                     "hint": "Pozwala zamienić zwykły stan w kombinację efekt+stan z czasem trwania."
                 }
+            },
+            "rollsTracker": {
+                "title": "Śledzenie rzutów",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Śledź rzuty, aby sprawdzić, czy naprawdę masz takiego pecha."
+                }
             }
         },
         "tool": {
@@ -433,7 +440,7 @@
                 "tradeError": "Wystąpił błąd podczas próby przetworzenia transakcji między <strong>{sender}</strong> i <strong>{receiver}</strong>."
             },
             "message": {
-                "drawn": "Wylosował ({nb}) Akcję Heroiczną",
+                "drawn": "Wylosowano ({nb}) Akcji Heroicznych",
                 "given": "Podarował ({nb}) Akcję Heroiczną",
                 "discarded": "Odrzucił ({nb}) Akcję Heroiczną",
                 "used": {
@@ -755,6 +762,102 @@
                 "add": "Utwórz",
                 "cancel": "Anuluj",
                 "origin": "Oryginalne"
+            }
+        },
+        "rollsTracker": {
+            "tracker": {
+                "title": "Śledzenie rzutów",
+                "left": "Liczba rzutów",
+                "bottom": "Wartość rzutu",
+                "mode": {
+                    "all": {
+                        "label": "Wszystkie testy"
+                    },
+                    "attack-roll": {
+                        "label": "Rzuty na atak"
+                    },
+                    "attack-roll-outcome": {
+                        "label": "Rezultaty ataku",
+                        "bottom": "Rezultaty rzutu"
+                    },
+                    "saving-throw": {
+                        "label": "Rzuty obronne"
+                    },
+                    "saving-throw-outcome": {
+                        "label": "Rezultaty rzutów obronnych",
+                        "bottom": "Wytrwałość|Refleks|Wola"
+                    },
+                    "flat-check": {
+                        "label": "Płaskie testy"
+                    },
+                    "skill-check": {
+                        "label": "Testy umiejętności"
+                    },
+                    "skill-check-1": {
+                        "label": "Umiejętności (Pierwsza połowa)",
+                        "bottom": "Test umiejętności"
+                    },
+                    "skill-check-2": {
+                        "label": "Umiejętności (Druga połowa)",
+                        "bottom": "Test umiejętności"
+                    },
+                    "perception-check": {
+                        "label": "Testy Percepcji"
+                    },
+                    "initiative": {
+                        "label": "Rzuty na inicjatywę"
+                    }
+                },
+                "filter": {
+                    "all": "Cały czas",
+                    "time": "Przedział czasu",
+                    "session": "Sesja",
+                    "encounter": "Spotkanie"
+                },
+                "options": {
+                    "from": "Od",
+                    "to": "Do"
+                },
+                "controls": {
+                    "play": "Wznów rejestrowanie",
+                    "pause": "Wstrzymaj rejestrowanie",
+                    "start": "Rozpocznij sesję",
+                    "end": "Zakończ sesję",
+                    "delete": "Wyczyść rekordy",
+                    "session": "Gracze nie zobaczą żadnych nowych wyników aż do zakończenia sesji."
+                },
+                "info": {
+                    "paused": {
+                        "label": "Rejestrowanie jest wstrzymane",
+                        "tooltip": "Żaden rzut nie jest rejestrowany w twoim świecie"
+                    },
+                    "session": {
+                        "label": "Obecnie w trakcie sesji",
+                        "tooltip": "Żaden nowy wynik nie zostanie wyświetlony przed zakończeniem bieżącej sesji"
+                    }
+                },
+                "stats": {
+                    "total": "Ilość rzutów",
+                    "mean": "Średnia",
+                    "median": "Mediana",
+                    "mode": "Tryb"
+                }
+            },
+            "clear": {
+                "title": "Wyczyść rekordy",
+                "hint": "Czy chcesz wyczyścić wszelkie zapisy do tej daty?",
+                "yes": "Wyczyść",
+                "no": "Anuluj"
+            },
+            "confirm": {
+                "start": "Nowa sesja <strong>{time}</strong> została rozpoczęta.",
+                "end": "Sesja <strong>{time}</strong> została zakończona.",
+                "pause": "Rejestrowanie rzutów zostało wstrzymane.",
+                "play": "Wznowiono rejestrowanie rzutów.",
+                "delete": {
+                    "all": "Rekordy zostały wyczyszczone.",
+                    "before": "Rekordy przed <strong>{time}</strong> zostały wyczyszczone."
+                }
             }
         }
     }
