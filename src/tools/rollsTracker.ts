@@ -30,16 +30,18 @@ const FILTERS = ["all", "time", "session", "encounter"] as const;
 const MODES: RollsMode[] = [];
 
 function prepareModes() {
+    const checkOutcomes = DEGREE_OF_SUCCESS_STRINGS.map((x) =>
+        game.i18n.localize(`PF2E.Check.Result.Degree.Check.${x}`)
+    );
+
     MODES.push(
         createRollMode("all"),
         createRollMode("attack-roll"),
         {
             type: "attack-roll-outcome",
-            entries: () => {
-                return DEGREE_OF_SUCCESS_STRINGS.map((x) =>
-                    game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${x}`)
-                );
-            },
+            entries: DEGREE_OF_SUCCESS_STRINGS.map((x) =>
+                game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${x}`)
+            ),
             rolls: (rolls) => {
                 return rolls.filter((roll) => roll.type === "attack-roll" && !!roll.outcome);
             },
@@ -58,12 +60,7 @@ function prepareModes() {
         createRollMode("saving-throw"),
         {
             type: "saving-throw-outcome",
-            entries: () => {
-                const outcomes = DEGREE_OF_SUCCESS_STRINGS.map((x) =>
-                    game.i18n.localize(`PF2E.Check.Result.Degree.Check.${x}`)
-                );
-                return R.times(3, () => outcomes).flat();
-            },
+            entries: R.times(3, () => checkOutcomes).flat(),
             rolls: (rolls) => {
                 return rolls.filter(
                     (roll) => roll.type === "saving-throw" && !!roll.modifier && !!roll.outcome
@@ -100,9 +97,7 @@ function prepareModes() {
 
             return {
                 type: `skill-check-${index}`,
-                entries: () => {
-                    return skills.map(([_, { label }]) => game.i18n.localize(label));
-                },
+                entries: skills.map(([_, { label }]) => game.i18n.localize(label)),
                 rolls: (rolls) => {
                     return rolls.filter((roll) => {
                         return (
@@ -332,7 +327,7 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
             localize.ifExist("tracker.mode", mode.type, "bottom") ?? localize("tracker.bottom")
         ).split("|");
 
-        const entries = mode.entries().map((value, index, entries) => {
+        const entries = mode.entries.map((value, index, entries) => {
             return {
                 value,
                 marker: !!index && index % (entries.length / labels.length) === 0,
@@ -875,9 +870,7 @@ function createEndOfDayDate() {
 function createRollMode<T extends CheckType | "all">(type: T) {
     return {
         type,
-        entries: () => {
-            return R.times(20, (x) => String(x + 1));
-        },
+        entries: R.times(20, (x) => String(x + 1)),
         rolls: (rolls) => {
             return type === "all" ? rolls : rolls.filter((roll) => roll.type === type);
         },
@@ -909,7 +902,7 @@ type RollsSelected = { user: UserPF2e; actor?: ActorPF2e; rolls: UserRoll[] };
 
 type RollsMode = {
     type: string;
-    entries: () => string[];
+    entries: string[];
     rolls: (rolls: UserRoll[]) => UserRoll[];
     values: (rolls: UserRoll[]) => number[];
 };
