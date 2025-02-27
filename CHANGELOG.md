@@ -1,3 +1,8 @@
+# 2.31.1
+
+-   `Hide Damage`:
+    -   fix players being able to expand the dice results when some system metagame settings are used
+
 # 2.31.0
 
 -   add new `Rolls Tracker` feature:
