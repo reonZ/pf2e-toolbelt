@@ -37,7 +37,8 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
     if (revealed) return;
 
     const isGM = game.user.isGM;
-    const diceTotalElement = htmlQuery(html, ".dice-result .dice-total");
+    const diceResult = htmlQuery(html, ".dice-result");
+    const diceTotalElement = htmlQuery(diceResult, ".dice-total");
     const totalElement = htmlQuery(diceTotalElement, ":scope > .total");
     const instancesElement = htmlQuery(diceTotalElement, ":scope > .instances");
 
@@ -52,7 +53,9 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
                 setFlag(this, "revealed", true);
             });
         } else {
+            totalElement.dataset.tooltip = "";
             totalElement.innerText = "???";
+            htmlQuery(diceResult, ".dice-tooltip")?.remove();
         }
     }
 
