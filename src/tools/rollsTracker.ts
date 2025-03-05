@@ -211,7 +211,8 @@ const {
         if (isGM) {
             Hooks.on("combatStart", onCombatStart);
         }
-
+    },
+    ready: () => {
         prepareModes();
     },
 } as const);
