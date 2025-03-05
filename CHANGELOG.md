@@ -1,3 +1,10 @@
+# 2.31.2
+
+-   `Rolls Tracker`:
+    -   fix non-creature actors being shown in the list
+    -   fix x-absis labels not being localized
+    -   fix shared actors being selected for evey user owning them
+
 # 2.31.1
 
 -   `Hide Damage`:
