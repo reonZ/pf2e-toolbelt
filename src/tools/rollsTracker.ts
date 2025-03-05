@@ -290,7 +290,10 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
                 user.isGM
                     ? [user.character]
                     : game.actors.filter(
-                          (actor) => !actor.isToken && actor.testUserPermission(user, "OWNER")
+                          (actor) =>
+                              !actor.isToken &&
+                              actor.isOfType("creature") &&
+                              actor.testUserPermission(user, "OWNER")
                       ),
                 R.isTruthy
             );
