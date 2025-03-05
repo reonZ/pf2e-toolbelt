@@ -276,7 +276,8 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
         const selected: RollsSelected[] = [];
 
         for (const user of game.users) {
-            const selectIndex = this.#selections.indexOf(`user-${user.id}`);
+            const userIndex = `user-${user.id}`;
+            const selectIndex = this.#selections.indexOf(userIndex);
             const rolls = this.getUserRolls(user);
 
             if (selectIndex >= 0) {
@@ -302,7 +303,8 @@ class RollsTracker extends foundry.applications.api.ApplicationV2 {
 
             for (const actor of actors) {
                 const actorId = actor.id;
-                const selectIndex = this.#selections.indexOf(`actor-${actorId}`);
+                const actorIndex = `${userIndex}-actor-${actorId}`;
+                const selectIndex = this.#selections.indexOf(actorIndex);
 
                 userActors.push({
                     id: actorId,

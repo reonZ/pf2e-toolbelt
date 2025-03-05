@@ -27,9 +27,13 @@
     </div>
     <div class="list">
         {{#each list as |user|}}
-        <div class="user{{user.select}}" data-id="user-{{user.id}}">{{user.name}}</div>
+        <div class="user{{user.select}}" data-id="user-{{user.id}}">
+            {{user.name}}
+        </div>
         {{#each user.actors as |actor|}}
-        <div class="actor{{actor.select}}" data-id="actor-{{actor.id}}">{{actor.name}}</div>
+        <div class="actor{{actor.select}}" data-id="user-{{user.id}}-actor-{{actor.id}}">
+            {{actor.name}}
+        </div>
         {{/each}}
         {{/each}}
     </div>
