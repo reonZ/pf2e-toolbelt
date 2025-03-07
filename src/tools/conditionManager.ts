@@ -98,7 +98,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             name: `${game.i18n.localize("TYPES.Item.effect")}: ${condition.name}`,
             img: condition.img,
             system: {
-                tokenIcon: { show: false },
+                // tokenIcon: { show: false },
                 unidentified: false,
                 duration: {
                     expiry: "turn-start",
