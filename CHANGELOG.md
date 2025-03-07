@@ -1,9 +1,16 @@
+# 2.32.0
+
+-   this is a system `6.10.0` release
+-   `Condition Manager`:
+    -   no longer disable the `Show token icon?` option from the effect
+        -   the latest system changes now also hides the effect from the `Effects Panel`
+
 # 2.31.2
 
 -   `Rolls Tracker`:
     -   fix non-creature actors being shown in the list
     -   fix x-absis labels not being localized
-    -   fix shared actors being selected for evey user owning them
+    -   fix shared actors being selected for every user owning them
 
 # 2.31.1
 
