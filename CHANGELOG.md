@@ -1,3 +1,8 @@
+# 2.32.2
+
+-   `Hide Damage`:
+    -   fix damages made by the GM without any associated actor not being hidden
+
 # 2.32.1
 
 -   `Stances`:
