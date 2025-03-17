@@ -1,3 +1,8 @@
+# 2.32.1
+
+-   `Stances`:
+    -   fix current stance not being toggled off when clicking on its button
+
 # 2.32.0
 
 -   this is a system `6.10.0` release
