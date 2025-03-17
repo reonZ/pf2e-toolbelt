@@ -31,7 +31,8 @@ async function chatMessageGetHTML(this: ChatMessagePF2e, html: HTMLElement) {
     if (!this.isContentVisible || !this.isDamageRoll) return;
 
     const actor = this.actor;
-    if (!actor || actor.hasPlayerOwner) return;
+    const author = this.author;
+    if (actor?.hasPlayerOwner || (!actor && author && !author.isGM)) return;
 
     const revealed = getFlag<boolean>(this, "revealed");
     if (revealed) return;
