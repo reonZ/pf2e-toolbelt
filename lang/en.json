@@ -762,7 +762,8 @@
                 "add": "Create",
                 "cancel": "Cancel",
                 "origin": "Origin",
-                "label": "Label"
+                "label": "Label",
+                "anonymous": "Anonymous"
             }
         },
         "rollsTracker": {

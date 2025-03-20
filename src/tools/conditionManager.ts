@@ -18,6 +18,7 @@ import { createTool } from "../tool";
 
 let MANAGE = false;
 let EFFECT_LABEL: string | undefined;
+let ANON_LABEL: string | undefined;
 
 const { config, settings, hook, localize, render } = createTool({
     name: "conditionManager",
@@ -148,12 +149,16 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     }
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<ConditionManagerContext> {
+        const isGM = game.user.isGM;
         const combat = this.#combat;
         const combatants = R.pipe(
             combat?.combatants.contents ?? [],
             R.filter((combatant) => !!combatant.actor),
             R.map((combatant) => {
-                return { value: combatant.id, label: combatant.name };
+                return {
+                    value: combatant.id,
+                    label: isGM || combatant.playersCanSeeName ? combatant.name : getAnonLabel(),
+                };
             })
         );
         const origin = combatants.length ? { combatants, selected: this.#origin!.id } : null;
@@ -165,9 +170,9 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         };
 
         return {
+            isGM,
             label,
             origin,
-            isGM: game.user.isGM,
             data: this.system,
             timeUnits: CONFIG.PF2E.timeUnits,
             counter: this.#counter,
@@ -307,6 +312,10 @@ function onPreCreateItem(item: ItemPF2e<ActorPF2e>) {
     if (!MANAGE || !item.isOfType("condition") || !item.actor) return;
     new ConditionManager(item).render(true);
     return false;
+}
+
+function getAnonLabel() {
+    return (ANON_LABEL ??= `<${localize("manager.anonymous")}>`);
 }
 
 type EventChangeName =
