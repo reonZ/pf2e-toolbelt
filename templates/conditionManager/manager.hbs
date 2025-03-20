@@ -1,4 +1,8 @@
 <div class="standard-form">
+    <div class="form-group">
+        <label>{{@root.i18n 'label'}}</label>
+        <input type="text" name="label" value="{{label.value}}" placeholder="{{label.placeholder}}">
+    </div>
     {{#if counter}}
     <div class="form-group">
         <label>{{localize 'PF2E.Item.Effect.Badge.Type.counter'}}</label>

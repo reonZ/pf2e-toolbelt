@@ -761,7 +761,8 @@
                 "title": "Condition Manager - {name}",
                 "add": "Create",
                 "cancel": "Cancel",
-                "origin": "Origin"
+                "origin": "Origin",
+                "label": "Label"
             }
         },
         "rollsTracker": {
