@@ -1680,14 +1680,16 @@ async function getMessageData(
                     const significantList =
                         foundry.utils.deepClone(saveFlag.significantModifiers) ?? [];
 
-                    const hasSignificantModifiers = R.pipe(
-                        significantList,
-                        R.map(({ value, significance }) => ({
-                            value: Math.abs(value),
-                            css: significance,
-                        })),
-                        R.firstBy([R.prop("value"), "desc"])
-                    )?.css;
+                    const hasSignificantModifiers =
+                        (showSignificant || isTargetFriendly) &&
+                        R.pipe(
+                            significantList,
+                            R.map(({ value, significance }) => ({
+                                value: Math.abs(value),
+                                css: significance,
+                            })),
+                            R.firstBy([R.prop("value"), "desc"])
+                        )?.css;
 
                     const modifiers =
                         showBreakdowns || isTargetFriendly
