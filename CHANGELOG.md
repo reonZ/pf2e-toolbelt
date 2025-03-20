@@ -1,3 +1,8 @@
+# 2.33.1
+
+-   `Condition Manager`:
+    -   fix players being able to see the name of creatures in the `Origin` select when they shouldn't (due to settings)
+
 # 2.33.0
 
 -   `Condition Manager`:
