@@ -761,7 +761,9 @@
                 "title": "Menedżer stanów - {name}",
                 "add": "Utwórz",
                 "cancel": "Anuluj",
-                "origin": "Oryginalne"
+                "origin": "Oryginalne",
+                "label": "Etykieta",
+                "anonymous": "Anonimowy"
             }
         },
         "rollsTracker": {
