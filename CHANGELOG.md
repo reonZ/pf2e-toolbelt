@@ -1,3 +1,9 @@
+# 2.33.2
+
+-   `Better Merchant`:
+    -   fix items with runes not having their price updated by filters
+    -   fix filters `Price Ratio` field being too small
+
 # 2.33.1
 
 -   `Condition Manager`:
