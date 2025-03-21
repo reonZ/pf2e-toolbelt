@@ -279,11 +279,6 @@ const {
             path: "game.pf2e.compendiumBrowser.constructor.prototype._onClose",
             callback: browserOnClose,
         },
-        {
-            key: "itemDerivedData",
-            path: ITEM_PREPARE_DERIVED_DATA,
-            callback: itemPrepareDerivedData,
-        },
     ],
     api: {
         testItem,
@@ -303,7 +298,8 @@ const {
     init: () => {
         if (!settings.enabled) return;
 
-        wrappers.itemDerivedData.activate();
+        replacePrepareDerivedData();
+
         wrappers.actorTransferItem.activate();
         wrappers.lootActorTransfer.activate();
     },
@@ -514,28 +510,36 @@ async function buyItem(
     });
 }
 
-function itemPrepareDerivedData(this: ItemPF2e, wrapped: libWrapper.RegisterCallback) {
-    wrapped();
-
+function replacePrepareDerivedData() {
     try {
-        if (!this.isOfType("physical") || this.isOfType("treasure")) return;
+        const PhysicalItemPF2eCls = Reflect.getPrototypeOf(
+            CONFIG.PF2E.Item.documentClasses.armor
+        ) as typeof PhysicalItemPF2e;
 
-        const actor = this.actor;
-        if (!actor?.isOfType("loot") || !actor.isMerchant) return;
+        const _prepareDerivedData = PhysicalItemPF2eCls.prototype.prepareDerivedData;
 
-        deleteInMemory(this);
+        PhysicalItemPF2eCls.prototype.prepareDerivedData = function (this: PhysicalItemPF2e) {
+            _prepareDerivedData.call(this);
 
-        const infinite = getFlag<boolean>(actor, "infiniteAll");
-        const itemFilter = testItem(actor, this, "sell", this.system.price.per);
+            if (this.isOfType("treasure")) return;
 
-        if (infinite) {
-            this.system.quantity = 9999;
-        }
+            const actor = this.actor;
+            if (!actor?.isOfType("loot") || !actor.isMerchant) return;
 
-        if (itemFilter && itemFilter.filter.ratio !== 1) {
-            this.system.price.value = itemFilter.price;
-            setInMemory(this, "filter", itemFilter.filter.id);
-        }
+            deleteInMemory(this);
+
+            const infinite = getFlag<boolean>(actor, "infiniteAll");
+            const itemFilter = testItem(actor, this, "sell", this.system.price.per);
+
+            if (infinite) {
+                this.system.quantity = 9999;
+            }
+
+            if (itemFilter && itemFilter.filter.ratio !== 1) {
+                this.system.price.value = itemFilter.price;
+                setInMemory(this, "filter", itemFilter.filter.id);
+            }
+        };
     } catch (error) {
         wrapperError(ITEM_PREPARE_DERIVED_DATA, error);
     }
