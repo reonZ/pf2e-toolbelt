@@ -1386,6 +1386,7 @@ class ServiceMenu extends foundry.applications.api.ApplicationV2 {
         tag: "form",
         position: {
             width: 600,
+            height: 500,
         },
         form: {
             handler: ServiceMenu.myFormHandler,
