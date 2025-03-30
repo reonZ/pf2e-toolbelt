@@ -1,3 +1,9 @@
+# 2.33.3
+
+-   `Better Merchant`:
+    -   increase the height of the service menu app
+    -   fix description editor header scrolling out of bounds when reaching the bottom of the section
+
 # 2.33.2
 
 -   `Better Merchant`:
