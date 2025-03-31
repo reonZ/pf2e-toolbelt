@@ -9,6 +9,7 @@ import {
     FeatPF2e,
     FeatSheetPF2e,
     ItemPF2e,
+    MacroPF2e,
     R,
     SpellPF2e,
     SpellSheetPF2e,
@@ -18,6 +19,7 @@ import {
     createHTMLElement,
     elementDataset,
     getActionGlyph,
+    handleSelfEffectDrop,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
@@ -298,33 +300,49 @@ async function spellcastingEntryPF2eCast(
 async function itemSheetPF2eOnDrop(this: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
     if (!this.isEditable) return;
 
-    const item = await (async (): Promise<ItemPF2e | Macro | null> => {
+    const item = await (async (): Promise<Maybe<ItemPF2e | MacroPF2e>> => {
         try {
             const dataString = event.dataTransfer?.getData("text/plain");
             const dropData = JSON.parse(dataString ?? "");
-            if (typeof dropData !== "object") return null;
+            if (typeof dropData !== "object") return;
 
             if (dropData.type === "Item") {
-                return (await getDocumentClass("Item").fromDropData(dropData)) ?? null;
+                return await getDocumentClass("Item").fromDropData(dropData);
             }
 
             if (dropData.type === "Macro") {
-                return (await getDocumentClass("Macro").fromDropData(dropData)) ?? null;
+                return await getDocumentClass("Macro").fromDropData(dropData);
             }
-
-            return null;
         } catch {
             return null;
         }
     })();
 
-    if (item instanceof Item && item.isOfType("effect")) {
-        await this.item.update({ "system.selfEffect": { uuid: item.uuid, name: item.name } });
-    } else if (item instanceof Macro) {
+    if (!item) return;
+
+    if (item instanceof Macro) {
         await setFlag(this.item, "macro", item.uuid);
-    } else {
-        throw ErrorPF2e("Invalid item drop");
+        return;
     }
+
+    if (await handleSelfEffectDrop(this, item)) return;
+
+    if (
+        this.item.isOfType("feat") &&
+        item.isOfType("feat") &&
+        item.category === "classfeature" &&
+        item.sourceId &&
+        item.sourceId !== this.item.sourceId
+    ) {
+        const feats = this.item._source.system.subfeatures?.suppressedFeatures ?? [];
+        if (!feats.includes(item.sourceId)) {
+            const newFeatures = [...feats, item.sourceId];
+            await this.item.update({ "system.subfeatures.suppressedFeatures": newFeatures });
+        }
+        return;
+    }
+
+    throw ErrorPF2e("Invalid item drop");
 }
 
 async function getActionMacro(item: Maybe<ItemPF2e>) {
