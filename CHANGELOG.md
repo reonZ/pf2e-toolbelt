@@ -1,3 +1,9 @@
+# 2.33.4
+
+-   `Actionable`:
+    -   fix not being able to drop feats in the `Suppressed Class Features` field
+    -   fix localization of macro delete button tooltip
+
 # 2.33.3
 
 -   `Better Merchant`:
