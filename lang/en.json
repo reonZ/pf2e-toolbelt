@@ -326,7 +326,7 @@
                 "title": "Condition Manager",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Let you turn a regular condition into an effet+condition combo with duration."
+                    "hint": "Drag a condition while holding the defined keybind to open the condition manager allowing you to set its duration."
                 }
             },
             "rollsTracker": {
