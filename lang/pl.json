@@ -326,7 +326,7 @@
                 "title": "Menedżer stanów",
                 "enabled": {
                     "name": "Włączone",
-                    "hint": "Pozwala zamienić zwykły stan w kombinację efekt+stan z czasem trwania."
+                    "hint": "Przeciągnij stan, przytrzymując zdefiniowane powiązanie klawiszy, aby otworzyć menedżera stanów, umożliwiając ustawienie jego czasu trwania."
                 }
             },
             "rollsTracker": {
