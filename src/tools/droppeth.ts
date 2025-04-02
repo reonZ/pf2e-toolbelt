@@ -21,8 +21,6 @@ import {
 import { createTool } from "../tool";
 import { globalSettings } from "./global";
 
-let DROPPETH = false;
-
 const DEFAULT_IMG = "systems/pf2e/icons/default-icons/backpack.svg";
 
 const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProperty } = createTool(
@@ -35,7 +33,7 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
                 default: false,
                 onChange: (value: boolean) => {
                     wrapper.toggle(value);
-                    hooks.toggleAll(value);
+                    hooks.preDeleteToken.toggle(value);
                     socket.toggle(value && game.user.isGM);
                 },
             },
@@ -78,10 +76,12 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
                 name: "droppeth",
                 editable: [{ key: "ControlLeft", modifiers: [] }],
                 onDown: () => {
-                    DROPPETH = true;
+                    if (settings.enabled) {
+                        hooks.dropCanvasData.activate();
+                    }
                 },
                 onUp: () => {
-                    DROPPETH = false;
+                    hooks.dropCanvasData.disable();
                 },
             },
         ],
@@ -98,11 +98,11 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
             }
         },
         ready: (isGM) => {
-            const enabled = settings.enabled;
+            if (!settings.enabled) return;
 
-            wrapper.toggle(enabled);
-            hooks.toggleAll(enabled);
-            socket.toggle(enabled && game.user.isGM);
+            wrapper.activate();
+            hooks.preDeleteToken.activate();
+            socket.toggle(game.user.isGM);
         },
     } as const
 );
@@ -110,7 +110,7 @@ const { config, settings, hooks, wrapper, socket, localize, getFlag, setFlagProp
 const droppethRequest = createCallOrEmit("drop", droppethItem, socket);
 
 function onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData) {
-    if (!DROPPETH || data.type !== "Item" || !R.isString(data.uuid)) return true;
+    if (data.type !== "Item" || !R.isString(data.uuid)) return true;
 
     const item = fromUuidSync<ItemPF2e>(data.uuid);
     if (!item || !itemIsOfType(item, "physical")) return true;
