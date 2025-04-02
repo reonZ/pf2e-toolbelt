@@ -15,6 +15,7 @@ import {
     initiateTransfer,
     isPrimaryUpdater,
     itemIsOfType,
+    positionTokenFromCoords,
     updateTransferSource,
 } from "module-helpers";
 import { createTool } from "../tool";
@@ -241,10 +242,7 @@ async function droppethItem({ item, x, y, quantity }: DroppethOptions, userId: s
         tokenDocument
     );
 
-    let position = token.getCenterPoint({ x: 0, y: 0 });
-    position.x = x - position.x;
-    position.y = y - position.y;
-    position = token.getSnappedPosition(position);
+    const position = positionTokenFromCoords({ x, y }, token);
 
     token.destroy({ children: true });
     tokenDocument.updateSource(position);
