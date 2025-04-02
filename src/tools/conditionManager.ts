@@ -16,9 +16,7 @@ import {
 } from "module-helpers";
 import { createTool } from "../tool";
 
-let MANAGE = false;
-let EFFECT_LABEL: string | undefined;
-let ANON_LABEL: string | undefined;
+const CACHE: ToolCache = {};
 
 const { config, settings, hook, localize, render } = createTool({
     name: "conditionManager",
@@ -28,9 +26,6 @@ const { config, settings, hook, localize, render } = createTool({
             type: Boolean,
             default: false,
             scope: "client",
-            onChange: (value: boolean) => {
-                hook.toggle(value);
-            },
         },
     ],
     hooks: [
@@ -43,16 +38,15 @@ const { config, settings, hook, localize, render } = createTool({
         {
             name: "manage",
             onDown: () => {
-                MANAGE = true;
+                if (settings.enabled) {
+                    hook.activate();
+                }
             },
             onUp: () => {
-                MANAGE = false;
+                hook.disable();
             },
         },
     ],
-    init: () => {
-        hook.toggle(settings.enabled);
-    },
 } as const);
 
 class ConditionManager extends foundry.applications.api.ApplicationV2 {
@@ -135,7 +129,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     }
 
     get effectLabel(): string {
-        const base = (EFFECT_LABEL ??= game.i18n.localize("TYPES.Item.effect"));
+        const base = (CACHE.effectLabel ??= game.i18n.localize("TYPES.Item.effect"));
         const label = `${base}: ${this.#condition.name}`;
 
         return this.#origin && this.#origin !== this.#combatant
@@ -309,13 +303,13 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 }
 
 function onPreCreateItem(item: ItemPF2e<ActorPF2e>) {
-    if (!MANAGE || !item.isOfType("condition") || !item.actor) return;
+    if (!item.isOfType("condition") || !item.actor) return;
     new ConditionManager(item).render(true);
     return false;
 }
 
 function getAnonLabel() {
-    return (ANON_LABEL ??= `<${localize("manager.anonymous")}>`);
+    return (CACHE.anonLabel ??= `<${localize("manager.anonymous")}>`);
 }
 
 type EventChangeName =
@@ -343,6 +337,11 @@ type ConditionManagerContext = {
         value: string;
         label: string;
     }[];
+};
+
+type ToolCache = {
+    effectLabel?: string;
+    anonLabel?: string;
 };
 
 export { config as conditionManager };
