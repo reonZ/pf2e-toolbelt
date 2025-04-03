@@ -42,6 +42,12 @@
                     "name": "Zarządzanie stanem",
                     "hint": "Klawisz przytrzymywany podczas porzucania stanu w celu zarządzania jego czasem trwania."
                 }
+            },
+            "teleport": {
+                "teleport": {
+                    "name": "Teleport tokenów",
+                    "hint": "Klawisz przytrzymany podczas klikania sceny teleportuje wszystkie wybrane tokeny."
+                }
             }
         },
         "settings": {
@@ -336,6 +342,17 @@
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Śledź rzuty, aby sprawdzić, czy naprawdę masz takiego pecha."
+                }
+            },
+            "teleport": {
+                "title": "Teleport tokenów",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Kliknięcie na planszy przy jednoczesnym przytrzymaniu zdefiniowanego powiązanego klawisza spowoduje natychmiastowe teleportowanie wybranych tokenów do lokalizacji bez konieczności podróżowania."
+                },
+                "expand": {
+                    "name": "Rozejście tokenów",
+                    "hint": "Po teleportacji tokeny będą próbowały rozejść się z wybranej lokalizacji."
                 }
             }
         },
