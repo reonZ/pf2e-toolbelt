@@ -1,3 +1,14 @@
+# 2.34.0
+
+-   add new `Teleport Tokens` feature:
+    -   this is a gm only feature and will move tokens anywhere in a scene without any travel time
+    -   2 keybinds are available (no key is bound by default)
+        -   the `(Uselect)` keybind will also unselect all the tokens to give an unobstructed vision of the scene
+    -   tokens will fan out in a small radius around the target location while being constrained by any `move` wall
+    -   if `[Right Click]` is used instead, all the tokens will stack on top of each other at the location
+-   `Condition Manager`:
+    -   update the setting description to make it clear that a keybind is involved in the the feature's process
+
 # 2.33.4
 
 -   `Actionable`:
