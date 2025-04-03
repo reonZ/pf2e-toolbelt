@@ -47,6 +47,10 @@
                 "teleport": {
                     "name": "Teleport tokenów",
                     "hint": "Klawisz przytrzymany podczas klikania sceny teleportuje wszystkie wybrane tokeny."
+                },
+                "unselect": {
+                    "name": "Teleport tokenów (Odznacz)",
+                    "hint": "Przytrzymanie klawisza podczas klikania sceny powoduje teleportację wszystkich wybranych tokenów. Usunięcie zaznaczenia tokenów po naciśnięciu klawisza daje nieograniczony widok na całą scenę."
                 }
             }
         },
