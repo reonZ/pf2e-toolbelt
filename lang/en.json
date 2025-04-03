@@ -353,10 +353,6 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Clicking on the board while holding the defined keybind will instanlty teleport the selected tokens to location without any travel."
-                },
-                "spread": {
-                    "name": "Fan Out Tokens",
-                    "hint": "Once teleported, the tokens will attempt to fan out from the selected location."
                 }
             }
         },

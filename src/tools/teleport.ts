@@ -43,13 +43,6 @@ const { config, settings } = createTool({
             scope: "client",
             gmOnly: true,
         },
-        {
-            key: "spread",
-            type: Boolean,
-            default: true,
-            scope: "client",
-            gmOnly: true,
-        },
     ],
     keybinds: [
         {
@@ -96,10 +89,15 @@ function disableTeleport() {
 
 async function onCanvasStagePointerDown(event: PIXI.FederatedPointerEvent) {
     const operation = { animate: false, bypass: true };
-    const updates = settings.spread ? spreadTokens(event) : groupTokens(event);
+    const updates = event.button !== 2 ? spreadTokens(event) : groupTokens(event);
 
     await canvas.scene?.updateEmbeddedDocuments("Token", updates, operation);
+
     disableTeleport();
+
+    if (event.button !== 0) {
+        canvas.tokens.releaseAll();
+    }
 }
 
 function spreadTokens(event: PIXI.FederatedPointerEvent): PositionUpdate[] {
