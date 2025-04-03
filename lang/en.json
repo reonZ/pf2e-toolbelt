@@ -47,6 +47,10 @@
                 "teleport": {
                     "name": "Teleport Tokens",
                     "hint": "Key held while clicking on the scene to teleport all selected tokens."
+                },
+                "unselect": {
+                    "name": "Teleport Tokens (Unselect)",
+                    "hint": "Key held while clicking on the scene to teleport all selected tokens. Also unselect the tokens when pressing the keybind to give an unobstructed vision over the whole scene."
                 }
             }
         },

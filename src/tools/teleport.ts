@@ -19,21 +19,43 @@ const { config, settings } = createTool({
             name: "teleport",
             restricted: true,
             onDown: () => {
-                if (!settings.enabled) return;
-
-                TOKENS.push(...canvas.tokens.controlled);
-
-                if (TOKENS.length) {
-                    canvas.stage.on("pointerdown", onCanvasStagePointerDown);
-                }
+                activeTeleport(false);
             },
             onUp: () => {
-                TOKENS.length = 0;
-                canvas.stage.off("pointerdown", onCanvasStagePointerDown);
+                disableTeleport();
+            },
+        },
+        {
+            name: "unselect",
+            restricted: true,
+            onDown: () => {
+                activeTeleport(true);
+            },
+            onUp: () => {
+                disableTeleport();
             },
         },
     ],
 } as const);
+
+function activeTeleport(unselect: boolean) {
+    if (!settings.enabled) return;
+
+    TOKENS.push(...canvas.tokens.controlled);
+
+    if (unselect) {
+        canvas.tokens.releaseAll();
+    }
+
+    if (TOKENS.length) {
+        canvas.stage.on("pointerdown", onCanvasStagePointerDown);
+    }
+}
+
+function disableTeleport() {
+    TOKENS.length = 0;
+    canvas.stage.off("pointerdown", onCanvasStagePointerDown);
+}
 
 async function onCanvasStagePointerDown(event: PIXI.FederatedPointerEvent) {
     const operation = { animate: false, bypass: true };
