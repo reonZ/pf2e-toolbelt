@@ -26,6 +26,8 @@
                 "staff": "Staff",
                 "charges": "Charges"
             },
+            "gmOnly": "GM Only",
+            "reloadRequired": "Requires Reload",
             "sending": "Sending"
         },
         "keybindings": {
@@ -39,6 +41,12 @@
                 "manage": {
                     "name": "Manage Condition",
                     "hint": "Key held when dropping a condition to manage its duration."
+                }
+            },
+            "teleport": {
+                "teleport": {
+                    "name": "Teleport Tokens",
+                    "hint": "Key held while clicking on the scene to teleport all selected tokens."
                 }
             }
         },
@@ -334,6 +342,13 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Track rolls to see if you are really that unlucky."
+                }
+            },
+            "teleport": {
+                "title": "Teleport Tokens",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Clicking on the board while holding the defined keybind will instanlty teleport the selected tokens to location without any travel."
                 }
             }
         },

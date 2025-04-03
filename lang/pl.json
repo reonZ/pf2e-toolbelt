@@ -26,6 +26,8 @@
                 "staff": "Kostur",
                 "charges": "Ładunki"
             },
+            "gmOnly": "Tylko MG",
+            "reloadRequired": "Wymaga przeładowania",
             "sending": "Wysyłanie"
         },
         "keybindings": {

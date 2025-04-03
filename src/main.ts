@@ -21,6 +21,7 @@ import { ShareTool } from "./tools/share";
 import { spellsSummaryTool } from "./tools/spellsSummary";
 import { stancesTool } from "./tools/stances";
 import { targetHelperTool } from "./tools/targetHelper";
+import { teleportTool } from "./tools/teleport";
 import { templateHelperTool } from "./tools/templateHelper";
 import { undergroundTool } from "./tools/underground";
 import { unidedTool } from "./tools/unided";
@@ -51,6 +52,7 @@ const TOOLS: ToolConfig[] = [
     spellsSummaryTool,
     stancesTool,
     targetHelperTool,
+    teleportTool,
     templateHelperTool,
     undergroundTool,
     useButtonTool,
