@@ -1,5 +1,6 @@
 import {
     MODULE,
+    addExtraInfoToSettingLabel,
     createHTMLElement,
     elementDataset,
     htmlQuery,
@@ -32,10 +33,7 @@ function onRenderSettingsConfig(app: SettingsConfig, $html: JQuery) {
         const { settingId } = elementDataset(group);
         const setting = game.settings.settings.get(settingId);
 
-        if (setting.requiresReload) {
-            const label = htmlQuery(group, "label")!;
-            label.textContent = `${label.textContent} ${localize("settings.requiresReload")}`;
-        }
+        addExtraInfoToSettingLabel(setting, group);
     }
 }
 
