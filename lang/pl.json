@@ -350,7 +350,7 @@
                     "name": "Włączone",
                     "hint": "Kliknięcie na planszy przy jednoczesnym przytrzymaniu zdefiniowanego powiązanego klawisza spowoduje natychmiastowe teleportowanie wybranych tokenów do lokalizacji bez konieczności podróżowania."
                 },
-                "expand": {
+                "spread": {
                     "name": "Rozejście tokenów",
                     "hint": "Po teleportacji tokeny będą próbowały rozejść się z wybranej lokalizacji."
                 }
