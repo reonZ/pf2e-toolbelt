@@ -586,7 +586,11 @@ async function getHeroActionDetails(uuid: string) {
         return;
     }
 
-    if (parent.uuid === JOURNAL_UUID) text = text.replace(/^<p>/, "<p><strong>Trigger</strong> ");
+    if (parent.uuid === JOURNAL_UUID) {
+        const triggerLabel = localize("trigger");
+        text = text.replace(/^<p>/, `<p><strong>${triggerLabel}</strong> `);
+    }
+
     return { name: page.name, description: text };
 }
 

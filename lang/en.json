@@ -407,6 +407,7 @@
             }
         },
         "heroActions": {
+            "trigger": "Trigger",
             "sheet": {
                 "action": {
                     "use": "Use",
