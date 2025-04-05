@@ -353,6 +353,10 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Clicking on the board while holding the defined keybind will instanlty teleport the selected tokens to location without any travel."
+                },
+                "select": {
+                    "name": "Re-Select Tokens",
+                    "hint": "Should the tokens be re-selected at the end the move."
                 }
             }
         },
