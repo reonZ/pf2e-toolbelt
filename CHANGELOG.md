@@ -1,3 +1,17 @@
+# 2.35.0
+
+-   `Hero Actions`:
+    -   fix the `Trigger` added by the module to system hero deck actions not being localized
+-   `Teleport Tokens`:
+    -   add new `Re-Select Tokens` setting (disabled by default)
+        -   re-select the tokens at the end of the teleport
+    -   improve the spread algorithm so tokens can be moved around corners
+        -   this is still a simple logic, but it should be enough for the majority of cases
+    -   no longer start to spread on the outer squares when a large & larger token is in the selection
+    -   now sort tokens by size so that larger tokens are behind smaller ones
+    -   now put the center of large & larger tokens at the center of the square to make sure they don't end up seeing the wrong side of a wall
+    -   fix large & larger tokens not being teleported if only one of them was in the selection
+
 # 2.34.0
 
 -   add new `Teleport Tokens` feature:
