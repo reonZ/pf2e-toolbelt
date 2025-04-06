@@ -265,7 +265,7 @@
                 }
             },
             "betterMerchant": {
-                "title": "Lepszy kupiec",
+                "title": "Lepszy Kupiec",
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Dodawanie niestandardowych funkcji do domyślnego kupca systemowego."
@@ -353,6 +353,10 @@
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Kliknięcie na planszy przy jednoczesnym przytrzymaniu zdefiniowanego powiązanego klawisza spowoduje natychmiastowe teleportowanie wybranych tokenów do lokalizacji bez konieczności podróżowania."
+                },
+                "select": {
+                    "name": "Ponowny wybór tokenów",
+                    "hint": "Czy tokeny powinny zostać ponownie wybrane na koniec ruchu."
                 }
             }
         },
@@ -407,6 +411,7 @@
             }
         },
         "heroActions": {
+            "trigger": "Wyzwalacz",
             "sheet": {
                 "action": {
                     "use": "Użyj",
@@ -419,19 +424,19 @@
                 "give": "Przekaż"
             },
             "trade": {
-                "title": "Handluj Akcją Heroiczną",
-                "select": "Wybierz postać, z którą chcesz handlować",
+                "title": "Wymień się Akcją Heroiczną",
+                "select": "Wybierz postać, z którą chcesz się wymienić",
                 "yes": "Wyślij",
                 "no": "Anuluj",
                 "request": {
                     "title": "Akcja Heroiczna - Prośba o wymianę",
-                    "flavor": "Postać <strong>{sender} </strong> chce handlować z <strong>{receiver}</strong>",
+                    "flavor": "Postać <strong>{sender} </strong> chce wymienić się z <strong>{receiver}</strong>",
                     "give": "Oferuje: {give}",
                     "want": "Potrzebuje: {want}",
                     "yes": "Akceptuj",
                     "no": "Odrzuć"
                 },
-                "rejected": "Handel pomiędzy <strong>{sender}</strong> i <strong>{receiver}</strong> została odrzucona."
+                "rejected": "Wymiana pomiędzy <strong>{sender}</strong> i <strong>{receiver}</strong> została odrzucona."
             },
             "giveActions": {
                 "title": "Podaruj Akcję Heroiczną",
@@ -780,7 +785,7 @@
                 "title": "Menedżer stanów - {name}",
                 "add": "Utwórz",
                 "cancel": "Anuluj",
-                "origin": "Oryginalne",
+                "origin": "Aktor źródłowy",
                 "label": "Etykieta",
                 "anonymous": "Anonimowy"
             }
