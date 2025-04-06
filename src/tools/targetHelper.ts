@@ -1843,12 +1843,7 @@ type MessageSaveData = MessageSaveFlag & {
     label: string;
 };
 
-type MessageSaveFlag = {
-    statistic: SaveType;
-    basic: boolean;
-    dc: number;
-    author?: string;
-};
+type MessageSaveFlag = toolbelt.targetHelper.MessageSaveFlag;
 
 type MessageDataWithSave = Omit<MessageData, "save"> & { save: MessageSaveDataWithTooltip };
 
