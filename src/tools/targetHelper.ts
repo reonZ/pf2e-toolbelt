@@ -1249,7 +1249,7 @@ async function rollSaves(
     targets: TokenDocumentPF2e[]
 ) {
     const msgFlag = getToolFlag<MessageFlag>(message) ?? {};
-    const msgSaves = (msgFlag.saves = {});
+    const msgSaves = (msgFlag.saves ??= {});
 
     const user = game.user;
     const msgActor = message.actor;
