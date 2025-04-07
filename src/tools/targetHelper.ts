@@ -7,7 +7,6 @@ import {
     CreaturePF2e,
     DEGREE_OF_SUCCESS_STRINGS,
     DamageRoll,
-    DegreeAdjustmentsRecord,
     DegreeOfSuccess,
     DegreeOfSuccessString,
     ItemPF2e,
@@ -1843,40 +1842,12 @@ type MessageSaveData = MessageSaveFlag & {
     label: string;
 };
 
+type TargetMessageType = toolbelt.targetHelper.TargetMessageType;
 type MessageSaveFlag = toolbelt.targetHelper.MessageSaveFlag;
+type MessageTargetSave = toolbelt.targetHelper.MessageTargetSave;
+type MessageFlag = toolbelt.targetHelper.MessageFlag;
 
 type MessageDataWithSave = Omit<MessageData, "save"> & { save: MessageSaveDataWithTooltip };
-
-type MessageTargetSave = {
-    private: boolean;
-    value: number;
-    die: number;
-    success: DegreeOfSuccessString;
-    roll: string;
-    notes: RollNoteSource[];
-    dosAdjustments: DegreeAdjustmentsRecord | undefined;
-    unadjustedOutcome?: DegreeOfSuccessString | null;
-    modifiers: { label: string; modifier: number }[];
-    significantModifiers: modifiersMatter.SignificantModifier[] | undefined;
-    rerolled?: keyof typeof REROLL;
-    statistic: SaveType;
-};
-
-type TargetMessageType = "damage" | "spell-damage" | "spell-save" | "action" | "check";
-
-type MessageFlag = {
-    type?: TargetMessageType;
-    targets?: string[];
-    save?: MessageSaveFlag;
-    saves?: Record<string, MessageTargetSave>;
-    splashIndex?: number;
-    isRegen?: boolean;
-    applied?: Record<string, boolean[]>;
-    options?: string[];
-    traits?: string[];
-    item?: ItemUUID;
-    splashTargets?: string[];
-};
 
 type CheckLinkData = {
     pf2Check: SaveType;
