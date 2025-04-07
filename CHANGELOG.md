@@ -1,3 +1,9 @@
+# 2.35.1
+
+-   `Target Helper`:
+    -   make sure to always add the `damaging-effect` when a save is basic
+        -   this is mostly for third party module who manually feed data to the feature's flag
+
 # 2.35.0
 
 -   `Hero Actions`:
