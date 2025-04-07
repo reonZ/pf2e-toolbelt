@@ -1245,7 +1245,7 @@ function createSetTargetsBtn(message: ChatMessagePF2e, isAnchor = false) {
 async function rollSaves(
     event: MouseEvent,
     message: ChatMessagePF2e,
-    { dc, statistic }: MessageSaveData,
+    { dc, statistic, basic }: MessageSaveData,
     targets: TokenDocumentPF2e[]
 ) {
     const msgFlag = getToolFlag<MessageFlag>(message) ?? {};
@@ -1262,7 +1262,7 @@ async function rollSaves(
         return item instanceof Item && item.actor ? item : message.item;
     })();
 
-    const extraRollOptions = getExtraRollOptions(msgFlag);
+    const extraRollOptions = getExtraRollOptions(msgFlag, basic);
 
     await Promise.all(
         targets.map((target) => {
@@ -1353,7 +1353,7 @@ function getAppliedDamage(message: ChatMessagePF2e, targetId: string) {
 async function rerollSave(
     event: MouseEvent,
     message: ChatMessagePF2e,
-    { dc, statistic }: MessageSaveData,
+    { dc, statistic, basic }: MessageSaveData,
     target: TokenDocumentPF2e
 ) {
     const actor = target?.actor as CreaturePF2e | undefined;
@@ -1434,7 +1434,7 @@ async function rerollSave(
     }
 
     const msgFlag = getToolFlag<MessageFlag>(message) ?? {};
-    const extraRollOptions = getExtraRollOptions(msgFlag);
+    const extraRollOptions = getExtraRollOptions(msgFlag, basic);
 
     const domains = actor.saves[statistic].domains;
     const outcome = DEGREE_OF_SUCCESS_STRINGS[keptRoll.degreeOfSuccess!];
