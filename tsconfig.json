@@ -19,7 +19,8 @@
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "types": ["module-helpers"],
         "rootDir": "src",
-        "outDir": "scripts"
+        "outDir": "scripts",
+        "baseUrl": "src"
     },
     "include": ["./src/**/*"]
 }

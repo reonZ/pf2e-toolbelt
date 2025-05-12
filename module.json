@@ -12,12 +12,12 @@
         "scripts/main.js"
     ],
     "compatibility": {
-        "minimum": "12.329",
-        "verified": "12.331",
-        "maximum": "12"
+        "minimum": "13.342",
+        "verified": "13.342",
+        "maximum": "13"
     },
     "socket": true,
-    "version": "2.35.1",
+    "version": "3.0.0",
     "url": "https://github.com/reonZ/pf2e-toolbelt",
     "readme": "https://github.com/reonZ/pf2e-toolbelt/blob/master/README.md",
     "manifest": "https://raw.githubusercontent.com/reonZ/pf2e-toolbelt/master/module.json",
