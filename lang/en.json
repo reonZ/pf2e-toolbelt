@@ -4,6 +4,15 @@
         "reloadRequired": "Requires Reload"
     },
     "pf2e-toolbelt": {
+        "keybindings": {
+            "conditionManager": {
+                "title": "Condition Manager",
+                "manage": {
+                    "name": "Manage Condition",
+                    "hint": "Key held when dropping a condition to manage its duration."
+                }
+            }
+        },
         "settings": {
             "arp": {
                 "title": "Automatic Rune Progression",
@@ -15,7 +24,22 @@
                     "name": "Force Update",
                     "hint": "When enabled, the runes will always be updated based on actor level. When disabled only the runes that are currently at a lower value than what they should be for that level will be upgraded."
                 }
+            },
+            "conditionManager": {
+                "title": "Condition Manager",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Drag a condition while holding the defined keybind to open the condition manager allowing you to set its duration."
+                }
             }
+        },
+        "condition-manager": {
+            "title": "Condition Manager - {name}",
+            "add": "Create",
+            "cancel": "Cancel",
+            "origin": "Origin",
+            "label": "Label",
+            "anonymous": "Anonymous"
         }
     }
 }

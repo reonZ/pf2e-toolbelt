@@ -6,8 +6,7 @@ import {
     userIsGM,
 } from "module-helpers";
 import { ModuleTool } from "module-tool";
-import { ArpTool } from "tools";
-import { ConditionManagerTool } from "tools/condition.manager";
+import { ArpTool, ConditionManagerTool } from "tools";
 
 const TOOLS: ModuleTool<Record<string, string | number | boolean>>[] = [
     new ArpTool(),
