@@ -3,6 +3,7 @@
 -   `Automatic Rune Progression`:
     -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
     -   now allow the use of `Handwraps of Mighty Blows` without the `Invested` trait
+    -   fix fundamental run selects not always being hidden from the item sheet when `Force Update` is enabled
 
 # 2.35.1
 

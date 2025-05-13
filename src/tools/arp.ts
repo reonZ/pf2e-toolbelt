@@ -4,6 +4,8 @@ import {
     ArmorPF2e,
     createHook,
     createToggleableWrapper,
+    ItemSheetPF2e,
+    PhysicalItemPF2e,
     WeaponPF2e,
     ZeroToFour,
 } from "module-helpers";
@@ -11,6 +13,7 @@ import { ModuleTool } from "tool";
 import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "./_shared";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
+const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
 class ArpTool extends ModuleTool<Settings> {
     #renderItemSheetHook = createHook(
@@ -96,7 +99,27 @@ class ArpTool extends ModuleTool<Settings> {
         activateWrappers(this.#wrappers);
     }
 
-    #onRenderPhysicalItemSheetPF2e() {}
+    #onRenderPhysicalItemSheetPF2e(
+        sheet: ItemSheetPF2e<PhysicalItemPF2e<ActorPF2e>>,
+        $html: JQuery
+    ) {
+        const item = sheet.item;
+        if (!item.isOfType("weapon", "armor") || !isValidActor(item.actor, true)) return;
+
+        const html = $html[0];
+        const runesSection = html.querySelector(".tab.details .material-runes");
+        if (!runesSection) return;
+
+        const lookups = ["potency", "striking", "resilient"]
+            .map((x) => `[name="system.runes.${x}"], [data-property="system.runes.${x}"]`)
+            .join(", ");
+
+        const groups = runesSection.querySelectorAll<HTMLElement>(`.form-group:has(${lookups})`);
+
+        for (const group of groups) {
+            group.style.display = "none";
+        }
+    }
 
     #weaponPrepareBaseData(weapon: WeaponPF2e<ActorPF2e>) {
         const actor = weapon.actor;
@@ -214,7 +237,7 @@ function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
         return hasHandwrap(weapon.actor);
     }
 
-    if (group === "shield" && (!baseItem || !["shield-boss", "shield-spikes"].includes(baseItem))) {
+    if (group === "shield" && (!baseItem || !STRIKING_SHIELDS.includes(baseItem))) {
         return false;
     }
 
