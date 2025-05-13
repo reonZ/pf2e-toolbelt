@@ -1,4 +1,4 @@
-import { MODULE, R } from "module-helpers";
+import { MODULE, R, userIsGM } from "module-helpers";
 import { ModuleTool } from "tool";
 import { ArpTool } from "tools";
 
@@ -14,3 +14,21 @@ MODULE.register("pf2e-toolbelt", {
     ),
 });
 MODULE.enableDebugMode();
+
+Hooks.once("init", () => {
+    const isGM = userIsGM();
+
+    for (const tool of TOOLS) {
+        tool.init(isGM);
+    }
+
+    MODULE.debug(TOOLS);
+});
+
+Hooks.once("ready", () => {
+    const isGM = userIsGM();
+
+    for (const tool of TOOLS) {
+        tool.ready(isGM);
+    }
+});

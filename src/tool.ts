@@ -4,8 +4,11 @@ abstract class ModuleTool<TSettings extends Record<string, string | number | boo
     abstract get key(): string;
     abstract get settings(): ReadonlyArray<ToolSetting<TSettings>>;
 
+    init(isGM: boolean) {}
+    ready(isGM: boolean) {}
+
     getSetting<K extends keyof TSettings & string>(setting: K): TSettings[K] {
-        return getSetting(setting);
+        return getSetting(`${this.key}.${setting}`);
     }
 }
 
