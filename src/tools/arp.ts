@@ -1,6 +1,68 @@
+import {
+    activateWrappers,
+    ActorPF2e,
+    ArmorPF2e,
+    createHook,
+    createToggleableWrapper,
+    WeaponPF2e,
+    ZeroToFour,
+} from "module-helpers";
 import { ModuleTool } from "tool";
+import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "./_shared";
+
+const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 
 class ArpTool extends ModuleTool<Settings> {
+    #renderItemSheetHook = createHook(
+        "renderPhysicalItemSheetPF2e",
+        this.#onRenderPhysicalItemSheetPF2e.bind(this)
+    );
+
+    #wrappers = [
+        sharedWeaponPrepareBaseData.register(this.#weaponPrepareBaseData, { context: this }),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData",
+            this.#weaponPrepareDerivedData,
+            { context: this }
+        ),
+        sharedArmorPrepareBaseData.register(this.#armorPrepareBaseData, { context: this }),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData",
+            this.#armorPrepareDerivedData,
+            { context: this }
+        ),
+    ];
+
+    static WEAPON_POTENCY_PRICE = {
+        1: 35,
+        2: 935,
+        3: 8935,
+        4: 8935,
+    };
+
+    static WEAPON_STRIKING_PRICE = {
+        1: 65,
+        2: 1065,
+        3: 31065,
+        4: 31065,
+    };
+
+    static ARMOR_POTENCY_PRICE = {
+        1: 160,
+        2: 1060,
+        3: 20560,
+        4: 20560,
+    };
+
+    static ARMOR_RESILIENCY_PRICE = {
+        1: 340,
+        2: 3440,
+        3: 49440,
+        4: 49440,
+    };
+
     get key(): "arp" {
         return "arp";
     }
@@ -23,6 +85,161 @@ class ArpTool extends ModuleTool<Settings> {
             },
         ] as const;
     }
+
+    init(isGM: boolean): void {
+        if (!this.getSetting("enabled")) return;
+
+        if (this.getSetting("force")) {
+            this.#renderItemSheetHook.activate();
+        }
+
+        activateWrappers(this.#wrappers);
+    }
+
+    #onRenderPhysicalItemSheetPF2e() {}
+
+    #weaponPrepareBaseData(weapon: WeaponPF2e<ActorPF2e>) {
+        const actor = weapon.actor;
+        if (!isValidActor(actor, true) || !isValidWeapon(weapon)) return;
+
+        const level = actor.level;
+        const forceUpdate = this.getSetting("force");
+        const expectedPotency: ZeroToFour = level < 2 ? 0 : level < 10 ? 1 : level < 16 ? 2 : 3;
+        const expectedStriking: ZeroToFour = level < 4 ? 0 : level < 12 ? 1 : level < 19 ? 2 : 3;
+
+        if (forceUpdate || weapon.system.runes.potency <= expectedPotency) {
+            weapon.system.runes.potency = expectedPotency;
+        }
+
+        if (forceUpdate || weapon.system.runes.striking <= expectedStriking) {
+            weapon.system.runes.striking = expectedStriking;
+        }
+    }
+
+    #weaponPrepareDerivedData(weapon: WeaponPF2e<ActorPF2e>, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        if (!isValidActor(weapon.actor) || !isValidWeapon(weapon)) return;
+
+        const coins = weapon.price.value.toObject();
+        if (!coins.gp) return;
+
+        const potency = weapon.system.runes.potency;
+        const striking = weapon.system.runes.striking;
+
+        if (potency) {
+            coins.gp -= ArpTool.WEAPON_POTENCY_PRICE[potency];
+        }
+
+        if (striking) {
+            coins.gp -= ArpTool.WEAPON_STRIKING_PRICE[striking];
+        }
+
+        let newPrice = new game.pf2e.Coins(coins);
+
+        if ((potency || striking) && !weapon.system.runes.property.length) {
+            newPrice = newPrice.plus(weapon._source.system.price.value);
+        }
+
+        weapon.system.price.value = newPrice;
+    }
+
+    #armorPrepareBaseData(armor: ArmorPF2e<ActorPF2e>) {
+        const actor = armor.actor;
+        if (!isValidActor(actor, true) || !isValidArmor(armor)) return;
+
+        const level = actor.level;
+        const forceUpdate = this.getSetting("force");
+        const expectedPotency: ZeroToFour = level < 5 ? 0 : level < 11 ? 1 : level < 18 ? 2 : 3;
+        const expectedResilient: ZeroToFour = level < 8 ? 0 : level < 14 ? 1 : level < 20 ? 2 : 3;
+
+        if (forceUpdate || armor.system.runes.potency <= expectedPotency) {
+            armor.system.runes.potency = expectedPotency;
+        }
+
+        if (forceUpdate || armor.system.runes.resilient <= expectedResilient) {
+            armor.system.runes.resilient = expectedResilient;
+        }
+    }
+
+    #armorPrepareDerivedData(armor: ArmorPF2e<ActorPF2e>, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        if (!isValidActor(armor.actor) || !isValidArmor(armor)) return;
+
+        const coins = armor.price.value.toObject();
+        if (!coins.gp) return;
+
+        const potency = armor.system.runes.potency;
+        const resiliency = armor.system.runes.resilient;
+
+        if (potency) {
+            coins.gp -= ArpTool.ARMOR_POTENCY_PRICE[potency];
+        }
+
+        if (resiliency) {
+            coins.gp -= ArpTool.ARMOR_RESILIENCY_PRICE[resiliency];
+        }
+
+        let newPrice = new game.pf2e.Coins(coins);
+
+        if ((potency || resiliency) && !armor.system.runes.property.length) {
+            newPrice = newPrice.plus(armor._source.system.price.value);
+        }
+
+        armor.system.price.value = newPrice;
+    }
+}
+
+function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is ActorPF2e {
+    return (
+        !!actor &&
+        !actor.getFlag("pf2e", "disableABP") &&
+        (!isCharacter || actor.isOfType("character"))
+    );
+}
+
+function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
+    return !armor._source.system.specific;
+}
+
+function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
+    const { specific, category, group, baseItem, traits } = weapon._source.system;
+
+    if (specific) {
+        return false;
+    }
+
+    if (category === "unarmed" && !isHandwrap(weapon)) {
+        return hasHandwrap(weapon.actor);
+    }
+
+    if (group === "shield" && (!baseItem || !["shield-boss", "shield-spikes"].includes(baseItem))) {
+        return false;
+    }
+
+    return !traits.value.includes("alchemical") && !traits.value.includes("bomb");
+}
+
+function isHandwrap(weapon: WeaponPF2e<ActorPF2e>): boolean {
+    const { slug, traits } = weapon._source.system;
+    return slug === HANDWRAPS_SLUG || traits.otherTags.includes(HANDWRAPS_SLUG);
+}
+
+function hasHandwrap(actor: ActorPF2e): boolean {
+    return actor.itemTypes.weapon.some((weapon) => {
+        const { equipped, identification, category, traits } = weapon._source.system;
+        const { carryType, invested, inSlot } = equipped;
+
+        return (
+            category === "unarmed" &&
+            isHandwrap(weapon) &&
+            carryType === "worn" &&
+            inSlot &&
+            identification.status === "identified" &&
+            (!traits.value.includes("invested") || invested)
+        );
+    });
 }
 
 type Settings = {

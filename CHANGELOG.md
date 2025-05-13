@@ -1,3 +1,9 @@
+#
+
+-   `Automatic Rune Progression`:
+    -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
+    -   now allow the use of `Handwraps of Mighty Blows` without the `Invested` trait
+
 # 2.35.1
 
 -   `Target Helper`:
