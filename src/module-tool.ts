@@ -4,6 +4,10 @@ abstract class ModuleTool<TSettings extends Record<string, string | number | boo
     abstract get key(): string;
     abstract get settings(): ReadonlyArray<ToolSetting<TSettings>>;
 
+    get keybinds(): KeybindingActionConfig[] {
+        return [];
+    }
+
     init(isGM: boolean) {}
     ready(isGM: boolean) {}
 

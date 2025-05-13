@@ -1,22 +1,44 @@
-import { MODULE, R, userIsGM } from "module-helpers";
-import { ModuleTool } from "tool";
+import {
+    MODULE,
+    R,
+    registerModuleKeybinds,
+    registerModuleSettings,
+    userIsGM,
+} from "module-helpers";
+import { ModuleTool } from "module-tool";
 import { ArpTool } from "tools";
+import { ConditionManagerTool } from "tools/condition.manager";
 
 const TOOLS: ModuleTool<Record<string, string | number | boolean>>[] = [
-    new ArpTool(), //
+    new ArpTool(),
+    new ConditionManagerTool(),
 ];
 
-MODULE.register("pf2e-toolbelt", {
-    settings: R.pipe(
-        TOOLS,
-        R.map((tool) => [tool.key, tool.settings] as const),
-        R.mapToObj(([key, entries]) => [key, entries])
-    ),
-});
+MODULE.register("pf2e-toolbelt");
 MODULE.enableDebugMode();
 
 Hooks.once("init", () => {
     const isGM = userIsGM();
+
+    registerModuleKeybinds(
+        R.pipe(
+            TOOLS,
+            R.map((tool) => {
+                if (!tool.keybinds.length) return;
+                return [tool.key, tool.keybinds] as const;
+            }),
+            R.filter(R.isTruthy),
+            R.mapToObj(([key, entries]) => [key, entries])
+        )
+    );
+
+    registerModuleSettings(
+        R.pipe(
+            TOOLS,
+            R.map((tool) => [tool.key, tool.settings] as const),
+            R.mapToObj(([key, entries]) => [key, entries])
+        )
+    );
 
     for (const tool of TOOLS) {
         tool.init(isGM);

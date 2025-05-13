@@ -9,8 +9,8 @@ import {
     WeaponPF2e,
     ZeroToFour,
 } from "module-helpers";
-import { ModuleTool } from "tool";
-import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "./_shared";
+import { ModuleTool } from "module-tool";
+import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
