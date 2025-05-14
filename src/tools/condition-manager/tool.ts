@@ -19,7 +19,7 @@ class ConditionManagerTool extends ModuleTool<Settings> {
                 key: "enabled",
                 type: Boolean,
                 default: false,
-                scope: "client",
+                scope: "user",
                 onChange: (value) => {
                     this.#setKeybindAction(value);
                 },
