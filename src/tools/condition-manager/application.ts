@@ -12,6 +12,7 @@ import {
     R,
     render,
     RenderTemplateData,
+    setApplicationTitle,
 } from "module-helpers";
 
 class ConditionManager extends foundry.applications.api.ApplicationV2 {
@@ -33,9 +34,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         condition: ConditionPF2e<ActorPF2e>,
         options: DeepPartial<ApplicationConfiguration> = {}
     ) {
-        const title = localize("condition-manager.title", { name: condition._source.name });
-        foundry.utils.setProperty(options, "window.title", title);
-
+        setApplicationTitle(options, "condition-manager.title", condition._source);
         super(options);
 
         this.#label = "";
@@ -131,6 +130,19 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         this.#activateListeners(content);
     }
 
+    async _onClickAction(event: PointerEvent, target: HTMLElement) {
+        switch (target.dataset.action as "add" | "cancel") {
+            case "add": {
+                this.#createEffect();
+                return this.close();
+            }
+
+            case "cancel": {
+                return this.close();
+            }
+        }
+    }
+
     #createEffect() {
         const origin =
             this.#origin?.actor && this.#origin !== this.#combatant
@@ -215,19 +227,6 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             }
 
             this.render();
-        });
-
-        addListenerAll(html, "[data-action]", (event, el) => {
-            switch (el.dataset.action as "add" | "cancel") {
-                case "add": {
-                    this.#createEffect();
-                    return this.close();
-                }
-
-                case "cancel": {
-                    return this.close();
-                }
-            }
         });
     }
 }
