@@ -16,6 +16,8 @@ const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
 class ArpTool extends ModuleTool<Settings> {
+    #force = false;
+
     #renderItemSheetHook = createHook(
         "renderPhysicalItemSheetPF2e",
         this.#onRenderPhysicalItemSheetPF2e.bind(this)
@@ -92,10 +94,9 @@ class ArpTool extends ModuleTool<Settings> {
     init(isGM: boolean): void {
         if (!this.getSetting("enabled")) return;
 
-        if (this.getSetting("force")) {
-            this.#renderItemSheetHook.activate();
-        }
+        this.#force = this.getSetting("force");
 
+        this.#renderItemSheetHook.toggle(this.#force);
         activateWrappers(this.#wrappers);
     }
 
@@ -126,15 +127,14 @@ class ArpTool extends ModuleTool<Settings> {
         if (!isValidActor(actor, true) || !isValidWeapon(weapon)) return;
 
         const level = actor.level;
-        const forceUpdate = this.getSetting("force");
         const expectedPotency: ZeroToFour = level < 2 ? 0 : level < 10 ? 1 : level < 16 ? 2 : 3;
         const expectedStriking: ZeroToFour = level < 4 ? 0 : level < 12 ? 1 : level < 19 ? 2 : 3;
 
-        if (forceUpdate || weapon.system.runes.potency <= expectedPotency) {
+        if (this.#force || weapon.system.runes.potency <= expectedPotency) {
             weapon.system.runes.potency = expectedPotency;
         }
 
-        if (forceUpdate || weapon.system.runes.striking <= expectedStriking) {
+        if (this.#force || weapon.system.runes.striking <= expectedStriking) {
             weapon.system.runes.striking = expectedStriking;
         }
     }
@@ -172,15 +172,14 @@ class ArpTool extends ModuleTool<Settings> {
         if (!isValidActor(actor, true) || !isValidArmor(armor)) return;
 
         const level = actor.level;
-        const forceUpdate = this.getSetting("force");
         const expectedPotency: ZeroToFour = level < 5 ? 0 : level < 11 ? 1 : level < 18 ? 2 : 3;
         const expectedResilient: ZeroToFour = level < 8 ? 0 : level < 14 ? 1 : level < 20 ? 2 : 3;
 
-        if (forceUpdate || armor.system.runes.potency <= expectedPotency) {
+        if (this.#force || armor.system.runes.potency <= expectedPotency) {
             armor.system.runes.potency = expectedPotency;
         }
 
-        if (forceUpdate || armor.system.runes.resilient <= expectedResilient) {
+        if (this.#force || armor.system.runes.resilient <= expectedResilient) {
             armor.system.runes.resilient = expectedResilient;
         }
     }
