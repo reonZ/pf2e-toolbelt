@@ -6,11 +6,12 @@ import {
     userIsGM,
 } from "module-helpers";
 import { ModuleTool } from "module-tool";
-import { ArpTool, ConditionManagerTool } from "tools";
+import { ArpTool, ConditionManagerTool, ResourceTrackerTool } from "tools";
 
-const TOOLS: ModuleTool<Record<string, string | number | boolean>>[] = [
-    new ArpTool(),
+const TOOLS: ModuleTool[] = [
+    new ArpTool(), //
     new ConditionManagerTool(),
+    new ResourceTrackerTool(),
 ];
 
 MODULE.register("pf2e-toolbelt");
@@ -42,8 +43,14 @@ Hooks.once("init", () => {
     for (const tool of TOOLS) {
         tool.init(isGM);
     }
+});
 
-    MODULE.debug(TOOLS);
+Hooks.once("setup", () => {
+    const isGM = userIsGM();
+
+    for (const tool of TOOLS) {
+        tool.setup(isGM);
+    }
 });
 
 Hooks.once("ready", () => {
@@ -53,3 +60,5 @@ Hooks.once("ready", () => {
         tool.ready(isGM);
     }
 });
+
+MODULE.devExpose({ tools: TOOLS });

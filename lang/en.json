@@ -31,6 +31,17 @@
                     "name": "Enabled",
                     "hint": "Drag a condition while holding the defined keybind to open the condition manager allowing you to set its duration."
                 }
+            },
+            "resourceTracker": {
+                "title": "Resource Tracker",
+                "offline": {
+                    "name": "Show Offlines",
+                    "hint": "Display shared resources from offline users as well."
+                },
+                "show": {
+                    "name": "Display Tracker",
+                    "hint": "Should the resource tracker widget be displayed in your interface. Can be toggled on/off via controls on the left UI."
+                }
             }
         },
         "condition-manager": {
@@ -40,6 +51,47 @@
             "origin": "Origin",
             "label": "Label",
             "anonymous": "Anonymous"
+        },
+        "resource-tracker": {
+            "header": {
+                "add": "Add new resource"
+            },
+            "resource": {
+                "title": {
+                    "create": "Create New Resource",
+                    "edit": "Edit Resource"
+                },
+                "name": {
+                    "label": "Resource Name",
+                    "default": "New Resource"
+                },
+                "value": {
+                    "label": "Value",
+                    "min": "Minimum Value",
+                    "max": "Maximum Value",
+                    "current": "Current Value"
+                },
+                "steps": {
+                    "label": "Click Steps",
+                    "step1": "[Click]",
+                    "step2": "[Shift-Click]",
+                    "step3": "[Control-Click]"
+                },
+                "timeout": {
+                    "label": "Timeout (seconds)",
+                    "tooltip": "Time passed in your world before the resource value is decremented by 1"
+                },
+                "edit": "[Right-Click] Edit Resource",
+                "delete": "Delete Resource?",
+                "shared": "Visible to others?",
+                "yes": {
+                    "create": "Create",
+                    "edit": "Edit"
+                },
+                "no": "Cancel",
+                "increase": "{click} increase by {value}",
+                "decrease": "{click} decrease by {value}"
+            }
         }
     }
 }

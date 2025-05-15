@@ -1,0 +1,178 @@
+#pf2e-toolbelt-resource-tracker {
+    --color: #efe6d8;
+    --color-highlight: #ffffff;
+    --header-background-color: #00000087;
+    --border-color: black;
+    --stats-background: #00000045;
+    --filler-background: #00000059;
+
+    background: none;
+    border: 0;
+    min-width: 0;
+    box-shadow: none;
+    border-radius: unset;
+
+    .window-header {
+        pointer-events: none;
+        background: none;
+        border: 0;
+        padding: 0;
+        flex: 0;
+        font-size: inherit;
+
+        .drag-hand,
+        .header-control {
+            background: var(--header-background-color);
+            border: 1px solid var(--border-color);
+            pointer-events: all;
+            margin: 0;
+            color: var(--color);
+            border-radius: 4px;
+            padding: 0 0.1em;
+        }
+
+        .drag-hand {
+            font-size: 1.8em;
+        }
+
+        .header-control {
+            cursor: pointer;
+            margin-inline: 0.1em;
+            font-size: 1.1em;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                color: var(--color-highlight);
+                box-shadow: 0 0 5px var(--color-shadow-primary);
+            }
+        }
+    }
+
+    .window-content {
+        padding: 0;
+        gap: 0.3em;
+        padding-top: 0.3em;
+
+        hr {
+            margin: 0.2em 0;
+        }
+
+        .resource {
+            --ratio: 1;
+
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 14em;
+            gap: 0.1em;
+            color: var(--color);
+
+            .name {
+                background: linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 100%);
+                padding: 0 0.3em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                i {
+                    font-size: 0.86em;
+                    margin-right: 0.1em;
+                }
+            }
+
+            .stats {
+                position: relative;
+                height: 1.2em;
+                background: var(--stats-background);
+                border-radius: 4px;
+
+                > * {
+                    position: absolute;
+                    top: 0;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .filler {
+                    left: 0;
+                    width: calc(var(--ratio) * 100%);
+                    background: var(--filler-background);
+                    border-radius: 4px;
+                }
+
+                .value {
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+            }
+
+            .left,
+            .right {
+                position: absolute;
+                height: 100%;
+                width: 50%;
+                top: 0;
+                display: flex;
+                align-items: flex-end;
+            }
+
+            .left {
+                left: 0.3em;
+
+                .decrease {
+                    display: none;
+                }
+
+                &:hover {
+                    .min {
+                        display: none;
+                    }
+
+                    .decrease {
+                        display: block;
+                    }
+                }
+            }
+
+            .right {
+                right: 0.3em;
+                justify-content: end;
+
+                .increase {
+                    display: none;
+                }
+
+                &:hover {
+                    .max {
+                        display: none;
+                    }
+
+                    .increase {
+                        display: block;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.application.dialog.pf2e-toolbelt.resource-menu {
+    .dialog-content {
+        gap: 0.6em;
+
+        input[type="number"] {
+            flex: 0 0 8ch;
+            text-align: end;
+        }
+
+        .delete {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+    }
+}

@@ -1,1 +1,10 @@
 @import "./condition-manager";
+@import "./resource-tracker";
+
+.application.dialog.pf2e-toolbelt {
+    .window-content {
+        .form-group {
+            white-space: nowrap;
+        }
+    }
+}
