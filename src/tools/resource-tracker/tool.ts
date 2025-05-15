@@ -1,4 +1,4 @@
-import { createHook, PositionModel, settingPath, userIsGM } from "module-helpers";
+import { createHook, getWorldTime, PositionModel, settingPath, userIsGM } from "module-helpers";
 import { ModuleTool, ToolSetting } from "module-tool";
 import { Resource, ResourceCollection, ResourceTracker } from ".";
 
@@ -71,6 +71,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
 
     setup(isGM: boolean): void {
         this.#setResources();
+        this.#onUpdateWorldTime();
     }
 
     ready(isGM: boolean): void {
@@ -89,7 +90,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         this.#updateWorldTimeHook.toggle(hasTimeout);
     }
 
-    #onUpdateWorldTime(worldTime: number) {
+    #onUpdateWorldTime(worldTime: number = getWorldTime()) {
         if (game.user.isGM && !game.user.isActiveGM) return;
 
         let updated = false;

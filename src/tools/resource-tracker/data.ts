@@ -1,4 +1,12 @@
-import { DataModelCollection, IdField, localize, MODULE, R, setSetting } from "module-helpers";
+import {
+    DataModelCollection,
+    getWorldTime,
+    IdField,
+    localize,
+    MODULE,
+    R,
+    setSetting,
+} from "module-helpers";
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
 
@@ -48,7 +56,7 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
             time: new fields.NumberField({
                 required: false,
                 nullable: false,
-                initial: () => game.settings.get("core", "time"),
+                initial: () => getWorldTime(),
                 min: 0,
             }),
             timeout: new fields.NumberField({
@@ -121,7 +129,7 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
         const diff = super.updateSource(changes, options);
 
         if ("timeout" in diff || ("value" in diff && !("time" in diff))) {
-            return super.updateSource({ time: game.settings.get("core", "time") }, options);
+            return super.updateSource({ time: getWorldTime() }, options);
         }
 
         return diff;
