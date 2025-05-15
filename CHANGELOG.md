@@ -2,8 +2,14 @@
 
 -   `Automatic Rune Progression`:
     -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
+        -   no longer hide rune selects from item sheets when `Force Update` is enabled
     -   now allow the use of `Handwraps of Mighty Blows` without the `Invested` trait
-    -   fix fundamental run selects not always being hidden from the item sheet when `Force Update` is enabled
+    -   add `Shield Rune` setting: automatically adds reinforcing runes to shields
+-   add `Resource Tracker` feature:
+    -   a small widget to track arbitrary resources that can be toggled via a control button on the left UI
+    -   resources can be be shown to everybody, though only the owner can update them
+    -   resources created by GMs are shared among all GMs
+    -   resources can have a timeout option linked to the world clock to decrement their value automatically over time
 
 # 2.35.1
 

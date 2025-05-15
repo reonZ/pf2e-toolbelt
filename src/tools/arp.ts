@@ -2,12 +2,11 @@ import {
     activateWrappers,
     ActorPF2e,
     ArmorPF2e,
-    createHook,
     createToggleableWrapper,
-    ItemSheetPF2e,
-    PhysicalItemPF2e,
+    ShieldPF2e,
     WeaponPF2e,
     ZeroToFour,
+    ZeroToSix,
 } from "module-helpers";
 import { ModuleTool } from "module-tool";
 import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
@@ -16,14 +15,10 @@ const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
 class ArpTool extends ModuleTool<Settings> {
+    #shield = false;
     #force = false;
 
-    #renderItemSheetHook = createHook(
-        "renderPhysicalItemSheetPF2e",
-        this.#onRenderPhysicalItemSheetPF2e.bind(this)
-    );
-
-    #wrappers = [
+    #baseWrappers = [
         sharedWeaponPrepareBaseData.register(this.#weaponPrepareBaseData, { context: this }),
         createToggleableWrapper(
             "WRAPPER",
@@ -36,6 +31,21 @@ class ArpTool extends ModuleTool<Settings> {
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData",
             this.#armorPrepareDerivedData,
+            { context: this }
+        ),
+    ];
+
+    #shieldWrappers = [
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData",
+            this.#shieldPrepareBaseData,
+            { context: this }
+        ),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData",
+            this.#shieldPrepareDerivedData,
             { context: this }
         ),
     ];
@@ -68,6 +78,15 @@ class ArpTool extends ModuleTool<Settings> {
         4: 49440,
     };
 
+    static SHIELD_REINFORCING_PRICE = {
+        1: 75,
+        2: 300,
+        3: 900,
+        4: 2500,
+        5: 8000,
+        6: 32000,
+    };
+
     get key(): "arp" {
         return "arp";
     }
@@ -88,6 +107,13 @@ class ArpTool extends ModuleTool<Settings> {
                 scope: "world",
                 requiresReload: true,
             },
+            {
+                key: "shield",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                requiresReload: true,
+            },
         ] as const;
     }
 
@@ -95,33 +121,16 @@ class ArpTool extends ModuleTool<Settings> {
         if (!this.getSetting("enabled")) return;
 
         this.#force = this.getSetting("force");
+        this.#shield = this.getSetting("shield");
 
-        this.#renderItemSheetHook.toggle(this.#force);
-        activateWrappers(this.#wrappers);
-    }
+        activateWrappers(this.#baseWrappers);
 
-    #onRenderPhysicalItemSheetPF2e(
-        sheet: ItemSheetPF2e<PhysicalItemPF2e<ActorPF2e>>,
-        $html: JQuery
-    ) {
-        const item = sheet.item;
-        if (!item.isOfType("weapon", "armor") || !isValidActor(item.actor, true)) return;
-
-        const html = $html[0];
-        const runesSection = html.querySelector(".tab.details .material-runes");
-        if (!runesSection) return;
-
-        const lookups = ["potency", "striking", "resilient"]
-            .map((x) => `[name="system.runes.${x}"], [data-property="system.runes.${x}"]`)
-            .join(", ");
-
-        const groups = runesSection.querySelectorAll<HTMLElement>(`.form-group:has(${lookups})`);
-
-        for (const group of groups) {
-            group.style.display = "none";
+        if (this.#shield) {
+            activateWrappers(this.#shieldWrappers);
         }
     }
 
+    // this is a shared wrapper listener
     #weaponPrepareBaseData(weapon: WeaponPF2e<ActorPF2e>) {
         const actor = weapon.actor;
         if (!isValidActor(actor, true) || !isValidWeapon(weapon)) return;
@@ -167,6 +176,7 @@ class ArpTool extends ModuleTool<Settings> {
         weapon.system.price.value = newPrice;
     }
 
+    // this is a shared wrapper listener
     #armorPrepareBaseData(armor: ArmorPF2e<ActorPF2e>) {
         const actor = armor.actor;
         if (!isValidActor(actor, true) || !isValidArmor(armor)) return;
@@ -211,6 +221,41 @@ class ArpTool extends ModuleTool<Settings> {
 
         armor.system.price.value = newPrice;
     }
+
+    #shieldPrepareBaseData(shield: ShieldPF2e<ActorPF2e>, wrapped: libWrapper.RegisterCallback) {
+        const actor = shield.actor;
+
+        if (!isValidActor(actor, true) || !isValidShield(shield)) {
+            wrapped();
+            return;
+        }
+
+        // 4, 7, 10, 13, 16, 19
+        const expected = Math.min(Math.ceil((actor.level - 3) / 3), 6) as ZeroToSix;
+
+        if (this.#force || shield.system.runes.reinforcing <= expected) {
+            shield.system.runes.reinforcing = expected;
+        }
+
+        wrapped();
+    }
+
+    #shieldPrepareDerivedData(shield: ShieldPF2e<ActorPF2e>, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        if (!isValidActor(shield.actor) || !isValidShield(shield)) return;
+
+        const coins = shield.price.value.toObject();
+        if (!coins.gp) return;
+
+        const reinforcing = shield.system.runes.reinforcing;
+
+        if (reinforcing) {
+            coins.gp -= ArpTool.SHIELD_REINFORCING_PRICE[reinforcing];
+        }
+
+        shield.system.price.value = new game.pf2e.Coins(coins);
+    }
 }
 
 function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is ActorPF2e {
@@ -223,6 +268,10 @@ function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is Ac
 
 function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
     return !armor._source.system.specific;
+}
+
+function isValidShield(shield: ShieldPF2e<ActorPF2e>): boolean {
+    return !shield._source.system.specific;
 }
 
 function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
@@ -267,6 +316,7 @@ function hasHandwrap(actor: ActorPF2e): boolean {
 type Settings = {
     enabled: boolean;
     force: boolean;
+    shield: boolean;
 };
 
 export { ArpTool };

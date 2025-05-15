@@ -23,6 +23,10 @@
                 "force": {
                     "name": "Force Update",
                     "hint": "When enabled, the runes will always be updated based on actor level. When disabled only the runes that are currently at a lower value than what they should be for that level will be upgraded."
+                },
+                "shield": {
+                    "name": "Shield Rune",
+                    "hint": "Should reinforcing runes also be added to shields."
                 }
             },
             "conditionManager": {
