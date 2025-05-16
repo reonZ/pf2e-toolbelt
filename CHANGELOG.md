@@ -4,7 +4,8 @@
     -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
         -   no longer hide rune selects from item sheets when `Force Update` is enabled
     -   now allow the use of `Handwraps of Mighty Blows` without the `Invested` trait
-    -   add `Shield Rune` setting: automatically adds reinforcing runes to shields
+    -   add `Shield Rune` setting (disabled) : automatically adds reinforcing runes to shields
+    -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from equipment
 -   add `Resource Tracker` feature:
     -   a small widget to track arbitrary resources that can be toggled via a control button on the left UI
     -   resources can be be shown to everybody, though only the owner can update them

@@ -24,6 +24,10 @@
                     "name": "Force Update",
                     "hint": "When enabled, the runes will always be updated based on actor level. When disabled only the runes that are currently at a lower value than what they should be for that level will be upgraded."
                 },
+                "price": {
+                    "name": "Subtract Rune Price",
+                    "hint": "Should fundamental rune prices be subtracted from the weapon price."
+                },
                 "shield": {
                     "name": "Shield Rune",
                     "hint": "Should reinforcing runes also be added to shields."

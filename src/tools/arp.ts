@@ -15,18 +15,22 @@ const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
 class ArpTool extends ModuleTool<Settings> {
-    #shield = false;
     #force = false;
+    #price = false;
+    #shield = false;
 
     #baseWrappers = [
         sharedWeaponPrepareBaseData.register(this.#weaponPrepareBaseData, { context: this }),
+        sharedArmorPrepareBaseData.register(this.#armorPrepareBaseData, { context: this }),
+    ];
+
+    #basePriceWrappers = [
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData",
             this.#weaponPrepareDerivedData,
             { context: this }
         ),
-        sharedArmorPrepareBaseData.register(this.#armorPrepareBaseData, { context: this }),
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData",
@@ -35,20 +39,18 @@ class ArpTool extends ModuleTool<Settings> {
         ),
     ];
 
-    #shieldWrappers = [
-        createToggleableWrapper(
-            "WRAPPER",
-            "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData",
-            this.#shieldPrepareBaseData,
-            { context: this }
-        ),
-        createToggleableWrapper(
-            "WRAPPER",
-            "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData",
-            this.#shieldPrepareDerivedData,
-            { context: this }
-        ),
-    ];
+    #shieldPrepareBaseDataWrapper = createToggleableWrapper(
+        "WRAPPER",
+        "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData",
+        this.#shieldPrepareBaseData,
+        { context: this }
+    );
+    #shieldPrepareDeriveDataWrapper = createToggleableWrapper(
+        "WRAPPER",
+        "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData",
+        this.#shieldPrepareDerivedData,
+        { context: this }
+    );
 
     static WEAPON_POTENCY_PRICE = {
         1: 35,
@@ -108,6 +110,13 @@ class ArpTool extends ModuleTool<Settings> {
                 requiresReload: true,
             },
             {
+                key: "price",
+                type: Boolean,
+                default: true,
+                scope: "world",
+                requiresReload: true,
+            },
+            {
                 key: "shield",
                 type: Boolean,
                 default: false,
@@ -121,12 +130,21 @@ class ArpTool extends ModuleTool<Settings> {
         if (!this.getSetting("enabled")) return;
 
         this.#force = this.getSetting("force");
+        this.#price = this.getSetting("price");
         this.#shield = this.getSetting("shield");
 
         activateWrappers(this.#baseWrappers);
 
+        if (this.#price) {
+            activateWrappers(this.#basePriceWrappers);
+        }
+
         if (this.#shield) {
-            activateWrappers(this.#shieldWrappers);
+            this.#shieldPrepareBaseDataWrapper.activate();
+
+            if (this.#price) {
+                this.#shieldPrepareDeriveDataWrapper.activate();
+            }
         }
     }
 
@@ -316,6 +334,7 @@ function hasHandwrap(actor: ActorPF2e): boolean {
 type Settings = {
     enabled: boolean;
     force: boolean;
+    price: boolean;
     shield: boolean;
 };
 
