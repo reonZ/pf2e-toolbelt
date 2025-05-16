@@ -1,5 +1,5 @@
 import { ActorPF2e, createHook, ItemPF2e } from "module-helpers";
-import { ModuleTool, ToolSetting } from "module-tool";
+import { ModuleTool, ToolSettings } from "module-tool";
 import { ConditionManager } from ".";
 
 class ConditionManagerTool extends ModuleTool<Settings> {
@@ -13,7 +13,7 @@ class ConditionManagerTool extends ModuleTool<Settings> {
         return "conditionManager";
     }
 
-    get settings(): ReadonlyArray<ToolSetting<Settings>> {
+    get settings(): ToolSettings<Settings> {
         return [
             {
                 key: "enabled",

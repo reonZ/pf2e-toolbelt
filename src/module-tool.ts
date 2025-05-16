@@ -34,5 +34,7 @@ type ToolSetting<TSettings extends Record<string, any>> = TSettings extends Reco
     ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> }
     : never;
 
+type ToolSettings<TSettings extends Record<string, any>> = ReadonlyArray<ToolSetting<TSettings>>;
+
 export { ModuleTool };
-export type { ToolSetting };
+export type { ToolSettings };

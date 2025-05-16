@@ -1,5 +1,5 @@
 import { createHook, getWorldTime, PositionModel, settingPath, userIsGM } from "module-helpers";
-import { ModuleTool, ToolSetting } from "module-tool";
+import { ModuleTool, ToolSettings } from "module-tool";
 import { Resource, ResourceCollection, ResourceTracker } from ".";
 
 class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
@@ -11,7 +11,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         return "resourceTracker";
     }
 
-    get settings(): ReadonlyArray<ToolSetting<ResourceTrackerSettings>> {
+    get settings(): ToolSettings<ResourceTrackerSettings> {
         return [
             {
                 key: "offline",

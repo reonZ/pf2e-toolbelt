@@ -6,11 +6,12 @@ import {
     userIsGM,
 } from "module-helpers";
 import { ModuleTool } from "module-tool";
-import { ArpTool, ConditionManagerTool, ResourceTrackerTool } from "tools";
+import { ArpTool, ConditionManagerTool, EffectsPanelTool, ResourceTrackerTool } from "tools";
 
 const TOOLS: ModuleTool[] = [
     new ArpTool(), //
     new ConditionManagerTool(),
+    new EffectsPanelTool(),
     new ResourceTrackerTool(),
 ];
 

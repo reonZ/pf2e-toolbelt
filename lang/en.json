@@ -18,7 +18,7 @@
                 "title": "Automatic Rune Progression",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Should your world use the Automatic Rune Progression Variant? This is incompatible with the regular ABP variant and will disable the system's variant setting."
+                    "hint": "Should your world use the Automatic Rune Progression Variant."
                 },
                 "force": {
                     "name": "Force Update",
@@ -38,6 +38,13 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Drag a condition while holding the defined keybind to open the condition manager allowing you to set its duration."
+                }
+            },
+            "effectsPanel": {
+                "title": "Effects Panel",
+                "remove": {
+                    "name": "Remove-Effect Shortcut",
+                    "hint": "Using [Shift + Right Click] on effect icons in the effects-panel will instantly remove all their charges/counters/badges."
                 }
             },
             "resourceTracker": {

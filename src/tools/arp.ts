@@ -8,7 +8,7 @@ import {
     ZeroToFour,
     ZeroToSix,
 } from "module-helpers";
-import { ModuleTool } from "module-tool";
+import { ModuleTool, ToolSettings } from "module-tool";
 import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
@@ -93,7 +93,7 @@ class ArpTool extends ModuleTool<Settings> {
         return "arp";
     }
 
-    get settings() {
+    get settings(): ToolSettings<Settings> {
         return [
             {
                 key: "enabled",
