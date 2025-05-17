@@ -1,7 +1,11 @@
 {
     "LEVIKTIMES": {
         "gmOnly": "GM Only",
-        "reloadRequired": "Requires Reload"
+        "reloadRequired": "Requires Reload",
+        "emiting": {
+            "label": "Sending",
+            "noGm": "A GM must be online in order to enact this request."
+        }
     },
     "pf2e-toolbelt": {
         "keybindings": {
@@ -45,6 +49,13 @@
                 "remove": {
                     "name": "Remove-Effect Shortcut",
                     "hint": "Using [Shift + Right Click] on effect icons in the effects-panel will instantly remove all their charges/counters/badges."
+                }
+            },
+            "global": {
+                "title": "Global",
+                "withContent": {
+                    "name": "With Container Content",
+                    "hint": "When a container is moved from one actor to another, should its content go with it."
                 }
             },
             "resourceTracker": {

@@ -1,4 +1,5 @@
 import {
+    getSetting,
     MODULE,
     R,
     registerModuleKeybinds,
@@ -6,10 +7,17 @@ import {
     userIsGM,
 } from "module-helpers";
 import { ModuleTool } from "module-tool";
-import { ArpTool, ConditionManagerTool, EffectsPanelTool, ResourceTrackerTool } from "tools";
+import {
+    ArpTool,
+    ConditionManagerTool,
+    EffectsPanelTool,
+    GlobalTool,
+    ResourceTrackerTool,
+} from "tools";
 
 const TOOLS: ModuleTool[] = [
-    new ArpTool(), //
+    new GlobalTool(),
+    new ArpTool(),
     new ConditionManagerTool(),
     new EffectsPanelTool(),
     new ResourceTrackerTool(),
@@ -36,10 +44,20 @@ Hooks.once("init", () => {
     registerModuleSettings(
         R.pipe(
             TOOLS,
-            R.map((tool) => [tool.key, tool.settings] as const),
+            R.map((tool) => [tool.key, tool.settingsSchema] as const),
             R.mapToObj(([key, entries]) => [key, entries])
         )
     );
+
+    const context = (game.toolbelt ??= {} as toolbelt.GamePF2e);
+    Object.defineProperty(context, "getToolSetting", {
+        value: function (tool: string, setting: string) {
+            return this.active ? getSetting(`${tool}.${setting}`) : undefined;
+        },
+        writable: false,
+        configurable: false,
+        enumerable: false,
+    });
 
     for (const tool of TOOLS) {
         tool.init(isGM);
