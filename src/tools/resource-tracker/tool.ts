@@ -6,19 +6,21 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     #updateWorldTimeHook = createHook("updateWorldTime", this.#onUpdateWorldTime.bind(this));
     #application: ResourceTracker | null = null;
     #resources!: ResourceCollection;
+    #offline = false;
 
     get key(): "resourceTracker" {
         return "resourceTracker";
     }
 
-    get settings(): ToolSettings<ResourceTrackerSettings> {
+    get settingsSchema(): ToolSettings<ResourceTrackerSettings> {
         return [
             {
                 key: "offline",
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: () => {
+                onChange: (value) => {
+                    this.#offline = value;
                     this.#application?.render();
                 },
             },
@@ -65,7 +67,13 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         return this.#resources;
     }
 
+    get offline(): boolean {
+        return this.#offline;
+    }
+
     init(isGM: boolean): void {
+        this.#offline = this.getSetting("offline");
+
         Hooks.on("getSceneControlButtons", this.#onGetSceneControlButtons.bind(this));
     }
 

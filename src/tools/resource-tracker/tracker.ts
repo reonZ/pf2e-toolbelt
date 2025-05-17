@@ -59,7 +59,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
             this.#tool.getSettingKey("userResources")
         );
 
-        const usersResources = this.#tool.getSetting("offline")
+        const usersResources = this.#tool.offline
             ? allUsersResources
             : allUsersResources.filter(({ user }) => game.users.get(user)?.active);
 
