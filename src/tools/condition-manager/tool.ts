@@ -13,7 +13,7 @@ class ConditionManagerTool extends ModuleTool<Settings> {
         return "conditionManager";
     }
 
-    get settings(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettings<Settings> {
         return [
             {
                 key: "enabled",

@@ -5,7 +5,6 @@ import {
     createHook,
     EffectsPanel,
     EffectsPanelViewData,
-    htmlQuery,
 } from "module-helpers";
 import { ModuleTool, ToolSettings } from "module-tool";
 
@@ -19,7 +18,7 @@ class EffectsPanelTool extends ModuleTool<Settings> {
         return "effectsPanel";
     }
 
-    get settings(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettings<Settings> {
         return [
             {
                 key: "remove",
@@ -48,11 +47,9 @@ class EffectsPanelTool extends ModuleTool<Settings> {
         for (const effect of effects) {
             if (effect.isLocked || !effect.badge || effect.badge.type !== "counter") continue;
 
-            const effectEl = htmlQuery(html, `.effect-item[data-item-id="${effect.id}"]`);
-
             addListener(
-                effectEl,
-                ".icon",
+                html,
+                `.effect-item[data-item-id="${effect.id}"] .icon`,
                 "contextmenu",
                 (event, el) => this.#onRemoveEffect(event, effect),
                 true

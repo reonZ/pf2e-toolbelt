@@ -2,7 +2,7 @@ import { getSetting, RegisterSettingOptions, setSetting } from "module-helpers";
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
     abstract get key(): string;
-    abstract get settings(): ReadonlyArray<ToolSetting<TSettings>>;
+    abstract get settingsSchema(): ReadonlyArray<ToolSetting<TSettings>>;
 
     get keybinds(): KeybindingActionConfig[] {
         return [];

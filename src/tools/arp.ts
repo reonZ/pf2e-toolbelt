@@ -93,7 +93,7 @@ class ArpTool extends ModuleTool<Settings> {
         return "arp";
     }
 
-    get settings(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettings<Settings> {
         return [
             {
                 key: "enabled",
