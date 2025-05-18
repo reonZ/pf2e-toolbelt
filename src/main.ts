@@ -9,16 +9,18 @@ import {
 import { ModuleTool } from "module-tool";
 import {
     ArpTool,
-    ConditionManagerTool,
     BetterEffectsPanelTool,
+    BetterInventoryTool,
+    BetterTradeTool,
+    ConditionManagerTool,
     GivethTool,
     ResourceTrackerTool,
-    BetterTradeTool,
 } from "tools";
 
 const TOOLS: ModuleTool[] = [
     new ArpTool(),
     new BetterEffectsPanelTool(),
+    new BetterInventoryTool(),
     new BetterTradeTool(),
     new ConditionManagerTool(),
     new GivethTool(),

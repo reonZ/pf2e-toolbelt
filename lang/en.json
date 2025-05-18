@@ -45,7 +45,15 @@
                 }
             },
             "betterInventory": {
-                "title": "Better Inventory"
+                "title": "Better Inventory",
+                "coins": {
+                    "name": "Weightless Coins",
+                    "hint": "Coins are weightless in the inventory."
+                },
+                "dropped": {
+                    "name": "No Dropped Bulk",
+                    "hint": "Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
+                }
             },
             "betterTrade": {
                 "title": "Better Trade",

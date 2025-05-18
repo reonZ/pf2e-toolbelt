@@ -10,13 +10,16 @@
     -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from equipment
 -   `Giveth`:
     -   remove the `Send Message to Chat` setting
--   add `Resource Tracker` section:
+-   convert `Effects Panel` tools to `Better Effects Panel`
+-   convert `No Bulk` tools to `Better Inventory`:
+    -   settings have been reset to default values
+-   add `Better Trade` tools:
+    -   move the `With Container Content` feature there and reset its setting
+-   add `Resource Tracker` tools:
     -   a small widget to track arbitrary resources that can be toggled via a control button on the left UI
     -   resources can be shown to everybody, though only the owner can update them
     -   resources created by GMs are shared among all GMs
     -   resources can have a timeout option linked to the world clock to decrement their value automatically over time
--   add `Trade` section:
-    -   move the `With Container Content` feature there which resets it setting and requires to be re-enabled
 
 # 2.35.1
 
