@@ -6,9 +6,9 @@ import {
     EffectsPanel,
     EffectsPanelViewData,
 } from "module-helpers";
-import { ModuleTool, ToolSettings } from "module-tool";
+import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class EffectsPanelTool extends ModuleTool<Settings> {
+class EffectsPanelTool extends ModuleTool<ToolSettings> {
     #renderEffectsPanelHook = createHook(
         "renderEffectsPanel",
         this.#onRenderEffectsPanel.bind(this)
@@ -18,7 +18,7 @@ class EffectsPanelTool extends ModuleTool<Settings> {
         return "effectsPanel";
     }
 
-    get settingsSchema(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
                 key: "remove",
@@ -68,7 +68,7 @@ class EffectsPanelTool extends ModuleTool<Settings> {
     }
 }
 
-type Settings = {
+type ToolSettings = {
     remove: boolean;
 };
 

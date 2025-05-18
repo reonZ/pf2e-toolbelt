@@ -1,8 +1,8 @@
 import { ActorPF2e, createHook, ItemPF2e } from "module-helpers";
-import { ModuleTool, ToolSettings } from "module-tool";
+import { ModuleTool, ToolSettingsList } from "module-tool";
 import { ConditionManager } from ".";
 
-class ConditionManagerTool extends ModuleTool<Settings> {
+class ConditionManagerTool extends ModuleTool<ToolSettings> {
     #preCreateItemHook = createHook("preCreateItem", this.#onPreCreateItem.bind(this));
     #keybindActions = {
         down: () => {},
@@ -13,7 +13,7 @@ class ConditionManagerTool extends ModuleTool<Settings> {
         return "conditionManager";
     }
 
-    get settingsSchema(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
                 key: "enabled",
@@ -65,7 +65,7 @@ class ConditionManagerTool extends ModuleTool<Settings> {
     }
 }
 
-type Settings = {
+type ToolSettings = {
     enabled: boolean;
 };
 

@@ -5,10 +5,10 @@ import {
     giveItemToActor,
     PhysicalItemPF2e,
 } from "module-helpers";
-import { ModuleTool, ToolSettings } from "module-tool";
+import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
-class TradeTool extends ModuleTool<Settings> {
+class TradeTool extends ModuleTool<ToolSettings> {
     #transferContainerEmitable = createEmitable("trade", ({ item, target }: WithContentOptions) => {
         giveItemToActor(item, target);
     });
@@ -22,7 +22,7 @@ class TradeTool extends ModuleTool<Settings> {
         return "trade";
     }
 
-    get settingsSchema(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
                 key: "withContent",
@@ -74,7 +74,7 @@ type WithContentOptions = {
     target: ActorPF2e;
 };
 
-type Settings = {
+type ToolSettings = {
     withContent: boolean;
 };
 

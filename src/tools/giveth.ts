@@ -16,10 +16,10 @@ import {
     PhysicalItemPF2e,
     updateItemTransferDialog,
 } from "module-helpers";
-import { ModuleTool, ToolSettings } from "module-tool";
+import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
-class GivethTool extends ModuleTool<Settings> {
+class GivethTool extends ModuleTool<ToolSettings> {
     #givethEmitable = createEmitable("giveth", (options: GivethOptions, userId: string) => {
         if (options.type === "item") {
             this.#givethItem(options, userId);
@@ -52,7 +52,7 @@ class GivethTool extends ModuleTool<Settings> {
         return "giveth";
     }
 
-    get settingsSchema(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
                 key: "enabled",
@@ -69,7 +69,7 @@ class GivethTool extends ModuleTool<Settings> {
                 choices: ["disabled", "ally", "all"],
                 default: "ally",
                 scope: "world",
-                onChange: (effect: Settings["effect"]) => {
+                onChange: (effect: ToolSettings["effect"]) => {
                     this.configurate();
                 },
             },
@@ -210,7 +210,7 @@ type GiveEffectOptions = {
 
 type GivethOptions = GiveItemOptions | GiveEffectOptions;
 
-type Settings = {
+type ToolSettings = {
     enabled: boolean;
     effect: "disabled" | "ally" | "all";
 };

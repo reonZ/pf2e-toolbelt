@@ -8,13 +8,13 @@ import {
     ZeroToFour,
     ZeroToSix,
 } from "module-helpers";
-import { ModuleTool, ToolSettings } from "module-tool";
+import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
-class ArpTool extends ModuleTool<Settings> {
+class ArpTool extends ModuleTool<ToolSettings> {
     #force = false;
     #price = false;
     #shield = false;
@@ -93,7 +93,7 @@ class ArpTool extends ModuleTool<Settings> {
         return "arp";
     }
 
-    get settingsSchema(): ToolSettings<Settings> {
+    get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
                 key: "enabled",
@@ -331,7 +331,7 @@ function hasHandwrap(actor: ActorPF2e): boolean {
     });
 }
 
-type Settings = {
+type ToolSettings = {
     enabled: boolean;
     force: boolean;
     price: boolean;
