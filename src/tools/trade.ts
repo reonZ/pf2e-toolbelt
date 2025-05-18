@@ -9,7 +9,10 @@ import { ModuleTool, ToolSettings } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
 class TradeTool extends ModuleTool<Settings> {
-    #transferContainerEmitable = createEmitable("trade", this.#transferContainer.bind(this));
+    #transferContainerEmitable = createEmitable("trade", ({ item, target }: WithContentOptions) => {
+        giveItemToActor(item, target);
+    });
+
     #transferItemToActorWrapper = sharedActorTransferItemToActor.register(
         this.#transferItemToActor,
         { context: this, priority: 100 }
@@ -41,10 +44,6 @@ class TradeTool extends ModuleTool<Settings> {
         }
     }
 
-    #transferContainer({ item, target }: { item: ContainerPF2e<ActorPF2e>; target: ActorPF2e }) {
-        giveItemToActor(item, target);
-    }
-
     #transferItemToActor(
         actor: ActorPF2e,
         target: ActorPF2e,
@@ -69,6 +68,11 @@ class TradeTool extends ModuleTool<Settings> {
         return false;
     }
 }
+
+type WithContentOptions = {
+    item: ContainerPF2e<ActorPF2e>;
+    target: ActorPF2e;
+};
 
 type Settings = {
     withContent: boolean;

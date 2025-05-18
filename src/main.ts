@@ -11,6 +11,7 @@ import {
     ArpTool,
     ConditionManagerTool,
     EffectsPanelTool,
+    GivethTool,
     ResourceTrackerTool,
     TradeTool,
 } from "tools";
@@ -19,6 +20,7 @@ const TOOLS: ModuleTool[] = [
     new ArpTool(),
     new ConditionManagerTool(),
     new EffectsPanelTool(),
+    new GivethTool(),
     new ResourceTrackerTool(),
     new TradeTool(),
 ];

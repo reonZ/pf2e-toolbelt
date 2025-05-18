@@ -11,6 +11,9 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     init(isGM: boolean) {}
     setup(isGM: boolean) {}
     ready(isGM: boolean) {}
+    _configurate() {}
+
+    configurate = foundry.utils.debounce(this._configurate, 1);
 
     getSettingKey<K extends keyof TSettings & string>(setting: K): string {
         return `${this.key}.${setting}`;
