@@ -10,10 +10,19 @@
     "pf2e-toolbelt": {
         "keybindings": {
             "conditionManager": {
-                "title": "Condition Manager",
                 "manage": {
                     "name": "Manage Condition",
                     "hint": "Key held when dropping a condition to manage its duration."
+                }
+            },
+            "betterMovement": {
+                "teleport": {
+                    "name": "Teleport Tokens",
+                    "hint": "Key held while clicking on the scene to teleport all selected tokens."
+                },
+                "unselect": {
+                    "name": "Teleport Tokens (Unselect)",
+                    "hint": "Key held while clicking on the scene to teleport all selected tokens. Also unselect the tokens when pressing the keybind to give an unobstructed vision over the whole scene."
                 }
             }
         },
@@ -53,6 +62,18 @@
                 "dropped": {
                     "name": "No Dropped Bulk",
                     "hint": "Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
+                }
+            },
+            "betterMovement": {
+                "title": "Better Movement",
+                "teleport": {
+                    "name": "Teleport Tokens",
+                    "hint": "Clicking on the board while holding the defined keybind will instanlty teleport the selected tokens to location without any travel.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "enabled": "Enabled",
+                        "select": "Re-Select Tokens"
+                    }
                 }
             },
             "betterTrade": {

@@ -13,6 +13,8 @@
 -   convert `Effects Panel` tools to `Better Effects Panel`
 -   convert `No Bulk` tools to `Better Inventory`:
     -   settings have been reset to default values
+-   add `Better Movement` tools:
+    -   move the `Teleport Tokens` in it while combining both its settings into a single one
 -   add `Better Trade` tools:
     -   move the `With Container Content` feature there and reset its setting
 -   add `Resource Tracker` tools:

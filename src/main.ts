@@ -11,6 +11,7 @@ import {
     ArpTool,
     BetterEffectsPanelTool,
     BetterInventoryTool,
+    BetterMovementyTool,
     BetterTradeTool,
     ConditionManagerTool,
     GivethTool,
@@ -21,6 +22,7 @@ const TOOLS: ModuleTool[] = [
     new ArpTool(),
     new BetterEffectsPanelTool(),
     new BetterInventoryTool(),
+    new BetterMovementyTool(),
     new BetterTradeTool(),
     new ConditionManagerTool(),
     new GivethTool(),
@@ -37,8 +39,8 @@ Hooks.once("init", () => {
         R.pipe(
             TOOLS,
             R.map((tool) => {
-                if (!tool.keybinds.length) return;
-                return [tool.key, tool.keybinds] as const;
+                if (!tool.keybindsSchema.length) return;
+                return [tool.key, tool.keybindsSchema] as const;
             }),
             R.filter(R.isTruthy),
             R.mapToObj(([key, entries]) => [key, entries])

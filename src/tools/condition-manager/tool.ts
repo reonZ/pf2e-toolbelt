@@ -38,7 +38,9 @@ class ConditionManagerTool extends ModuleTool<ToolSettings> {
     }
 
     init(): void {
-        this.#manageKeybind.toggle(this.getSetting("enabled"));
+        if (this.getSetting("enabled")) {
+            this.#manageKeybind.activate();
+        }
     }
 
     #onPreCreateItem(item: ItemPF2e<ActorPF2e>) {

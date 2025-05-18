@@ -4,7 +4,7 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     abstract get key(): string;
     abstract get settingsSchema(): ToolSettingsList<TSettings>;
 
-    get keybinds(): KeybindingActionConfig[] {
+    get keybindsSchema(): KeybindingActionConfig[] {
         return [];
     }
 
