@@ -1,13 +1,19 @@
-import { ActorPF2e, createHook, ItemPF2e } from "module-helpers";
+import { ActorPF2e, createHook, createToggleKeybind, ItemPF2e } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { ConditionManager } from ".";
 
 class ConditionManagerTool extends ModuleTool<ToolSettings> {
     #preCreateItemHook = createHook("preCreateItem", this.#onPreCreateItem.bind(this));
-    #keybindActions = {
-        down: () => {},
-        up: () => {},
-    };
+
+    #manageKeybind = createToggleKeybind({
+        name: "manage",
+        onDown: () => {
+            this.#preCreateItemHook.activate();
+        },
+        onUp: () => {
+            this.#preCreateItemHook.disable();
+        },
+    });
 
     get key(): "conditionManager" {
         return "conditionManager";
@@ -21,40 +27,18 @@ class ConditionManagerTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "user",
                 onChange: (value) => {
-                    this.#setKeybindAction(value);
+                    this.#manageKeybind.toggle(value);
                 },
             },
         ] as const;
     }
 
-    get keybinds(): KeybindingActionConfig[] {
-        return [
-            {
-                name: "manage",
-                onDown: () => this.#keybindActions.down(),
-                onUp: () => this.#keybindActions.up(),
-            },
-        ];
+    get keybindsSchema(): KeybindingActionConfig[] {
+        return [this.#manageKeybind.configs];
     }
 
     init(): void {
-        this.#setKeybindAction();
-    }
-
-    #setKeybindAction(enabled = this.getSetting("enabled")) {
-        if (enabled) {
-            this.#keybindActions = {
-                down: () => this.#preCreateItemHook.activate(),
-                up: () => this.#preCreateItemHook.disable(),
-            };
-        } else {
-            // we simulate a key-up before unbinding the key
-            this.#keybindActions.up();
-            this.#keybindActions = {
-                down: () => {},
-                up: () => {},
-            };
-        }
+        this.#manageKeybind.toggle(this.getSetting("enabled"));
     }
 
     #onPreCreateItem(item: ItemPF2e<ActorPF2e>) {
