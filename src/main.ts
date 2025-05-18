@@ -10,19 +10,19 @@ import { ModuleTool } from "module-tool";
 import {
     ArpTool,
     ConditionManagerTool,
-    EffectsPanelTool,
+    BetterEffectsPanelTool,
     GivethTool,
     ResourceTrackerTool,
-    TradeTool,
+    BetterTradeTool,
 } from "tools";
 
 const TOOLS: ModuleTool[] = [
     new ArpTool(),
+    new BetterEffectsPanelTool(),
+    new BetterTradeTool(),
     new ConditionManagerTool(),
-    new EffectsPanelTool(),
     new GivethTool(),
     new ResourceTrackerTool(),
-    new TradeTool(),
 ];
 
 MODULE.register("pf2e-toolbelt");

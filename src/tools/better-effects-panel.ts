@@ -8,14 +8,14 @@ import {
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class EffectsPanelTool extends ModuleTool<ToolSettings> {
+class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
     #renderEffectsPanelHook = createHook(
         "renderEffectsPanel",
         this.#onRenderEffectsPanel.bind(this)
     );
 
-    get key(): "effectsPanel" {
-        return "effectsPanel";
+    get key(): "betterEffectsPanel" {
+        return "betterEffectsPanel";
     }
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
@@ -24,7 +24,7 @@ class EffectsPanelTool extends ModuleTool<ToolSettings> {
                 key: "remove",
                 type: Boolean,
                 default: false,
-                scope: "world",
+                scope: "user",
                 onChange: (value) => {
                     this.#renderEffectsPanelHook.toggle(value);
                 },
@@ -72,4 +72,4 @@ type ToolSettings = {
     remove: boolean;
 };
 
-export { EffectsPanelTool };
+export { BetterEffectsPanelTool };

@@ -8,7 +8,7 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
-class TradeTool extends ModuleTool<ToolSettings> {
+class BetterTradeTool extends ModuleTool<ToolSettings> {
     #transferContainerEmitable = createEmitable("trade", ({ item, target }: WithContentOptions) => {
         giveItemToActor(item, target);
     });
@@ -18,8 +18,8 @@ class TradeTool extends ModuleTool<ToolSettings> {
         { context: this, priority: 100 }
     );
 
-    get key(): "trade" {
-        return "trade";
+    get key(): "betterTrade" {
+        return "betterTrade";
     }
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
@@ -78,4 +78,4 @@ type ToolSettings = {
     withContent: boolean;
 };
 
-export { TradeTool };
+export { BetterTradeTool };
