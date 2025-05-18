@@ -99,7 +99,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     }
 
     #onUpdateWorldTime(worldTime: number = getWorldTime()) {
-        if (game.user.isGM && !game.user.isActiveGM) return;
+        if (!game.ready || (game.user.isGM && !game.user.isActiveGM)) return;
 
         let updated = false;
 
