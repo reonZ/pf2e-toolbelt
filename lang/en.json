@@ -74,6 +74,10 @@
                         "enabled": "Enabled",
                         "select": "Re-Select Tokens"
                     }
+                },
+                "history": {
+                    "name": "No History Record",
+                    "hint": "Should movement history recording be prevented for you. This makes successive move actions in a same turn less confusing."
                 }
             },
             "betterTrade": {

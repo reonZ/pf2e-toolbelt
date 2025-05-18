@@ -1,4 +1,5 @@
 import {
+    createToggleableWrapper,
     createToggleKeybind,
     MODULE,
     positionTokenFromCoords,
@@ -10,6 +11,13 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterMovementyTool extends ModuleTool<ToolSettings> {
     #cancelTeleport: (() => void) | null = null;
+
+    #shouldRecordMovementHistoryWrapper = createToggleableWrapper(
+        "OVERRIDE",
+        "CONFIG.Token.documentClass.prototype._shouldRecordMovementHistory",
+        this.#shouldRecordMovementHistory,
+        { context: this }
+    );
 
     #teleportKeybind = createToggleKeybind({
         name: "teleport",
@@ -88,10 +96,21 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
                 choices: ["disabled", "enabled", "select"],
                 scope: "user",
                 gmOnly: true,
-                onChange: (value: ToolSettings["teleport"]) => {
+                onChange: (value: ToolSettings["teleport"], _, userId) => {
+                    if (userId !== game.userId) return;
                     const enabled = value !== "disabled";
                     this.#teleportKeybind.toggle(enabled);
                     this.#unselectKeybind.toggle(enabled);
+                },
+            },
+            {
+                key: "history",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: (value, _, userId) => {
+                    if (userId !== game.userId) return;
+                    this.#shouldRecordMovementHistoryWrapper.toggle(value);
                 },
             },
         ] as const;
@@ -109,6 +128,14 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
             this.#teleportKeybind.activate();
             this.#unselectKeybind.activate();
         }
+
+        if (this.getSetting("history")) {
+            this.#shouldRecordMovementHistoryWrapper.activate();
+        }
+    }
+
+    #shouldRecordMovementHistory(token: TokenPF2e) {
+        return false;
     }
 
     #activeTeleport(unselect: boolean) {
@@ -311,6 +338,7 @@ type PositionUpdate = {
 
 type ToolSettings = {
     teleport: "disabled" | "enabled" | "select";
+    history: boolean;
 };
 
 export { BetterMovementyTool };
