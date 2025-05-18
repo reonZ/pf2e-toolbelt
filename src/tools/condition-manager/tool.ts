@@ -26,7 +26,8 @@ class ConditionManagerTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "user",
-                onChange: (value) => {
+                onChange: (value, _, userId) => {
+                    if (userId !== game.userId) return;
                     this.#manageKeybind.toggle(value);
                 },
             },

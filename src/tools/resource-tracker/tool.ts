@@ -29,7 +29,8 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
                 type: Boolean,
                 default: false,
                 scope: "user",
-                onChange: (value) => {
+                onChange: (value, _, userId) => {
+                    if (userId !== game.userId) return;
                     this.#showApplication(value);
                 },
             },
@@ -47,6 +48,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
                 scope: "user",
                 config: false,
                 onChange: (value, _, userId) => {
+                    if (userId !== game.userId) return;
                     this.#onResourceUpdate(value, userId);
                 },
             },
