@@ -8,15 +8,15 @@ import {
 import { ModuleTool, ToolSettings } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
-class GlobalTool extends ModuleTool<Settings> {
-    #transferContainerEmitable = createEmitable("global", this.#transferContainer.bind(this));
+class TradeTool extends ModuleTool<Settings> {
+    #transferContainerEmitable = createEmitable("trade", this.#transferContainer.bind(this));
     #transferItemToActorWrapper = sharedActorTransferItemToActor.register(
         this.#transferItemToActor,
         { context: this, priority: 100 }
     );
 
-    get key(): "global" {
-        return "global";
+    get key(): "trade" {
+        return "trade";
     }
 
     get settingsSchema(): ToolSettings<Settings> {
@@ -74,4 +74,4 @@ type Settings = {
     withContent: boolean;
 };
 
-export { GlobalTool };
+export { TradeTool };

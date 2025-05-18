@@ -11,16 +11,16 @@ import {
     ArpTool,
     ConditionManagerTool,
     EffectsPanelTool,
-    GlobalTool,
     ResourceTrackerTool,
+    TradeTool,
 } from "tools";
 
 const TOOLS: ModuleTool[] = [
-    new GlobalTool(),
     new ArpTool(),
     new ConditionManagerTool(),
     new EffectsPanelTool(),
     new ResourceTrackerTool(),
+    new TradeTool(),
 ];
 
 MODULE.register("pf2e-toolbelt");
