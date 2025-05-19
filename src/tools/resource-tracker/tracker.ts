@@ -96,7 +96,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         context: RenderContext,
         options: ApplicationRenderOptions
     ): Promise<string> {
-        return render("resource-tracker/tracker", context);
+        return render("resourceTracker/tracker", context);
     }
 
     protected _replaceHTML(
@@ -112,7 +112,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         const windowHeader = htmlQuery(frame, ".window-header");
 
         const header = createHTMLElement("div", {
-            content: await render("resource-tracker/header"),
+            content: await render("resourceTracker/header"),
         });
 
         windowHeader?.replaceChildren(...header.children);
@@ -181,15 +181,15 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         isCreate?: boolean
     ): Promise<(Resource & { delete?: boolean }) | false | null> {
         return await waitDialog({
-            content: "resource-tracker/menu",
-            i18n: "resource-tracker.resource",
+            content: "resourceTracker/menu",
+            i18n: "resourceTracker.resource",
             data: {
                 resource,
                 isCreate,
             },
-            title: localize("resource-tracker.resource.title", isCreate ? "create" : "edit"),
+            title: localize("resourceTracker.resource.title", isCreate ? "create" : "edit"),
             yes: {
-                label: localize("resource-tracker.resource.yes", isCreate ? "create" : "edit"),
+                label: localize("resourceTracker.resource.yes", isCreate ? "create" : "edit"),
             },
             classes: ["resource-menu"],
         });

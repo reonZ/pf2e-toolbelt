@@ -34,7 +34,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         condition: ConditionPF2e<ActorPF2e>,
         options: DeepPartial<ApplicationConfiguration> = {}
     ) {
-        setApplicationTitle(options, "condition-manager.title", condition._source);
+        setApplicationTitle(options, "conditionManager.title", condition._source);
         super(options);
 
         this.#label = "";
@@ -76,7 +76,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<RenderContext> {
         const isGM = game.user.isGM;
-        const anonLabel = `<${localize("condition-manager.anonymous")}>`;
+        const anonLabel = `<${localize("conditionManager.anonymous")}>`;
 
         const labelPlaceholder = this.effectLabel;
         const label = {
@@ -118,7 +118,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         context: RenderContext,
         options: ApplicationRenderOptions
     ): Promise<string> {
-        return render("condition-manager", context);
+        return render("conditionManager", context);
     }
 
     protected _replaceHTML(

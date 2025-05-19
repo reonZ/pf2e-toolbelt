@@ -101,12 +101,12 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
             ] as const,
             R.map((step) => {
                 const value = this[step];
-                const click = localize("resource-tracker.resource.steps", step);
-                return localize("resource-tracker.resource", direction, { click, value });
+                const click = localize("resourceTracker.resource.steps", step);
+                return localize("resourceTracker.resource", direction, { click, value });
             })
         );
 
-        steps.unshift(localize("resource-tracker.resource.edit"));
+        steps.unshift(localize("resourceTracker.resource.edit"));
 
         return steps.join("<br>");
     }
