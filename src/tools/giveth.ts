@@ -11,7 +11,6 @@ import {
     isAllyActor,
     ItemPF2e,
     ItemTransferDialog,
-    localize,
     localizePath,
     PhysicalItemPF2e,
     updateItemTransferDialog,
@@ -103,11 +102,11 @@ class GivethTool extends ModuleTool<ToolSettings> {
             item: added.item,
             message: localizePath(
                 "giveth.message.content",
-                added.withContent ? "container" : "item"
+                added.hasContent ? "container" : "item"
             ),
             source: item.actor,
-            subtitle: localize("giveth.message.subtitle"),
-            quantity: added.quantity,
+            subtitle: this.localize("message.subtitle"),
+            quantity: added.giveQuantity,
             target,
             userId,
         });
@@ -128,8 +127,8 @@ class GivethTool extends ModuleTool<ToolSettings> {
         if (app.options.isPurchase || !this.#ShouldHandleItemTransfer(source, target)) return;
 
         updateItemTransferDialog($html[0], {
-            title: localize("giveth.dialog.title"),
-            prompt: localize("giveth.dialog.prompt"),
+            title: this.localize("dialog.title"),
+            prompt: this.localize("dialog.prompt"),
         });
     }
 
