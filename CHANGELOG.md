@@ -10,11 +10,15 @@
     -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from equipment
 -   `Giveth`:
     -   remove the `Send Message to Chat` setting
+-   `Underground`:
+    -   make sure to refresh the canvas when disabling/enabling the feature
 -   convert `Effects Panel` tools to `Better Effects Panel`
 -   convert `No Bulk` tools to `Better Inventory`:
     -   settings have been reset to default values
 -   add `Better Movement` tools:
     -   move the `Teleport Tokens` in it while combining both its settings into a single one
+    -   add `No History Record` setting
+        -   prevents movement history recording on your client
 -   add `Better Trade` tools:
     -   move the `With Container Content` feature there and reset its setting
 -   add `Resource Tracker` tools:

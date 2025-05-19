@@ -120,6 +120,30 @@
                     "name": "Display Tracker",
                     "hint": "Should the resource tracker widget be displayed in your interface. Can be toggled on/off via controls on the left UI."
                 }
+            },
+            "underground": {
+                "title": "Underground",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Will allow tokens with negative elevation to remain visible on the board."
+                },
+                "mode": {
+                    "name": "Applied Filter",
+                    "hint": "Which type of filter should be applied to tokens with an elevation below 0.",
+                    "choices": {
+                        "normal": "No Filter",
+                        "greyscale": "Greyscale Filter",
+                        "sepia": "Sepia Filter"
+                    }
+                },
+                "contrast": {
+                    "name": "Contrast",
+                    "hint": "Contrast value when the token has a negative elevation."
+                },
+                "alpha": {
+                    "name": "Opacity",
+                    "hint": "Opacity value when the token has a negative elevation."
+                }
             }
         },
         "condition-manager": {

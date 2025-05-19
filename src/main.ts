@@ -16,6 +16,7 @@ import {
     ConditionManagerTool,
     GivethTool,
     ResourceTrackerTool,
+    UndergroundTool,
 } from "tools";
 
 const TOOLS: ModuleTool[] = [
@@ -27,6 +28,7 @@ const TOOLS: ModuleTool[] = [
     new ConditionManagerTool(),
     new GivethTool(),
     new ResourceTrackerTool(),
+    new UndergroundTool(),
 ];
 
 MODULE.register("pf2e-toolbelt");
