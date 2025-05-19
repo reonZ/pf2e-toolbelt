@@ -59,7 +59,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (enabled) => {
+                onChange: () => {
                     this.configurate();
                 },
             },
@@ -69,7 +69,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
                 choices: ["disabled", "ally", "all"],
                 default: "ally",
                 scope: "world",
-                onChange: (effect: ToolSettings["effect"]) => {
+                onChange: () => {
                     this.configurate();
                 },
             },

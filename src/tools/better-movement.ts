@@ -96,8 +96,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
                 choices: ["disabled", "enabled", "select"],
                 scope: "user",
                 gmOnly: true,
-                onChange: (value: ToolSettings["teleport"], _, userId) => {
-                    if (userId !== game.userId) return;
+                onChange: (value: ToolSettings["teleport"]) => {
                     const enabled = value !== "disabled";
                     this.#teleportKeybind.toggle(enabled);
                     this.#unselectKeybind.toggle(enabled);
@@ -108,8 +107,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "user",
-                onChange: (value, _, userId) => {
-                    if (userId !== game.userId) return;
+                onChange: (value) => {
                     this.#shouldRecordMovementHistoryWrapper.toggle(value);
                 },
             },
