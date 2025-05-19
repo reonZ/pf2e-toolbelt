@@ -1,11 +1,4 @@
-import {
-    createHook,
-    createToggleableWrapper,
-    deleteInMemory,
-    getInMemory,
-    setInMemory,
-    TokenPF2e,
-} from "module-helpers";
+import { createHook, createToggleableWrapper, TokenPF2e } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class UndergroundTool extends ModuleTool<ToolSettings> {
@@ -104,7 +97,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
 
         const elevation = token.document.elevation;
 
-        const currentFilters = getInMemory<PIXI.Filter[]>(token, "elevationFilters") ?? [];
+        const currentFilters = this.getInMemory<PIXI.Filter[]>(token, "elevationFilters") ?? [];
         for (const filter of currentFilters) {
             token.mesh?.filters?.findSplice((f) => f === filter);
         }
@@ -141,9 +134,9 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
             if (token.mesh && filters.length) {
                 token.mesh.filters ??= [];
                 token.mesh.filters.push(...filters);
-                setInMemory(token, "elevationFilters", filters);
+                this.setInMemory(token, "elevationFilters", filters);
             } else {
-                deleteInMemory(token, "elevationFilters");
+                this.deleteInMemory(token, "elevationFilters");
             }
         }
     }

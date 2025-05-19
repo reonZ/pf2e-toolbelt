@@ -1,10 +1,13 @@
 import {
+    deleteInMemory,
     error,
+    getInMemory,
     getSetting,
     localize,
     LocalizeArgs,
     NotificationArgs,
     RegisterSettingOptions,
+    setInMemory,
     setSetting,
 } from "module-helpers";
 
@@ -43,6 +46,18 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     error(...args: NotificationArgs): number {
         return error(this.key, ...args);
+    }
+
+    getInMemory<T>(obj: ClientDocument | Token, ...path: string[]): T | undefined {
+        return getInMemory(obj, this.key, ...path);
+    }
+
+    setInMemory<T>(obj: ClientDocument | Token, ...args: [...string[], T]): boolean {
+        return setInMemory(obj, this.key, ...args);
+    }
+
+    deleteInMemory(obj: ClientDocument | Token, ...path: string[]) {
+        return deleteInMemory(obj, this.key, ...path);
     }
 
     _initialize() {
