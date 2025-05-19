@@ -38,7 +38,7 @@ class ConditionManagerTool extends ModuleTool<ToolSettings> {
     }
 
     init(): void {
-        if (this.getSetting("enabled")) {
+        if (this.settings.enabled) {
             this.#manageKeybind.activate();
         }
     }

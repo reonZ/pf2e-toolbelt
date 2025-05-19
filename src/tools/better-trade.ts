@@ -38,7 +38,7 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        if (this.getSetting("withContent")) {
+        if (this.settings.withContent) {
             this.#transferItemToActorWrapper.activate();
             this.#transferContainerEmitable.activate();
         }

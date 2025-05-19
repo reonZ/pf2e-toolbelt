@@ -122,12 +122,12 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        if (isGM && this.getSetting("teleport") !== "disabled") {
+        if (isGM && this.settings.teleport !== "disabled") {
             this.#teleportKeybind.activate();
             this.#unselectKeybind.activate();
         }
 
-        if (this.getSetting("history")) {
+        if (this.settings.history) {
             this.#shouldRecordMovementHistoryWrapper.activate();
         }
     }
@@ -171,7 +171,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
 
         await canvas.scene?.updateEmbeddedDocuments("Token", updates, operation);
 
-        if (this.getSetting("teleport") === "select") {
+        if (this.settings.teleport === "select") {
             selectTokens(tokens);
         } else if (event.button !== 0) {
             canvas.tokens.releaseAll();

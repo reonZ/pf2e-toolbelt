@@ -1,6 +1,8 @@
 import { getSetting, RegisterSettingOptions, setSetting } from "module-helpers";
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
+    declare settings: Readonly<TSettings>;
+
     abstract get key(): string;
     abstract get settingsSchema(): ToolSettingsList<TSettings>;
 
@@ -19,17 +21,32 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return `${this.key}.${setting}`;
     }
 
-    getSetting<K extends keyof TSettings & string>(setting: K): TSettings[K] {
-        const key = this.getSettingKey(setting);
-        return getSetting(key);
-    }
-
     setSetting<K extends keyof TSettings & string>(
         setting: K,
         value: TSettings[K]
     ): Promise<TSettings[K]> {
         const key = this.getSettingKey(setting);
         return setSetting(key, value);
+    }
+
+    _initialize() {
+        const settings = {};
+
+        for (const setting of this.settingsSchema) {
+            const key = this.getSettingKey(setting.key);
+
+            Object.defineProperty(settings, setting.key, {
+                get() {
+                    return getSetting(key);
+                },
+            });
+        }
+
+        Object.defineProperty(this, "settings", {
+            get() {
+                return settings;
+            },
+        });
     }
 }
 

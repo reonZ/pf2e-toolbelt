@@ -127,11 +127,11 @@ class ArpTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        if (!this.getSetting("enabled")) return;
+        if (!this.settings.enabled) return;
 
-        this.#force = this.getSetting("force");
-        this.#price = this.getSetting("price");
-        this.#shield = this.getSetting("shield");
+        this.#force = this.settings.force;
+        this.#price = this.settings.price;
+        this.#shield = this.settings.shield;
 
         activateWrappers(this.#baseWrappers);
 

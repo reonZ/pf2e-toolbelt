@@ -73,7 +73,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     }
 
     init(isGM: boolean): void {
-        this.#offline = this.getSetting("offline");
+        this.#offline = this.settings.offline;
 
         Hooks.on("getSceneControlButtons", this.#onGetSceneControlButtons.bind(this));
     }
@@ -91,7 +91,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         const settingKey = userIsGM() ? "worldResources" : "userResources";
         const resourcesKey = this.getSettingKey(settingKey);
 
-        resources ??= this.getSetting(settingKey);
+        resources ??= this.settings[settingKey];
 
         this.#resources = new ResourceCollection(resourcesKey, resources);
 
@@ -130,7 +130,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         this.#application?.render();
     }
 
-    #showApplication(show = this.getSetting("show")) {
+    #showApplication(show = this.settings.show) {
         if (show) {
             if (this.#application) {
                 this.#application.bringToFront();
@@ -149,7 +149,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         if (!tokenTools) return;
 
         tokenTools.resourceTracker = {
-            active: this.getSetting("show"),
+            active: this.settings.show,
             name: "resourceTracker",
             title: settingPath("resourceTracker.title"),
             icon: "fa-regular fa-bars-progress",

@@ -23,7 +23,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
     #setPosition = R.funnel(
         () => {
             const { left, top } = this.position;
-            const position = this.#tool.getSetting("position");
+            const position = this.#tool.settings.position;
 
             position.set(left, top);
             this.#tool.setSetting("position", position);
@@ -65,7 +65,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
 
         const userId = game.user.isGM ? "world" : game.userId;
         const [ownResources, otherResources] = R.pipe(
-            [{ user: "world", value: this.#tool.getSetting("worldResources") }, ...usersResources],
+            [{ user: "world", value: this.#tool.settings.worldResources }, ...usersResources],
             R.map(({ user, value }) => {
                 const resources = value
                     .filter(({ shared }) => shared || user === userId)
@@ -121,7 +121,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
     }
 
     _onFirstRender(context: RenderContext, options: ApplicationRenderOptions) {
-        const { x, y } = this.#tool.getSetting("position");
+        const { x, y } = this.#tool.settings.position;
         foundry.utils.setProperty(options, "position", { left: x, top: y });
 
         this.#userConnectedHook.activate();

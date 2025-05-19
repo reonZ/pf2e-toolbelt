@@ -81,16 +81,14 @@ class GivethTool extends ModuleTool<ToolSettings> {
     }
 
     _configurate(): void {
-        const enabled = this.getSetting("enabled");
+        const enabled = this.settings.enabled;
 
         if (game.user.isGM) {
             this.#givethEmitable.toggle(enabled);
         } else {
             this.#renderTransferDialogHook.toggle(enabled);
             this.#transferItemWrapper.toggle(enabled);
-            this.#handleDroppedItemWrapper.toggle(
-                enabled && this.getSetting("effect") !== "disabled"
-            );
+            this.#handleDroppedItemWrapper.toggle(enabled && this.settings.effect !== "disabled");
         }
     }
 
@@ -147,7 +145,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         if (
             item.isOfType("condition", "effect") &&
             !actor.isOwner &&
-            (this.getSetting("effect") === "all" || isAllyActor(actor))
+            (this.settings.effect === "all" || isAllyActor(actor))
         ) {
             this.#givethEmitable.call({
                 type: "effect",

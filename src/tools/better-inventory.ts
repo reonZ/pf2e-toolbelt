@@ -47,8 +47,8 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        this.#actorPrepareEmbeddedDocumentsWrapper.toggle(this.getSetting("dropped"));
-        this.#treasurePreparedBaseDataWrapper.toggle(this.getSetting("coins"));
+        this.#actorPrepareEmbeddedDocumentsWrapper.toggle(this.settings.dropped);
+        this.#treasurePreparedBaseDataWrapper.toggle(this.settings.coins);
     }
 
     #actorPrepareEmbeddedDocuments(actor: ActorPF2e, wrapped: libWrapper.RegisterCallback) {

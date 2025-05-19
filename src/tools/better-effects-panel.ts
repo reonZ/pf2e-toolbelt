@@ -33,7 +33,7 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        this.#renderEffectsPanelHook.toggle(this.getSetting("remove"));
+        this.#renderEffectsPanelHook.toggle(this.settings.remove);
     }
 
     #onRenderEffectsPanel(panel: EffectsPanel, html: HTMLElement, data: EffectsPanelViewData) {

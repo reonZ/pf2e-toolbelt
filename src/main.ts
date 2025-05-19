@@ -66,6 +66,7 @@ Hooks.once("init", () => {
     });
 
     for (const tool of TOOLS) {
+        tool._initialize();
         tool.init(isGM);
     }
 });
