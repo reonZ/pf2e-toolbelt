@@ -6,7 +6,6 @@ import {
     createToggleableWrapper,
     createTradeMessage,
     DropCanvasItemDataPF2e,
-    error,
     giveItemToActor,
     isAllyActor,
     ItemPF2e,
@@ -95,7 +94,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         const added = await giveItemToActor(item, target, quantity, newStack);
 
         if (!added) {
-            return error("giveth.error");
+            return this.error("error");
         }
 
         createTradeMessage({

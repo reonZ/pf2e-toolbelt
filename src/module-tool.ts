@@ -1,4 +1,12 @@
-import { getSetting, RegisterSettingOptions, setSetting } from "module-helpers";
+import {
+    error,
+    getSetting,
+    localize,
+    LocalizeArgs,
+    NotificationArgs,
+    RegisterSettingOptions,
+    setSetting,
+} from "module-helpers";
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
     declare settings: Readonly<TSettings>;
@@ -27,6 +35,14 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     ): Promise<TSettings[K]> {
         const key = this.getSettingKey(setting);
         return setSetting(key, value);
+    }
+
+    localize(...args: LocalizeArgs): string {
+        return localize(this.key, ...args);
+    }
+
+    error(...args: NotificationArgs): number {
+        return error(this.key, ...args);
     }
 
     _initialize() {
