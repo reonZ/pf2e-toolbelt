@@ -18,6 +18,7 @@ import {
     ResourceTrackerTool,
     UndergroundTool,
 } from "tools";
+import { UnidedTool } from "tools/unided";
 
 const TOOLS: ModuleTool[] = [
     new ArpTool(),
@@ -29,6 +30,7 @@ const TOOLS: ModuleTool[] = [
     new GivethTool(),
     new ResourceTrackerTool(),
     new UndergroundTool(),
+    new UnidedTool(),
 ];
 
 MODULE.register("pf2e-toolbelt");

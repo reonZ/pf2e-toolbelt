@@ -26,6 +26,9 @@
     -   resources can be shown to everybody, though only the owner can update them
     -   resources created by GMs are shared among all GMs
     -   resources can have a timeout option linked to the world clock to decrement their value automatically over time
+-   remove `Hide Damage` tools
+-   remove `Spells Summary` tools
+-   remove `Stances` tools
 
 # 2.35.1
 

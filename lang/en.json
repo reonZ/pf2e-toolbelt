@@ -144,6 +144,17 @@
                     "name": "Opacity",
                     "hint": "Opacity value when the token has a negative elevation."
                 }
+            },
+            "unided": {
+                "title": "Set Unidentified Image",
+                "create": {
+                    "name": "On Item Creation",
+                    "hint": "Automatically set the un-identifed image of items to be the same as the regular image when the item is created/imported."
+                },
+                "update": {
+                    "name": "On Item Update",
+                    "hint": "Automatically update the un-identifed image when the item's regular image is updated."
+                }
             }
         },
         "condition-manager": {
