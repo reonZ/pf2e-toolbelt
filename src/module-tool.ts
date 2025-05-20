@@ -9,6 +9,7 @@ import {
     localizePath,
     NotificationArgs,
     RegisterSettingOptions,
+    render,
     setFlagProperties,
     setInMemory,
     setSetting,
@@ -41,6 +42,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     ): Promise<TSettings[K]> {
         const key = this.getSettingKey(setting);
         return setSetting(key, value);
+    }
+
+    render(template: string, data?: Record<string, any>): Promise<string> {
+        return render(`${this.key}/${template}`, data);
     }
 
     localizePath(...path: string[]): string {

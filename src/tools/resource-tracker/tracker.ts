@@ -8,9 +8,7 @@ import {
     getUsersSetting,
     htmlClosest,
     htmlQuery,
-    localize,
     R,
-    render,
     RenderTemplateData,
     waitDialog,
 } from "module-helpers";
@@ -96,7 +94,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         context: RenderContext,
         options: ApplicationRenderOptions
     ): Promise<string> {
-        return render("resourceTracker/tracker", context);
+        return this.#tool.render("tracker", context);
     }
 
     protected _replaceHTML(
@@ -112,7 +110,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         const windowHeader = htmlQuery(frame, ".window-header");
 
         const header = createHTMLElement("div", {
-            content: await render("resourceTracker/header"),
+            content: await this.#tool.render("header"),
         });
 
         windowHeader?.replaceChildren(...header.children);
@@ -187,9 +185,9 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
                 resource,
                 isCreate,
             },
-            title: localize("resourceTracker.resource.title", isCreate ? "create" : "edit"),
+            title: this.#tool.localize("resource.title", isCreate ? "create" : "edit"),
             yes: {
-                label: localize("resourceTracker.resource.yes", isCreate ? "create" : "edit"),
+                label: this.#tool.localize("resource.yes", isCreate ? "create" : "edit"),
             },
             classes: ["resource-menu"],
         });

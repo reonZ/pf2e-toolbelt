@@ -45,7 +45,7 @@ class ConditionManagerTool extends ModuleTool<ToolSettings> {
 
     #onPreCreateItem(item: ItemPF2e<ActorPF2e>) {
         if (item.isOfType("condition") && item.actor) {
-            new ConditionManager(item).render(true);
+            new ConditionManager(this, item).render(true);
             return false;
         }
     }

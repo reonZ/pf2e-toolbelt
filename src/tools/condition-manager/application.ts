@@ -8,14 +8,14 @@ import {
     createCustomCondition,
     DurationData,
     EncounterPF2e,
-    localize,
     R,
-    render,
     RenderTemplateData,
     setApplicationTitle,
 } from "module-helpers";
+import { ConditionManagerTool } from "./tool";
 
 class ConditionManager extends foundry.applications.api.ApplicationV2 {
+    #tool: ConditionManagerTool;
     #label: string;
     #actor: ActorPF2e;
     #combat: EncounterPF2e | null;
@@ -31,12 +31,14 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     };
 
     constructor(
+        tool: ConditionManagerTool,
         condition: ConditionPF2e<ActorPF2e>,
         options: DeepPartial<ApplicationConfiguration> = {}
     ) {
-        setApplicationTitle(options, "conditionManager.title", condition._source);
+        setApplicationTitle(options, "conditionManager.manager.title", condition._source);
         super(options);
 
+        this.#tool = tool;
         this.#label = "";
         this.#actor = condition.actor;
         this.#condition = condition;
@@ -76,7 +78,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<RenderContext> {
         const isGM = game.user.isGM;
-        const anonLabel = `<${localize("conditionManager.anonymous")}>`;
+        const anonLabel = `<${this.#tool.localize("anonymous")}>`;
 
         const labelPlaceholder = this.effectLabel;
         const label = {
@@ -118,7 +120,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         context: RenderContext,
         options: ApplicationRenderOptions
     ): Promise<string> {
-        return render("conditionManager", context);
+        return this.#tool.render("manager", context);
     }
 
     protected _replaceHTML(
