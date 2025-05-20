@@ -70,7 +70,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
                     this.configurate();
                 },
             },
-        ] as const;
+        ];
     }
 
     ready(isGM: boolean): void {

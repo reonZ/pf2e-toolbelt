@@ -72,7 +72,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
                 default: true,
                 scope: "world",
             },
-        ] as const;
+        ];
     }
 
     get keybindsSchema(): KeybindingActionConfig[] {

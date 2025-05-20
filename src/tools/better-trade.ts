@@ -34,7 +34,7 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
                     this.#transferContainerEmitable.toggle(value);
                 },
             },
-        ] as const;
+        ];
     }
 
     init(isGM: boolean): void {

@@ -29,7 +29,7 @@ class UnidedTool extends ModuleTool<ToolSettings> {
                     this.#preUpdateItemHook.toggle(value);
                 },
             },
-        ] as const;
+        ];
     }
 
     init(): void {

@@ -123,7 +123,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
                 scope: "world",
                 requiresReload: true,
             },
-        ] as const;
+        ];
     }
 
     init(isGM: boolean): void {

@@ -78,7 +78,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
                     this.#drawCanvas();
                 },
             },
-        ] as const;
+        ];
     }
 
     init(isGM: boolean): void {

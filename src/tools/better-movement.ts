@@ -111,7 +111,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
                     this.#shouldRecordMovementHistoryWrapper.toggle(value);
                 },
             },
-        ] as const;
+        ];
     }
 
     get keybindsSchema(): KeybindingActionConfig[] {

@@ -30,7 +30,7 @@ class ConditionManagerTool extends ModuleTool<ToolSettings> {
                     this.#manageKeybind.toggle(value);
                 },
             },
-        ] as const;
+        ];
     }
 
     get keybindsSchema(): KeybindingActionConfig[] {

@@ -29,7 +29,7 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
                     this.#renderEffectsPanelHook.toggle(value);
                 },
             },
-        ] as const;
+        ];
     }
 
     init(isGM: boolean): void {

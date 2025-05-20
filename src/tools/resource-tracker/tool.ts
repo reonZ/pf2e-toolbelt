@@ -61,7 +61,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
                     this.#onResourceUpdate(value, "world");
                 },
             },
-        ] as const;
+        ];
     }
 
     get resources(): ResourceCollection {
