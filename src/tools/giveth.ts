@@ -10,7 +10,6 @@ import {
     isAllyActor,
     ItemPF2e,
     ItemTransferDialog,
-    localizePath,
     PhysicalItemPF2e,
     updateItemTransferDialog,
 } from "module-helpers";
@@ -99,10 +98,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
 
         createTradeMessage({
             item: added.item,
-            message: localizePath(
-                "giveth.message.content",
-                added.hasContent ? "container" : "item"
-            ),
+            message: this.localizePath("message.content", added.hasContent ? "container" : "item"),
             source: item.actor,
             subtitle: this.localize("message.subtitle"),
             quantity: added.giveQuantity,

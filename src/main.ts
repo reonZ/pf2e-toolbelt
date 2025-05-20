@@ -14,11 +14,12 @@ import {
     BetterMovementyTool,
     BetterTradeTool,
     ConditionManagerTool,
+    DroppethTool,
     GivethTool,
     ResourceTrackerTool,
     UndergroundTool,
+    UnidedTool,
 } from "tools";
-import { UnidedTool } from "tools/unided";
 
 const TOOLS: ModuleTool[] = [
     new ArpTool(),
@@ -27,6 +28,7 @@ const TOOLS: ModuleTool[] = [
     new BetterMovementyTool(),
     new BetterTradeTool(),
     new ConditionManagerTool(),
+    new DroppethTool(),
     new GivethTool(),
     new ResourceTrackerTool(),
     new UndergroundTool(),

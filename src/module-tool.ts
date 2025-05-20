@@ -1,12 +1,15 @@
 import {
     deleteInMemory,
     error,
+    getFlag,
     getInMemory,
     getSetting,
     localize,
     LocalizeArgs,
+    localizePath,
     NotificationArgs,
     RegisterSettingOptions,
+    setFlagProperties,
     setInMemory,
     setSetting,
 } from "module-helpers";
@@ -40,6 +43,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return setSetting(key, value);
     }
 
+    localizePath(...path: string[]): string {
+        return localizePath(this.key, ...path);
+    }
+
     localize(...args: LocalizeArgs): string {
         return localize(this.key, ...args);
     }
@@ -56,8 +63,19 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return setInMemory(obj, this.key, ...args);
     }
 
-    deleteInMemory(obj: ClientDocument | Token, ...path: string[]) {
+    deleteInMemory(obj: ClientDocument | Token, ...path: string[]): boolean {
         return deleteInMemory(obj, this.key, ...path);
+    }
+
+    getFlag<T>(doc: foundry.abstract.Document, ...path: string[]): T | undefined {
+        return getFlag(doc, this.key, ...path);
+    }
+
+    setFlagProperties<T extends object>(
+        obj: T,
+        ...args: [...string[], properties: Record<string, any>]
+    ): T {
+        return setFlagProperties(obj, this.key, ...args);
     }
 
     _initialize() {

@@ -7,7 +7,10 @@
     -   no longer hide rune select fields from the item sheet when `Force Update` is enabled
     -   now allow the use of `Handwraps of Mighty Blows` without the `Invested` trait
     -   add `Shield Rune` setting (disabled) : automatically adds reinforcing runes to shields
-    -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from equipment
+    -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from non-specific equipment
+-   `Droppeth`:
+    -   remove the `Remove on Empty` setting
+    -   remove the `Send Message to Chat` setting
 -   `Giveth`:
     -   remove the `Send Message to Chat` setting
 -   `Underground`:
@@ -29,6 +32,7 @@
 -   remove `Hide Damage` tools
 -   remove `Spells Summary` tools
 -   remove `Stances` tools
+-   remove `De-targeting` tools
 
 # 2.35.1
 

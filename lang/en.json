@@ -24,6 +24,12 @@
                     "name": "Teleport Tokens (Unselect)",
                     "hint": "Key held while clicking on the scene to teleport all selected tokens. Also unselect the tokens when pressing the keybind to give an unobstructed vision over the whole scene."
                 }
+            },
+            "droppeth": {
+                "droppeth": {
+                    "name": "Droppeth Modifier",
+                    "hint": "Key held when dropping an item on the ground."
+                }
             }
         },
         "settings": {
@@ -94,6 +100,17 @@
                     "hint": "Drag a condition while holding the defined keybind to open the condition manager allowing you to set its duration."
                 }
             },
+            "droppeth": {
+                "title": "Droppeth",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Allow users to drop items on the canvas by holding the assigned key."
+                },
+                "light": {
+                    "name": "Light Source",
+                    "hint": "Should the dropped item emit light. It will only be the case if a single item is present in the loot actor."
+                }
+            },
             "giveth": {
                 "title": "Giveth",
                 "enabled": {
@@ -157,13 +174,31 @@
                 }
             }
         },
-        "condition-manager": {
+        "conditionManager": {
             "title": "Condition Manager - {name}",
             "add": "Create",
             "cancel": "Cancel",
             "origin": "Origin",
             "label": "Label",
             "anonymous": "Anonymous"
+        },
+        "droppeth": {
+            "dialog": {
+                "title": "Droppeth Item",
+                "prompt": "How many items do you wish to droppeth?"
+            },
+            "error": {
+                "out-of-bounds": "Couldn't create droppeth token at provided location.",
+                "unknown": "Something went wrong when trying to droppeth selected item(s).",
+                "no-scene": "There is no scene available to droppeth."
+            },
+            "message": {
+                "subtitle": "Droppeth Item",
+                "content": {
+                    "item": "{source} droppeth {quantity} × {item} on the ground.",
+                    "container": "{source} droppeth {item} and all its content."
+                }
+            }
         },
         "giveth": {
             "error": "Something went wrong when trying to process a player <strong>Giveth</strong> request.",
@@ -179,7 +214,7 @@
                 }
             }
         },
-        "resource-tracker": {
+        "resourceTracker": {
             "header": {
                 "add": "Add new resource"
             },
