@@ -179,7 +179,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             | "system.duration.value"
             | "system.unidentified";
 
-        addListenerAll(html, "[name]", "change", (event, el: HTMLInputElement) => {
+        addListenerAll(html, "[name]", "change", (el: HTMLInputElement) => {
             switch (el.name as EventChangeName) {
                 case "label": {
                     this.#label = el.value.trim();

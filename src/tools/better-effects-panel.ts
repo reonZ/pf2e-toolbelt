@@ -51,7 +51,7 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
                 html,
                 `.effect-item[data-item-id="${effect.id}"] .icon`,
                 "contextmenu",
-                (event, el) => this.#onRemoveEffect(event, effect),
+                (el, event) => this.#onRemoveEffect(event, effect),
                 true
             );
         }

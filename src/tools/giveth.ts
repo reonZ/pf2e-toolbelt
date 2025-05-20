@@ -74,7 +74,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
     }
 
     ready(isGM: boolean): void {
-        this.configurate();
+        this._configurate();
     }
 
     _configurate(): void {
