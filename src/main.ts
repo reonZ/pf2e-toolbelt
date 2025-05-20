@@ -8,6 +8,7 @@ import {
 } from "module-helpers";
 import { ModuleTool } from "module-tool";
 import {
+    ActionableTool,
     ArpTool,
     BetterEffectsPanelTool,
     BetterInventoryTool,
@@ -22,6 +23,7 @@ import {
 } from "tools";
 
 const TOOLS: ModuleTool[] = [
+    new ActionableTool(),
     new ArpTool(),
     new BetterEffectsPanelTool(),
     new BetterInventoryTool(),

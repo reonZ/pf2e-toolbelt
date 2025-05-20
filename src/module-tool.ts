@@ -10,9 +10,11 @@ import {
     NotificationArgs,
     RegisterSettingOptions,
     render,
+    setFlag,
     setFlagProperties,
     setInMemory,
     setSetting,
+    unsetFlag,
 } from "module-helpers";
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
@@ -44,7 +46,7 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return setSetting(key, value);
     }
 
-    render(template: string, data?: Record<string, any>): Promise<string> {
+    render<T extends Record<string, any>>(template: string, data?: T): Promise<string> {
         return render(`${this.key}/${template}`, data);
     }
 
@@ -74,6 +76,14 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     getFlag<T>(doc: foundry.abstract.Document, ...path: string[]): T | undefined {
         return getFlag(doc, this.key, ...path);
+    }
+
+    setFlag<D extends foundry.abstract.Document, T>(doc: D, ...args: [...string[], T]): Promise<D> {
+        return setFlag(doc, this.key, ...args);
+    }
+
+    unsetFlag<D extends foundry.abstract.Document>(doc: D, ...path: string[]): Promise<D> {
+        return unsetFlag(doc, this.key, ...path);
     }
 
     setFlagProperties<T extends object>(

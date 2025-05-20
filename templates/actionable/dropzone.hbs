@@ -1,0 +1,20 @@
+<div class="form-group" data-drop-zone="self-applied-effect">
+    <label>{{@root.i18n 'label'}}</label>
+    <div class="drop-zone{{#unless link}} empty{{/unless}}">
+        {{#if link}}
+        <a class="content-link" data-action="open-link-sheet"
+            data-tooltip="{{localize 'CONTROLS.CommonOpenSheet'}}">
+            <img src="{{link.img}}" />
+            <span class="name">{{link.name}}</span>
+        </a>
+        <a class="delete" data-action="delete-link"
+            data-tooltip="{{localize 'PF2E.Item.Ability.SelfAppliedEffect.Delete'}}">
+            <i class="fa-solid fa-trash"></i>
+        </a>
+        {{else}}
+        <picture class="icon-placeholder"></picture>
+        <span class="name">{{localize "PF2E.Item.Ability.SelfAppliedEffect.Drop"}}</span>
+        {{/if}}
+    </div>
+    <p class="hint">{{@root.i18n 'hint'}}</p>
+</div>

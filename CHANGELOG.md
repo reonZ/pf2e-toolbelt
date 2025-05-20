@@ -2,6 +2,8 @@
 
 -   this is a foundry v13 release
 -   all `client` settings have been converted into `user` settings and have been reset to their default value
+-   `Actionable`:
+    -   use the macro image for actions that use the default image
 -   `Automatic Rune Progression`:
     -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
     -   no longer hide rune select fields from the item sheet when `Force Update` is enabled

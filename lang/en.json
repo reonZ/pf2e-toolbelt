@@ -33,6 +33,18 @@
             }
         },
         "settings": {
+            "actionable": {
+                "title": "Actionable",
+                "action": {
+                    "name": "Actions",
+                    "hint": "Adds a way to link a macro to actions/feats."
+                },
+                "item": {},
+                "spell": {
+                    "name": "Spells",
+                    "hint": "Adds a way to link a macro or self-applied effect to spells."
+                }
+            },
             "arp": {
                 "title": "Automatic Rune Progression",
                 "enabled": {
@@ -174,13 +186,21 @@
                 }
             }
         },
+        "actionable": {
+            "dropzone": {
+                "label": "Self-Applied Effect / Macro",
+                "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used"
+            }
+        },
         "conditionManager": {
-            "title": "Condition Manager - {name}",
-            "add": "Create",
-            "cancel": "Cancel",
-            "origin": "Origin",
-            "label": "Label",
-            "anonymous": "Anonymous"
+            "manager": {
+                "title": "Condition Manager - {name}",
+                "add": "Create",
+                "cancel": "Cancel",
+                "origin": "Origin",
+                "label": "Label",
+                "anonymous": "Anonymous"
+            }
         },
         "droppeth": {
             "dialog": {
