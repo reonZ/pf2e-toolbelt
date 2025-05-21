@@ -1,5 +1,5 @@
 import {
-    activateWrappers,
+    activateHooksAndWrappers,
     ActorPF2e,
     ArmorPF2e,
     createToggleableWrapper,
@@ -133,10 +133,10 @@ class ArpTool extends ModuleTool<ToolSettings> {
         this.#price = this.settings.price;
         this.#shield = this.settings.shield;
 
-        activateWrappers(this.#baseWrappers);
+        activateHooksAndWrappers(this.#baseWrappers);
 
         if (this.#price) {
-            activateWrappers(this.#basePriceWrappers);
+            activateHooksAndWrappers(this.#basePriceWrappers);
         }
 
         if (this.#shield) {

@@ -10,11 +10,13 @@ import {
     NotificationArgs,
     RegisterSettingOptions,
     render,
+    RenderTemplateData,
     setFlag,
     setFlagProperties,
     setInMemory,
     setSetting,
     unsetFlag,
+    warning,
 } from "module-helpers";
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
@@ -46,7 +48,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return setSetting(key, value);
     }
 
-    render<T extends Record<string, any>>(template: string, data?: T): Promise<string> {
+    render<T extends Record<string, any>>(
+        template: string,
+        data?: T & RenderTemplateData
+    ): Promise<string> {
         return render(`${this.key}/${template}`, data);
     }
 
@@ -56,6 +61,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     localize(...args: LocalizeArgs): string {
         return localize(this.key, ...args);
+    }
+
+    warning(...args: NotificationArgs): number {
+        return warning(this.key, ...args);
     }
 
     error(...args: NotificationArgs): number {

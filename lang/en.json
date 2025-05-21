@@ -190,6 +190,13 @@
             "dropzone": {
                 "label": "Self-Applied Effect / Macro",
                 "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used"
+            },
+            "spellzone": {
+                "label": "Macro",
+                "hint": "A macro that will be executed when this action is used"
+            },
+            "spell": {
+                "cancel": "<strong>{name}</strong> cast was cancelled by its macro."
             }
         },
         "conditionManager": {
