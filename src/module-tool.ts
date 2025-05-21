@@ -13,6 +13,7 @@ import {
     RenderTemplateData,
     setFlag,
     setFlagProperties,
+    setFlagProperty,
     setInMemory,
     setSetting,
     unsetFlag,
@@ -93,6 +94,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     unsetFlag<D extends foundry.abstract.Document>(doc: D, ...path: string[]): Promise<D> {
         return unsetFlag(doc, this.key, ...path);
+    }
+
+    setFlagProperty<T extends object>(obj: T, ...args: [...string[], any]): T {
+        return setFlagProperty(obj, this.key, ...args);
     }
 
     setFlagProperties<T extends object>(
