@@ -2,8 +2,14 @@
 
 -   this is a foundry v13 release
 -   all `client` settings have been converted into `user` settings and have been reset to their default value
--   `Actionable`:
-    -   use the macro image for actions that use the default image
+-   `Actionable` was revamped:
+    -   `Action Macro`
+        -   now use the macro image for actions that use the default image
+    -   `Spell Effect/Macro`
+        -   now allow linking self-applied effects on top of macros
+    -   `Auto Self-Applied`
+        -   previously a feature of `Use Button`
+        -   now take over the `use` button entirely instead of reacting to the chat message creation
 -   `Automatic Rune Progression`:
     -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
     -   no longer hide rune select fields from the item sheet when `Force Update` is enabled
@@ -35,6 +41,7 @@
 -   remove `Spells Summary` tools
 -   remove `Stances` tools
 -   remove `De-targeting` tools
+-   remove `Use Button` tools
 
 # 2.35.1
 

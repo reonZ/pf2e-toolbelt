@@ -30,6 +30,8 @@ import {
     SpellPF2e,
     SpellSheetPF2e,
     toggleHooksAndWrappers,
+    useAction,
+    useSelfAppliedAction,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
@@ -86,7 +88,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {
+                onChange: () => {
                     this.configurate();
                 },
             },
@@ -95,11 +97,26 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
+                onChange: () => {
+                    this.configurate();
+                },
+            },
+            {
+                key: "apply",
+                type: Boolean,
+                default: false,
+                scope: "user",
                 onChange: (value) => {
                     this.configurate();
                 },
             },
         ];
+    }
+
+    get api() {
+        return {
+            getActionMacro: this.getActionMacro.bind(this),
+        };
     }
 
     ready(): void {
@@ -108,12 +125,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     _configurate(): void {
         const actionEnabled = this.settings.action;
+        const applyEnabled = this.settings.apply;
         const spellEnabled = this.settings.spell;
 
         toggleHooksAndWrappers(this.#actionHooksAndWrappers, actionEnabled);
         toggleHooksAndWrappers(this.#spellHooksAndWrappers, spellEnabled);
 
-        this.#renderCharacterSheetPF2eHook.toggle(actionEnabled);
+        this.#renderCharacterSheetPF2eHook.toggle(actionEnabled || applyEnabled);
 
         renderItemSheets(["FeatSheetPF2e", "AbilitySheetPF2e", "SpellSheetPF2e"]);
         renderCharacterSheets();
@@ -149,7 +167,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const html = $html[0];
 
-        if (this.settings.action) {
+        if (this.settings.action || this.settings.apply) {
             this.#updateCharacterActions(sheet, html, data);
         }
     }
@@ -160,6 +178,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         data: CharacterSheetData
     ) {
         const isEditable = sheet.isEditable;
+        const selfApply = isEditable && this.settings.apply;
+        const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
         const actor = sheet.actor;
         const actions = R.pipe(
             data.actions.encounter,
@@ -179,40 +199,33 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 const item = actor.items.get(itemId);
                 if (!el || !item?.isOfType("action", "feat") || !this.isValidAction(item)) return;
 
-                const macro = await this.getActionMacro(item);
-                if (!macro) return;
+                const macro = await getActionMacro(item);
+                if (!macro && (!selfApply || !item.system.selfEffect)) return;
 
                 const actionCost = item.actionCost;
-
-                // we replace the action image if it is the default
-                const imgEl = htmlQuery<HTMLImageElement>(el, ".item-image img");
-                if (imgEl && macro.img && isDefaultActionIcon(actionImg, actionCost)) {
-                    imgEl.src = macro.img;
-                }
-
                 const glyph = getActionGlyph(actionCost);
                 const btn = createHTMLElement("button", {
                     classes: ["use-action"],
                     content: `<span>${useLabel}</span><span class="action-glyph">${glyph}</span>`,
                 });
 
-                // don't forget to make it a button to avoid form submition
-                btn.type = "button";
+                btn.addEventListener("click", (event) => {
+                    useAction(item, event);
+                });
 
-                if (item.frequency) {
-                    el.querySelector("button[data-action='use-action']")?.replaceWith(btn);
-                } else {
-                    el.querySelector(".button-group")?.append(btn);
+                const existingBtn = htmlQuery(el, "button[data-action='use-action']");
+                if (existingBtn) {
+                    existingBtn.replaceWith(btn);
+                } else if (macro) {
+                    htmlQuery(el, ".button-group")?.append(btn);
                 }
 
-                if (isEditable) {
-                    btn.addEventListener("click", async () => {
-                        if (item.system.frequency && item.system.frequency.value > 0) {
-                            const newValue = item.system.frequency.value - 1;
-                            await item.update({ "system.frequency.value": newValue });
-                        }
-                        macro.execute({ actor: item.actor, item });
-                    });
+                if (macro) {
+                    // we replace the action image if it is the default
+                    const imgEl = htmlQuery<HTMLImageElement>(el, ".item-image img");
+                    if (imgEl && macro.img && isDefaultActionIcon(actionImg, actionCost)) {
+                        imgEl.src = macro.img;
+                    }
                 }
             })
         );
@@ -384,8 +397,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 }
             }
         } else if (linked) {
-            actor.createEmbeddedDocuments("Item", [linked.toObject()]);
-            // TODO add self-applied notification somewhere in chat
+            await useSelfAppliedAction(spell, "roll", linked);
         }
 
         wrapped(spell, options);
@@ -433,6 +445,7 @@ type DropZoneData = {
 type ToolSettings = {
     action: boolean;
     spell: boolean;
+    apply: boolean;
 };
 
 type SpellMacroValue = {

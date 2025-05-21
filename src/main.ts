@@ -40,6 +40,12 @@ const TOOLS: ModuleTool[] = [
 MODULE.register("pf2e-toolbelt");
 MODULE.enableDebugMode();
 
+for (const tool of TOOLS) {
+    MODULE.apiExpose({
+        [tool.key]: tool.api,
+    });
+}
+
 Hooks.once("init", () => {
     const isGM = userIsGM();
 

@@ -30,6 +30,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return [];
     }
 
+    get api(): Record<string, any> {
+        return {};
+    }
+
     init(isGM: boolean) {}
     setup(isGM: boolean) {}
     ready(isGM: boolean) {}

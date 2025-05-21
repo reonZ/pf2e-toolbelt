@@ -39,10 +39,14 @@
                     "name": "Action Macro",
                     "hint": "Adds a way to link a macro to actions/feats."
                 },
+                "apply": {
+                    "name": "Auto Self-Applied",
+                    "hint": "The use button for self-applied effect will automatically apply the effect."
+                },
                 "item": {},
                 "spell": {
-                    "name": "Spell Macro/Effect",
-                    "hint": "Adds a way to link a macro or self-applied effect to spells."
+                    "name": "Spell Effect/Macro",
+                    "hint": "Adds a way to link a self-applied effect or macro to spells."
                 }
             },
             "arp": {
