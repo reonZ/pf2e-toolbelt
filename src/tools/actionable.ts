@@ -8,11 +8,13 @@ import {
     CastOptions,
     CharacterPF2e,
     CharacterSheetData,
+    ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
     createHook,
     createHTMLElement,
     createHTMLElementContent,
+    createSelfApplyMessage,
     createToggleableWrapper,
     CreaturePF2e,
     EffectPF2e,
@@ -41,7 +43,6 @@ import {
     toggleHooksAndWrappers,
     useAction,
     usePhysicalItem,
-    useSelfAppliedAction,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
@@ -53,6 +54,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         ],
         this.#onRenderSheetPF2e.bind(this)
     );
+
+    #createChatMessageHook = createHook("createChatMessage", this.#onCreateChatMessage.bind(this));
 
     #actionWrappers = [
         createToggleableWrapper(
@@ -131,8 +134,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: () => {
-                    this.configurate();
+                onChange: (value) => {
+                    toggleHooksAndWrappers(this.#spellWrappers, value);
+                    renderItemSheets("SpellSheetPF2e");
                 },
             },
             {
@@ -150,7 +154,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "user",
                 onChange: (value) => {
-                    this.configurate();
+                    this.#createChatMessageHook.toggle(value);
                 },
             },
         ];
@@ -165,6 +169,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     ready(): void {
         this._configurate(true);
+        toggleHooksAndWrappers(this.#spellWrappers, this.settings.spell);
+        this.#createChatMessageHook.toggle(this.settings.apply);
     }
 
     _configurate(skipRenders?: boolean): void {
@@ -173,10 +179,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         toggleHooksAndWrappers(this.#actionWrappers, actionEnabled);
         toggleHooksAndWrappers(this.#itemWrappers, itemEnabled);
-        toggleHooksAndWrappers(this.#spellWrappers, this.settings.spell);
 
         this.#renderCharacterSheetPF2eHook.toggle(
-            actionEnabled || itemEnabled || this.settings.apply || this.settings.use
+            actionEnabled || itemEnabled || this.settings.use
         );
 
         if (!skipRenders) {
@@ -185,7 +190,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 "ConsumableSheetPF2e",
                 "EquipmentSheetPF2e",
                 "FeatSheetPF2e",
-                "SpellSheetPF2e",
             ]);
 
             renderCharacterSheets();
@@ -209,8 +213,27 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             : undefined;
     }
 
-    isValidAction(item: AbilityItemPF2e | FeatPF2e): boolean {
-        return item.system.actionType.value !== "passive";
+    isPassiveAction(item: AbilityItemPF2e | FeatPF2e): boolean {
+        return item.system.actionType.value === "passive";
+    }
+
+    #onCreateChatMessage(origin: ChatMessagePF2e) {
+        if (!origin.author || origin.getFlag("pf2e", "context.type") !== "self-effect") return;
+
+        const hookId = Hooks.on(
+            "renderChatMessageHTML",
+            (message: ChatMessagePF2e, html: HTMLElement) => {
+                if (message !== origin) return;
+
+                Hooks.off("renderChatMessageHTML", hookId);
+
+                // we wait for the message to actually be added to the DOM
+                requestAnimationFrame(() => {
+                    const btn = htmlQuery(html, `button[data-action="applyEffect"]`);
+                    btn?.click();
+                });
+            }
+        );
     }
 
     #onRenderSheetPF2e(
@@ -222,7 +245,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const html = $html[0];
 
-        if (this.settings.action || this.settings.apply) {
+        if (this.settings.action) {
             this.#updateActorActions(sheet, html, data);
         }
 
@@ -293,7 +316,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     ) {
         const actor = sheet.actor as CreaturePF2e;
         const isCharacter = actor.isOfType("character");
-        const selfApply = sheet.isEditable && this.settings.apply;
         const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
 
         const actionGroups: Record<string, { actions: AbilityViewData[] }> =
@@ -314,10 +336,16 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
             const item = actor.items.get(itemId);
-            if (!item?.isOfType("action", "feat") || !this.isValidAction(item)) return;
+
+            if (
+                !item?.isOfType("action", "feat") ||
+                this.isPassiveAction(item) ||
+                item.system.selfEffect
+            )
+                return;
 
             const macro = await getActionMacro(item);
-            if (!macro && (!selfApply || !item.system.selfEffect)) return;
+            if (!macro) return;
 
             const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
             if (!el) return;
@@ -404,7 +432,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
 
-        if (!this.isValidAction(item)) {
+        if (this.isPassiveAction(item)) {
             return $html;
         }
 
@@ -438,7 +466,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     async #actionSheetPF2eOnDrop(sheet: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
         const sheetItem = sheet.item;
-        if (!sheet.isEditable || !this.isValidAction(sheetItem)) return;
+        if (!sheet.isEditable || this.isPassiveAction(sheetItem)) return;
 
         const droppedItem = await this.#resolveDroppedItem(event, false);
         if (!droppedItem) return;
@@ -532,7 +560,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         if (linked) {
-            await useSelfAppliedAction(spell, "roll", linked);
+            await createSelfApplyMessage(spell, linked);
         }
 
         wrapped(spell, options);
