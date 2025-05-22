@@ -1,28 +1,37 @@
 import {
     AbilityItemPF2e,
     AbilitySheetPF2e,
+    AbilityViewData,
     ActorPF2e,
+    ActorSheetPF2e,
     addListenerAll,
     CastOptions,
     CharacterPF2e,
     CharacterSheetData,
-    CharacterSheetPF2e,
+    ConsumablePF2e,
+    ConsumableSheetPF2e,
     createHook,
     createHTMLElement,
     createHTMLElementContent,
     createToggleableWrapper,
+    CreaturePF2e,
     EffectPF2e,
+    EquipmentPF2e,
+    EquipmentSheetPF2e,
     ErrorPF2e,
     FeatPF2e,
     FeatSheetPF2e,
     getActionGlyph,
     htmlQuery,
+    isCastConsumable,
     isDefaultActionIcon,
     isScriptMacro,
     ItemPF2e,
     ItemSheetPF2e,
     MacroPF2e,
     MODULE,
+    NPCPF2e,
+    NPCSheetData,
     R,
     renderCharacterSheets,
     renderItemSheets,
@@ -31,17 +40,21 @@ import {
     SpellSheetPF2e,
     toggleHooksAndWrappers,
     useAction,
+    usePhysicalItem,
     useSelfAppliedAction,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
     #renderCharacterSheetPF2eHook = createHook(
-        "renderCharacterSheetPF2e",
-        this.#onRenderCharacterSheetPF2e.bind(this)
+        [
+            "renderCharacterSheetPF2e", //
+            "renderNPCSheetPF2e",
+        ],
+        this.#onRenderSheetPF2e.bind(this)
     );
 
-    #actionHooksAndWrappers = [
+    #actionWrappers = [
         createToggleableWrapper(
             "WRAPPER",
             [
@@ -62,11 +75,23 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
-    #spellHooksAndWrappers = [
+    #itemWrappers = [
+        createToggleableWrapper(
+            "WRAPPER",
+            [
+                "CONFIG.Item.sheetClasses.consumable['pf2e.ConsumableSheetPF2e'].cls.prototype._renderInner",
+                "CONFIG.Item.sheetClasses.equipment['pf2e.EquipmentSheetPF2e'].cls.prototype._renderInner",
+            ],
+            this.#itemSheetRenderInner,
+            { context: this }
+        ),
+    ];
+
+    #spellWrappers = [
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.Item.sheetClasses.spell['pf2e.SpellSheetPF2e'].cls.prototype._renderInner",
-            this.#spellSheetRenderInner,
+            this.#itemSheetRenderInner,
             { context: this }
         ),
         createToggleableWrapper(
@@ -93,10 +118,28 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
+                key: "item",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                onChange: () => {
+                    this.configurate();
+                },
+            },
+            {
                 key: "spell",
                 type: Boolean,
                 default: false,
                 scope: "world",
+                onChange: () => {
+                    this.configurate();
+                },
+            },
+            {
+                key: "use",
+                type: Boolean,
+                default: false,
+                scope: "user",
                 onChange: () => {
                     this.configurate();
                 },
@@ -116,25 +159,37 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     get api() {
         return {
             getActionMacro: this.getActionMacro.bind(this),
+            getItemLink: this.getItemLink.bind(this),
         };
     }
 
     ready(): void {
-        this._configurate();
+        this._configurate(true);
     }
 
-    _configurate(): void {
+    _configurate(skipRenders?: boolean): void {
         const actionEnabled = this.settings.action;
-        const applyEnabled = this.settings.apply;
-        const spellEnabled = this.settings.spell;
+        const itemEnabled = this.settings.item;
 
-        toggleHooksAndWrappers(this.#actionHooksAndWrappers, actionEnabled);
-        toggleHooksAndWrappers(this.#spellHooksAndWrappers, spellEnabled);
+        toggleHooksAndWrappers(this.#actionWrappers, actionEnabled);
+        toggleHooksAndWrappers(this.#itemWrappers, itemEnabled);
+        toggleHooksAndWrappers(this.#spellWrappers, this.settings.spell);
 
-        this.#renderCharacterSheetPF2eHook.toggle(actionEnabled || applyEnabled);
+        this.#renderCharacterSheetPF2eHook.toggle(
+            actionEnabled || itemEnabled || this.settings.apply || this.settings.use
+        );
 
-        renderItemSheets(["FeatSheetPF2e", "AbilitySheetPF2e", "SpellSheetPF2e"]);
-        renderCharacterSheets();
+        if (!skipRenders) {
+            renderItemSheets([
+                "AbilitySheetPF2e",
+                "ConsumableSheetPF2e",
+                "EquipmentSheetPF2e",
+                "FeatSheetPF2e",
+                "SpellSheetPF2e",
+            ]);
+
+            renderCharacterSheets();
+        }
     }
 
     async getActionMacro(action: AbilityItemPF2e | FeatPF2e): Promise<Maybe<MacroPF2e>> {
@@ -146,7 +201,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return isScriptMacro(macro) ? macro : undefined;
     }
 
-    async getItemLink(item: SpellPF2e): Promise<Maybe<MacroPF2e | EffectPF2e>> {
+    async getItemLink(item: ItemPF2e): Promise<Maybe<MacroPF2e | EffectPF2e>> {
         const uuid = this.getFlag<string>(item, "linked");
         const linked = uuid ? await fromUuid<MacroPF2e | EffectPF2e>(uuid) : undefined;
         return isScriptMacro(linked) || (linked instanceof Item && linked.isOfType("effect"))
@@ -158,31 +213,93 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return item.system.actionType.value !== "passive";
     }
 
-    #onRenderCharacterSheetPF2e(
-        sheet: CharacterSheetPF2e<CharacterPF2e>,
+    #onRenderSheetPF2e(
+        sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         $html: JQuery,
-        data: CharacterSheetData
+        data: CharacterSheetData | NPCSheetData
     ) {
         if (!sheet.isEditable) return;
 
         const html = $html[0];
 
         if (this.settings.action || this.settings.apply) {
-            this.#updateCharacterActions(sheet, html, data);
+            this.#updateActorActions(sheet, html, data);
+        }
+
+        if (this.settings.use || this.settings.item) {
+            this.#updateActorItems(sheet, html, data);
         }
     }
 
-    async #updateCharacterActions(
-        sheet: CharacterSheetPF2e<CharacterPF2e>,
+    async #updateActorItems(
+        sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         html: HTMLElement,
-        data: CharacterSheetData
+        data: CharacterSheetData | NPCSheetData
     ) {
-        const isEditable = sheet.isEditable;
-        const selfApply = isEditable && this.settings.apply;
+        if (!sheet.isEditable) return;
+
+        const useConsumables = this.settings.use;
+        const getItemLink = this.settings.item ? this.getItemLink.bind(this) : () => null;
+
+        const items = R.pipe(
+            data.inventory.sections,
+            R.intersectionWith(["consumable", "equipment"], (section, type) =>
+                section.types.includes(type)
+            ),
+            R.flatMap((section) =>
+                section.items.map(
+                    ({ item }) => item as EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e>
+                )
+            )
+        );
+
+        const panel = htmlQuery(html, `.tab[data-tab="inventory"] .inventory-pane`);
+
+        const itemsPromise = items.map(async (item) => {
+            const isConsumable = item.isOfType("consumable");
+            if (isConsumable && isCastConsumable(item)) return;
+
+            const isLinked = !!(await getItemLink(item));
+            const isUsable = useConsumables && isConsumable;
+            if (!isLinked && !isUsable) return;
+
+            const el = htmlQuery(panel, `[data-item-id="${item.id}"]`);
+            if (!el) return;
+
+            const btn = createHTMLElement("a", {
+                content: `<i class='fa-solid fa-play'></i>`,
+                dataset: {
+                    tooltip: "PF2E.Action.Use",
+                },
+                style: {
+                    marginRight: "0.15rem",
+                },
+            });
+
+            btn.addEventListener("click", (event) => {
+                usePhysicalItem(event, item);
+            });
+
+            htmlQuery(el, ".item-controls")?.prepend(btn);
+        });
+
+        Promise.all(itemsPromise);
+    }
+
+    async #updateActorActions(
+        sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
+        html: HTMLElement,
+        data: CharacterSheetData | NPCSheetData
+    ) {
+        const actor = sheet.actor as CreaturePF2e;
+        const isCharacter = actor.isOfType("character");
+        const selfApply = sheet.isEditable && this.settings.apply;
         const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
-        const actor = sheet.actor;
+
+        const actionGroups: Record<string, { actions: AbilityViewData[] }> =
+            "encounter" in data.actions ? data.actions.encounter : R.pick(data.actions, ["active"]);
         const actions = R.pipe(
-            data.actions.encounter,
+            actionGroups,
             R.values(),
             R.flatMap((group) => group.actions)
         );
@@ -190,45 +307,56 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const useLabel = game.i18n.localize("PF2E.Action.Use");
         const panel = htmlQuery(
             html,
-            `.tab[data-tab="actions"] .tab-content .tab[data-tab="encounter"]`
+            isCharacter
+                ? `.tab[data-tab="actions"] .tab-content .tab[data-tab="encounter"]`
+                : `.tab[data-tab="main"] .actions.section-container .section-body`
         );
 
-        Promise.all(
-            actions.map(async ({ id: itemId, img: actionImg }) => {
-                const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
-                const item = actor.items.get(itemId);
-                if (!el || !item?.isOfType("action", "feat") || !this.isValidAction(item)) return;
+        const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
+            const item = actor.items.get(itemId);
+            if (!item?.isOfType("action", "feat") || !this.isValidAction(item)) return;
 
-                const macro = await getActionMacro(item);
-                if (!macro && (!selfApply || !item.system.selfEffect)) return;
+            const macro = await getActionMacro(item);
+            if (!macro && (!selfApply || !item.system.selfEffect)) return;
 
-                const actionCost = item.actionCost;
-                const glyph = getActionGlyph(actionCost);
-                const btn = createHTMLElement("button", {
-                    classes: ["use-action"],
-                    content: `<span>${useLabel}</span><span class="action-glyph">${glyph}</span>`,
+            const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
+            if (!el) return;
+
+            const actionCost = item.actionCost;
+            const glyph = getActionGlyph(actionCost);
+            const existingBtn = htmlQuery(el, "button[data-action='use-action']");
+
+            const btn = createHTMLElement("button", {
+                classes: ["use-action"],
+                content: `<span>${useLabel}</span><span class="action-glyph">${glyph}</span>`,
+            });
+
+            btn.addEventListener("click", (event) => {
+                useAction(event, item);
+            });
+
+            if (existingBtn) {
+                existingBtn.replaceWith(btn);
+            } else if (macro && isCharacter) {
+                htmlQuery(el, ".button-group")?.append(btn);
+            } else if (macro) {
+                const wrapper = createHTMLElement("div", {
+                    classes: ["button-group"],
+                    content: btn,
                 });
+                htmlQuery(el, ".controls")?.after(wrapper);
+            }
 
-                btn.addEventListener("click", (event) => {
-                    useAction(item, event);
-                });
-
-                const existingBtn = htmlQuery(el, "button[data-action='use-action']");
-                if (existingBtn) {
-                    existingBtn.replaceWith(btn);
-                } else if (macro) {
-                    htmlQuery(el, ".button-group")?.append(btn);
+            if (macro && isCharacter) {
+                // we replace the action image if it is the default
+                const imgEl = htmlQuery<HTMLImageElement>(el, ".item-image img");
+                if (imgEl && macro.img && isDefaultActionIcon(actionImg, actionCost)) {
+                    imgEl.src = macro.img;
                 }
+            }
+        });
 
-                if (macro) {
-                    // we replace the action image if it is the default
-                    const imgEl = htmlQuery<HTMLImageElement>(el, ".item-image img");
-                    if (imgEl && macro.img && isDefaultActionIcon(actionImg, actionCost)) {
-                        imgEl.src = macro.img;
-                    }
-                }
-            })
-        );
+        Promise.all(actionsPromise);
     }
 
     async #renderDropzone(
@@ -271,7 +399,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #actionSheetRenderInner(
         sheet: AbilitySheetPF2e | FeatSheetPF2e,
         wrapped: libWrapper.RegisterCallback,
-        data: ActorSheetData<ActorPF2e>
+        data: ItemSheetData<AbilityItemPF2e | FeatPF2e>
     ): Promise<JQuery> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
@@ -351,15 +479,20 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         throw ErrorPF2e("Invalid item drop");
     }
 
-    async #spellSheetRenderInner(
-        sheet: SpellSheetPF2e,
+    async #itemSheetRenderInner(
+        sheet: EquipmentSheetPF2e | ConsumableSheetPF2e | SpellSheetPF2e,
         wrapped: libWrapper.RegisterCallback,
-        data: ActorSheetData<ActorPF2e>
+        data: ItemSheetData<EquipmentPF2e | ConsumablePF2e | SpellPF2e>
     ): Promise<JQuery> {
+        const item = sheet.item;
         const $html: JQuery = await wrapped(data);
 
+        if (item.isOfType("consumable") && ["wand", "scroll"].includes(item.category)) {
+            return $html;
+        }
+
         const html = $html[0];
-        const linked = await this.getItemLink(sheet.item);
+        const linked = await this.getItemLink(item);
         const tab = htmlQuery(html, `.tab[data-tab="details"]`);
         const dropzone = createHTMLElement("fieldset", {
             classes: ["linked"],
@@ -381,22 +514,24 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const linked = await this.getItemLink(spell);
 
         if (linked instanceof Macro) {
-            const value: any = await linked.execute({
+            // we let the macro handle the cast or cancelation of the spell
+            return linked.execute({
                 actor,
-                item: spell,
+                spell,
                 options,
+                cast: (macroOptions: CastOptions = {}) => {
+                    return wrapped(
+                        spell,
+                        foundry.utils.mergeObject(options, macroOptions, { inplace: false })
+                    );
+                },
+                cancel: () => {
+                    return this.warning("spell.cancel", { name: spell.name });
+                },
             });
+        }
 
-            if (value === false) {
-                return this.warning("spell.cancel", { name: spell.name });
-            } else if (R.isPlainObject<SpellMacroValue>(value)) {
-                if (value.skipNotification) {
-                    return;
-                } else if (R.isString(value.customNotification)) {
-                    return ui.notifications.warn(value.customNotification);
-                }
-            }
-        } else if (linked) {
+        if (linked) {
             await useSelfAppliedAction(spell, "roll", linked);
         }
 
@@ -442,15 +577,6 @@ type DropZoneData = {
     }>;
 };
 
-type ToolSettings = {
-    action: boolean;
-    spell: boolean;
-    apply: boolean;
-};
-
-type SpellMacroValue = {
-    skipNotification?: boolean;
-    customNotification?: string;
-};
+type ToolSettings = toolbelt.Settings["actionable"];
 
 export { ActionableTool };

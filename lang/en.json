@@ -43,10 +43,17 @@
                     "name": "Auto Self-Applied",
                     "hint": "The use button for self-applied effect will automatically apply the effect."
                 },
-                "item": {},
+                "item": {
+                    "name": "Item Effect/Macro",
+                    "hint": "Adds a way to link a self-applied effect or macro to equipment & consumable items."
+                },
                 "spell": {
                     "name": "Spell Effect/Macro",
                     "hint": "Adds a way to link a self-applied effect or macro to spells."
+                },
+                "use": {
+                    "name": "Use Consumable",
+                    "hint": "Will add an extra 'use' button for consumables and generate a custom message when used."
                 }
             },
             "arp": {
@@ -194,6 +201,12 @@
             "dropzone": {
                 "label": "Self-Applied Effect / Macro",
                 "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used"
+            },
+            "action": {
+                "cancel": "<strong>{name}</strong> action was cancelled by its macro."
+            },
+            "item": {
+                "cancel": "<strong>{name}</strong> usage was cancelled by its macro."
             },
             "spell": {
                 "cancel": "<strong>{name}</strong> cast was cancelled by its macro."

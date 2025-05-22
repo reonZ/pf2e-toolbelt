@@ -74,8 +74,6 @@ type WithContentOptions = {
     target: ActorPF2e;
 };
 
-type ToolSettings = {
-    withContent: boolean;
-};
+type ToolSettings = toolbelt.Settings["betterTrade"];
 
 export { BetterTradeTool };

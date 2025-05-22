@@ -12,8 +12,8 @@
         "scripts/main.js"
     ],
     "compatibility": {
-        "minimum": "13.342",
-        "verified": "13.342",
+        "minimum": "13.344",
+        "verified": "13.344",
         "maximum": "13"
     },
     "socket": true,

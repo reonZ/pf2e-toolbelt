@@ -4,16 +4,30 @@
 -   all `client` settings have been converted into `user` settings and have been reset to their default value
 -   `Actionable` was revamped:
     -   `Action Macro`
-        -   now use the macro image for actions that use the default image
+        -   now works on NPCs as well
+        -   now uses the macro image for actions that use the default image
+        -   macros are now provided a `use` & `cancel` function arguments
+            -   nothing is processed until the `use` function is called from the macro (including uses value reduction)
+            -   calling the `cancel` function will display a notification to the user (you don't need to call it)
+    -   `Item Effect/Macro`
+        -   adds a way to link a self-applied effect or macro to equipment & consumable items (except scrolls & wands)
+        -   macros arguments work the same as for actions
     -   `Spell Effect/Macro`
-        -   now allow linking self-applied effects on top of macros
+        -   now allows linking self-applied effects, the effect message will show before the spell's
+        -   the module doesn't expect anything to be returned from the macros anymore
+        -   renamed the macro `item` argument to `spell`
+        -   macros are now provided a `cast` & `cancel` function arguments
+            -   calling the `cast` function will cast the spell and accepts an object of type `CastOptions` to override the casting options of the spells (e.g. `rank`)
+            -   calling the `cancel` function will display a notification to the user (you don't need to call it)
+    -   `Use Consumable`
+        -   previously a feature of `Use Button`
+        -   now also handles ammunition
     -   `Auto Self-Applied`
         -   previously a feature of `Use Button`
-        -   now take over the `use` button entirely instead of reacting to the chat message creation
 -   `Automatic Rune Progression`:
-    -   no longer modify `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
-    -   no longer hide rune select fields from the item sheet when `Force Update` is enabled
-    -   now allow the use of `Handwraps of Mighty Blows` without the `Invested` trait
+    -   no longer modifies `Specific Magic Weapon`, `Specific Magic Armor` or `Specific Magic Shield` items
+    -   no longer hides rune select fields from the item sheet when `Force Update` is enabled
+    -   now allows the use of `Handwraps of Mighty Blows` without the `Invested` trait
     -   add `Shield Rune` setting (disabled) : automatically adds reinforcing runes to shields
     -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from non-specific equipment
 -   `Droppeth`:
