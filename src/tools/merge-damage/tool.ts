@@ -1,6 +1,7 @@
 import {
     addListenerAll,
     ArithmeticExpression,
+    arraysEqual,
     ChatMessageFlagsPF2e,
     ChatMessagePF2e,
     ChatMessageSourcePF2e,
@@ -10,6 +11,7 @@ import {
     DamageInstance,
     DamageRoll,
     DamageType,
+    DEGREE_STRINGS,
     DegreeOfSuccessString,
     getDamageRollClass,
     GroupingData,
@@ -17,11 +19,12 @@ import {
     htmlQueryAll,
     latestChatMessages,
     MaterialDamageEffect,
+    R,
     refreshLatestMessages,
     toggleHooksAndWrappers,
 } from "module-helpers";
-import { arraysEqual, DEGREE_STRINGS, R } from "module-helpers/src";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { MessageDataModel } from ".";
 
 class MergeDamageTool extends ModuleTool<ToolSettings> {
     #injected: string | undefined;
@@ -92,7 +95,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     setMessageUpdateFlags(
         updates: Record<string, unknown>,
         message: ChatMessagePF2e,
-        data: MessageData[]
+        data: MessageDataModel[]
     ) {
         const targets = this.getMessageTargets(message);
         game.toolbelt!.api.targetHelper.setMessageFlagTargets(updates, targets);
@@ -100,7 +103,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         this.setFlagProperties(updates, {
             type: "damage-roll",
             merged: true,
-            data: data,
+            data,
         });
     }
 
@@ -121,9 +124,15 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         })());
     }
 
-    getMessageData(message: ChatMessagePF2e): MessageData[] {
-        const flag = this.getFlag<MessageData[]>(message, "data");
-        if (flag) return flag;
+    getMessageFlagData(message: ChatMessagePF2e): MessageDataModel[] | undefined {
+        return this.getDataFlag<MessageDataModel[]>(message, MessageDataModel, "data");
+    }
+
+    getMessageData(message: ChatMessagePF2e): MessageDataModel[] {
+        const data = this.getMessageFlagData(message);
+        if (data) {
+            return data;
+        }
 
         const source = message.toObject() as PreCreate<ChatMessageSourcePF2e>;
 
@@ -151,7 +160,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         );
 
         return [
-            {
+            new MessageDataModel({
                 source,
                 name:
                     sourceFlag.strike?.name ??
@@ -163,7 +172,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                 modifiers,
                 notes,
                 tags,
-            },
+            }),
         ];
     }
 
@@ -186,13 +195,12 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
         if (injected || this.getFlag(message, "merged")) {
             buttons.push("split");
-        } else {
-            if (this.settings.inject) {
-                buttons.push("inject");
-            }
-            if (this.settings.merge) {
-                buttons.push("merge");
-            }
+        } else if (this.settings.inject) {
+            buttons.push("inject");
+        }
+
+        if (this.settings.merge) {
+            buttons.push("merge");
         }
 
         const buttonsElement = createHTMLElement("div", {
@@ -234,7 +242,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                 }
 
                 case "split-damage": {
-                    const flag = this.getFlag<MessageData[]>(message, "data");
+                    const flag = this.getMessageFlagData(message);
 
                     const sources = flag?.flatMap((data) => {
                         const source = data.source;
@@ -497,16 +505,6 @@ type MessageGroup = {
         label: string;
         count: number;
     }[];
-};
-
-type MessageData = {
-    source: PreCreate<ChatMessageSourcePF2e>;
-    name: string;
-    notes: string[];
-    outcome: DegreeOfSuccessString | null;
-    options: string[];
-    modifiers: string;
-    tags: string;
 };
 
 interface SpellCastContextFlag {

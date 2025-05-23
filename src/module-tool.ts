@@ -2,6 +2,7 @@ import {
     deleteFlagProperty,
     deleteInMemory,
     error,
+    getDataFlag,
     getFlag,
     getInMemory,
     getSetting,
@@ -114,6 +115,14 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         ...args: [...string[], properties: Record<string, any>]
     ): T {
         return setFlagProperties(obj, this.key, ...args);
+    }
+
+    getDataFlag<T extends foundry.abstract.DataModel | foundry.abstract.DataModel[]>(
+        doc: foundry.abstract.Document,
+        Model: ConstructorOf<T extends foundry.abstract.DataModel[] ? T[number] : T>,
+        ...path: string[]
+    ): T | undefined {
+        return getDataFlag(doc, Model, this.key, ...path);
     }
 
     _initialize() {
