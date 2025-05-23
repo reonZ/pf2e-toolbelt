@@ -10,14 +10,11 @@
             -   nothing is processed until the `use` function is called from the macro (including uses value reduction)
             -   calling the `cancel` function will display a notification to the user (you don't need to call it)
     -   `Item Effect/Macro`
-        -   adds a way to link a self-applied effect or macro to equipment & consumable items (except scrolls & wands)
-        -   self-applied effects are always automatically applied without regard for the `Auto Self-Applied` setting
+        -   adds a way to link a macro to equipment & consumable items (except scrolls & wands)
         -   macros are provided with a `item`, `use` and `cancel` function arguments
             -   nothing is processed until the `use` function is called from the macro (including uses value reduction for consumables)
             -   calling the `cancel` function will display a notification to the user (you don't need to call it)
     -   `Spell Effect/Macro`
-        -   now allows linking self-applied effects, the effect message will show before the spell's
-        -   self-applied effects are always automatically applied without regard for the `Auto Self-Applied` setting
         -   the module doesn't expect anything to be returned from the macros anymore
         -   renamed the macro `item` argument to `spell`
         -   macros are now provided a `cast` & `cancel` function arguments

@@ -273,9 +273,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const itemsPromise = items.map(async (item) => {
             const isConsumable = item.isOfType("consumable");
-            if (isConsumable && isCastConsumable(item)) return;
-
-            const macro = !!(await getItemMacro(item));
+            const canUseMacro = !isConsumable || !isCastConsumable(item);
+            const macro = canUseMacro && !!(await getItemMacro(item));
             const isUsable = useConsumables && isConsumable;
             if (!macro && !isUsable) return;
 
