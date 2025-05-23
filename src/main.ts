@@ -17,7 +17,9 @@ import {
     ConditionManagerTool,
     DroppethTool,
     GivethTool,
+    MergeDamageTool,
     ResourceTrackerTool,
+    TargetHelperTool,
     UndergroundTool,
     UnidedTool,
 } from "tools";
@@ -32,7 +34,9 @@ const TOOLS: ModuleTool[] = [
     new ConditionManagerTool(),
     new DroppethTool(),
     new GivethTool(),
+    new MergeDamageTool(),
     new ResourceTrackerTool(),
+    new TargetHelperTool(),
     new UndergroundTool(),
     new UnidedTool(),
 ];

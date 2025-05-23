@@ -36,6 +36,8 @@
     -   remove the `Send Message to Chat` setting
 -   `Giveth`:
     -   remove the `Send Message to Chat` setting
+-   `Merge Damage`:
+    -   split the tool into 2 settings: `Merge Button` & `Inject Button`
 -   `Underground`:
     -   make sure to refresh the canvas when disabling/enabling the feature
 -   convert `Effects Panel` tools to `Better Effects Panel`

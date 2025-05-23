@@ -67,7 +67,7 @@
                     "hint": "When enabled, the runes will always be updated based on actor level. When disabled only the runes that are currently at a lower value than what they should be for that level will be upgraded."
                 },
                 "price": {
-                    "name": "Subtract Rune Price",
+                    "name": "No Rune Price",
                     "hint": "Should fundamental rune prices be subtracted from the weapon price."
                 },
                 "shield": {
@@ -132,6 +132,17 @@
                 "light": {
                     "name": "Light Source",
                     "hint": "Should the dropped item emit light. It will only be the case if a single item is present in the loot actor."
+                }
+            },
+            "mergeDamage": {
+                "title": "Merge Damages",
+                "merge": {
+                    "name": "Merge Button",
+                    "hint": "Adds a button to damage messages allowing them to be merged with other damage messages."
+                },
+                "inject": {
+                    "name": "Inject Button",
+                    "hint": "Adds a button to damage messages allowing them to be injected to a previous damage message."
                 }
             },
             "giveth": {
@@ -255,6 +266,15 @@
                     "container": "{source} giveth {item} and all its content to {target}."
                 }
             }
+        },
+        "mergeDamage": {
+            "buttons": {
+                "split": "Split back to original messages",
+                "merge": "Merge with previous damage message",
+                "inject": "Inject damage to previous message"
+            },
+            "injected": "Damage was injected into this message",
+            "noMatch": "Couldn't find another matching damage message."
         },
         "resourceTracker": {
             "header": {

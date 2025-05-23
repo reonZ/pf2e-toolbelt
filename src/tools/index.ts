@@ -8,6 +8,8 @@ export * from "./better-trade";
 export * from "./condition-manager";
 export * from "./droppeth";
 export * from "./giveth";
+export * from "./mergeDamage";
 export * from "./resource-tracker";
+export * from "./targetHelper";
 export * from "./underground";
 export * from "./unided";

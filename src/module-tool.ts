@@ -1,4 +1,5 @@
 import {
+    deleteFlagProperty,
     deleteInMemory,
     error,
     getFlag,
@@ -102,6 +103,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     setFlagProperty<T extends object>(obj: T, ...args: [...string[], any]): T {
         return setFlagProperty(obj, this.key, ...args);
+    }
+
+    deleteFlagProperty<T extends object>(obj: T, ...path: string[]): T {
+        return deleteFlagProperty(obj, this.key, ...path);
     }
 
     setFlagProperties<T extends object>(
