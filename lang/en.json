@@ -198,17 +198,19 @@
             }
         },
         "actionable": {
-            "dropzone": {
-                "label": "Self-Applied Effect / Macro",
-                "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used"
-            },
             "action": {
+                "label": "Self-Applied Effect / Macro",
+                "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used",
                 "cancel": "<strong>{name}</strong> action was cancelled by its macro."
             },
             "item": {
+                "label": "Macro",
+                "hint": "A macro that will be executed when this item is used",
                 "cancel": "<strong>{name}</strong> usage was cancelled by its macro."
             },
             "spell": {
+                "label": "Macro",
+                "hint": "A macro that will be executed when this spell is cast",
                 "cancel": "<strong>{name}</strong> cast was cancelled by its macro."
             }
         },

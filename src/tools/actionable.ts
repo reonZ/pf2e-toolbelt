@@ -14,7 +14,6 @@ import {
     createHook,
     createHTMLElement,
     createHTMLElementContent,
-    createSelfApplyMessage,
     createToggleableWrapper,
     CreaturePF2e,
     EffectPF2e,
@@ -163,7 +162,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     get api() {
         return {
             getActionMacro: this.getActionMacro.bind(this),
-            getItemLink: this.getItemLink.bind(this),
+            getItemMacro: this.getItemMacro.bind(this),
         };
     }
 
@@ -198,19 +197,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     async getActionMacro(action: AbilityItemPF2e | FeatPF2e): Promise<Maybe<MacroPF2e>> {
         if (action.system.selfEffect || action.crafting) return;
-
-        const uuid = this.getFlag<string>(action, "linked");
-        const macro = uuid ? await fromUuid<MacroPF2e>(uuid) : undefined;
-
-        return isScriptMacro(macro) ? macro : undefined;
+        return this.getItemMacro(action);
     }
 
-    async getItemLink(item: ItemPF2e): Promise<Maybe<MacroPF2e | EffectPF2e>> {
-        const uuid = this.getFlag<string>(item, "linked");
-        const linked = uuid ? await fromUuid<MacroPF2e | EffectPF2e>(uuid) : undefined;
-        return isScriptMacro(linked) || (linked instanceof Item && linked.isOfType("effect"))
-            ? linked
-            : undefined;
+    async getItemMacro(action: ItemPF2e): Promise<Maybe<MacroPF2e>> {
+        const uuid = this.getFlag<string>(action, "linked");
+        const macro = uuid ? await fromUuid<MacroPF2e>(uuid) : undefined;
+        return isScriptMacro(macro) ? macro : undefined;
     }
 
     isPassiveAction(item: AbilityItemPF2e | FeatPF2e): boolean {
@@ -262,7 +255,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         if (!sheet.isEditable) return;
 
         const useConsumables = this.settings.use;
-        const getItemLink = this.settings.item ? this.getItemLink.bind(this) : () => null;
+        const getItemMacro = this.settings.item ? this.getItemMacro.bind(this) : () => null;
 
         const items = R.pipe(
             data.inventory.sections,
@@ -282,9 +275,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const isConsumable = item.isOfType("consumable");
             if (isConsumable && isCastConsumable(item)) return;
 
-            const isLinked = !!(await getItemLink(item));
+            const macro = !!(await getItemMacro(item));
             const isUsable = useConsumables && isConsumable;
-            if (!isLinked && !isUsable) return;
+            if (!macro && !isUsable) return;
 
             const el = htmlQuery(panel, `[data-item-id="${item.id}"]`);
             if (!el) return;
@@ -390,11 +383,14 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #renderDropzone(
         sheet: ItemSheetPF2e<ItemPF2e>,
         linked: Maybe<ItemPF2e | MacroPF2e>,
-        withDrop: boolean
+        type: "action" | "item" | "spell"
     ): Promise<HTMLElement> {
         const isEditable = sheet.isEditable;
         const dropzone = createHTMLElementContent({
-            content: await this.render<DropZoneData>("dropzone", { linked }),
+            content: await this.render<DropZoneData>("dropzone", {
+                linked,
+                i18n: `${this.key}.${type}`,
+            }),
         });
 
         addListenerAll(dropzone, "[data-action]", (el) => {
@@ -409,7 +405,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             }
         });
 
-        if (withDrop && isEditable) {
+        if (type !== "action" && isEditable) {
             dropzone.addEventListener("drop", async (event) => {
                 const droppedItem = await this.#resolveDroppedItem(event, true);
 
@@ -445,19 +441,19 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         if (macro) {
             const newDropzone = createHTMLElementContent({
-                content: await this.#renderDropzone(sheet, macro, false),
+                content: await this.#renderDropzone(sheet, macro, "action"),
             });
 
             dropzone?.replaceWith(newDropzone);
         } else {
             const label = htmlQuery(dropzone, "label");
             if (label) {
-                label.innerText = this.localize("dropzone.label");
+                label.innerText = this.localize("action.label");
             }
 
             const hint = htmlQuery(dropzone, ".hint");
             if (hint) {
-                hint.innerHTML = this.localize("dropzone.hint");
+                hint.innerHTML = this.localize("action.hint");
             }
         }
 
@@ -520,11 +516,15 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         const html = $html[0];
-        const linked = await this.getItemLink(item);
+        const macro = await this.getItemMacro(item);
         const tab = htmlQuery(html, `.tab[data-tab="details"]`);
         const dropzone = createHTMLElement("fieldset", {
             classes: ["linked"],
-            content: await this.#renderDropzone(sheet, linked, true),
+            content: await this.#renderDropzone(
+                sheet,
+                macro,
+                item.isOfType("spell") ? "spell" : "item"
+            ),
         });
 
         tab?.prepend(dropzone);
@@ -539,11 +539,11 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         options: CastOptions = {}
     ) {
         const actor = spell.actor;
-        const linked = await this.getItemLink(spell);
+        const macro = await this.getItemMacro(spell);
 
-        if (linked instanceof Macro) {
+        if (macro) {
             // we let the macro handle the cast or cancelation of the spell
-            return linked.execute({
+            return macro.execute({
                 actor,
                 spell,
                 options,
@@ -557,10 +557,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                     return this.warning("spell.cancel", { name: spell.name });
                 },
             });
-        }
-
-        if (linked) {
-            await createSelfApplyMessage(spell, linked);
         }
 
         wrapped(spell, options);
