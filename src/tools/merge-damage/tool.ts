@@ -24,7 +24,7 @@ import {
     toggleHooksAndWrappers,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { MessageDataModel } from ".";
+import { MergeDataModel } from ".";
 
 class MergeDamageTool extends ModuleTool<ToolSettings> {
     #injected: string | undefined;
@@ -95,7 +95,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     setMessageUpdateFlags(
         updates: Record<string, unknown>,
         message: ChatMessagePF2e,
-        data: MessageDataModel[]
+        data: MergeDataModel[]
     ) {
         const targets = this.getMessageTargets(message);
         game.toolbelt!.api.targetHelper.setMessageFlagTargets(updates, targets);
@@ -124,11 +124,11 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         })());
     }
 
-    getMessageFlagData(message: ChatMessagePF2e): MessageDataModel[] | undefined {
-        return this.getDataFlag<MessageDataModel[]>(message, MessageDataModel, "data");
+    getMessageFlagData(message: ChatMessagePF2e): MergeDataModel[] | undefined {
+        return this.getDataFlag<MergeDataModel[]>(message, MergeDataModel, "data");
     }
 
-    getMessageData(message: ChatMessagePF2e): MessageDataModel[] {
+    getMessageData(message: ChatMessagePF2e): MergeDataModel[] {
         const data = this.getMessageFlagData(message);
         if (data) {
             return data;
@@ -160,7 +160,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         );
 
         return [
-            new MessageDataModel({
+            new MergeDataModel({
                 source,
                 name:
                     sourceFlag.strike?.name ??

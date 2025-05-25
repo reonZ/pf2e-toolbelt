@@ -8,8 +8,8 @@ import {
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
 
-class MessageDataModel extends abstract.DataModel<null, MessageDataSchema> {
-    static defineSchema(): MessageDataSchema {
+class MergeDataModel extends abstract.DataModel<null, MergeDataSchema> {
+    static defineSchema(): MergeDataSchema {
         return {
             modifiers: new fields.StringField({
                 required: false,
@@ -50,11 +50,11 @@ class MessageDataModel extends abstract.DataModel<null, MessageDataSchema> {
     }
 }
 
-interface MessageDataModel
-    extends abstract.DataModel<null, MessageDataSchema>,
-        ModelPropsFromSchema<MessageDataSchema> {}
+interface MergeDataModel
+    extends abstract.DataModel<null, MergeDataSchema>,
+        ModelPropsFromSchema<MergeDataSchema> {}
 
-type MessageDataSchema = {
+type MergeDataSchema = {
     modifiers: fields.StringField<string, string>;
     name: fields.StringField<string, string>;
     notes: ArrayField<fields.StringField>;
@@ -64,6 +64,6 @@ type MessageDataSchema = {
     tags: fields.StringField<string, string>;
 };
 
-MODULE.devExpose({ MessageDataModel });
+MODULE.devExpose({ MergeDataModel });
 
-export { MessageDataModel };
+export { MergeDataModel };
