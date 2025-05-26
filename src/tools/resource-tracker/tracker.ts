@@ -145,18 +145,12 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
 
         if (event.button !== 0) return;
 
-        switch (action) {
-            case "create-resource": {
-                return this.#createResource();
-            }
-
-            case "decrease-resource": {
-                return this.#updateValue(event, resourceId, -1);
-            }
-
-            case "increase-resource": {
-                return this.#updateValue(event, resourceId, 1);
-            }
+        if (action === "create-resource") {
+            this.#createResource();
+        } else if (action === "decrease-resource") {
+            this.#updateValue(event, resourceId, -1);
+        } else if (action === "increase-resource") {
+            this.#updateValue(event, resourceId, 1);
         }
     }
 

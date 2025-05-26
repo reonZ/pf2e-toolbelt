@@ -221,44 +221,36 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             type EventAction = "merge-damage" | "split-damage" | "inject-damage";
             const action = el.dataset.action as EventAction;
 
-            switch (action) {
-                case "merge-damage":
-                case "inject-damage": {
-                    for (const otherMessage of latestChatMessages(5, message)) {
-                        if (otherMessage.actor !== actor || !this.isDamageRoll(otherMessage))
-                            continue;
+            if (R.isIncludedIn(action, ["merge-damage", "inject-damage"] as const)) {
+                for (const otherMessage of latestChatMessages(5, message)) {
+                    if (otherMessage.actor !== actor || !this.isDamageRoll(otherMessage)) continue;
 
-                        const otherTargets = this.getMessageTargets(otherMessage);
-                        if (arraysEqual(targets, otherTargets)) {
-                            if (action === "merge-damage") {
-                                return this.#mergeDamages(message, otherMessage);
-                            } else {
-                                return this.#injectDamage(message, otherMessage);
-                            }
+                    const otherTargets = this.getMessageTargets(otherMessage);
+                    if (arraysEqual(targets, otherTargets)) {
+                        if (action === "merge-damage") {
+                            return this.#mergeDamages(message, otherMessage);
+                        } else {
+                            return this.#injectDamage(message, otherMessage);
                         }
                     }
-
-                    return this.warning("noMatch");
                 }
 
-                case "split-damage": {
-                    const flag = this.getMessageFlagData(message);
+                this.warning("noMatch");
+            } else if (action === "split-damage") {
+                const flag = this.getMessageFlagData(message);
 
-                    const sources = flag?.flatMap((data) => {
-                        const source = data.source;
+                const sources = flag?.flatMap((data) => {
+                    const source = data.source;
 
-                        source.sound = null;
-                        this.setFlagProperty(source, "splitted", true);
+                    source.sound = null;
+                    this.setFlagProperty(source, "splitted", true);
 
-                        return source;
-                    });
+                    return source;
+                });
 
-                    if (sources?.length) {
-                        await message.delete();
-                        getDocumentClass("ChatMessage").createDocuments(sources);
-                    }
-
-                    return;
+                if (sources?.length) {
+                    await message.delete();
+                    getDocumentClass("ChatMessage").createDocuments(sources);
                 }
             }
         });

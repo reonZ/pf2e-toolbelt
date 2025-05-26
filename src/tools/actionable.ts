@@ -393,14 +393,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         });
 
         addListenerAll(dropzone, "[data-action]", (el) => {
-            switch (el.dataset.action as "open-link-sheet" | "delete-link") {
-                case "open-link-sheet": {
-                    return linked?.sheet.render(true);
-                }
+            const action = el.dataset.action as "open-link-sheet" | "delete-link";
 
-                case "delete-link": {
-                    return isEditable && this.unsetFlag(sheet.item, "linked");
-                }
+            if (action === "delete-link") {
+                isEditable && this.unsetFlag(sheet.item, "linked");
+            } else if (action === "open-link-sheet") {
+                linked?.sheet.render(true);
             }
         });
 

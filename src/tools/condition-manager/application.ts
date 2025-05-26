@@ -133,16 +133,13 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
     }
 
     async _onClickAction(event: PointerEvent, target: HTMLElement) {
-        switch (target.dataset.action as "add" | "cancel") {
-            case "add": {
-                this.#createEffect();
-                return this.close();
-            }
+        const action = target.dataset.action as "add" | "cancel";
 
-            case "cancel": {
-                return this.close();
-            }
+        if (action === "add") {
+            this.#createEffect();
         }
+
+        this.close();
     }
 
     #createEffect() {
@@ -180,52 +177,31 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             | "system.unidentified";
 
         addListenerAll(html, "[name]", "change", (el: HTMLInputElement) => {
-            switch (el.name as EventChangeName) {
-                case "label": {
-                    this.#label = el.value.trim();
-                    break;
-                }
+            const input = el.name as EventChangeName;
 
-                case "origin": {
-                    this.#origin = this.#combat?.combatants.get(el.value) ?? null;
-                    break;
-                }
+            if (input === "label") {
+                this.#label = el.value.trim();
+            } else if (input === "origin") {
+                this.#origin = this.#combat?.combatants.get(el.value) ?? null;
+            } else if (input === "system.badge.value") {
+                const value = el.valueAsNumber;
 
-                case "system.badge.value": {
-                    const value = el.valueAsNumber;
+                this.#counter.value = isNaN(value)
+                    ? this.#counter.default
+                    : Math.max(el.valueAsNumber, 1);
+            } else if (input === "system.duration.expiry") {
+                this.#duration.expiry = el.value as DurationData["expiry"];
+            } else if (input === "system.duration.unit") {
+                const value = el.value as DurationData["unit"];
+                const isUnit = !["unlimited", "encounter"].includes(value);
 
-                    this.#counter.value = isNaN(value)
-                        ? this.#counter.default
-                        : Math.max(el.valueAsNumber, 1);
-
-                    break;
-                }
-
-                case "system.duration.unit": {
-                    const value = el.value as DurationData["unit"];
-                    const isUnit = !["unlimited", "encounter"].includes(value);
-
-                    this.#duration.unit = value;
-                    this.#duration.value = isUnit ? 1 : -1;
-                    this.#duration.expiry = isUnit ? "turn-start" : null;
-
-                    break;
-                }
-
-                case "system.duration.expiry": {
-                    this.#duration.expiry = el.value as DurationData["expiry"];
-                    break;
-                }
-
-                case "system.duration.value": {
-                    this.#duration.value = Math.max(el.valueAsNumber || 0, 0);
-                    break;
-                }
-
-                case "system.unidentified": {
-                    this.#unidentified = el.checked;
-                    break;
-                }
+                this.#duration.unit = value;
+                this.#duration.value = isUnit ? 1 : -1;
+                this.#duration.expiry = isUnit ? "turn-start" : null;
+            } else if (input === "system.duration.value") {
+                this.#duration.value = Math.max(el.valueAsNumber || 0, 0);
+            } else if (input === "system.unidentified") {
+                this.#unidentified = el.checked;
             }
 
             this.render();
