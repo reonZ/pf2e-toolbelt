@@ -89,6 +89,16 @@ class ArpTool extends ModuleTool<ToolSettings> {
         6: 32000,
     };
 
+    static SHIELD_HP = {
+        0: { extra: 0, max: 0 },
+        1: { extra: 44, max: 64 },
+        2: { extra: 52, max: 80 },
+        3: { extra: 64, max: 104 },
+        4: { extra: 80, max: 120 },
+        5: { extra: 84, max: 136 },
+        6: { extra: 108, max: 160 },
+    };
+
     get key(): "arp" {
         return "arp";
     }
@@ -157,11 +167,11 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const expectedPotency: ZeroToFour = level < 2 ? 0 : level < 10 ? 1 : level < 16 ? 2 : 3;
         const expectedStriking: ZeroToFour = level < 4 ? 0 : level < 12 ? 1 : level < 19 ? 2 : 3;
 
-        if (this.#force || weapon.system.runes.potency <= expectedPotency) {
+        if (this.#force || weapon.system.runes.potency < expectedPotency) {
             weapon.system.runes.potency = expectedPotency;
         }
 
-        if (this.#force || weapon.system.runes.striking <= expectedStriking) {
+        if (this.#force || weapon.system.runes.striking < expectedStriking) {
             weapon.system.runes.striking = expectedStriking;
         }
     }
@@ -203,11 +213,11 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const expectedPotency: ZeroToFour = level < 5 ? 0 : level < 11 ? 1 : level < 18 ? 2 : 3;
         const expectedResilient: ZeroToFour = level < 8 ? 0 : level < 14 ? 1 : level < 20 ? 2 : 3;
 
-        if (this.#force || armor.system.runes.potency <= expectedPotency) {
+        if (this.#force || armor.system.runes.potency < expectedPotency) {
             armor.system.runes.potency = expectedPotency;
         }
 
-        if (this.#force || armor.system.runes.resilient <= expectedResilient) {
+        if (this.#force || armor.system.runes.resilient < expectedResilient) {
             armor.system.runes.resilient = expectedResilient;
         }
     }
@@ -250,9 +260,14 @@ class ArpTool extends ModuleTool<ToolSettings> {
 
         // 4, 7, 10, 13, 16, 19
         const expected = Math.min(Math.ceil((actor.level - 3) / 3), 6) as ZeroToSix;
+        const current = shield.system.runes.reinforcing;
 
-        if (this.#force || shield.system.runes.reinforcing <= expected) {
+        if (this.#force || current < expected) {
+            const hpData = ArpTool.SHIELD_HP[expected];
+            const maxHp = Math.min(shield._source.system.hp.max + hpData.extra, hpData.max);
+
             shield.system.runes.reinforcing = expected;
+            shield.system.hp.value = maxHp - (shield.system.hp.max - shield.system.hp.value);
         }
 
         wrapped();
