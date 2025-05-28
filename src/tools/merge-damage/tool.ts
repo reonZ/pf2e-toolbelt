@@ -125,7 +125,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     }
 
     getMessageFlagData(message: ChatMessagePF2e): MergeDataModel[] | undefined {
-        return this.getDataFlag<MergeDataModel[]>(message, MergeDataModel, "data");
+        return this.getDataFlagArray(message, MergeDataModel, "data");
     }
 
     getMessageData(message: ChatMessagePF2e): MergeDataModel[] {
