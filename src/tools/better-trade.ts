@@ -9,9 +9,12 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
 class BetterTradeTool extends ModuleTool<ToolSettings> {
-    #transferContainerEmitable = createEmitable("trade", ({ item, target }: WithContentOptions) => {
-        giveItemToActor(item, target);
-    });
+    #transferContainerEmitable = createEmitable(
+        this.key,
+        ({ item, target }: WithContentOptions) => {
+            giveItemToActor(item, target);
+        }
+    );
 
     #transferItemToActorWrapper = sharedActorTransferItemToActor.register(
         this.#transferItemToActor,

@@ -173,8 +173,8 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         isCreate?: boolean
     ): Promise<(Resource & { delete?: boolean }) | false | null> {
         return await waitDialog({
-            content: "resourceTracker/menu",
-            i18n: "resourceTracker.resource",
+            content: `${this.key}/menu`,
+            i18n: `${this.key}.resource`,
             data: {
                 resource,
                 isCreate,

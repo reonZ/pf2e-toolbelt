@@ -17,7 +17,7 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
 
 class GivethTool extends ModuleTool<ToolSettings> {
-    #givethEmitable = createEmitable("giveth", (options: GivethOptions, userId: string) => {
+    #givethEmitable = createEmitable(this.key, (options: GivethOptions, userId: string) => {
         if (options.type === "item") {
             this.#givethItem(options, userId);
         } else {

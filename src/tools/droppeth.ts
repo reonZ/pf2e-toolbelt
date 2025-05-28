@@ -26,7 +26,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createHook("deleteToken", this.#onDeleteToken.bind(this));
     #dropCanvasDataHook = createHook("dropCanvasData", this.#onDropCanvasData.bind(this));
 
-    #droppethItemEmitable = createEmitable("droppeth", this.#droppethItem.bind(this));
+    #droppethItemEmitable = createEmitable(this.key, this.#droppethItem.bind(this));
 
     #onEmbeddedDocumentChangeWrapper = createToggleableWrapper(
         "WRAPPER",
