@@ -132,12 +132,9 @@ class TargetsData {
         return this.#flag.setFlag();
     }
 
-    clone(data?: DeepPartial<TargetDataSource>): TargetsFlagData {
-        return this.#flag.clone(data);
-    }
-
-    toJSON(): TargetDataSource {
-        return this.#flag.toJSON();
+    toJSON(udpates?: DeepPartial<TargetDataSource>): TargetDataSource {
+        const source = udpates ? this.#flag.clone(udpates) : this.#flag;
+        return source.toJSON();
     }
 }
 

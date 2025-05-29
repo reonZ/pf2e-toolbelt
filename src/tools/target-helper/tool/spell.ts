@@ -98,7 +98,7 @@ async function renderSpellMessage(
 
     damageBtn.addEventListener("click", (event) => {
         // we cache the data & add the spell just in case
-        const cached = data.clone({ type: "damage", item: data.item ?? spell.uuid }).toJSON();
+        const cached = data.toJSON({ type: "damage", item: data.item ?? spell.uuid });
 
         registerUpstreamHook(
             "preCreateChatMessage",
