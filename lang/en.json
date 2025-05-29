@@ -172,6 +172,25 @@
                     "hint": "Should the resource tracker widget be displayed in your interface. Can be toggled on/off via controls on the left UI."
                 }
             },
+            "targetHelper": {
+                "title": "Target Helper",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Enabled the 'Target Helper' feature in your world."
+                },
+                "small": {
+                    "name": "Small Damage Buttons",
+                    "hint": "Reduce the size of damage buttons for the extra targets."
+                },
+                "targets": {
+                    "name": "Add Targets to Messages",
+                    "hint": "Will add extra targets to chat messages where damage can be applied and saves can be rolled."
+                },
+                "checks": {
+                    "name": "Upgrade Checks Messages",
+                    "hint": ""
+                }
+            },
             "underground": {
                 "title": "Underground",
                 "enabled": {
@@ -316,6 +335,44 @@
                 "increase": "{click} increase by {value}",
                 "decrease": "{click} decrease by {value}"
             }
+        },
+        "targetHelper": {
+            "damage": {
+                "toggle": "Toggle original damage buttons"
+            },
+            "drop": {
+                "added": "You have successfully added a save to the message.",
+                "already": "This message already has a save check linked to it.",
+                "unauth": "You can only do that on messages you are the author of."
+            },
+            "header": {
+                "hidden": "Hidden From Players",
+                "noSave": "This actor cannot roll {save} checks",
+                "select": "Select Target<br>[Double Click] Open Sheet"
+            },
+            "reroll": {
+                "title": "Save Check Reroll",
+                "noPoints": "You need at least 1 Hero Point to Reroll.",
+                "yes": "Reroll",
+                "no": "Cancel",
+                "keeley": "Low Reroll"
+            },
+            "rollSaves": "Roll NPC Saves",
+            "setTargets": {
+                "splashTargets": "Set Splash targets",
+                "targets": "Set targets"
+            },
+            "tooltip": {
+                "adjustment": "Adjustment: {value}",
+                "dcWithValue": "DC {dc}",
+                "reroll": "Can reroll the save check",
+                "result": {
+                    "format": "Result: {result}",
+                    "withOffset": "{success} by {offset}",
+                    "withoutOffset": "{success}"
+                }
+            },
+            "unnamed": "Unnamed"
         }
     }
 }

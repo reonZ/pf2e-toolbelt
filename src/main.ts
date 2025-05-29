@@ -36,9 +36,9 @@ const TOOLS: ModuleTool[] = [
     new GivethTool(),
     new MergeDamageTool(),
     new ResourceTrackerTool(),
+    new UnidedTool(),
     new TargetHelperTool(),
     new UndergroundTool(),
-    new UnidedTool(),
 ];
 
 MODULE.register("pf2e-toolbelt");

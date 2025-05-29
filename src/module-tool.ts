@@ -3,9 +3,11 @@ import {
     deleteInMemory,
     error,
     getDataFlag,
+    getDataFlagArray,
     getFlag,
     getInMemory,
     getSetting,
+    info,
     localize,
     LocalizeArgs,
     localizePath,
@@ -19,8 +21,11 @@ import {
     setInMemory,
     setSetting,
     unsetFlag,
+    updateSourceFlag,
     warning,
 } from "module-helpers";
+import { FlagDataModel } from "module-helpers/src";
+type Document = foundry.abstract.Document;
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
     declare settings: Readonly<TSettings>;
@@ -70,6 +75,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return localize(this.key, ...args);
     }
 
+    info(...args: NotificationArgs): number {
+        return info(this.key, ...args);
+    }
+
     warning(...args: NotificationArgs): number {
         return warning(this.key, ...args);
     }
@@ -90,15 +99,15 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return deleteInMemory(obj, this.key, ...path);
     }
 
-    getFlag<T>(doc: foundry.abstract.Document, ...path: string[]): T | undefined {
+    getFlag<T>(doc: Document, ...path: string[]): T | undefined {
         return getFlag(doc, this.key, ...path);
     }
 
-    setFlag<D extends foundry.abstract.Document, T>(doc: D, ...args: [...string[], T]): Promise<D> {
+    setFlag<D extends Document, T>(doc: D, ...args: [...string[], T]): Promise<D> {
         return setFlag(doc, this.key, ...args);
     }
 
-    unsetFlag<D extends foundry.abstract.Document>(doc: D, ...path: string[]): Promise<D> {
+    unsetFlag<D extends Document>(doc: D, ...path: string[]): Promise<D> {
         return unsetFlag(doc, this.key, ...path);
     }
 
@@ -117,12 +126,27 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return setFlagProperties(obj, this.key, ...args);
     }
 
-    getDataFlag<T extends foundry.abstract.DataModel | foundry.abstract.DataModel[]>(
-        doc: foundry.abstract.Document,
-        Model: ConstructorOf<T extends foundry.abstract.DataModel[] ? T[number] : T>,
+    updateSourceFlag<T extends Document>(
+        doc: T,
+        ...args: [...string[], any]
+    ): DeepPartial<T["_source"]> {
+        return updateSourceFlag(doc, this.key, ...args);
+    }
+
+    getDataFlag<T extends foundry.abstract.DataModel, D extends Document>(
+        doc: D,
+        Model: ConstructorOf<T>,
         ...path: string[]
-    ): T | undefined {
+    ): FlagDataModel<T, D> | undefined {
         return getDataFlag(doc, Model, this.key, ...path);
+    }
+
+    getDataFlagArray<T extends foundry.abstract.DataModel, D extends Document>(
+        doc: D,
+        Model: ConstructorOf<T>,
+        ...path: string[]
+    ): FlagDataModel<T[], D> | undefined {
+        return getDataFlagArray(doc, Model, this.key, ...path);
     }
 
     _initialize() {

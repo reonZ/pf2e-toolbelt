@@ -1,0 +1,57 @@
+<hr>
+<div class="target-header">
+    <span class="name">
+        <i class="fa-{{ifThen isHidden 'thin' 'solid'}} fa-{{ifThen hasPlayerOwner 'person' 'ghost'}}"
+            {{#if isHidden}}{{{@root.i18n.tooltip 'hidden' }}}{{/if}}></i>
+        {{name}}
+    </span>
+    <span class="controls {{save.significantModifier}}" data-tooltip-class="pf2e">
+        {{#if save.notes}}
+        <i class="fa-duotone fa-list-check list" data-tooltip="{{save.notes}}"></i>
+        {{/if}}
+        {{#if (and isOwner save.canReroll)}}
+        <a class="reroll" data-action="reroll-save" data-statistic="{{save.statistic}}"
+            data-tooltip="{{save.tooltip}}" {{save.visibility}}>
+            <i class="fa-solid fa-rotate rotate"></i>
+            <i class="save {{save.icon}}"></i>
+            <span
+                class="degree {{#if showSuccess}}show{{/if}} {{save.success}}">{{save.value}}</span>
+        </a>
+        {{else if save.value includeZero=true}}
+        <span class="observe" data-tooltip="{{save.tooltip}}" {{save.visibility}}>
+            {{#if save.canSeeResult}}
+            <i class="{{save.rerolled.icon}} reroll"></i>
+            <i class="save {{save.icon}}"></i>
+            <span class="degree {{#if showSuccess}}show{{/if}} {{save.success}}">
+                {{save.value}}
+            </span>
+            {{else}}
+            <i class="save {{save.icon}}"></i>
+            <i class="fa-solid fa-circle-question unknown"></i>
+            {{/if}}
+        </span>
+        {{else if (and save.tooltip isOwner)}}
+        <a data-action="roll-save" data-statistic="{{save.statistic}}"
+            data-tooltip="{{save.tooltip}}">
+            <i class="save {{save.icon}}"></i>
+            <i class="fa-solid fa-dice-d20 die"></i>
+        </a>
+        {{else if save.tooltip}}
+        <span data-tooltip="{{save.tooltip}}">
+            <i class="save {{save.icon}}"></i>
+            <i class="fa-regular fa-circle-question unknown"></i>
+        </span>
+        {{else if save}}
+        <span data-tooltip="{{@root.i18n 'noSave' save=save.statistic}}">
+            <i class="save {{save.icon}}"></i>
+            <i class="fa-solid fa-ban ban"></i>
+        </span>
+        {{/if}}
+        {{#if save}}
+        <hr>
+        {{/if}}
+        <a data-action="ping-target" title="{{localize 'COMBAT.PingCombatant'}}">
+            <i class="fa-solid fa-fw fa-signal-stream"></i>
+        </a>
+    </span>
+</div>

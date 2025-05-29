@@ -30,6 +30,7 @@
     -   no longer hides rune select fields from the item sheet when `Force Update` is enabled
     -   now allows the use of `Handwraps of Mighty Blows` without the `Invested` trait
     -   add `Shield Rune` setting (disabled) : automatically adds reinforcing runes to shields
+        -   shield HP is proportionaly updated to fit the change
     -   add `Subtract Rune Price` setting (enabled): remove the price of fundamental runes from non-specific equipment
 -   `Droppeth`:
     -   remove the `Remove on Empty` setting
