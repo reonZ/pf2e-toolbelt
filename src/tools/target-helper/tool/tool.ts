@@ -15,11 +15,11 @@ import {
     isActionMessage,
     isDamageMessage,
     isSpellMessage,
-    isValidCheckLink,
     prepareActionMessage,
     prepareCheckMessage,
     prepareDamageMessage,
     prepareSpellMessage,
+    renderActionMessage,
     renderDamageMessage,
     renderSpellMessage,
     SaveRollData,
@@ -28,7 +28,7 @@ import {
 import {
     RerollType,
     SaveDragData,
-    TargetDataSource,
+    TargetsDataSource,
     TargetsDataModel,
     TargetsSaveSource,
 } from "..";
@@ -216,13 +216,8 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     #onDragStart(event: DragEvent) {
         const target = event.target;
         const dataTransfer = event.dataTransfer;
-        if (!dataTransfer || !isValidCheckLink(target)) return;
-
         const saveData = getSaveLinkData(target);
-        if (saveData === null) {
-            event.preventDefault();
-            return;
-        }
+        if (!dataTransfer || !saveData) return;
 
         event.stopPropagation();
 
@@ -244,7 +239,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     #onPreCreateChatMessage(message: ChatMessagePF2e) {
         if (message.isCheckRoll) return;
 
-        const updates: DeepPartial<TargetDataSource> = {};
+        const updates: DeepPartial<TargetsDataSource> = {};
 
         if (isDamageMessage(message)) {
             if (!prepareDamageMessage.call(this, message, updates)) return;
@@ -276,6 +271,8 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             await renderDamageMessage.call(this, message, html, flag);
         } else if (flag.type === "spell") {
             await renderSpellMessage.call(this, message, html, flag);
+        } else if (flag.type === "action") {
+            await renderActionMessage.call(this, message, html, flag);
         }
 
         return html;

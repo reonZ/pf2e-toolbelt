@@ -4,7 +4,6 @@ import {
     createHTMLElement,
     htmlQuery,
     R,
-    registerUpstreamHook,
     SaveType,
     SpellPF2e,
 } from "module-helpers";
@@ -13,17 +12,18 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
-    TargetDataSource,
+    sendDataToDamageMessage,
     TargetHelperTool,
     TargetsData,
+    TargetsDataSource,
     TargetsFlagData,
 } from "..";
 
 function prepareSpellMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetDataSource>
-): updates is WithRequired<DeepPartial<TargetDataSource>, "type" | "save"> {
+    updates: DeepPartial<TargetsDataSource>
+): updates is WithRequired<DeepPartial<TargetsDataSource>, "type" | "save"> {
     const spellData = getSpellData(message);
     if (!spellData) return false;
 
@@ -43,11 +43,10 @@ async function renderSpellMessage(
     html: HTMLElement,
     flag: TargetsFlagData
 ) {
-    const isGM = game.user.isGM;
-    const data = new TargetsData(flag);
-    const isAuthor = message.isAuthor;
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
+
+    const data = new TargetsData(flag);
 
     if (data.hasTargets) {
         const rowsWrapper = createHTMLElement("div", {
@@ -61,6 +60,8 @@ async function renderSpellMessage(
         msgContent.append(rowsWrapper);
     }
 
+    const isGM = game.user.isGM;
+    const isAuthor = message.isAuthor;
     if (!isGM && !isAuthor) return;
 
     const cardBtns = htmlQuery(msgContent, ".card-buttons");
@@ -97,21 +98,7 @@ async function renderSpellMessage(
     delete damageBtn.dataset.action;
 
     damageBtn.addEventListener("click", (event) => {
-        // we cache the data & add the spell just in case
-        const cached = data.toJSON({ type: "damage", item: data.item ?? spell.uuid });
-
-        registerUpstreamHook(
-            "preCreateChatMessage",
-            (msg: ChatMessagePF2e) => {
-                // we feed all the data to the damage message
-                this.updateSourceFlag(msg, cached);
-            },
-            true
-        );
-
-        // we clean the spell message as we are not gonna use it anymore from that point on
-        this.unsetFlag(message);
-
+        sendDataToDamageMessage.call(this, message, data, spell);
         spell?.rollDamage(event);
     });
 }

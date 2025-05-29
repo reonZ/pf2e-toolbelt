@@ -6,12 +6,14 @@ import {
     ItemPF2e,
     MODULE,
     R,
+    registerUpstreamHook,
     resolveActorAndItemFromHTML,
+    SAVE_TYPES,
     SaveType,
     splitListString,
 } from "module-helpers";
 import { TargetHelperTool } from ".";
-import { TargetsDataModel } from "..";
+import { TargetsData, TargetsDataModel, TargetsSaveSource } from "..";
 
 function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     const target = htmlClosest<HTMLLIElement>(event.target, "li.chat-message");
@@ -50,7 +52,9 @@ function getCurrentTargets(): TokenDocumentUUID[] {
 }
 
 let BASIC_SAVE_REGEX: RegExp;
-function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): SaveLinkData | null {
+function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null {
+    if (!isValidSaveLink(el)) return null;
+
     const dataset = el.dataset;
 
     const dc = (() => {
@@ -95,12 +99,49 @@ function getSaveLinkData(el: HTMLAnchorElement & { dataset: CheckLinkData }): Sa
     return data;
 }
 
+function sendDataToDamageMessage(
+    this: TargetHelperTool,
+    message: ChatMessagePF2e,
+    data: TargetsData,
+    item?: ItemPF2e
+) {
+    // we cache the data & add the spell just in case
+    const cached = data.toJSON({ type: "damage", item: data.item ?? item?.uuid });
+
+    registerUpstreamHook(
+        "preCreateChatMessage",
+        (msg: ChatMessagePF2e) => {
+            // we feed all the data to the damage message
+            this.updateSourceFlag(msg, cached);
+        },
+        true
+    );
+
+    // we clean the spell message as we are not gonna use it anymore from that point on
+    this.unsetFlag(message);
+}
+
+function isValidSaveLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorElement & {
+    dataset: CheckLinkData;
+} {
+    if (!(el instanceof HTMLAnchorElement) || !el.classList.contains("inline-check")) {
+        return false;
+    }
+
+    const { pf2Dc, against, itemUuid, pf2Check, rollerRole } = el.dataset;
+
+    return (
+        ((rollerRole !== "origin" && !!pf2Dc) || !!(against && itemUuid)) &&
+        SAVE_TYPES.includes(pf2Check as SaveType)
+    );
+}
+
 type SaveDragData = SaveLinkData & {
     type: `${typeof MODULE.id}-check-roll`;
 };
 
 type SaveLinkData = {
-    save: Exclude<toolbelt.targetHelper.MessageFlag["save"], undefined>;
+    save: WithPartial<TargetsSaveSource, "author">;
     options: string[];
     traits: string[];
     item: ItemUUID | undefined;
@@ -116,5 +157,5 @@ type CheckLinkData = {
 
 type TargetsFlagData = FlagDataModel<TargetsDataModel, ChatMessagePF2e>;
 
-export { getCurrentTargets, getSaveLinkData, onChatMessageDrop };
+export { getCurrentTargets, getSaveLinkData, onChatMessageDrop, sendDataToDamageMessage };
 export type { CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };

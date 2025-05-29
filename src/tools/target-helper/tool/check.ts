@@ -7,23 +7,17 @@ import {
     SaveType,
     splitListString,
 } from "module-helpers";
-import {
-    CheckLinkData,
-    getSaveLinkData,
-    SaveLinkData,
-    TargetDataSource,
-    TargetHelperTool,
-} from "..";
+import { getSaveLinkData, SaveLinkData, TargetsDataSource, TargetHelperTool } from "..";
 import utils = foundry.utils;
 
 const REPOST_CHECK_MESSAGE_REGEX =
-    /^(?:<span data-visibility="[\w]+">.+?<\/span> ?)?(<a class="inline-check.+?<\/a>)$/;
+    /^(?:<span data-visibility="\w+">.+?<\/span> ?)?(<a class="inline-check.+?<\/a>)$/;
 const PROMPT_CHECK_MESSAGE_REGEX = /^(?:<p>)?@Check\[([^\]]+)\](?:{([^}]+)})?(?:<\/p>)?$/;
 
 function prepareCheckMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetDataSource>
+    updates: DeepPartial<TargetsDataSource>
 ): boolean {
     if (!this.upgradeChecks) return false;
 
@@ -65,8 +59,8 @@ function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
 
     const repostMatch = message.content.match(REPOST_CHECK_MESSAGE_REGEX);
     if (repostMatch) {
-        const link = createHTMLElementContent({ content: repostMatch[1] });
-        const linkData = isValidCheckLink(link) ? getSaveLinkData(link) : null;
+        const link = createHTMLElementContent({ content: repostMatch[0] });
+        const linkData = getSaveLinkData(link);
 
         if (linkData) {
             linkData.save.author = message.actor?.uuid;
@@ -78,19 +72,4 @@ function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
     return null;
 }
 
-function isValidCheckLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorElement & {
-    dataset: CheckLinkData;
-} {
-    if (!(el instanceof HTMLAnchorElement) || !el.classList.contains("inline-check")) {
-        return false;
-    }
-
-    const { pf2Dc, against, itemUuid, pf2Check, rollerRole } = el.dataset;
-
-    return (
-        ((rollerRole !== "origin" && !!pf2Dc) || !!(against && itemUuid)) &&
-        SAVE_TYPES.includes(pf2Check as SaveType)
-    );
-}
-
-export { isValidCheckLink, prepareCheckMessage };
+export { prepareCheckMessage };

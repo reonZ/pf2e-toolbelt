@@ -94,9 +94,9 @@ type TargetsDataSchema = {
 
 type TargetMessageType = (typeof TARGET_MESSAGE_TYPE)[number];
 
-type TargetDataSource = SourceFromSchema<TargetsDataSchema>;
+type TargetsDataSource = SourceFromSchema<TargetsDataSchema>;
 
 MODULE.devExpose({ TargetsDataModel });
 
 export { TargetsDataModel };
-export type { TargetDataSource };
+export type { TargetsDataSource };

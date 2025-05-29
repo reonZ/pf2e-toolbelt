@@ -56,6 +56,22 @@
                 }
             }
         }
+
+        .chat-card {
+            footer {
+                .pf2e-toolbelt-target-buttons {
+                    display: inline-flex;
+                    float: right;
+                    margin-bottom: -1px;
+                    height: 100%;
+                    gap: 0.5em;
+                }
+
+                span:has(+ .pf2e-toolbelt-target-buttons) {
+                    border-right: 0;
+                }
+            }
+        }
     }
 
     .message-content .pf2e-toolbelt-target-targetRows .target-row {
@@ -253,14 +269,16 @@
             }
         }
 
-        &:first-child {
-            margin-top: 0.4em;
-        }
-
         &:last-child {
             .damage-application {
                 margin-bottom: 0;
             }
+        }
+    }
+
+    .message-content .pf2e-toolbelt-target-targetRows:not(.pf2e-toolbelt-target-actionRows) {
+        .target-row:first-child {
+            margin-top: 0.4em;
         }
     }
 }

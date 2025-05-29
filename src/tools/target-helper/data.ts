@@ -6,7 +6,7 @@ import {
     R,
     TokenDocumentPF2e,
 } from "module-helpers";
-import { TargetDataSource, TargetSaveModel, TargetsFlagData, TargetsSaveModel } from ".";
+import { TargetsDataSource, TargetSaveModel, TargetsFlagData, TargetsSaveModel } from ".";
 
 class TargetsData {
     #isGM: boolean;
@@ -122,9 +122,9 @@ class TargetsData {
     }
 
     update(
-        changes: DeepPartial<TargetDataSource>,
+        changes: DeepPartial<TargetsDataSource>,
         options?: Partial<DocumentSourceUpdateContext>
-    ): DeepPartial<TargetDataSource> {
+    ): DeepPartial<TargetsDataSource> {
         return this.#flag.updateSource(changes, options);
     }
 
@@ -132,7 +132,7 @@ class TargetsData {
         return this.#flag.setFlag();
     }
 
-    toJSON(udpates?: DeepPartial<TargetDataSource>): TargetDataSource {
+    toJSON(udpates?: DeepPartial<TargetsDataSource>): TargetsDataSource {
         const source = udpates ? this.#flag.clone(udpates) : this.#flag;
         return source.toJSON();
     }
