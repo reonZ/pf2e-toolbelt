@@ -2,6 +2,7 @@ import {
     deleteFlagProperty,
     deleteInMemory,
     error,
+    FlagDataArray,
     getDataFlag,
     getDataFlagArray,
     getFlag,
@@ -24,7 +25,7 @@ import {
     updateSourceFlag,
     warning,
 } from "module-helpers";
-import { FlagDataModel } from "module-helpers/src";
+import { FlagData } from "module-helpers/src";
 type Document = foundry.abstract.Document;
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
@@ -137,7 +138,7 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         doc: D,
         Model: ConstructorOf<T>,
         ...path: string[]
-    ): FlagDataModel<T, D> | undefined {
+    ): FlagData<T, D> | undefined {
         return getDataFlag(doc, Model, this.key, ...path);
     }
 
@@ -145,7 +146,7 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         doc: D,
         Model: ConstructorOf<T>,
         ...path: string[]
-    ): FlagDataModel<T[], D> | undefined {
+    ): FlagDataArray<T, D> | undefined {
         return getDataFlagArray(doc, Model, this.key, ...path);
     }
 

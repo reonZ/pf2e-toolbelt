@@ -99,7 +99,7 @@ class TargetsData {
         return getExtraRollOptions(this.#flag, this.save?.basic);
     }
 
-    get canRollSaveNPCs(): TokenDocumentPF2e[] {
+    get npcListToRoll(): TokenDocumentPF2e[] {
         const statistic = this.#flag.save?.statistic;
         if (!statistic || !this.#isGM) return [];
 
@@ -113,6 +113,10 @@ class TargetsData {
         });
     }
 
+    get canRollNPCSaves(): boolean {
+        return this.npcListToRoll.length > 0;
+    }
+
     targetSave(id: string): TargetSaveModel | undefined {
         return this.#flag.saves[id];
     }
@@ -122,13 +126,13 @@ class TargetsData {
     }
 
     update(
-        changes: DeepPartial<TargetsDataSource>,
+        changes: Record<string, JSONValue>,
         options?: Partial<DocumentSourceUpdateContext>
     ): DeepPartial<TargetsDataSource> {
         return this.#flag.updateSource(changes, options);
     }
 
-    setFlag(): Promise<ChatMessagePF2e> {
+    setFlag(): Promise<ChatMessagePF2e | undefined> {
         return this.#flag.setFlag();
     }
 

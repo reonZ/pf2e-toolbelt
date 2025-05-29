@@ -1,19 +1,18 @@
 import {
     ChatMessagePF2e,
-    FlagDataModel,
+    FlagData,
     getDragEventData,
     htmlClosest,
     ItemPF2e,
     MODULE,
     R,
-    registerUpstreamHook,
     resolveActorAndItemFromHTML,
     SAVE_TYPES,
     SaveType,
     splitListString,
 } from "module-helpers";
 import { TargetHelperTool } from ".";
-import { TargetsData, TargetsDataModel, TargetsSaveSource } from "..";
+import { TargetsDataModel, TargetsSaveSource } from "..";
 
 function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     const target = htmlClosest<HTMLLIElement>(event.target, "li.chat-message");
@@ -99,28 +98,6 @@ function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null 
     return data;
 }
 
-function sendDataToDamageMessage(
-    this: TargetHelperTool,
-    message: ChatMessagePF2e,
-    data: TargetsData,
-    item?: ItemPF2e
-) {
-    // we cache the data & add the spell just in case
-    const cached = data.toJSON({ type: "damage", item: data.item ?? item?.uuid });
-
-    registerUpstreamHook(
-        "preCreateChatMessage",
-        (msg: ChatMessagePF2e) => {
-            // we feed all the data to the damage message
-            this.updateSourceFlag(msg, cached);
-        },
-        true
-    );
-
-    // we clean the spell message as we are not gonna use it anymore from that point on
-    this.unsetFlag(message);
-}
-
 function isValidSaveLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorElement & {
     dataset: CheckLinkData;
 } {
@@ -155,7 +132,7 @@ type CheckLinkData = {
     isBasic?: boolean;
 } & ({ against: string; itemUuid: string } | { pf2Dc: `${number}` });
 
-type TargetsFlagData = FlagDataModel<TargetsDataModel, ChatMessagePF2e>;
+type TargetsFlagData = FlagData<TargetsDataModel, ChatMessagePF2e>;
 
-export { getCurrentTargets, getSaveLinkData, onChatMessageDrop, sendDataToDamageMessage };
+export { getCurrentTargets, getSaveLinkData, onChatMessageDrop };
 export type { CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };

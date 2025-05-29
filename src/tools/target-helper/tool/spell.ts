@@ -4,6 +4,7 @@ import {
     createHTMLElement,
     htmlQuery,
     R,
+    registerUpstreamHook,
     SaveType,
     SpellPF2e,
 } from "module-helpers";
@@ -12,7 +13,6 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
-    sendDataToDamageMessage,
     TargetHelperTool,
     TargetsData,
     TargetsDataSource,
@@ -98,7 +98,21 @@ async function renderSpellMessage(
     delete damageBtn.dataset.action;
 
     damageBtn.addEventListener("click", (event) => {
-        sendDataToDamageMessage.call(this, message, data, spell);
+        // we cache the data & add the spell just in case
+        const cached = data.toJSON({ type: "damage", item: data.item ?? spell.uuid });
+
+        registerUpstreamHook(
+            "preCreateChatMessage",
+            (msg: ChatMessagePF2e) => {
+                // we feed all the data to the damage message
+                this.updateSourceFlag(msg, cached);
+            },
+            true
+        );
+
+        // we clean the spell message as we are not gonna use it anymore from that point on
+        this.unsetFlag(message);
+
         spell?.rollDamage(event);
     });
 }

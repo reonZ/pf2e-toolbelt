@@ -54,7 +54,7 @@ function createRollNPCSavesBtn(
     message: ChatMessagePF2e,
     data: TargetsData
 ): HTMLElement | undefined {
-    if (!data.canRollSaveNPCs.length) return;
+    if (!data.canRollNPCSaves) return;
 
     const btn = createHTMLElement(data.isAction ? "a" : "button", {
         classes: ["pf2e-toolbelt-target-rollSaves"],
@@ -76,7 +76,7 @@ function addRollSavesListener(
     btn.addEventListener("click", async (event) => {
         event.stopPropagation();
 
-        const targets = data.canRollSaveNPCs;
+        const targets = data.npcListToRoll;
 
         if (targets.length) {
             rollSaves.call(this, event, message, data, targets);

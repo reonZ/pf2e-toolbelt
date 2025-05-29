@@ -3,6 +3,7 @@ import {
     createHTMLElement,
     createHTMLElementContent,
     htmlQuery,
+    registerUpstreamHook,
 } from "module-helpers";
 import {
     createRollNPCSavesBtn,
@@ -14,7 +15,6 @@ import {
     TargetHelperTool,
     TargetsData,
     TargetsFlagData,
-    sendDataToDamageMessage,
 } from "..";
 
 const SAVE_LINK_REGEX =
@@ -51,8 +51,9 @@ async function renderActionMessage(
     if (!msgContent) return;
 
     const data = new TargetsData(flag);
+    const hasSave = data.hasSave;
 
-    if (data.hasSave && data.hasTargets) {
+    if (hasSave && data.hasTargets) {
         const rowsWrapper = createHTMLElement("div", {
             classes: ["pf2e-toolbelt-target-targetRows", "pf2e-toolbelt-target-actionRows"],
         });
@@ -69,6 +70,8 @@ async function renderActionMessage(
     if (!isGM && !isAuthor) return;
 
     html.addEventListener("drop", onChatMessageDrop.bind(this));
+
+    if (!hasSave) return;
 
     const chatCard = htmlQuery(msgContent, ".chat-card");
     if (!chatCard) return;
@@ -105,7 +108,27 @@ async function renderActionMessage(
     for (const link of damageLinks) {
         link.addEventListener(
             "click",
-            (event) => sendDataToDamageMessage.call(this, message, data),
+            (event) => {
+                // we cache the data & add the spell just in case
+                const cached = data.toJSON({ type: "damage" });
+
+                registerUpstreamHook(
+                    "preCreateChatMessage",
+                    (msg: ChatMessagePF2e) => {
+                        // we feed all the data to the damage message
+                        this.updateSourceFlag(msg, cached);
+                    },
+                    true
+                );
+
+                // we clean the message save related data
+                data.update({
+                    ["-=save"]: null,
+                    ["==saves"]: {},
+                });
+
+                data.setFlag();
+            },
             true
         );
     }
