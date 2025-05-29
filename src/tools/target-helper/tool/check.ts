@@ -11,7 +11,7 @@ import {
     CheckLinkData,
     getSaveLinkData,
     SaveLinkData,
-    TargetDataModelSource,
+    TargetDataSource,
     TargetHelperTool,
 } from "..";
 import utils = foundry.utils;
@@ -23,7 +23,7 @@ const PROMPT_CHECK_MESSAGE_REGEX = /^(?:<p>)?@Check\[([^\]]+)\](?:{([^}]+)})?(?:
 function prepareCheckMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetDataModelSource>
+    updates: DeepPartial<TargetDataSource>
 ): boolean {
     if (!this.upgradeChecks) return false;
 

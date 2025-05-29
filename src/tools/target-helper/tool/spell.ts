@@ -1,9 +1,11 @@
 import {
+    ActorPF2e,
     ChatMessagePF2e,
     createHTMLElement,
     htmlQuery,
     R,
     registerUpstreamHook,
+    SaveType,
     SpellPF2e,
 } from "module-helpers";
 import {
@@ -11,7 +13,7 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
-    TargetDataModelSource,
+    TargetDataSource,
     TargetHelperTool,
     TargetsData,
     TargetsFlagData,
@@ -20,17 +22,17 @@ import {
 function prepareSpellMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetDataModelSource>
-): updates is WithRequired<DeepPartial<TargetDataModelSource>, "type" | "save"> {
-    const item = message.item as Maybe<SpellPF2e>;
-    const save = item?.system.defense?.save;
-    if (!save) return false;
-
-    const dc = item.spellcasting?.statistic?.dc.value;
-    if (!R.isNumber(dc)) return false;
+    updates: DeepPartial<TargetDataSource>
+): updates is WithRequired<DeepPartial<TargetDataSource>, "type" | "save"> {
+    const spellData = getSpellData(message);
+    if (!spellData) return false;
 
     updates.type = "spell";
-    updates.save = { ...save, dc, author: message.actor?.uuid };
+
+    if (!this.getMessageSave(message)) {
+        const { dc, save } = spellData;
+        updates.save = { ...save, dc, author: message.actor?.uuid };
+    }
 
     return true;
 }
@@ -65,16 +67,16 @@ async function renderSpellMessage(
     const saveBtn = htmlQuery<HTMLButtonElement>(cardBtns, `[data-action="spell-save"]`);
     if (!saveBtn) return;
 
-    const damageBtn = htmlQuery(cardBtns, `[data-action="spell-damage"]`);
     const buttonsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
-    const fakeBtn = saveBtn.cloneNode(true) as HTMLButtonElement;
 
-    delete fakeBtn.dataset.action;
+    const fakeSaveBtn = saveBtn.cloneNode(true) as HTMLButtonElement;
+    delete fakeSaveBtn.dataset.action;
 
     saveBtn.classList.add("hidden");
     saveBtn.after(buttonsWrapper);
 
-    buttonsWrapper.append(fakeBtn);
+    addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, data);
+    buttonsWrapper.append(fakeSaveBtn);
 
     const setTargetsBtn = createSetTargetsBtn.call(this, data);
     buttonsWrapper.prepend(setTargetsBtn);
@@ -84,36 +86,58 @@ async function renderSpellMessage(
         buttonsWrapper.append(rollSavesBtn);
     }
 
-    if (damageBtn) {
-        delete damageBtn.dataset.action;
+    const damageBtn = htmlQuery(cardBtns, `[data-action="spell-damage"]`);
+    if (!damageBtn) return;
 
-        damageBtn.addEventListener("click", (event) => {
-            const item = message.item;
-            if (!item) return;
+    const spellData = getSpellData(message);
+    if (!spellData) return;
 
-            const spell = item.isOfType("spell")
-                ? item
-                : item.isOfType("consumable")
-                ? item.embeddedSpell
-                : null;
-            if (!spell) return;
+    const { spell } = spellData;
 
-            registerUpstreamHook(
-                "preCreateChatMessage",
-                (msg: ChatMessagePF2e) => {
-                    const updates: DeepPartial<TargetDataModelSource> = {};
-                    this.updateSourceFlag(msg, updates);
-                    // updateSourceFlag(message, "messageId", messageId);
-                    // updateSourceFlag(message, "save", save);
-                },
-                true
-            );
+    delete damageBtn.dataset.action;
 
-            spell?.rollDamage(event);
-        });
-    }
+    damageBtn.addEventListener("click", (event) => {
+        // we cache the data & add the spell just in case
+        const cached = data.clone({ type: "damage", item: data.item ?? spell.uuid }).toJSON();
 
-    addSaveBtnListener.call(this, saveBtn, fakeBtn, message, data);
+        registerUpstreamHook(
+            "preCreateChatMessage",
+            (msg: ChatMessagePF2e) => {
+                // we feed all the data to the damage message
+                this.updateSourceFlag(msg, cached);
+            },
+            true
+        );
+
+        // we clean the spell message as we are not gonna use it anymore from that point on
+        this.unsetFlag(message);
+
+        spell?.rollDamage(event);
+    });
+}
+
+function getSpellData(message: ChatMessagePF2e): {
+    dc: number;
+    save: { statistic: SaveType; basic: boolean };
+    spell: SpellPF2e<ActorPF2e>;
+} | null {
+    const item = message.item;
+    if (!item) return null;
+
+    const spell = item.isOfType("spell")
+        ? item
+        : item.isOfType("consumable")
+        ? item.embeddedSpell
+        : null;
+
+    if (!spell) return null;
+
+    const save = spell?.system.defense?.save;
+    if (!save) return null;
+
+    const dc = spell?.spellcasting?.statistic?.dc.value;
+
+    return R.isNumber(dc) ? { dc, save, spell } : null;
 }
 
 function isSpellMessage(message: ChatMessagePF2e): boolean {

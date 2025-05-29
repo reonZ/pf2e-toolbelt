@@ -24,13 +24,13 @@ import {
     TargetHelperTool,
     TargetsFlagData,
 } from ".";
-import { TargetDataModelSource, TargetsData } from "..";
+import { TargetDataSource, TargetsData } from "..";
 
 function prepareDamageMessage(
     this: TargetHelperTool,
     message: DamageMessage,
-    updates: DeepPartial<TargetDataModelSource>
-): updates is WithRequired<DeepPartial<TargetDataModelSource>, "type" | "isRegen"> {
+    updates: DeepPartial<TargetDataSource>
+): updates is WithRequired<DeepPartial<TargetDataSource>, "type" | "isRegen"> {
     if (isPersistentDamageMessage(message)) return false;
 
     updates.type = "damage";

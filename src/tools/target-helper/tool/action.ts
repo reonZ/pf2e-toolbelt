@@ -1,10 +1,10 @@
-import { TargetDataModelSource, TargetHelperTool } from "..";
+import { TargetDataSource, TargetHelperTool } from "..";
 import { ChatMessagePF2e } from "module-helpers";
 
 function prepareActionMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetDataModelSource>
+    updates: DeepPartial<TargetDataSource>
 ): boolean {
     updates.type = "action";
     // TODO look at the message for a single save link and add it to the message

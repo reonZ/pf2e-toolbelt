@@ -25,7 +25,13 @@ import {
     SaveRollData,
     TargetsFlagData,
 } from ".";
-import { RerollType, SaveDragData, TargetDataModelSource, TargetsDataModel } from "..";
+import {
+    RerollType,
+    SaveDragData,
+    TargetDataSource,
+    TargetsDataModel,
+    TargetsSaveSource,
+} from "..";
 import utils = foundry.utils;
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
@@ -188,6 +194,10 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return this.getFlag(message, "targets") ?? [];
     }
 
+    getMessageSave(message: ChatMessagePF2e): TargetsSaveSource | undefined {
+        return this.getFlag(message, "save");
+    }
+
     #updateMessage({ message, applied, saves }: UpdateMessageOptions, userId: string) {
         const data = this.getTargetsFlagData(message);
         if (!data) return;
@@ -234,7 +244,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     #onPreCreateChatMessage(message: ChatMessagePF2e) {
         if (message.isCheckRoll) return;
 
-        const updates: DeepPartial<TargetDataModelSource> = {};
+        const updates: DeepPartial<TargetDataSource> = {};
 
         if (isDamageMessage(message)) {
             if (!prepareDamageMessage.call(this, message, updates)) return;

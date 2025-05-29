@@ -42,6 +42,9 @@ type TargetsSaveSchema = {
     statistic: fields.StringField<SaveType, SaveType, true, false, false>;
 };
 
+type TargetsSaveSource = SourceFromSchema<TargetsSaveSchema>;
+
 MODULE.devExpose({ TargetsSaveModel });
 
 export { TargetsSaveModel };
+export type { TargetsSaveSource };

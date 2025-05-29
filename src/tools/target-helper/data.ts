@@ -6,7 +6,7 @@ import {
     R,
     TokenDocumentPF2e,
 } from "module-helpers";
-import { TargetDataModelSource, TargetSaveModel, TargetsFlagData, TargetsSaveModel } from ".";
+import { TargetDataSource, TargetSaveModel, TargetsFlagData, TargetsSaveModel } from ".";
 
 class TargetsData {
     #isGM: boolean;
@@ -87,6 +87,10 @@ class TargetsData {
         return this.#targets;
     }
 
+    get saves(): Record<string, TargetSaveModel | undefined> {
+        return this.#flag.saves;
+    }
+
     get splashTargets(): TokenDocumentPF2e[] {
         return this.#splashTargets;
     }
@@ -118,14 +122,22 @@ class TargetsData {
     }
 
     update(
-        changes: DeepPartial<TargetDataModelSource>,
+        changes: DeepPartial<TargetDataSource>,
         options?: Partial<DocumentSourceUpdateContext>
-    ): DeepPartial<TargetDataModelSource> {
+    ): DeepPartial<TargetDataSource> {
         return this.#flag.updateSource(changes, options);
     }
 
     setFlag(): Promise<ChatMessagePF2e> {
         return this.#flag.setFlag();
+    }
+
+    clone(data?: DeepPartial<TargetDataSource>): TargetsFlagData {
+        return this.#flag.clone(data);
+    }
+
+    toJSON(): TargetDataSource {
+        return this.#flag.toJSON();
     }
 }
 
