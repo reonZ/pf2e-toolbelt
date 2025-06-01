@@ -248,8 +248,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             if (!prepareSpellMessage.call(this, message, updates)) return;
         } else if (
             !prepareCheckMessage.call(this, message, updates) &&
-            isActionMessage(message) &&
-            !prepareActionMessage.call(this, message, updates)
+            (!isActionMessage(message) || !prepareActionMessage.call(this, message, updates))
         ) {
             return;
         }
