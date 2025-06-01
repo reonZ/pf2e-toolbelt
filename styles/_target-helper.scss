@@ -5,7 +5,8 @@
                 display: flex;
                 gap: 1px;
 
-                button[data-save] {
+                button[data-save],
+                button[data-action="roll-fake-check"] {
                     flex: 1;
                     border-radius: 0 4px 4px 0;
 

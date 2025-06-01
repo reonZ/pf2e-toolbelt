@@ -1,0 +1,41 @@
+{{{link}}}
+<div class="pf2e chat-card item-card pf2e-toolbelt-target-check" {{#if speaker.actor}}
+    data-actor-id="{{speaker.actor}}" {{/if}} {{#if item}} data-item-id="{{item.id}}" {{/if}} {{#if
+    speaker.token}}data-token-id="{{speaker.token}}" {{/if}}>
+    <header class="card-header flexrow">
+        {{#if item}}
+        <img src="{{item.img}}" alt="{{item.name}}" />
+        <h3>{{item.name}}{{#if item.actionCost}} {{{actionGlyph item.actionCost}}}{{/if}}</h3>
+        {{else}}
+        <h3>{{{label}}}</h3>
+        {{/if}}
+    </header>
+
+    <section class="tags paizo-style{{#unless traits.length}} empty{{/unless}}"
+        data-tooltip-class="pf2e">
+        {{#each traits as |trait|}}
+        {{#unless trait.mystified}}
+        <span class="tag" data-trait="{{trait.name}}"
+            data-tooltip="{{trait.description}}">{{localize trait.label}}</span>
+        {{/unless}}
+        {{/each}}
+    </section>
+
+    <section class="card-buttons">
+        <div class="pf2e-toolbelt-target-buttons">
+            {{#if isOwner}}
+            <button class="pf2e-toolbelt-target-setTargets" data-action="set-targets"
+                title="{{setTarget}}">
+                <i class="fa-solid fa-bullseye-arrow"></i>
+            </button>
+            {{/if}}
+            <button type="button" data-action="roll-fake-check">{{{save}}}</button>
+            {{#if canRollSaves}}
+            <button class="pf2e-toolbelt-target-rollSaves" data-action="roll-saves"
+                title="{{rollSaves}}">
+                <i class="fa-duotone fa-solid fa-dice-d20"></i>
+            </button>
+            {{/if}}
+        </div>
+    </section>
+</div>

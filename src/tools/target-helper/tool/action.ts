@@ -114,9 +114,9 @@ async function renderActionMessage(
 
                 registerUpstreamHook(
                     "preCreateChatMessage",
-                    (msg: ChatMessagePF2e) => {
+                    (damageMessage: ChatMessagePF2e) => {
                         // we feed all the data to the damage message
-                        this.updateSourceFlag(msg, cached);
+                        this.updateSourceFlag(damageMessage, cached);
                     },
                     true
                 );

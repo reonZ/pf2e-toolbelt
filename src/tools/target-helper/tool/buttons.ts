@@ -1,4 +1,10 @@
-import { ChatMessagePF2e, createHTMLElement, R } from "module-helpers";
+import {
+    ChatMessagePF2e,
+    createHTMLElement,
+    R,
+    selectTokens,
+    TokenDocumentPF2e,
+} from "module-helpers";
 import { getCurrentTargets, rollSaves, TargetHelperTool, TargetsType } from ".";
 import { TargetsData } from "..";
 
@@ -84,4 +90,49 @@ function addRollSavesListener(
     });
 }
 
-export { createRollNPCSavesBtn, createSetTargetsBtn };
+function addSaveBtnListener(
+    this: TargetHelperTool,
+    realBtn: HTMLButtonElement | HTMLAnchorElement,
+    fakeBtn: HTMLButtonElement,
+    message: ChatMessagePF2e,
+    data: TargetsData
+) {
+    const allTargets = data.targets.map((target) => target.uuid);
+
+    fakeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const selected = game.user.getActiveTokens();
+        const targets: TokenDocumentPF2e[] = [];
+        const remainSelected: TokenDocumentPF2e[] = [];
+
+        for (const token of selected) {
+            if (!data.targetSave(token.id) && allTargets.includes(token.uuid)) {
+                targets.push(token);
+            } else {
+                remainSelected.push(token);
+            }
+        }
+
+        if (remainSelected.length) {
+            selectTokens(remainSelected);
+        }
+
+        if (remainSelected.length || !targets.length) {
+            const clickEvent = new MouseEvent("click", event);
+            realBtn.dispatchEvent(clickEvent);
+        }
+
+        if (targets.length) {
+            rollSaves.call(this, event, message, data, targets);
+        }
+    });
+}
+
+export {
+    addRollSavesListener,
+    addSaveBtnListener,
+    addSetTargetsListener,
+    createRollNPCSavesBtn,
+    createSetTargetsBtn,
+};

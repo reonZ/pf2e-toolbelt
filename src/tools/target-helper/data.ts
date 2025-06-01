@@ -47,7 +47,7 @@ class TargetsData {
         return this.#flag.save;
     }
 
-    get item(): ItemUUID | null {
+    get itemUUID(): ItemUUID | null {
         return this.#flag.item;
     }
 

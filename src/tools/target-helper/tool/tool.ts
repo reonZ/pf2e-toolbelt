@@ -20,6 +20,7 @@ import {
     prepareDamageMessage,
     prepareSpellMessage,
     renderActionMessage,
+    renderCheckMessage,
     renderDamageMessage,
     renderSpellMessage,
     SaveRollData,
@@ -245,10 +246,12 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             if (!prepareDamageMessage.call(this, message, updates)) return;
         } else if (isSpellMessage(message)) {
             if (!prepareSpellMessage.call(this, message, updates)) return;
-        } else if (isActionMessage(message)) {
-            if (!prepareActionMessage.call(this, message, updates)) return;
-        } else {
-            if (!prepareCheckMessage.call(this, message, updates)) return;
+        } else if (
+            !prepareCheckMessage.call(this, message, updates) &&
+            isActionMessage(message) &&
+            !prepareActionMessage.call(this, message, updates)
+        ) {
+            return;
         }
 
         if (!this.getMessageTargets(message).length) {
@@ -267,12 +270,14 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         const flag = this.getTargetsFlagData(message);
         if (!flag) return html;
 
-        if (flag.type === "damage") {
+        if (flag.type === "action") {
+            await renderActionMessage.call(this, message, html, flag);
+        } else if (flag.type === "check" && this.upgradeChecks) {
+            await renderCheckMessage.call(this, message, html, flag);
+        } else if (flag.type === "damage") {
             await renderDamageMessage.call(this, message, html, flag);
         } else if (flag.type === "spell") {
             await renderSpellMessage.call(this, message, html, flag);
-        } else if (flag.type === "action") {
-            await renderActionMessage.call(this, message, html, flag);
         }
 
         return html;

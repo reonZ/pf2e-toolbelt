@@ -99,13 +99,13 @@ async function renderSpellMessage(
 
     damageBtn.addEventListener("click", (event) => {
         // we cache the data & add the spell just in case
-        const cached = data.toJSON({ type: "damage", item: data.item ?? spell.uuid });
+        const cached = data.toJSON({ type: "damage", item: data.itemUUID ?? spell.uuid });
 
         registerUpstreamHook(
             "preCreateChatMessage",
-            (msg: ChatMessagePF2e) => {
+            (damageMessage: ChatMessagePF2e) => {
                 // we feed all the data to the damage message
-                this.updateSourceFlag(msg, cached);
+                this.updateSourceFlag(damageMessage, cached);
             },
             true
         );

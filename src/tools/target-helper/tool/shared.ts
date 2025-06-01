@@ -1,7 +1,9 @@
 import {
+    ActorPF2e,
     ChatMessagePF2e,
     FlagData,
     getDragEventData,
+    getItemFromUuid,
     htmlClosest,
     ItemPF2e,
     MODULE,
@@ -12,7 +14,7 @@ import {
     splitListString,
 } from "module-helpers";
 import { TargetHelperTool } from ".";
-import { TargetsDataModel, TargetsSaveSource } from "..";
+import { TargetsData, TargetsDataModel, TargetsSaveSource } from "..";
 
 function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     const target = htmlClosest<HTMLLIElement>(event.target, "li.chat-message");
@@ -113,6 +115,13 @@ function isValidSaveLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorElem
     );
 }
 
+async function getItem(
+    message: ChatMessagePF2e,
+    data: TargetsData
+): Promise<ItemPF2e<ActorPF2e> | null> {
+    return ((await getItemFromUuid(data.itemUUID)) ?? message.item) as ItemPF2e<ActorPF2e> | null;
+}
+
 type SaveDragData = SaveLinkData & {
     type: `${typeof MODULE.id}-check-roll`;
 };
@@ -134,5 +143,5 @@ type CheckLinkData = {
 
 type TargetsFlagData = FlagData<TargetsDataModel, ChatMessagePF2e>;
 
-export { getCurrentTargets, getSaveLinkData, onChatMessageDrop };
+export { getCurrentTargets, getItem, getSaveLinkData, onChatMessageDrop };
 export type { CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };

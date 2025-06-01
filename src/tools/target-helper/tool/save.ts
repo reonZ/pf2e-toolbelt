@@ -1,5 +1,4 @@
 import {
-    ActorPF2e,
     CharacterPF2e,
     ChatMessagePF2e,
     CheckContextChatFlag,
@@ -9,16 +8,13 @@ import {
     DegreeOfSuccess,
     eventToRollParams,
     extractNotes,
-    getItemFromUuid,
-    ItemPF2e,
     R,
     RawModifier,
     RollNotePF2e,
-    selectTokens,
     TokenDocumentPF2e,
     waitDialog,
 } from "module-helpers";
-import { TargetHelperTool } from ".";
+import { getItem, TargetHelperTool } from ".";
 import { RerollType, TargetSaveSource, TargetsData } from "..";
 
 async function rollSaves(
@@ -32,7 +28,7 @@ async function rollSaves(
     if (!dataSave) return;
 
     const extraRollOptions = data.extraRollOptions;
-    const item = ((await getItemFromUuid(data.item)) ?? message.item) as ItemPF2e<ActorPF2e>;
+    const item = await getItem(message, data);
 
     const user = game.user;
     const origin = message.actor;
@@ -262,45 +258,6 @@ async function rerollSave(
     }
 }
 
-function addSaveBtnListener(
-    this: TargetHelperTool,
-    realBtn: HTMLButtonElement,
-    fakeBtn: HTMLButtonElement,
-    message: ChatMessagePF2e,
-    data: TargetsData
-) {
-    const allTargets = data.targets.map((target) => target.uuid);
-
-    fakeBtn.addEventListener("click", (event) => {
-        event.preventDefault();
-
-        const selected = game.user.getActiveTokens();
-        const targets: TokenDocumentPF2e[] = [];
-        const remainSelected: TokenDocumentPF2e[] = [];
-        const clickEvent = new MouseEvent("click", event);
-
-        for (const token of selected) {
-            if (!data.targetSave(token.id) && allTargets.includes(token.uuid)) {
-                targets.push(token);
-            } else {
-                remainSelected.push(token);
-            }
-        }
-
-        if (remainSelected.length) {
-            selectTokens(remainSelected);
-        }
-
-        if (remainSelected.length || !targets.length) {
-            realBtn.dispatchEvent(clickEvent);
-        }
-
-        if (targets.length) {
-            rollSaves.call(this, event, message, data, targets);
-        }
-    });
-}
-
 type SaveRollData = WithUndefined<
     WithPartial<TargetSaveSource, "rerolled" | "unadjustedOutcome">,
     "dosAdjustments" | "significantModifiers"
@@ -323,5 +280,5 @@ type RerollSaveHook = {
     data: SaveRollData;
 };
 
-export { addSaveBtnListener, rerollSave, rollSaves };
+export { rerollSave, rollSaves };
 export type { SaveRollData };
