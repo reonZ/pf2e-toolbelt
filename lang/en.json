@@ -337,6 +337,9 @@
             }
         },
         "targetHelper": {
+            "check-card": {
+                "merge": "Merge with following damage message"
+            },
             "damage": {
                 "toggle": "Toggle original damage buttons"
             },
@@ -349,6 +352,9 @@
                 "hidden": "Hidden From Players",
                 "noSave": "This actor cannot roll {save} checks",
                 "select": "Select Target<br>[Double Click] Open Sheet"
+            },
+            "merge": {
+                "none": "Could not find a suitable damage message to merge with."
             },
             "reroll": {
                 "title": "Save Check Reroll",

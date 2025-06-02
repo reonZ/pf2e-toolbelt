@@ -99,7 +99,7 @@ async function renderSpellMessage(
             true
         );
 
-        // we clean the spell message as we are not gonna use it anymore from that point on
+        // we clean up the spell message as we are not gonna use it anymore
         this.unsetFlag(message);
 
         spell?.rollDamage(event);

@@ -1,30 +1,32 @@
 import {
     ChatMessagePF2e,
-    createHTMLElement,
     createHTMLElementContent,
     firstElementWithText,
     htmlQuery,
     parseInlineParams,
     R,
+    registerUpstreamHook,
     SAVE_TYPES,
     SaveType,
     splitListString,
 } from "module-helpers";
+import { canObserveActor } from "module-helpers/src";
 import {
-    getSaveLinkData,
-    SaveLinkData,
-    TargetsDataSource,
-    TargetHelperTool,
-    TargetsFlagData,
-    TargetsData,
-    getItem,
-    addSetTargetsListener,
     addRollSavesListener,
     addSaveBtnListener,
-    createTargetsRows,
+    addSetTargetsListener,
+    addTargetsHeaders,
+    getItem,
+    getSaveLinkData,
+    isDamageMessage,
+    isMessageOwner,
+    SaveLinkData,
+    TargetHelperTool,
+    TargetsData,
+    TargetsDataSource,
+    TargetsFlagData,
 } from "..";
 import utils = foundry.utils;
-import { canObserveActor } from "module-helpers/src";
 
 const REPOST_CHECK_MESSAGE_REGEX =
     /^(?:<span data-visibility="\w+">.+?<\/span> ?)?(<a class="inline-check.+?<\/a>)$/;
@@ -57,8 +59,10 @@ async function renderCheckMessage(
     const data = new TargetsData(flag);
     if (!data.hasSave) return;
 
+    html.classList.add("pf2e-toolbelt-check");
+
+    const isOwner = isMessageOwner(message);
     const canRollSaves = data.canRollNPCSaves;
-    const isOwner = game.user.isGM || message.isAuthor;
     const canObserve = canObserveActor(message.actor);
     const item = canObserve ? await getItem(message, data) : null;
 
@@ -77,11 +81,17 @@ async function renderCheckMessage(
         traits: item?.traitChatData(),
     });
 
-    msgContent.prepend(link);
-
     flavor?.remove();
-
+    msgContent.prepend(link);
     link.classList.add("hidden");
+    addTargetsHeaders.call(this, message, data, msgContent);
+
+    const fakeBtn = htmlQuery<HTMLButtonElement>(msgContent, `[data-action="roll-fake-check"]`);
+    if (fakeBtn) {
+        addSaveBtnListener.call(this, link, fakeBtn, message, data);
+    }
+
+    if (!isOwner) return;
 
     const setTargetsBtn = htmlQuery(msgContent, `[data-action="set-targets"]`);
     if (setTargetsBtn) {
@@ -90,29 +100,31 @@ async function renderCheckMessage(
 
     if (canRollSaves) {
         const rollSavesBtn = htmlQuery(msgContent, `[data-action="roll-saves"]`);
-
         if (rollSavesBtn) {
             addRollSavesListener.call(this, rollSavesBtn, message, data);
         }
     }
 
-    const fakeBtn = htmlQuery<HTMLButtonElement>(msgContent, `[data-action="roll-fake-check"]`);
-
-    if (fakeBtn) {
-        addSaveBtnListener.call(this, link, fakeBtn, message, data);
-    }
-
-    if (!data.hasTargets) return;
-
-    const rowsWrapper = createHTMLElement("div", {
-        classes: ["pf2e-toolbelt-target-targetRows"],
+    const mergeBtn = htmlQuery(msgContent, `[data-action="merge-to-damage"]`);
+    mergeBtn?.addEventListener("click", () => {
+        mergeToDamage.call(this, message, data);
     });
+}
 
-    for (const { row } of await createTargetsRows.call(this, message, data, false)) {
-        rowsWrapper.append(row);
+function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e, data: TargetsData) {
+    const messages = game.messages.contents;
+    const index = messages.findLastIndex((msg) => message === msg);
+    const damageMessage = messages[index + 1];
+
+    if (!damageMessage || !isDamageMessage(damageMessage) || this.getMessageSave(damageMessage)) {
+        return this.warning("merge.none");
     }
 
-    msgContent.append(rowsWrapper);
+    const source = R.pick(data.toJSON(), ["save", "saves", "targets"]);
+    this.setFlag(damageMessage, source);
+
+    // we clean up the check message as we are not gonna use it anymore
+    this.unsetFlag(message);
 }
 
 function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {

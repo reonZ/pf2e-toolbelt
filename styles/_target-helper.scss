@@ -10,7 +10,7 @@
                     flex: 1;
                     border-radius: 0 4px 4px 0;
 
-                    &:has(+ .pf2e-toolbelt-target-rollSaves) {
+                    &:has(+ button) {
                         border-radius: 0;
                     }
                 }
@@ -280,6 +280,23 @@
     .message-content .pf2e-toolbelt-target-targetRows:not(.pf2e-toolbelt-target-actionRows) {
         .target-row:first-child {
             margin-top: 0.4em;
+        }
+    }
+
+    &.pf2e-toolbelt-check {
+        .message-content .card-buttons .pf2e-toolbelt-target-buttons {
+            button[data-action="merge-to-damage"] {
+                display: none;
+                border-radius: 0;
+            }
+        }
+
+        &:has(+ .pf2e-toolbelt-damage) {
+            .message-content .card-buttons .pf2e-toolbelt-target-buttons {
+                button[data-action="merge-to-damage"] {
+                    display: block;
+                }
+            }
         }
     }
 }
