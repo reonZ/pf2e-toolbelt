@@ -284,15 +284,15 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 }
 
 type ToolSettings = {
+    checks: boolean;
     enabled: boolean;
     small: boolean;
     targets: boolean;
-    checks: boolean;
 };
 
 type UpdateMessageOptions = {
-    message: ChatMessagePF2e;
     applied?: MessageApplied;
+    message: ChatMessagePF2e;
     saves?: Record<string, SaveRollData>;
 };
 

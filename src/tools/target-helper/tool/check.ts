@@ -5,7 +5,6 @@ import {
     htmlQuery,
     parseInlineParams,
     R,
-    registerUpstreamHook,
     SAVE_TYPES,
     SaveType,
     splitListString,
