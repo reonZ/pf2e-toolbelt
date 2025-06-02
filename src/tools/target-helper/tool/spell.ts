@@ -13,6 +13,7 @@ import {
     addTargetsHeaders,
     createRollNPCSavesBtn,
     createSetTargetsBtn,
+    isMessageOwner,
     TargetHelperTool,
     TargetsData,
     TargetsDataSource,
@@ -50,9 +51,7 @@ async function renderSpellMessage(
 
     addTargetsHeaders.call(this, message, data, msgContent);
 
-    const isGM = game.user.isGM;
-    const isAuthor = message.isAuthor;
-    if (!isGM && !isAuthor) return;
+    if (!isMessageOwner(message)) return;
 
     const cardBtns = htmlQuery(msgContent, ".card-buttons");
     const saveBtn = htmlQuery<HTMLButtonElement>(cardBtns, `[data-action="spell-save"]`);

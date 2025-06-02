@@ -28,7 +28,7 @@ function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     const data = message && this.getTargetsFlagData(message);
     if (!data) return;
 
-    if (!game.user.isGM && !message.isAuthor) {
+    if (!isMessageOwner(message)) {
         this.warning("drop.unauth");
         return;
     }
@@ -122,6 +122,10 @@ async function getItem(
     return ((await getItemFromUuid(data.itemUUID)) ?? message.item) as ItemPF2e<ActorPF2e> | null;
 }
 
+function isMessageOwner(message: ChatMessagePF2e) {
+    return game.user.isGM || message.isAuthor;
+}
+
 type SaveDragData = SaveLinkData & {
     type: `${typeof MODULE.id}-check-roll`;
 };
@@ -143,5 +147,5 @@ type CheckLinkData = {
 
 type TargetsFlagData = FlagData<TargetsDataModel, ChatMessagePF2e>;
 
-export { getCurrentTargets, getItem, getSaveLinkData, onChatMessageDrop };
+export { getCurrentTargets, getItem, getSaveLinkData, isMessageOwner, onChatMessageDrop };
 export type { CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };

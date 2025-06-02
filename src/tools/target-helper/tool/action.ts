@@ -10,6 +10,7 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     getSaveLinkData,
+    isMessageOwner,
     onChatMessageDrop,
     TargetHelperTool,
     TargetsData,
@@ -59,9 +60,7 @@ async function renderActionMessage(
         ]);
     }
 
-    const isGM = game.user.isGM;
-    const isAuthor = message.isAuthor;
-    if (!isGM && !isAuthor) return;
+    if (!isMessageOwner(message)) return;
 
     html.addEventListener("drop", onChatMessageDrop.bind(this));
 

@@ -24,6 +24,7 @@ import {
     toggleHooksAndWrappers,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { isMessageOwner } from "tools/target-helper";
 import { MergeDataModel } from ".";
 
 class MergeDamageTool extends ModuleTool<ToolSettings> {
@@ -186,7 +187,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
     async #onRenderChatMessage(message: ChatMessagePF2e, html: HTMLElement) {
         const actor = message.actor;
-        if (!actor || (!game.user.isGM && !message.isAuthor) || !this.isDamageRoll(message)) return;
+        if (!actor || !isMessageOwner(message) || !this.isDamageRoll(message)) return;
 
         const targets = this.getMessageTargets(message);
         const injected = this.getFlag(message, "injected");

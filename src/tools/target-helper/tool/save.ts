@@ -14,7 +14,7 @@ import {
     TokenDocumentPF2e,
     waitDialog,
 } from "module-helpers";
-import { getItem, TargetHelperTool } from ".";
+import { getItem, isMessageOwner, TargetHelperTool } from ".";
 import { RerollType, TargetSaveSource, TargetsData } from "..";
 
 async function rollSaves(
@@ -100,7 +100,7 @@ async function rollSaves(
 
     await Promise.all(filteredTargetsRollsPromise);
 
-    if (user.isGM || message.isAuthor) {
+    if (isMessageOwner(message)) {
         data.update({ saves: updates });
         data.setFlag();
     } else {
@@ -247,7 +247,7 @@ async function rerollSave(
 
     const updates = { [target.id]: rollData };
 
-    if (game.user.isGM || message.isAuthor) {
+    if (isMessageOwner(message)) {
         data.update({ saves: updates });
         data.setFlag();
     } else {

@@ -20,6 +20,7 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
+    isMessageOwner,
     onChatMessageDrop,
     TargetHelperTool,
     TargetsFlagData,
@@ -72,12 +73,11 @@ async function renderDamageMessage(
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
 
-    const isGM = game.user.isGM;
-    const isAuthor = message.isAuthor;
+    const isOwner = isMessageOwner(message);
     const data = new TargetsData(flag);
     const hasTargets = data.hasTargets;
     const hasSplashTargets = data.hasSplashTargets;
-    if (!hasTargets && !hasSplashTargets && !isGM && !isAuthor) return;
+    if (!hasTargets && !hasSplashTargets && !isOwner) return;
 
     const damageRows = htmlQueryAll(msgContent, ".damage-application");
     const diceTotalElements = msgContent.querySelectorAll(".dice-result .dice-total");
@@ -103,7 +103,7 @@ async function renderDamageMessage(
         splashWrapper.append(toggleBtn);
     }
 
-    if (isGM || isAuthor) {
+    if (isOwner) {
         const setTargetsBtn = createSetTargetsBtn.call(this, data);
         btnWrapper.append(setTargetsBtn);
 
@@ -112,6 +112,7 @@ async function renderDamageMessage(
             splashWrapper.append(setSplashTargetBtn);
         }
 
+        html.classList.add("pf2e-toolbelt-damage");
         html.addEventListener("drop", onChatMessageDrop.bind(this));
     }
 
@@ -130,7 +131,7 @@ async function renderDamageMessage(
 
     const originActor = message.actor;
     const showResults =
-        isGM ||
+        game.user.isGM ||
         game.pf2e.settings.metagame.results ||
         !originActor ||
         originActor.isOwner ||
@@ -491,7 +492,7 @@ function onDamageApplied(
         }
     }
 
-    if (game.user.isGM || message.isAuthor) {
+    if (isMessageOwner(message)) {
         data.update({ applied });
         data.setFlag();
     } else {
