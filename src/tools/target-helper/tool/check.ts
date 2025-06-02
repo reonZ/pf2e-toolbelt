@@ -58,8 +58,6 @@ async function renderCheckMessage(
     const data = new TargetsData(flag);
     if (!data.hasSave) return;
 
-    html.classList.add("pf2e-toolbelt-check");
-
     const isOwner = isMessageOwner(message);
     const canRollSaves = data.canRollNPCSaves;
     const canObserve = canObserveActor(message.actor);
@@ -92,6 +90,8 @@ async function renderCheckMessage(
 
     if (!isOwner) return;
 
+    html.classList.add("pf2e-toolbelt-check");
+
     const setTargetsBtn = htmlQuery(msgContent, `[data-action="set-targets"]`);
     if (setTargetsBtn) {
         addSetTargetsListener.call(this, setTargetsBtn, data, "targets");
@@ -115,7 +115,12 @@ function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e, data: T
     const index = messages.findLastIndex((msg) => message === msg);
     const damageMessage = messages[index + 1];
 
-    if (!damageMessage || !isDamageMessage(damageMessage) || this.getMessageSave(damageMessage)) {
+    if (
+        !damageMessage ||
+        !isDamageMessage(damageMessage) ||
+        !isMessageOwner(message) ||
+        this.getMessageSave(damageMessage)
+    ) {
         return this.warning("merge.none");
     }
 
