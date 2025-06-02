@@ -17,6 +17,26 @@ import { RerollDetails, rerollSave, rollSaves, TargetHelperTool } from ".";
 import { TargetsData } from "..";
 import utils = foundry.utils;
 
+async function addTargetsHeaders(
+    this: TargetHelperTool,
+    message: ChatMessagePF2e,
+    data: TargetsData,
+    parent: HTMLElement,
+    classes: string[] = []
+) {
+    if (!data.hasTargets) return;
+
+    const rowsWrapper = createHTMLElement("div", {
+        classes: ["pf2e-toolbelt-target-targetRows", ...classes],
+    });
+
+    for (const { row } of await createTargetsRows.call(this, message, data, false)) {
+        rowsWrapper.append(row);
+    }
+
+    parent.append(rowsWrapper);
+}
+
 async function createTargetsRows(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
@@ -393,5 +413,5 @@ type TooltipData = {
 
 type TargetsType = "targets" | "splashTargets";
 
-export { createTargetsRows };
+export { addTargetsHeaders, createTargetsRows };
 export type { TargetsType };

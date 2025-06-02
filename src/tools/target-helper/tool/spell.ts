@@ -10,9 +10,9 @@ import {
 } from "module-helpers";
 import {
     addSaveBtnListener,
+    addTargetsHeaders,
     createRollNPCSavesBtn,
     createSetTargetsBtn,
-    createTargetsRows,
     TargetHelperTool,
     TargetsData,
     TargetsDataSource,
@@ -48,17 +48,7 @@ async function renderSpellMessage(
 
     const data = new TargetsData(flag);
 
-    if (data.hasTargets) {
-        const rowsWrapper = createHTMLElement("div", {
-            classes: ["pf2e-toolbelt-target-targetRows"],
-        });
-
-        for (const { row } of await createTargetsRows.call(this, message, data, false)) {
-            rowsWrapper.append(row);
-        }
-
-        msgContent.append(rowsWrapper);
-    }
+    addTargetsHeaders.call(this, message, data, msgContent);
 
     const isGM = game.user.isGM;
     const isAuthor = message.isAuthor;

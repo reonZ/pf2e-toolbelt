@@ -6,14 +6,14 @@ import {
     registerUpstreamHook,
 } from "module-helpers";
 import {
+    addTargetsHeaders,
     createRollNPCSavesBtn,
     createSetTargetsBtn,
-    createTargetsRows,
     getSaveLinkData,
     onChatMessageDrop,
-    TargetsDataSource,
     TargetHelperTool,
     TargetsData,
+    TargetsDataSource,
     TargetsFlagData,
 } from "..";
 
@@ -53,16 +53,10 @@ async function renderActionMessage(
     const data = new TargetsData(flag);
     const hasSave = data.hasSave;
 
-    if (hasSave && data.hasTargets) {
-        const rowsWrapper = createHTMLElement("div", {
-            classes: ["pf2e-toolbelt-target-targetRows", "pf2e-toolbelt-target-actionRows"],
-        });
-
-        for (const { row } of await createTargetsRows.call(this, message, data, false)) {
-            rowsWrapper.append(row);
-        }
-
-        msgContent.append(rowsWrapper);
+    if (hasSave) {
+        addTargetsHeaders.call(this, message, data, msgContent, [
+            "pf2e-toolbelt-target-actionRows",
+        ]);
     }
 
     const isGM = game.user.isGM;
