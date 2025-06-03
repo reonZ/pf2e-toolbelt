@@ -8,6 +8,7 @@ import {
     DegreeOfSuccess,
     eventToRollParams,
     extractNotes,
+    getActiveModule,
     R,
     RawModifier,
     RollNotePF2e,
@@ -16,6 +17,31 @@ import {
 } from "module-helpers";
 import { getItem, isMessageOwner, TargetHelperTool } from ".";
 import { RerollType, TargetSaveSource, TargetsData } from "..";
+
+function showGhostDiceOnPrivate() {
+    const dsn = getActiveModule("dice-so-nice");
+    return !!dsn && dsn.getSetting<"0" | "1" | "2">("showGhostDice") !== "0";
+}
+
+function roll3dDice(
+    roll: Rolled<CheckRoll>,
+    target: TokenDocumentPF2e,
+    isPrivate: boolean
+): Promise<boolean> | undefined {
+    if (!game.dice3d) return;
+
+    const speaker = ChatMessage.getSpeaker({ token: target });
+
+    if (!isPrivate && (target.hasPlayerOwner || !showGhostDiceOnPrivate())) {
+        return game.dice3d.showForRoll(roll, game.user, true, null, false, null, speaker);
+    }
+
+    const cloneRoll = Roll.fromTerms(roll.terms) as Rolled<CheckRoll> & { ghost: boolean };
+    cloneRoll.ghost = true;
+
+    game.dice3d.showForRoll(cloneRoll, game.user, true, null, true, null, speaker);
+    return game.dice3d.showForRoll(roll, game.user, false, null, false, null, speaker);
+}
 
 async function rollSaves(
     this: TargetHelperTool,
@@ -48,7 +74,7 @@ async function rollSaves(
                 const isPrivate =
                     msg.whisper.filter((userId) => game.users.get(userId)?.isGM).length > 0;
 
-                // await roll3dDice(roll, target, isPrivate, false);
+                await roll3dDice(roll, target, isPrivate);
 
                 const context = msg.getFlag("pf2e", "context") as CheckContextChatFlag;
                 const modifiers = msg.getFlag("pf2e", "modifiers") as RawModifier[];
@@ -179,7 +205,7 @@ async function rerollSave(
     );
 
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
-    // await roll3dDice(newRoll, target, targetSave.private, false);
+    await roll3dDice(newRoll, target, targetSave.private);
 
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, isHeroReroll, keep);
 
