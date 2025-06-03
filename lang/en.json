@@ -109,6 +109,13 @@
                     "hint": "Should movement history recording be prevented for you. This makes successive move actions in a same turn less confusing."
                 }
             },
+            "betterTemplate": {
+                "title": "Better Templates",
+                "target": {
+                    "name": "Auto Target",
+                    "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside it."
+                }
+            },
             "betterTrade": {
                 "title": "Better Trade",
                 "withContent": {
@@ -242,6 +249,18 @@
                 "label": "Macro",
                 "hint": "A macro that will be executed when this spell is cast",
                 "cancel": "<strong>{name}</strong> cast was cancelled by its macro."
+            }
+        },
+        "betterTemplate": {
+            "target": {
+                "all": "Both",
+                "allies": "Allies",
+                "dismiss": "Remove Template",
+                "enemies": "Enemies",
+                "neutral": "Include Neutral",
+                "self": "Include Self",
+                "title": "Template Helper",
+                "yes": "Target"
             }
         },
         "conditionManager": {

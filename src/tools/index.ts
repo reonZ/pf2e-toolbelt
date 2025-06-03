@@ -4,6 +4,7 @@ export * from "./arp";
 export * from "./better-effects-panel";
 export * from "./better-inventory";
 export * from "./better-movement";
+export * from "./better-template";
 export * from "./better-trade";
 export * from "./condition-manager";
 export * from "./droppeth";

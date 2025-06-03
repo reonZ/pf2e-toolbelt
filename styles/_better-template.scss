@@ -1,0 +1,49 @@
+.dialog.pf2e-toolbelt.betterTemplate-target {
+    .window-header {
+        flex: 1 2em;
+        --button-size: 12px;
+    }
+
+    .window-content {
+        padding: 0.1em 0.6em 0.5em;
+    }
+
+    .dialog-form {
+        gap: 0.3em;
+    }
+
+    .dialog-content {
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-columns: auto auto;
+        gap: 0 1em;
+        align-items: center;
+        font-size: 0.9em;
+
+        label {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+
+            input {
+                &[type="radio"] {
+                    --checkbox-size: 13px;
+
+                    margin-inline: 0.3em;
+                }
+
+                &[type="checkbox"] {
+                    --checkbox-size: 16px;
+                }
+            }
+        }
+    }
+
+    .form-footer {
+        button {
+            --button-size: 1.5rem;
+
+            padding: 0;
+        }
+    }
+}

@@ -39,27 +39,43 @@
     -   remove the `Send Message to Chat` setting
 -   `Merge Damage`:
     -   split the tool into 2 settings: `Merge Button` & `Inject Button`
+-   `Target Helper`:
+    -   lot of small style improvement/tweaks
+    -   add `Upgrade Checks Messages` setting (enabled)
+        -   this allow you to opt out of the upgraded version of simple save check links which was previously imposed on you by the module if the `Add Targets to Messages` setting was enabled
+    -   rework spell message workflow: targets now always show on spell messages that have a save and when the damage is rolled, all the save related data is transferred to the damage message
+        -   data is removed from the spell message once a damage is rolled
+    -   extend the action message workflow: on top of being able to drag a save onto an action message, the module will now also do the following:
+        -   if a single save link is found in the message content, the save will automatically be added to it as if you dragged it manually
+        -   if an action message currently has data from a **basic** save on it, clicking a damage link will automatically transfer all the data to the newly generated damage message
+        -   save data is removed from the action message when a damage is rolled from one of its links, which means you could do the drag-save + roll-damage process multiple times from a same action message if it was ever needed
+    -   extend check message workflow: if a damage message is created right after a save check message, you will be offered the option to transfer the check message data to the damage message following it
+        -   the save check message is reset to its regular form once transferred to a damage message
 -   `Underground`:
     -   make sure to refresh the canvas when disabling/enabling the feature
--   convert `Effects Panel` tools to `Better Effects Panel`
--   convert `No Bulk` tools to `Better Inventory`:
+-   convert `Effects Panel` tool to `Better Effects Panel`
+-   convert `No Bulk` tool to `Better Inventory`:
     -   settings have been reset to default values
--   add `Better Movement` tools:
+-   convert `Template Helper` tool to `Better Templates`:
+    -   remove the `Auto Dismiss` setting
+        -   it is now an option in the popup instead
+    -   clicking on either buttons of the popup will respect the `Remove Template` option while closing the popup via the `x` button will do nothing
+-   add `Better Movement` tool:
     -   move the `Teleport Tokens` in it while combining both its settings into a single one
     -   add `No History Record` setting
         -   prevents movement history recording on your client
--   add `Better Trade` tools:
+-   add `Better Trade` tool:
     -   move the `With Container Content` feature there and reset its setting
--   add `Resource Tracker` tools:
+-   add `Resource Tracker` tool:
     -   a small widget to track arbitrary resources that can be toggled via a control button on the left UI
     -   resources can be shown to everybody, though only the owner can update them
     -   resources created by GMs are shared among all GMs
     -   resources can have a timeout option linked to the world clock to decrement their value automatically over time
--   remove `Hide Damage` tools
--   remove `Spells Summary` tools
--   remove `Stances` tools
--   remove `De-targeting` tools
--   remove `Use Button` tools
+-   remove `Hide Damage` tool
+-   remove `Spells Summary` tool
+-   remove `Stances` tool
+-   remove `De-targeting` tool
+-   remove `Use Button` tool
 
 # 2.35.1
 
