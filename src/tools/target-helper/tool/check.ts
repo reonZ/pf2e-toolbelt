@@ -81,7 +81,8 @@ async function renderCheckMessage(
     flavor?.remove();
     msgContent.prepend(link);
     link.classList.add("hidden");
-    addTargetsHeaders.call(this, message, data, msgContent);
+
+    await addTargetsHeaders.call(this, message, data, msgContent);
 
     const fakeBtn = htmlQuery<HTMLButtonElement>(msgContent, `[data-action="roll-fake-check"]`);
     if (fakeBtn) {

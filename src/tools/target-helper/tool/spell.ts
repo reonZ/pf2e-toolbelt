@@ -49,7 +49,7 @@ async function renderSpellMessage(
 
     const data = new TargetsData(flag);
 
-    addTargetsHeaders.call(this, message, data, msgContent);
+    await addTargetsHeaders.call(this, message, data, msgContent);
 
     if (!isMessageOwner(message)) return;
 

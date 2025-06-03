@@ -29,8 +29,8 @@ import {
 import {
     RerollType,
     SaveDragData,
-    TargetsDataSource,
     TargetsDataModel,
+    TargetsDataSource,
     TargetsSaveSource,
 } from "..";
 import utils = foundry.utils;

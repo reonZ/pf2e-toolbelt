@@ -55,7 +55,7 @@ async function renderActionMessage(
     const hasSave = data.hasSave;
 
     if (hasSave) {
-        addTargetsHeaders.call(this, message, data, msgContent, [
+        await addTargetsHeaders.call(this, message, data, msgContent, [
             "pf2e-toolbelt-target-actionRows",
         ]);
     }
