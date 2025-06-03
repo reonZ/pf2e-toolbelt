@@ -1,6 +1,6 @@
-#
+# 3.0.0
 
--   this is a foundry v13 release
+-   this is a foundry `13.344` and system `7.1.0` release
 -   all `client` settings have been converted into `user` settings and have been reset to their default value
 -   `Actionable` was revamped:
     -   `Action Macro`
@@ -43,6 +43,8 @@
     -   lot of small style improvement/tweaks
     -   add `Upgrade Checks Messages` setting (enabled)
         -   this allow you to opt out of the upgraded version of simple save check links which was previously imposed on you by the module if the `Add Targets to Messages` setting was enabled
+        -   is now able to retrieve the origin item if the link was sent to chat from an actor sheet
+        -   traits are now always shown to the players
     -   rework spell message workflow: targets now always show on spell messages that have a save and when the damage is rolled, all the save related data is transferred to the damage message
         -   data is removed from the spell message once a damage is rolled
     -   extend the action message workflow: on top of being able to drag a save onto an action message, the module will now also do the following:
@@ -78,7 +80,7 @@
 -   remove `Spells Summary` tool
 -   remove `Stances` tool
 -   remove `De-targeting` tool
--   the `Better Merchat`, `Hero Actions`, `Identify`, `Roll Tracker` and `Share Data` tools will be re-implemented at a later date
+-   the `Better Merchant`, `Hero Actions`, `Identify`, `Roll Tracker` and `Share Data` tools will be re-implemented at a later date
 
 # 2.35.1
 

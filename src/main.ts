@@ -46,7 +46,7 @@ const TOOLS: ModuleTool[] = [
 ];
 
 MODULE.register("pf2e-toolbelt");
-MODULE.enableDebugMode();
+// MODULE.enableDebugMode();
 
 for (const tool of TOOLS) {
     MODULE.apiExpose({
