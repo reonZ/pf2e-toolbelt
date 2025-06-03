@@ -130,8 +130,4 @@ function getSpellData(message: ChatMessagePF2e): {
     return R.isNumber(dc) ? { dc, save, spell } : null;
 }
 
-function isSpellMessage(message: ChatMessagePF2e): boolean {
-    return message.getFlag("pf2e", "context.type") === "spell-cast";
-}
-
-export { isSpellMessage, prepareSpellMessage, renderSpellMessage };
+export { prepareSpellMessage, renderSpellMessage };
