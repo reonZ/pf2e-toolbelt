@@ -61,7 +61,7 @@ async function renderCheckMessage(
     const isOwner = isMessageOwner(message);
     const canRollSaves = data.canRollNPCSaves;
     const canObserve = canObserveActor(message.actor);
-    const item = canObserve ? await getItem(message, data) : null;
+    const item = await getItem(message, data);
 
     const flavor = htmlQuery(html, ".message-header .flavor-text");
     const saveLabel = firstElementWithText(msgContent.lastElementChild);
@@ -69,7 +69,7 @@ async function renderCheckMessage(
         firstElementWithText(flavor) ?? firstElementWithText(msgContent.firstElementChild);
 
     msgContent.innerHTML = await this.render("check-card", {
-        item,
+        item: canObserve ? item : null,
         isOwner,
         canRollSaves,
         speaker: message.speaker,
