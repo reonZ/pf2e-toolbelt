@@ -1,5 +1,6 @@
 export * from "./_shared";
 export * from "./actionable";
+export * from "./anonymous";
 export * from "./arp";
 export * from "./better-effects-panel";
 export * from "./better-inventory";

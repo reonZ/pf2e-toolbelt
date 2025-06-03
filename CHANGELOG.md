@@ -60,6 +60,9 @@
     -   remove the `Auto Dismiss` setting
         -   it is now an option in the popup instead
     -   clicking on either buttons of the popup will respect the `Remove Template` option while closing the popup via the `x` button will do nothing
+-   add `Anonymous` tool:
+    -   the `Anonymize NPC spells` allows the GM to cast spells from NPCs while not revealing their name or description to the players
+        -   the GM can reveal the full spell at any time using the `Reveal spell to players` option in the message context menu
 -   add `Better Movement` tool:
     -   move the `Teleport Tokens` in it while combining both its settings into a single one
     -   add `No History Record` setting
@@ -75,7 +78,7 @@
 -   remove `Spells Summary` tool
 -   remove `Stances` tool
 -   remove `De-targeting` tool
--   remove `Use Button` tool
+-   the `Better Merchat`, `Hero Actions`, `Identify`, `Roll Tracker` and `Share Data` tools will be re-implemented at a later date
 
 # 2.35.1
 

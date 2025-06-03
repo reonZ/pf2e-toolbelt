@@ -56,6 +56,13 @@
                     "hint": "Will add an extra 'use' button for consumables and generate a custom message when used."
                 }
             },
+            "anonymous": {
+                "title": "Anonymous",
+                "spell": {
+                    "name": "Anonymize NPC spells",
+                    "hint": "Spells casted by a non-player owned actor will be anonymized for players."
+                }
+            },
             "arp": {
                 "title": "Automatic Rune Progression",
                 "enabled": {
@@ -249,6 +256,12 @@
                 "label": "Macro",
                 "hint": "A macro that will be executed when this spell is cast",
                 "cancel": "<strong>{name}</strong> cast was cancelled by its macro."
+            }
+        },
+        "anonymous": {
+            "spell": {
+                "header": "Is casting a spell..",
+                "context": "Reveal spell to Players"
             }
         },
         "betterTemplate": {

@@ -2,11 +2,16 @@ import {
     ActorPF2e,
     ActorTransferItemArgs,
     ArmorPF2e,
+    ChatMessagePF2e,
     createSharedWrapper,
     WeaponPF2e,
 } from "module-helpers";
 
-const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, () => void>(
+const sharedWeaponPrepareBaseData = createSharedWrapper<
+    WeaponPF2e<ActorPF2e>,
+    () => void,
+    () => void
+>(
     "WRAPPER",
     "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData",
     function (registered, wrapped) {
@@ -18,7 +23,11 @@ const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, (
     }
 );
 
-const sharedArmorPrepareBaseData = createSharedWrapper<ArmorPF2e<ActorPF2e>, () => void>(
+const sharedArmorPrepareBaseData = createSharedWrapper<
+    ArmorPF2e<ActorPF2e>,
+    () => void,
+    () => void
+>(
     "WRAPPER",
     "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData",
     function (registered, wrapped) {
@@ -32,13 +41,14 @@ const sharedArmorPrepareBaseData = createSharedWrapper<ArmorPF2e<ActorPF2e>, () 
 
 const sharedActorTransferItemToActor = createSharedWrapper<
     ActorPF2e,
+    (...args: ActorTransferItemArgs) => boolean,
     (...args: ActorTransferItemArgs) => boolean
 >(
     "MIXED",
     "CONFIG.Actor.documentClass.prototype.transferItemToActor",
-    function (registered, wrapped) {
+    function (registered, wrapped, args) {
         for (const listener of registered) {
-            const cancel = listener();
+            const cancel = listener(...args);
             // we processed the item and should stop there
             if (cancel) return;
         }
@@ -47,4 +57,19 @@ const sharedActorTransferItemToActor = createSharedWrapper<
     }
 );
 
-export { sharedActorTransferItemToActor, sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData };
+const sharedMessageRenderHTML = createSharedWrapper<
+    ChatMessagePF2e,
+    (...args: any[]) => Promise<HTMLElement>,
+    (html: HTMLElement) => Promise<void>
+>("WRAPPER", "ChatMessage.prototype.renderHTML", async function (registered, wrapped, args) {
+    const html = await wrapped();
+    await Promise.all(registered.map((listener) => listener(html)));
+    return html;
+});
+
+export {
+    sharedActorTransferItemToActor,
+    sharedArmorPrepareBaseData,
+    sharedMessageRenderHTML,
+    sharedWeaponPrepareBaseData,
+};

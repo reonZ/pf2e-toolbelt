@@ -1,0 +1,10 @@
+li.chat-message {
+    &.pf2e-toolbelt-anonymous {
+        .card-header,
+        .card-content,
+        footer {
+            background: var(--visibility-gm-bg);
+            outline: 1px dotted rgba(75, 74, 68, 0.5);
+        }
+    }
+}

@@ -10,6 +10,7 @@ import {
     TextEditorPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { sharedMessageRenderHTML } from "tools";
 import {
     getCurrentTargets,
     getSaveLinkData,
@@ -51,12 +52,9 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         { context: this }
     );
 
-    #messageRenderHTMLWrapper = createToggleableWrapper(
-        "WRAPPER",
-        "ChatMessage.prototype.renderHTML",
-        this.#messageRenderHTML,
-        { context: this }
-    );
+    #messageRenderHTMLWrapper = sharedMessageRenderHTML.register(this.#messageRenderHTML, {
+        context: this,
+    });
 
     #preCreateChatMessageHook = createHook(
         "preCreateChatMessage",
@@ -260,14 +258,9 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         this.updateSourceFlag(message, updates);
     }
 
-    async #messageRenderHTML(
-        message: ChatMessagePF2e,
-        wrapped: libWrapper.RegisterCallback,
-        ...args: any[]
-    ): Promise<HTMLElement> {
-        const html = (await wrapped(...args)) as HTMLElement;
+    async #messageRenderHTML(message: ChatMessagePF2e, html: HTMLElement) {
         const flag = this.getTargetsFlagData(message);
-        if (!flag) return html;
+        if (!flag) return;
 
         if (flag.type === "action") {
             await renderActionMessage.call(this, message, html, flag);
@@ -278,8 +271,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         } else if (flag.type === "spell") {
             await renderSpellMessage.call(this, message, html, flag);
         }
-
-        return html;
     }
 }
 
