@@ -1,3 +1,416 @@
 {
-    "pf2e-toolbelt": {}
+    "LEVIKTIMES": {
+        "gmOnly": "Tylko MG",
+        "reloadRequired": "Wymaga przeładowania",
+        "emiting": {
+            "label": "Wysyłanie",
+            "noGm": "MG musi być online, aby zrealizować tę prośbę."
+        }
+    },
+    "pf2e-toolbelt": {
+        "keybindings": {
+            "conditionManager": {
+                "manage": {
+                    "name": "Zarządzanie stanem",
+                    "hint": "Klawisz przytrzymywany podczas porzucania stanu w celu zarządzania jego czasem trwania."
+                }
+            },
+            "betterMovement": {
+                "teleport": {
+                    "name": "Teleport tokenów",
+                    "hint": "Klawisz przytrzymany podczas klikania sceny teleportuje wszystkie wybrane tokeny."
+                },
+                "unselect": {
+                    "name": "Teleport tokenów (Odznacz)",
+                    "hint": "Przytrzymanie klawisza podczas klikania sceny powoduje teleportację wszystkich wybranych tokenów. Usunięcie zaznaczenia tokenów po naciśnięciu klawisza daje nieograniczony widok na całą scenę."
+                }
+            },
+            "droppeth": {
+                "droppeth": {
+                    "name": "Upuszczanie modyfikatora",
+                    "hint": "Przytrzymywany klawisz podczas upuszczania przedmiotu na ziemię."
+                }
+            }
+        },
+        "settings": {
+            "actionable": {
+                "title": "Wykonalne Akcje",
+                "action": {
+                    "name": "Makro akcji",
+                    "hint": "Dodaje możliwość powiązania makra z akcjami/atutami."
+                },
+                "apply": {
+                    "name": "Automatyczna aplikacja efektu",
+                    "hint": "Przycisk użycia dla efektu nakładanego na siebie spowoduje automatyczne nałożenie efektu."
+                },
+                "item": {
+                    "name": "Efekt/Makro Przedmiotu",
+                    "hint": "Dodaje możliwość powiązania samodzielnie zastosowanego efektu lub makra z wyposażeniem i przedmiotami zużywalnymi."
+                },
+                "spell": {
+                    "name": "Efekt/Makro Zaklęcia",
+                    "hint": "Dodaje możliwość powiązania samodzielnie zastosowanego efektu lub makra z zaklęciami."
+                },
+                "use": {
+                    "name": "Użyj przedmioty zużywalne",
+                    "hint": "Zostanie dodany dodatkowy przycisk „użyj” dla przedmiotów zużywalnych i wygeneruje komunikat po ich użyciu."
+                }
+            },
+            "anonymous": {
+                "title": "Anonimowy",
+                "spell": {
+                    "name": "Ukryj zaklęcia BN",
+                    "hint": "Zaklęcia rzucane przez postacie niebędące własnością graczy będą dla graczy ukryte."
+                }
+            },
+            "arp": {
+                "title": "Automatyczna Progresja Run",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Zastosuj w swoim świecie wariant Automatycznego Postępu Run."
+                },
+                "force": {
+                    "name": "Wymuś aktualizację",
+                    "hint": "Gdy opcja ta jest włączona, runy będą zawsze aktualizowane w oparciu o poziom aktora. Gdy opcja ta jest wyłączona, aktualizowane będą tylko te runy, których wartość jest obecnie niższa niż powinna być dla danego poziomu."
+                },
+                "price": {
+                    "name": "Brak ceny run",
+                    "hint": "Podstawowe ceny run są odejmowane od ceny broni."
+                },
+                "shield": {
+                    "name": "Runa tarczy",
+                    "hint": "Dodaje również runy wzmacniające do tarcz."
+                }
+            },
+            "betterEffectsPanel": {
+                "title": "Lepszy Panel Efektów",
+                "remove": {
+                    "name": "Skrót Usuń efekt",
+                    "hint": "Użycie kombinacji [Shift + kliknięcie prawym przyciskiem myszy] na ikonach efektów w panelu efektów natychmiast usunie wszystkie ich ładunki/liczniki/znaczniki."
+                }
+            },
+            "betterInventory": {
+                "title": "Lepszy Ekwipunek",
+                "coins": {
+                    "name": "Monety bez ciężaru",
+                    "hint": "Monety nie mają wagi w ekwipunku."
+                },
+                "dropped": {
+                    "name": "Bez Masy upuszczonych przedmiotów",
+                    "hint": "Upuszczony sprzęt w ekwipunku aktora nie będzie uwzględniany przy obliczaniu wartości obciążenia."
+                }
+            },
+            "betterMovement": {
+                "title": "Lepszy Ruch",
+                "teleport": {
+                    "name": "Teleport tokenów",
+                    "hint": "Kliknięcie na planszy przy jednoczesnym przytrzymaniu zdefiniowanego powiązanego klawisza spowoduje natychmiastowe teleportowanie wybranych tokenów do lokalizacji bez konieczności podróżowania.",
+                    "choices": {
+                        "disabled": "Wyłączone",
+                        "enabled": "Włączone",
+                        "select": "Ponowny wybór tokenów"
+                    }
+                },
+                "history": {
+                    "name": "Brak historii",
+                    "hint": "Czy należy zablokować rejestrowanie historii ruchów? Dzięki temu kolejne ruchy wykonane w tej samej turze będą mniej mylące."
+                }
+            },
+            "betterTemplate": {
+                "title": "Lepsze Szablony",
+                "target": {
+                    "name": "Auto celowanie",
+                    "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
+                }
+            },
+            "betterTrade": {
+                "title": "Lepsza Wymiana",
+                "withContent": {
+                    "name": "Z zawartością pojemnika",
+                    "hint": "Kiedy pojemnik jest przenoszony z jednego aktora do drugiego, jego zawartość powinna być przenoszona razem z nim."
+                }
+            },
+            "conditionManager": {
+                "title": "Menedżer Stanów",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Przeciągnij stan, przytrzymując zdefiniowane powiązanie klawiszy, aby otworzyć menedżera stanów, umożliwiając ustawienie jego czasu trwania."
+                }
+            },
+            "droppeth": {
+                "title": "Upuszczanie",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Umożliwia użytkownikom upuszczanie elementów na płótnie poprzez przytrzymanie przypisanego klawisza."
+                },
+                "light": {
+                    "name": "Źródło światła",
+                    "hint": "Czy upuszczony przedmiot powinien emitować światło. Będzie to miało miejsce tylko wtedy, gdy w aktorze łupów znajduje się pojedynczy przedmiot."
+                }
+            },
+            "mergeDamage": {
+                "title": "Złączanie Obrażeń",
+                "merge": {
+                    "name": "Przycisk złączania",
+                    "hint": "Dodaje przycisk do komunikatów o obrażeniach, umożliwiający połączenie ich z innymi komunikatami o obrażeniach."
+                },
+                "inject": {
+                    "name": "Przycisk wstrzyknięcia",
+                    "hint": "Dodaje przycisk do komunikatów o obrażeniach, umożliwiający wstawienie ich do poprzedniego komunikatu o obrażeniach."
+                }
+            },
+            "giveth": {
+                "title": "Przekazywanie",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Czy świat powinien umożliwiać graczom przekazywanie przedmiotów z ekwipunku innym graczom."
+                },
+                "effect": {
+                    "name": "Uwzględnienie efektów/stanów",
+                    "hint": "Czy gracze powinni mieć również możliwość zrzucania efektów i stanów na aktorów, których nie posiadają.",
+                    "choices": {
+                        "disabled": "Wyłączone",
+                        "ally": "Tylko sojusznicy",
+                        "all": "Wszyscy aktorzy"
+                    }
+                }
+            },
+            "resourceTracker": {
+                "title": "Śledzenie Zasobów",
+                "offline": {
+                    "name": "Pokaż zasoby graczy offline",
+                    "hint": "Wyświetlaj również udostępnione zasoby od użytkowników offline."
+                },
+                "show": {
+                    "name": "Wyświetlacz śledzenia zasobów",
+                    "hint": "Czy widget śledzenia zasobów powinien być wyświetlany w interfejsie? Można go włączyć/wyłączyć za pomocą elementów sterujących po lewej stronie interfejsu użytkownika."
+                }
+            },
+            "targetHelper": {
+                "title": "Pomocnik Celowania",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Włączono funkcję \"Pomocnik celowania\" na twoim świecie."
+                },
+                "small": {
+                    "name": "Małe przyciski obrażeń",
+                    "hint": "Zmniejsz rozmiar przycisków obrażeń dla dodatkowych celów."
+                },
+                "targets": {
+                    "name": "Dodawanie celów do wiadomości",
+                    "hint": "Doda dodatkowe cele do wiadomości na czacie, w których można zadawać obrażenia i rzucać rzuty obronne."
+                },
+                "checks": {
+                    "name": "Wiadomości dotyczące testów",
+                    "hint": ""
+                }
+            },
+            "underground": {
+                "title": "Pod Ziemią",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Pozwoli tokenom z ujemną wysokością pozostać widocznymi na planszy."
+                },
+                "mode": {
+                    "name": "Zastosuj filtr",
+                    "hint": "Jakiego typu filtr należy zastosować do tokenów o wysokości poniżej 0.",
+                    "choices": {
+                        "normal": "Brak filtra",
+                        "greyscale": "Filtr skali szarości",
+                        "sepia": "Filtr sepii"
+                    }
+                },
+                "contrast": {
+                    "name": "Kontrast",
+                    "hint": "Wartość kontrastu, gdy token ma ujemną wysokość."
+                },
+                "alpha": {
+                    "name": "Przezroczystość",
+                    "hint": "Wartość przezroczystości, gdy token ma ujemną wysokość."
+                }
+            },
+            "unided": {
+                "title": "Ustawienie Niezidentyfikowanego Obrazu",
+                "create": {
+                    "name": "Podczas tworzenia przedmiotu",
+                    "hint": "Automatycznie ustawia niezidentyfikowany obraz przedmiotów tak, aby był taki sam jak zwykły obraz, gdy przedmiot jest tworzony/importowany."
+                },
+                "update": {
+                    "name": "Podczas aktualizacji przedmiotu",
+                    "hint": "Automatycznie aktualizuj Niezidentyfikowany obraz po zaktualizowaniu zwykłego obrazu przedmiotu."
+                }
+            }
+        },
+        "actionable": {
+            "action": {
+                "label": "Samodzielnie nakładany Efekt / Makro",
+                "hint": "Pojedynczy efekt, który zostanie zastosowany do aktora używającego tej akcji lub makra, które zostanie wykonane po użyciu tej akcji.",
+                "cancel": "Akcja <strong>{name}</strong> została anulowana przez makro."
+            },
+            "item": {
+                "label": "Makro",
+                "hint": "Makro, które zostanie wykonane po użyciu tego przedmiotu.",
+                "cancel": "Użycie <strong>{name}</strong> zostało anulowane przez makro."
+            },
+            "spell": {
+                "label": "Makro",
+                "hint": "Makro, które zostanie wykonane po rzuceniu tego zaklęcia.",
+                "cancel": "Rzucenie zaklęcia <strong>{name}</strong> zostało anulowane przez makro."
+            }
+        },
+        "anonymous": {
+            "spell": {
+                "header": "Rzuca zaklęcie...",
+                "context": "Ujawnij zaklęcie graczom"
+            }
+        },
+        "betterTemplate": {
+            "target": {
+                "all": "Oba",
+                "allies": "Sojusznicy",
+                "dismiss": "Usuń szablon",
+                "enemies": "Wrogowie",
+                "neutral": "Uwzględnij neutralne",
+                "self": "Uwzględnij siebie",
+                "title": "Pomocnik Szablonów",
+                "yes": "Cel"
+            }
+        },
+        "conditionManager": {
+            "manager": {
+                "title": "Menedżer Stanów - {name}",
+                "add": "Utwórz",
+                "cancel": "Anuluj",
+                "origin": "Aktor źródłowy",
+                "label": "Etykieta",
+                "anonymous": "Anonimowy"
+            }
+        },
+        "droppeth": {
+            "dialog": {
+                "title": "Upuszczanie Przedmiotu",
+                "prompt": "Ile przedmiotów chcesz upuścić?"
+            },
+            "error": {
+                "out-of-bounds": "Nie można utworzyć tokenu upuszczanego przedmiotu w podanej lokalizacji.",
+                "unknown": "Wystąpił błąd podczas próby upuszczenia wybranych przedmiotów.",
+                "no-scene": "Nie ma sceny, na którą można by to upuścić."
+            },
+            "message": {
+                "subtitle": "Upuszczanie Przedmiotu",
+                "content": {
+                    "item": "Upuszczono {quantity} × {item} na ziemię przez {source}.",
+                    "container": "Upuszczono {item} i całą jego zawartość przez {source}."
+                }
+            }
+        },
+        "giveth": {
+            "error": "Wystąpił błąd podczas przetwarzania żądania <strong>Przekazania</strong>.",
+            "dialog": {
+                "title": "Przekaż Przedmiot",
+                "prompt": "Ile przedmiotów chcesz przekazać?"
+            },
+            "message": {
+                "subtitle": "Przekaż Przedmiot",
+                "content": {
+                    "item": "{source} przekazuje {quantity} × {item} do {target}.",
+                    "container": "{source} przekazuje {item} i całą jego zawartość do {target}."
+                }
+            }
+        },
+        "mergeDamage": {
+            "buttons": {
+                "split": "Powrót do oryginalnych wiadomości",
+                "merge": "Scal z poprzednią wiadomością o obrażeniach",
+                "inject": "Wstaw obrażenia do poprzedniej wiadomości"
+            },
+            "injected": "Obrażenia zostały wstawione do tej wiadomości",
+            "noMatch": "Nie znaleziono innego pasującego komunikatu o obrażeniach."
+        },
+        "resourceTracker": {
+            "header": {
+                "add": "Dodaj nowy zasób"
+            },
+            "resource": {
+                "title": {
+                    "create": "Utwórz Nowy Zasób",
+                    "edit": "Edytuj Zasób"
+                },
+                "name": {
+                    "label": "Nazwa zasobu",
+                    "default": "Nowy zasób"
+                },
+                "value": {
+                    "label": "Wartość",
+                    "min": "Wartość minimalna",
+                    "max": "Wartość maksymalna",
+                    "current": "Bieżąca wartość"
+                },
+                "steps": {
+                    "label": "Kliknij stopnie",
+                    "step1": "[Kliknij]",
+                    "step2": "[Shift-Kliknięcie]",
+                    "step3": "[Ctrl-Kliknięcie]"
+                },
+                "timeout": {
+                    "label": "Limit czasu (sekundy)",
+                    "tooltip": "Czas upłynął w Twoim świecie, zanim wartość zasobów została zmniejszona o 1."
+                },
+                "edit": "[Prawy przycisk myszy] Edytuj zasób",
+                "delete": "Usunąć zasób?",
+                "shared": "Widoczny dla innych?",
+                "yes": {
+                    "create": "Utwórz",
+                    "edit": "Edytuj"
+                },
+                "no": "Anuluj",
+                "increase": "{click} zwiększa o {value}",
+                "decrease": "{click} zmniejsza o {value}"
+            }
+        },
+        "targetHelper": {
+            "check-card": {
+                "merge": "Połącz z następującym komunikatem o obrażeniach"
+            },
+            "damage": {
+                "toggle": "Przełącz oryginalne przyciski obrażeń"
+            },
+            "drop": {
+                "added": "Pomyślnie dodano rzut obronny do wiadomości.",
+                "already": "Ta wiadomość ma już powiązany rzut obronny.",
+                "unauth": "Możesz to zrobić tylko w wiadomościach, których jesteś autorem."
+            },
+            "header": {
+                "hidden": "Ukryte przed graczami",
+                "noSave": "Ten aktor nie może rzucać testów {save}",
+                "select": "Wybierz cel<br>[Dwukrotne kliknięcie] Otwórz kartę"
+            },
+            "merge": {
+                "none": "Nie znaleziono odpowiedniego komunikatu o obrażeniach, który można by połączyć."
+            },
+            "reroll": {
+                "title": "Przerzuć ponowny test rzutu obronnego",
+                "noPoints": "Potrzebujesz co najmniej 1 Punktu Bohaterstwa, aby wykonać przerzut.",
+                "yes": "Ponowny rzut",
+                "no": "Anuluj",
+                "keeley": "Niższy przerzut"
+            },
+            "rollSaves": "Rzuć rzuty obronne BN-ów",
+            "setTargets": {
+                "splashTargets": "Wyznacz cele Rozprysku",
+                "targets": "Wyznacz cele"
+            },
+            "tooltip": {
+                "adjustment": "Dostosowanie: {value}",
+                "dcWithValue": "ST {dc}",
+                "reroll": "Może przerzucić rzut obronny",
+                "result": {
+                    "format": "Wynik: {result}",
+                    "withOffset": "{success} przez {offset}",
+                    "withoutOffset": "{success}"
+                }
+            },
+            "unnamed": "Bez nazwy"
+        }
+    }
 }
