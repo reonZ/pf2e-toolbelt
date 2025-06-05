@@ -1,0 +1,415 @@
+{
+    "pf2e-toolbelt": {
+        "settings": {
+            "actionable": {
+                "item": {
+                    "hint": "为装备或消耗品新增添加应用于自身效果或宏的设置栏。",
+                    "name": "物品效果/宏"
+                },
+                "use": {
+                    "hint": "给消耗品添加一个额外的“使用”键，并在使用后发送对应信息。",
+                    "name": "使用消耗品"
+                },
+                "action": {
+                    "hint": "为动作/专长新增添加宏的设置栏。",
+                    "name": "动作宏"
+                },
+                "apply": {
+                    "name": "自动应用于自身",
+                    "hint": "自应用效果的使用键会自动将效应应用。"
+                },
+                "title": "动作项",
+                "spell": {
+                    "name": "法术效果/宏",
+                    "hint": "为法术新增添加应用于自身效果或宏的设置栏。"
+                }
+            },
+            "arp": {
+                "enabled": {
+                    "hint": "需要你的世界开启自动符文升级变体（在核心系统设置）。",
+                    "name": "启用"
+                },
+                "title": "自动符文升级",
+                "force": {
+                    "name": "强制更新",
+                    "hint": "当启用此项，符文将始终基于角色等级更新。禁用时，只有低于当前等级应有值的符文才会被升级。"
+                },
+                "price": {
+                    "name": "忽略符文价格",
+                    "hint": "是否在武器价格中忽略基础符文价格。"
+                },
+                "shield": {
+                    "name": "盾牌符文",
+                    "hint": "是否自动给盾牌添加强固符文。"
+                }
+            },
+            "betterInventory": {
+                "coins": {
+                    "hint": "货币重量不被计入负载。",
+                    "name": "无重量货币"
+                },
+                "title": "更轻便的库存",
+                "dropped": {
+                    "name": "丢弃物忽略负载",
+                    "hint": "一名角色丢弃的装备不会纳入负载值计算。"
+                }
+            },
+            "betterMovement": {
+                "teleport": {
+                    "hint": "按住已设置的快捷键并点击场景，所选token无需移动立即传送至指定位置。",
+                    "name": "传送Token",
+                    "choices": {
+                        "disabled": "关闭",
+                        "enabled": "启用",
+                        "select": "重选Token"
+                    }
+                },
+                "title": "更便捷的移动",
+                "history": {
+                    "name": "禁止记录",
+                    "hint": "是否禁止记录你的移动历史。这会使同一回合内的连续移动操作不那么混乱。"
+                }
+            },
+            "anonymous": {
+                "title": "匿名化设置",
+                "spell": {
+                    "name": "匿名化NPC法术",
+                    "hint": "由非玩家所有的角色释放的法术会对玩家匿名化。"
+                }
+            },
+            "conditionManager": {
+                "enabled": {
+                    "name": "启用",
+                    "hint": "拖拽状态时按住设定好的快捷键，即可以打开状态管理栏设置其持续时间。"
+                },
+                "title": "状态管理器"
+            },
+            "betterEffectsPanel": {
+                "remove": {
+                    "name": "效果移除快捷键",
+                    "hint": "使用 [Shift + 鼠标右键] 点击效果图标，将无视所有充能/计数/徽标，直接移除该效果。"
+                },
+                "title": "更高效的效果面板"
+            },
+            "betterTemplate": {
+                "title": "更方便的测量板",
+                "target": {
+                    "name": "自动选择目标",
+                    "hint": "放置测量板后，将显示是否选择测量板内指示物为目标的对话框。"
+                }
+            },
+            "betterTrade": {
+                "withContent": {
+                    "name": "同步容器内容物",
+                    "hint": "当容器从一名角色转移至另一名角色身上时，是否同步转移其内容物。"
+                },
+                "title": "更便利的交易"
+            },
+            "droppeth": {
+                "title": "丢弃物品",
+                "enabled": {
+                    "hint": "允许用户按住指定快捷键以在场景中丢弃物品。",
+                    "name": "启用"
+                },
+                "light": {
+                    "name": "光源",
+                    "hint": "丢弃的物品会发光。仅在战利品角色中存在物品时才会发光。"
+                }
+            },
+            "mergeDamage": {
+                "title": "合并伤害",
+                "merge": {
+                    "name": "合并按钮",
+                    "hint": "为伤害信息添加一个按钮，允许它们与其他伤害信息合并数值。"
+                },
+                "inject": {
+                    "name": "注入按钮",
+                    "hint": "在伤害信息中添加一个按钮，允许它们被注入到上一个伤害信息中。"
+                }
+            },
+            "giveth": {
+                "enabled": {
+                    "name": "启用",
+                    "hint": "你的世界是否允许玩家操控的角色将物品给予其他玩家操控的角色。"
+                },
+                "effect": {
+                    "choices": {
+                        "ally": "仅限盟友",
+                        "disabled": "关闭",
+                        "all": "所有角色"
+                    },
+                    "name": "包括效应/状态",
+                    "hint": "玩家是否也可以将效果或状态拖给其他玩家操控的角色。"
+                },
+                "title": "交易物品"
+            },
+            "resourceTracker": {
+                "title": "资源跟踪器",
+                "offline": {
+                    "name": "显示离线资源",
+                    "hint": "显示来自离线用户的共享资源。"
+                },
+                "show": {
+                    "hint": "如果资源跟踪器部件显示在您的界面中。可以通过左侧UI上的控件切换开/关。",
+                    "name": "显示跟踪器"
+                }
+            },
+            "targetHelper": {
+                "title": "目标助手",
+                "targets": {
+                    "name": "为信息添加目标",
+                    "hint": "允许在聊天信息中添加能够应用伤害与骰掷豁免的额外目标。"
+                },
+                "small": {
+                    "name": "缩小伤害按钮",
+                    "hint": "缩小额外目标的伤害按钮。"
+                },
+                "checks": {
+                    "name": "更新检查信息"
+                },
+                "enabled": {
+                    "name": "启用",
+                    "hint": "在你的世界启用 '目标助手' 特性。"
+                }
+            },
+            "underground": {
+                "enabled": {
+                    "name": "启用",
+                    "hint": "允许负高度的指示物在场景可见。"
+                },
+                "title": "地下",
+                "mode": {
+                    "name": "应用滤镜",
+                    "choices": {
+                        "normal": "无滤镜",
+                        "greyscale": "灰度滤镜",
+                        "sepia": "褐色滤镜"
+                    },
+                    "hint": "对高度低于0以下的指示物使用什么滤镜。"
+                },
+                "contrast": {
+                    "name": "对比度",
+                    "hint": "指示物具备负高度时的对比度。"
+                },
+                "alpha": {
+                    "name": "不透明度",
+                    "hint": "指示物具备负高度时的不透明度。"
+                }
+            },
+            "unided": {
+                "title": "设置未鉴定图像",
+                "create": {
+                    "name": "在物品创建时",
+                    "hint": "在创建/导入物品时，自动设置物品的未鉴定图像与正常图像相同。"
+                },
+                "update": {
+                    "name": "在物品更新时",
+                    "hint": "在物品的正常图像更新时自动更新其未鉴定图像。"
+                }
+            }
+        },
+        "actionable": {
+            "action": {
+                "cancel": "<strong>{name}</strong> 动作被其宏取消。",
+                "label": "应用于自身的效应/宏",
+                "hint": "单个被应用于使用该动作的角色的效应物品，或该动作使用时执行的宏"
+            },
+            "item": {
+                "label": "宏",
+                "hint": "使用物品时将被执行的宏",
+                "cancel": "<strong>{name}</strong>的使用被其宏取消。"
+            },
+            "spell": {
+                "hint": "该法术释放时执行的宏",
+                "cancel": "<strong>{name}</strong> 的施放被其宏取消。",
+                "label": "宏"
+            }
+        },
+        "keybindings": {
+            "betterMovement": {
+                "unselect": {
+                    "name": "传送Token（自动取消选中）",
+                    "hint": "按住此键点击场景传送全部选中的token，同时在传送结束后取消所有选中token以便整个场景视野清晰无阻。"
+                },
+                "teleport": {
+                    "name": "传送Token",
+                    "hint": "当点击场景某处以传送全部选中token时，按此键。"
+                }
+            },
+            "conditionManager": {
+                "manage": {
+                    "name": "管理状态",
+                    "hint": "快捷键：长按并点击状态调出效果编辑界面，以调整其持续时间。"
+                }
+            },
+            "droppeth": {
+                "droppeth": {
+                    "hint": "快捷键：将一件物品丢弃在地上。",
+                    "name": "丢弃调整"
+                }
+            }
+        },
+        "anonymous": {
+            "spell": {
+                "header": "正在施放一个法术..",
+                "context": "对玩家揭示法术"
+            }
+        },
+        "betterTemplate": {
+            "target": {
+                "allies": "盟友",
+                "all": "全部",
+                "enemies": "敌人",
+                "neutral": "包括中立角色",
+                "self": "包括自身",
+                "yes": "确认目标",
+                "title": "测量板助手",
+                "dismiss": "移除测量板"
+            }
+        },
+        "conditionManager": {
+            "manager": {
+                "title": "状态管理器 - {name}",
+                "add": "创建",
+                "cancel": "取消",
+                "origin": "来源",
+                "label": "标记",
+                "anonymous": "匿名化"
+            }
+        },
+        "droppeth": {
+            "dialog": {
+                "title": "丢弃物品",
+                "prompt": "你希望丢弃多少数量的物品？"
+            },
+            "error": {
+                "out-of-bounds": "无法在指定位置创建丢弃指示物。",
+                "no-scene": "没有可以丢弃物品的场景。",
+                "unknown": "在尝试丢弃选中物品时出现错误。"
+            },
+            "message": {
+                "subtitle": "丢弃物品",
+                "content": {
+                    "item": "{source} 丢弃了 {quantity} × {item} 在地上。",
+                    "container": "{source} 丢弃了 {item} 与其所有内容物。"
+                }
+            }
+        },
+        "giveth": {
+            "dialog": {
+                "title": "传递物品",
+                "prompt": "你希望传递多少物品？"
+            },
+            "error": "在尝试处理一位玩家的 <strong>传递</strong> 请求时出现错误。",
+            "message": {
+                "subtitle": "传递物品",
+                "content": {
+                    "container": "{source} 传递了 {item} 与其中所有内容物给 {target}。",
+                    "item": "{source} 传递了 {quantity} × {item} 给 {target}。"
+                }
+            }
+        },
+        "mergeDamage": {
+            "buttons": {
+                "merge": "与上一条伤害信息合并",
+                "inject": "注入上一条伤害信息中",
+                "split": "拆分为原信息"
+            },
+            "noMatch": "无法找到另一条符合条件的伤害信息。",
+            "injected": "伤害已被注入该条信息"
+        },
+        "resourceTracker": {
+            "header": {
+                "add": "添加新资源"
+            },
+            "resource": {
+                "title": {
+                    "create": "创建新资源",
+                    "edit": "资源详情"
+                },
+                "name": {
+                    "label": "资源名称",
+                    "default": "新资源"
+                },
+                "value": {
+                    "label": "值",
+                    "min": "最大值",
+                    "max": "最小值",
+                    "current": "当前值"
+                },
+                "steps": {
+                    "step1": "[点击]",
+                    "step2": "[Shift-点击]",
+                    "label": "点击步进数值",
+                    "step3": "[Ctrl-点击]"
+                },
+                "edit": "[右键点击] 资源详情",
+                "delete": "删除该资源？",
+                "shared": "对其他人可见？",
+                "yes": {
+                    "create": "创建",
+                    "edit": "确认编辑"
+                },
+                "no": "取消",
+                "timeout": {
+                    "label": "时间流逝（秒）",
+                    "tooltip": "在资源值减少1时，你的世界经过的时间"
+                },
+                "increase": "{click} 增加 {value} 点",
+                "decrease": "{click} 减少 {value} 点"
+            }
+        },
+        "targetHelper": {
+            "check-card": {
+                "merge": "与后一条伤害信息合并"
+            },
+            "damage": {
+                "toggle": "切换为原始伤害按钮"
+            },
+            "drop": {
+                "added": "你已成功在该信息中添加一项豁免。",
+                "unauth": "你只能够对由你发出的信息这样做。",
+                "already": "该信息已有与之链接的豁免检定。"
+            },
+            "rollSaves": "骰掷 NPC 豁免",
+            "header": {
+                "noSave": "该角色无法骰掷 {save} 检定",
+                "select": "选择目标<br>[双击] 打开角色表",
+                "hidden": "隐藏玩家"
+            },
+            "reroll": {
+                "title": "重骰豁免检定",
+                "noPoints": "你需要至少1点英雄点重骰此检定。",
+                "yes": "重骰",
+                "no": "取消",
+                "keeley": "低值重骰"
+            },
+            "setTargets": {
+                "splashTargets": "设置溅射目标",
+                "targets": "设置目标"
+            },
+            "merge": {
+                "none": "无法找到适合的伤害信息进行合并。"
+            },
+            "tooltip": {
+                "dcWithValue": "DC {dc}",
+                "result": {
+                    "format": "结果： {result}",
+                    "withoutOffset": "{success}",
+                    "withOffset": "{offset}的{success}"
+                },
+                "reroll": "允许重骰豁免检定",
+                "adjustment": "调整值： {value}"
+            },
+            "unnamed": "未命名"
+        }
+    },
+    "LEVIKTIMES": {
+        "reloadRequired": "需要刷新重载",
+        "emiting": {
+            "label": "发送",
+            "noGm": "GM必须在线才能执行此请求。"
+        },
+        "gmOnly": "仅限GM"
+    }
+}
