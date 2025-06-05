@@ -163,11 +163,26 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
     }
 
     async #onCanvasStagePointerDown(event: PIXI.FederatedPointerEvent, tokens: TokenPF2e[]) {
-        const operation = { animate: false, bypass: true };
+        const operation: TokenOperation = {
+            animate: false,
+            history: false,
+            diff: false,
+            movement: {},
+        };
+
         const updates =
             event.button !== 2
                 ? this.#spreadTokens(event, tokens)
                 : this.#groupTokens(event, tokens);
+
+        for (const { _id } of updates) {
+            operation.movement[_id] = {
+                autoRotate: false,
+                constrainOptions: { ignoreWalls: true, ignoreCost: true },
+                method: "api",
+                showRuler: false,
+            };
+        }
 
         await canvas.scene?.updateEmbeddedDocuments("Token", updates, operation);
 
@@ -317,7 +332,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
     #groupTokens(event: PIXI.FederatedPointerEvent, tokens: TokenPF2e[]): PositionUpdate[] {
         const position = event.getLocalPosition(canvas.app.stage);
 
-        return tokens.map((token) => {
+        return tokens.map((token): PositionUpdate => {
             const { x, y } = positionTokenFromCoords(position, token);
             return { _id: token.id, x, y };
         });
@@ -337,6 +352,21 @@ type PositionUpdate = {
 type ToolSettings = {
     teleport: "disabled" | "enabled" | "select";
     history: boolean;
+};
+
+type TokenOperation = {
+    animate: boolean;
+    history: boolean;
+    diff: boolean;
+    movement: Record<
+        string,
+        {
+            autoRotate: boolean;
+            constrainOptions: { ignoreWalls: true; ignoreCost: true };
+            method: "api";
+            showRuler: boolean;
+        }
+    >;
 };
 
 export { BetterMovementyTool };
