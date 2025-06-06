@@ -8,9 +8,9 @@ import {
     createCustomCondition,
     DurationData,
     EncounterPF2e,
+    localize,
     R,
     RenderTemplateData,
-    setApplicationTitle,
 } from "module-helpers";
 import { ConditionManagerTool } from "./tool";
 
@@ -35,7 +35,6 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         condition: ConditionPF2e<ActorPF2e>,
         options: DeepPartial<ApplicationConfiguration> = {}
     ) {
-        setApplicationTitle(options, "conditionManager.manager.title", condition._source);
         super(options);
 
         this.#tool = tool;
@@ -57,6 +56,10 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
             value: condition.system.value.value ?? 1,
             default: condition.system.value.value ?? 1,
         };
+    }
+
+    get title(): string {
+        return localize("conditionManager.manager.title", this.#condition._source);
     }
 
     get hasCounter(): boolean {
