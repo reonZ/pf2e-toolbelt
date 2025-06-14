@@ -1,3 +1,9 @@
+# 3.0.3
+
+-   `Automatic Rune Progression`
+    -   fix not being able to update shield HP when using the `Shield Rune` setting
+    -   remove the shield HP update automation to fix the bug, so you are gonna have to do it manually from now on whenever a shield rune is updated, there is really no solution for that problem sadly
+
 # 3.0.2
 
 -   `Better Movement`:

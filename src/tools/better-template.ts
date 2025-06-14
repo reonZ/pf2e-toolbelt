@@ -102,12 +102,12 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         const tokens = getTemplateTokens(template);
 
         const targets = tokens.filter((token) => {
-            const actor = token.actor;
+            const targetActor = token.actor;
 
             if (
                 token.document.hidden ||
-                !actor?.isOfType("creature", "hazard", "vehicle") ||
-                actor.isDead
+                !targetActor?.isOfType("creature", "hazard", "vehicle") ||
+                targetActor.isDead
             ) {
                 return false;
             }
@@ -116,7 +116,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
                 return result.self;
             }
 
-            const targetAlliance = actor.alliance;
+            const targetAlliance = targetActor.alliance;
 
             if (targetAlliance === null) {
                 return result.neutral;
