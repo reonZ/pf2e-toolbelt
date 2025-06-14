@@ -260,14 +260,13 @@ class ArpTool extends ModuleTool<ToolSettings> {
 
         // 4, 7, 10, 13, 16, 19
         const expected = Math.min(Math.ceil((actor.level - 3) / 3), 6) as ZeroToSix;
-        const current = shield.system.runes.reinforcing;
 
-        if (this.#force || current < expected) {
-            const hpData = ArpTool.SHIELD_HP[expected];
-            const maxHp = Math.min(shield._source.system.hp.max + hpData.extra, hpData.max);
+        if (this.#force || shield.system.runes.reinforcing < expected) {
+            // const hpData = ArpTool.SHIELD_HP[expected];
+            // const maxHp = Math.min(shield._source.system.hp.max + hpData.extra, hpData.max);
 
             shield.system.runes.reinforcing = expected;
-            shield.system.hp.value = maxHp - (shield.system.hp.max - shield.system.hp.value);
+            // shield.system.hp.value = maxHp - (shield.system.hp.max - shield.system.hp.value);
         }
 
         wrapped();
