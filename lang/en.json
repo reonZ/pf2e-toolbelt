@@ -44,12 +44,12 @@
                     "hint": "The use button for self-applied effect will automatically apply the effect."
                 },
                 "item": {
-                    "name": "Item Effect/Macro",
-                    "hint": "Adds a way to link a self-applied effect or macro to equipment & consumable items."
+                    "name": "Item Macro",
+                    "hint": "Adds a way to link a macro to equipment & consumable items."
                 },
                 "spell": {
-                    "name": "Spell Effect/Macro",
-                    "hint": "Adds a way to link a self-applied effect or macro to spells."
+                    "name": "Spell Macro",
+                    "hint": "Adds a way to link a macro to spells."
                 },
                 "use": {
                     "name": "Use Consumable",
