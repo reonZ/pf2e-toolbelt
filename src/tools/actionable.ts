@@ -259,14 +259,15 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const items = R.pipe(
             data.inventory.sections,
-            R.intersectionWith(["consumable", "equipment"], (section, type) =>
-                section.types.includes(type)
-            ),
+            R.intersectionWith(["consumable", "equipment"], (section, type) => {
+                return section.types.includes(type);
+            }),
             R.flatMap((section) =>
-                section.items.map(
-                    ({ item }) => item as EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e>
-                )
-            )
+                section.items.map(({ item }) => {
+                    return item as EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e>;
+                })
+            ),
+            R.filter((item) => item.isIdentified)
         );
 
         const panel = htmlQuery(html, `.tab[data-tab="inventory"] .inventory-pane`);
