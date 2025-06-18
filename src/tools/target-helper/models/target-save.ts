@@ -148,9 +148,7 @@ type DegreeAdjustments = {
 
 type RerollType = (typeof REROLL_TYPE)[number];
 
-type TargetSaveSource = SourceFromSchema<TargetSaveSchema>;
-
 MODULE.devExpose({ TargetSaveModel });
 
 export { TargetSaveModel };
-export type { RerollType, TargetSaveSource };
+export type { RerollType };

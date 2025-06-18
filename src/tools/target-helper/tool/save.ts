@@ -5,18 +5,22 @@ import {
     CheckRoll,
     CheckRollCallback,
     DEGREE_STRINGS,
+    DegreeAdjustmentAmount,
     DegreeOfSuccess,
+    DegreeOfSuccessString,
     eventToRollParams,
     extractNotes,
     getActiveModule,
     R,
     RawModifier,
     RollNotePF2e,
+    RollNoteSource,
+    SaveType,
     TokenDocumentPF2e,
     waitDialog,
 } from "module-helpers";
 import { getItem, isMessageOwner, TargetHelperTool } from ".";
-import { RerollType, TargetSaveSource, TargetsData } from "..";
+import { RerollType, TargetsData } from "..";
 
 function showGhostDiceOnPrivate() {
     const dsn = getActiveModule("dice-so-nice");
@@ -284,10 +288,25 @@ async function rerollSave(
     }
 }
 
-type SaveRollData = WithUndefined<
-    WithPartial<TargetSaveSource, "rerolled" | "unadjustedOutcome">,
-    "dosAdjustments" | "significantModifiers"
->;
+type SaveRollData = {
+    die: number;
+    dosAdjustments?: Record<string, { label: string; amount: DegreeAdjustmentAmount }>;
+    modifiers: { label: string; modifier: number }[];
+    notes: RollNoteSource[];
+    private: boolean;
+    rerolled?: "hero" | "new" | "lower" | "higher";
+    roll: string;
+    significantModifiers?: {
+        appliedTo: "roll" | "dc";
+        name: string;
+        significance: "ESSENTIAL" | "HELPFUL" | "NONE" | "HARMFUL" | "DETRIMENTAL";
+        value: number;
+    }[];
+    statistic: SaveType;
+    success: DegreeOfSuccessString;
+    unadjustedOutcome?: DegreeOfSuccessString | null;
+    value: number;
+};
 
 type RollSaveHook = {
     roll: Rolled<CheckRoll>;
