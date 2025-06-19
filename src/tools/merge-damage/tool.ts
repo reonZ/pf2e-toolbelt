@@ -27,10 +27,12 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { isMessageOwner } from "tools/target-helper";
 import { MergeDataModel } from ".";
 
-class MergeDamageTool extends ModuleTool<ToolSettings> {
-    #injected: string | undefined;
-    #icons: PartialRecord<ButtonType, string> = {};
+const _cached: { injected: string | undefined; icons: PartialRecord<ButtonType, string> } = {
+    icons: {},
+    injected: undefined,
+};
 
+class MergeDamageTool extends ModuleTool<ToolSettings> {
     #hooks = [
         createHook("renderChatMessageHTML", this.#onRenderChatMessage.bind(this)),
         createHook("diceSoNiceMessageProcessed", this.#onDiceSoNiceMessageProcessed.bind(this)),
@@ -109,7 +111,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     }
 
     getButton(type: ButtonType) {
-        return (this.#icons[type] ??= (() => {
+        return (_cached.icons[type] ??= (() => {
             const icon = MergeDamageTool.ICONS[type];
             const tooltip = this.localize("buttons", type);
             return `<button data-action="${type}-damage" title="${tooltip}">
@@ -119,7 +121,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     }
 
     getInjectedIcon() {
-        return (this.#injected ??= (() => {
+        return (_cached.injected ??= (() => {
             const tooltip = this.localize("injected");
             return `<i class="fa-solid fa-syringe" title="${tooltip}"></i> `;
         })());
