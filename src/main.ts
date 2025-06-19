@@ -63,7 +63,7 @@ Hooks.once("init", () => {
             R.map((tool) => {
                 const schemas = tool.keybindsSchema;
                 if (schemas.length) {
-                    return [tool.key, tool.keybindsSchema] as const;
+                    return [tool.key, schemas] as const;
                 }
             }),
             R.filter(R.isTruthy),
