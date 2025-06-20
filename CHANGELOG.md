@@ -1,3 +1,15 @@
+# 3.1.0
+
+-   small refactor of tool settings code, nothing on the user's end should be affected
+-   `Actionable`:
+    -   fix `Item Macro` & `Spell Macro` settings name/hint
+    -   fix items being 'usable' when un-identified
+-   `Better Template`:
+    -   reset the `Remove Template` checkbox to default value
+    -   fix error when the module tries to remove a template that was already destroyed
+-   `Resource Tracker`:
+    -   fix not being able to create resources in w world with negative world-time
+
 # 3.0.3
 
 -   `Automatic Rune Progression`
