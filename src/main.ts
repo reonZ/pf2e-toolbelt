@@ -74,7 +74,7 @@ Hooks.once("init", () => {
     registerModuleSettings(
         R.pipe(
             TOOLS,
-            R.map((tool) => [tool.key, tool.settingsSchema] as const),
+            R.map((tool) => [tool.key, tool._getToolSettings()] as const),
             R.mapToObj(([key, entries]) => [key, entries])
         )
     );
@@ -111,4 +111,4 @@ Hooks.once("ready", () => {
     }
 });
 
-MODULE.devExpose({ tools: TOOLS });
+MODULE.devExpose({ tools: R.mapToObj(TOOLS, (tool) => [tool.key, tool]) });

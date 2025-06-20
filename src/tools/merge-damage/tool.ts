@@ -27,9 +27,8 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { isMessageOwner } from "tools/target-helper";
 import { MergeDataModel } from ".";
 
-const _cached: { injected: string | undefined; icons: PartialRecord<ButtonType, string> } = {
+const _cached: { injected?: string; icons: PartialRecord<ButtonType, string> } = {
     icons: {},
-    injected: undefined,
 };
 
 class MergeDamageTool extends ModuleTool<ToolSettings> {

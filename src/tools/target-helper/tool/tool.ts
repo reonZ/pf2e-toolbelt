@@ -37,8 +37,6 @@ import {
 import utils = foundry.utils;
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
-    #checks = false;
-
     #debounceRefreshMessages = utils.debounce(() => {
         refreshLatestMessages(20);
     }, 100);
@@ -135,7 +133,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                 default: true,
                 scope: "user",
                 onChange: (value) => {
-                    this.#checks = value;
                     this.configurate();
                 },
             },
@@ -162,18 +159,16 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 
     get upgradeChecks(): boolean {
-        return this.#checks;
+        return this.settings.checks;
     }
 
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
 
-        this.#checks = this.settings.checks;
-
         this.updateMessageEmitable.activate();
         this.#preCreateChatMessageHook.activate();
         this.#textEditorEnrichHTMLWrapper.activate();
-        this.#messageRenderHTMLWrapper.toggle(this.settings.targets || this.#checks);
+        this.#messageRenderHTMLWrapper.toggle(this.settings.targets || this.settings.checks);
 
         document.body.addEventListener("dragstart", this.#onDragStart.bind(this), true);
     }

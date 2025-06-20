@@ -29,7 +29,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
-                key: "target.dismiss",
+                key: "targetDismiss",
                 type: Boolean,
                 default: true,
                 scope: "user",
@@ -50,7 +50,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         const user = game.user;
         if (user.id !== userId || !canvas.grid.isSquare || isHoldingModifierKey("Control")) return;
 
-        const dismiss = this.settings["target.dismiss"];
+        const dismiss = this.settings.targetDismiss;
         const actor = template.actor;
         const self: Token | null | undefined = !actor
             ? undefined
@@ -85,7 +85,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
 
         const returnAndDismiss = () => {
             if (dismiss !== result.dismiss) {
-                this.setSetting("target.dismiss", result.dismiss);
+                this.settings.targetDismiss = result.dismiss;
             }
             if (result.dismiss) {
                 template.delete();
@@ -137,7 +137,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
 
 type ToolSettings = {
     target: boolean;
-    "target.dismiss": boolean;
+    targetDismiss: boolean;
 };
 
 export { BetterTemplateTool };

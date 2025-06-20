@@ -24,7 +24,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
             const position = this.#tool.settings.position;
 
             position.set(left, top);
-            this.#tool.setSetting("position", position);
+            this.#tool.settings.position = position;
         },
         { minQuietPeriodMs: 1000 }
     );
@@ -57,7 +57,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
             this.#tool.getSettingKey("userResources")
         );
 
-        const usersResources = this.#tool.offline
+        const usersResources = this.#tool.settings.offline
             ? allUsersResources
             : allUsersResources.filter(({ user }) => game.users.get(user)?.active);
 

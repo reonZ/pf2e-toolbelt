@@ -29,7 +29,9 @@ import { FlagData } from "module-helpers/src";
 type Document = foundry.abstract.Document;
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
-    declare settings: Readonly<TSettings>;
+    #settings: Record<string, any> = {};
+
+    declare settings: TSettings;
 
     abstract get key(): string;
     abstract get settingsSchema(): ToolSettingsList<TSettings>;
@@ -51,14 +53,6 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     getSettingKey<K extends keyof TSettings & string>(setting: K): string {
         return `${this.key}.${setting}`;
-    }
-
-    setSetting<K extends keyof TSettings & string>(
-        setting: K,
-        value: TSettings[K]
-    ): Promise<TSettings[K]> {
-        const key = this.getSettingKey(setting);
-        return setSetting(key, value);
     }
 
     render<T extends Record<string, any>>(
@@ -152,13 +146,18 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     _initialize() {
         const settings = {};
+        const self = this;
 
         for (const setting of this.settingsSchema) {
             const key = this.getSettingKey(setting.key);
+            this.#settings[key] = getSetting(key);
 
             Object.defineProperty(settings, setting.key, {
                 get() {
-                    return getSetting(key);
+                    return self.#settings[key];
+                },
+                set(value) {
+                    setSetting(key, value);
                 },
             });
         }
@@ -167,6 +166,19 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
             get() {
                 return settings;
             },
+        });
+    }
+
+    _getToolSettings(): ToolSettingsList<TSettings> {
+        return this.settingsSchema.map((setting) => {
+            const _onChange = setting.onChange;
+
+            setting.onChange = (value, operation, userId) => {
+                this.#settings[setting.key] = value;
+                _onChange?.(value, operation, userId);
+            };
+
+            return setting;
         });
     }
 }

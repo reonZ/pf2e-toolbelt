@@ -15,10 +15,6 @@ const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
 class ArpTool extends ModuleTool<ToolSettings> {
-    #force = false;
-    #price = false;
-    #shield = false;
-
     #baseWrappers = [
         sharedWeaponPrepareBaseData.register(this.#weaponPrepareBaseData, { context: this }),
         sharedArmorPrepareBaseData.register(this.#armorPrepareBaseData, { context: this }),
@@ -139,20 +135,18 @@ class ArpTool extends ModuleTool<ToolSettings> {
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
 
-        this.#force = this.settings.force;
-        this.#price = this.settings.price;
-        this.#shield = this.settings.shield;
+        const priceEnabled = this.settings.price;
 
         activateHooksAndWrappers(this.#baseWrappers);
 
-        if (this.#price) {
+        if (priceEnabled) {
             activateHooksAndWrappers(this.#basePriceWrappers);
         }
 
-        if (this.#shield) {
+        if (this.settings.shield) {
             this.#shieldPrepareBaseDataWrapper.activate();
 
-            if (this.#price) {
+            if (priceEnabled) {
                 this.#shieldPrepareDeriveDataWrapper.activate();
             }
         }
@@ -163,15 +157,16 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const actor = weapon.actor;
         if (!isValidActor(actor, true) || !isValidWeapon(weapon)) return;
 
+        const force = this.settings.force;
         const level = actor.level;
         const expectedPotency: ZeroToFour = level < 2 ? 0 : level < 10 ? 1 : level < 16 ? 2 : 3;
         const expectedStriking: ZeroToFour = level < 4 ? 0 : level < 12 ? 1 : level < 19 ? 2 : 3;
 
-        if (this.#force || weapon.system.runes.potency < expectedPotency) {
+        if (force || weapon.system.runes.potency < expectedPotency) {
             weapon.system.runes.potency = expectedPotency;
         }
 
-        if (this.#force || weapon.system.runes.striking < expectedStriking) {
+        if (force || weapon.system.runes.striking < expectedStriking) {
             weapon.system.runes.striking = expectedStriking;
         }
     }
@@ -209,15 +204,16 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const actor = armor.actor;
         if (!isValidActor(actor, true) || !isValidArmor(armor)) return;
 
+        const force = this.settings.force;
         const level = actor.level;
         const expectedPotency: ZeroToFour = level < 5 ? 0 : level < 11 ? 1 : level < 18 ? 2 : 3;
         const expectedResilient: ZeroToFour = level < 8 ? 0 : level < 14 ? 1 : level < 20 ? 2 : 3;
 
-        if (this.#force || armor.system.runes.potency < expectedPotency) {
+        if (force || armor.system.runes.potency < expectedPotency) {
             armor.system.runes.potency = expectedPotency;
         }
 
-        if (this.#force || armor.system.runes.resilient < expectedResilient) {
+        if (force || armor.system.runes.resilient < expectedResilient) {
             armor.system.runes.resilient = expectedResilient;
         }
     }
@@ -261,7 +257,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         // 4, 7, 10, 13, 16, 19
         const expected = Math.min(Math.ceil((actor.level - 3) / 3), 6) as ZeroToSix;
 
-        if (this.#force || shield.system.runes.reinforcing < expected) {
+        if (this.settings.force || shield.system.runes.reinforcing < expected) {
             // const hpData = ArpTool.SHIELD_HP[expected];
             // const maxHp = Math.min(shield._source.system.hp.max + hpData.extra, hpData.max);
 
