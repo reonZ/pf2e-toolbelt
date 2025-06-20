@@ -87,7 +87,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
             if (dismiss !== result.dismiss) {
                 this.settings.targetDismiss = result.dismiss;
             }
-            if (result.dismiss) {
+            if (result.dismiss && template.rendered) {
                 template.delete();
             }
             return;
