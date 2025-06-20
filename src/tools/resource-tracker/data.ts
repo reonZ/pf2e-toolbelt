@@ -57,7 +57,6 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
                 required: false,
                 nullable: false,
                 initial: () => getWorldTime(),
-                min: 0,
             }),
             timeout: new fields.NumberField({
                 required: false,
