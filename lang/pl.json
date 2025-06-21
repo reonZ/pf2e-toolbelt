@@ -44,12 +44,12 @@
                     "hint": "Przycisk użycia dla efektu nakładanego na siebie spowoduje automatyczne nałożenie efektu."
                 },
                 "item": {
-                    "name": "Efekt/Makro Przedmiotu",
-                    "hint": "Dodaje możliwość powiązania samodzielnie zastosowanego efektu lub makra z wyposażeniem i przedmiotami zużywalnymi."
+                    "name": "Makro przedmiotu",
+                    "hint": "Dodaje możliwość powiązania makra z wyposażeniem i materiałami eksploatacyjnymi."
                 },
                 "spell": {
-                    "name": "Efekt/Makro Zaklęcia",
-                    "hint": "Dodaje możliwość powiązania samodzielnie zastosowanego efektu lub makra z zaklęciami."
+                    "name": "Makro zaklęcia",
+                    "hint": "Dodaje możliwość powiązania makra z zaklęciami."
                 },
                 "use": {
                     "name": "Użyj przedmioty zużywalne",
