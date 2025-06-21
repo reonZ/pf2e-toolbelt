@@ -144,11 +144,13 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return getDataFlagArray(doc, Model, this.key, ...path);
     }
 
-    _initialize() {
+    _initialize(isGM: boolean) {
         const settings = {};
         const self = this;
 
         for (const setting of this.settingsSchema) {
+            if (setting.gmOnly && !isGM) continue;
+
             const key = this.getSettingKey(setting.key);
             this.#settings[key] = getSetting(key);
 

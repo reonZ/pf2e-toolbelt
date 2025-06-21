@@ -90,7 +90,7 @@ Hooks.once("init", () => {
     });
 
     for (const tool of TOOLS) {
-        tool._initialize();
+        tool._initialize(isGM);
         tool.init(isGM);
     }
 });
