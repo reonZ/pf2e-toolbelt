@@ -1,3 +1,7 @@
+# 3.1.2
+
+-   fix breaking error caused by gm-only settings
+
 # 3.1.1
 
 -   fix little conflict with the module debug mode
