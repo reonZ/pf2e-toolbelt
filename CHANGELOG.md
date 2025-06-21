@@ -1,3 +1,7 @@
+# 3.1.1
+
+-   fix little conflict with the module debug mode
+
 # 3.1.0
 
 -   small refactor of tool settings code, nothing on the user's end should be affected
