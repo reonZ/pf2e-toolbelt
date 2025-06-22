@@ -1,3 +1,12 @@
+# 3.2.0
+
+-   `Target Helper`:
+    -   make sure to always add save data to spell damage messages that don't already have it, which means that:
+        -   directly roll the damage without previously creating the spell message will now have saves
+        -   rolling the damage from a spell message more than once will have saves
+    -   fix breaking issue when multiple modifiers apps are opened before rolling any and the message "loosing" its data
+    -   fix the `Add Targets to Message` user setting not actually doing anything
+
 # 3.1.2
 
 -   fix breaking error caused by gm-only settings
