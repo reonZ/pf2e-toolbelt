@@ -158,10 +158,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         };
     }
 
-    get upgradeChecks(): boolean {
-        return this.settings.checks;
-    }
-
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
 
@@ -258,13 +254,13 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         if (!flag) return;
 
         if (flag.type === "action") {
-            await renderActionMessage.call(this, message, html, flag);
-        } else if (flag.type === "check" && this.upgradeChecks) {
-            await renderCheckMessage.call(this, message, html, flag);
+            this.settings.targets && (await renderActionMessage.call(this, message, html, flag));
+        } else if (flag.type === "check") {
+            this.settings.checks && (await renderCheckMessage.call(this, message, html, flag));
         } else if (flag.type === "damage") {
-            await renderDamageMessage.call(this, message, html, flag);
+            this.settings.targets && (await renderDamageMessage.call(this, message, html, flag));
         } else if (flag.type === "spell") {
-            await renderSpellMessage.call(this, message, html, flag);
+            this.settings.targets && (await renderSpellMessage.call(this, message, html, flag));
         }
     }
 }
