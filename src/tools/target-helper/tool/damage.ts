@@ -20,6 +20,7 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
+    getSpellData,
     isMessageOwner,
     onChatMessageDrop,
     TargetHelperTool,
@@ -36,6 +37,15 @@ function prepareDamageMessage(
 
     updates.type = "damage";
     updates.isRegen = isRegenMessage(message);
+
+    if (!this.getMessageSave(message)) {
+        const spellData = getSpellData(message);
+
+        if (spellData) {
+            const { dc, save } = spellData;
+            updates.save = { ...save, dc, author: message.actor?.uuid };
+        }
+    }
 
     if (updates.isRegen) {
         const token = message.token;
