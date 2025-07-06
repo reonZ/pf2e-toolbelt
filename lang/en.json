@@ -202,7 +202,7 @@
                 },
                 "checks": {
                     "name": "Upgrade Checks Messages",
-                    "hint": ""
+                    "hint": "Upgrades the simple inline save messages into something that can be used by the feature. Also adds more details to it."
                 }
             },
             "underground": {
