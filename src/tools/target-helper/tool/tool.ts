@@ -177,7 +177,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 
     getTargetsFlagData(message: ChatMessagePF2e): TargetsFlagData | undefined {
-        return this.getDataFlag(message, TargetsDataModel);
+        return this.getDataFlag(message, TargetsDataModel, { strict: true });
     }
 
     getMessageTargets(message: ChatMessagePF2e): TokenDocumentUUID[] {

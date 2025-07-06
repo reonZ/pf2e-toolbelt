@@ -1,4 +1,5 @@
 import {
+    DataFlagArgs,
     deleteFlagProperty,
     deleteInMemory,
     error,
@@ -131,9 +132,9 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     getDataFlag<T extends foundry.abstract.DataModel, D extends Document>(
         doc: D,
         Model: ConstructorOf<T>,
-        ...path: string[]
-    ): FlagData<T, D> | undefined {
-        return getDataFlag(doc, Model, this.key, ...path);
+        ...args: DataFlagArgs<T>
+    ): FlagData<T> | undefined {
+        return getDataFlag(doc, Model, this.key, ...args);
     }
 
     getDataFlagArray<T extends foundry.abstract.DataModel, D extends Document>(

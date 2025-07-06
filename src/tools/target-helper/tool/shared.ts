@@ -145,7 +145,7 @@ type CheckLinkData = {
     isBasic?: boolean;
 } & ({ against: string; itemUuid: string } | { pf2Dc: `${number}` });
 
-type TargetsFlagData = FlagData<TargetsDataModel, ChatMessagePF2e>;
+type TargetsFlagData = FlagData<TargetsDataModel>;
 
 export { getCurrentTargets, getItem, getSaveLinkData, isMessageOwner, onChatMessageDrop };
 export type { CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };
