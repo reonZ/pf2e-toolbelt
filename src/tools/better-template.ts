@@ -48,7 +48,14 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         userId: string
     ) {
         const user = game.user;
-        if (user.id !== userId || !canvas.grid.isSquare || isHoldingModifierKey("Control")) return;
+
+        if (
+            user.id !== userId ||
+            !canvas.grid.isSquare ||
+            isHoldingModifierKey("Control") ||
+            this.getFlag(template, "skip")
+        )
+            return;
 
         const dismiss = this.settings.targetDismiss;
         const actor = template.actor;
