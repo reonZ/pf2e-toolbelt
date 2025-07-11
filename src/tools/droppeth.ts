@@ -221,6 +221,10 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             folder: folder?.id,
             items: [tradeData.itemSource, ...tradeData.contentSources],
             img,
+            ownership: {
+                default: 3,
+                [userId]: 3,
+            },
         };
 
         this.setFlagProperties(actorSource, { temporary: true, tokenUuid });
