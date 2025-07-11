@@ -210,6 +210,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return item.system.actionType.value === "passive";
     }
 
+    isCraftingAction(item: AbilityItemPF2e | FeatPF2e): boolean {
+        return !!item.crafting;
+    }
+
     #onCreateChatMessage(origin: ChatMessagePF2e) {
         if (!origin.author || origin.getFlag("pf2e", "context.type") !== "self-effect") return;
 
@@ -333,6 +337,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (
                 !item?.isOfType("action", "feat") ||
                 this.isPassiveAction(item) ||
+                this.isCraftingAction(item) ||
                 item.system.selfEffect
             )
                 return;
@@ -426,7 +431,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
 
-        if (this.isPassiveAction(item)) {
+        if (this.isPassiveAction(item) || this.isCraftingAction(item)) {
             return $html;
         }
 
@@ -466,6 +471,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         if (!droppedItem) return;
 
         if (droppedItem instanceof Macro) {
+            if (this.isCraftingAction(sheetItem)) {
+                throw ErrorPF2e("Invalid item drop");
+            }
+
             const updates = {
                 "system.selfEffect": null,
             };
