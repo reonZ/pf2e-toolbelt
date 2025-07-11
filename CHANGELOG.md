@@ -1,3 +1,16 @@
+# 3.3.0
+
+-   `Actionable`:
+    -   no longer modify the sheet of crafting related actions (e.g. `Quick Alchemy`)
+-   `Better Template`:
+    -   add `skip` flag to skip showing the popup on template creation
+-   `Droppeth`:
+    -   now give ownership of the dropped token/actor to the user
+-   `Resource Tracker`:
+    -   slightly offset the color of the `min` and `max` values
+-   `Target Helper`:
+    -   add missing `Upgrade Checks Messages` description
+
 # 3.2.0
 
 -   `Target Helper`:
