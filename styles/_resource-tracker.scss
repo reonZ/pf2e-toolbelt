@@ -1,5 +1,6 @@
 #pf2e-toolbelt-resource-tracker {
     --color: #efe6d8;
+    --color-dim: #bdbbb7;
     --color-highlight: #ffffff;
     --header-background-color: #00000087;
     --border-color: black;
@@ -118,6 +119,11 @@
                 top: 0;
                 display: flex;
                 align-items: flex-end;
+            }
+
+            .dim {
+                color: var(--color-dim);
+                text-shadow: 0 0 2px #000000;
             }
 
             .left {

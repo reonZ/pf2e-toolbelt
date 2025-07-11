@@ -31,23 +31,23 @@
     </div>
     {{#if ../isOwner}}
     <a class="left" data-action="decrease-resource" data-tooltip="{{resource.decrease}}">
-        <div class="min">{{resource.min}}</div>
+        <div class="min dim">{{resource.min}}</div>
         <div class="decrease">
             <i class="fa-solid fa-minus"></i>
         </div>
     </a>
     <a class="right" data-action="increase-resource" data-tooltip="{{resource.increase}}">
-        <div class="max">{{resource.max}}</div>
+        <div class="max dim">{{resource.max}}</div>
         <div class="increase">
             <i class="fa-solid fa-plus"></i>
         </div>
     </a>
     {{else}}
     <div class="left">
-        <div>{{resource.min}}</div>
+        <div class="dim">{{resource.min}}</div>
     </div>
     <div class="right">
-        <div>{{resource.max}}</div>
+        <div class="dim">{{resource.max}}</div>
     </div>
     {{/if}}
 </div>
