@@ -1,3 +1,8 @@
+# 3.3.1
+
+-   `Actionable`:
+    -   fix case of `Auto Self-Applied` triggering multiple times
+
 # 3.3.0
 
 -   `Actionable`:
