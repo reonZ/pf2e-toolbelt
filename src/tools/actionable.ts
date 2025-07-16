@@ -215,7 +215,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #onCreateChatMessage(origin: ChatMessagePF2e) {
-        if (!origin.author || origin.getFlag("pf2e", "context.type") !== "self-effect") return;
+        if (!origin.isAuthor || origin.getFlag("pf2e", "context.type") !== "self-effect") return;
 
         const hookId = Hooks.on(
             "renderChatMessageHTML",
