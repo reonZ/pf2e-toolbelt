@@ -1,0 +1,416 @@
+{
+  "LEVIKTIMES": {
+    "gmOnly": "MJ uniquement",
+    "reloadRequired": "Nécessite le rechargement",
+    "emiting": {
+      "label": "Envoi",
+      "noGm": "Un MJ doit être en ligne pour pouvoir autoriser cette demande."
+    }
+  },
+  "pf2e-toolbelt": {
+    "keybindings": {
+      "conditionManager": {
+        "manage": {
+          "name": "Gérer l'état",
+          "hint": "Touche maintenue lors de la suppression d'un état pour gérer sa durée."
+        }
+      },
+      "betterMovement": {
+        "teleport": {
+          "name": "Téléportation des jetons",
+          "hint": "Touche maintenue tout en cliquant sur la scène pour téléporter tous les jetons sélectionnés."
+        },
+        "unselect": {
+          "name": "Téléportation des jetons (désélectionner)",
+          "hint": "Maintenez la touche tout en cliquant sur la scène pour téléporter tous les jetons sélectionnés. Désélectionnez également les jetons en appuyant sur la touche liée pour une vision dégagée sur la totalité de la scène."
+        }
+      },
+      "droppeth": {
+        "droppeth": {
+          "name": "Modificateur pour le dépôt sur la scène",
+          "hint": "Touche maintenue lorsque vous déposez un objet sur le sol."
+        }
+      }
+    },
+    "settings": {
+      "actionable": {
+        "title": "Actionnable",
+        "action": {
+          "name": "Macro d'action",
+          "hint": "Ajoute un moyen de lier une macro à des actions/dons."
+        },
+        "apply": {
+          "name": "Auto-appliqué",
+          "hint": "Pour utiliser le bouton pour l'effet auto-appliqué appliquera automatiquement l'effet."
+        },
+        "item": {
+          "name": "Macro d'objet",
+          "hint": "Ajoute un moyen de lier une macro aux objets d'équipement & consommables."
+        },
+        "spell": {
+          "name": "Macro de sort",
+          "hint": "Ajoute un moyen de lier une macro aux sorts."
+        },
+        "use": {
+          "name": "Utiliser un consommable",
+          "hint": "Ajoutera un bouton « utiliser » pour les consommables et enverra un message personnalisé lors de son utilisation."
+        }
+      },
+      "anonymous": {
+        "title": "Anonyme",
+        "spell": {
+          "name": "Anonymiser les sorts des PNJ",
+          "hint": "Les sorts lancés par un acteur non détenu par un joueur seront anonymisés pour les joueurs."
+        }
+      },
+      "arp": {
+        "title": "Progression automatique des runes",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Votre monde utilise t-il la variante de progression automatique des runes ?"
+        },
+        "force": {
+          "name": "Forcer la mise à jour",
+          "hint": "Lorsque cette option est activée, les runes sont toujours mises à jour en fonction du niveau de l'acteur. Lorsqu'elle est désactivée, seules les runes dont la valeur est inférieure à celle attendue pour ce niveau sont mises à jour."
+        },
+        "price": {
+          "name": "Pas de prix des runes",
+          "hint": "Les prix des runes fondamentales doivent-ils être soustraits du prix de l'arme ?"
+        },
+        "shield": {
+          "name": "Rune de bouclier",
+          "hint": "Les runes de renforcement devraient-elles également être ajoutées aux boucliers ?"
+        }
+      },
+      "betterEffectsPanel": {
+        "title": "Panneau d'effets amélioré",
+        "remove": {
+          "name": "Raccourci de suppression d'effet",
+          "hint": "L'utilisation de [Maj + clic droit] sur les icônes d'effet dans le panneau d'effets supprimera instantanément toutes leurs charges/compteurs/badges."
+        }
+      },
+      "betterInventory": {
+        "title": "Meilleur inventaire",
+        "coins": {
+          "name": "Pièces sans poids",
+          "hint": "Les pièces n'ont aucun poids dans l'inventaire."
+        },
+        "dropped": {
+          "name": "Pas d'Encombrement lâché",
+          "hint": "L'équipement lâché dans l'inventaire d'un acteur ne sera pas pris en compte dans le calcul de l'Encombrement."
+        }
+      },
+      "betterMovement": {
+        "title": "Meilleur déplacement",
+        "teleport": {
+          "name": "Téléportation des jetons",
+          "hint": "Cliquer sur le tableau tout en maintenant la touche liée définie téléportera instantanément les jetons sélectionnés à l'emplacement sans aucun déplacement.",
+          "choices": {
+            "disabled": "Désactivé",
+            "enabled": "Activé",
+            "select": "Resélectionner les jetons"
+          }
+        },
+        "history": {
+          "name": "Aucun enregistrement de l'historique",
+          "hint": "L'enregistrement de l'historique de déplacement devrait-il être bloqué ? Cela rend les actions de déplacement successives au cours d'un même tour moins confuses."
+        }
+      },
+      "betterTemplate": {
+        "title": "Meilleurs gabarits",
+        "target": {
+          "name": "Cible automatique",
+          "hint": "Lorsque vous placez un gabarit sur la scène, une nouvelle boîte de dialogue apparaîtra vous permettant de cibler tous les jetons qu'il contient."
+        }
+      },
+      "betterTrade": {
+        "title": "Meilleur commerce",
+        "withContent": {
+          "name": "Avec le contenu du contenant",
+          "hint": "Lorsqu'un contenant est déplacé d'un acteur à un autre, son contenu doit-il l'accompagner ?"
+        }
+      },
+      "conditionManager": {
+        "title": "Gestionnaire d'état",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Faites glisser un état tout en maintenant la touche définie pour ouvrir le gestionnaire d'états vous permettant de définir sa durée."
+        }
+      },
+      "droppeth": {
+        "title": "Dépôt sur la scène",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Autoriser les utilisateurs à déposer des éléments sur le canevas en maintenant la touche attribuée."
+        },
+        "light": {
+          "name": "Source de lumière",
+          "hint": "L'objet lâché doit-il émettre de la lumière ? Ce n'est le cas que si un seul objet est présent dans l'acteur de butin."
+        }
+      },
+      "mergeDamage": {
+        "title": "Fusionner les dégâts",
+        "merge": {
+          "name": "Bouton de fusion",
+          "hint": "Ajoute un bouton aux messages de dégâts leur permettant d'être fusionnés avec les autres messages de dégâts."
+        },
+        "inject": {
+          "name": "Bouton d'injection",
+          "hint": "Ajoute un bouton aux messages de dégâts permettant de les injecter dans un message de dégâts précédent."
+        }
+      },
+      "giveth": {
+        "title": "Donner",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Votre monde devrait-il permettre aux acteurs des joueurs de pouvoir donner des objets d'inventaire à d'autres acteurs appartenant à des joueurs."
+        },
+        "effect": {
+          "name": "Inclure les effets/états",
+          "hint": "Les joueurs devraient-ils également pouvoir appliquer des effets et des états sur des acteurs qu'ils ne possèdent pas ?",
+          "choices": {
+            "disabled": "Désactivé",
+            "ally": "Alliés seulement",
+            "all": "Tous les acteurs"
+          }
+        }
+      },
+      "resourceTracker": {
+        "title": "Suivi des ressources",
+        "offline": {
+          "name": "Afficher hors ligne",
+          "hint": "Montre également les ressources partagées des utilisateurs hors ligne."
+        },
+        "show": {
+          "name": "Suivi d'affichage",
+          "hint": "Le widget de suivi des ressources doit-il être affiché dans votre interface ? Il peut être activé/désactivé via les commandes situées sur l'interface de gauche."
+        }
+      },
+      "targetHelper": {
+        "title": "Assistant de ciblage",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Activé la fonctionnalité « Assistant de ciblage » dans votre monde."
+        },
+        "small": {
+          "name": "Petits boutons de dégâts",
+          "hint": "Réduit la taille des boutons de dégâts pour les cibles supplémentaires."
+        },
+        "targets": {
+          "name": "Ajouter les cibles aux messages",
+          "hint": "Cela ajoutera des cibles supplémentaires aux messages de discussion lorsque des dégâts peuvent être appliqués et des jets de sauvegarde peuvent être effectuées."
+        },
+        "checks": {
+          "name": "Amélioration des messages des tests",
+          "hint": "Améliore les messages des jets de sauvegarde en ligne simples pour les rendre exploitables par la fonctionnalité. Leur ajoute également des détails."
+        }
+      },
+      "underground": {
+        "title": "Souterrain",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Permettra aux jetons avec une élévation négative de rester visibles sur la scène."
+        },
+        "mode": {
+          "name": "Filtre appliqué",
+          "hint": "Quel type de filtre doit être appliqué aux jetons avec une élévation inférieure à 0.",
+          "choices": {
+            "normal": "Pas de filtre",
+            "greyscale": "Filtre en niveaux de gris",
+            "sepia": "Filtre sépia"
+          }
+        },
+        "contrast": {
+          "name": "Contraste",
+          "hint": "Valeur de contraste lorsque le jeton a une élévation négative."
+        },
+        "alpha": {
+          "name": "Opacité",
+          "hint": "Valeur d'opacité lorsque le jeton a une élévation négative."
+        }
+      },
+      "unided": {
+        "title": "Définir une image non identifiée",
+        "create": {
+          "name": "Lors de la création d'un objet",
+          "hint": "Définissez automatiquement l'image non identifiée des éléments pour qu'elle soit identique à l'image normale lorsque l'élément est créé/importé."
+        },
+        "update": {
+          "name": "Lors de la mise à jour de l'objet",
+          "hint": "Mise à jour automatique de l'image non identifiée lorsque l'image régulière de l'objet est mise à jour."
+        }
+      }
+    },
+    "actionable": {
+      "action": {
+        "label": "Effet auto-appliqué / Macro",
+        "hint": "Un unique effet d'objet à appliquer à l'acteur qui utilise cette action ou une macro qui sera exécutée lorsque cette action sera utilisée",
+        "cancel": "action <strong>{name}</strong> a été effacée par sa macro."
+      },
+      "item": {
+        "label": "Macro",
+        "hint": "Une macro qui sera exécutée lorsque cet élément sera utilisé",
+        "cancel": "usage de <strong>{name}</strong> a été effacé par sa macro."
+      },
+      "spell": {
+        "label": "Macro",
+        "hint": "Une macro qui sera exécutée lorsque ce sort sera lancé",
+        "cancel": "le sort <strong>{name}</strong> lancé a été effacé par sa macro."
+      }
+    },
+    "anonymous": {
+      "spell": {
+        "header": "Is casting a spell..",
+        "context": "Révéler le sort aux joueurs"
+      }
+    },
+    "betterTemplate": {
+      "target": {
+        "all": "Aux deux",
+        "allies": "Aux alliés",
+        "dismiss": "Retirer le gabarit",
+        "enemies": "Aux ennemis",
+        "neutral": "Inclure les neutres",
+        "self": "S'inclure",
+        "title": "Assistant de gabarit",
+        "yes": "Cible"
+      }
+    },
+    "conditionManager": {
+      "manager": {
+        "title": "Gestionnaire d'état - {name}",
+        "add": "Créer",
+        "cancel": "Annuler",
+        "origin": "Origine",
+        "label": "Étiquette",
+        "anonymous": "Anonyme"
+      }
+    },
+    "droppeth": {
+      "dialog": {
+        "title": "Objet déposé au sol",
+        "prompt": "Combien d'objets souhaitez-vous déposer ?"
+      },
+      "error": {
+        "out-of-bounds": "Impossible de créer un jeton de dépôt au sol à l'emplacement fourni.",
+        "unknown": "Une erreur s'est produite En tentant de déposer cet/ces objet(s).",
+        "no-scene": "Il n'y a aucune scène disponible pour déposer au sol."
+      },
+      "message": {
+        "subtitle": "Objet déposé au sol",
+        "content": {
+          "item": "{source} a déposé {quantity} × {item} sur le sol.",
+          "container": "{source} a déposé {item} et tout son contenu."
+        }
+      }
+    },
+    "giveth": {
+      "error": "Une erreur s'est produite en tentant de traiter une demande de joueur de <strong>déposer au sol</strong>.",
+      "dialog": {
+        "title": "Objet déposé au sol",
+        "prompt": "Combien d'objets souhaitez-vous donner ?"
+      },
+      "message": {
+        "subtitle": "Donner un objet",
+        "content": {
+          "item": "{source} a donné {quantity} × {item} à {target}.",
+          "container": "{source} a donné {item} et tout son contenu à {target}."
+        }
+      }
+    },
+    "mergeDamage": {
+      "buttons": {
+        "split": "Revenir aux messages d'origine",
+        "merge": "Fusionner avec le message de dégâts précédent",
+        "inject": "Injecter les dégâts au message précédent"
+      },
+      "injected": "Des dégâts ont été injectés dans ce message",
+      "noMatch": "Impossible de trouver un autre message de dégât correspondant."
+    },
+    "resourceTracker": {
+      "header": {
+        "add": "Ajouter une nouvelle ressource"
+      },
+      "resource": {
+        "title": {
+          "create": "Créer une nouvelle ressource",
+          "edit": "Modifier la ressource"
+        },
+        "name": {
+          "label": "Nom de la ressource",
+          "default": "Nouvelle ressource"
+        },
+        "value": {
+          "label": "Valeur",
+          "min": "Valeur minimale",
+          "max": "Valeur maximale",
+          "current": "Valeur actuelle"
+        },
+        "steps": {
+          "label": "Étapes de clic",
+          "step1": "[Clic]",
+          "step2": "[Maj-Clic]",
+          "step3": "[Contrôle-Clic]"
+        },
+        "timeout": {
+          "label": "Délai d'attente (secondes)",
+          "tooltip": "Temps écoulé dans votre monde avant que la valeur de la ressource ne soit réduite d' 1 cran"
+        },
+        "edit": "[Clic droit] Modifier la ressource",
+        "delete": "Supprimer la ressource ?",
+        "shared": "Visible pour les autres ?",
+        "yes": {
+          "create": "Créer",
+          "edit": "Modifier"
+        },
+        "no": "Annuler",
+        "increase": "{clic} augmenter de {value}",
+        "decrease": "{clic} diminuer de {value}"
+      }
+    },
+    "targetHelper": {
+      "check-card": {
+        "merge": "Fusionner avec le message de dégâts suivant"
+      },
+      "damage": {
+        "toggle": "Activer/désactiver les boutons de dégâts d'origine"
+      },
+      "drop": {
+        "added": "Vous avez ajouté avec succès un jet de sauvegarde au message.",
+        "already": "Ce message possède déjà un jet de sauvegarde qui lui est associé.",
+        "unauth": "Vous ne pouvez le faire que sur les messages dont vous êtes l'auteur."
+      },
+      "header": {
+        "hidden": "Caché aux joueurs",
+        "noSave": "Cet acteur ne peut lancer des tests de {save}",
+        "select": "Sélectionner la cible<br>[Double-clic] Ouvrir la feuille"
+      },
+      "merge": {
+        "none": "Impossible de trouver un message de dégâts approprié avec lequel fusionner."
+      },
+      "reroll": {
+        "title": "Relancer le test de sauvegarde",
+        "noPoints": "Vous avez besoin d'au moins 1 point d'héroïsme pour relancer.",
+        "yes": "Relancer",
+        "no": "Annuler",
+        "keeley": "Relance basse"
+      },
+      "rollSaves": "Lancer les jets de sauvegarde des PNJ",
+      "setTargets": {
+        "splashTargets": "Définir les cibles des éclaboussures",
+        "targets": "Définir les cibles"
+      },
+      "tooltip": {
+        "adjustment": "Ajustment : {value}",
+        "dcWithValue": "DD {dc}",
+        "reroll": "Peut relancer le jet de sauvegarde",
+        "result": {
+          "format": "Résultat : {result}",
+          "withOffset": "{success} de {offset}",
+          "withoutOffset": "{success}"
+        }
+      },
+      "unnamed": "Pas nommé"
+    }
+  }
+}
