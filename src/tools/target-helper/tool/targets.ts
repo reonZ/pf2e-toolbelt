@@ -51,7 +51,7 @@ async function createTargetsRows(
 
     const isGM = game.user.isGM;
     const originActor = message.actor;
-    const author = await getActorFromUuid(data.save?.author);
+    const author = await getActorFromUuid(data.author);
     const showBreakdowns = isGM || game.pf2e.settings.metagame.breakdowns;
 
     const showSignificant: boolean =

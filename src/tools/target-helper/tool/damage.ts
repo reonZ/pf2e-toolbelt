@@ -20,13 +20,13 @@ import {
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
-    getSpellData,
+    getSpellSaveVariants,
     isMessageOwner,
     onChatMessageDrop,
     TargetHelperTool,
     TargetsFlagData,
 } from ".";
-import { TargetsDataSource, TargetsData } from "..";
+import { TargetsData, TargetsDataSource } from "..";
 
 function prepareDamageMessage(
     this: TargetHelperTool,
@@ -39,11 +39,10 @@ function prepareDamageMessage(
     updates.isRegen = isRegenMessage(message);
 
     if (!this.getMessageSave(message)) {
-        const spellData = getSpellData(message);
+        const saveVariants = getSpellSaveVariants(message);
 
-        if (spellData) {
-            const { dc, save } = spellData;
-            updates.save = { ...save, dc, author: message.actor?.uuid };
+        if (saveVariants) {
+            updates.saveVariants = saveVariants;
         }
     }
 

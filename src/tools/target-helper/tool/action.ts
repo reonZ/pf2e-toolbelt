@@ -35,7 +35,7 @@ function prepareActionMessage(
     const linkData = getSaveLinkData(link);
 
     if (linkData) {
-        linkData.save.author ??= message.actor?.uuid;
+        linkData.author ??= message.actor?.uuid;
         foundry.utils.mergeObject(updates, linkData, { inplace: true });
     }
 
@@ -102,7 +102,7 @@ async function renderActionMessage(
         link.addEventListener(
             "click",
             (event) => {
-                // we cache the data & add the spell just in case
+                // we cache the data
                 const cached = data.toJSON({ type: "damage" });
 
                 registerUpstreamHook(
@@ -116,8 +116,7 @@ async function renderActionMessage(
 
                 // we clean the message save related data
                 data.update({
-                    ["-=save"]: null,
-                    ["==saves"]: {},
+                    ["-=saveVariants"]: null,
                 });
 
                 data.setFlag();

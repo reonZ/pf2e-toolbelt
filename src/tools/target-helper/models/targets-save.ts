@@ -1,16 +1,11 @@
-import { MODULE, SAVE_TYPES, SaveType } from "module-helpers";
+import { MODULE, RecordField, SAVE_TYPES, SaveType } from "module-helpers";
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
+import { TargetSaveModel } from "./target-save";
 
 class TargetsSaveModel extends abstract.DataModel<null, TargetsSaveSchema> {
     static defineSchema(): TargetsSaveSchema {
         return {
-            author: new fields.DocumentUUIDField({
-                required: false,
-                nullable: true,
-                blank: false,
-                initial: null,
-            }),
             basic: new fields.BooleanField({
                 required: false,
                 nullable: false,
@@ -20,6 +15,10 @@ class TargetsSaveModel extends abstract.DataModel<null, TargetsSaveSchema> {
                 required: true,
                 nullable: false,
                 min: 5,
+            }),
+            saves: new fields.TypedObjectField(new fields.EmbeddedDataField(TargetSaveModel), {
+                required: false,
+                nullable: false,
             }),
             statistic: new fields.StringField({
                 required: true,
@@ -36,9 +35,13 @@ interface TargetsSaveModel
         ModelPropsFromSchema<TargetsSaveSchema> {}
 
 type TargetsSaveSchema = {
-    author: fields.DocumentUUIDField<ActorUUID, false, true, true>;
     basic: fields.BooleanField<boolean, boolean, false, false, true>;
     dc: fields.NumberField<number, number, true, false, false>;
+    saves: RecordField<
+        fields.EmbeddedDataField<TargetSaveModel, false, false, false>,
+        false,
+        false
+    >;
     statistic: fields.StringField<SaveType, SaveType, true, false, false>;
 };
 

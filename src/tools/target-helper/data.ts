@@ -6,17 +6,25 @@ import {
     R,
     TokenDocumentPF2e,
 } from "module-helpers";
-import { TargetsDataSource, TargetSaveModel, TargetsFlagData, TargetsSaveModel } from ".";
+import {
+    TargetsDataSource,
+    TargetSaveModel,
+    TargetsFlagData,
+    TargetsSaveModel,
+    SaveRollData,
+} from ".";
 
 class TargetsData {
     #isGM: boolean;
     #flag: TargetsFlagData;
     #targets: TokenDocumentPF2e[];
     #splashTargets: TokenDocumentPF2e[];
+    #variantId: string;
 
-    constructor(flag: TargetsFlagData) {
+    constructor(flag: TargetsFlagData, variantId?: string | null) {
         this.#isGM = game.user.isGM;
         this.#flag = flag;
+        this.#variantId = variantId ?? "null";
 
         const isValidToken = (target: unknown): target is TokenDocumentPF2e => {
             if (!(target instanceof TokenDocument)) return false;
@@ -39,12 +47,20 @@ class TargetsData {
         );
     }
 
+    get author(): ActorUUID | null {
+        return this.#flag.author;
+    }
+
     get type(): toolbelt.targetHelper.TargetMessageType {
         return this.#flag.type;
     }
 
+    get variantId(): string {
+        return this.#variantId;
+    }
+
     get save(): TargetsSaveModel | undefined {
-        return this.#flag.save;
+        return this.#flag.saveVariants[this.variantId];
     }
 
     get itemUUID(): ItemUUID | null {
@@ -52,7 +68,7 @@ class TargetsData {
     }
 
     get isBasicSave(): boolean {
-        return !!this.#flag.save?.basic;
+        return !!this.save?.basic;
     }
 
     get isAction(): boolean {
@@ -88,7 +104,7 @@ class TargetsData {
     }
 
     get saves(): Record<string, TargetSaveModel | undefined> {
-        return this.#flag.saves;
+        return this.save?.saves ?? {};
     }
 
     get splashTargets(): TokenDocumentPF2e[] {
@@ -100,15 +116,13 @@ class TargetsData {
     }
 
     get npcListToRoll(): TokenDocumentPF2e[] {
-        const statistic = this.#flag.save?.statistic;
+        const statistic = this.save?.statistic;
         if (!statistic || !this.#isGM) return [];
 
         return [...this.targets, ...this.splashTargets].filter((target) => {
             const actor = target.actor;
             return (
-                actor?.getStatistic(statistic) &&
-                !actor.hasPlayerOwner &&
-                !this.#flag.saves[target.id]
+                actor?.getStatistic(statistic) && !actor.hasPlayerOwner && !this.saves[target.id]
             );
         });
     }
@@ -118,7 +132,7 @@ class TargetsData {
     }
 
     targetSave(id: string): TargetSaveModel | undefined {
-        return this.#flag.saves[id];
+        return this.saves[id];
     }
 
     targetApplied(id: string): toolbelt.targetHelper.MessageTargetApplied {
@@ -132,11 +146,22 @@ class TargetsData {
         return this.#flag.updateSource(changes, options);
     }
 
+    updateSaves(
+        changes: Record<string, SaveRollData>,
+        options?: Partial<DocumentSourceUpdateContext>
+    ) {
+        return this.update({ [`saveVariants.${this.variantId}.saves`]: changes });
+    }
+
     setFlag(): Promise<ChatMessagePF2e | undefined> {
         return this.#flag.setFlag();
     }
 
-    toJSON(udpates?: DeepPartial<TargetsDataSource>): TargetsDataSource {
+    toJSON(
+        udpates?: DeepPartial<TargetsDataSource> & {
+            "==saveVariants"?: Record<string, TargetsSaveModel>;
+        }
+    ): TargetsDataSource {
         const source = udpates ? this.#flag.clone(udpates) : this.#flag;
         return source.toJSON();
     }

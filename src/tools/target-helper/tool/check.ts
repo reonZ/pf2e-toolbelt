@@ -125,7 +125,7 @@ function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e, data: T
         return this.warning("merge.none");
     }
 
-    const source = R.pick(data.toJSON(), ["save", "saves", "targets"]);
+    const source = R.pick(data.toJSON(), ["saveVariants", "targets"]);
     this.setFlag(damageMessage, source);
 
     // we clean up the check message as we are not gonna use it anymore
@@ -152,7 +152,8 @@ function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
             .sort();
 
         return {
-            save: { dc, basic, statistic, author: message.actor?.uuid },
+            author: message.actor?.uuid,
+            saveVariants: { null: { dc, basic, statistic } },
             options,
             item: undefined,
             traits: splitListString(rawParams.traits ?? ""),
@@ -165,7 +166,7 @@ function getCheckLinkData(message: ChatMessagePF2e): SaveLinkData | null {
         const linkData = getSaveLinkData(link);
 
         if (linkData) {
-            linkData.save.author = message.actor?.uuid;
+            linkData.author = message.actor?.uuid;
         }
 
         return linkData;

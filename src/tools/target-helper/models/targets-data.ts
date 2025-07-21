@@ -1,5 +1,5 @@
 import { ArrayField, MODULE, RecordField } from "module-helpers";
-import { TargetSaveModel, TargetsSaveModel } from ".";
+import { TargetsSaveModel, TargetsSaveSource } from ".";
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
 
@@ -15,6 +15,12 @@ class TargetsDataModel extends abstract.DataModel<null, TargetsDataSchema> {
                     nullable: false,
                 }
             ),
+            author: new fields.DocumentUUIDField({
+                required: false,
+                nullable: true,
+                blank: false,
+                initial: null,
+            }),
             item: new fields.DocumentUUIDField({
                 required: false,
                 nullable: true,
@@ -31,15 +37,13 @@ class TargetsDataModel extends abstract.DataModel<null, TargetsDataSchema> {
                 nullable: false,
                 initial: () => [],
             }),
-            save: new fields.EmbeddedDataField(TargetsSaveModel, {
-                required: false,
-                nullable: false,
-                initial: undefined,
-            }),
-            saves: new fields.TypedObjectField(new fields.EmbeddedDataField(TargetSaveModel), {
-                required: false,
-                nullable: false,
-            }),
+            saveVariants: new fields.TypedObjectField(
+                new fields.EmbeddedDataField(TargetsSaveModel),
+                {
+                    required: false,
+                    nullable: false,
+                }
+            ),
             splashIndex: new fields.NumberField({
                 required: false,
                 nullable: false,
@@ -75,14 +79,13 @@ interface TargetsDataModel
         ModelPropsFromSchema<TargetsDataSchema> {}
 
 type TargetsDataSchema = {
+    author: fields.DocumentUUIDField<ActorUUID, false, true, true>;
     applied: RecordField<RecordField<fields.BooleanField, false, false, false>, false>;
     isRegen: fields.BooleanField<boolean, boolean, false, false, true>;
     item: fields.DocumentUUIDField<ItemUUID, false, true, true>;
     options: ArrayField<fields.StringField>;
-    save: fields.EmbeddedDataField<TargetsSaveModel, false, false, false>;
-    saves: RecordField<
-        fields.EmbeddedDataField<TargetSaveModel, false, false, false>,
-        false,
+    saveVariants: RecordField<
+        fields.EmbeddedDataField<TargetsSaveModel, false, false, false>,
         false
     >;
     splashIndex: fields.NumberField<number, number, false, false, true>;
@@ -96,7 +99,9 @@ type TargetMessageType = (typeof TARGET_MESSAGE_TYPE)[number];
 
 type TargetsDataSource = SourceFromSchema<TargetsDataSchema>;
 
+type SaveVariantsSource = Record<string, WithPartial<TargetsSaveSource, "basic" | "saves">>;
+
 MODULE.devExpose({ TargetsDataModel });
 
 export { TargetsDataModel };
-export type { TargetsDataSource };
+export type { SaveVariantsSource, TargetsDataSource };

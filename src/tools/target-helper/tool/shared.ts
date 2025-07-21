@@ -33,7 +33,7 @@ function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
         return;
     }
 
-    if (data.save) {
+    if (data.saveVariants["null"]) {
         this.warning("drop.already");
         return;
     }
@@ -76,7 +76,7 @@ function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null 
 
     const { item } = resolveActorAndItemFromHTML(el);
     const data: SaveLinkData = {
-        save: { dc, basic: false, statistic: dataset.pf2Check },
+        saveVariants: { null: { dc, basic: false, statistic: dataset.pf2Check } },
         item: item?.uuid,
         options: splitListString(dataset.pf2RollOptions ?? ""),
         traits: splitListString(dataset.pf2Traits ?? ""),
@@ -93,7 +93,7 @@ function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null 
                 });
                 BASIC_SAVE_REGEX = new RegExp(joined);
             }
-            data.save.basic = BASIC_SAVE_REGEX.test(label);
+            data.saveVariants["null"].basic = BASIC_SAVE_REGEX.test(label);
         }
     }
 
@@ -131,7 +131,8 @@ type SaveDragData = SaveLinkData & {
 };
 
 type SaveLinkData = {
-    save: WithPartial<TargetsSaveSource, "author">;
+    author?: ActorUUID;
+    saveVariants: { null: WithPartial<TargetsSaveSource, "saves"> };
     options: string[];
     traits: string[];
     item: ItemUUID | undefined;

@@ -131,7 +131,7 @@ async function rollSaves(
     await Promise.all(filteredTargetsRollsPromise);
 
     if (isMessageOwner(message)) {
-        data.update({ saves: updates });
+        data.updateSaves(updates);
         data.setFlag();
     } else {
         this.updateMessageEmitable.emit({
@@ -278,7 +278,7 @@ async function rerollSave(
     const updates = { [target.id]: rollData };
 
     if (isMessageOwner(message)) {
-        data.update({ saves: updates });
+        data.updateSaves(updates);
         data.setFlag();
     } else {
         this.updateMessageEmitable.emit({
