@@ -18,13 +18,13 @@ class TargetsDataModel extends abstract.DataModel<null, TargetsDataSchema> {
             author: new fields.DocumentUUIDField({
                 required: false,
                 nullable: true,
-                blank: false,
+                type: "Actor",
                 initial: null,
             }),
             item: new fields.DocumentUUIDField({
                 required: false,
                 nullable: true,
-                blank: false,
+                type: "Item",
                 initial: null,
             }),
             isRegen: new fields.BooleanField({
