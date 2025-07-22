@@ -1,3 +1,13 @@
+# 3.4.0
+
+-   this release implements the `Roll Tracker` tool
+-   `Roll Tracker`:
+    -   because of the user settings changes in v13, the previous data isn't accessed by the module anymore
+    -   now only list creatures that are exclusively owned by the player
+-   `Target Helper`:
+    -   the feature has received a significant refactorization to accommodate spells with variants
+    -   fix fast-healing using the current targets instead of self-targeting the triggering token
+
 # 3.3.1
 
 -   `Actionable`:
