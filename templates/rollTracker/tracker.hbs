@@ -1,0 +1,144 @@
+<div class="sidebar" data-tooltip-direction="UP">
+    <div class="options">
+        <select name="mode">
+            {{selectOptions modes selected=mode.type valueAttr="type"}}
+        </select>
+        <select name="filter">
+            {{selectOptions filters selected=filter}}
+        </select>
+        {{#if (eq filter 'time')}}
+        <label>
+            {{@root.i18n 'options.from'}}
+            <input type="date" name="time-from" value="{{time.from}}">
+        </label>
+        <label>
+            {{@root.i18n 'options.to'}}
+            <input type="date" name="time-to" value="{{time.to}}">
+        </label>
+        {{else if (eq filter 'session')}}
+        <select class="time" name="session" {{disabled (eq sessions.length 0)}}>
+            {{selectOptions sessions selected=session}}
+        </select>
+        {{else if (eq filter 'encounter')}}
+        <select class="time" name="encounter" {{disabled (eq encounters.length 0)}}>
+            {{selectOptions encounters selected=encounter}}
+        </select>
+        {{/if}}
+    </div>
+    <div class="list">
+        {{#each list as |user|}}
+        <div class="user{{user.select}}" data-action="select" data-id="user-{{user.id}}">
+            {{user.name}}
+        </div>
+        {{#each user.actors as |actor|}}
+        <div class="actor{{actor.select}}" data-action="select"
+            data-id="user-{{user.id}}-actor-{{actor.id}}">
+            {{actor.name}}
+        </div>
+        {{/each}}
+        {{/each}}
+    </div>
+    {{#if isGM}}
+    <div class="controls">
+        {{#if isPaused}}
+        <button type="button" data-action="play" {{{@root.i18n.tooltip 'controls.play' }}}>
+            <i class="fa-solid fa-play"></i>
+        </button>
+        {{else}}
+        <button type="button" data-action="pause" {{{@root.i18n.tooltip 'controls.pause' }}}>
+            <i class="fa-solid fa-pause"></i>
+        </button>
+        {{/if}}
+        {{#if inSession}}
+        <button type="button" data-action="end" {{{@root.i18n.tooltip 'controls.session' }}}>
+            <i class="fa-solid fa-hourglass-end"></i> {{@root.i18n 'controls.end'}}
+        </button>
+        {{else}}
+        <button type="button" data-action="start" {{{@root.i18n.tooltip 'controls.session' }}}>
+            <i class="fa-solid fa-hourglass-start"></i> {{@root.i18n 'controls.start'}}
+        </button>
+        {{/if}}
+        <button type="button" data-action="delete" {{{@root.i18n.tooltip 'controls.delete' }}}>
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </div>
+    {{else if isPaused}}
+    <div class="info" {{{@root.i18n.tooltip 'info.paused.tooltip' }}}>
+        <i class="fa-solid fa-pause"></i> {{@root.i18n 'info.paused.label'}}
+    </div>
+    {{else if inSession}}
+    <div class="info" {{{@root.i18n.tooltip 'info.session.tooltip' }}}>
+        <i class="fa-solid fa-hourglass-start"></i> {{@root.i18n 'info.session.label'}}
+    </div>
+    {{/if}}
+</div>
+<div class="body">
+    <div class="stats">
+        {{#each stats as |data|}}
+        <div class="stats-entry select-{{@index}}">
+            <div class="entry">
+                <span class="name">{{data.name}}</span>
+            </div>
+            <div class="entry">
+                <span>{{@root.i18n 'stats.total'}}:</span>
+                <span class="value">{{data.total}}</span>
+            </div>
+            <div class="entry">
+                <span>{{@root.i18n 'stats.mean'}}:</span>
+                <span class="value">{{data.mean}}</span>
+            </div>
+            <div class="entry">
+                <span>{{@root.i18n 'stats.median'}}:</span>
+                <span class="value">{{data.median}}</span>
+            </div>
+            <div class="entry">
+                <span>{{@root.i18n 'stats.mode'}}:</span>
+                <span class="value">{{data.mode}}</span>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    <div class="graph" style="--rows: {{left.entries.length}}; --columns: {{mode.entries.length}};">
+        <div class="left">
+            {{@root.i18n 'left'}}
+        </div>
+        <div class="yAbsis">
+            {{#each left as |entry|}}
+            <div class="section">
+                <div class="value">{{entry}}</div>
+                <div class="fake">{{entry}}</div>
+            </div>
+            {{/each}}
+            <div class="section zero">
+                <div class="value">0</div>
+            </div>
+        </div>
+        <div class="bottom">
+            {{#each mode.labels as |label|}}
+            <span>{{label}}</span>
+            {{/each}}
+        </div>
+        <div class="xAbsis">
+            {{#each mode.entries as |entry|}}
+            <div class="section{{#if entry.marker}} marker{{/if}}">
+                <div class="value">{{entry.value}}</div>
+            </div>
+            {{/each}}
+        </div>
+        <div class="grid">
+            {{#each left}}
+            <div class="section"></div>
+            {{/each}}
+        </div>
+        <div class="center" style="--entries: {{selected}};" data-tooltip-direction="UP">
+            {{#each groups as |entries|}}
+            <div class="section">
+                {{#each entries as |entry|}}
+                <div class="value select-{{@index}}" style="--value: {{entry.ratio}}%;"
+                    data-tooltip="{{entry.value}}"></div>
+                {{/each}}
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

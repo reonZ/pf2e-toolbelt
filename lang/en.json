@@ -186,6 +186,13 @@
                     "hint": "Should the resource tracker widget be displayed in your interface. Can be toggled on/off via controls on the left UI."
                 }
             },
+            "rollTracker": {
+                "title": "Roll Tracker",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Track rolls to see if your players are really that unlucky."
+                }
+            },
             "targetHelper": {
                 "title": "Target Helper",
                 "enabled": {
@@ -366,6 +373,101 @@
                 "no": "Cancel",
                 "increase": "{click} increase by {value}",
                 "decrease": "{click} decrease by {value}"
+            }
+        },
+        "rollTracker": {
+            "tracker": {
+                "left": "Number of Rolls",
+                "bottom": "Roll Value",
+                "mode": {
+                    "all": {
+                        "label": "All Checks"
+                    },
+                    "attack-roll": {
+                        "label": "Attack Rolls"
+                    },
+                    "attack-roll-outcome": {
+                        "label": "Attack Outcomes",
+                        "bottom": "Roll Outcome"
+                    },
+                    "saving-throw": {
+                        "label": "Save Checks"
+                    },
+                    "saving-throw-outcome": {
+                        "label": "Save Outcomes",
+                        "bottom": "Fortitude|Reflex|Will"
+                    },
+                    "flat-check": {
+                        "label": "Flat-Checks"
+                    },
+                    "skill-check": {
+                        "label": "Skill Checks"
+                    },
+                    "skill-check-1": {
+                        "label": "Skills (First Half)",
+                        "bottom": "Skill Check"
+                    },
+                    "skill-check-2": {
+                        "label": "Skills (Second Half)",
+                        "bottom": "Skill Check"
+                    },
+                    "perception-check": {
+                        "label": "Perception Checks"
+                    },
+                    "initiative": {
+                        "label": "initiative Checks"
+                    }
+                },
+                "filter": {
+                    "all": "All Time",
+                    "time": "Time Range",
+                    "session": "Session",
+                    "encounter": "Encounter"
+                },
+                "options": {
+                    "from": "From",
+                    "to": "To"
+                },
+                "controls": {
+                    "play": "Resume Recording",
+                    "pause": "Pause Recording",
+                    "start": "Start Session",
+                    "end": "End Session",
+                    "delete": "Clear Records",
+                    "session": "Players will not see any new result until the session ends"
+                },
+                "info": {
+                    "paused": {
+                        "label": "Recording is Paused",
+                        "tooltip": "No roll is being recorded in your world"
+                    },
+                    "session": {
+                        "label": "Currently in Session",
+                        "tooltip": "No new result will be shown until the current session is over"
+                    }
+                },
+                "stats": {
+                    "total": "Nb Rolls",
+                    "mean": "Mean",
+                    "median": "Median",
+                    "mode": "Mode"
+                }
+            },
+            "clear": {
+                "title": "Clear Records",
+                "hint": "Do you want to clear any record up to this date?",
+                "yes": "Clear",
+                "no": "Cancel"
+            },
+            "confirm": {
+                "start": "New Session <strong>{time}</strong> has started.",
+                "end": "Session <strong>{time}</strong> has ended.",
+                "pause": "Rolls recording has been paused.",
+                "play": "Rolls recording has resumed.",
+                "delete": {
+                    "all": "Records have been cleared.",
+                    "before": "Records before <strong>{time}</strong> have been cleared."
+                }
             }
         },
         "targetHelper": {

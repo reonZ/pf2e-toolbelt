@@ -326,4 +326,4 @@ type RerollSaveHook = {
 };
 
 export { rerollSave, rollSaves };
-export type { SaveRollData };
+export type { RerollSaveHook, RollSaveHook, SaveRollData };

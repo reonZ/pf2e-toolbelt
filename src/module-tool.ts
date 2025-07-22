@@ -61,6 +61,13 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return `${this.key}.${setting}`;
     }
 
+    setSetting<K extends keyof TSettings & string>(
+        key: K,
+        value: TSettings[K]
+    ): Promise<TSettings[K]> {
+        return setSetting(this.getSettingKey(key), value);
+    }
+
     render<T extends Record<string, any>>(
         template: string,
         data?: T & RenderTemplateData
@@ -217,6 +224,13 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
 
     get settings(): TTool["settings"] {
         return this.tool.settings;
+    }
+
+    setSetting<K extends keyof TTool["settings"] & string>(
+        key: K,
+        value: TTool["settings"][K]
+    ): Promise<TTool["settings"][K]> {
+        return this.tool.setSetting(key, value);
     }
 
     localize(...args: LocalizeArgs): string {
