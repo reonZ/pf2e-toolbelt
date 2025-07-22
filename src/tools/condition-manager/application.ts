@@ -8,14 +8,13 @@ import {
     createCustomCondition,
     DurationData,
     EncounterPF2e,
-    localize,
     R,
     RenderTemplateData,
 } from "module-helpers";
-import { ConditionManagerTool } from "./tool";
+import { ModuleToolApplication } from "module-tool";
+import { ConditionManagerTool } from ".";
 
-class ConditionManager extends foundry.applications.api.ApplicationV2 {
-    #tool: ConditionManagerTool;
+class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
     #label: string;
     #actor: ActorPF2e;
     #combat: EncounterPF2e | null;
@@ -35,9 +34,8 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         condition: ConditionPF2e<ActorPF2e>,
         options: DeepPartial<ApplicationConfiguration> = {}
     ) {
-        super(options);
+        super(tool, options);
 
-        this.#tool = tool;
         this.#label = "";
         this.#actor = condition.actor;
         this.#condition = condition;
@@ -58,8 +56,12 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
         };
     }
 
+    get key(): string {
+        return "manager";
+    }
+
     get title(): string {
-        return localize("conditionManager.manager.title", this.#condition._source);
+        return this.localize("title", this.#condition._source);
     }
 
     get hasCounter(): boolean {
@@ -81,7 +83,7 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<RenderContext> {
         const isGM = game.user.isGM;
-        const anonLabel = `<${this.#tool.localize("anonymous")}>`;
+        const anonLabel = `<${this.tool.localize("anonymous")}>`;
 
         const labelPlaceholder = this.effectLabel;
         const label = {
@@ -117,13 +119,6 @@ class ConditionManager extends foundry.applications.api.ApplicationV2 {
                 { value: "round-end", label: "PF2E.Item.Effect.Expiry.EndOfRound" },
             ],
         };
-    }
-
-    protected _renderHTML(
-        context: RenderContext,
-        options: ApplicationRenderOptions
-    ): Promise<string> {
-        return this.#tool.render("manager", context);
     }
 
     protected _replaceHTML(

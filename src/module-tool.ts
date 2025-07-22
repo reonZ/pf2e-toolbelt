@@ -1,8 +1,13 @@
 import {
+    ApplicationConfiguration,
+    ApplicationRenderContext,
+    ApplicationRenderOptions,
+    DataField,
     DataFlagArgs,
     deleteFlagProperty,
     deleteInMemory,
     error,
+    FlagData,
     FlagDataArray,
     getDataFlag,
     getDataFlagArray,
@@ -12,6 +17,7 @@ import {
     info,
     localize,
     LocalizeArgs,
+    localizeIfExist,
     localizePath,
     NotificationArgs,
     RegisterSettingOptions,
@@ -26,7 +32,6 @@ import {
     updateSourceFlag,
     warning,
 } from "module-helpers";
-import { FlagData } from "module-helpers/src";
 type Document = foundry.abstract.Document;
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
@@ -69,6 +74,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     localize(...args: LocalizeArgs): string {
         return localize(this.key, ...args);
+    }
+
+    localizeIfExist(...args: LocalizeArgs): string | undefined {
+        return localizeIfExist(this.key, ...args);
     }
 
     info(...args: NotificationArgs): number {
@@ -186,13 +195,53 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     }
 }
 
+abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.applications.api
+    .ApplicationV2 {
+    #tool: TTool;
+
+    constructor(tool: TTool, options: DeepPartial<ApplicationConfiguration> = {}) {
+        super(options);
+
+        this.#tool = tool;
+    }
+
+    abstract get key(): string;
+
+    get tool(): TTool {
+        return this.#tool;
+    }
+
+    get toolKey(): string {
+        return this.tool.key;
+    }
+
+    get settings(): TTool["settings"] {
+        return this.tool.settings;
+    }
+
+    localize(...args: LocalizeArgs): string {
+        return this.tool.localize(this.key, ...args);
+    }
+
+    localizeIfExist(...args: LocalizeArgs): string | undefined {
+        return this.tool.localizeIfExist(this.key, ...args);
+    }
+
+    protected _renderHTML(
+        context: ApplicationRenderContext,
+        options: ApplicationRenderOptions
+    ): Promise<string> {
+        return this.tool.render(this.key, context);
+    }
+}
+
 type ToolSetting<TSettings extends Record<string, any>> = TSettings extends Record<infer K, infer V>
-    ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> }
+    ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> | DataField }
     : never;
 
 type ToolSettingsList<TSettings extends Record<string, any>> = ReadonlyArray<
     ToolSetting<TSettings>
 >;
 
-export { ModuleTool };
+export { ModuleTool, ModuleToolApplication };
 export type { ToolSettingsList };

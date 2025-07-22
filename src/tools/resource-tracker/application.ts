@@ -12,19 +12,19 @@ import {
     RenderTemplateData,
     waitDialog,
 } from "module-helpers";
-import { Resource, ResourceModel, ResourceTrackerTool } from ".";
+import { Resource, ResourceCollection, ResourceModel, ResourceTrackerTool } from ".";
+import { ModuleToolApplication } from "module-tool";
 
-class ResourceTracker extends foundry.applications.api.ApplicationV2 {
-    #tool: ResourceTrackerTool;
+class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
     #userConnectedHook = createHook("userConnected", () => this.render());
 
     #setPosition = R.funnel(
         () => {
             const { left, top } = this.position;
-            const position = this.#tool.settings.position;
+            const position = this.settings.position;
 
             position.set(left, top);
-            this.#tool.settings.position = position;
+            this.settings.position = position;
         },
         { minQuietPeriodMs: 1000 }
     );
@@ -41,10 +41,12 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         },
     };
 
-    constructor(tool: ResourceTrackerTool, options: DeepPartial<ApplicationConfiguration> = {}) {
-        super(options);
+    get key(): string {
+        return "tracker";
+    }
 
-        this.#tool = tool;
+    get resources(): ResourceCollection {
+        return this.tool.resources;
     }
 
     close(options: ApplicationClosingOptions = {}): Promise<this> {
@@ -54,16 +56,16 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<RenderContext> {
         const allUsersResources = getUsersSetting<Resource[]>(
-            this.#tool.getSettingKey("userResources")
+            this.tool.getSettingKey("userResources")
         );
 
-        const usersResources = this.#tool.settings.offline
+        const usersResources = this.settings.offline
             ? allUsersResources
             : allUsersResources.filter(({ user }) => game.users.get(user)?.active);
 
         const userId = game.user.isGM ? "world" : game.userId;
         const [ownResources, otherResources] = R.pipe(
-            [{ user: "world", value: this.#tool.settings.worldResources }, ...usersResources],
+            [{ user: "world", value: this.settings.worldResources }, ...usersResources],
             R.map(({ user, value }) => {
                 const resources = value
                     .filter(({ shared }) => shared || user === userId)
@@ -90,13 +92,6 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         };
     }
 
-    protected _renderHTML(
-        context: RenderContext,
-        options: ApplicationRenderOptions
-    ): Promise<string> {
-        return this.#tool.render("tracker", context);
-    }
-
     protected _replaceHTML(
         result: string,
         content: HTMLElement,
@@ -110,7 +105,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         const windowHeader = htmlQuery(frame, ".window-header");
 
         const header = createHTMLElement("div", {
-            content: await this.#tool.render("header"),
+            content: await this.tool.render("header"),
         });
 
         windowHeader?.replaceChildren(...header.children);
@@ -119,7 +114,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
     }
 
     _onFirstRender(context: RenderContext, options: ApplicationRenderOptions) {
-        const { x, y } = this.#tool.settings.position;
+        const { x, y } = this.settings.position;
         foundry.utils.setProperty(options, "position", { left: x, top: y });
 
         this.#userConnectedHook.activate();
@@ -155,7 +150,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
     }
 
     #updateValue(event: PointerEvent, resourceId: string, direction: 1 | -1) {
-        const resources = this.#tool.resources;
+        const resources = this.resources;
         const resource = resources.get(resourceId);
         if (!resource) return;
 
@@ -173,22 +168,22 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
         isCreate?: boolean
     ): Promise<(Resource & { delete?: boolean }) | false | null> {
         return await waitDialog({
-            content: `${this.#tool.key}/menu`,
-            i18n: `${this.#tool.key}.resource`,
+            content: `${this.toolKey}/menu`,
+            i18n: `${this.toolKey}.resource`,
             data: {
                 resource,
                 isCreate,
             },
-            title: this.#tool.localize("resource.title", isCreate ? "create" : "edit"),
+            title: this.tool.localize("resource.title", isCreate ? "create" : "edit"),
             yes: {
-                label: this.#tool.localize("resource.yes", isCreate ? "create" : "edit"),
+                label: this.tool.localize("resource.yes", isCreate ? "create" : "edit"),
             },
             classes: ["resource-menu"],
         });
     }
 
     async #editResource(resourceId: string) {
-        const resources = this.#tool.resources;
+        const resources = this.resources;
         const resource = resources.get(resourceId);
         if (!resource) return;
 
@@ -211,7 +206,7 @@ class ResourceTracker extends foundry.applications.api.ApplicationV2 {
 
         resource.updateSource(result);
 
-        const resources = this.#tool.resources;
+        const resources = this.resources;
 
         resources.add(resource);
         resources.save();
