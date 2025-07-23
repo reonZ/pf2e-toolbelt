@@ -30,6 +30,7 @@ import {
 import {
     RerollType,
     SaveDragData,
+    TargetsData,
     TargetsDataModel,
     TargetsDataSource,
     TargetsSaveSource,
@@ -188,16 +189,18 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return this.getFlag(message, "save");
     }
 
-    #updateMessage({ message, applied, saves }: UpdateMessageOptions, userId: string) {
-        const data = this.getTargetsFlagData(message);
-        if (!data) return;
+    #updateMessage({ message, applied, saves, variantId }: UpdateMessageOptions, userId: string) {
+        const flag = this.getTargetsFlagData(message);
+        if (!flag) return;
+
+        const data = new TargetsData(flag, variantId);
 
         if (applied) {
-            data.updateSource({ applied });
+            data.update({ applied });
         }
 
         if (saves) {
-            data.updateSource({ saves });
+            data.updateSaves(saves);
         }
 
         data.setFlag();
@@ -276,6 +279,7 @@ type UpdateMessageOptions = {
     applied?: MessageApplied;
     message: ChatMessagePF2e;
     saves?: Record<string, SaveRollData>;
+    variantId?: string;
 };
 
 type MessageApplied = Record<string, toolbelt.targetHelper.MessageTargetApplied>;

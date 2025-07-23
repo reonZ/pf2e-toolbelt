@@ -137,6 +137,7 @@ async function rollSaves(
         this.updateMessageEmitable.emit({
             message,
             saves: updates,
+            variantId: data.variantId,
         });
     }
 }
@@ -284,6 +285,7 @@ async function rerollSave(
         this.updateMessageEmitable.emit({
             message,
             saves: updates,
+            variantId: data.variantId,
         });
     }
 }
