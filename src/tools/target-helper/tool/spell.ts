@@ -56,8 +56,6 @@ async function renderSpellMessage(
 
     await addTargetsHeaders.call(this, message, data, msgContent);
 
-    if (!isMessageOwner(message)) return;
-
     const cardBtns = htmlQuery(msgContent, ".card-buttons");
     const saveBtn = htmlQuery<HTMLButtonElement>(cardBtns, `[data-action="spell-save"]`);
     if (!saveBtn) return;
@@ -72,6 +70,8 @@ async function renderSpellMessage(
 
     addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, data);
     buttonsWrapper.append(fakeSaveBtn);
+
+    if (!isMessageOwner(message)) return;
 
     const setTargetsBtn = createSetTargetsBtn.call(this, data);
     buttonsWrapper.prepend(setTargetsBtn);
