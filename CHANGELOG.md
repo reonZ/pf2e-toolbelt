@@ -1,3 +1,9 @@
+# 3.4.1
+
+-   `Target Helper`:
+    -   fix save rolling not working from a player client
+    -   fix players clicking on the regular save button of a spell message not prioritizing rolling the target save first
+
 # 3.4.0
 
 -   this release implements the `Roll Tracker` tool
