@@ -247,6 +247,17 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
     ): Promise<string> {
         return this.tool.render(this.key, context);
     }
+
+    protected _replaceHTML(
+        result: string,
+        content: HTMLElement,
+        options: ApplicationRenderOptions
+    ): void {
+        content.innerHTML = result;
+        this._activateListeners(content);
+    }
+
+    protected _activateListeners(html: HTMLElement) {}
 }
 
 type ToolSetting<TSettings extends Record<string, any>> = TSettings extends Record<infer K, infer V>

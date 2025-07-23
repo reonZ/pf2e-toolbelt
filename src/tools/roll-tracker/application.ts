@@ -454,7 +454,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
             this.#list.scrollTop = scrollPosition;
         }
 
-        this.#activateListeners(content);
+        this._activateListeners(content);
     }
 
     protected _onClickAction(event: PointerEvent, target: HTMLElement): void {
@@ -523,7 +523,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         };
     }
 
-    #activateListeners(html: HTMLElement) {
+    protected _activateListeners(html: HTMLElement) {
         addListenerAll(html, ".sidebar .options select", "change", (el: HTMLSelectElement) => {
             type SelectName = "mode" | "encounter" | "filter" | "session";
 

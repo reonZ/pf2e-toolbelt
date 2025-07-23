@@ -92,14 +92,6 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
         };
     }
 
-    protected _replaceHTML(
-        result: string,
-        content: HTMLElement,
-        options: ApplicationRenderOptions
-    ): void {
-        content.innerHTML = result;
-    }
-
     async _renderFrame(options: ApplicationRenderOptions) {
         const frame = await super._renderFrame(options);
         const windowHeader = htmlQuery(frame, ".window-header");

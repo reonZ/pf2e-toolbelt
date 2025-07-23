@@ -121,15 +121,6 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
         };
     }
 
-    protected _replaceHTML(
-        result: string,
-        content: HTMLElement,
-        options: ApplicationRenderOptions
-    ): void {
-        content.innerHTML = result;
-        this.#activateListeners(content);
-    }
-
     async _onClickAction(event: PointerEvent, target: HTMLElement) {
         const action = target.dataset.action as "add" | "cancel";
 
@@ -164,7 +155,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
         }
     }
 
-    #activateListeners(html: HTMLElement) {
+    protected _activateListeners(html: HTMLElement) {
         type EventChangeName =
             | "label"
             | "origin"
