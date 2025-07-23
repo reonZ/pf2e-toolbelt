@@ -186,6 +186,13 @@
           "hint": "Le widget de suivi des ressources doit-il être affiché dans votre interface ? Il peut être activé/désactivé via les commandes situées sur l'interface de gauche."
         }
       },
+      "rollTracker": {
+        "title": "Compteur de rencontre",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Suivre les jets pour voir si les joueurs sont vraiment si malchanceux."
+        }
+      },
       "targetHelper": {
         "title": "Assistant de ciblage",
         "enabled": {
@@ -366,6 +373,101 @@
         "no": "Annuler",
         "increase": "{clic} augmenter de {value}",
         "decrease": "{clic} diminuer de {value}"
+      }
+    },
+    "rollTracker": {
+      "tracker": {
+        "left": "Nombre de jets",
+        "bottom": "Valeur du jet",
+        "mode": {
+          "all": {
+            "label": "Tous les tests"
+          },
+          "attack-roll": {
+            "label": "Jets d'attaque"
+          },
+          "attack-roll-outcome": {
+            "label": "Résultats des attaques",
+            "bottom": "Résultats des jets"
+          },
+          "saving-throw": {
+            "label": "Jets de sauvegarde"
+          },
+          "saving-throw-outcome": {
+            "label": "Résultats des jets de sauvegarde",
+            "bottom": "Vigueur|Réflexes|Volonté"
+          },
+          "flat-check": {
+            "label": "Tests nus"
+          },
+          "skill-check": {
+            "label": "Tests de compétence"
+          },
+          "skill-check-1": {
+            "label": "Compétences (Première moitié)",
+            "bottom": "Test de compétence"
+          },
+          "skill-check-2": {
+            "label": "Compétences (Seconde moitié)",
+            "bottom": "Test de compétence"
+          },
+          "perception-check": {
+            "label": "Tests de Perception"
+          },
+          "initiative": {
+            "label": "Tests d'initiative"
+          }
+        },
+        "filter": {
+          "all": "Tout le temps",
+          "time": "Échelle de temps",
+          "session": "La session",
+          "encounter": "La rencontre"
+        },
+        "options": {
+          "from": "De",
+          "to": "À"
+        },
+        "controls": {
+          "play": "Reprendre l'enregistrement",
+          "pause": "Mettre en pause l'enregistrement",
+          "start": "Débuter la session",
+          "end": "Fin de la session",
+          "delete": "Effacer les enregistrements",
+          "session": "Les joueurs ne verront aucun résultat avant la fin de la session"
+        },
+        "info": {
+          "paused": {
+            "label": "L'enregistrement est en pause",
+            "tooltip": "Aucun jet ne sera enregistré dans votre monde"
+          },
+          "session": {
+            "label": "Actuellement en session",
+            "tooltip": "Aucun nouveau résultat ne sera montré avant que la session ne soit terminé"
+          }
+        },
+        "stats": {
+          "total": "Nombre de jets",
+          "mean": "Moyenne",
+          "median": "Médiane",
+          "mode": "Mode"
+        }
+      },
+      "clear": {
+        "title": "Effacer les enregistrements",
+        "hint": "Souhaitez vous effacer tous les enregistrement jusqu'à cette date ?",
+        "yes": "Effacer",
+        "no": "Annuler"
+      },
+      "confirm": {
+        "start": "Nouvelle Session <strong>{time}</strong> a démarré.",
+        "end": "Session <strong>{time}</strong> est terminée.",
+        "pause": "L'enregistrement des jets a été mis sur pause.",
+        "play": "L'enregistrement des jets a repris.",
+        "delete": {
+          "all": "Les enregistrements ont été effacés.",
+          "before": "Les enregistrements avant <strong>{time}</strong> ont été effacés."
+        }
       }
     },
     "targetHelper": {
