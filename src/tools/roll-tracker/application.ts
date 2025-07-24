@@ -326,7 +326,11 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                 !!actor?.prototypeToken.actorLink &&
                 actor.isOfType("creature") &&
                 (actor.ownership.default ?? 3) < 3 &&
-                R.pipe(actor.ownership, R.omit(excludes), R.keys()).length < 2
+                R.pipe(
+                    actor.ownership,
+                    R.entries(),
+                    R.filter(([id, permission]) => (permission ?? 0) >= 3 && !excludes.includes(id))
+                ).length < 2
             );
         });
 
