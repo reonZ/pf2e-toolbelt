@@ -198,7 +198,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
             const _onChange = setting.onChange;
 
             setting.onChange = (value, operation, userId) => {
-                this.#settings[setting.key] = value;
+                if (setting.scope !== "user" || userId === game.userId) {
+                    this.#settings[setting.key] = value;
+                }
+
                 _onChange?.(value, operation, userId);
             };
 
