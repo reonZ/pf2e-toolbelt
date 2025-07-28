@@ -19,7 +19,7 @@ import {
     TokenDocumentPF2e,
     waitDialog,
 } from "module-helpers";
-import { getItem, isMessageOwner, TargetHelperTool } from ".";
+import { getItem, TargetHelperTool } from ".";
 import { RerollType, TargetsData } from "..";
 
 function showGhostDiceOnPrivate() {
@@ -130,16 +130,11 @@ async function rollSaves(
 
     await Promise.all(filteredTargetsRollsPromise);
 
-    if (isMessageOwner(message)) {
-        data.updateSaves(updates);
-        data.setFlag();
-    } else {
-        this.updateMessageEmitable.emit({
-            message,
-            saves: updates,
-            variantId: data.variantId,
-        });
-    }
+    this.updateMessageEmitable.call({
+        message,
+        saves: updates,
+        variantId: data.variantId,
+    });
 }
 
 async function rerollSave(
@@ -278,16 +273,11 @@ async function rerollSave(
 
     const updates = { [target.id]: rollData };
 
-    if (isMessageOwner(message)) {
-        data.updateSaves(updates);
-        data.setFlag();
-    } else {
-        this.updateMessageEmitable.emit({
-            message,
-            saves: updates,
-            variantId: data.variantId,
-        });
-    }
+    this.updateMessageEmitable.call({
+        message,
+        saves: updates,
+        variantId: data.variantId,
+    });
 }
 
 type SaveRollData = {
