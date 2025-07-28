@@ -1,5 +1,6 @@
 import {
     ActorPF2e,
+    ActorSheetPF2e,
     ActorTransferItemArgs,
     addListener,
     addListenerAll,
@@ -14,6 +15,7 @@ import {
     createInputElement,
     createTradeMessage,
     EquipmentFilters,
+    ErrorPF2e,
     FlagData,
     FlagDataArray,
     getPreferredName,
@@ -60,8 +62,8 @@ const FILTER_TYPES = {
 };
 
 class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
-    #useServiceEmitable = createEmitable(this.key, this.#useService.bind(this));
-    #tradeItemEmitable = createEmitable(this.key, this.#tradeItem.bind(this));
+    #useServiceEmitable = createEmitable(`${this.key}.service`, this.#useService.bind(this));
+    #tradeItemEmitable = createEmitable(`${this.key}.item`, this.#tradeItem.bind(this));
 
     static INFINITY = "∞";
 
@@ -99,10 +101,23 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         if (!this.settings.enabled) return;
 
         this.#useServiceEmitable.activate();
+        this.#tradeItemEmitable.activate();
     }
 
     ready(isGM: boolean): void {
         if (!this.settings.enabled) return;
+
+        registerWrapper(
+            "OVERRIDE",
+            [
+                "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.party['pf2e.PartySheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.vehicle['pf2e.VehicleSheetPF2e'].cls.prototype.moveItemBetweenActors",
+            ],
+            this.#actorSheetPF2eMoveItemBetweenActors,
+            this
+        );
 
         registerWrapper(
             "WRAPPER",
@@ -187,6 +202,47 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         });
     }
 
+    /**
+     * slightly changed version of
+     * https://github.com/foundryvtt/pf2e/blob/dfb9e2b53fc36a3525dec1706d24ec2bbafa6322/src/module/actor/sheet/base.ts#L1281
+     */
+    async #actorSheetPF2eMoveItemBetweenActors(
+        sheet: ActorSheetPF2e<ActorPF2e>,
+        event: DragEvent,
+        item: PhysicalItemPF2e,
+        targetActor: ActorPF2e
+    ) {
+        const sourceActor = item.actor;
+        if (!sourceActor || !targetActor) {
+            throw ErrorPF2e("Unexpected missing actor(s)");
+        }
+
+        const containerId = htmlClosest(
+            event.target,
+            "[data-is-container]"
+        )?.dataset.containerId?.trim();
+        const stackable = !!targetActor.inventory.findStackableItem(item._source);
+        const isPurchase = sourceActor.isOfType("loot") && sourceActor.isMerchant;
+
+        // If more than one item can be moved, show a popup to ask how many to move
+        const result = await new ItemTransferDialog(item, {
+            targetActor,
+            lockStack: !stackable,
+            isPurchase,
+        }).resolve();
+
+        if (result !== null) {
+            sourceActor.transferItemToActor(
+                targetActor,
+                item as PhysicalItemPF2e<ActorPF2e>,
+                result.quantity,
+                containerId,
+                result.newStack,
+                result.isPurchase
+            );
+        }
+    }
+
     #onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
         const item = app.item;
         const merchant = item.actor;
@@ -257,6 +313,11 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     #transferItemToActor(source: ActorPF2e, ...args: ActorTransferItemArgs): boolean {
         const [target, item, quantity, containerId, newStack, isPurchase] = args;
+
+        if (!item.isIdentified) {
+            this.warning("item.unided");
+            return true;
+        }
 
         const merchantSelling = isMerchant(source) && isCustomer(target);
         const merchantBuying = !merchantSelling && isMerchant(target) && isCustomer(source);

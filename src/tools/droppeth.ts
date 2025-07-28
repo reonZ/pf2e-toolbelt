@@ -7,12 +7,13 @@ import {
     createToggleKeybind,
     createTradeMessage,
     getTradeData,
-    initiateTrade,
     isPrimaryUpdater,
     itemIsOfType,
     ItemPF2e,
+    ItemTransferDialog,
     LootPF2e,
     LootSource,
+    MoveLootFormData,
     PhysicalItemPF2e,
     positionTokenFromCoords,
     R,
@@ -293,6 +294,33 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         });
     }
 }
+
+async function initiateTrade(
+    item: PhysicalItemPF2e,
+    { prompt, targetActor, title }: InitiateTradeOptions = {}
+): Promise<MoveLootFormData | null> {
+    if (item.quantity <= 0) {
+        return null;
+    }
+
+    if (item.isOfType("backpack") || item.quantity === 1) {
+        return { quantity: 1, newStack: false, isPurchase: false };
+    }
+
+    return new ItemTransferDialog(item, {
+        targetActor,
+        lockStack: !targetActor?.inventory.findStackableItem(item._source),
+        title,
+        prompt,
+        button: title,
+    }).resolve();
+}
+
+type InitiateTradeOptions = {
+    targetActor?: ActorPF2e;
+    title?: string;
+    prompt?: string;
+};
 
 type DroppethOptions = {
     item: PhysicalItemPF2e;

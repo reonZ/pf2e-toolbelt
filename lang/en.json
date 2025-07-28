@@ -312,7 +312,8 @@
             "item": {
                 "error": "An error occured while trying to process a better merchant item trade: <strong>{reason}</strong>.",
                 "noStock": "<strong>{actor}</strong> cannot provide the requested quantity of <strong>{item}</strong>.",
-                "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>."
+                "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>.",
+                "unided": "Nobody sane would want to buy some random unidentified item."
             },
             "sheet": {
                 "browser": "From Browser",
