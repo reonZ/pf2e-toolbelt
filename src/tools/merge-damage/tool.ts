@@ -24,7 +24,7 @@ import {
     toggleHooksAndWrappers,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { isMessageOwner } from "tools/target-helper";
+import { isMessageOwner } from "tools";
 import { MergeDataModel } from ".";
 
 const _cached: { injected?: string; icons: PartialRecord<ButtonType, string> } = {
@@ -126,13 +126,14 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         })());
     }
 
-    getMessageFlagData(message: ChatMessagePF2e): MergeDataModel[] | undefined {
+    getMessageFlagData(message: ChatMessagePF2e): MergeDataModel[] {
         return this.getDataFlagArray(message, MergeDataModel, "data");
     }
 
     getMessageData(message: ChatMessagePF2e): MergeDataModel[] {
         const data = this.getMessageFlagData(message);
-        if (data) {
+
+        if (data.length) {
             return data;
         }
 
@@ -241,7 +242,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             } else if (action === "split-damage") {
                 const flag = this.getMessageFlagData(message);
 
-                const sources = flag?.flatMap((data) => {
+                const sources = flag.flatMap((data) => {
                     const source = data.source;
 
                     source.sound = null;
