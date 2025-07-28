@@ -1,0 +1,518 @@
+{
+  "LEVIKTIMES": {
+    "gmOnly": "Sólo MJ",
+    "reloadRequired": "Requiere recarga",
+    "emiting": {
+      "label": "Enviando",
+      "noGm": "Un MJ debe estar en línea para poder ejecutar esta solicitud."
+    }
+  },
+  "pf2e-toolbelt": {
+    "keybindings": {
+      "conditionManager": {
+        "manage": {
+          "name": "Gestionar condición",
+          "hint": "Mantener presionada la tecla al eliminar una condición para administrar su duración."
+        }
+      },
+      "betterMovement": {
+        "teleport": {
+          "name": "Teletransportar Tokens",
+          "hint": "Tecla que se mantiene presionada mientras hace clic en la escena para teletransportar todas las fichas seleccionadas."
+        },
+        "unselect": {
+          "name": "Teletransportar Tokens (Deselecionar)",
+          "hint": "Tecla que se mantiene presionada mientras hace clic en la escena para teletransportar todas las fichas seleccionadas. También puedes deseleccionar las fichas al pulsar la combinación de teclas para tener una visión despejada de toda la escena."
+        }
+      },
+      "droppeth": {
+        "droppeth": {
+          "name": "Modificador de Droppeth",
+          "hint": "Tecla a mantener al soltar un objeto en el suelo."
+        }
+      }
+    },
+    "settings": {
+      "actionable": {
+        "title": "Accionable",
+        "action": {
+          "name": "Macro de Acción",
+          "hint": "Agrega una forma de vincular una macro a acciones/dotes."
+        },
+        "apply": {
+          "name": "Auto autoaplicado",
+          "hint": "Botón para efecto autoaplicado que aplicará automáticamente el efecto."
+        },
+        "item": {
+          "name": "Macro de objeto",
+          "hint": "Agrega una forma de vincular una macro a equipo y artículos consumibles."
+        },
+        "spell": {
+          "name": "Macro de conjuro",
+          "hint": "Agrega una forma de vincular una macro a los conjuros."
+        },
+        "use": {
+          "name": "Utilizar consumible",
+          "hint": "Agregará un botón de \"uso\" adicional para consumibles y generará un mensaje personalizado cuando se use."
+        }
+      },
+      "anonymous": {
+        "title": "Anónimo",
+        "spell": {
+          "name": "Anonimizar conjuros de PNJ",
+          "hint": "Los conjuros lanzados por un actor que no es propiedad del jugador serán anonimizados para los jugadores."
+        }
+      },
+      "arp": {
+        "title": "Progresión automática de runas",
+        "enabled": {
+          "name": "Activado",
+          "hint": "¿Debería tu mundo utilizar la variante de progresión automática de runas?"
+        },
+        "force": {
+          "name": "Forzar actualización",
+          "hint": "Al habilitar esta opción, las runas se actualizarán siempre según el nivel del actor. Al deshabilitarla, solo se actualizarán las runas con un valor inferior al que deberían para ese nivel."
+        },
+        "price": {
+          "name": "Sin precio de runa",
+          "hint": "¿Se deben restar los precios de las runas fundamentales del precio del arma?"
+        },
+        "shield": {
+          "name": "Runa de escudo",
+          "hint": "¿También deberían añadirse runas de refuerzo a los escudos?"
+        }
+      },
+      "betterEffectsPanel": {
+        "title": "Panel de mejores efectos",
+        "remove": {
+          "name": "Atajo para eliminar efectos",
+          "hint": "Al utilizar [Shift + clic derecho] en los íconos de efectos en el panel de efectos, se eliminarán instantáneamente todas sus cargas/contadores/insignias."
+        }
+      },
+      "betterInventory": {
+        "title": "Mejor inventario",
+        "coins": {
+          "name": "Monedas sin peso",
+          "hint": "Las monedas en el inventario no pesan."
+        },
+        "dropped": {
+          "name": "Sin peso por lo soltado",
+          "hint": "El equipo \"soltado\" en el inventario de un actor no se tendrá en cuenta para el cálculo del peso total."
+        }
+      },
+      "betterMovement": {
+        "title": "Mejor movimiento",
+        "teleport": {
+          "name": "Teletransportar fichas",
+          "hint": "Al hacer clic en el tablero mientras se mantiene presionada la combinación de teclas definida, se teletransportarán instantáneamente las fichas seleccionadas a la ubicación sin necesidad de viajar.",
+          "choices": {
+            "disabled": "Desactivado",
+            "enabled": "Activado",
+            "select": "Re-seleccionar fichas"
+          }
+        },
+        "history": {
+          "name": "Sin registro histórico",
+          "hint": "¿Debería estar prohibido el registro del historial de movimientos para ti? Esto simplifica la confusión en los movimientos sucesivos de un mismo turno."
+        }
+      },
+      "betterTemplate": {
+        "title": "Mejores plantillas",
+        "target": {
+          "name": "Objetivo automático",
+          "hint": "Al colocar una plantilla en el tablero, aparecerá un nuevo cuadro de diálogo que te permitirá apuntar a todas las fichas que se encuentran dentro de ella."
+        }
+      },
+      "betterTrade": {
+        "title": "Mejor comercio",
+        "withContent": {
+          "name": "Con el contenido de contenedores",
+          "hint": "Cuando un contenedor se mueve de un actor a otro, ¿debe su contenido ir con él?"
+        }
+      },
+      "conditionManager": {
+        "title": "Administrador de condiciones",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Arrastra una condición mientras se mantiene presionada la combinación de teclas definida para abrir el administrador de condiciones que te permitirá establecer su duración."
+        }
+      },
+      "droppeth": {
+        "title": "Soltar",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Permitir a los usuarios soltar objetos en el tablero manteniendo presionada la tecla asignada."
+        },
+        "light": {
+          "name": "Fuente de luz",
+          "hint": "¿Debería el objeto soltado emitir luz? Esto solo ocurrirá si hay un solo objeto presente en el actor de botín."
+        }
+      },
+      "mergeDamage": {
+        "title": "Fusionar daños",
+        "merge": {
+          "name": "Botón de fusión",
+          "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
+        },
+        "inject": {
+          "name": "Botón de inyección",
+          "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
+        }
+      },
+      "giveth": {
+        "title": "Entregar",
+        "enabled": {
+          "name": "Activado",
+          "hint": "¿Debería tu mundo permitir que los actores de tus jugadores puedan dar elementos de inventario a otros actores propiedad de los jugadores?"
+        },
+        "effect": {
+          "name": "Incluir efectos/condiciones",
+          "hint": "¿Deberían también los jugadores poder aplicar efectos y condiciones a actores que no son de su propiedad?.",
+          "choices": {
+            "disabled": "Desactivado",
+            "ally": "Sólo aliados",
+            "all": "Todos los actores"
+          }
+        }
+      },
+      "resourceTracker": {
+        "title": "Rastreador de recursos",
+        "offline": {
+          "name": "Mostrar fuera de línea",
+          "hint": "Muestra también recursos compartidos de usuarios sin conexión."
+        },
+        "show": {
+          "name": "Mostrar rastreador",
+          "hint": "¿Debería mostrarse el widget de seguimiento de recursos en su interfaz? Puede activarlo o desactivarlo mediante los controles de la interfaz izquierda."
+        }
+      },
+      "rollTracker": {
+        "title": "Rastreador de tiradas",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Realiza un seguimiento de los dados para ver si tus jugadores realmente tienen tanta mala suerte."
+        }
+      },
+      "targetHelper": {
+        "title": "Asistente de objetivo",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Habilitar la función 'Ayudante de objetivo' en tu mundo."
+        },
+        "small": {
+          "name": "Botones de daño pequeños",
+          "hint": "Reduce el tamaño de los botones de daño para los objetivos adicionales."
+        },
+        "targets": {
+          "name": "Agregar objetivos a los mensajes",
+          "hint": "Agregará objetivos adicionales a los mensajes de chat donde se puede aplicar daño y se pueden realizar salvaciones."
+        },
+        "checks": {
+          "name": "Actualizar mensajes de comprobaciones",
+          "hint": "Se actualizan los mensajes salvaciones para que la función pueda usarlos. También se añaden más detalles."
+        }
+      },
+      "underground": {
+        "title": "Subterráneo",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Permitirá que las fichas con elevación negativa permanezcan visibles en el tablero."
+        },
+        "mode": {
+          "name": "Filtro aplicado",
+          "hint": "¿Qué tipo de filtro se debe aplicar a las fichas con una elevación inferior a 0?",
+          "choices": {
+            "normal": "Sin filtro",
+            "greyscale": "Filtro de escala de grises",
+            "sepia": "Filtro sepia"
+          }
+        },
+        "contrast": {
+          "name": "Contraste",
+          "hint": "Valor de contraste cuando la ficha tiene una elevación negativa."
+        },
+        "alpha": {
+          "name": "Opacidad",
+          "hint": "Valor de opacidad cuando la ficha tiene una elevación negativa."
+        }
+      },
+      "unided": {
+        "title": "Establecer imagen de \"No identificado\"",
+        "create": {
+          "name": "Al crear el objeto",
+          "hint": "Establece automáticamente la imagen de \"no identificado\" de los objetos para que sea la misma que la imagen normal cuando se crea o importa el objeto."
+        },
+        "update": {
+          "name": "Al actualizar el objeto",
+          "hint": "Actualiza automáticamente la imagen de \"no identificado\" cuando se actualice la imagen normal del objeto."
+        }
+      }
+    },
+    "actionable": {
+      "action": {
+        "label": "Efecto de autoaplicado / Macro",
+        "hint": "Un objeto con efecto único que se aplicará al actor que usa esta acción o una macro que se ejecutará cuando se use esta acción",
+        "cancel": "La acción <strong>{name}</strong> fue cancelada por su macro."
+      },
+      "item": {
+        "label": "Macro",
+        "hint": "Una macro que se ejecutará cuando se utilice este objeto",
+        "cancel": "El uso de <strong>{name}</strong> fue cancelado por su macro."
+      },
+      "spell": {
+        "label": "Macro",
+        "hint": "Una macro que se ejecutará cuando se lance este conjuro.",
+        "cancel": "El lanzamiento de <strong>{name}</strong> fue cancelado por su macro."
+      }
+    },
+    "anonymous": {
+      "spell": {
+        "header": "Está lanzando un conjuro...",
+        "context": "Revelar conjuro a los jugadores"
+      }
+    },
+    "betterTemplate": {
+      "target": {
+        "all": "Ambos",
+        "allies": "Aliados",
+        "dismiss": "Eliminar plantilla",
+        "enemies": "Enemigos",
+        "neutral": "Incluir neutrales",
+        "self": "Incluirse a sí mismo",
+        "title": "Asistente de plantillas",
+        "yes": "Objetivo"
+      }
+    },
+    "conditionManager": {
+      "manager": {
+        "title": "Administrador de condiciones - {name}",
+        "add": "Crear",
+        "cancel": "Cancelar",
+        "origin": "Origen",
+        "label": "Etiqueta",
+        "anonymous": "Anónimo"
+      }
+    },
+    "droppeth": {
+      "dialog": {
+        "title": "Objeto soltado",
+        "prompt": "¿Cuántos artículos deseas soltar?"
+      },
+      "error": {
+        "out-of-bounds": "No se pudo crear la ficha soltada en la ubicación proporcionada.",
+        "unknown": "Algo salió mal al intentar soltar los objetos seleccionados.",
+        "no-scene": "No hay ninguna escena disponible para soltar."
+      },
+      "message": {
+        "subtitle": "Objeto soltado",
+        "content": {
+          "item": "{source} suelta {quantity} × {item} en el suelo.",
+          "container": "{source} suelta {item} y todo su contenido."
+        }
+      }
+    },
+    "giveth": {
+      "error": "Algo salió mal al intentar procesar una solicitud de <strong>entrega</strong> del jugador.",
+      "dialog": {
+        "title": "Entregar objeto",
+        "prompt": "¿Cuántos objetos deseas entregar?"
+      },
+      "message": {
+        "subtitle": "Entregar objeto",
+        "content": {
+          "item": "{source} entrega {quantity} × {item} a {target}.",
+          "container": "{source} entrega {item} y todo su contenido a {target}."
+        }
+      }
+    },
+    "mergeDamage": {
+      "buttons": {
+        "split": "Volver a los mensajes originales",
+        "merge": "Fusionar con el mensaje de daño anterior",
+        "inject": "Inyectar daño al mensaje anterior"
+      },
+      "injected": "Se inyectó daño en este mensaje.",
+      "noMatch": "No se pudo encontrar otro mensaje de daño coincidente."
+    },
+    "resourceTracker": {
+      "header": {
+        "add": "Agregar nuevo recurso"
+      },
+      "resource": {
+        "title": {
+          "create": "Crear nuevo recurso",
+          "edit": "Editar recurso"
+        },
+        "name": {
+          "label": "Nombre del recurso",
+          "default": "Nuevo recurso"
+        },
+        "value": {
+          "label": "Valor",
+          "min": "Valor mínimo",
+          "max": "Valor máximo",
+          "current": "Valor actual"
+        },
+        "steps": {
+          "label": "Pasos por click",
+          "step1": "[Click]",
+          "step2": "[Shift-Click]",
+          "step3": "[Control-Click]"
+        },
+        "timeout": {
+          "label": "Tiempo de espera (segundos)",
+          "tooltip": "Tiempo que pasa en tu mundo antes de que el valor del recurso se reduzca en 1"
+        },
+        "edit": "[Clic derecho] Editar recurso",
+        "delete": "¿Eliminar recurso?",
+        "shared": "¿Visible para los demás?",
+        "yes": {
+          "create": "Crear",
+          "edit": "Editar"
+        },
+        "no": "Cancelar",
+        "increase": "{click} aumenta en {value}",
+        "decrease": "{click} disminuye en {value}"
+      }
+    },
+    "rollTracker": {
+      "tracker": {
+        "left": "Número de tiradas",
+        "bottom": "Valor de la tirada",
+        "mode": {
+          "all": {
+            "label": "Todos las pruebas"
+          },
+          "attack-roll": {
+            "label": "Tiradas de ataque"
+          },
+          "attack-roll-outcome": {
+            "label": "Resultados del ataque",
+            "bottom": "Resultado de la tirada"
+          },
+          "saving-throw": {
+            "label": "Pruebas de salvación"
+          },
+          "saving-throw-outcome": {
+            "label": "Resultados de las salvaciones",
+            "bottom": "Fortaleza|Reflejos|Voluntad"
+          },
+          "flat-check": {
+            "label": "Tirada plana"
+          },
+          "skill-check": {
+            "label": "Pruebas de habilidad"
+          },
+          "skill-check-1": {
+            "label": "Habilidades (Primera mitad)",
+            "bottom": "Prueba de habilidad"
+          },
+          "skill-check-2": {
+            "label": "Habilidades (Segunda mitad)",
+            "bottom": "Prueba de habilidad"
+          },
+          "perception-check": {
+            "label": "Prueba de percepción"
+          },
+          "initiative": {
+            "label": "Prueba de iniciativa"
+          }
+        },
+        "filter": {
+          "all": "Todo el tiempo",
+          "time": "Intervalo de tiempo",
+          "session": "Sesión",
+          "encounter": "Encuentro"
+        },
+        "options": {
+          "from": "Desde",
+          "to": "Hasta"
+        },
+        "controls": {
+          "play": "Reanudar grabación",
+          "pause": "Pausar grabación",
+          "start": "Iniciar sesión",
+          "end": "Finalizar sesión",
+          "delete": "Borrar registros",
+          "session": "Los jugadores no verán ningún resultado nuevo hasta que finalice la sesión."
+        },
+        "info": {
+          "paused": {
+            "label": "La grabación está en pausa",
+            "tooltip": "No se está grabando ninguna tirada en tu mundo"
+          },
+          "session": {
+            "label": "Actualmente en sesión",
+            "tooltip": "No se mostrará ningún resultado nuevo hasta que finalice la sesión actual."
+          }
+        },
+        "stats": {
+          "total": "Nº de tiradas",
+          "mean": "Media",
+          "median": "Mediana",
+          "mode": "Moda"
+        }
+      },
+      "clear": {
+        "title": "Borrar registros",
+        "hint": "¿Quieres borrar algún registro hasta la fecha?",
+        "yes": "Borrar",
+        "no": "Cancelar"
+      },
+      "confirm": {
+        "start": "Se ha iniciado una nueva sesión <strong>{time}</strong>.",
+        "end": "La sesión <strong>{time}</strong> ha finalizado.",
+        "pause": "La grabación de las tiradas ha sido pausada.",
+        "play": "Se ha reanudado la grabación de las tiradas.",
+        "delete": {
+          "all": "Los registros han sido borrados.",
+          "before": "Los registros anteriores a <strong>{time}</strong> han sido borrados."
+        }
+      }
+    },
+    "targetHelper": {
+      "check-card": {
+        "merge": "Fusionar con el siguiente mensaje de daño"
+      },
+      "damage": {
+        "toggle": "Activar o desactivar los botones de daño originales"
+      },
+      "drop": {
+        "added": "Has añadido con éxito una salvación al mensaje.",
+        "already": "Este mensaje ya tiene una salvación vinculada a él.",
+        "unauth": "Sólo puedes hacer esto en mensajes de los que seas autor."
+      },
+      "header": {
+        "hidden": "Oculto para los jugadores",
+        "noSave": "Este actor no puede realizar tiradas de {save}",
+        "select": "Seleccionar objetivo<br>[Doble clic] Abrir hoja"
+      },
+      "merge": {
+        "none": "No se pudo encontrar un mensaje de daño adecuado para fusionar."
+      },
+      "reroll": {
+        "title": "Repetir tirada de salvación",
+        "noPoints": "Necesitas al menos 1 punto de héroe para repetir la tirada.",
+        "yes": "Repetir tirada",
+        "no": "Cancelar",
+        "keeley": "Repetir bajo"
+      },
+      "rollSaves": "Tirar salvaciones de PNJ",
+      "setTargets": {
+        "splashTargets": "Establecer objetivos de salpicadura",
+        "targets": "Establecer objetivos"
+      },
+      "tooltip": {
+        "adjustment": "Ajuste: {value}",
+        "dcWithValue": "CD {dc}",
+        "reroll": "Puede repetir la tirada de salvación",
+        "result": {
+          "format": "Resultado: {result}",
+          "withOffset": "{success} por {offset}",
+          "withoutOffset": "{success}"
+        }
+      },
+      "unnamed": "Sin nombre"
+    }
+  }
+}
