@@ -11,10 +11,13 @@ import {
     confirmDialog,
     createEmitable,
     createHTMLElement,
+    createInputElement,
+    createTradeMessage,
     EquipmentFilters,
     FlagData,
     FlagDataArray,
     getPreferredName,
+    giveItemToActor,
     htmlClosest,
     htmlQuery,
     htmlQueryIn,
@@ -26,6 +29,7 @@ import {
     R,
     registerWrapper,
     toggleSummary,
+    TradeMessageOptions,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import {
@@ -83,6 +87,12 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     get browserTab(): CompendiumBrowserEquipmentTab {
         return this.browser.tabs.equipment;
+    }
+
+    get api(): Record<string, any> {
+        return {
+            getAllFilters: this.getAllFilters,
+        };
     }
 
     init(isGM: boolean): void {
@@ -179,23 +189,46 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     #onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
         const item = app.item;
-        if (!isMerchant(item.actor)) return;
-
-        const filter = this.getInMemory<ItemFilterModel>(item, "filter");
-        if (!(filter instanceof foundry.abstract.DataModel)) return;
+        const merchant = item.actor;
+        if (!isMerchant(merchant)) return;
 
         const html = $html[0];
         const priceElement = htmlQuery(html, ".price");
-        const quantityInput = htmlQuery<HTMLInputElement>(html, "input[name=quantity]");
+        const infiniteAll = this.getFlag(merchant, "infiniteAll");
+        const maxQuantity = infiniteAll ? Infinity : item.quantity;
+        const filter = this.getInMemory<ItemFilterModel>(item, "filter");
+        const ratio = filter?.ratio ?? 1;
+
+        let quantityInput = htmlQuery<HTMLInputElement>(html, "input[name=quantity]");
+
+        if (infiniteAll) {
+            if (quantityInput) {
+                quantityInput.removeAttribute("max");
+            } else {
+                const wrapper = createHTMLElement("div", {
+                    classes: ["quantity"],
+                    content: ` x `,
+                });
+
+                quantityInput = createInputElement("number", "quantity", 1);
+                quantityInput.setAttribute("min", "1");
+                quantityInput.setAttribute("step", "1");
+                quantityInput.style.height = "calc(var(--form-field-height) - 1px)";
+
+                wrapper.appendChild(quantityInput);
+
+                htmlQuery(html, ".item-row .name")?.after(wrapper);
+            }
+        }
 
         if (priceElement) {
             const getQuantity = () => {
-                return Math.clamp(quantityInput?.valueAsNumber ?? 1, 1, item.quantity);
+                return Math.clamp(quantityInput?.valueAsNumber ?? 1, 1, maxQuantity);
             };
 
             const updatePrice = () => {
                 const quantity = getQuantity();
-                const cost = game.pf2e.Coins.fromPrice(item.price, quantity).scale(filter.ratio);
+                const cost = game.pf2e.Coins.fromPrice(item.price, quantity).scale(ratio);
                 priceElement.innerText = `(${cost.toString()})`;
             };
 
@@ -224,16 +257,26 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     #transferItemToActor(source: ActorPF2e, ...args: ActorTransferItemArgs): boolean {
         const [target, item, quantity, containerId, newStack, isPurchase] = args;
-        const realQty = Math.min(quantity, item.quantity);
-        if (realQty <= 0) return false;
 
-        const merchantBuying = isMerchant(target) && isCustomer(source);
-        const merchantSelling = !merchantBuying && isMerchant(source) && isCustomer(target);
+        const merchantSelling = isMerchant(source) && isCustomer(target);
+        const merchantBuying = !merchantSelling && isMerchant(target) && isCustomer(source);
         if (!merchantSelling && !merchantBuying) return false;
 
-        const [filter, merchant, customer] = merchantBuying
-            ? [this.getAllFilters(target, "buy").find((x) => x.testFilter(item)), target, source]
-            : [this.getInMemory<ItemFilterModel>(item, "filter"), source as LootPF2e, target];
+        const [merchant, customer] = merchantSelling
+            ? [source, target]
+            : [target as LootPF2e, source];
+
+        const infiniteAll = this.getFlag(merchant, "infiniteAll");
+        const realQty = infiniteAll ? quantity : Math.min(quantity, item.quantity);
+
+        if (realQty <= 0) {
+            this.warning("item.noStock", { actor: merchant.name, item: item.name });
+            return true;
+        }
+
+        const filter = merchantSelling
+            ? this.getInMemory<ItemFilterModel>(item, "filter")
+            : this.getAllFilters(merchant, "buy").find((x) => x.testFilter(item));
 
         if (merchantSelling) {
             if (!filter) return false;
@@ -252,17 +295,18 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
         } else {
             if (!filter) {
-                this.warning("item.refuse", { actor: merchant.name });
+                this.warning("item.refuse", { actor: merchant.name, item: item.name });
                 return true;
             }
-
-            console.log(filter);
         }
 
         this.#tradeItemEmitable.call({
+            containerId,
             filterId: filter.id,
             free: !merchantBuying && !isPurchase,
+            infinite: merchantSelling && !!infiniteAll,
             item,
+            newStack,
             quantity: realQty,
             target,
         });
@@ -270,7 +314,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return true;
     }
 
-    async #tradeItem({ filterId, free, item, quantity, target }: TradeItemOptions) {
+    async #tradeItem(
+        { filterId, free, infinite, item, newStack, quantity, target }: TradeItemOptions,
+        userId: string
+    ) {
         const error = (reason: string) => {
             this.warning("item.error", { reason });
         };
@@ -279,15 +326,72 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return error("missing");
         }
 
-        const itemActor = item.actor;
-        const merchantSelling = isMerchant(itemActor);
-        const [merchant, customer] = merchantSelling ? [itemActor, target] : [target, itemActor];
+        const seller = item.actor;
+        const buyer = target;
+        const realQty = infinite ? quantity : Math.min(quantity, item.quantity);
+        if (realQty <= 0) return error("quantity");
 
-        const realQty = Math.min(quantity, item.quantity);
+        const merchantSelling = isMerchant(seller);
+        const merchant = merchantSelling ? seller : (buyer as LootPF2e);
+        const filter = this.getAllFilters(merchant, merchantSelling ? "sell" : "buy").find(
+            (x) => x.id === filterId
+        );
+        if (!filter) return error("missing");
 
-        if (realQty <= 0) {
-            return error("quantity");
+        const price = game.pf2e.Coins.fromPrice(item.price, realQty).scale(filter.ratio);
+
+        if (merchantSelling && !free) {
+            if (!(await buyer.inventory.removeCoins(price))) return error("funds");
+        } else if (!merchantSelling) {
+            await seller.inventory.addCoins(price);
         }
+
+        const data: TradeMessageOptions = {
+            message: "PF2E.loot.SellMessage",
+            source: seller,
+            subtitle: game.i18n.localize("PF2E.loot.SellSubtitle"),
+            target,
+            userId,
+        } as TradeMessageOptions satisfies Omit<TradeMessageOptions, "item" | "quantity">;
+
+        if (infinite) {
+            const itemSource = item.toObject();
+
+            const createItem = async () => {
+                itemSource.system.quantity = realQty;
+                itemSource.system.equipped.carryType = "worn";
+
+                const [item] = await target.createEmbeddedDocuments("Item", [itemSource]);
+
+                data.item = item as PhysicalItemPF2e<ActorPF2e>;
+            };
+
+            if (!newStack) {
+                const existingItem = target.inventory.findStackableItem(itemSource);
+
+                if (existingItem) {
+                    await existingItem.update({
+                        "system.quantity": existingItem.quantity + realQty,
+                    });
+
+                    data.item = existingItem;
+                } else {
+                    await createItem();
+                }
+            } else {
+                await createItem();
+            }
+
+            data.quantity = realQty;
+        } else {
+            const added = await giveItemToActor(item, target, realQty, newStack);
+            if (!added) return error("added");
+
+            data.item = added.item;
+            data.quantity = added.giveQuantity;
+        }
+
+        createTradeMessage(data);
     }
 
     async #lootSheetPF2eRenderInner(
@@ -330,10 +434,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             const filter = itemFilters.find((filter) => filter.testFilter(item));
             const ratio = filter?.ratio ?? 1;
 
+            this.setInMemory(item, { filter });
+
             if (ratio !== 1) {
                 const priceElement = htmlQuery(el, ".price span");
-
-                this.setInMemory(item, { filter });
 
                 if (priceElement) {
                     priceElement.innerText = item.price.value.scale(ratio).toString();
@@ -559,18 +663,12 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         if (!free) {
             const quantity = service.quantity;
-
-            if (quantity === 0) {
-                return error("quantity");
-            }
+            if (quantity === 0) return error("quantity");
 
             const filters = this.getAllFilters(seller, "service");
             const filter = service.testFilters(filters);
             const price = service.getFilteredPrice(filter);
-
-            if (!(await buyer.inventory.removeCoins(price))) {
-                return error("funds");
-            }
+            if (!(await buyer.inventory.removeCoins(price))) return error("funds");
 
             if (quantity > 0) {
                 service.updateSource({ quantity: quantity - 1 });
@@ -638,10 +736,14 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             content: data.label,
         });
 
-        btn.addEventListener("click", async (event) => {
-            await this.browser.close();
-            data.callback(event);
-        });
+        btn.addEventListener(
+            "click",
+            async (event) => {
+                await this.browser.close();
+                data.callback(event);
+            },
+            { once: true }
+        );
 
         controls?.replaceWith(btn);
     }
@@ -703,9 +805,12 @@ type ServiceMacroData = {
 };
 
 type TradeItemOptions = {
+    containerId: string | undefined;
     filterId: string;
     free: boolean;
+    infinite: boolean;
     item: PhysicalItemPF2e<ActorPF2e>;
+    newStack: boolean | undefined;
     quantity: number;
     target: ActorPF2e;
 };

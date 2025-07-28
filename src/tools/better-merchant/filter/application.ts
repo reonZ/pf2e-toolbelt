@@ -4,6 +4,7 @@ import {
     ApplicationConfiguration,
     ApplicationRenderOptions,
     confirmDialog,
+    EquipmentFilters,
     FlagData,
     FlagDataArray,
     getInputValue,
@@ -12,7 +13,7 @@ import {
     R,
 } from "module-helpers";
 import { ModuleToolApplication } from "module-tool";
-import { DefaultFilterModel, ServiceFilterModel } from ".";
+import { DefaultFilterModel, ItemFilterModel, ServiceFilterModel } from ".";
 import { BetterMerchantTool, FILTER_TYPES, FilterType, FilterTypes } from "..";
 
 class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
@@ -22,7 +23,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         classes: ["pf2e-toolbelt-better-merchant-filters"],
         position: {
             width: 900,
-            height: 600,
+            height: 700,
         },
         tag: "form",
     };
@@ -84,6 +85,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         if (action === "delete-filter") {
             this.#deleteFilter(type, filterId);
         } else if (action === "edit-filter") {
+            this.#editFilter(type, filterId);
         } else if (action === "move-filter") {
             this.#moveFilter(type, filterId, target);
         }
@@ -159,6 +161,53 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         this.render();
     }
 
+    async #editFilter(type: FilterType, filterId: string) {
+        if (type === "service") return;
+
+        const filters = this.getFilters(type);
+        const filter = filters.find((x) => x.id === filterId);
+        if (!filter) return;
+
+        const actor = this.actor;
+        const label = this.tool.localize("browserFilter.edit");
+
+        const merchantFilter = filter.filter;
+        const filterData = foundry.utils.mergeObject(
+            await this.tool.browserTab.getFilterData(),
+            merchantFilter
+        );
+
+        if (merchantFilter.ranges) {
+            for (const range of Object.values(filterData.ranges)) {
+                range.isExpanded = true;
+            }
+        }
+
+        if (merchantFilter.level) {
+            filterData.level.isExpanded = true;
+        }
+
+        if (merchantFilter.source) {
+            filterData.source.isExpanded = true;
+        }
+
+        for (const key of Object.keys(merchantFilter.checkboxes ?? {})) {
+            const checkbox = filterData.checkboxes[key as keyof typeof filterData.checkboxes];
+            if (checkbox) {
+                checkbox.isExpanded = true;
+            }
+        }
+
+        const callback = async () => {
+            const filterData = await this.#getEquipmentFilter();
+            filter.updateSource({ "==filter": filterData });
+            await filters.setFlag();
+            this.render();
+        };
+
+        this.tool.openEquipmentTab({ actor, label, callback }, filterData);
+    }
+
     #addFilter(type: FilterType) {
         const actor = this.actor;
 
@@ -175,10 +224,24 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         }
 
         const label = this.tool.localize("browserFilter.create");
-        const callback = () => {
-            // new BrowserPullMenu(this, actor).render(true);
+        const callback = async () => {
+            const filterData = await this.#getEquipmentFilter();
+            const filter = new ItemFilterModel({ filter: filterData });
+            addFilter(filter);
         };
-        return this.tool.openEquipmentTab({ actor, label, callback });
+
+        this.tool.openEquipmentTab({ actor, label, callback });
+    }
+
+    async #getEquipmentFilter(): Promise<Partial<EquipmentFilters>> {
+        const tab = this.tool.browserTab;
+        const filterData: Partial<EquipmentFilters> = foundry.utils.diffObject(
+            await tab.getFilterData(),
+            tab.filterData
+        );
+
+        delete filterData.order;
+        return filterData;
     }
 }
 
