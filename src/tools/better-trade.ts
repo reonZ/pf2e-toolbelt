@@ -52,17 +52,14 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         target: ActorPF2e,
         item: PhysicalItemPF2e<ActorPF2e>
     ): boolean {
-        const isLoot = actor.isOfType("loot");
-        const targetIsLoot = target.isOfType("loot");
-
         if (
             item.isOfType("backpack") &&
             item.quantity >= 1 &&
             item.contents.size > 0 &&
             actor.canUserModify(game.user, "update") &&
             target.canUserModify(game.user, "update") &&
-            (!isLoot || !actor.isMerchant) &&
-            (!targetIsLoot || !target.isMerchant)
+            (!actor.isOfType("loot") || !actor.isMerchant) &&
+            (!target.isOfType("loot") || !target.isMerchant)
         ) {
             this.#transferContainerEmitable.call({ item, target });
             return true;

@@ -584,7 +584,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         try {
             const dataString = event.dataTransfer?.getData("text/plain");
             const dropData = JSON.parse(dataString ?? "");
-            if (typeof dropData !== "object") return;
+
+            if (typeof dropData !== "object") {
+                throw new Error("invalid data type.");
+            }
 
             if (dropData.type === "Item") {
                 const item = await getDocumentClass("Item").fromDropData(dropData);
@@ -595,6 +598,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 const macro = await getDocumentClass("Macro").fromDropData(dropData);
                 return isScriptMacro(macro) ? macro : null;
             }
+
+            throw new Error("invalid data type.");
         } catch (err) {
             throw MODULE.Error(err);
         }

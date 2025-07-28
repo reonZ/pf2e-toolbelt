@@ -100,6 +100,13 @@
                     "hint": "Upuszczony sprzęt w ekwipunku aktora nie będzie uwzględniany przy obliczaniu wartości obciążenia."
                 }
             },
+            "betterMerchant": {
+                "title": "Lepszy Kupiec",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Dodawanie niestandardowych funkcji do domyślnego kupca systemowego."
+                }
+            },
             "betterMovement": {
                 "title": "Lepszy Ruch",
                 "teleport": {
@@ -268,6 +275,75 @@
             "spell": {
                 "header": "Rzuca zaklęcie...",
                 "context": "Ujawnij zaklęcie graczom"
+            }
+        },
+        "betterMerchant": {
+            "browserFilter": {
+                "empty": "Nie ma sensu tworzyć filtra bez ... filtrów."
+            },
+            "browserPull": {
+                "add": "Dodaj do kupca",
+                "all": "Przełącz wszystkie",
+                "confirm": "<div>Czy na pewno chcesz dodać przedmiot(y) (wybrano): <strong>{nb}</strong>) do kupca?</div><div>Proces ten może potrwać kilka sekund w zależności od ilości przedmiotów.</div>",
+                "finished": "Zakończono dodawanie przedmiotów do aktora kupca.",
+                "limit": "Osiągnąłeś limit!",
+                "owned": "Ten przedmiot znajduje się już w ekwipunku kupca",
+                "selected": "Wybrane",
+                "title": "Dodaj przedmioty - {name}",
+                "wait": "Poczekaj na przetworzenie przedmiotów."
+            },
+            "filtersMenu": {
+                "buy": "Filtry zakupu",
+                "enabled": "Włączone",
+                "ratio": "Współczynnik ceny",
+                "sell": "Filtry sprzedaży",
+                "title": "Filtry przedmiotów - {name}",
+                "treasure": "Skarby przechodzące przez ten filtr będą zawsze kupowane za 100% ich ceny"
+            },
+            "sheet": {
+                "browser": "Z przeglądarki",
+                "infiniteAll": {
+                    "label": "Nieskończone zapasy"
+                }
+            },
+            "sheetServices": {
+                "add": "Dodaj usługę",
+                "buy": "Zamów usługę",
+                "delete": "Usuń usługę",
+                "edit": "Edytuj usługę",
+                "enabled": "Przełącz usługę",
+                "export": "Eksportuj usługi",
+                "give": "Darmowa usługa",
+                "import": "Importuj usługi",
+                "label": "Usługi"
+            },
+            "service": {
+                "buy": "<strong>{buyer}</strong> wynajął usługi od <strong>{seller}</strong>.",
+                "give": "<strong>{seller}</strong> oferuje swoje usługi <strong>{buyer}</strong> bezpłatnie.",
+                "noBuyer": "Musisz wybrać jedną postać/postać niezależną/drużynę jako cel usługi.",
+                "noFunds": "<strong>{buyer}</strong> nie ma funduszy, aby wynająć usługi od <strong>{seller}</strong>.",
+                "noStock": "<strong>{seller}</strong> nie oferuje już tej usługi."
+            },
+            "serviceMenu": {
+                "buy": "<strong>{buyer}</strong> wynajął usługi od <strong>{seller}</strong>.",
+                "delete": {
+                    "title": "Usuń usługę",
+                    "content": "Czy na pewno chcesz usunąć tę usługę?"
+                },
+                "enabled": "Włączone",
+                "error": "Wystąpił błąd podczas próby przetworzenia żądania usługi",
+                "export": "Eksport usługi",
+                "give": "<strong>{seller}</strong> oferuje swoje usługi <strong>{buyer}</strong> bezpłatnie.",
+                "macro": {
+                    "label": "Makro wykonywane w usłudze"
+                },
+                "name": "Nazwa",
+                "noBuyer": "Musisz wybrać jedną postać/postać niezależną/drużynę jako cel usługi.",
+                "noFunds": "<strong>{buyer}</strong> nie ma funduszy, aby wynająć usługi od <strong>{seller}</strong>.",
+                "none": "Nie udało się znaleźć usługi",
+                "noStock": "<strong>{seller}</strong> nie oferuje już tej usługi.",
+                "quantity": "Liczba ujemna dla nieskończonych zasobów",
+                "title": "Usługa - {label}"
             }
         },
         "betterTemplate": {

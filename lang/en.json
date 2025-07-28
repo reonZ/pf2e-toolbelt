@@ -100,6 +100,13 @@
                     "hint": "Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
                 }
             },
+            "betterMerchant": {
+                "title": "Better Merchant",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Add custom functionalities to the default system merchant."
+                }
+            },
             "betterMovement": {
                 "title": "Better Movement",
                 "teleport": {
@@ -269,6 +276,93 @@
             "spell": {
                 "header": "Is casting a spell..",
                 "context": "Reveal spell to Players"
+            }
+        },
+        "betterMerchant": {
+            "browserFilter": {
+                "create": "Create Filter",
+                "edit": "Edit Filter",
+                "empty": "No point on creating a filter without .. filters."
+            },
+            "browserPull": {
+                "add": "Add To Merchant",
+                "all": "Toggle All",
+                "confirm": "<div>Are you sure you want to add the item(s) (selected: <strong>{nb}</strong>) to the merchant?</div><div>The process can take several seconds depending on the amount of items.</div>",
+                "finished": "Items have finished being added to the merchant actor.",
+                "limit": "You have reached the limit!",
+                "owned": "This item is already in the merchant's inventory",
+                "selected": "Selected",
+                "title": "Add Items - {name}",
+                "wait": "Please wait for the items to be processed."
+            },
+            "filtersMenu": {
+                "buy": "Buy Filters",
+                "delete": {
+                    "title": "Delete Filter",
+                    "content": "Are you sure you want to delete this Filter?"
+                },
+                "enabled": "Enabled",
+                "ratio": "Price Ratio",
+                "sell": "Sell Filters",
+                "service": "Service Filters",
+                "tag": "Tag",
+                "title": "Item Filters - {name}",
+                "treasure": "Treasures reaching this filter will always be bought for 100% of their price"
+            },
+            "item": {
+                "error": "An error occured while trying to process a better merchant item trade: <strong>{reason}</strong>.",
+                "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>."
+            },
+            "sheet": {
+                "browser": "From Browser",
+                "filters": "Setup Filters",
+                "infiniteAll": {
+                    "label": "Infinite Stocks",
+                    "tooltip": "The merchant will never run out of items to sell (does nothing to Treasures or Services)"
+                }
+            },
+            "sheetServices": {
+                "add": "Add Service",
+                "buy": "Request Service",
+                "delete": "Delete Service",
+                "edit": "Edit Service",
+                "enabled": "Toggle Service",
+                "export": "Export services",
+                "free": "Free",
+                "give": "Free Service",
+                "import": "Import Services",
+                "label": "Services"
+            },
+            "service": {
+                "buy": "<strong>{buyer}</strong> hired the services of <strong>{seller}</strong>.",
+                "error": "An error occured while trying to process a better merchant service ({service}) : <strong>{reason}</strong>.",
+                "give": "<strong>{seller}</strong> offers their services to <strong>{buyer}</strong> free of charge.",
+                "noBuyer": "You must select one Character/NPC/Party you own as the target of the service.",
+                "noFunds": "<strong>{buyer}</strong> doesn't have the funds to hire the services of <strong>{seller}</strong>.",
+                "noStock": "<strong>{seller}</strong> doesn't offer that service anymore."
+            },
+            "serviceMenu": {
+                "buy": "<strong>{buyer}</strong> hired the services of <strong>{seller}</strong>.",
+                "delete": {
+                    "title": "Delete Service",
+                    "content": "Are you sure you want to delete this Service?"
+                },
+                "enabled": "Enabled",
+                "error": "An error occured while trying to process the service request",
+                "export": "Export Service",
+                "give": "<strong>{seller}</strong> offers their services to <strong>{buyer}</strong> free of charge.",
+                "macro": {
+                    "label": "Macro Executed on Service",
+                    "drop": "Drop Macro Here"
+                },
+                "name": "Name",
+                "noBuyer": "You must select one Character/NPC/Party you own as the target of the service.",
+                "noFunds": "<strong>{buyer}</strong> doesn't have the funds to hire the services of <strong>{seller}</strong>.",
+                "none": "Couldn't find the service",
+                "noStock": "<strong>{seller}</strong> doesn't offer that service anymore.",
+                "quantity": "Negative number for infinite stock",
+                "tags": "Service Tags",
+                "title": "Service - {label}"
             }
         },
         "betterTemplate": {

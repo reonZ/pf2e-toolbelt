@@ -1,0 +1,91 @@
+{{#each sections as |section|}}
+<div class="section" data-section-type="{{section.type}}">
+    <div class="header">
+        {{@root.i18n section.type}}
+        <a data-action="add-filter"><i class="fa-solid fa-plus"></i></a>
+    </div>
+    <div class="filters">
+        {{#each section.filters as |filter|}}
+        {{> 'filter' type=section.type filter=filter isDefault=false}}
+        {{/each}}
+        {{> 'filter' type=section.type filter=section.default isDefault=true}}
+    </div>
+</div>
+{{/each}}
+
+{{#*inline 'filter'}}
+<fieldset class="filter" data-filter-id="{{filter.id}}">
+    <div class="group">
+        <label class="name">
+            <input type="text" name="name" value="{{filter.name}}" placeholder="{{filter.id}}"
+                {{disabled isDefault}}>
+        </label>
+        <div class="controls">
+            <div class="carets">
+                {{#if (or isDefault @first)}}
+                <span>
+                    <i class="fa-solid fa-caret-up"></i>
+                </span>
+                {{else}}
+                <a data-action="move-filter" data-direction="up">
+                    <i class="fa-solid fa-caret-up"></i>
+                </a>
+                {{/if}}
+                {{#if (or isDefault @last)}}
+                <span>
+                    <i class="fa-solid fa-caret-down"></i>
+                </span>
+                {{else}}
+                <a data-action="move-filter" data-direction="down">
+                    <i class="fa-solid fa-caret-down"></i>
+                </a>
+                {{/if}}
+            </div>
+            {{#if isDefault}}
+            {{#unless (eq type 'service')}}
+            <span>
+                <i class="fa-solid fa-pen-to-square"></i>
+            </span>
+            {{/unless}}
+            <span>
+                <i class="fa-solid fa-trash"></i>
+            </span>
+            {{else}}
+            {{#unless (eq type 'service')}}
+            <a data-action="edit-filter">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            {{/unless}}
+            <a data-action="delete-filter">
+                <i class="fa-solid fa-trash"></i>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+    {{#if (and (eq type 'service') (not isDefault))}}
+    <div class="group">
+        <label class="tag">
+            {{@root.i18n 'tag'}}
+            <input type="text" name="tag" value="{{filter.tag}}">
+        </label>
+        <label class="level">
+            {{localize 'PF2E.LevelLabel'}}
+            <input type="number" name="level" value="{{filter.level}}" min="0">
+        </label>
+    </div>
+    {{/if}}
+    <div class="group">
+        <label class="ratio">
+            {{@root.i18n 'ratio'}}
+            <input type="number" name="ratio" value="{{filter.ratio}}" min="0" max="10" step="0.5">
+            {{#if (and isDefault (eq section.type 'buy'))}}
+            <i class="fa-solid fa-coin" {{{@root.i18n.tooltip 'treasure' }}}></i>
+            {{/if}}
+        </label>
+        <label class="enabled">
+            {{@root.i18n 'enabled'}}
+            <input type="checkbox" name="enabled" {{checked filter.enabled}}>
+        </label>
+    </div>
+</fieldset>
+{{/inline}}

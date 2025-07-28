@@ -15,6 +15,7 @@ import {
     getInMemory,
     getSetting,
     info,
+    joinStr,
     localize,
     LocalizeArgs,
     localizeIfExist,
@@ -73,6 +74,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         data?: T & RenderTemplateData
     ): Promise<string> {
         return render(`${this.key}/${template}`, data);
+    }
+
+    localizeKey(...path: string[]): string {
+        return joinStr(".", this.key, ...path);
     }
 
     localizePath(...path: string[]): string {
@@ -157,7 +162,7 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         doc: D,
         Model: ConstructorOf<T>,
         ...path: string[]
-    ): FlagDataArray<T, D> | undefined {
+    ): FlagDataArray<T, D> {
         return getDataFlagArray(doc, Model, this.key, ...path);
     }
 
@@ -233,12 +238,24 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
         return this.tool.setSetting(key, value);
     }
 
+    localizePath(...path: string[]): string {
+        return this.tool.localizePath(this.key, ...path);
+    }
+
+    localizeKey(...path: string[]): string {
+        return this.tool.localizeKey(this.key, ...path);
+    }
+
     localize(...args: LocalizeArgs): string {
         return this.tool.localize(this.key, ...args);
     }
 
     localizeIfExist(...args: LocalizeArgs): string | undefined {
         return this.tool.localizeIfExist(this.key, ...args);
+    }
+
+    info(...args: NotificationArgs): number {
+        return this.tool.info(this.key, ...args);
     }
 
     protected _renderHTML(

@@ -1,0 +1,24 @@
+<div class="pf2e chat-card item-card" data-actor-id="{{actor.id}}" data-service-id="{{service.id}}"
+    {{#if tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+    {{#if tradeMsg}}
+    <i>{{{tradeMsg}}}</i>
+    {{/if}}
+    <header class="card-header flexrow">
+        <img src="{{service.img}}" />
+        <h3>{{service.label}}</h3>
+        {{#if service.tags.length}}
+        <div class="paizo-style tags">
+            {{#each service.tags as |tag|}}
+            <span class="tag">{{tag}}</span>
+            {{/each}}
+        </div>
+        {{/if}}
+    </header>
+    <div class="card-content">
+        {{{service.enrichedDescription}}}
+    </div>
+    <footer>
+        <span>{{localize "PF2E.LevelLabel"}} {{service.level}}</span>
+        <span>{{localize "PF2E.PriceLabel"}} {{service.enrichedPrice}}</span>
+    </footer>
+</div>

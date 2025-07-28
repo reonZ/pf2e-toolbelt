@@ -1,0 +1,411 @@
+#pf2e-toolbelt-better-merchant-browserPull {
+    --even-background-color: var(--color-dark-2);
+
+    max-height: 80%;
+
+    .window-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        padding-inline: 0;
+        padding-top: 0.5em;
+
+        .header {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            align-items: center;
+            justify-content: end;
+            gap: 2em;
+            padding-inline: 1em 2em;
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid var(--color-border);
+
+            > div {
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+            }
+        }
+
+        .items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+
+            .item {
+                display: grid;
+                grid-template-columns: 2.4em 1fr 9em 5em 1.5em 2.4em;
+                align-items: center;
+                justify-items: center;
+                gap: 0.25rem;
+                margin: 0;
+                padding-inline: 0.8em 0.3em;
+
+                &:nth-child(odd) {
+                    background-color: var(--even-background-color);
+                }
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.25);
+                }
+
+                img {
+                    height: 2.286em;
+                }
+
+                .name {
+                    justify-self: start;
+                }
+
+                .tags,
+                .price,
+                .level {
+                    height: 100%;
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .price {
+                    justify-content: end;
+                    margin-right: 0.65em;
+                }
+
+                .tags,
+                .level {
+                    justify-content: center;
+                }
+
+                .owned {
+                    font-size: 1.3em;
+                    margin-right: 0.1em;
+                }
+            }
+        }
+    }
+}
+
+.application.pf2e-toolbelt-better-merchant-service {
+    .window-content {
+        --row-height: 1.8em;
+        --row-gap: 0.2em;
+        --row-column-gap: 0.5em;
+
+        --color-disabled: grey;
+
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        .header {
+            display: flex;
+            gap: 1em;
+
+            input[type="text"],
+            input[type="number"] {
+                padding-block: 0;
+                height: var(--row-height);
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+                gap: var(--row-column-gap);
+
+                span {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.3em;
+                    white-space: nowrap;
+                }
+            }
+
+            .image {
+                cursor: pointer;
+                height: calc(var(--row-height) * 2 + var(--row-gap));
+                aspect-ratio: 1/1;
+                border: 1px solid var(--color-border);
+            }
+
+            .data {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: var(--row-gap);
+
+                .row,
+                string-tags {
+                    input[type="text"] {
+                        height: var(--row-height);
+                    }
+
+                    button {
+                        min-height: 0;
+                        flex-basis: max-content;
+                        height: calc(var(--row-height) - 1px);
+                        flex-basis: 32px;
+                        line-height: unset;
+                    }
+                }
+
+                string-tags {
+                    column-gap: var(--row-column-gap);
+                    row-gap: calc(var(--row-gap) / 2);
+                    margin-top: calc(var(--row-gap) / 2);
+                }
+
+                .row {
+                    display: flex;
+                    align-items: center;
+                    gap: 2em;
+
+                    .name,
+                    .enabled {
+                        flex: 1;
+                    }
+
+                    .level {
+                        input {
+                            width: 2em;
+                            text-align: center;
+                            padding-inline: 0;
+                        }
+                    }
+
+                    .price {
+                        input {
+                            width: 8em;
+                            text-align: end;
+                        }
+                    }
+
+                    .quantity {
+                        input {
+                            text-align: end;
+                            width: 3em;
+                        }
+                    }
+
+                    &.macro {
+                        flex: 1;
+                        gap: var(--row-column-gap);
+
+                        .macro-link {
+                            flex: 1;
+                            height: var(--row-height);
+                            border: 1px solid var(--color-border);
+                            border-radius: 4px;
+                            display: flex;
+                            align-items: center;
+
+                            img {
+                                border: 0;
+                                border-right: 1px solid var(--color-border);
+                                box-sizing: border-box;
+                                display: block;
+                                float: left;
+                                height: 100%;
+                            }
+
+                            span {
+                                padding-inline: 0.3em 0.5em;
+                            }
+
+                            &.empty {
+                                span {
+                                    color: var(--color-disabled);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .editor {
+            flex: 1;
+            border: 1px solid var(--color-border);
+            border-radius: 2px;
+
+            .editor-content {
+                padding-inline: 8px;
+            }
+
+            .editor-menu {
+                padding: 0 0.2em;
+                border-radius: 0;
+            }
+
+            .editor-container {
+                .editor-content {
+                    overflow-y: auto;
+                }
+            }
+        }
+    }
+}
+
+.application.pf2e-toolbelt-better-merchant-filters {
+    --border-color: #816b668a;
+    --color-disabled: grey;
+    --group-height: 1.8em;
+
+    .window-content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        padding: 0;
+        overflow: auto;
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            padding-inline: 0.6em;
+
+            input {
+                &[type="text"],
+                &[type="number"] {
+                    height: 1.5em;
+                    line-height: 1.5;
+                }
+
+                &[type="number"] {
+                    text-align: right;
+                }
+
+                &[type="checkbox"] {
+                    margin: 0;
+                }
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                font-size: 1.5em;
+                padding: 0.5em 0.3em;
+
+                i {
+                    font-size: 0.9em;
+                }
+            }
+
+            .filters {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 1em;
+
+                .filter {
+                    display: flex;
+                    white-space: nowrap;
+                    flex-direction: column;
+                    padding: 0.4em 0.5em;
+                    border-color: var(--border-color);
+                    border-radius: 8px;
+                    margin: 0;
+                    gap: 0.1em;
+
+                    .group,
+                    .group > * {
+                        display: flex;
+                        flex-wrap: nowrap;
+                        align-items: center;
+                    }
+
+                    .group {
+                        gap: 1em;
+                        justify-content: space-between;
+                        height: var(--group-height);
+                    }
+
+                    label {
+                        gap: 0.3em;
+
+                        &.name {
+                            flex: 1;
+                        }
+
+                        &.level {
+                            input {
+                                width: calc(1rem + 2ch);
+                            }
+                        }
+
+                        &.ratio {
+                            margin-left: 0.1em;
+
+                            input {
+                                width: calc(1rem + 4ch);
+                            }
+                        }
+
+                        &.enabled {
+                            margin-right: -1px;
+                        }
+                    }
+
+                    .controls {
+                        gap: 0.6em;
+
+                        span {
+                            color: var(--color-disabled);
+                        }
+
+                        .carets {
+                            font-size: 1.5em;
+                            display: flex;
+                            flex-wrap: nowrap;
+                            align-items: center;
+                            gap: 0.3em;
+                            margin-right: 0.1em;
+                        }
+                    }
+                }
+            }
+
+            &:nth-child(2) {
+                border-right: 1px solid var(--border-color);
+                border-left: 1px solid var(--border-color);
+            }
+        }
+    }
+}
+
+.sheet.actor.loot form {
+    section.content section.inventory section.inventory-list {
+        .price,
+        .price span {
+            &.cheap {
+                color: #0d5c10;
+                text-shadow: 0 0 1px #56d167;
+            }
+
+            &.expensive {
+                color: #7e1a1a;
+                text-shadow: 0 0 1px #c77a7a;
+            }
+        }
+
+        header.services,
+        .items.services {
+            .item-controls {
+                flex-basis: 6rem;
+
+                :only-child {
+                    margin-right: 0.2em;
+                }
+            }
+        }
+    }
+}
+
+body.theme-light {
+    #pf2e-toolbelt-better-merchant-browserPull {
+        --even-background-color: #2222222e;
+    }
+}

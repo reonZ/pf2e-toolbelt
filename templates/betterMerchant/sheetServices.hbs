@@ -1,0 +1,105 @@
+<header class="services">
+    <h3 class="item-name">{{@root.i18n 'label'}}</h3>
+    <span class="price">{{localize 'PF2E.PriceLabel'}}</span>
+    <span class="quantity">{{localize 'PF2E.QuantityLabel'}}</span>
+    {{#if isGM}}
+    <div class="item-controls">
+        <a data-better-action="export-services" {{#unless services.length}}class="disabled"
+            {{/unless}} {{{@root.i18n.tooltip 'export' }}}>
+            <i class="fa-regular fa-file-export"></i>
+        </a>
+        <a data-better-action="import-services" {{{@root.i18n.tooltip 'import' }}}>
+            <i class="fa-regular fa-file-import"></i>
+        </a>
+        <a data-better-action="create-service" {{{@root.i18n.tooltip 'add' }}}>
+            <i class="fa-solid fa-fw fa-plus"></i>
+        </a>
+    </div>
+    {{else}}
+    <div class="item-controls"></div>
+    {{/if}}
+</header>
+<ul class="items services">
+    {{#each services as |service index|}}
+    <li data-service-id="{{service.id}}" draggable="false">
+        <div class="data">
+            <div class="item-name">
+                <a class="item-image" data-better-action="service-to-chat">
+                    <img class="item-icon" src="{{service.img}}">
+                    <i class="fa-solid fa-message"></i>
+                </a>
+                <h4 class="name rarity-common">
+                    <a data-better-action="toggle-service-summary">
+                        {{service.label}}
+                    </a>
+                </h4>
+            </div>
+            {{#if service.isFree}}
+            <div class="price">{{@root.i18n 'free'}}</div>
+            {{else}}
+            <span class="price{{#if @root.isGM}} {{service.priceUpdate}}{{/if}}">
+                {{service.enrichedPrice}}
+            </span>
+            {{/if}}
+            <span class="quantity">
+                {{#if service.isInfinite}}
+                {{@root.infinity}}
+                {{else}}
+                {{!-- decrease btn --}}
+                {{#if @root.isGM}}
+                <a class="decrease{{#if service.isInfinite}} disabled{{/if}}"
+                    data-better-action="decrease-service">–</a>
+                {{/if}}
+                {{!-- quantity --}}
+                {{service.quantity}}
+                {{!-- increase btn --}}
+                {{#if @root.isGM}}
+                <a class="increase" data-better-action="increase-service">+</a>
+                {{/if}}
+                {{/if}}
+
+            </span>
+            <div class="item-controls{{#if @root.isGM}} large{{/if}}">
+                {{#if service.quantity}}
+                <a data-better-action="buy-service" {{{@root.i18n.tooltip 'buy' }}}>
+                    <i class="fa-fw fa-solid fa-coins"></i>
+                </a>
+                {{/if}}
+                {{#if @root.isGM}}
+                <a data-better-action="give-service" {{{@root.i18n.tooltip 'give' }}}>
+                    <i class="fa-fw fa-regular fa-hand-back-fist"></i>
+                </a>
+                <a class="toggle-enabled" {{{@root.i18n.tooltip 'enabled' }}}
+                    data-better-action="toggle-service-enabled">
+                    {{#if service.enabled}}
+                    <i class="fa-fw fa-solid fa-square-check"></i>
+                    {{else}}
+                    <i class="fa-fw fa-regular fa-square"></i>
+                    {{/if}}
+                </a>
+                <a data-better-action="edit-service" {{{@root.i18n.tooltip 'edit' }}}>
+                    <i class="fa-solid fa-fw fa-edit"></i>
+                </a>
+                <a data-better-action="delete-service" {{{@root.i18n.tooltip 'delete' }}}>
+                    <i class="fa-solid fa-fw fa-trash"></i>
+                </a>
+                {{/if}}
+            </div>
+            <div class="item-summary" hidden="hidden">
+                {{#if service.tags.length}}
+                <div class="paizo-style tags">
+                    {{#each service.tags as |tag|}}
+                    <span class="tag">{{tag}}</span>
+                    {{/each}}
+                </div>
+                {{/if}}
+                <section>
+                    <div>{{localize 'PF2E.LevelLabel'}} {{service.level}}</div>
+                    <div>{{localize 'PF2E.PriceLabel'}}: {{service.enrichedPrice}}</div>
+                </section>
+                {{{service.enrichedDescription}}}
+            </div>
+        </div>
+    </li>
+    {{/each}}
+</ul>
