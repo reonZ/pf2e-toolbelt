@@ -1,3 +1,22 @@
+# 3.5.0
+
+-   `Better Merchant`:
+    -   remove the `Services Ratio` toggle on the sheet
+    -   remove `Purse` functionality from filters
+    -   services can now have arbitrary tags
+    -   services are now updated when the application is closed instead of being refreshed live
+    -   services now have filters much like items
+    -   the module no longer modifies the data of the items (during data preparation) it instead display the modified values directly in the different applications and completely hijacks the trade to apply them when necessary
+-   `Merge Damage`:
+    -   fix the tool not working (though i am not sure the bug was actually in the last version or not)
+-   `Roll Tracker`:
+    -   fix creatures list missing some actors
+    -   fix rolls being mixed up between users
+        -   i sadly can't go back and fix all the rolls that were saved on the wrong users
+-   `Target Helper`:
+    -   fix saves being overriden when rolled by another user while the modifiers windows is open
+    -   fix `Notes` icon margin
+
 # 3.4.1
 
 -   `Target Helper`:
