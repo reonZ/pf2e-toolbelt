@@ -313,6 +313,10 @@
                 "error": "An error occured while trying to process a better merchant item trade: <strong>{reason}</strong>.",
                 "noStock": "<strong>{actor}</strong> cannot provide the requested quantity of <strong>{item}</strong>.",
                 "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>.",
+                "sell": {
+                    "title": "Sell Items",
+                    "prompt": "How many items do you wish to sell?"
+                },
                 "unided": "Nobody sane would want to buy some random unidentified item."
             },
             "sheet": {

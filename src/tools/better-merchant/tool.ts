@@ -110,6 +110,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             "OVERRIDE",
             [
                 "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.moveItemBetweenActors",
                 "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.moveItemBetweenActors",
                 "CONFIG.Actor.sheetClasses.party['pf2e.PartySheetPF2e'].cls.prototype.moveItemBetweenActors",
                 "CONFIG.Actor.sheetClasses.vehicle['pf2e.VehicleSheetPF2e'].cls.prototype.moveItemBetweenActors",
@@ -222,14 +223,17 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const isPurchase = sourceActor.isOfType("loot") && sourceActor.isMerchant;
         const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
         const filter = isPurchase ? this.getInMemory<ItemFilterModel>(item, "filter") : undefined;
+        const isSelling = !isPurchase && isMerchant(targetActor) && isCustomer(sourceActor);
 
         // If more than one item can be moved, show a popup to ask how many to move
         const result = await new ItemTransferDialog(item, {
             infinite,
             isPurchase,
             lockStack: !stackable,
+            prompt: isSelling ? this.localize("item.sell.prompt") : undefined,
             ratio: filter?.ratio,
             targetActor,
+            title: isSelling ? this.localize("item.sell.title") : undefined,
         }).resolve();
 
         if (result !== null) {
