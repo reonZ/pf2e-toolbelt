@@ -1,3 +1,9 @@
+# 3.5.1
+
+-   `Better Merchant`:
+    -   add custom title and message to the popup window when selling items
+    -   fix issue with trading popup showing when not needed and preventing the trade altogether
+
 # 3.5.0
 
 -   this release implements the `Better Merchant` tool
