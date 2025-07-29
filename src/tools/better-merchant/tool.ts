@@ -12,7 +12,6 @@ import {
     confirmDialog,
     createEmitable,
     createHTMLElement,
-    createInputElement,
     createTradeMessage,
     EquipmentFilters,
     ErrorPF2e,
@@ -23,7 +22,6 @@ import {
     htmlClosest,
     htmlQuery,
     htmlQueryIn,
-    ItemTransferDialog,
     LootPF2e,
     LootSheetPF2e,
     NPCPF2e,
@@ -45,6 +43,7 @@ import {
     ServiceModel,
 } from ".";
 import { sharedActorTransferItemToActor } from "tools/_shared";
+import { ItemTransferDialog } from "trade-dialog";
 
 const FILTER_TYPES = {
     buy: {
@@ -132,8 +131,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             this.#lootSheetPF2eActivateListeners,
             this
         );
-
-        Hooks.on("renderItemTransferDialog", this.#onRenderItemTransferDialog.bind(this));
 
         sharedActorTransferItemToActor
             .register(this.#transferItemToActor, { context: this, priority: -100 })
@@ -223,12 +220,16 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         )?.dataset.containerId?.trim();
         const stackable = !!targetActor.inventory.findStackableItem(item._source);
         const isPurchase = sourceActor.isOfType("loot") && sourceActor.isMerchant;
+        const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
+        const filter = isPurchase ? this.getInMemory<ItemFilterModel>(item, "filter") : undefined;
 
         // If more than one item can be moved, show a popup to ask how many to move
         const result = await new ItemTransferDialog(item, {
-            targetActor,
-            lockStack: !stackable,
+            infinite,
             isPurchase,
+            lockStack: !stackable,
+            ratio: filter?.ratio,
+            targetActor,
         }).resolve();
 
         if (result !== null) {
@@ -239,74 +240,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 containerId,
                 result.newStack,
                 result.isPurchase
-            );
-        }
-    }
-
-    #onRenderItemTransferDialog(app: ItemTransferDialog, $html: JQuery) {
-        const item = app.item;
-        const merchant = item.actor;
-        if (!isMerchant(merchant)) return;
-
-        const html = $html[0];
-        const priceElement = htmlQuery(html, ".price");
-        const infiniteAll = this.getFlag(merchant, "infiniteAll");
-        const maxQuantity = infiniteAll ? Infinity : item.quantity;
-        const filter = this.getInMemory<ItemFilterModel>(item, "filter");
-        const ratio = filter?.ratio ?? 1;
-
-        let quantityInput = htmlQuery<HTMLInputElement>(html, "input[name=quantity]");
-
-        if (infiniteAll) {
-            if (quantityInput) {
-                quantityInput.removeAttribute("max");
-            } else {
-                const wrapper = createHTMLElement("div", {
-                    classes: ["quantity"],
-                    content: ` x `,
-                });
-
-                quantityInput = createInputElement("number", "quantity", 1);
-                quantityInput.setAttribute("min", "1");
-                quantityInput.setAttribute("step", "1");
-                quantityInput.style.height = "calc(var(--form-field-height) - 1px)";
-
-                wrapper.appendChild(quantityInput);
-
-                htmlQuery(html, ".item-row .name")?.after(wrapper);
-            }
-        }
-
-        if (priceElement) {
-            const getQuantity = () => {
-                return Math.clamp(quantityInput?.valueAsNumber ?? 1, 1, maxQuantity);
-            };
-
-            const updatePrice = () => {
-                const quantity = getQuantity();
-                const cost = game.pf2e.Coins.fromPrice(item.price, quantity).scale(ratio);
-                priceElement.innerText = `(${cost.toString()})`;
-            };
-
-            updatePrice();
-
-            quantityInput?.addEventListener(
-                "input",
-                (event) => {
-                    event.stopPropagation();
-                    updatePrice();
-                },
-                true
-            );
-
-            quantityInput?.addEventListener(
-                "blur",
-                (event) => {
-                    event.stopPropagation();
-                    quantityInput.value = String(getQuantity());
-                    updatePrice();
-                },
-                true
             );
         }
     }

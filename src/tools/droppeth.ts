@@ -10,10 +10,8 @@ import {
     isPrimaryUpdater,
     itemIsOfType,
     ItemPF2e,
-    ItemTransferDialog,
     LootPF2e,
     LootSource,
-    MoveLootFormData,
     PhysicalItemPF2e,
     positionTokenFromCoords,
     R,
@@ -22,6 +20,7 @@ import {
     updateTradedItemSource,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { ItemTransferDialog, MoveLootFormData } from "trade-dialog";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createHook("deleteToken", this.#onDeleteToken.bind(this));

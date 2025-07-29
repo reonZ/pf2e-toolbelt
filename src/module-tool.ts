@@ -116,7 +116,7 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return deleteInMemory(obj, this.key, ...path);
     }
 
-    getFlag<T>(doc: Document, ...path: string[]): T | undefined {
+    getFlag<T = boolean>(doc: Document, ...path: string[]): T | undefined {
         return getFlag(doc, this.key, ...path);
     }
 

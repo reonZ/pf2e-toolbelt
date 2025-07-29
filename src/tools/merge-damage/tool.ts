@@ -81,7 +81,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
     isDamageRoll(message: ChatMessagePF2e): boolean {
         return (
-            this.getFlag(message, "type") === "damage-roll" ||
+            this.getFlag<string>(message, "type") === "damage-roll" ||
             message.getFlag("pf2e", "context.type") === "damage-roll"
         );
     }
