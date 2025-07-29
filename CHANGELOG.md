@@ -1,5 +1,6 @@
 # 3.5.0
 
+-   this release implements the `Better Merchant` tool
 -   `Better Merchant`:
     -   remove the `Services Ratio` toggle on the sheet
     -   remove `Purse` functionality from filters
@@ -14,7 +15,7 @@
     -   fix rolls being mixed up between users
         -   i sadly can't go back and fix all the rolls that were saved on the wrong users
 -   `Target Helper`:
-    -   fix saves being overriden when rolled by another user while the modifiers windows is open
+    -   fix saves being overridden when rolled by another user while the modifiers windows is open
     -   fix `Notes` icon margin
 
 # 3.4.1
