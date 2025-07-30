@@ -100,6 +100,13 @@
           "hint": "El equipo \"soltado\" en el inventario de un actor no se tendrá en cuenta para el cálculo del peso total."
         }
       },
+      "betterMerchant": {
+        "title": "Mejor comerciante",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Añade funcionalidades personalizadas al sistema de comercio predeterminado."
+        }
+      },
       "betterMovement": {
         "title": "Mejor movimiento",
         "teleport": {
@@ -269,6 +276,99 @@
       "spell": {
         "header": "Está lanzando un conjuro...",
         "context": "Revelar conjuro a los jugadores"
+      }
+    },
+    "betterMerchant": {
+      "browserFilter": {
+        "create": "Crear filtro",
+        "edit": "Editar filtro",
+        "empty": "No tiene sentido crear un filtro sin... filtros."
+      },
+      "browserPull": {
+        "add": "Agregar al comerciante",
+        "all": "Alternar todo",
+        "confirm": "<div>¿Está seguro de que desea agregar el/los artículos (seleccionados: <strong>{nb}</strong>) al comerciante?</div><div>El proceso puede tardar varios segundos dependiendo de la cantidad de artículos.</div>",
+        "finished": "Se terminaron de agregar artículos al actor comerciante.",
+        "limit": "¡Has llegado al límite!",
+        "owned": "Este artículo ya está en el inventario del comerciante.",
+        "selected": "Seleccionado",
+        "title": "Agregar artículos - {name}",
+        "wait": "Por favor espere a que se procesen los artículos."
+      },
+      "filtersMenu": {
+        "buy": "Filtros de compra",
+        "delete": {
+          "title": "Eliminar filtro",
+          "content": "¿Está seguro que desea eliminar este filtro?"
+        },
+        "enabled": "Activado",
+        "ratio": "Relación de precios",
+        "sell": "Filtros de venta",
+        "service": "Filtros de servicio",
+        "tag": "Etiqueta",
+        "title": "Filtros de artículo - {name}",
+        "treasure": "Los tesoros que lleguen a este filtro siempre se comprarán por el 100% de su precio."
+      },
+      "item": {
+        "error": "Se produjo un error al intentar procesar un intercambio de artículos de mejor comerciante: <strong>{reason}</strong>.",
+        "noStock": "<strong>{actor}</strong> no puede proporcionar la cantidad solicitada de <strong>{item}</strong>.",
+        "refuse": "<strong>{actor}</strong> no está interesado en comprar <strong>{item}</strong>.",
+        "sell": {
+          "title": "Sell Items",
+          "prompt": "¿Cuantos quieres vender?"
+        },
+        "unided": "Nadie en su sano juicio querría comprar algún artículo al azar y no identificado."
+      },
+      "sheet": {
+        "browser": "Desde el navegador",
+        "filters": "Filtros de configuración",
+        "infiniteAll": {
+          "label": "Existencias infinitas",
+          "tooltip": "El comerciante nunca se quedará sin artículos para vender (no afecta a los tesoros ni a los servicios)"
+        }
+      },
+      "sheetServices": {
+        "add": "Agregar servicio",
+        "buy": "Solicitar servicio",
+        "delete": "Eliminar servicio",
+        "edit": "Editar servicio",
+        "enabled": "Alternar servicio",
+        "export": "Exportar servicios",
+        "free": "Gratis",
+        "give": "Servicio gratuito",
+        "import": "Importar servicios",
+        "label": "Servicios"
+      },
+      "service": {
+        "buy": "<strong>{buyer}</strong> contrató los servicios de <strong>{seller}</strong>.",
+        "error": "Se produjo un error al intentar procesar un servicio de mejor comerciante ({service}): <strong>{reason}</strong>.",
+        "give": "<strong>{seller}</strong> ofrece sus servicios a <strong>{buyer}</strong> de forma gratuita.",
+        "noBuyer": "Debes seleccionar un personaje/NPC/grupo tuyo como objetivo del servicio.",
+        "noFunds": "<strong>{buyer}</strong> no tiene los fondos para contratar los servicios de <strong>{seller}</strong>.",
+        "noStock": "<strong>{seller}</strong> ya no ofrece ese servicio."
+      },
+      "serviceMenu": {
+        "buy": "<strong>{buyer}</strong> contrató los servicios de <strong>{seller}</strong>.",
+        "delete": {
+          "title": "Eliminar servicio",
+          "content": "¿Está seguro de que desea eliminar este servicio?"
+        },
+        "enabled": "Activado",
+        "error": "Se produjo un error al intentar procesar la solicitud de servicio.",
+        "export": "Exportar servicio",
+        "give": "<strong>{seller}</strong> ofrece sus servicios a <strong>{buyer}</strong> de forma gratuita.",
+        "macro": {
+          "label": "Macro ejecutada en el servicio",
+          "drop": "Soltar macro aquí"
+        },
+        "name": "Nombre",
+        "noBuyer": "Debes seleccionar un personaje/NPC/grupo tuyo como objetivo del servicio.",
+        "noFunds": "<strong>{buyer}</strong> no tiene los fondos para contratar los servicios de <strong>{seller}</strong>.",
+        "none": "No se pudo encontrar el servicio",
+        "noStock": "<strong>{seller}</strong> ya no ofrece ese servicio.",
+        "quantity": "Número negativo para stock infinito",
+        "tags": "Etiquetas de servicio",
+        "title": "Servicio - {label}"
       }
     },
     "betterTemplate": {
