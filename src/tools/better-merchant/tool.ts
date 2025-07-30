@@ -253,6 +253,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     #transferItemToActor(source: ActorPF2e, ...args: ActorTransferItemArgs): boolean {
         const [target, item, quantity, containerId, newStack, isPurchase] = args;
 
+        const merchantSelling = isMerchant(source) && isCustomer(target);
+        const merchantBuying = !merchantSelling && isMerchant(target) && isCustomer(source);
+        if (!merchantSelling && !merchantBuying) return false;
+
         const error = (reason: string, data?: Record<string, string>): boolean => {
             if (data) {
                 this.warning("item", reason, data);
@@ -265,10 +269,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         if (!item.isIdentified) {
             return error("unided");
         }
-
-        const merchantSelling = isMerchant(source) && isCustomer(target);
-        const merchantBuying = !merchantSelling && isMerchant(target) && isCustomer(source);
-        if (!merchantSelling && !merchantBuying) return false;
 
         const [merchant, customer] = merchantSelling
             ? [source, target]
