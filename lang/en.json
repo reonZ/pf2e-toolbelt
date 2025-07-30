@@ -346,7 +346,8 @@
                 "give": "<strong>{seller}</strong> offers their services to <strong>{buyer}</strong> free of charge.",
                 "noBuyer": "You must select one Character/NPC/Party you own as the target of the service.",
                 "noFunds": "<strong>{buyer}</strong> doesn't have the funds to hire the services of <strong>{seller}</strong>.",
-                "noStock": "<strong>{seller}</strong> doesn't offer that service anymore."
+                "noStock": "<strong>{seller}</strong> doesn't offer that service anymore.",
+                "unwilling": "<strong>{seller}</strong> isn't willing to offer that service anymore."
             },
             "serviceMenu": {
                 "buy": "<strong>{buyer}</strong> hired the services of <strong>{seller}</strong>.",

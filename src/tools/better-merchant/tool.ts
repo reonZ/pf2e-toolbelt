@@ -251,9 +251,17 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     #transferItemToActor(source: ActorPF2e, ...args: ActorTransferItemArgs): boolean {
         const [target, item, quantity, containerId, newStack, isPurchase] = args;
 
-        if (!item.isIdentified) {
-            this.warning("item.unided");
+        const error = (reason: string, data?: Record<string, string>): boolean => {
+            if (data) {
+                this.warning("item", reason, data);
+            } else {
+                this.warning("item", reason);
+            }
             return true;
+        };
+
+        if (!item.isIdentified) {
+            return error("unided");
         }
 
         const merchantSelling = isMerchant(source) && isCustomer(target);
@@ -268,8 +276,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const realQty = infiniteAll ? quantity : Math.min(quantity, item.quantity);
 
         if (realQty <= 0) {
-            this.warning("item.noStock", { actor: source.name, item: item.name });
-            return true;
+            return error("noStock", { actor: source.name, item: item.name });
         }
 
         const filter = merchantSelling
@@ -278,8 +285,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         if (merchantSelling) {
             if (!filter) {
-                this.warning("item.unwilling", { actor: merchant.name, item: item.name });
-                return true;
+                return error("unwilling", { actor: merchant.name, item: item.name });
             }
 
             if (isPurchase) {
@@ -296,8 +302,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
         } else {
             if (!filter) {
-                this.warning("item.refuse", { actor: merchant.name, item: item.name });
-                return true;
+                return error("refuse", { actor: merchant.name, item: item.name });
             }
         }
 
@@ -330,19 +335,27 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const seller = item.actor;
         const buyer = target;
         const realQty = infinite ? quantity : Math.min(quantity, item.quantity);
-        if (realQty <= 0) return error("quantity");
+
+        if (realQty <= 0) {
+            return error("quantity");
+        }
 
         const merchantSelling = isMerchant(seller);
         const merchant = merchantSelling ? seller : (buyer as LootPF2e);
         const filter = this.getAllFilters(merchant, merchantSelling ? "sell" : "buy").find(
             (x) => x.id === filterId
         );
-        if (!filter) return error("missing");
+
+        if (!filter) {
+            return error("filter");
+        }
 
         const price = game.pf2e.Coins.fromPrice(item.price, realQty).scale(filter.ratio);
 
         if (merchantSelling && !free) {
-            if (!(await buyer.inventory.removeCoins(price))) return error("funds");
+            if (!(await buyer.inventory.removeCoins(price))) {
+                return error("funds");
+            }
         } else if (!merchantSelling) {
             await seller.inventory.addCoins(price);
         }
@@ -386,7 +399,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             data.quantity = realQty;
         } else {
             const added = await giveItemToActor(item, target, realQty, newStack);
-            if (!added) return error("added");
+
+            if (!added) {
+                return error("added");
+            }
 
             data.item = added.item;
             data.quantity = added.giveQuantity;
@@ -525,6 +541,11 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
                 const filters = this.getAllFilters(actor, "service");
                 const filter = service.testFilters(filters);
+
+                if (!filter) {
+                    return this.warning("service.unwilling", { seller: actor.name });
+                }
+
                 const price = service.getFilteredPrice(filter);
 
                 if (buyer.inventory.coins.copperValue < price.copperValue) {
@@ -664,12 +685,23 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         if (!free) {
             const quantity = service.quantity;
-            if (quantity === 0) return error("quantity");
+
+            if (quantity === 0) {
+                return error("quantity");
+            }
 
             const filters = this.getAllFilters(seller, "service");
             const filter = service.testFilters(filters);
+
+            if (!filter) {
+                return error("filter");
+            }
+
             const price = service.getFilteredPrice(filter);
-            if (!(await buyer.inventory.removeCoins(price))) return error("funds");
+
+            if (!(await buyer.inventory.removeCoins(price))) {
+                return error("funds");
+            }
 
             if (quantity > 0) {
                 service.updateSource({ quantity: quantity - 1 });
