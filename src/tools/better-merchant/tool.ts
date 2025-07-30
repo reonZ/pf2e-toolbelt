@@ -268,7 +268,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const realQty = infiniteAll ? quantity : Math.min(quantity, item.quantity);
 
         if (realQty <= 0) {
-            this.warning("item.noStock", { actor: merchant.name, item: item.name });
+            this.warning("item.noStock", { actor: source.name, item: item.name });
             return true;
         }
 
@@ -277,7 +277,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             : this.getAllFilters(merchant, "buy").find((x) => x.testFilter(item));
 
         if (merchantSelling) {
-            if (!filter) return false;
+            if (!filter) {
+                this.warning("item.unwilling", { actor: merchant.name, item: item.name });
+                return true;
+            }
 
             if (isPurchase) {
                 const price = game.pf2e.Coins.fromPrice(item.price, realQty).scale(filter.ratio);
