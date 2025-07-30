@@ -24,12 +24,14 @@ import {
     htmlQueryIn,
     LootPF2e,
     LootSheetPF2e,
+    MODULE,
     NPCPF2e,
     PhysicalItemPF2e,
     R,
     registerWrapper,
     toggleSummary,
     TradeMessageOptions,
+    waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import {
@@ -521,46 +523,77 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         });
     }
 
+    async #importServices(actor: LootPF2e) {
+        const result = await waitDialog<{ code: string }>({
+            content: `<textarea name="code"></textarea>`,
+            i18n: this.localizeKey("importServices"),
+            title: this.localize("importServices.title", actor),
+        });
+
+        if (!result) return;
+
+        try {
+            const parsed = JSON.parse(result.code);
+            const toAdd = R.pipe(
+                Array.isArray(parsed) ? parsed : [parsed],
+                R.map((data) => new ServiceModel(data))
+            );
+
+            if (!toAdd.length) return;
+
+            const services = this.getServices(actor);
+
+            services.push(...toAdd);
+            services.setFlag();
+        } catch (error) {
+            MODULE.error(this.localize("importServices.error"), error);
+        }
+    }
+
+    #buyService(actor: LootPF2e, serviceId: string) {
+        const buyer = getServiceBuyer();
+
+        if (!buyer) {
+            return this.warning("service.noBuyer");
+        }
+
+        const service = this.getServices(actor).find((x) => x.id === serviceId);
+
+        if (!service?.hasStocks) {
+            return this.warning("service.noStock", { seller: actor.name });
+        }
+
+        const filters = this.getAllFilters(actor, "service");
+        const filter = service.testFilters(filters);
+
+        if (!filter) {
+            return this.warning("service.unwilling", { seller: actor.name });
+        }
+
+        const price = service.getFilteredPrice(filter);
+
+        if (buyer.inventory.coins.copperValue < price.copperValue) {
+            return this.warning("service.noFunds", {
+                buyer: buyer.name,
+                seller: actor.name,
+            });
+        }
+
+        this.#useServiceEmitable.call({
+            buyer,
+            free: false,
+            seller: actor,
+            serviceId,
+        });
+    }
+
     async #onBetterAction(actor: LootPF2e, target: HTMLElement) {
         const action = target.dataset.betterAction as EventBetterAction;
 
         switch (action) {
             case "buy-service": {
-                const buyer = getServiceBuyer();
-
-                if (!buyer) {
-                    return this.warning("service.noBuyer");
-                }
-
                 const serviceId = getServiceIdFromElement(target);
-                const service = this.getServices(actor).find((x) => x.id === serviceId);
-
-                if (!service?.hasStocks) {
-                    return this.warning("service.noStock", { seller: actor.name });
-                }
-
-                const filters = this.getAllFilters(actor, "service");
-                const filter = service.testFilters(filters);
-
-                if (!filter) {
-                    return this.warning("service.unwilling", { seller: actor.name });
-                }
-
-                const price = service.getFilteredPrice(filter);
-
-                if (buyer.inventory.coins.copperValue < price.copperValue) {
-                    return this.warning("service.noFunds", {
-                        buyer: buyer.name,
-                        seller: actor.name,
-                    });
-                }
-
-                return this.#useServiceEmitable.call({
-                    buyer,
-                    free: false,
-                    seller: actor,
-                    serviceId,
-                });
+                return this.#buyService(actor, serviceId);
             }
 
             case "create-service": {
@@ -588,7 +621,11 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
 
             case "export-services": {
-                return;
+                const services = this.getServices(actor);
+                const data = services.map((service) => service.toExport());
+
+                game.clipboard.copyPlainText(JSON.stringify(data));
+                return this.info("sheetServices.copied", actor);
             }
 
             case "from-browser": {
@@ -617,7 +654,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
 
             case "import-services": {
-                return;
+                return this.#importServices(actor);
             }
 
             case "increase-service": {

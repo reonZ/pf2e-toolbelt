@@ -94,9 +94,19 @@ class ServiceMenu extends ModuleToolApplication<BetterMerchantTool> {
         return htmlQuery<HTMLInputElement>(this.element, "input[name='macroUUID']");
     }
 
-    async _onClickAction(event: PointerEvent, target: HTMLElement) {
-        type EventAction = "edit-image" | "open-macro-sheet" | "delete-macro" | "open-macros";
+    async _renderFrame(options: ApplicationRenderOptions) {
+        const frame = await super._renderFrame(options);
 
+        const exportLabel = this.localize("export");
+        const exportBtn = `<button type="button" class="header-control icon fa-regular fa-file-export" 
+        data-action="export" data-tooltip="${exportLabel}"></button>`;
+
+        this.window.close.insertAdjacentHTML("beforebegin", exportBtn);
+
+        return frame;
+    }
+
+    async _onClickAction(event: PointerEvent, target: HTMLElement) {
         const action = target.dataset.action as EventAction;
 
         if (action === "delete-macro") {
@@ -108,6 +118,12 @@ class ServiceMenu extends ModuleToolApplication<BetterMerchantTool> {
             }
         } else if (action === "edit-image") {
             this.#editImage(target as HTMLImageElement);
+        } else if (action === "export") {
+            const service = this.service;
+            const data = service.toExport();
+
+            game.clipboard.copyPlainText(JSON.stringify(data));
+            this.info("copied", service);
         } else if (action === "open-macro-sheet") {
             const macro = await fromUuid<MacroPF2e>(this.macroInput?.value ?? "");
             macro?.sheet.render(true);
@@ -193,6 +209,8 @@ class ServiceMenu extends ModuleToolApplication<BetterMerchantTool> {
         this.render();
     }
 }
+
+type EventAction = "edit-image" | "export" | "open-macro-sheet" | "delete-macro" | "open-macros";
 
 type ServiceMenuContext = {
     enrichedDescription: string;

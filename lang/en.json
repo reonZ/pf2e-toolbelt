@@ -309,10 +309,15 @@
                 "title": "Item Filters - {name}",
                 "treasure": "Treasures reaching this filter will always be bought for 100% of their price"
             },
+            "importServices": {
+                "title": "Import Services - {name}",
+                "yes": "Import",
+                "error": "An error occured while trying to import the services."
+            },
             "item": {
                 "error": "An error occured while trying to process a better merchant item trade: <strong>{reason}</strong>.",
                 "noStock": "<strong>{actor}</strong> cannot provide the requested quantity of <strong>{item}</strong>.",
-                "unwilling": "<strong>{actor}</strong> isn't willing to let go of <strong>{item}</strong>.",
+                "unwilling": "<strong>{actor}</strong> isn't willing to part from <strong>{item}</strong>.",
                 "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>.",
                 "sell": {
                     "title": "Sell Items",
@@ -331,6 +336,7 @@
             "sheetServices": {
                 "add": "Add Service",
                 "buy": "Request Service",
+                "copied": "<strong>{name}</strong> services have been copied to clipboard.",
                 "delete": "Delete Service",
                 "edit": "Edit Service",
                 "enabled": "Toggle Service",
@@ -351,6 +357,7 @@
             },
             "serviceMenu": {
                 "buy": "<strong>{buyer}</strong> hired the services of <strong>{seller}</strong>.",
+                "copied": "Service <strong>{label}</strong> has been copied to clipboard.",
                 "delete": {
                     "title": "Delete Service",
                     "content": "Are you sure you want to delete this Service?"

@@ -300,6 +300,11 @@
                 "title": "Filtry przedmiotów - {name}",
                 "treasure": "Skarby przechodzące przez ten filtr będą zawsze kupowane za 100% ich ceny"
             },
+            "importServices": {
+                "title": "Import usług - {name}",
+                "yes": "Importuj",
+                "error": "Wystąpił błąd podczas próby zaimportowania usług."
+            },
             "sheet": {
                 "browser": "Z przeglądarki",
                 "infiniteAll": {
@@ -309,6 +314,7 @@
             "sheetServices": {
                 "add": "Dodaj usługę",
                 "buy": "Zamów usługę",
+                "copied": "Usługi <strong>{name}</strong> zostały skopiowane do schowka.",
                 "delete": "Usuń usługę",
                 "edit": "Edytuj usługę",
                 "enabled": "Przełącz usługę",
@@ -326,6 +332,7 @@
             },
             "serviceMenu": {
                 "buy": "<strong>{buyer}</strong> wynajął usługi od <strong>{seller}</strong>.",
+                "copied": "Usługa <strong>{label}</strong> została skopiowana do schowka.",
                 "delete": {
                     "title": "Usuń usługę",
                     "content": "Czy na pewno chcesz usunąć tę usługę?"

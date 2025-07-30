@@ -119,6 +119,15 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
         return ratio === 1 ? price : price.scale(ratio);
     }
 
+    toExport(): Omit<ServiceSource, "id" | "enabled"> {
+        const data = this.toJSON() as WithPartial<ServiceSource, "id" | "enabled">;
+
+        delete data.id;
+        delete data.enabled;
+
+        return data;
+    }
+
     async toTemplate(filters: ServiceFilters): Promise<ServiceTemplate> {
         const filter = this.testFilters(filters);
         const ratio = filter?.ratio ?? 1;
