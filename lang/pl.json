@@ -83,14 +83,14 @@
                 }
             },
             "betterEffectsPanel": {
-                "title": "Lepszy Panel Efektów",
+                "title": "Ulepszony Panel Efektów",
                 "remove": {
                     "name": "Skrót Usuń efekt",
                     "hint": "Użycie kombinacji [Shift + kliknięcie prawym przyciskiem myszy] na ikonach efektów w panelu efektów natychmiast usunie wszystkie ich ładunki/liczniki/znaczniki."
                 }
             },
             "betterInventory": {
-                "title": "Lepszy Ekwipunek",
+                "title": "Ulepszony Ekwipunek",
                 "coins": {
                     "name": "Monety bez ciężaru",
                     "hint": "Monety nie mają wagi w ekwipunku."
@@ -101,14 +101,14 @@
                 }
             },
             "betterMerchant": {
-                "title": "Lepszy Kupiec",
+                "title": "Ulepszony Kupiec",
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Dodawanie niestandardowych funkcji do domyślnego kupca systemowego."
                 }
             },
             "betterMovement": {
-                "title": "Lepszy Ruch",
+                "title": "Ulepszony Ruch",
                 "teleport": {
                     "name": "Teleport tokenów",
                     "hint": "Kliknięcie na planszy przy jednoczesnym przytrzymaniu zdefiniowanego powiązanego klawisza spowoduje natychmiastowe teleportowanie wybranych tokenów do lokalizacji bez konieczności podróżowania.",
@@ -124,14 +124,14 @@
                 }
             },
             "betterTemplate": {
-                "title": "Lepsze Szablony",
+                "title": "Ulepszone Szablony",
                 "target": {
                     "name": "Auto celowanie",
                     "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
                 }
             },
             "betterTrade": {
-                "title": "Lepsza Wymiana",
+                "title": "Ulepszona Wymiana",
                 "withContent": {
                     "name": "Z zawartością pojemnika",
                     "hint": "Kiedy pojemnik jest przenoszony z jednego aktora do drugiego, jego zawartość powinna być przenoszona razem z nim."
@@ -196,7 +196,8 @@
             "rollTracker": {
                 "title": "Śledzenie rzutów",
                 "enabled": {
-                    "name": "Włączone"
+                    "name": "Włączone",
+                    "hint": "Śledź wyniki, aby sprawdzić, czy Twoi gracze naprawdę mają tyle pecha."
                 }
             },
             "targetHelper": {
@@ -215,7 +216,7 @@
                 },
                 "checks": {
                     "name": "Wiadomości dotyczące testów",
-                    "hint": ""
+                    "hint": "Ulepsza proste wiadomości zapisu liniowego do czegoś, co może być używane przez funkcję. Dodaje również więcej szczegółów."
                 }
             },
             "underground": {
@@ -279,31 +280,51 @@
         },
         "betterMerchant": {
             "browserFilter": {
+                "create": "Utwórz filtr",
+                "edit": "Edytuj filtr",
                 "empty": "Nie ma sensu tworzyć filtra bez ... filtrów."
             },
             "browserPull": {
                 "add": "Dodaj do kupca",
                 "all": "Przełącz wszystkie",
-                "confirm": "<div>Czy na pewno chcesz dodać przedmiot(y) (wybrano): <strong>{nb}</strong>) do kupca?</div><div>Proces ten może potrwać kilka sekund w zależności od ilości przedmiotów.</div>",
+                "confirm": "<div>Czy na pewno chcesz dodać przedmiot(y): (wybrano <strong>{nb}</strong>) do kupca?</div><div>Proces ten może potrwać kilka sekund w zależności od ilości przedmiotów.</div>",
                 "finished": "Zakończono dodawanie przedmiotów do aktora kupca.",
                 "limit": "Osiągnąłeś limit!",
                 "owned": "Ten przedmiot znajduje się już w ekwipunku kupca",
-                "selected": "Wybrane",
+                "selected": "Wybrano",
                 "title": "Dodaj przedmioty - {name}",
                 "wait": "Poczekaj na przetworzenie przedmiotów."
             },
             "filtersMenu": {
                 "buy": "Filtry zakupu",
+                "delete": {
+                    "title": "Usuń filtr",
+                    "content": "Czy na pewno chcesz usunąć ten filtr?"
+                },
                 "enabled": "Włączone",
                 "ratio": "Współczynnik ceny",
                 "sell": "Filtry sprzedaży",
+                "service": "Filtry usług",
+                "tag": "Tag",
                 "title": "Filtry przedmiotów - {name}",
                 "treasure": "Skarby przechodzące przez ten filtr będą zawsze kupowane za 100% ich ceny"
             },
+            "item": {
+                "error": "Wystąpił błąd podczas próby przetworzenia transakcji wymiany przedmiotu: <strong>{reason}</strong>.",
+                "noStock": "<strong>{actor}</strong> nie może dostarczyć żądanej ilości <strong>{item}</strong>.",
+                "refuse": "<strong>{actor}</strong> nie jest zainteresowany kupnem <strong>{item}</strong>.",
+                "sell": {
+                    "title": "Sprzedaj przedmioty",
+                    "prompt": "Ile przedmiotów chcesz sprzedać?"
+                },
+                "unided": "Nikt przy zdrowych zmysłach nie chciałby kupić jakiegoś przypadkowego, niezidentyfikowanego przedmiotu."
+            },
             "sheet": {
                 "browser": "Z przeglądarki",
+                "filters": "Konfiguracja filtrów",
                 "infiniteAll": {
-                    "label": "Nieskończone zapasy"
+                    "label": "Nieskończone zapasy",
+                    "tooltip": "Kupcowi nigdy nie zabraknie przedmiotów do sprzedaży (nie ma wpływu na Skarby ani Usługi)."
                 }
             },
             "sheetServices": {
@@ -313,14 +334,16 @@
                 "edit": "Edytuj usługę",
                 "enabled": "Przełącz usługę",
                 "export": "Eksportuj usługi",
+                "free": "Darmowy",
                 "give": "Darmowa usługa",
                 "import": "Importuj usługi",
                 "label": "Usługi"
             },
             "service": {
                 "buy": "<strong>{buyer}</strong> wynajął usługi od <strong>{seller}</strong>.",
+                "error": "Wystąpił błąd podczas próby przetworzenia usługi ({service}) : <strong>{reason}</strong>.",
                 "give": "<strong>{seller}</strong> oferuje swoje usługi <strong>{buyer}</strong> bezpłatnie.",
-                "noBuyer": "Musisz wybrać jedną postać/postać niezależną/drużynę jako cel usługi.",
+                "noBuyer": "Musisz wybrać jedną postać / postać niezależną / drużynę jako cel usługi.",
                 "noFunds": "<strong>{buyer}</strong> nie ma funduszy, aby wynająć usługi od <strong>{seller}</strong>.",
                 "noStock": "<strong>{seller}</strong> nie oferuje już tej usługi."
             },
@@ -335,14 +358,16 @@
                 "export": "Eksport usługi",
                 "give": "<strong>{seller}</strong> oferuje swoje usługi <strong>{buyer}</strong> bezpłatnie.",
                 "macro": {
-                    "label": "Makro wykonywane w usłudze"
+                    "label": "Makro wykonywane w usłudze",
+                    "drop": "Upuść makro tutaj"
                 },
                 "name": "Nazwa",
-                "noBuyer": "Musisz wybrać jedną postać/postać niezależną/drużynę jako cel usługi.",
+                "noBuyer": "Musisz wybrać jedną postać / postać niezależną / drużynę jako cel usługi.",
                 "noFunds": "<strong>{buyer}</strong> nie ma funduszy, aby wynająć usługi od <strong>{seller}</strong>.",
                 "none": "Nie udało się znaleźć usługi",
                 "noStock": "<strong>{seller}</strong> nie oferuje już tej usługi.",
                 "quantity": "Liczba ujemna dla nieskończonych zasobów",
+                "tags": "Tagi usług",
                 "title": "Usługa - {label}"
             }
         },
