@@ -128,12 +128,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return this.browser.tabs.equipment;
     }
 
-    get api(): Record<string, any> {
-        return {
-            getAllFilters: this.getAllFilters,
-        };
-    }
-
     _configurate(): void {
         const enabled = this.settings.enabled;
 

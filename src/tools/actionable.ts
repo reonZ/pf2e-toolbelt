@@ -159,7 +159,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    get api() {
+    get api(): toolbelt.ToolbeltApi["actionable"] {
         return {
             getActionMacro: this.getActionMacro.bind(this),
             getItemMacro: this.getItemMacro.bind(this),
