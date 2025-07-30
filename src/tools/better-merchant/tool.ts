@@ -12,6 +12,7 @@ import {
     confirmDialog,
     createEmitable,
     createHTMLElement,
+    createToggleableWrapper,
     createTradeMessage,
     EquipmentFilters,
     ErrorPF2e,
@@ -28,12 +29,15 @@ import {
     NPCPF2e,
     PhysicalItemPF2e,
     R,
-    registerWrapper,
+    renderActorSheets,
+    toggleHooksAndWrappers,
     toggleSummary,
     TradeMessageOptions,
     waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { sharedActorTransferItemToActor } from "tools/_shared";
+import { ItemTransferDialog } from "trade-dialog";
 import {
     BrowserPullMenu,
     BuyDefaultFilterModel,
@@ -44,8 +48,6 @@ import {
     ServiceMenu,
     ServiceModel,
 } from ".";
-import { sharedActorTransferItemToActor } from "tools/_shared";
-import { ItemTransferDialog } from "trade-dialog";
 
 const FILTER_TYPES = {
     buy: {
@@ -66,6 +68,37 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     #useServiceEmitable = createEmitable(`${this.key}.service`, this.#useService.bind(this));
     #tradeItemEmitable = createEmitable(`${this.key}.item`, this.#tradeItem.bind(this));
 
+    #wrappers = [
+        createToggleableWrapper(
+            "OVERRIDE",
+            [
+                "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.party['pf2e.PartySheetPF2e'].cls.prototype.moveItemBetweenActors",
+                "CONFIG.Actor.sheetClasses.vehicle['pf2e.VehicleSheetPF2e'].cls.prototype.moveItemBetweenActors",
+            ],
+            this.#actorSheetPF2eMoveItemBetweenActors,
+            { context: this }
+        ),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype._renderInner",
+            this.#lootSheetPF2eRenderInner,
+            { context: this }
+        ),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.activateListeners",
+            this.#lootSheetPF2eActivateListeners,
+            { context: this }
+        ),
+        sharedActorTransferItemToActor.register(this.#transferItemToActor, {
+            context: this,
+            priority: -100,
+        }),
+    ];
+
     static INFINITY = "∞";
 
     get key(): "betterMerchant" {
@@ -79,7 +112,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                requiresReload: true,
+                onChange: () => {
+                    this._configurate();
+                    renderActorSheets("LootSheetPF2e");
+                },
             },
         ];
     }
@@ -98,46 +134,16 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         };
     }
 
-    init(isGM: boolean): void {
-        if (!this.settings.enabled) return;
+    _configurate(): void {
+        const enabled = this.settings.enabled;
 
-        this.#useServiceEmitable.activate();
-        this.#tradeItemEmitable.activate();
+        this.#useServiceEmitable.toggle(enabled);
+        this.#tradeItemEmitable.toggle(enabled);
+        toggleHooksAndWrappers(this.#wrappers, enabled);
     }
 
     ready(isGM: boolean): void {
-        if (!this.settings.enabled) return;
-
-        registerWrapper(
-            "OVERRIDE",
-            [
-                "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.moveItemBetweenActors",
-                "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.moveItemBetweenActors",
-                "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.moveItemBetweenActors",
-                "CONFIG.Actor.sheetClasses.party['pf2e.PartySheetPF2e'].cls.prototype.moveItemBetweenActors",
-                "CONFIG.Actor.sheetClasses.vehicle['pf2e.VehicleSheetPF2e'].cls.prototype.moveItemBetweenActors",
-            ],
-            this.#actorSheetPF2eMoveItemBetweenActors,
-            this
-        );
-
-        registerWrapper(
-            "WRAPPER",
-            "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype._renderInner",
-            this.#lootSheetPF2eRenderInner,
-            this
-        );
-
-        registerWrapper(
-            "WRAPPER",
-            "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.activateListeners",
-            this.#lootSheetPF2eActivateListeners,
-            this
-        );
-
-        sharedActorTransferItemToActor
-            .register(this.#transferItemToActor, { context: this, priority: -100 })
-            .activate();
+        this._configurate();
     }
 
     getFilters<T extends FilterType>(
