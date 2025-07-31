@@ -23,6 +23,7 @@ import {
     htmlClosest,
     htmlQuery,
     htmlQueryIn,
+    isMerchant,
     LootPF2e,
     LootSheetPF2e,
     MODULE,
@@ -850,10 +851,6 @@ function getServiceBuyer(): ActorPF2e | null {
 
     const assigned = game.user.character;
     return isValidBuyer(assigned) ? assigned : null;
-}
-
-function isMerchant(actor: Maybe<ActorPF2e>): actor is LootPF2e {
-    return !!actor?.isOfType("loot") && actor.isMerchant;
 }
 
 function isCustomer(actor: Maybe<ActorPF2e>): actor is CharacterPF2e | NPCPF2e {
