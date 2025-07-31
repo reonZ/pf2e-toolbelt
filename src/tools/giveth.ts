@@ -12,6 +12,7 @@ import {
     ItemTransferDialog,
     PhysicalItemPF2e,
     updateItemTransferDialog,
+    userIsGM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedActorTransferItemToActor } from ".";
@@ -80,7 +81,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
     _configurate(): void {
         const enabled = this.settings.enabled;
 
-        if (game.user.isGM) {
+        if (userIsGM()) {
             this.#givethEmitable.toggle(enabled);
         } else {
             this.#renderTransferDialogHook.toggle(enabled);

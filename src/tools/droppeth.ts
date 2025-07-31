@@ -18,6 +18,7 @@ import {
     TokenDocumentPF2e,
     TokenLightRuleElement,
     updateTradedItemSource,
+    userIsGM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { ItemTransferDialog, MoveLootFormData } from "trade-dialog";
@@ -86,7 +87,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         this.#droppethKeybind.toggle(enabled);
 
-        if (game.user.isGM) {
+        if (userIsGM()) {
             this.#deleteTokenHook.toggle(enabled);
             this.#droppethItemEmitable.toggle(enabled);
             this.#onEmbeddedDocumentChangeWrapper.toggle(enabled);

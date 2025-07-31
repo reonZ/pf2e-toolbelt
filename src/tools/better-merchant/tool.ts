@@ -65,8 +65,8 @@ const FILTER_TYPES = {
 };
 
 class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
-    #useServiceEmitable = createEmitable(`${this.key}.service`, this.#useService.bind(this));
-    #tradeItemEmitable = createEmitable(`${this.key}.item`, this.#tradeItem.bind(this));
+    #useServiceEmitable = createEmitable(this.localizeKey("service"), this.#useService.bind(this));
+    #tradeItemEmitable = createEmitable(this.localizeKey("item"), this.#tradeItem.bind(this));
 
     #wrappers = [
         createToggleableWrapper(
