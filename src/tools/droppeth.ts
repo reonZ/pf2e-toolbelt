@@ -64,7 +64,9 @@ class DroppethTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {},
+                onChange: (value) => {
+                    this._configurate();
+                },
             },
             {
                 key: "light",
@@ -79,16 +81,20 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         return [this.#droppethKeybind.configs];
     }
 
-    ready(isGM: boolean): void {
-        if (!this.settings.enabled) return;
+    _configurate(): void {
+        const enabled = this.settings.enabled;
 
-        this.#droppethKeybind.activate();
+        this.#droppethKeybind.toggle(enabled);
 
-        if (isGM) {
-            this.#deleteTokenHook.activate();
-            this.#droppethItemEmitable.activate();
-            this.#onEmbeddedDocumentChangeWrapper.activate();
+        if (game.user.isGM) {
+            this.#deleteTokenHook.toggle(enabled);
+            this.#droppethItemEmitable.toggle(enabled);
+            this.#onEmbeddedDocumentChangeWrapper.toggle(enabled);
         }
+    }
+
+    ready(isGM: boolean): void {
+        this._configurate();
     }
 
     isDroppethActor(actor: Maybe<ActorPF2e>): actor is LootPF2e {
