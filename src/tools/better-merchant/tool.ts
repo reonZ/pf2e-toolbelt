@@ -24,6 +24,7 @@ import {
     htmlQuery,
     htmlQueryIn,
     isMerchant,
+    ItemPF2e,
     LootPF2e,
     LootSheetPF2e,
     MODULE,
@@ -121,6 +122,12 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         ];
     }
 
+    get api(): Record<string, any> {
+        return {
+            testItemsForMerchant: this.testItemsForMerchant.bind(this),
+        };
+    }
+
     get browser(): CompendiumBrowser {
         return game.pf2e.compendiumBrowser;
     }
@@ -201,6 +208,36 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             filter: filters ?? (await this.browserTab.getFilterData()),
             hideNavigation: true,
         });
+    }
+
+    testItemsForMerchant(merchant: ActorPF2e, items: ItemPF2e[]): TestItemData[] {
+        if (!(merchant instanceof Actor) || !isMerchant(merchant) || !items?.[Symbol.iterator])
+            return [];
+
+        const filters = this.getAllFilters(merchant, "buy");
+
+        return R.pipe(
+            items,
+            R.filter((item): item is PhysicalItemPF2e<CharacterPF2e | NPCPF2e> => {
+                return (
+                    item instanceof Item &&
+                    item.isOfType("physical") &&
+                    item.isIdentified &&
+                    isCustomer(item.actor)
+                );
+            }),
+            R.map((item): TestItemData | undefined => {
+                const filter = filters.find((x) => x.testFilter(item));
+                if (!filter) return;
+
+                const buyPrice = game.pf2e.Coins.fromPrice(item.price, item.quantity).scale(
+                    filter.ratio
+                );
+
+                return { buyPrice, item };
+            }),
+            R.filter(R.isTruthy)
+        );
     }
 
     /**
@@ -856,6 +893,8 @@ function getServiceBuyer(): ActorPF2e | null {
 function isCustomer(actor: Maybe<ActorPF2e>): actor is CharacterPF2e | NPCPF2e {
     return !!actor?.isOfType("character", "npc", "vehicle", "party") && actor.isOwner;
 }
+
+type TestItemData = toolbelt.betterMerchant.TestItemData;
 
 type ServiceMacroData = {
     actor: ActorPF2e;
