@@ -155,6 +155,25 @@
                     "hint": "Czy upuszczony przedmiot powinien emitować światło. Będzie to miało miejsce tylko wtedy, gdy w aktorze łupów znajduje się pojedynczy przedmiot."
                 }
             },
+            "identify": {
+                "title": "Identyfikacja",
+                "delay": {
+                    "name": "Opóźnienie 24 godziny",
+                    "hint": "Po włączeniu tej opcji postać będzie musiała odczekać 24 godziny po nieudanej próbie zidentyfikowania przedmiotu, zanim będzie mogła podjąć kolejną próbę. W przeciwnym razie zostanie ona zresetowana następnego dnia."
+                },
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Pomoże ci zarządzać niezidentyfikowanymi przedmiotami w twoim świecie i śledzić, które przedmioty są zidentyfikowane."
+                },
+                "identifyPartials": {
+                    "name": "Automatyczna identyfikacja podobnych przedmiotów",
+                    "hint": "Czy „podobne” przedmioty powinny być również identyfikowane podczas korzystania z opcji „Automatycznie identyfikuj znane przedmioty”."
+                },
+                "playerRequest": {
+                    "name": "Zezwalaj na żądania graczy",
+                    "hint": "Czy gracze powinni mieć możliwość żądania identyfikacji przedmiotów."
+                }
+            },
             "mergeDamage": {
                 "title": "Złączanie Obrażeń",
                 "merge": {
@@ -405,6 +424,51 @@
                     "item": "{source} przekazuje {quantity} × {item} do {target}.",
                     "container": "{source} przekazuje {item} i całą jego zawartość do {target}."
                 }
+            }
+        },
+        "identify": {
+            "request": {
+                "hint": "Poproszono o identyfikację przedmiotu dla",
+                "proceed": "Czy chcesz kontynuować?",
+                "sent": "Żądanie identyfikacji przedmiotu zostało wysłane do MG."
+            },
+            "tracker": {
+                "auto": {
+                    "content": "Zidentyfikuj przedmioty, które są już znane członkom drużyny:<br><ul>{items}</ul>",
+                    "label": "Auto",
+                    "none": "Nie ma przedmiotów do automatycznej identyfikacji",
+                    "title": "Automatyczna identyfikacja",
+                    "tooltip": "Automatyczna identyfikacja znanych przedmiotów"
+                },
+                "clock": {
+                    "backward": "Przesunięcie czasu o 10 minut do tyłu",
+                    "forward": "Przesunięcie czasu o 10 minut do przodu",
+                    "open": "Otwórz menu zegara światowego"
+                },
+                "failed": {
+                    "daily": "Nie udało się zidentyfikować dzisiaj tego przedmiotu",
+                    "delay": "Nie udało się zidentyfikować tego przedmiotu:<br>pozostało {hours} godz."
+                },
+                "identified": "Już zidentyfikowano",
+                "known": {
+                    "full": "Ten przedmiot został już zidentyfikowany",
+                    "partial": "Zidentyfikował podobny przedmiot:<br>{item}",
+                    "recall": "Może wydać jedną akcję Przywołania Wiedzy<br>i automatycznie odnieść sukces"
+                },
+                "misidentify": "Błędna identyfikacja przełącznika",
+                "request-checks": "Żądanie testów",
+                "reset": {
+                    "label": "Reset",
+                    "tooltip": "Cofnij bieżące zmiany"
+                },
+                "save": {
+                    "content": "Zapisz bieżące zmiany i automatycznie zidentyfikuj następujące przedmioty:<br><ul>{items}</ul>",
+                    "label": "Aktualizacja",
+                    "title": "Aktualizacja zmian",
+                    "tooltip": "Aktualizacja bieżących zmian i identyfikacji przedmiotów"
+                },
+                "send-to-chat": "Wyślij na czat",
+                "title": "Śledzenie identyfikacji przedmiotów"
             }
         },
         "mergeDamage": {

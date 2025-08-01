@@ -155,6 +155,25 @@
                     "hint": "Should the dropped item emit light. It will only be the case if a single item is present in the loot actor."
                 }
             },
+            "identify": {
+                "title": "Identify",
+                "delay": {
+                    "name": "24 Hours Delay",
+                    "hint": "When enabled, a character will need to wait 24h after failling to identify an item before being able to make another attempt. Otherwise it will be reset on the next day date."
+                },
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Will help you manage unidentified items in your world and keep track of which items are identified."
+                },
+                "identifyPartials": {
+                    "name": "Auto Identify Similar Items",
+                    "hint": "Should 'similar' items also be identified when using the 'Automatically identify known items' option."
+                },
+                "playerRequest": {
+                    "name": "Allow Player Request",
+                    "hint": "Should players be able to request identification of items."
+                }
+            },
             "mergeDamage": {
                 "title": "Merge Damages",
                 "merge": {
@@ -432,6 +451,51 @@
                     "item": "{source} giveth {quantity} × {item} to {target}.",
                     "container": "{source} giveth {item} and all its content to {target}."
                 }
+            }
+        },
+        "identify": {
+            "request": {
+                "hint": "Requested an item identification for",
+                "proceed": "Would you like to proceed?",
+                "sent": "An item identification request has been sent to the GM."
+            },
+            "tracker": {
+                "auto": {
+                    "content": "Identify the items that are already known by the members of the party:<br><ul>{items}</ul>",
+                    "label": "Auto",
+                    "none": "There are no items to automatically identify",
+                    "title": "Automatic Identification",
+                    "tooltip": "Automatically identify known items"
+                },
+                "clock": {
+                    "backward": "Move time backward by 10 minutes",
+                    "forward": "Move time forward by 10 minutes",
+                    "open": "Open the world clock menu"
+                },
+                "failed": {
+                    "daily": "Has failed to identify this item today",
+                    "delay": "Has failed to identify this item:<br>{hours}h remaining"
+                },
+                "identified": "Already Identified",
+                "known": {
+                    "full": "Already identified this item",
+                    "partial": "Has identified a similar item:<br>{item}",
+                    "recall": "Can spend a single Recall Knowledge action<br>and automatically succeed"
+                },
+                "misidentify": "Toggle Misidentification",
+                "request-checks": "Request Checks",
+                "reset": {
+                    "label": "Reset",
+                    "tooltip": "Revert current Changes"
+                },
+                "save": {
+                    "content": "Save the current changes and automatically identify the following item(s):<br><ul>{items}</ul>",
+                    "label": "Update",
+                    "title": "Update Changes",
+                    "tooltip": "Update current changes and identify items"
+                },
+                "send-to-chat": "Send to Chat",
+                "title": "Item Identification Tracker"
             }
         },
         "mergeDamage": {

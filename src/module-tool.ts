@@ -30,6 +30,7 @@ import {
     setInMemory,
     setSetting,
     unsetFlag,
+    unsetFlagProperty,
     updateSourceFlag,
     warning,
 } from "module-helpers";
@@ -130,6 +131,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     setFlagProperty<T extends object>(obj: T, ...args: [...string[], any]): T {
         return setFlagProperty(obj, this.key, ...args);
+    }
+
+    unsetFlagProperty<T extends object>(obj: T, ...path: [string, ...string[]]): T {
+        return unsetFlagProperty(obj, this.key, ...path);
     }
 
     deleteFlagProperty<T extends object>(obj: T, ...path: string[]): T {
