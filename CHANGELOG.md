@@ -1,3 +1,19 @@
+# 3.6.0
+
+-   this release implements the `Identify` tool
+-   `Better Merchant`:
+    -   the `Enabled` setting doesn't require reload anymore
+    -   merchants no longer sell items not matching any filter
+    -   merchants no longer sell services not matching any filter
+    -   implement import/export of services
+    -   add `testItemsForMerchant` to the API for third parties who want to sell in bundle to a merchant
+    -   fix the module preventing trade of all unidentified items instead of only preventing selling/buying
+-   `Droppeth`:
+    -   fix `Enabled` setting not updating the state of the tool until a reload was done
+-   `Identify`:
+    -   remove the `Add Party Stash` setting, it is now always "enabled"
+    -   all previous data should be compatible
+
 # 3.5.1
 
 -   `Better Merchant`:
