@@ -144,15 +144,7 @@
                 "title": "交易物品"
             },
             "resourceTracker": {
-                "title": "资源跟踪器",
-                "offline": {
-                    "name": "显示离线资源",
-                    "hint": "显示来自离线用户的共享资源。"
-                },
-                "show": {
-                    "hint": "如果资源跟踪器部件显示在您的界面中。可以通过左侧UI上的控件切换开/关。",
-                    "name": "显示跟踪器"
-                }
+                "title": "资源跟踪器"
             },
             "targetHelper": {
                 "title": "目标助手",

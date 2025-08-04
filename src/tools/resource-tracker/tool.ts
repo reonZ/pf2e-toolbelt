@@ -14,20 +14,20 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     get settingsSchema(): ToolSettingsList<ResourceTrackerSettings> {
         return [
             {
-                key: "offline",
+                key: "enabled",
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {
-                    this.#application?.render();
-                },
+                requiresReload: true,
             },
             {
                 key: "show",
                 type: Boolean,
                 default: false,
                 scope: "user",
+                config: false,
                 onChange: (value) => {
+                    if (!this.settings.enabled) return;
                     this.#showApplication(value);
                 },
             },
@@ -67,15 +67,21 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     }
 
     init(isGM: boolean): void {
+        if (!this.settings.enabled) return;
+
         Hooks.on("getSceneControlButtons", this.#onGetSceneControlButtons.bind(this));
     }
 
     setup(isGM: boolean): void {
+        if (!this.settings.enabled) return;
+
         this.#setResources();
         this.#onUpdateWorldTime();
     }
 
     ready(isGM: boolean): void {
+        if (!this.settings.enabled) return;
+
         this.#showApplication();
     }
 
@@ -156,6 +162,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
 }
 
 type ResourceTrackerSettings = {
+    enabled: boolean;
     offline: boolean;
     position: PositionModel;
     show: boolean;

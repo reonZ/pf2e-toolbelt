@@ -183,15 +183,7 @@
         }
       },
       "resourceTracker": {
-        "title": "Rastreador de recursos",
-        "offline": {
-          "name": "Mostrar fuera de línea",
-          "hint": "Muestra también recursos compartidos de usuarios sin conexión."
-        },
-        "show": {
-          "name": "Mostrar rastreador",
-          "hint": "¿Debería mostrarse el widget de seguimiento de recursos en su interfaz? Puede activarlo o desactivarlo mediante los controles de la interfaz izquierda."
-        }
+        "title": "Rastreador de recursos"
       },
       "rollTracker": {
         "title": "Rastreador de tiradas",

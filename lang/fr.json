@@ -176,15 +176,7 @@
         }
       },
       "resourceTracker": {
-        "title": "Suivi des ressources",
-        "offline": {
-          "name": "Afficher hors ligne",
-          "hint": "Montre également les ressources partagées des utilisateurs hors ligne."
-        },
-        "show": {
-          "name": "Suivi d'affichage",
-          "hint": "Le widget de suivi des ressources doit-il être affiché dans votre interface ? Il peut être activé/désactivé via les commandes situées sur l'interface de gauche."
-        }
+        "title": "Suivi des ressources"
       },
       "rollTracker": {
         "title": "Compteur de rencontre",
