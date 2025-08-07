@@ -124,6 +124,12 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         return MODULE.isDebug || game.users.filter((user) => user.active).length > 1;
     }
 
+    async togglePause(paused?: boolean) {
+        if (!game.user.isGM) return;
+        await this.setSetting("paused", paused ?? !this.settings.paused);
+        this.info("confirm", paused ? "pause" : "play");
+    }
+
     #onCombatStart(combat: EncounterPF2e) {
         const encounters = this.settings.encounters;
         encounters[combat.id] = Date.now();

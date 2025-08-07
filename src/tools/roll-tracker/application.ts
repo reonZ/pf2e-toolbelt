@@ -185,12 +185,6 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         }));
     }
 
-    async togglePause(paused?: boolean) {
-        if (!game.user.isGM) return;
-        await this.setSetting("paused", paused ?? !this.settings.paused);
-        this.tool.info("confirm", paused ? "pause" : "play");
-    }
-
     getUserRolls(userid: string): UserRoll[] {
         const rolls = getUserSetting<UserRoll[]>(userid, `${this.toolKey}.userRolls`)?.value ?? [];
 
@@ -472,9 +466,9 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         } else if (action === "end") {
             this.endSession();
         } else if (action === "pause") {
-            this.togglePause(true);
+            this.tool.togglePause(true);
         } else if (action === "play") {
-            this.togglePause(false);
+            this.tool.togglePause(false);
         } else if (action === "select") {
             this.#select(event, target);
         } else if (action === "start") {
