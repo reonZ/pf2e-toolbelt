@@ -1,3 +1,8 @@
+# 3.7.2
+
+-   `Shared Data`:
+    -   make the master AC bonus `potency` instead of `item` for eidolon and eldamon creatures
+
 # 3.7.1
 
 -   `Shared Data`:
