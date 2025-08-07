@@ -108,6 +108,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
 
     get api(): Record<string, any> {
         return {
+            deleteRecords: this.deleteRecords.bind(this),
             endSession: this.endSession.bind(this),
             openTracker: () => this.application.render(true),
             startSession: this.startSession.bind(this),
