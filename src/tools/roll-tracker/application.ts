@@ -205,33 +205,6 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         return rolls;
     }
 
-    async startSession() {
-        if (!game.user.isGM) return;
-
-        const id = foundry.utils.randomID();
-        const sessions = this.settings.sessions;
-
-        sessions[id] = Date.now();
-
-        await this.setSetting("sessions", sessions);
-        await this.setSetting("session", id);
-
-        this.tool.info("confirm.start", { time: timestampToLocalTime(sessions[id]) });
-    }
-
-    async endSession() {
-        if (!game.user.isGM) return;
-
-        const id = this.settings.session;
-
-        await this.setSetting("session", undefined);
-
-        if (id) {
-            const time = this.settings.sessions[id];
-            this.tool.info("confirm.end", { time: timestampToLocalTime(time) });
-        }
-    }
-
     async deleteRecords(days?: number) {
         if (!game.user.isGM) return;
 
@@ -259,7 +232,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         }
 
         if (createEndOfDayDate().getTime() === time) {
-            await this.endSession();
+            await this.tool.endSession();
             await this.setSetting("sessions", {});
             await this.setSetting("encounters", {});
 
@@ -277,7 +250,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
             R.map((entries) => R.omitBy(entries, (entryTime) => entryTime < time))
         );
 
-        await this.endSession();
+        await this.tool.endSession();
         await this.setSetting("sessions", sessions);
         await this.setSetting("encounters", encounters);
 
@@ -464,7 +437,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         if (action === "delete") {
             this.deleteRecords();
         } else if (action === "end") {
-            this.endSession();
+            this.tool.endSession();
         } else if (action === "pause") {
             this.tool.togglePause(true);
         } else if (action === "play") {
@@ -472,7 +445,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         } else if (action === "select") {
             this.#select(event, target);
         } else if (action === "start") {
-            this.startSession();
+            this.tool.startSession();
         }
     }
 

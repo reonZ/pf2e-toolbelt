@@ -8,6 +8,7 @@ import {
     MODULE,
     R,
     settingPath,
+    timestampToLocalTime,
     toggleHooksAndWrappers,
     tupleHasValue,
 } from "module-helpers";
@@ -128,6 +129,33 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         if (!game.user.isGM) return;
         await this.setSetting("paused", paused ?? !this.settings.paused);
         this.info("confirm", paused ? "pause" : "play");
+    }
+
+    async startSession() {
+        if (!game.user.isGM) return;
+
+        const id = foundry.utils.randomID();
+        const sessions = this.settings.sessions;
+
+        sessions[id] = Date.now();
+
+        await this.setSetting("sessions", sessions);
+        await this.setSetting("session", id);
+
+        this.info("confirm.start", { time: timestampToLocalTime(sessions[id]) });
+    }
+
+    async endSession() {
+        if (!game.user.isGM) return;
+
+        const id = this.settings.session;
+
+        await this.setSetting("session", undefined);
+
+        if (id) {
+            const time = this.settings.sessions[id];
+            this.info("confirm.end", { time: timestampToLocalTime(time) });
+        }
     }
 
     #onCombatStart(combat: EncounterPF2e) {
