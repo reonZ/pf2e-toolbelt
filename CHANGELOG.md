@@ -1,3 +1,23 @@
+# 3.7.0
+
+-   this release implements the `Shared Data` tool
+-   `Resource Tracker`:
+    -   remove the `Show Offlines` setting which was doing literally nothing
+    -   remove the `Display Tracker` setting, it is now exclusively done via the UI control button
+    -   add `Enabled` world setting, completely disables the tool process in your world when unchecked
+-   `Shared Data`:
+    -   masters and bound actors do not need to be owned by the same user anymore
+    -   masters are no longer restricted to characters or linked actors anymore
+        -   selecting an unlinked master will use the world actor and not any particular synthetic one
+    -   the shared data options are no longer added to the actor config menu but have their own application
+        -   the application will disable options not compatible with the actor and the currently selected master
+    -   `Health Pool` and `Hero Points` are now always shared once a master is selected (options are locked)
+    -   bound actor will now receive the master's encounter `Roll Options` when the `Time Events` option is enabled
+    -   remove `Rest for the Night` automation from the `Time Events` option
+    -   add `Spellcasting` option for characters to share both the spellcasting proficiency and the focus pool
+-   `Target Helper`:
+    -   fix system issue with custom spell save variants not having an id
+
 # 3.6.0
 
 -   this release implements the `Identify` tool
