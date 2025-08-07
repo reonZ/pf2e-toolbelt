@@ -9,8 +9,6 @@ import {
 } from "module-helpers";
 import { ModuleToolApplication } from "module-tool";
 import {
-    AUTO_SHARE,
-    AutoDataType,
     BASE_SHARE_DATA,
     CHARACTER_MASTER_SHARE_DATA,
     CHARACTER_SHARE_DATA,
@@ -75,35 +73,32 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
         );
 
         type RawOption = {
-            name: ShareDataType | AutoDataType;
+            name: ShareDataType;
             character: false | "both" | "master";
-            auto?: boolean;
         };
 
         const rawOptions: RawOption[] = [
-            ...AUTO_SHARE,
             ...BASE_SHARE_DATA.map((name): RawOption => {
-                return { name, auto: false, character: false };
+                return { name, character: false };
             }),
             ...CHARACTER_MASTER_SHARE_DATA.map((name): RawOption => {
-                return { name, auto: false, character: "master" };
+                return { name, character: "master" };
             }),
             ...CHARACTER_SHARE_DATA.map((name): RawOption => {
-                return { name, auto: false, character: "both" };
+                return { name, character: "both" };
             }),
         ];
 
         const options = R.pipe(
             rawOptions,
-            R.map(({ name, auto = true, character }) => {
+            R.map(({ name, character }): ShareDataOption => {
                 const disabled =
                     !master ||
                     (character === "both" && !bothCharacters) ||
                     (character === "master" && !masterIsCharacter);
 
                 return {
-                    auto,
-                    checked: !disabled && (auto || this.#data![name as ShareDataType]),
+                    checked: !disabled && this.#data![name],
                     disabled,
                     name,
                 };
@@ -156,10 +151,9 @@ type ShareDataContext = {
 };
 
 type ShareDataOption = {
-    auto: boolean;
     checked: boolean;
     disabled: boolean;
-    name: ShareDataType | AutoDataType;
+    name: ShareDataType;
 };
 
 export { ShareDataConfig };

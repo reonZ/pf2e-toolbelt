@@ -405,12 +405,19 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const masterId = newMasterId ?? getMasterId(actor);
         const master = masterId ? game.actors.get(masterId) : undefined;
         if (isValidMaster(master)) {
-            const updateKeys: UpdateMasterPath[] = [
-                "system.attributes.hp.value",
-                "system.attributes.hp.sp.value",
-                "system.attributes.hp.temp",
-                "system.resources.heroPoints.value",
-            ];
+            const updateKeys: UpdateMasterPath[] = [];
+
+            if (newData?.health ?? getShareOptionInMemory(actor, "health")) {
+                updateKeys.push(
+                    "system.attributes.hp.value",
+                    "system.attributes.hp.sp.value",
+                    "system.attributes.hp.temp"
+                );
+            }
+
+            if (newData?.heroPoints ?? getShareOptionInMemory(actor, "heroPoints")) {
+                updateKeys.push("system.resources.heroPoints.value");
+            }
 
             if (newData?.spellcasting ?? getShareOptionInMemory(actor, "spellcasting")) {
                 updateKeys.push("system.resources.focus.value");
@@ -525,17 +532,21 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const master = data?.master;
         if (!master) return;
 
-        actor.system.attributes.hp = foundry.utils.mergeObject(
-            new game.pf2e.StatisticModifier("hp"),
-            master.system.attributes.hp
-        );
+        if (data.health) {
+            actor.system.attributes.hp = foundry.utils.mergeObject(
+                new game.pf2e.StatisticModifier("hp"),
+                master.system.attributes.hp
+            );
+        }
 
         // the following is only for characters
         if (!master.isOfType("character") || !actor.isOfType("character")) return;
 
-        actor.system.resources.heroPoints = foundry.utils.deepClone(
-            master.system.resources.heroPoints
-        );
+        if (data.heroPoints) {
+            actor.system.resources.heroPoints = foundry.utils.deepClone(
+                master.system.resources.heroPoints
+            );
+        }
 
         if (data.spellcasting) {
             actor.system.resources.focus = foundry.utils.deepClone(master.system.resources.focus);

@@ -11,8 +11,7 @@
     {{#each options as |option|}}
     <div class="form-group{{#if option.disabled}} disabled{{/if}}">
         <label>{{@root.i18n option.name 'label'}}</label>
-        <input type="checkbox" name="{{option.name}}" {{checked option.checked}} {{disabled
-            option.auto}}>
+        <input type="checkbox" name="{{option.name}}" {{checked option.checked}}>
         <p class="hint">{{@root.i18n option.name 'hint'}}</p>
     </div>
     {{/each}}
