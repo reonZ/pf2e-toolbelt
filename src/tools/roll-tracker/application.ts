@@ -9,6 +9,7 @@ import {
     localize,
     R,
     setUserSetting,
+    timestampToLocalTime,
     UserPF2e,
     waitDialog,
 } from "module-helpers";
@@ -581,10 +582,6 @@ function createEndOfDayDate() {
 
 function formatTimedEventOption({ id, time }: TimedEventEntry): SelectOption {
     return { value: id, label: timestampToLocalTime(time) };
-}
-
-function timestampToLocalTime(time: number) {
-    return new Date(time).toLocaleString();
 }
 
 function createRollMode<T extends RollType | "all">(type: T): RawRollMode {
