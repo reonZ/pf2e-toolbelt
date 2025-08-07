@@ -5,12 +5,15 @@ import {
     createHook,
     DEGREE_STRINGS,
     EncounterPF2e,
+    getUserSetting,
     MODULE,
     R,
     settingPath,
+    setUserSetting,
     timestampToLocalTime,
     toggleHooksAndWrappers,
     tupleHasValue,
+    waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { RerollSaveHook, RollSaveHook } from "tools";
@@ -134,6 +137,10 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         return MODULE.isDebug || game.users.filter((user) => user.active).length > 1;
     }
 
+    getUserRolls(userid: string): UserRoll[] {
+        return getUserSetting<UserRoll[]>(userid, `${this.key}.userRolls`)?.value ?? [];
+    }
+
     async togglePause(paused?: boolean) {
         if (!game.user.isGM) return;
         await this.setSetting("paused", paused ?? !this.settings.paused);
@@ -165,6 +172,68 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
             const time = this.settings.sessions[id];
             this.info("confirm.end", { time: timestampToLocalTime(time) });
         }
+    }
+
+    async deleteRecords(days?: number) {
+        if (!game.user.isGM) return;
+
+        let time: number = 0;
+
+        if (R.isNumber(days)) {
+            const date = createEndOfDayDate();
+            date.setDate(date.getDate() - days);
+            time = date.getTime();
+        } else {
+            const date = new Date().toDateInputString();
+            const hint = this.localize("clear.hint");
+
+            const result = await waitDialog({
+                content: `<div class="hint">${hint}</div><input type="date" name="date" value="${date}">`,
+                i18n: `${this.key}.clear`,
+                yes: {
+                    icon: "fa-solid fa-trash",
+                },
+            });
+
+            if (!result) return;
+
+            time = new Date(result.date + "T23:59:59").getTime();
+        }
+
+        if (createEndOfDayDate().getTime() === time) {
+            await this.endSession();
+            await this.setSetting("sessions", {});
+            await this.setSetting("encounters", {});
+
+            await Promise.all(
+                game.users.map((user) => {
+                    return setUserSetting(user, `${this.key}.userRolls`, []);
+                })
+            );
+
+            return this.info("confirm.delete.all");
+        }
+
+        const [encounters, sessions] = R.pipe(
+            [this.settings.encounters, this.settings.sessions],
+            R.map((entries) => R.omitBy(entries, (entryTime) => entryTime < time))
+        );
+
+        await this.endSession();
+        await this.setSetting("sessions", sessions);
+        await this.setSetting("encounters", encounters);
+
+        await Promise.all(
+            game.users.map((user) => {
+                const currentRolls = this.getUserRolls(user.id).slice();
+                if (currentRolls.length === 0) return;
+
+                const rolls = currentRolls.filter((roll) => roll.time >= time);
+                return setUserSetting(user, `${this.key}.userRolls`, rolls);
+            })
+        );
+
+        this.info("confirm.delete.before", { time: timestampToLocalTime(time) });
     }
 
     #onCombatStart(combat: EncounterPF2e) {
@@ -270,6 +339,17 @@ function isCheckContextFlag(flag?: ChatContextFlag): flag is CheckContextChatFla
         !!flag &&
         !tupleHasValue(["damage-roll", "spell-cast", "self-effect", "damage-taken"], flag.type)
     );
+}
+
+function createEndOfDayDate() {
+    const date = new Date();
+
+    date.setHours(23);
+    date.setMinutes(59);
+    date.setSeconds(59);
+    date.setMilliseconds(0);
+
+    return date;
 }
 
 type RollTrackerSettings = {

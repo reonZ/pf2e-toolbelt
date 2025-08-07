@@ -4,14 +4,11 @@ import {
     ApplicationConfiguration,
     ApplicationRenderOptions,
     DEGREE_STRINGS,
-    getUserSetting,
     htmlQuery,
     localize,
     R,
-    setUserSetting,
     timestampToLocalTime,
     UserPF2e,
-    waitDialog,
 } from "module-helpers";
 import { ModuleToolApplication } from "module-tool";
 import { RollTrackerTool, RollType, UserRoll } from ".";
@@ -186,7 +183,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
     }
 
     getUserRolls(userid: string): UserRoll[] {
-        const rolls = getUserSetting<UserRoll[]>(userid, `${this.toolKey}.userRolls`)?.value ?? [];
+        const rolls = this.tool.getUserRolls(userid);
 
         if (this.#filter === "encounter") {
             return this.#combat ? rolls.filter((roll) => roll.encounter === this.#combat) : [];
@@ -203,68 +200,6 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         }
 
         return rolls;
-    }
-
-    async deleteRecords(days?: number) {
-        if (!game.user.isGM) return;
-
-        let time: number = 0;
-
-        if (R.isNumber(days)) {
-            const date = createEndOfDayDate();
-            date.setDate(date.getDate() - days);
-            time = date.getTime();
-        } else {
-            const date = new Date().toDateInputString();
-            const hint = this.tool.localize("clear.hint");
-
-            const result = await waitDialog({
-                content: `<div class="hint">${hint}</div><input type="date" name="date" value="${date}">`,
-                i18n: `${this.toolKey}.clear`,
-                yes: {
-                    icon: "fa-solid fa-trash",
-                },
-            });
-
-            if (!result) return;
-
-            time = new Date(result.date + "T23:59:59").getTime();
-        }
-
-        if (createEndOfDayDate().getTime() === time) {
-            await this.tool.endSession();
-            await this.setSetting("sessions", {});
-            await this.setSetting("encounters", {});
-
-            await Promise.all(
-                game.users.map((user) => {
-                    return setUserSetting(user, `${this.toolKey}.userRolls`, []);
-                })
-            );
-
-            return this.tool.info("confirm.delete.all");
-        }
-
-        const [encounters, sessions] = R.pipe(
-            [this.settings.encounters, this.settings.sessions],
-            R.map((entries) => R.omitBy(entries, (entryTime) => entryTime < time))
-        );
-
-        await this.tool.endSession();
-        await this.setSetting("sessions", sessions);
-        await this.setSetting("encounters", encounters);
-
-        await Promise.all(
-            game.users.map((user) => {
-                const currentRolls = this.getUserRolls(user.id).slice();
-                if (currentRolls.length === 0) return;
-
-                const rolls = currentRolls.filter((roll) => roll.time >= time);
-                return setUserSetting(user, `${this.toolKey}.userRolls`, rolls);
-            })
-        );
-
-        this.tool.info("confirm.delete.before", { time: timestampToLocalTime(time) });
     }
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<RollTrackerContext> {
@@ -435,7 +370,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         const action = target.dataset.action as EventAction;
 
         if (action === "delete") {
-            this.deleteRecords();
+            this.tool.deleteRecords();
         } else if (action === "end") {
             this.tool.endSession();
         } else if (action === "pause") {
@@ -534,17 +469,6 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
             }
         );
     }
-}
-
-function createEndOfDayDate() {
-    const date = new Date();
-
-    date.setHours(23);
-    date.setMinutes(59);
-    date.setSeconds(59);
-    date.setMilliseconds(0);
-
-    return date;
 }
 
 function formatTimedEventOption({ id, time }: TimedEventEntry): SelectOption {
