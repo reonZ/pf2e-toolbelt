@@ -1,3 +1,8 @@
+# 3.7.1
+
+-   `Shared Data`:
+    -   revert auto enabling and locking the `Health Pool` and `Hero Points` options
+
 # 3.7.0
 
 -   this release implements the `Shared Data` tool
