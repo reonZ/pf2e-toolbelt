@@ -100,6 +100,13 @@
           "hint": "L'équipement lâché dans l'inventaire d'un acteur ne sera pas pris en compte dans le calcul de l'Encombrement."
         }
       },
+      "betterMerchant": {
+        "title": "Meilleur marchand",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Ajoute des fonctionnalités personnalisées au système de marchand par défaut"
+        }
+      },
       "betterMovement": {
         "title": "Meilleur déplacement",
         "teleport": {
@@ -146,6 +153,25 @@
         "light": {
           "name": "Source de lumière",
           "hint": "L'objet lâché doit-il émettre de la lumière ? Ce n'est le cas que si un seul objet est présent dans l'acteur de butin."
+        }
+      },
+      "identify": {
+        "title": "Identifier",
+        "delay": {
+          "name": "Délai de 24 heures",
+          "hint": "En cas d'activation, un personnage devra attendre 24h en cas d'échec pour identifier un objet avant de pouvoir refaire une tentative. Sinon, il sera réinitialisé lors de la prochaine journée."
+        },
+        "enabled": {
+          "name": "Activé",
+          "hint": "Vous aidera à gérer les objets non identifiés dans votre monde et de conserver la trace des objets qui sont identifiés."
+        },
+        "identifyPartials": {
+          "name": "Identifier automatiquement les objets similaires",
+          "hint": "Les objets 'similaires' devraient aussi être identifiés en utilisant l'option 'Identifier automatiquement les objets connus'."
+        },
+        "playerRequest": {
+          "name": "Permettre les sollicitations des joueurs",
+          "hint": "Les joueurs devraient-ils pouvoir être capables de solliciter l'identification des objets."
         }
       },
       "mergeDamage": {
@@ -263,6 +289,108 @@
         "context": "Révéler le sort aux joueurs"
       }
     },
+    "betterMerchant": {
+      "browserFilter": {
+        "create": "Créer un filtre",
+        "edit": "Éditer un filtre",
+        "empty": "Cela ne sert à rien de créer un filtre sans... filtres."
+      },
+      "browserPull": {
+        "add": "Ajouter au marchand",
+        "all": "Tout activer/désactiver",
+        "confirm": "<div>Êtes vous certains de vouloir ajouter le(s) objet(s) (<strong>{nb}</strong> sélectionnés) au marchand ?</div><div>Le processus peut prendre plusieurs secondes en fonction du nombre d'objets.</div>",
+        "finished": "Les objets ont fini d'être ajoutés à l'acteur marchand.",
+        "limit": "Vous avez atteint la limite !",
+        "owned": "Cet objet se trouve déjà dans l'inventaire du marchand",
+        "selected": "Sélectionné",
+        "title": "Ajouter les objets - {name}",
+        "wait": "Veuillez attendre que les objets soient traités."
+      },
+      "filtersMenu": {
+        "buy": "Acheter des filtres",
+        "delete": {
+          "title": "Supprimer le filtre",
+          "content": "Êtes-vous certain de vouloir supprimer ce filtre ?"
+        },
+        "enabled": "Activé",
+        "ratio": "Rapport prix",
+        "sell": "Vendre des filtres",
+        "service": "Filtres de service",
+        "tag": "Étiquette",
+        "title": "Filtres d'objet - {name}",
+        "treasure": "Les trésors atteignant ce filtre seront toujours achetés à 100 % de leur prix"
+      },
+      "importServices": {
+        "title": "Importer des services - {name}",
+        "yes": "Importer",
+        "error": "Une erreur s'est produite lors de la tentative d'importation les services."
+      },
+      "item": {
+        "error": "Une erreur s'est produite lors de la tentative de traitement d'un meilleur échange d'objet marchand : <strong>{reason}</strong>.",
+        "noStock": "<strong>{actor}</strong> ne peut pas fournir la quantité demandée de <strong>{item}</strong>.",
+        "unwilling": "<strong>{actor}</strong> ne veut pas se séparer de <strong>{item}</strong>.",
+        "refuse": "<strong>{actor}</strong> n'est pas intéressé par l'achat de <strong>{item}</strong>.",
+        "sell": {
+          "title": "Vendre des articles",
+          "prompt": "Combien d'objets souhaitez-vous vendre ?"
+        },
+        "unided": "Personne de sensé ne voudrait acheter un objet quelconque non identifié."
+      },
+      "sheet": {
+        "browser": "Depuis le navigateur",
+        "filters": "Configurer les filtres",
+        "infiniteAll": {
+          "label": "Stocks infinis",
+          "tooltip": "Le marchand ne sera jamais à court d'articles à vendre (ne fait rien aux trésors ou aux services)"
+        }
+      },
+      "sheetServices": {
+        "add": "Ajouter un service",
+        "buy": "Demander un service",
+        "copied": "Les services <strong>{name}</strong> ont été copiés dans le presse-papiers.",
+        "delete": "Supprimer le service",
+        "edit": "Éditer le service",
+        "enabled": "Activer/désactiver le service",
+        "export": "Exporter les services",
+        "free": "Gratuit",
+        "give": "Service gratuit",
+        "import": "Importer des services",
+        "label": "Services"
+      },
+      "service": {
+        "buy": "<strong>{buyer}</strong> a engagé les services de <strong>{seller}</strong>.",
+        "error": "Une erreur s'est produite lors de la tentative de traitement d'un meilleur service marchand ({service}) : <strong>{reason}</strong>.",
+        "give": "<strong>{seller}</strong> offre ses services à <strong>{buyer}</strong> gratuitement.",
+        "noBuyer": "Vous devez sélectionner un personnage/PNJ/groupe que vous possédez comme cible du service.",
+        "noFunds": "<strong>{buyer}</strong> ne dispose pas des fonds nécessaires pour engager les services de <strong>{seller}</strong>.",
+        "noStock": "<strong>{seller}</strong> n'offre plus ce service.",
+        "unwilling": "<strong>{seller}</strong> n'est plus disposé à offrir ce service."
+      },
+      "serviceMenu": {
+        "buy": "<strong>{buyer}</strong> a engagé les services de <strong>{seller}</strong>.",
+        "copied": "Le service <strong>{label}</strong> a été copié dans le presse-papiers.",
+        "delete": {
+          "title": "Effacer un service",
+          "content": "Êtes-vous certain de vouloir supprimer ce service ?"
+        },
+        "enabled": "Activé",
+        "error": "Une erreur s'est produite lors de la tentative de traitement de la demande de service",
+        "export": "Exporter le service",
+        "give": "<strong>{seller}</strong> offre ses services à <strong>{buyer}</strong> gratuitement.",
+        "macro": {
+          "label": "Macro exécutée sur le service",
+          "drop": "Déposer la macro ici"
+        },
+        "name": "Nom",
+        "noBuyer": "Vous devez sélectionner un personnage/PNJ/groupe que vous possédez comme cible du service.",
+        "noFunds": "<strong>{buyer}</strong> ne dispose pas des fonds nécessaires pour engager les services de <strong>{seller}</strong>.",
+        "none": "Impossible de trouver le service",
+        "noStock": "<strong>{seller}</strong> n'offre plus ce service.",
+        "quantity": "Nombre négatif pour un stock infini",
+        "tags": "Étiquettes de service",
+        "title": "Service - {label}"
+      }
+    },
     "betterTemplate": {
       "target": {
         "all": "Aux deux",
@@ -315,6 +443,51 @@
           "item": "{source} a donné {quantity} × {item} à {target}.",
           "container": "{source} a donné {item} et tout son contenu à {target}."
         }
+      }
+    },
+    "identify": {
+      "request": {
+        "hint": "A demandé une identification d'objet pour",
+        "proceed": "Souhaitez-vous poursuivre ?",
+        "sent": "Une demande d'identification d'objet a été envoyée au MJ."
+      },
+      "tracker": {
+        "auto": {
+          "content": "Identifier les objets déjà connus des membres du groupe :<br><ul>{items}</ul>",
+          "label": "Auto",
+          "none": "Il n'y a aucun objet à identifier automatiquement",
+          "title": "Identification automatique",
+          "tooltip": "Identifier automatiquement les objets connus"
+        },
+        "clock": {
+          "backward": "Reculer le temps de 10 minutes",
+          "forward": "Avancer le temps de 10 minutes",
+          "open": "Ouvrir le menu de l'horloge du monde"
+        },
+        "failed": {
+          "daily": "N'a pas réussi à identifier cet objet aujourd'hui",
+          "delay": "N'a pas réussi à identifier cet objet : {heures} heures restantes"
+        },
+        "identified": "Déjà identifié",
+        "known": {
+          "full": "Cet objet a déjà été identifié",
+          "partial": "A identifié un article similaire :<br>{item}",
+          "recall": "Peut dépenser une unique action Se souvenir<br>et réussir automatiquement"
+        },
+        "misidentify": "Activer/désactiver l'erreur d'identification",
+        "request-checks": "Solliciter des tests",
+        "reset": {
+          "label": "Réinitialiser",
+          "tooltip": "Annuler les modifications actuelles"
+        },
+        "save": {
+          "content": "Enregistrez les modifications actuelles et identifiez automatiquement le(s) objet(s) suivant(s) :<br><ul>{items}</ul>",
+          "label": "Mise à jour",
+          "title": "Mise à jour des modifications",
+          "tooltip": "Mettre à jour les modifications actuelles et identifier les éléments"
+        },
+        "send-to-chat": "Envoyer dans la conversation",
+        "title": "Suivi d'identification des objets"
       }
     },
     "mergeDamage": {
