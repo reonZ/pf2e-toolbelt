@@ -14,9 +14,11 @@ import {
     EncounterPF2e,
     EquipmentPF2e,
     getFirstActiveToken,
+    includesAny,
     isPrimaryOwner,
     isPrimaryUpdater,
     ModifierPF2e,
+    ModifierType,
     MODULE,
     R,
     registerWrapper,
@@ -651,11 +653,18 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         const label = armorBonus > bracerBonus ? armor!.name : bracers!.name;
                         const slug = game.pf2e.system.sluggify(label);
 
+                        const modifierType: ModifierType =
+                            selector === "saving-throw"
+                                ? "item"
+                                : includesAny(actor.system.traits.value, ["eidolon", "eldamon"])
+                                ? "potency"
+                                : "item";
+
                         const modifier = new game.pf2e.Modifier({
                             slug,
                             label,
                             modifier: Math.max(armorBonus, bracerBonus),
-                            type: "item",
+                            type: modifierType,
                         });
 
                         if (options.test) {
