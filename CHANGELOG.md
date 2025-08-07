@@ -1,3 +1,8 @@
+# 3.7.3
+
+-   `Roll Tracker`:
+    -   add `openTracker`, `togglePause`, `startSession` and `endSession` function to the API
+
 # 3.7.2
 
 -   `Shared Data`:
