@@ -202,21 +202,20 @@
                 }
             },
             "resourceTracker": {
-                "title": "Śledzenie Zasobów",
-                "offline": {
-                    "name": "Pokaż zasoby graczy offline",
-                    "hint": "Wyświetlaj również udostępnione zasoby od użytkowników offline."
-                },
-                "show": {
-                    "name": "Wyświetlacz śledzenia zasobów",
-                    "hint": "Czy widget śledzenia zasobów powinien być wyświetlany w interfejsie? Można go włączyć/wyłączyć za pomocą elementów sterujących po lewej stronie interfejsu użytkownika."
-                }
+                "title": "Śledzenie Zasobów"
             },
             "rollTracker": {
                 "title": "Śledzenie rzutów",
                 "enabled": {
                     "name": "Włączone",
                     "hint": "Śledź wyniki, aby sprawdzić, czy Twoi gracze naprawdę mają tyle pecha."
+                }
+            },
+            "shareData": {
+                "title": "Współdzielone dane",
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Aktorzy będą mogli łączyć/współdzielić swoje dane między sobą."
                 }
             },
             "targetHelper": {
@@ -638,6 +637,37 @@
                 "delete": {
                     "all": "Rekordy zostały wyczyszczone.",
                     "before": "Rekordy przed <strong>{time}</strong> zostały wyczyszczone."
+                }
+            }
+        },
+        "shareData": {
+            "config": {
+                "armorRunes": {
+                    "label": "Runy pancerza",
+                    "hint": "Wykorzystaj zainwestowane przez mistrza runy mocy pancerza/osłony i odporności."
+                },
+                "health": {
+                    "label": "Pula zdrowia",
+                    "hint": "Dzieli się punktami zdrowia i staminy ze swoim mistrzem."
+                },
+                "heroPoints": {
+                    "label": "Punkty Bohaterstwa",
+                    "hint": "Użyj Punktów Bohaterstwa mistrza."
+                },
+                "master": {
+                    "label": "Mistrz",
+                    "hint": "Wybierz mistrza, z którą ten aktor będzie udostępniać dane."
+                },
+                "skills": {
+                    "label": "Biegłość w umiejętnościach",
+                    "hint": "Użyj biegłości z umiejętności mistrza."
+                },
+                "time Events": {
+                    "label": "Czas wydarzeń"
+                },
+                "weaponRunes": {
+                    "label": "Runy broni",
+                    "hint": "Wykorzystaj zainwestowane przez mistrza runy podstawowe i runy właściwości."
                 }
             }
         },

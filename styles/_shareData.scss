@@ -1,0 +1,11 @@
+.application.pf2e-toolbelt-shareData-config {
+    max-width: 700px;
+
+    .standard-form {
+        .form-group {
+            &.disabled {
+                filter: opacity(0.5) blur(1px);
+            }
+        }
+    }
+}

@@ -203,13 +203,9 @@
             },
             "resourceTracker": {
                 "title": "Resource Tracker",
-                "offline": {
-                    "name": "Show Offlines",
-                    "hint": "Display shared resources from offline users as well."
-                },
-                "show": {
-                    "name": "Display Tracker",
-                    "hint": "Should the resource tracker widget be displayed in your interface. Can be toggled on/off via controls on the left UI."
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Enabled this tool on your client. The tracker can be toggled on/off via controls on the left UI"
                 }
             },
             "rollTracker": {
@@ -217,6 +213,13 @@
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Track rolls to see if your players are really that unlucky."
+                }
+            },
+            "shareData": {
+                "title": "Shared Data",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Actors will be able to link/share their data with one another."
                 }
             },
             "targetHelper": {
@@ -642,6 +645,45 @@
                     "before": "Records before <strong>{time}</strong> have been cleared."
                 }
             }
+        },
+        "shareData": {
+            "config": {
+                "armorRunes": {
+                    "label": "Armor Runes",
+                    "hint": "Use the master's invested armor/bracers potency & resilient runes."
+                },
+                "health": {
+                    "label": "Health Pool",
+                    "hint": "Share health & stamina points with its master."
+                },
+                "heroPoints": {
+                    "label": "Hero Points",
+                    "hint": "Use the master's hero points."
+                },
+                "master": {
+                    "label": "Master",
+                    "hint": "Select a master with whom this actor will share data."
+                },
+                "skills": {
+                    "label": "Skills Proficiencies",
+                    "hint": "Use the master's skills proficiencies."
+                },
+                "spellcasting": {
+                    "label": "Spellcasting",
+                    "hint": "Use the master's spellcasting proficiency and it's focus pool."
+                },
+                "timeEvents": {
+                    "label": "Time Events",
+                    "hint": "Whenever the master's turn starts/ends or initiative changes, the events will also be triggered for this actor. It will also use the master to calculate remaining duration for effects."
+                },
+                "title": "Shared Data - {name}",
+                "unable": "This actor is unable to be linked to a master.",
+                "weaponRunes": {
+                    "label": "Weapon Runes",
+                    "hint": "Use the master's invested handwraps/weapon fundamental & property runes."
+                }
+            },
+            "share": "Share"
         },
         "targetHelper": {
             "check-card": {

@@ -53,10 +53,6 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
 
     static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
         id: IdentifyTracker.ID,
-        position: {
-            // width: 1200,
-            // height: 750,
-        },
     };
 
     constructor(

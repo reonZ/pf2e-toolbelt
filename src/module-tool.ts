@@ -13,6 +13,7 @@ import {
     getDataFlagArray,
     getFlag,
     getInMemory,
+    getOrSetInMemory,
     getSetting,
     info,
     joinStr,
@@ -111,6 +112,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     setInMemory<T>(obj: ClientDocument | Token, ...args: [...string[], T]): boolean {
         return setInMemory(obj, this.key, ...args);
+    }
+
+    getOrSetInMemory<T>(obj: ClientDocument | Token, ...args: [...string[], () => T]): T {
+        return getOrSetInMemory(obj, this.key, ...args);
     }
 
     deleteInMemory(obj: ClientDocument | Token, ...path: string[]): boolean {

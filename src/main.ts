@@ -24,6 +24,7 @@ import {
     MergeDamageTool,
     ResourceTrackerTool,
     RollTrackerTool,
+    ShareDataTool,
     TargetHelperTool,
     UndergroundTool,
     UnidedTool,
@@ -47,6 +48,7 @@ const TOOLS: ModuleTool[] = [
     new ResourceTrackerTool(),
     new RollTrackerTool(),
     new UnidedTool(),
+    new ShareDataTool(),
     new TargetHelperTool(),
     new UndergroundTool(),
 ];

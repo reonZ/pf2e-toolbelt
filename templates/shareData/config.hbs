@@ -1,0 +1,38 @@
+<div class="standard-form">
+    {{#if masters}}
+    <div class="form-group">
+        <label>{{@root.i18n 'master.label'}}</label>
+        <select name="master" {{#unless masters.length}} disabled{{/unless}}>
+            <option value=""></option>
+            {{selectOptions masters selected=masterId valueAttr="id" labelAttr="name"}}
+        </select>
+        <p class="hint">{{@root.i18n 'master.hint'}}</p>
+    </div>
+    {{#each options as |option|}}
+    <div class="form-group{{#if option.disabled}} disabled{{/if}}">
+        <label>{{@root.i18n option.name 'label'}}</label>
+        <input type="checkbox" name="{{option.name}}" {{checked option.checked}} {{disabled
+            option.auto}}>
+        <p class="hint">{{@root.i18n option.name 'hint'}}</p>
+    </div>
+    {{/each}}
+    <footer class="form-footer">
+        <button type="button" data-action="save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>{{localize 'Save'}}</span>
+        </button>
+        <button type="button" data-action="cancel">
+            <i class="fa-solid fa-xmark"></i>
+            <span>{{localize 'Cancel'}}</span>
+        </button>
+    </footer>
+    {{else}}
+    <p>{{@root.i18n 'unable'}}</p>
+    <footer class="form-footer">
+        <button type="button" data-action="cancel">
+            <i class="fa-solid fa-xmark"></i>
+            <span>{{localize 'Close'}}</span>
+        </button>
+    </footer>
+    {{/if}}
+</div>
