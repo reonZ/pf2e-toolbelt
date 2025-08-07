@@ -5,7 +5,6 @@ import {
     htmlQuery,
     R,
     registerUpstreamHook,
-    SpellOverlayOverride,
     SpellPF2e,
 } from "module-helpers";
 import {
@@ -125,27 +124,26 @@ function getSpellSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | nu
     const baseSave = spell?.system.defense?.save;
 
     if (spell.hasVariants) {
-        const overlays = spell.overlays.contents as (SpellOverlayOverride & { _id: string })[];
+        const saveVariants: SaveVariantsSource = {};
 
-        return R.pipe(
-            overlays,
-            R.map(({ _id, system }) => {
-                if (system?.defense === null) return;
+        for (const [id, { system }] of spell.overlays.entries()) {
+            if (system?.defense === null) continue;
 
-                const override = system?.defense?.save;
-                if (!override && !baseSave) return;
+            const override = system?.defense?.save;
+            if (!baseSave && !override) continue;
 
-                const save = foundry.utils.mergeObject(
-                    baseSave ?? {},
-                    { dc, ...override },
-                    { inplace: false }
-                ) as Omit<TargetsSaveSource, "saves">;
+            const save = foundry.utils.mergeObject(
+                baseSave ?? {},
+                { dc, ...override },
+                { inplace: false }
+            ) as Omit<TargetsSaveSource, "saves">;
 
-                return [_id, save] as const;
-            }),
-            R.filter(R.isTruthy),
-            R.mapToObj(([id, save]) => [id, save])
-        );
+            if (save.statistic) {
+                saveVariants[id] = save;
+            }
+        }
+
+        return saveVariants;
     } else if (baseSave) {
         return { null: { dc, ...baseSave } };
     }
