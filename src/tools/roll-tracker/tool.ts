@@ -103,6 +103,15 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         ];
     }
 
+    get api(): Record<string, any> {
+        return {
+            endSession: this.endSession.bind(this),
+            openTracker: () => this.application.render(true),
+            startSession: this.startSession.bind(this),
+            togglePause: this.togglePause.bind(this),
+        };
+    }
+
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
 
