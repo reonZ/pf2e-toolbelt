@@ -1,5 +1,6 @@
 export * from "./shared";
 export * from "./action";
+export * from "./area";
 export * from "./buttons";
 export * from "./check";
 export * from "./damage";

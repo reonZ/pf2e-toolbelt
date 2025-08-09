@@ -15,12 +15,15 @@ import {
     getCurrentTargets,
     getSaveLinkData,
     isActionMessage,
+    isAreaMessage,
     isDamageMessage,
     prepareActionMessage,
+    prepareAreaMessage,
     prepareCheckMessage,
     prepareDamageMessage,
     prepareSpellMessage,
     renderActionMessage,
+    renderAreaMessage,
     renderCheckMessage,
     renderDamageMessage,
     renderSpellMessage,
@@ -234,7 +237,9 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
         const updates: DeepPartial<TargetsDataSource> = {};
 
-        if (isDamageMessage(message)) {
+        if (isAreaMessage(message)) {
+            if (!prepareAreaMessage.call(this, message, updates)) return;
+        } else if (isDamageMessage(message)) {
             if (!prepareDamageMessage.call(this, message, updates)) return;
         } else if (isSpellMessage(message)) {
             if (!prepareSpellMessage.call(this, message, updates)) return;
@@ -258,6 +263,8 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
         if (flag.type === "action") {
             this.settings.targets && (await renderActionMessage.call(this, message, html, flag));
+        } else if (flag.type === "area") {
+            this.settings.targets && (await renderAreaMessage.call(this, message, html, flag));
         } else if (flag.type === "check") {
             this.settings.checks && (await renderCheckMessage.call(this, message, html, flag));
         } else if (flag.type === "damage") {

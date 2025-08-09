@@ -3,7 +3,7 @@ import { TargetsSaveModel, TargetsSaveSource } from ".";
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
 
-const TARGET_MESSAGE_TYPE = ["damage", "spell", "action", "check"] as const;
+const TARGET_MESSAGE_TYPE = ["area", "damage", "spell", "action", "check"] as const;
 
 class TargetsDataModel extends abstract.DataModel<null, TargetsDataSchema> {
     static defineSchema(): TargetsDataSchema {

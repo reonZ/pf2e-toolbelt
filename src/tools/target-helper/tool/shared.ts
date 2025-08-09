@@ -1,19 +1,30 @@
 import {
     ActorPF2e,
     ChatMessagePF2e,
+    createHTMLElement,
     FlagData,
     getDragEventData,
     getItemFromUuid,
     htmlClosest,
+    htmlQuery,
     ItemPF2e,
     MODULE,
     R,
+    registerUpstreamHook,
     resolveActorAndItemFromHTML,
     SAVE_TYPES,
     SaveType,
+    SpellPF2e,
     splitListString,
+    WeaponPF2e,
 } from "module-helpers";
-import { TargetHelperTool } from ".";
+import {
+    addSaveBtnListener,
+    addTargetsHeaders,
+    createRollNPCSavesBtn,
+    createSetTargetsBtn,
+    TargetHelperTool,
+} from ".";
 import { TargetsData, TargetsDataModel, TargetsSaveSource } from "..";
 
 function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
@@ -49,6 +60,88 @@ function getCurrentTargets(): TokenDocumentUUID[] {
         Array.from(game.user.targets),
         R.filter((target) => !!target.actor?.isOfType("creature", "hazard", "vehicle")),
         R.map((target) => target.document.uuid)
+    );
+}
+
+async function renderSpellCardLikeMessage(
+    this: TargetHelperTool,
+    message: ChatMessagePF2e,
+    msgContent: HTMLElement,
+    flag: TargetsFlagData,
+    item: SpellPF2e | WeaponPF2e,
+    rollDamage: (event: PointerEvent) => void
+): Promise<void> {
+    const data = new TargetsData(flag, item.isOfType("spell") ? item.variantId : null);
+    const save = data.save;
+    if (!save) return;
+
+    await addTargetsHeaders.call(this, message, data, msgContent);
+
+    const cardBtns = htmlQuery(msgContent, ".card-buttons");
+    const saveBtn = htmlQuery<HTMLButtonElement>(
+        cardBtns,
+        `[data-action="spell-save"], [data-action="roll-area-save"]`
+    );
+    if (!saveBtn) return;
+
+    const buttonsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
+    const fakeSaveBtn = saveBtn.cloneNode(true) as HTMLButtonElement;
+
+    fakeSaveBtn.dataset.save = "reflex";
+    delete fakeSaveBtn.dataset.action;
+
+    saveBtn.classList.add("hidden");
+    saveBtn.after(buttonsWrapper);
+
+    addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, data);
+    buttonsWrapper.append(fakeSaveBtn);
+
+    if (!isMessageOwner(message)) return;
+
+    const setTargetsBtn = createSetTargetsBtn.call(this, data);
+    buttonsWrapper.prepend(setTargetsBtn);
+
+    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, data);
+    if (rollSavesBtn) {
+        buttonsWrapper.append(rollSavesBtn);
+    }
+
+    const damageBtn = htmlQuery(
+        cardBtns,
+        `[data-action="spell-damage"], [data-action="roll-area-damage"]`
+    );
+    if (!damageBtn) return;
+
+    delete damageBtn.dataset.action;
+
+    damageBtn.addEventListener(
+        "click",
+        (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // we cache the data & add the spell just in case
+            const cached = data.toJSON({
+                type: "damage",
+                item: data.itemUUID ?? item.uuid,
+                "==saveVariants": { null: save },
+            });
+
+            registerUpstreamHook(
+                "preCreateChatMessage",
+                (damageMessage: ChatMessagePF2e) => {
+                    // we feed all the data to the damage message
+                    this.updateSourceFlag(damageMessage, cached);
+                },
+                true
+            );
+
+            // we clean up the spell message as we are not gonna use it anymore
+            this.unsetFlag(message);
+
+            rollDamage(event);
+        },
+        true
     );
 }
 
@@ -130,6 +223,12 @@ type SaveDragData = SaveLinkData & {
     type: `${typeof MODULE.id}-check-roll`;
 };
 
+type AreaFireData = {
+    author?: ActorUUID;
+    saveVariants: { null: WithPartial<TargetsSaveSource, "saves"> };
+    options: string[];
+};
+
 type SaveLinkData = {
     author?: ActorUUID;
     saveVariants: { null: WithPartial<TargetsSaveSource, "saves"> };
@@ -148,5 +247,12 @@ type CheckLinkData = {
 
 type TargetsFlagData = FlagData<TargetsDataModel>;
 
-export { getCurrentTargets, getItem, getSaveLinkData, isMessageOwner, onChatMessageDrop };
-export type { CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };
+export {
+    getCurrentTargets,
+    getItem,
+    getSaveLinkData,
+    isMessageOwner,
+    onChatMessageDrop,
+    renderSpellCardLikeMessage,
+};
+export type { AreaFireData, CheckLinkData, SaveDragData, SaveLinkData, TargetsFlagData };
