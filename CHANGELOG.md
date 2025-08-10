@@ -1,3 +1,8 @@
+# 3.8.1
+
+-   `Shared Data`:
+    -   fix error with unlinked encounters
+
 # 3.8.0
 
 -   this release implements the `Hero Actions` tool and concludes the re-implementation of all the tools from v12
