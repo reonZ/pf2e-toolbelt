@@ -70,12 +70,16 @@
           "hint": "Se o seu mundo deve usar a regra caseira de Progressão Automática de Runas, do Rules Lawyer."
         },
         "force": {
-          "name": "Forçar Atualização"
+          "name": "Forçar Atualização",
+          "hint": "Quando habilitado, as runas serão sempre atualizadas com base no nível do ator. Quando desabilitado, apenas as runas que estiverem com um valor inferior ao que deveriam ter para aquele nível serão atualizadas."
         },
         "price": {
+          "name": "Sem preço de runa",
           "hint": "Os preços de runas fundamentais devem ser subtraídos do preço das armas?"
         },
         "shield": {
+          "name": "Runa de Escudo",
+          "hint": "Runas de reforço também devem ser adicionadas aos escudos?"
         }
       },
       "betterEffectsPanel": {
@@ -110,7 +114,8 @@
           "hint": "Clicar no mapa enquanto segura a tecla de atalho definida teletransportará instantaneamente os tokens selecionados para o local sem precisar se deslocar.",
           "choices": {
             "disabled": "Desabilitado",
-            "enabled": "Habilitado"
+            "enabled": "Habilitado",
+            "select": "Re-selecionar tokens"
           }
         },
         "history": {
@@ -135,31 +140,45 @@
       "conditionManager": {
         "title": "Gerente de Condições",
         "enabled": {
-          "name": "Habilitado"
+          "name": "Habilitado",
+          "hint": "Arraste uma condição enquanto mantém pressionada a tecla de atalho definida para abrir o gerenciador de condições, permitindo que você defina sua duração."
         }
       },
       "droppeth": {
         "title": "Droppeth",
         "enabled": {
-          "name": "Habilitado"
+          "name": "Habilitado",
+          "hint": "Permita que os usuários soltem itens na tela mantendo pressionada a tecla atribuída."
         },
         "light": {
+          "name": "Fonte de luz",
+          "hint": "O item derrubado deve emitir luz. Isso só ocorrerá se houver um único item presente no agente de saque."
         }
       },
       "identify": {
+        "title": "Identificar",
         "delay": {
+          "name": "Atraso de 24 horas",
           "hint": "Quando habilitado, o personagem precisará aguardar 24 horas após não conseguir identificar um item antes de poder fazer outra tentativa. Caso contrário, será reiniciada no dia seguinte."
         },
         "enabled": {
-          "name": "Habilitado"
+          "name": "Habilitado",
+          "hint": "Ajudará você a gerenciar itens não identificados em seu mundo e a controlar quais itens são identificados."
         },
         "identifyPartials": {
+          "name": "Identificar automaticamente itens semelhantes",
+          "hint": "Itens \"similares\" também devem ser identificados ao usar a opção \"Identificar automaticamente itens conhecidos\"."
         },
         "playerRequest": {
+          "name": "Permitir solicitação do jogador",
+          "hint": "Os jogadores devem poder solicitar a identificação de itens."
         }
       },
       "mergeDamage": {
+        "title": "Mesclar Danos",
         "merge": {
+          "name": "Botão Mesclar",
+          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam mescladas com outras mensagens de dano."
         },
         "inject": {
           "name": "Injetar Botão",
@@ -169,29 +188,38 @@
       "giveth": {
         "title": "Giveth",
         "enabled": {
-          "name": "Habilitado"
+          "name": "Habilitado",
+          "hint": "Seu mundo deve permitir que seus jogadores atores possam dar itens de inventário para outros atores de propriedade de jogadores?"
         },
         "effect": {
+          "name": "Incluir efeitos/condições",
+          "hint": "Os jogadores também deveriam poder aplicar efeitos e condições em atores que não são seus?",
           "choices": {
-            "disabled": "Desabilitado"
+            "disabled": "Desabilitado",
+            "ally": "Somente aliados",
+            "all": "Todos os atores"
           }
         }
       },
       "resourceTracker": {
         "title": "Monitor de Recursos",
         "enabled": {
+          "name": "Habilitado",
           "hint": "Habilite esta ferramenta no seu browser. O monitor pode ser ativado/desativado por meio dos controles na interface do usuário à esquerda."
         }
       },
       "rollTracker": {
         "title": "Monitor de Rolagens",
         "enabled": {
-          "name": "Habilitado"
+          "name": "Habilitado",
+          "hint": "Acompanhe as jogadas para ver se seus jogadores são realmente tão azarados."
         }
       },
       "shareData": {
+        "title": "Dados Compartilhados",
         "enabled": {
-          "name": "Habilitado"
+          "name": "Habilitado",
+          "hint": "Os atores poderão vincular/compartilhar seus dados uns com os outros."
         }
       },
       "targetHelper": {
@@ -205,15 +233,19 @@
           "hint": "Reduz o tamanho dos botões de dano para os alvos adicionais."
         },
         "targets": {
-          "name": "Adicionar alvos às mensagens"
+          "name": "Adicionar alvos às mensagens",
+          "hint": "Adicionará alvos extras às mensagens de bate-papo, onde o dano pode ser aplicado e defesas podem ser realizadas."
         },
         "checks": {
-          "name": "Atualizar mensagens de testes"
+          "name": "Atualizar mensagens de testes",
+          "hint": "Atualiza as mensagens simples de salvamento em linha para algo que pode ser usado pelo recurso. Também adiciona mais detalhes."
         }
       },
       "underground": {
         "title": "Subterrâneo",
         "enabled": {
+          "name": "Habilitado",
+          "hint": "Permitirá que tokens com elevação negativa permaneçam visíveis no tabuleiro."
         },
         "mode": {
           "name": "Filtro Aplicado",
@@ -234,6 +266,7 @@
         }
       },
       "unided": {
+        "title": "Definir imagem não identificada",
         "create": {
           "name": "Na criação de itens",
           "hint": "Defina automaticamente a imagem não identificada dos itens para ser a mesma que a imagem normal quando o item for criado/importado."
@@ -246,35 +279,62 @@
     },
     "actionable": {
       "action": {
-        "label": "Efeito autoaplicado / Macro"
+        "label": "Efeito autoaplicado / Macro",
+        "hint": "Um único item de efeito a ser aplicado ao ator que usa esta ação ou uma macro que será executada quando esta ação for usada",
+        "cancel": "A ação <strong>{name}</strong> foi cancelada por sua macro."
       },
       "item": {
+        "label": "Macro",
+        "hint": "Uma macro que será executada quando este item for usado",
+        "cancel": "O uso de <strong>{name}</strong> foi cancelado por sua macro."
       },
       "spell": {
+        "label": "Macro",
+        "hint": "Uma macro que será executada quando este feitiço for lançado",
+        "cancel": "<strong>{name}</strong> cast foi cancelado por sua macro."
       }
     },
     "anonymous": {
       "spell": {
-        "header": "Está conjurando uma magia..."
+        "header": "Está conjurando uma magia...",
+        "context": "Revelar feitiço para jogadores"
       }
     },
     "betterMerchant": {
       "browserFilter": {
+        "create": "Criar filtro",
+        "edit": "Editar filtro",
         "empty": "Não faz sentido criar um filtro sem filtros..."
       },
       "browserPull": {
-        "title": "Adicionar itens - {name}"
+        "add": "Adicionar ao comerciante",
+        "all": "Alternar tudo",
+        "confirm": "<div>Tem certeza de que deseja adicionar o(s) item(ns) (selecionado(s): <strong>{nb}</strong>) ao comerciante?</div><div>O processo pode levar vários segundos, dependendo da quantidade de itens.</div>",
+        "finished": "Os itens terminaram de ser adicionados ao ator comerciante.",
+        "limit": "Você atingiu o limite!",
+        "owned": "Este item já está no inventário do comerciante",
+        "selected": "Selecionado",
+        "title": "Adicionar itens - {name}",
+        "wait": "Aguarde o processamento dos itens."
       },
       "filtersMenu": {
         "buy": "Filtros de compra",
         "delete": {
+          "title": "Excluir filtro",
+          "content": "Tem certeza de que deseja excluir este filtro?"
         },
+        "enabled": "Habilitado",
         "ratio": "Proporção do preço",
+        "sell": "Filtros de Venda",
+        "service": "Filtros de serviço",
         "tag": "Tag",
-        "title": "Filtros de itens - {name}"
+        "title": "Filtros de itens - {name}",
+        "treasure": "Os tesouros que atingirem este filtro serão sempre comprados por 100% do seu preço"
       },
       "importServices": {
-        "title": "Serviços de Importação - {name}"
+        "title": "Serviços de Importação - {name}",
+        "yes": "Importar",
+        "error": "Ocorreu um erro ao tentar importar os serviços."
       },
       "item": {
         "error": "Ocorreu um erro ao tentar processar uma troca melhor de item do comerciante: <strong>{reason}</strong>.",
@@ -282,16 +342,26 @@
         "unwilling": "<strong>{actor}</strong> não está disposto a se separar de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> não está interessado em comprar <strong>{item}</strong>.",
         "sell": {
-        }
+          "title": "Vender itens",
+          "prompt": "Quantos itens você deseja vender?"
+        },
+        "unided": "Ninguém em sã consciência iria querer comprar um item aleatório e não identificado."
       },
       "sheet": {
+        "browser": "Do navegador",
+        "filters": "Filtros de configuração",
         "infiniteAll": {
-          "label": "Estoque Infinito"
+          "label": "Estoque Infinito",
+          "tooltip": "O comerciante nunca ficará sem itens para vender (não afeta Tesouros ou Serviços)"
         }
       },
       "sheetServices": {
+        "add": "Adicionar serviço",
+        "buy": "Solicitar serviço",
         "copied": "Os serviços do <strong>{name}</strong> foram copiados para a área de transferência.",
+        "delete": "Excluir serviço",
         "edit": "Editar serviço",
+        "enabled": "Alternar serviço",
         "export": "Exportar Serviços",
         "free": "Gratuito",
         "give": "Serviço Gratuito",
@@ -299,62 +369,123 @@
         "label": "Serviços"
       },
       "service": {
+        "buy": "<strong>{buyer}</strong> contratou os serviços de <strong>{seller}</strong>.",
+        "error": "Ocorreu um erro ao tentar processar um serviço comercial melhor ({service}): <strong>{reason}</strong>.",
+        "give": "<strong>{seller}</strong> oferece seus serviços a <strong>{buyer}</strong> gratuitamente.",
+        "noBuyer": "Você deve selecionar um Personagem/NPC/Grupo de sua propriedade como alvo do serviço.",
+        "noFunds": "<strong>{buyer}</strong> não tem fundos para contratar os serviços de <strong>{seller}</strong>.",
+        "noStock": "<strong>{seller}</strong> não oferece mais esse serviço.",
+        "unwilling": "<strong>{seller}</strong> não está mais disposto a oferecer esse serviço."
       },
       "serviceMenu": {
+        "buy": "<strong>{buyer}</strong> contratou os serviços de <strong>{seller}</strong>.",
+        "copied": "O serviço <strong>{label}</strong> foi copiado para a área de transferência.",
         "delete": {
+          "title": "Excluir serviço",
+          "content": "Tem certeza de que deseja excluir este serviço?"
         },
+        "enabled": "Habilitado",
+        "error": "Ocorreu um erro ao tentar processar a solicitação de serviço",
+        "export": "Serviço de Exportação",
+        "give": "<strong>{seller}</strong> oferece seus serviços a <strong>{buyer}</strong> gratuitamente.",
         "macro": {
           "label": "Macro executada no serviço",
           "drop": "Solte a macro aqui"
         },
         "name": "Nome",
-        "noBuyer": "Você deve selecionar um Personagem/PDM/Grupo que pertença a você como alvo do serviço."
+        "noBuyer": "Você deve selecionar um Personagem/PDM/Grupo que pertença a você como alvo do serviço.",
+        "noFunds": "<strong>{buyer}</strong> não tem fundos para contratar os serviços de <strong>{seller}</strong>.",
+        "none": "Não foi possível encontrar o serviço",
+        "noStock": "<strong>{seller}</strong> não oferece mais esse serviço.",
+        "quantity": "Número negativo para estoque infinito",
+        "tags": "Etiquetas de serviço",
+        "title": "Serviço - {label}"
       }
     },
     "betterTemplate": {
       "target": {
+        "all": "Ambos",
+        "allies": "Aliados",
+        "dismiss": "Remover modelo",
+        "enemies": "Inimigos",
+        "neutral": "Incluir Neutro",
+        "self": "Incluir a si mesmo",
+        "title": "Assistente de modelo",
+        "yes": "Alvo"
       }
     },
     "conditionManager": {
       "manager": {
+        "title": "Gerente de Condições - {name}",
+        "add": "Criar",
         "cancel": "Cancelar",
-        "label": "Nome"
+        "origin": "Origem",
+        "label": "Nome",
+        "anonymous": "Anônimo"
       }
     },
     "droppeth": {
       "dialog": {
+        "title": "Item Droppeth",
+        "prompt": "Quantos itens você deseja dropar?"
       },
       "error": {
+        "out-of-bounds": "Não foi possível criar o token droppeth no local fornecido.",
+        "unknown": "Algo deu errado ao tentar soltar o(s) item(ns) selecionado(s).",
+        "no-scene": "Não há nenhuma cena disponível para droppeth."
       },
       "message": {
         "subtitle": "Dar Item",
         "content": {
-          "item": "{source} larga {quantity} × {item} no chão."
+          "item": "{source} larga {quantity} × {item} no chão.",
+          "container": "{source} remove {item} e todo seu conteúdo."
         }
       }
     },
     "giveth": {
+      "error": "Algo deu errado ao tentar processar uma solicitação <strong>Giveth</strong> do jogador.",
       "dialog": {
-        "title": "Dar Item"
+        "title": "Dar Item",
+        "prompt": "Quantos itens você deseja doar?"
       },
       "message": {
+        "subtitle": "Dá Item",
         "content": {
-          "item": "{source} dá {quantity} × {item} para {target}."
+          "item": "{source} dá {quantity} × {item} para {target}.",
+          "container": "{source} dá {item} e todo seu conteúdo para {target}."
         }
       }
     },
     "identify": {
       "request": {
+        "hint": "Solicitou uma identificação de item para",
+        "proceed": "Você gostaria de prosseguir?",
+        "sent": "Uma solicitação de identificação de item foi enviada ao GM."
       },
       "tracker": {
         "auto": {
+          "content": "Identifique os itens que já são conhecidos pelos membros do grupo:<br><ul>{items}</ul>",
+          "label": "Auto",
+          "none": "Não há itens para identificar automaticamente",
+          "title": "Identificação Automática",
+          "tooltip": "Identificar automaticamente itens conhecidos"
         },
         "clock": {
+          "backward": "Retroceder o tempo em 10 minutos",
+          "forward": "Avance o tempo em 10 minutos",
+          "open": "Abra o menu do relógio mundial"
         },
         "failed": {
+          "daily": "Não conseguiu identificar este item hoje",
+          "delay": "Não foi possível identificar este item:<br>{horas}h restantes"
         },
+        "identified": "Já identificado",
         "known": {
+          "full": "Já identificou este item",
+          "partial": "Identificou um item semelhante:<br>{item}",
+          "recall": "Pode gastar uma única ação de Recordar Conhecimento<br>e obter sucesso automaticamente"
         },
+        "misidentify": "Alternar identificação incorreta",
         "request-checks": "Solicitar testes",
         "reset": {
           "label": "Redefinir",
@@ -363,29 +494,54 @@
         "save": {
           "content": "Salvar as alterações atuais e identifique automaticamente os seguintes itens:<br><ul>{items}</ul>",
           "label": "Atualizar",
-          "title": "Atualizar alterações"
+          "title": "Atualizar alterações",
+          "tooltip": "Atualizar as alterações atuais e identificar itens"
         },
+        "send-to-chat": "Enviar para o bate-papo",
         "title": "Monitor de Identificação de Itens"
       }
     },
     "mergeDamage": {
       "buttons": {
-      }
+        "split": "Dividir de volta para mensagens originais",
+        "merge": "Mesclar com mensagem de dano anterior",
+        "inject": "Injetar dano à mensagem anterior"
+      },
+      "injected": "Danos foram injetados nesta mensagem",
+      "noMatch": "Não foi possível encontrar outra mensagem de dano correspondente."
     },
     "resourceTracker": {
       "header": {
+        "add": "Adicionar novo recurso"
       },
       "resource": {
         "title": {
+          "create": "Criar novo recurso",
+          "edit": "Editar Recurso"
         },
         "name": {
+          "label": "Nome do recurso",
+          "default": "Novo Recurso"
         },
         "value": {
+          "label": "Valor",
+          "min": "Valor Mínimo",
+          "max": "Valor Máximo",
+          "current": "Valor atual"
         },
         "steps": {
+          "label": "Etapas de clique",
+          "step1": "[Clique]",
+          "step2": "[Shift-Clique]",
+          "step3": "[Control-Clique]"
         },
         "timeout": {
+          "label": "Tempo limite (segundos)",
+          "tooltip": "Tempo passou em seu mundo antes que o valor do recurso fosse diminuído em 1"
         },
+        "edit": "[Clique com o botão direito] Editar recurso",
+        "delete": "Excluir recurso?",
+        "shared": "Visível para os outros?",
         "yes": {
           "create": "Criar",
           "edit": "Editar"
@@ -398,13 +554,16 @@
     "rollTracker": {
       "tracker": {
         "left": "Número de rolagens",
+        "bottom": "Valor de rolagem",
         "mode": {
           "all": {
             "label": "Todos os testes"
           },
           "attack-roll": {
+            "label": "Rolagens de Ataque"
           },
           "attack-roll-outcome": {
+            "label": "Resultados do Ataque",
             "bottom": "Resultado da Rolagem"
           },
           "saving-throw": {
@@ -436,16 +595,31 @@
           }
         },
         "filter": {
-          "all": "Todo o Tempo"
+          "all": "Todo o Tempo",
+          "time": "Intervalo de tempo",
+          "session": "Sessão",
+          "encounter": "Encontro"
         },
         "options": {
+          "from": "De",
+          "to": "Para"
         },
         "controls": {
+          "play": "Retomar gravação",
+          "pause": "Pausar gravação",
+          "start": "Iniciar sessão",
+          "end": "Fim da sessão",
+          "delete": "Limpar registros",
+          "session": "Os jogadores não verão nenhum novo resultado até que a sessão termine"
         },
         "info": {
           "paused": {
+            "label": "A gravação está pausada",
+            "tooltip": "Nenhum rolo está sendo gravado em seu mundo"
           },
           "session": {
+            "label": "Atualmente em sessão",
+            "tooltip": "Nenhum novo resultado será exibido até que a sessão atual termine"
           }
         },
         "stats": {
@@ -456,19 +630,26 @@
         }
       },
       "clear": {
+        "title": "Limpar registros",
+        "hint": "Você quer limpar algum registro até esta data?",
         "yes": "Limpar",
         "no": "Cancelar"
       },
       "confirm": {
+        "start": "Nova sessão <strong>{time}</strong> foi iniciada.",
+        "end": "A sessão <strong>{time}</strong> terminou.",
         "pause": "A gravação de rolagens foi pausada.",
         "play": "A gravação de rolagens foi retomada.",
         "delete": {
+          "all": "Os registros foram apagados.",
+          "before": "Os registros anteriores a <strong>{time}</strong> foram apagados."
         }
       }
     },
     "shareData": {
       "config": {
         "armorRunes": {
+          "label": "Runas de armadura",
           "hint": "Use as runas de potência e resilientes da armadura/braçadeiras investidas do mestre."
         },
         "health": {
@@ -480,28 +661,41 @@
           "hint": "Use os pontos de heroismo do mestre."
         },
         "master": {
+          "label": "Mestre",
+          "hint": "Selecione um mestre com quem este ator compartilhará dados."
         },
         "skills": {
           "label": "Proficiências em perícias",
           "hint": "Use as proficiências das perícias do mestre."
         },
         "spellcasting": {
+          "label": "Conjuração de magias",
           "hint": "Use a proficiência em conjuração do mestre e sua reserva de foco."
         },
         "timeEvents": {
+          "label": "Eventos de tempo",
+          "hint": "Sempre que o turno do mestre começar/terminar ou a iniciativa mudar, os eventos também serão acionados para este ator. Ele também usará o mestre para calcular a duração restante dos efeitos."
         },
         "title": "Dados Compartilhados - {name}",
+        "unable": "Este ator não pode ser vinculado a um mestre.",
         "weaponRunes": {
+          "label": "Runas de armas",
+          "hint": "Use as runas fundamentais e de propriedade das bandagens/armas investidas do mestre."
         }
-      }
+      },
+      "share": "Compartilhar"
     },
     "targetHelper": {
       "check-card": {
+        "merge": "Mesclar com a seguinte mensagem de dano"
       },
       "damage": {
+        "toggle": "Alternar botões de dano originais"
       },
       "drop": {
-        "already": "Esta mensagem já tem um teste de salvamento vinculada a ela."
+        "added": "Você adicionou com sucesso um salvamento à mensagem.",
+        "already": "Esta mensagem já tem um teste de salvamento vinculada a ela.",
+        "unauth": "Você só pode fazer isso em mensagens das quais você é o autor."
       },
       "header": {
         "hidden": "Escondido dos Jogadores",
@@ -532,7 +726,8 @@
           "withOffset": "{success} por {offset}",
           "withoutOffset": "{success}"
         }
-      }
+      },
+      "unnamed": "Sem nome"
     }
   }
 }
