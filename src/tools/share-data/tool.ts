@@ -732,7 +732,7 @@ function createCombatant(actor: CreaturePF2e, encounter: EncounterPF2e) {
     const CombatantPF2e = getDocumentClass("Combatant");
 
     return new CombatantPF2e(
-        { tokenId: token?.id, actorId: actor.id, hidden: false, sceneId: scene.id },
+        { tokenId: token?.id, actorId: actor.id, hidden: false, sceneId: scene?.id },
         { parent: encounter }
     );
 }
