@@ -1,0 +1,538 @@
+{
+  "LEVIKTIMES": {
+    "gmOnly": "Somente Mestre",
+    "reloadRequired": "Requer recarregar a página",
+    "emiting": {
+      "label": "Enviando",
+      "noGm": "Um mestre deve estar online para executar esta solicitação."
+    }
+  },
+  "pf2e-toolbelt": {
+    "keybindings": {
+      "conditionManager": {
+        "manage": {
+          "name": "Gerenciar condição",
+          "hint": "Mantenha a tecla pressionada ao soltar uma condição para gerenciar sua duração."
+        }
+      },
+      "betterMovement": {
+        "teleport": {
+          "name": "Teleportar Token",
+          "hint": "Mantenha a tecla pressionada enquanto clica na cena para teletransportar todos os tokens selecionados."
+        },
+        "unselect": {
+          "name": "Teleportar Token (Desselecionar)",
+          "hint": "Mantenha a tecla pressionada enquanto clica na cena para teletransportar todos os tokens selecionados. Também desmarca os tokens ao pressionar a tecla de atalho para ter uma visão desobstruída de toda a cena."
+        }
+      },
+      "droppeth": {
+        "droppeth": {
+          "name": "Modificador do \"Droppeth\"",
+          "hint": "Tecla pressionada ao soltar um item no chão."
+        }
+      }
+    },
+    "settings": {
+      "actionable": {
+        "title": "Acionável",
+        "action": {
+          "name": "Macro de ação",
+          "hint": "Adiciona uma maneira de vincular uma macro a ações e talentos."
+        },
+        "apply": {
+          "name": "Auto-aplicado",
+          "hint": "O botão de uso para efeito autoaplicado aplicará o efeito automaticamente."
+        },
+        "item": {
+          "name": "Macro de item",
+          "hint": "Adiciona uma maneira de vincular uma macro a equipamentos e itens consumíveis."
+        },
+        "spell": {
+          "name": "Macro de magia",
+          "hint": "Adiciona uma maneira de vincular uma macro a magias."
+        },
+        "use": {
+          "name": "Usar consumível",
+          "hint": "Adicionará um botão extra \"usar\" para consumíveis e gerará uma mensagem personalizada quando usado."
+        }
+      },
+      "anonymous": {
+        "title": "Anônimo",
+        "spell": {
+          "name": "Anonimizar magias de PDMs",
+          "hint": "Magias conjuradas por um ator que não pertença a um jogador serão anonimizados para os jogadores."
+        }
+      },
+      "arp": {
+        "title": "Progressão Automática de Runas",
+        "enabled": {
+          "name": "Habilitado",
+          "hint": "Se o seu mundo deve usar a regra caseira de Progressão Automática de Runas, do Rules Lawyer."
+        },
+        "force": {
+          "name": "Forçar Atualização"
+        },
+        "price": {
+          "hint": "Os preços de runas fundamentais devem ser subtraídos do preço das armas?"
+        },
+        "shield": {
+        }
+      },
+      "betterEffectsPanel": {
+        "title": "Painel de Efeitos Melhorado",
+        "remove": {
+          "name": "Atalho para remover efeito",
+          "hint": "Usar [Shift + Clique direito] nos ícones de efeito no painel de efeitos removerá instantaneamente todas as suas cargas/contadores/emblemas."
+        }
+      },
+      "betterInventory": {
+        "title": "Inventário Melhorado",
+        "coins": {
+          "name": "Moedas sem peso",
+          "hint": "Moedas não têm peso no inventário."
+        },
+        "dropped": {
+          "name": "Sem peso de itens largados",
+          "hint": "Equipamentos largados não serão contabilizados no cálculo do volume."
+        }
+      },
+      "betterMerchant": {
+        "title": "Comerciante Melhorado",
+        "enabled": {
+          "name": "Habilitado",
+          "hint": "Adicione funcionalidades personalizadas ao comerciante padrão do sistema."
+        }
+      },
+      "betterMovement": {
+        "title": "Movimento Melhorado",
+        "teleport": {
+          "name": "Teleportar Tokens",
+          "hint": "Clicar no mapa enquanto segura a tecla de atalho definida teletransportará instantaneamente os tokens selecionados para o local sem precisar se deslocar.",
+          "choices": {
+            "disabled": "Desabilitado",
+            "enabled": "Habilitado"
+          }
+        },
+        "history": {
+          "name": "Não Registrar Histórico de Movimento",
+          "hint": "O registro de movimentos será bloqueado para você, tornando ações de movimento sucessivas menos confusas."
+        }
+      },
+      "betterTemplate": {
+        "title": "Modelos Melhores",
+        "target": {
+          "name": "Marcar Alvos Automaticamente",
+          "hint": "Ao colocar um modelo no mapa, uma nova caixa de diálogo será exibida permitindo que você selecione todos os tokens dentro dele."
+        }
+      },
+      "betterTrade": {
+        "title": "Comércio Melhorado",
+        "withContent": {
+          "name": "Com conteúdo de recipiente",
+          "hint": "Quando um recipiente é movido de um ator para outro, seu conteúdo deve ir junto?"
+        }
+      },
+      "conditionManager": {
+        "title": "Gerente de Condições",
+        "enabled": {
+          "name": "Habilitado"
+        }
+      },
+      "droppeth": {
+        "title": "Droppeth",
+        "enabled": {
+          "name": "Habilitado"
+        },
+        "light": {
+        }
+      },
+      "identify": {
+        "delay": {
+          "hint": "Quando habilitado, o personagem precisará aguardar 24 horas após não conseguir identificar um item antes de poder fazer outra tentativa. Caso contrário, será reiniciada no dia seguinte."
+        },
+        "enabled": {
+          "name": "Habilitado"
+        },
+        "identifyPartials": {
+        },
+        "playerRequest": {
+        }
+      },
+      "mergeDamage": {
+        "merge": {
+        },
+        "inject": {
+          "name": "Injetar Botão",
+          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam injetadas em uma mensagem de dano anterior."
+        }
+      },
+      "giveth": {
+        "title": "Giveth",
+        "enabled": {
+          "name": "Habilitado"
+        },
+        "effect": {
+          "choices": {
+            "disabled": "Desabilitado"
+          }
+        }
+      },
+      "resourceTracker": {
+        "title": "Monitor de Recursos",
+        "enabled": {
+          "hint": "Habilite esta ferramenta no seu browser. O monitor pode ser ativado/desativado por meio dos controles na interface do usuário à esquerda."
+        }
+      },
+      "rollTracker": {
+        "title": "Monitor de Rolagens",
+        "enabled": {
+          "name": "Habilitado"
+        }
+      },
+      "shareData": {
+        "enabled": {
+          "name": "Habilitado"
+        }
+      },
+      "targetHelper": {
+        "title": "Assistente de Alvo",
+        "enabled": {
+          "name": "Habilitado",
+          "hint": "Habilita o recurso 'Assistente de Alvo' no seu mundo."
+        },
+        "small": {
+          "name": "Pequenos botões de dano",
+          "hint": "Reduz o tamanho dos botões de dano para os alvos adicionais."
+        },
+        "targets": {
+          "name": "Adicionar alvos às mensagens"
+        },
+        "checks": {
+          "name": "Atualizar mensagens de testes"
+        }
+      },
+      "underground": {
+        "title": "Subterrâneo",
+        "enabled": {
+        },
+        "mode": {
+          "name": "Filtro Aplicado",
+          "hint": "Que tipo de filtro deve ser aplicado a tokens com elevação abaixo de 0.",
+          "choices": {
+            "normal": "Sem filtro",
+            "greyscale": "Filtro de escala de cinza",
+            "sepia": "Filtro Sépia"
+          }
+        },
+        "contrast": {
+          "name": "Contraste",
+          "hint": "Valor de contraste quando o token tem uma elevação negativa."
+        },
+        "alpha": {
+          "name": "Opacidade",
+          "hint": "Valor de opacidade quando o token tem uma elevação negativa."
+        }
+      },
+      "unided": {
+        "create": {
+          "name": "Na criação de itens",
+          "hint": "Defina automaticamente a imagem não identificada dos itens para ser a mesma que a imagem normal quando o item for criado/importado."
+        },
+        "update": {
+          "name": "Na atualização do item",
+          "hint": "Atualizar automaticamente a imagem não identificada quando a imagem normal do item for atualizada."
+        }
+      }
+    },
+    "actionable": {
+      "action": {
+        "label": "Efeito autoaplicado / Macro"
+      },
+      "item": {
+      },
+      "spell": {
+      }
+    },
+    "anonymous": {
+      "spell": {
+        "header": "Está conjurando uma magia..."
+      }
+    },
+    "betterMerchant": {
+      "browserFilter": {
+        "empty": "Não faz sentido criar um filtro sem filtros..."
+      },
+      "browserPull": {
+        "title": "Adicionar itens - {name}"
+      },
+      "filtersMenu": {
+        "buy": "Filtros de compra",
+        "delete": {
+        },
+        "ratio": "Proporção do preço",
+        "tag": "Tag",
+        "title": "Filtros de itens - {name}"
+      },
+      "importServices": {
+        "title": "Serviços de Importação - {name}"
+      },
+      "item": {
+        "error": "Ocorreu um erro ao tentar processar uma troca melhor de item do comerciante: <strong>{reason}</strong>.",
+        "noStock": "<strong>{actor}</strong> não pode fornecer a quantidade solicitada de <strong>{item}</strong>.",
+        "unwilling": "<strong>{actor}</strong> não está disposto a se separar de <strong>{item}</strong>.",
+        "refuse": "<strong>{actor}</strong> não está interessado em comprar <strong>{item}</strong>.",
+        "sell": {
+        }
+      },
+      "sheet": {
+        "infiniteAll": {
+          "label": "Estoque Infinito"
+        }
+      },
+      "sheetServices": {
+        "copied": "Os serviços do <strong>{name}</strong> foram copiados para a área de transferência.",
+        "edit": "Editar serviço",
+        "export": "Exportar Serviços",
+        "free": "Gratuito",
+        "give": "Serviço Gratuito",
+        "import": "Importar Serviços",
+        "label": "Serviços"
+      },
+      "service": {
+      },
+      "serviceMenu": {
+        "delete": {
+        },
+        "macro": {
+          "label": "Macro executada no serviço",
+          "drop": "Solte a macro aqui"
+        },
+        "name": "Nome",
+        "noBuyer": "Você deve selecionar um Personagem/PDM/Grupo que pertença a você como alvo do serviço."
+      }
+    },
+    "betterTemplate": {
+      "target": {
+      }
+    },
+    "conditionManager": {
+      "manager": {
+        "cancel": "Cancelar",
+        "label": "Nome"
+      }
+    },
+    "droppeth": {
+      "dialog": {
+      },
+      "error": {
+      },
+      "message": {
+        "subtitle": "Dar Item",
+        "content": {
+          "item": "{source} larga {quantity} × {item} no chão."
+        }
+      }
+    },
+    "giveth": {
+      "dialog": {
+        "title": "Dar Item"
+      },
+      "message": {
+        "content": {
+          "item": "{source} dá {quantity} × {item} para {target}."
+        }
+      }
+    },
+    "identify": {
+      "request": {
+      },
+      "tracker": {
+        "auto": {
+        },
+        "clock": {
+        },
+        "failed": {
+        },
+        "known": {
+        },
+        "request-checks": "Solicitar testes",
+        "reset": {
+          "label": "Redefinir",
+          "tooltip": "Reverter alterações atuais"
+        },
+        "save": {
+          "content": "Salvar as alterações atuais e identifique automaticamente os seguintes itens:<br><ul>{items}</ul>",
+          "label": "Atualizar",
+          "title": "Atualizar alterações"
+        },
+        "title": "Monitor de Identificação de Itens"
+      }
+    },
+    "mergeDamage": {
+      "buttons": {
+      }
+    },
+    "resourceTracker": {
+      "header": {
+      },
+      "resource": {
+        "title": {
+        },
+        "name": {
+        },
+        "value": {
+        },
+        "steps": {
+        },
+        "timeout": {
+        },
+        "yes": {
+          "create": "Criar",
+          "edit": "Editar"
+        },
+        "no": "Cancelar",
+        "increase": "{click} aumenta em {value}",
+        "decrease": "{click} diminuir em {value}"
+      }
+    },
+    "rollTracker": {
+      "tracker": {
+        "left": "Número de rolagens",
+        "mode": {
+          "all": {
+            "label": "Todos os testes"
+          },
+          "attack-roll": {
+          },
+          "attack-roll-outcome": {
+            "bottom": "Resultado da Rolagem"
+          },
+          "saving-throw": {
+            "label": "Salvar testes"
+          },
+          "saving-throw-outcome": {
+            "label": "Salvar resultados",
+            "bottom": "Fortitude|Reflexo|Vontade"
+          },
+          "flat-check": {
+            "label": "Testes básicos"
+          },
+          "skill-check": {
+            "label": "Testes de Perícia"
+          },
+          "skill-check-1": {
+            "label": "Perícias (Primeira Metade)",
+            "bottom": "Teste de Perícia"
+          },
+          "skill-check-2": {
+            "label": "Perícias (Segunda Metade)",
+            "bottom": "Teste de Perícia"
+          },
+          "perception-check": {
+            "label": "Testes de Percepção"
+          },
+          "initiative": {
+            "label": "Testes de Iniciativa"
+          }
+        },
+        "filter": {
+          "all": "Todo o Tempo"
+        },
+        "options": {
+        },
+        "controls": {
+        },
+        "info": {
+          "paused": {
+          },
+          "session": {
+          }
+        },
+        "stats": {
+          "total": "Número de Rolagens",
+          "mean": "Média",
+          "median": "Mediana",
+          "mode": "Modo"
+        }
+      },
+      "clear": {
+        "yes": "Limpar",
+        "no": "Cancelar"
+      },
+      "confirm": {
+        "pause": "A gravação de rolagens foi pausada.",
+        "play": "A gravação de rolagens foi retomada.",
+        "delete": {
+        }
+      }
+    },
+    "shareData": {
+      "config": {
+        "armorRunes": {
+          "hint": "Use as runas de potência e resilientes da armadura/braçadeiras investidas do mestre."
+        },
+        "health": {
+          "label": "Vida",
+          "hint": "Compartilhe pontos de vida e estamina com seu mestre."
+        },
+        "heroPoints": {
+          "label": "Pontos de Heroismo",
+          "hint": "Use os pontos de heroismo do mestre."
+        },
+        "master": {
+        },
+        "skills": {
+          "label": "Proficiências em perícias",
+          "hint": "Use as proficiências das perícias do mestre."
+        },
+        "spellcasting": {
+          "hint": "Use a proficiência em conjuração do mestre e sua reserva de foco."
+        },
+        "timeEvents": {
+        },
+        "title": "Dados Compartilhados - {name}",
+        "weaponRunes": {
+        }
+      }
+    },
+    "targetHelper": {
+      "check-card": {
+      },
+      "damage": {
+      },
+      "drop": {
+        "already": "Esta mensagem já tem um teste de salvamento vinculada a ela."
+      },
+      "header": {
+        "hidden": "Escondido dos Jogadores",
+        "noSave": "Este ator não pode rolar testes de {save}",
+        "select": "Selecionar Alvo<br>[Clique duplo] Abrir Ficha"
+      },
+      "merge": {
+        "none": "Não foi encontrada uma mensagem de dano adequada para mesclar."
+      },
+      "reroll": {
+        "title": "Rerrolar teste de salvamento",
+        "noPoints": "Você precisa de pelo menos 1 Ponto de Heroismo para rerrolar.",
+        "yes": "Rerrolar",
+        "no": "Cancelar",
+        "keeley": "Rerrolagem Baixa"
+      },
+      "rollSaves": "Rolar salvamentos de PDM",
+      "setTargets": {
+        "splashTargets": "Definir alvos de respingo",
+        "targets": "Definir alvos"
+      },
+      "tooltip": {
+        "adjustment": "Ajuste: {value}",
+        "dcWithValue": "CD {dc}",
+        "reroll": "Pode rerrolar o teste de salvamento",
+        "result": {
+          "format": "Resultado: {result}",
+          "withOffset": "{success} por {offset}",
+          "withoutOffset": "{success}"
+        }
+      }
+    }
+  }
+}
