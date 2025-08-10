@@ -1,3 +1,19 @@
+# 3.8.0
+
+-   this release implement the `Hero Actions` tool and concludes the re-implementation of all the tools from v12
+-   add Brazilian Portuguese localization (thanks to [mclemente](https://github.com/mclemente))
+-   `Hero Actions`:
+    -   v13 no longer allows a player to draw from a table that has the `Draw with Replacement` unchecked if they don't have ownership of the table itself.
+        -   if you don't give ownership of the table to your players, the module will have the GM do the drawing in their stead via websocket
+    -   remove the `drawHeroAction` function from the API
+-   `Roll Tracker`:
+    -   add `deleteRecords` function to the API
+    -   fix `Clear Records` only deleting records of the current filter selected in the application
+-   `Target Helper`:
+    -   add support for SF2e area-fire actions
+        -   everything behaves exactly like you would expect from a spell
+-   fix identification of spell messages missing some of them which impacted both the `Target Helper` and `Anonymous` tools
+
 # 3.7.3
 
 -   `Roll Tracker`:
