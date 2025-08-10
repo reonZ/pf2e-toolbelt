@@ -1,6 +1,6 @@
 # 3.8.0
 
--   this release implement the `Hero Actions` tool and concludes the re-implementation of all the tools from v12
+-   this release implements the `Hero Actions` tool and concludes the re-implementation of all the tools from v12
 -   add Brazilian Portuguese localization (thanks to [mclemente](https://github.com/mclemente))
 -   `Hero Actions`:
     -   v13 no longer allows a player to draw from a table that has the `Draw with Replacement` unchecked if they don't have ownership of the table itself.
@@ -17,7 +17,7 @@
 # 3.7.3
 
 -   `Roll Tracker`:
-    -   add `openTracker`, `togglePause`, `startSession` and `endSession` function to the API
+    -   add `openTracker`, `togglePause`, `startSession` and `endSession` functions to the API
 
 # 3.7.2
 
@@ -27,7 +27,7 @@
 # 3.7.1
 
 -   `Shared Data`:
-    -   revert auto enabling and locking the `Health Pool` and `Hero Points` options
+    -   revert auto enabling and locking of the `Health Pool` and `Hero Points` options
 
 # 3.7.0
 
