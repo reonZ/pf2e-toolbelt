@@ -1,0 +1,29 @@
+<div class="actions">
+    {{#each actions as |action|}}
+    <div class="action{{#if action.drawn}} drawn{{/if}}" data-uuid="{{action.uuid}}">
+        <input class="item-select" type="checkbox" name="action" value="{{action.value}}"
+            data-dtype="JSON">
+        <a class="item-name" data-action="expand">{{action.name}}</a>
+        <span class="item-drawn">
+            {{#if action.drawn}}
+            <i class="fas fa-lock fa-fw" {{{@root.i18n.tooltip 'drawn' }}}></i>
+            {{/if}}
+        </span>
+        <div class="item-summary" hidden="hidden">
+            <div class="item-description"></div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+<div class="buttons">
+    <div>
+        <input type="checkbox" name="message" checked>
+        <span>{{@root.i18n 'withMessage'}}</span>
+    </div>
+    {{#if isUnique}}
+    <div>
+        <input type="checkbox" name="drawn" checked>
+        <span>{{@root.i18n 'asDrawn'}}</span>
+    </div>
+    {{/if}}
+</div>

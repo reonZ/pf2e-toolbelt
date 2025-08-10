@@ -155,6 +155,29 @@
                     "hint": "Czy upuszczony przedmiot powinien emitować światło. Będzie to miało miejsce tylko wtedy, gdy w aktorze łupów znajduje się pojedynczy przedmiot."
                 }
             },
+            "heroActions": {
+                "title": "Akcje Heroiczne",
+                "count": {
+                    "name": "Wariant Zestawu Heroicznego",
+                    "hint": "Jeśli 0, postacie mogą mieć tylko jedną akcję heroiczną na punkt bohaterstwa. W przeciwnym razie liczba akcji heroicznych zostanie oddzielona od liczby dostępnych punktów bohaterstwa, a postacie będą losować akcje heroiczne w zestawie."
+                },
+                "enabled": {
+                    "name": "Włączone",
+                    "hint": "Jeśli twój świat korzysta z akcji Talii Punktów Bohaterstwa."
+                },
+                "private": {
+                    "name": "Losuj prywatnie",
+                    "hint": "Po włączeniu tej opcji wygenerowana wiadomość na czacie będzie prywatna dla innych graczy."
+                },
+                "table": {
+                    "name": "UUID tabeli",
+                    "hint": "Unikalny identyfikator tabeli, której chcesz użyć w swoim świecie. Aby uzyskać identyfikator UUID tabeli (w kompendium lub w katalogu tabel rzutów), wystarczy otworzyć tabelę i kliknąć lewym przyciskiem myszy na 📔 obok jej nazwy."
+                },
+                "trade": {
+                    "name": "Zezwól na wymianę",
+                    "hint": "Po włączeniu tej opcji postacie będą mogły wymieniać się między sobą akcjami."
+                }
+            },
             "identify": {
                 "title": "Identyfikacja",
                 "delay": {
@@ -449,6 +472,77 @@
                     "container": "{source} przekazuje {item} i całą jego zawartość do {target}."
                 }
             }
+        },
+        "heroActions": {
+            "error": {
+                "onlyCharacter": "Akcje Heroiczne są kompatybilne tylko z aktorami postaci",
+                "notEnoughPoint": "Postać nie ma wystarczającej liczby punktów bohaterstwa",
+                "noDetails": "Nie udało się znaleźć szczegółów dotyczących tej Akcji Heroicznej.",
+                "noAction": "Postać nie ma żadnej Akcji Heroicznej.",
+                "mustDiscard": "Postać musi odrzucić {nb} akcji, aby związać się z handlem.",
+                "noOther": "Nie ma innej postaci z Akcjami Heroicznymi, z którą można by handlować.",
+                "notGM": "Musisz być MG, aby przyznawać Akcje Heroiczne.",
+                "tradeError": "Wystąpił błąd podczas próby przetworzenia transakcji między <strong>{sender}</strong> i <strong>{receiver}</strong>."
+            },
+            "giveActions": {
+                "asDrawn": "Ustaw jako wylosowany, gdy zostanie podarowany",
+                "drawn": "Już wylosowana",
+                "no": "Anuluj",
+                "title": "Podaruj Akcję Heroiczną",
+                "withMessage": "Wygeneruj wiadomość czatu",
+                "yes": "Podaruj Akcje"
+            },
+            "message": {
+                "drawn": "Wylosowano ({nb}) Akcji Heroicznych",
+                "given": "Podarował ({nb}) Akcję Heroiczną",
+                "discarded": "Odrzucił ({nb}) Akcję Heroiczną",
+                "used": {
+                    "heroPoints": "Punkt Bohaterstwa",
+                    "mythicPoints": "Punkt Mityczny",
+                    "message": "Wydaje {type} na użycie"
+                },
+                "exchanged": "Wymieniono Akcję Heroiczną z {name}",
+                "offer": "Oferowane: {link}",
+                "receive": "Otrzymano: {link}"
+            },
+            "removeActions": {
+                "all": "Wszystkie postacie",
+                "no": "Anuluj",
+                "removed": "Akcje Heroiczne zostały usunięte z wybranych postaci.",
+                "title": "Usuń Akcje Heroiczne",
+                "yes": "Usuń"
+            },
+            "sheet": {
+                "action": {
+                    "use": "Użyj",
+                    "discard": "Odrzuć"
+                },
+                "draw": "Losuj {nb}",
+                "give": "Przekaż",
+                "label": "Akcje Heroiczne",
+                "redraw": "Przelosuj",
+                "trade": "Wymiana"
+            },
+            "table": {
+                "notFound": "W tym świecie nie można znaleźć tabeli talii Punktów Bohaterstwa.",
+                "noFormulaCompendium": "Tabela Talii Bohaterów nie ma formuły i jest tabelą kompendium."
+            },
+            "trade": {
+                "no": "Anuluj",
+                "rejected": "Wymiana pomiędzy <strong>{sender}</strong> i <strong>{receiver}</strong> została odrzucona.",
+                "request": {
+                    "title": "Akcja Heroiczna - Prośba o wymianę",
+                    "flavor": "Postać <strong>{sender} </strong> chce wymienić się z <strong>{receiver}</strong>",
+                    "give": "Oferuje: {give}",
+                    "want": "Potrzebuje: {want}",
+                    "yes": "Akceptuj",
+                    "no": "Odrzuć"
+                },
+                "select": "Wybierz postać, z którą chcesz się wymienić",
+                "title": "Wymień się Akcją Heroiczną",
+                "yes": "Wyślij"
+            },
+            "trigger": "Wyzwalacz"
         },
         "identify": {
             "request": {

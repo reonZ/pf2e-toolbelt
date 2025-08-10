@@ -1,0 +1,44 @@
+<div class="header">
+    <div class="hint">{{@root.i18n 'select'}}</div>
+    <select name="target" {{disabled (eq others.length 1)}}>
+        {{selectOptions others selected=selected valueAttr="id" labelAttr="name"}}
+    </select>
+</div>
+<div class="actions">
+    <div class="left">
+        {{#each actions as |action|}}
+        <div class="action" data-uuid="{{action.uuid}}">
+            <input type="radio" name="action" value="{{action.uuid}}" {{checked (eq @index 0)}} />
+            <a data-action="description"> {{action.name}}</a>
+        </div>
+        {{/each}}
+    </div>
+    <i class="exchange fa-solid fa-right-left"></i>
+    {{#each others as |other|}}
+    <div class="right{{#if (eq other.id ../selected)}} selected{{/if}}"
+        data-target-id="{{other.id}}">
+        {{#each other.actions as |action|}}
+        <div class="action" data-uuid="{{action.uuid}}">
+            {{#if other.isPrivate}}
+            <label>??????</label>
+            {{else}}
+            <a data-action="description">{{action.name}}</a>
+            <input type="radio" name="action-{{other.id}}" value="{{action.uuid}}" {{checked (eq
+                @index 0)}} />
+            {{/if}}
+
+        </div>
+        {{/each}}
+    </div>
+    {{/each}}
+</div>
+<footer class="form-footer">
+    <button type="button" data-action="trade">
+        <i class="fa-duotone fa-solid fa-share-from-square"></i>
+        {{@root.i18n 'yes'}}
+    </button>
+    <button type="button" data-action="cancel">
+        <i class="fa-solid fa-xmark"></i>
+        {{@root.i18n 'no'}}
+    </button>
+</footer>

@@ -1,0 +1,8 @@
+<div>
+    <label><input type="checkbox" name="all" checked />{{@root.i18n 'all'}}</label>
+</div>
+{{#each actors}}
+<div class="actor">
+    <label><input type="checkbox" name="actor" value="{{this.id}}" checked />{{this.name}}</label>
+</div>
+{{/each}}

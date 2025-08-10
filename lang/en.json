@@ -155,6 +155,29 @@
                     "hint": "Should the dropped item emit light. It will only be the case if a single item is present in the loot actor."
                 }
             },
+            "heroActions": {
+                "title": "Hero Actions",
+                "count": {
+                    "name": "Hero Set Variant",
+                    "hint": "If 0, characters can only have one hero action per hero point. Otherwise, the number of hero actions will be dissociated from the number of hero points available and characters will redraw hero actions in set."
+                },
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Should your world use the Hero Point Deck actions."
+                },
+                "private": {
+                    "name": "Private Draw",
+                    "hint": "When enabled, the chat message generated will be private to other players."
+                },
+                "table": {
+                    "name": "Table UUID",
+                    "hint": "Unique identifier of the table you want to use in your world. To get the UUID of a table (in a compendium or in the Rollable Tables directory), simply open the table and Left-Click on 📔 next to its name."
+                },
+                "trade": {
+                    "name": "Allow Trade",
+                    "hint": "When enabled, characters will be able to trade actions with one another."
+                }
+            },
             "identify": {
                 "title": "Identify",
                 "delay": {
@@ -455,6 +478,79 @@
                     "container": "{source} giveth {item} and all its content to {target}."
                 }
             }
+        },
+        "heroActions": {
+            "error": {
+                "onlyCharacter": "Hero Actions is only compatible with Character actors",
+                "notEnoughPoint": "The character doesn't have enough hero points",
+                "noDetails": "Could not find the details for this Hero Action.",
+                "noAction": "The character doesn't have any Hero Action.",
+                "mustDiscard": "The character must discard {nb} actions to engage in a trade.",
+                "noOther": "There is no other character with Hero Actions available to trade with.",
+                "notGM": "You need to be a GM to give Hero Actions.",
+                "tradeError": "An error occured while trying to process the trade between <strong>{sender}</strong> and <strong>{receiver}</strong>."
+            },
+            "giveActions": {
+                "asDrawn": "Set as drawn when given",
+                "drawn": "Already Drawn",
+                "no": "Cancel",
+                "title": "Give Hero Actions",
+                "withMessage": "Generate chat message",
+                "yes": "Give Actions"
+            },
+            "message": {
+                "drawn": "Has Drawn ({nb}) Hero Action",
+                "given": "Was given ({nb}) Hero Action",
+                "discarded": "Has Discarded ({nb}) Hero Action",
+                "used": {
+                    "heroPoints": "Hero Point",
+                    "mythicPoints": "Mythic Point",
+                    "message": "Spends a {type} to use"
+                },
+                "exchanged": "Traded a Hero Action with {name}",
+                "offer": "Offered: {link}",
+                "receive": "Received: {link}"
+            },
+            "removeActions": {
+                "all": "All Characters",
+                "no": "Cancel",
+                "removed": "Hero Actions were removed from selected Character(s).",
+                "title": "Remove Hero Actions",
+                "yes": "Remove"
+            },
+            "sheet": {
+                "action": {
+                    "use": "Use",
+                    "discard": "Discard"
+                },
+                "draw": "Draw {nb}",
+                "give": "Give",
+                "label": "Hero Actions",
+                "redraw": "Redraw",
+                "trade": "Trade"
+            },
+            "table": {
+                "noDraw": "No action could be drawn from the table for <strong>{name}</strong>.",
+                "notFound": "No Hero Point Deck table could be found in this world.",
+                "noFormulaCompendium": "The Hero Deck table has no formula and is a compendium table.",
+                "drawError": "An error occurred during the draw of a Hero Action, the table may contain non-conform results."
+            },
+            "trade": {
+                "no": "Cancel",
+                "rejected": "The trade between <strong>{sender}</strong> and <strong>{receiver}</strong> was rejected.",
+                "request": {
+                    "title": "Hero Action - Trade Request",
+                    "flavor": "The character <strong>{sender}</strong> wants to trade with <strong>{receiver}</strong>",
+                    "give": "Offers: {give}",
+                    "want": "Wants: {want}",
+                    "yes": "Accept",
+                    "no": "Reject"
+                },
+                "select": "Select the character to trade with",
+                "title": "Trade Hero Action",
+                "yes": "Send"
+            },
+            "trigger": "Trigger"
         },
         "identify": {
             "request": {

@@ -1,0 +1,314 @@
+.sheet.actor.character .tab[data-tab="actions"] .tab-content .tab[data-tab="encounter"] {
+    header.heroActions-header {
+        .controls {
+            gap: 2px;
+        }
+
+        button {
+            &.draw {
+                @keyframes heroActionsDraw {
+                    from {
+                        box-shadow: 0 0 1px 1px #618f52;
+                    }
+                    to {
+                        box-shadow: 0 0 3px 3px #618f52;
+                    }
+                }
+
+                animation: heroActionsDraw 0.75s infinite alternate;
+            }
+
+            &.give {
+                background: var(--visibility-gm-bg);
+                border: 1px dotted rgba(75, 74, 68, 0.5);
+            }
+        }
+    }
+
+    ol.actions-list.heroActions-list {
+        .action {
+            grid:
+                "icon-name controls" auto
+                "summary summary" auto;
+
+            .item-name {
+                grid-area: icon-name;
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+
+                h4 {
+                    white-space: nowrap;
+                    cursor: pointer;
+                    margin: 0.1em 0 0 0;
+
+                    &:hover {
+                        color: var(--color-pf-primary);
+                    }
+                }
+            }
+
+            .item-image {
+                height: 20px;
+                width: 20px;
+                background-position: center;
+            }
+
+            .item-controls {
+                button {
+                    text-rendering: optimizeLegibility;
+                    border: none;
+                    border-radius: 0;
+                    box-shadow: inset 0 0 0 2px #9d9d9d;
+                    color: var(--text-dark);
+                    flex: 0;
+                    font-family: var(--sans-serif);
+                    font-size: var(--font-size-10);
+                    font-weight: 600;
+                    letter-spacing: 0.05em;
+                    line-height: 14px;
+                    margin: 0;
+                    padding: 4px 6px 3px;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    background: var(--bg-dark);
+                }
+            }
+
+            &.discarded {
+                background-color: #00000021;
+
+                .item-name h4,
+                .item-controls button {
+                    color: grey;
+                    text-decoration: line-through;
+                }
+            }
+
+            &:not(.discarded) {
+                .item-controls {
+                    button {
+                        &.discard {
+                            @keyframes heroActionsDiscard {
+                                from {
+                                    box-shadow: 0 0 1px 1px #8f5252;
+                                }
+                                to {
+                                    box-shadow: 0 0 3px 3px #8f5252;
+                                }
+                            }
+
+                            animation: heroActionsDiscard 0.75s infinite alternate;
+                        }
+
+                        &:hover {
+                            text-shadow: 0 0 1px var(--text-dark);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.application.pf2e-toolbelt-heroActions-trade {
+    .window-content {
+        gap: 0;
+        padding: 0.5em 1em;
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5em;
+
+            .hint {
+                white-space: nowrap;
+            }
+
+            select {
+                width: max-content;
+                min-width: 40%;
+            }
+        }
+
+        .actions {
+            --action-height: 1.9em;
+
+            display: grid;
+            grid-template-columns: 1fr 40px 1fr;
+            gap: 6px;
+            border-top: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
+            margin-block: 0.5em;
+            padding-block: 6px;
+
+            > div {
+                display: flex;
+                flex-direction: column;
+                min-height: calc(var(--action-height) * 3);
+            }
+
+            .action {
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+                height: var(--action-height);
+            }
+
+            .right {
+                align-items: flex-end;
+
+                &:not(.selected) {
+                    display: none;
+                }
+            }
+
+            .exchange {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2em;
+                border-left: 1px solid var(--color-border);
+                border-right: 1px solid var(--color-border);
+            }
+
+            hr {
+                width: 100%;
+                flex: 0;
+            }
+        }
+    }
+}
+
+.application.pf2e-toolbelt-heroActions-remove {
+    .dialog-content {
+        gap: 0;
+
+        label {
+            display: flex;
+            align-items: center;
+        }
+
+        .actor {
+            margin-left: 1em;
+        }
+    }
+}
+
+.application.pf2e-toolbelt-heroActions-give {
+    --padding: 8px;
+
+    max-height: 98%;
+
+    .window-content {
+        padding: 0;
+
+        .dialog-form {
+            overflow: hidden;
+            gap: 0.5em;
+        }
+    }
+
+    .dialog-content {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden auto;
+        gap: 0;
+
+        .actions {
+            overflow-y: auto;
+            padding-inline: var(--padding);
+            margin-top: calc(var(--padding) / 2);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .action {
+            display: grid;
+            grid-template-areas:
+                "item-select item-name item-drawn"
+                "item-summary item-summary item-summary";
+            grid-template-rows: auto auto;
+            grid-template-columns: auto 1fr auto;
+
+            &.drawn {
+                position: relative;
+
+                &::before {
+                    content: "";
+                    position: absolute;
+                    background: #ffffff12;
+                    border-radius: 4px;
+                    pointer-events: none;
+                    top: -1px;
+                    left: 0;
+                    right: 0;
+                    height: 2em;
+                }
+            }
+
+            &:not(.drawn) {
+                .item-drawn {
+                    color: var(--color-text-light-primary);
+                }
+            }
+
+            .item-select {
+                grid-area: item-select;
+                align-self: baseline;
+                margin-inline: 0.5em;
+                z-index: 1;
+            }
+
+            .item-name {
+                cursor: pointer;
+                grid-area: item-name;
+            }
+
+            .item-name,
+            .item-drawn {
+                display: flex;
+                align-items: center;
+            }
+
+            .item-drawn {
+                margin-right: 0.2em;
+            }
+
+            .item-summary {
+                grid-area: item-summary;
+                border: 4px double var(--color-border);
+                padding: 1px var(--padding);
+                margin: 0 var(--padding) var(--padding);
+
+                hr {
+                    background: none;
+                    border-top: 1px solid var(--color-border);
+                }
+            }
+        }
+
+        .buttons {
+            padding-inline: var(--padding);
+            border-top: 1px solid var(--border-color);
+
+            > div {
+                margin-top: 0.5em;
+                display: flex;
+                align-items: center;
+                flex-direction: row-reverse;
+
+                span {
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+
+    footer.form-footer {
+        flex: 0;
+        padding: 0 var(--padding) var(--padding);
+    }
+}
