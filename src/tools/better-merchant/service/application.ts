@@ -4,6 +4,7 @@ import {
     ApplicationClosingOptions,
     ApplicationConfiguration,
     ApplicationRenderOptions,
+    Coins,
     FlagDataArray,
     htmlQuery,
     isScriptMacro,
@@ -190,17 +191,17 @@ class ServiceMenu extends ModuleToolApplication<BetterMerchantTool> {
         const dataObj = formData.object as Omit<ServiceSource, "img" | "price"> & { price: string };
         const img = htmlQuery<HTMLImageElement>(form, ".image")?.dataset.src;
 
-        const data: ServiceSource = {
+        const updates: Omit<ServiceSource, "price"> & { "==price": Coins } = {
             ...dataObj,
             img: (img ?? DEFAULT_SERVICE_ICON) as ImageFilePath,
             macroUUID: dataObj.macroUUID || null,
-            price: game.pf2e.Coins.fromString(dataObj.price).toObject(),
+            "==price": game.pf2e.Coins.fromString(dataObj.price).toObject(),
         };
 
         const service = this.service;
         const services = this.services;
 
-        service.updateSource(data);
+        service.updateSource(updates);
 
         if (!services.findSplice((x) => x.id === service.id)) {
             services.push(service);
