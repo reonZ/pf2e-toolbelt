@@ -1,3 +1,8 @@
+# 3.8.2
+
+-   `Better Merchant`:
+    -   fix issue with old price coins not being updated if their new value is 0
+
 # 3.8.1
 
 -   `Shared Data`:
