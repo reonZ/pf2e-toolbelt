@@ -1,15 +1,14 @@
 import {
+    calculateSaveDC,
     CharacterPF2e,
     ChatMessagePF2e,
+    EXTRA_AREA_OPTIONS,
     htmlQuery,
     ItemPF2e,
-    Statistic,
     WeaponPF2e,
 } from "module-helpers";
 import { renderSpellCardLikeMessage, TargetHelperTool, TargetsFlagData } from ".";
 import { SaveVariantsSource, TargetsData, TargetsDataSource } from "..";
-
-const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 
 function prepareAreaMessage(
     this: TargetHelperTool,
@@ -72,21 +71,6 @@ function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | nul
 
 function isValidWeapon(item: Maybe<ItemPF2e>): item is WeaponPF2e<CharacterPF2e> {
     return !!item?.isOfType("weapon") && !!item.actor?.isOfType("character");
-}
-
-/**
- * https://github.com/TikaelSol/sf2e-anachronism/blob/28ab37351cd4deb1f68f56ac6b6e42b7a3c373c5/module/actions/area-fire.mjs#L146C1-L152C2
- */
-function calculateSaveDC(weapon: WeaponPF2e<CharacterPF2e>): Statistic<CharacterPF2e> {
-    const ModifierPF2e = game.pf2e.Modifier;
-    const actor = weapon.actor;
-    const classDC = actor.getStatistic("class");
-    const itemBonus = new ModifierPF2e({
-        label: "Tracking Bonus",
-        type: "item",
-        modifier: weapon.flags.pf2e.attackItemBonus,
-    });
-    return classDC.extend({ modifiers: itemBonus.modifier ? [itemBonus] : [] });
 }
 
 export { getAreaSaveVariants, isAreaMessage, prepareAreaMessage, renderAreaMessage };
