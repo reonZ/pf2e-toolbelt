@@ -155,6 +155,28 @@
           "hint": "L'objet lâché doit-il émettre de la lumière ? Ce n'est le cas que si un seul objet est présent dans l'acteur de butin."
         }
       },
+      "heroActions": {
+        "title": "Actions héroïques",
+        "count": {
+          "name": "Fixer la variante d'héroïsme"
+        },
+        "enabled": {
+          "name": "Activé",
+          "hint": "Souhaitez vous que votre monde utilise les actions du jeu de cartes des actions de héros ?"
+        },
+        "private": {
+          "name": "Tirage privé",
+          "hint": "Lorsque cette option est activée, le message de discussion généré sera privé pour les autres joueurs."
+        },
+        "table": {
+          "name": "Table UUID",
+          "hint": "Identifiant unique de la table que vous souhaitez utiliser dans votre monde. Pour obtenir l'UUID d'une table (dans un compendium ou dans un répertoire de tables aléatoires), ouvrez simplement la table et faites un clic gauche sur 📔 à côté de son nom."
+        },
+        "trade": {
+          "name": "Autoriser l'échange",
+          "hint": "Lorsque cette option est activée, les personnages pourront échanger des actions entre eux."
+        }
+      },
       "identify": {
         "title": "Identifier",
         "delay": {
@@ -202,13 +224,24 @@
         }
       },
       "resourceTracker": {
-        "title": "Suivi des ressources"
+        "title": "Suivi des ressources",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Cet outil doit être activé sur votre client. Le suivi peut être activé/désactivé via les commandes de l'interface utilisateur de gauche."
+        }
       },
       "rollTracker": {
         "title": "Compteur de rencontre",
         "enabled": {
           "name": "Activé",
           "hint": "Suivre les jets pour voir si les joueurs sont vraiment si malchanceux."
+        }
+      },
+      "shareData": {
+        "title": "Données partagées",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Les acteurs pourront lier/partager leurs données entre eux."
         }
       },
       "targetHelper": {
@@ -445,6 +478,79 @@
         }
       }
     },
+    "heroActions": {
+      "error": {
+        "onlyCharacter": "Les actions de héros ne sont compatibles qu'avec les acteurs personnages",
+        "notEnoughPoint": "Le personnage n'a pas assez de points d'héroïsme",
+        "noDetails": "Impossible de trouver les détails de cette action de héros.",
+        "noAction": "Le personnage ne dispose d'aucune action de héros.",
+        "mustDiscard": "Le personnage doit défausser {nb} actions pour s'engager dans un échange.",
+        "noOther": "Il n'y a aucun autre personnage avec des actions de héros disponibles pour échanger.",
+        "notGM": "Vous devez être un MJ pour donner des actions de héros.",
+        "tradeError": "Une erreur s'est produite lors de la tentative de traitement de l'échange entre <strong>{sender}</strong> et <strong>{receiver}</strong>."
+      },
+      "giveActions": {
+        "asDrawn": "Définir comme tirée lorsqu'elle est donnée",
+        "drawn": "Déjà tirée",
+        "no": "Annuler",
+        "title": "Donner des actions de héros",
+        "withMessage": "Générer un message de conversation",
+        "yes": "Donner des actions"
+      },
+      "message": {
+        "drawn": "A tiré ({nb}) action(s) de héros",
+        "given": "A reçu ({nb}) action(s) de héros",
+        "discarded": "A rejeté ({nb}) action(s) de héros",
+        "used": {
+          "heroPoints": "Point d'héroïsme",
+          "mythicPoints": "Point mythique",
+          "message": "Dépense un {type} pour utiliser"
+        },
+        "exchanged": "A échangé une action de héros avec {name}",
+        "offer": "Offert : {link}",
+        "receive": "Reçu : {link}"
+      },
+      "removeActions": {
+        "all": "Tous les personnages",
+        "no": "Annuler",
+        "removed": "Les actions de héros ont été supprimées du/des personnage(s) sélectionné(s).",
+        "title": "Supprimer les actions de héros",
+        "yes": "Supprimer"
+      },
+      "sheet": {
+        "action": {
+          "use": "Utiliser",
+          "discard": "Défausser"
+        },
+        "draw": "Tirer {nb}",
+        "give": "Donner",
+        "label": "Actions de héros",
+        "redraw": "Refaire un tirage",
+        "trade": "Échanger"
+      },
+      "table": {
+        "noDraw": "Aucune action n'a pu être tirée de la table pour <strong>{name}</strong>.",
+        "notFound": "Aucune table de Point d'héroïsme n'a pu être trouvée sur ce monde.",
+        "noFormulaCompendium": "La table de cartes de héros n'a pas de formule et est une table de compendium.",
+        "drawError": "Une erreur s'est produite lors du tirage d'une action de héros, le tableau pourrait contenir des résultats non conformes."
+      },
+      "trade": {
+        "no": "Annuler",
+        "rejected": "L'échange entre <strong>{sender}</strong> et <strong>{receiver}</strong> a été rejeté.",
+        "request": {
+          "title": "Action de héros - Demande d'échange",
+          "flavor": "Le personnage <strong>{sender}</strong> souhaite échanger avec <strong>{receiver}</strong>",
+          "give": "Offre : {give}",
+          "want": "Souhaite : {want}",
+          "yes": "Accepter",
+          "no": "Rejeter"
+        },
+        "select": "Sélectionnez le personnage avec lequel échanger",
+        "title": "Échange d'action de héros",
+        "yes": "Envoyer"
+      },
+      "trigger": "Déclenchement"
+    },
     "identify": {
       "request": {
         "hint": "A demandé une identification d'objet pour",
@@ -634,6 +740,45 @@
           "before": "Les enregistrements avant <strong>{time}</strong> ont été effacés."
         }
       }
+    },
+    "shareData": {
+      "config": {
+        "armorRunes": {
+          "label": "Runes d'armure",
+          "hint": "Utilisez les runes de puissance et & résilience de l'armure/des brassards investis par le maître."
+        },
+        "health": {
+          "label": "Réserve de santé",
+          "hint": "Partage les points de santé & d'endurance avec son maître."
+        },
+        "heroPoints": {
+          "label": "Points d'héroïsme",
+          "hint": "Utilise les points d'héroïsme du maître."
+        },
+        "master": {
+          "label": "Maître",
+          "hint": "Sélectionnez un maître avec lequel cet acteur partagera les données."
+        },
+        "skills": {
+          "label": "Maîtrises de compétence",
+          "hint": "Utiliser la maîtrise des compétences du maître."
+        },
+        "spellcasting": {
+          "label": "Incantation",
+          "hint": "Utilise la maîtrise d'incantation du maître et sa réserve de focalisation."
+        },
+        "timeEvents": {
+          "label": "Événements temporels",
+          "hint": "Chaque fois que le tour du maître commence/se termine ou que l'initiative change, les événements se déclenchent également pour cet acteur. Le maître servira également pour le calcul de la durée restante des effets."
+        },
+        "title": "Données partagées - {name}",
+        "unable": "Cet acteur ne peut pas être lié à un maître.",
+        "weaponRunes": {
+          "label": "Runes d'armes",
+          "hint": "Utilisez les runes fondamentales & de propriété des armes/bandelettes investies par le maître."
+        }
+      },
+      "share": "Partager"
     },
     "targetHelper": {
       "check-card": {
