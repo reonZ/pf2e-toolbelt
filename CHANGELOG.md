@@ -1,3 +1,8 @@
+# 3.8.3
+
+-   `Hero Actions`:
+    -   fix trading action not proceeding when there is only one possible target character to trade with
+
 # 3.8.2
 
 -   `Better Merchant`:
