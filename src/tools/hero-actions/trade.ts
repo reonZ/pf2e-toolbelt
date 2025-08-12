@@ -92,7 +92,8 @@ class TradeHeroAction extends ModuleToolApplication<HeroActionsTool> {
         const form = this.form;
         if (!form) return;
 
-        const data = new foundry.applications.ux.FormDataExtended(form).object as {
+        const ExtendedData = new foundry.applications.ux.FormDataExtended(form, { disabled: true });
+        const data = ExtendedData.object as {
             target: string;
             action: DocumentUUID;
             [k: `action-${string}`]: DocumentUUID;
