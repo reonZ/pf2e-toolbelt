@@ -409,10 +409,6 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
             return;
         }
 
-        if (count > 0) {
-            actions.length = 0;
-        }
-
         const table = await this.getDeckTable();
 
         if (!table) {
@@ -693,6 +689,10 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         const count = this.settings.count;
         const actions = this.getHeroActions(actor);
         const nb = count || getMythicOrHeroPoints(actor).value - actions.length;
+
+        if (count > 0) {
+            actions.length = 0;
+        }
 
         if (!table.formula) {
             if (table.compendium) {
