@@ -1,3 +1,8 @@
+# 3.8.4
+
+-   `Hero Actions`:
+    -   fix `Redraw` adding hero actions instead of replacing them
+
 # 3.8.3
 
 -   `Hero Actions`:
