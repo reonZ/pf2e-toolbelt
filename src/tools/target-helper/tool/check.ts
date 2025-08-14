@@ -1,4 +1,5 @@
 import {
+    canObserveActor,
     ChatMessagePF2e,
     createHTMLElementContent,
     firstElementWithText,
@@ -9,7 +10,6 @@ import {
     SaveType,
     splitListString,
 } from "module-helpers";
-import { canObserveActor } from "module-helpers/src";
 import {
     addRollSavesListener,
     addSaveBtnListener,

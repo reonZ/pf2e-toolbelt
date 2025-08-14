@@ -1,10 +1,11 @@
 import {
     createHook,
+    getTemplateTokens,
     isHoldingModifierKey,
     MeasuredTemplateDocumentPF2e,
+    oppositeAlliance,
     waitDialog,
 } from "module-helpers";
-import { getTemplateTokens, oppositeAlliance } from "module-helpers/src";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterTemplateTool extends ModuleTool<ToolSettings> {
