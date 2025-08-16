@@ -158,7 +158,8 @@
       "heroActions": {
         "title": "Actions héroïques",
         "count": {
-          "name": "Fixer la variante d'héroïsme"
+          "name": "Fixer la variante d'héroïsme",
+          "hint": "Si la valeur est 0, les personnages ne peuvent effectuer qu'une seule action de héros par point d'héroïsme. Sinon, le nombre d'actions de héros sera dissocié du nombre de points d'héroïsme disponibles et les personnages devront retirer les actions de héros du jeu."
         },
         "enabled": {
           "name": "Activé",
