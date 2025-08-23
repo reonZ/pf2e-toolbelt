@@ -728,7 +728,7 @@ function getMasterIfOption(actor: CreaturePF2e, option: ShareDataType): Creature
 
 function createCombatant(actor: CreaturePF2e, encounter: EncounterPF2e) {
     const scene = encounter.scene;
-    const token = getFirstActiveToken(actor, scene);
+    const token = getFirstActiveToken(actor, { scene });
     const CombatantPF2e = getDocumentClass("Combatant");
 
     return new CombatantPF2e(
