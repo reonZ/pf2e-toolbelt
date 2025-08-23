@@ -123,6 +123,13 @@
                     "hint": "Should movement history recording be prevented for you. This makes successive move actions in a same turn less confusing."
                 }
             },
+            "betterSheet": {
+                "title": "Better Actor Sheet",
+                "partyAsObserved": {
+                    "name": "Party Alliance as Observed",
+                    "hint": "Allow players to observe actor sheets while having the 'Limited' permission as long as they belong to the 'party' alliance. Not to be confused with the 'Party' actor."
+                }
+            },
             "betterTemplate": {
                 "title": "Better Templates",
                 "target": {
