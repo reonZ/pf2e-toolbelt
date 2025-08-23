@@ -509,6 +509,25 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                     quantityElement.innerHTML = BetterMerchantTool.INFINITY;
                 }
             }
+
+            if (item.quantity <= 0) continue;
+
+            let controls = htmlQuery(el, ".item-controls");
+
+            if (!controls) {
+                controls = createHTMLElement("div", { classes: ["item-controls"] });
+                htmlQuery(el, ".data")?.appendChild(controls);
+            }
+
+            const buyBtn = createHTMLElement("a", {
+                content: `<i class="fa-fw fa-solid fa-coins"></i>`,
+                dataset: {
+                    betterAction: "buy-item",
+                    tooltip: "PF2E.loot.BuySubtitle",
+                },
+            });
+
+            controls?.prepend(buyBtn);
         }
 
         if (!isGM) return $html;
@@ -625,10 +644,46 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         });
     }
 
+    async #buyItem(actor: LootPF2e, item: PhysicalItemPF2e<LootPF2e>) {
+        const target = R.only(canvas.tokens.controlled)?.actor ?? game.user.character;
+
+        if (!target?.isOfType("character", "npc", "party", "vehicle")) {
+            return this.warning("item.buy.noTarget");
+        }
+
+        if (item.quantity === 1 && !this.getFlag(actor, "infiniteAll")) {
+            const result = await confirmDialog(this.localizeKey("item.buy.confirm"), {
+                data: { buyer: target.name, item: item.name },
+            });
+            if (!result) return;
+        }
+
+        const event = new DragEvent("dragstart", {
+            dataTransfer: new DataTransfer(),
+        });
+
+        const data = {
+            fromInventory: true,
+            itemType: item.type,
+            type: "Item",
+            uuid: item.uuid,
+        };
+
+        event.dataTransfer?.setData("text/plain", JSON.stringify(data));
+        target.sheet._onDrop(event);
+    }
+
     async #onBetterAction(actor: LootPF2e, target: HTMLElement) {
         const action = target.dataset.betterAction as EventBetterAction;
 
         switch (action) {
+            case "buy-item": {
+                const itemId = htmlClosest(target, "[data-item-id]")?.dataset.itemId ?? "";
+                const item = actor.items.get<PhysicalItemPF2e<LootPF2e>>(itemId);
+
+                return item && this.#buyItem(actor, item);
+            }
+
             case "buy-service": {
                 const serviceId = getServiceIdFromElement(target);
                 return this.#buyService(actor, serviceId);
@@ -928,6 +983,8 @@ type UseServiceOptions = {
     serviceId: string;
 };
 
+type EventItemAction = "buy-item";
+
 type EventSheetAction =
     | "create-service"
     | "export-services"
@@ -949,7 +1006,7 @@ type EventSheetServiceAction =
     | "toggle-service-enabled"
     | "toggle-service-summary";
 
-type EventBetterAction = EventSheetAction | EventSheetServiceAction;
+type EventBetterAction = EventItemAction | EventSheetAction | EventSheetServiceAction;
 
 type BrowserData = {
     actor: LootPF2e;

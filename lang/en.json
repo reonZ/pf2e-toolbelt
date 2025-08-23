@@ -367,6 +367,13 @@
                 "error": "An error occured while trying to import the services."
             },
             "item": {
+                "buy": {
+                    "confirm": {
+                        "content": "Does <strong>{buyer}</strong> want to buy <strong>{item}</strong>?",
+                        "title": "Buy Item - {item}"
+                    },
+                    "noTarget": "You must select a valid actor to buy from this merchant"
+                },
                 "error": "An error occured while trying to process a better merchant item trade: <strong>{reason}</strong>.",
                 "noStock": "<strong>{actor}</strong> cannot provide the requested quantity of <strong>{item}</strong>.",
                 "unwilling": "<strong>{actor}</strong> isn't willing to part from <strong>{item}</strong>.",

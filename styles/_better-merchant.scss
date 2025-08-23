@@ -395,10 +395,12 @@
         .items.services {
             .item-controls {
                 flex-basis: 6rem;
+            }
+        }
 
-                :only-child {
-                    margin-right: 0.2em;
-                }
+        .items {
+            .item-controls :only-child {
+                margin-right: 0.1em;
             }
         }
     }
