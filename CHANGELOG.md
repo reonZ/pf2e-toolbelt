@@ -1,3 +1,20 @@
+# 3.9.0
+
+-   add `Better Actor Sheet` tool:
+    -   `Party Alliance as Observed`: allows players to observe actor sheets without the `Observer` permission as long as they belong to the `party` alliance (not to be confused with the `Party` actor)
+    -   `Improvised Weapon Button`: add a button in the inventory of character actors to create an improvised weapon on the fly
+        -   the weapon is simple and contains the `Rule Element` giving the "–2 item penalty to attack rolls"
+    -   `Allow Item Split`: make item quantity number in sheets clickable to split them into multiple stacks
+    -   `Items Merging Button`: add a merge button in the inventory tab to merge items in bundle
+        -   this feature is a bit sensitive and only merge items that have a sourceId and haven't been updated compared to the source item
+        -   some properties are excluded from the diff test as they would almost always be changed (i.e. `quantity` or `equipped`)
+        -   everything is merged onto the stack with the highest quantity
+        -   the initial process to check which items can be merged can take a bit of time depending on how many items are in the inventory as it requires to fetch compendium sources and test against them, the button is disabled until it is finished to avoid multi click
+-   `Better Merchant`:
+    -   add `Buy Item` buttons to the merchant sheet to buy items without having to drag & drop them
+-   `Underground`:
+    -   now also force tiles to be behind tokens with negative elevation
+
 # 3.8.4
 
 -   `Hero Actions`:
