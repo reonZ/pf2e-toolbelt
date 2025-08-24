@@ -125,6 +125,10 @@
             },
             "betterSheet": {
                 "title": "Better Actor Sheet",
+                "mergeItems": {
+                    "name": "Allow Item Merging",
+                    "hint": "Add a merge button in the inventory tab to merging stacks of items."
+                },
                 "partyAsObserved": {
                     "name": "Party Alliance as Observed",
                     "hint": "Allow players to observe actor sheets while having the 'Limited' permission as long as they belong to the 'party' alliance. Not to be confused with the 'Party' actor."
@@ -444,7 +448,13 @@
             }
         },
         "betterSheet": {
+            "merge": {
+                "none": "There are no items to merge in the inventory.",
+                "title": "Merge Items - {name}",
+                "yes": "Merge"
+            },
             "sheet": {
+                "merge": "Merge Items",
                 "split": "Split Item"
             },
             "split": {

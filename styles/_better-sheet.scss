@@ -1,4 +1,4 @@
-.application.dialog.pf2e-toolbelt.toolbelt-split {
+.application.dialog.pf2e-toolbelt.toolbelt-split-item {
     .form-fields {
         flex: 0;
 
@@ -6,5 +6,37 @@
             width: 8ch;
             text-align: end;
         }
+    }
+}
+
+.application.dialog.pf2e-toolbelt.toolbelt-merge-items {
+    --highlight: #ffffff14;
+
+    .dialog-content {
+        gap: 0.5em;
+    }
+
+    .item {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+
+        img {
+            height: 2em;
+        }
+
+        .name {
+            flex: 1;
+        }
+
+        &:hover {
+            background: var(--highlight);
+        }
+    }
+}
+
+body.theme-light {
+    .application.dialog.pf2e-toolbelt.toolbelt-merge-items {
+        --highlight: #00000014;
     }
 }

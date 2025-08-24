@@ -4,18 +4,24 @@ import {
     belongToPartyAlliance,
     CharacterPF2e,
     CharacterSheetPF2e,
+    ConsumablePF2e,
+    createButtonElement,
     createHook,
     createHTMLElement,
     createToggleableWrapper,
     CreatureSheetData,
+    EquipmentPF2e,
     FamiliarPF2e,
     FamiliarSheetPF2e,
     htmlClosest,
     htmlQuery,
     NPCSheetPF2e,
+    R,
     renderActorSheets,
     toggleHooksAndWrappers,
+    TreasurePF2e,
     waitDialog,
+    waitTimeout,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
@@ -41,6 +47,11 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
+    #renderSheetSettingUpdate = foundry.utils.debounce(() => {
+        this.#renderActorSheetHook.toggle(this.settings.splitItem || this.settings.mergeItems);
+        renderActorSheets();
+    }, 1);
+
     #renderActorSheetHook = createHook("renderActorSheet", this.#onRenderActorSheet.bind(this));
 
     get key(): "betterSheet" {
@@ -59,20 +70,28 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
+                key: "mergeItems",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: () => {
+                    this.#renderSheetSettingUpdate();
+                },
+            },
+            {
                 key: "splitItem",
                 type: Boolean,
                 default: false,
                 scope: "user",
-                onChange: (value) => {
-                    this.#renderActorSheetHook.toggle(value);
-                    renderActorSheets();
+                onChange: () => {
+                    this.#renderSheetSettingUpdate();
                 },
             },
         ];
     }
 
     ready(isGM: boolean): void {
-        this.#renderActorSheetHook.toggle(this.settings.splitItem);
+        this.#renderActorSheetHook.toggle(this.settings.splitItem || this.settings.mergeItems);
         toggleHooksAndWrappers(this.#partyAsObservedHooks, !isGM && this.settings.partyAsObserved);
     }
 
@@ -81,30 +100,158 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         if (!actor.isOwner) return;
 
         const html = $html[0];
-        const inventory = htmlQuery(html, `.tab.inventory section.inventory-list`);
+        const inventory = htmlQuery(html, `.tab.inventory`);
         if (!inventory) return;
 
-        const elements = inventory.querySelectorAll<HTMLElement>(
-            ".items [data-item-id] .quantity span"
+        if (this.settings.mergeItems) {
+            const btn = createButtonElement({
+                dataset: { tooltip: this.localizePath("sheet.merge") },
+                icon: "fa-solid fa-merge",
+            });
+            const li = createHTMLElement("li", { content: btn });
+
+            btn.addEventListener("click", () => this.#onMergeItems(actor, btn));
+
+            htmlQuery(inventory, ".currency")?.append(li);
+        }
+
+        if (this.settings.splitItem) {
+            const elements = inventory.querySelectorAll<HTMLElement>(
+                ".items [data-item-id] .quantity span"
+            );
+
+            const splitItem = (event: MouseEvent) => {
+                this.#onSplitItem(event, actor);
+            };
+
+            for (const el of elements) {
+                const quantity = Number(el.innerText);
+                if (isNaN(quantity) || quantity <= 1) continue;
+
+                const btn = createHTMLElement("a", {
+                    content: el.innerText,
+                    dataset: { tooltip: this.localizePath("sheet.split") },
+                });
+
+                btn.addEventListener("click", splitItem);
+
+                el.replaceChildren(btn);
+            }
+        }
+    }
+
+    async #onMergeItems(actor: ActorPF2e, btn: HTMLButtonElement) {
+        type Mergeable =
+            | EquipmentPF2e<ActorPF2e>
+            | ConsumablePF2e<ActorPF2e>
+            | TreasurePF2e<ActorPF2e>;
+
+        btn.disabled = true;
+        await waitTimeout();
+
+        const itemsBySource: Record<ItemUUID, Mergeable[]> = R.groupBy(
+            actor.inventory.filter((item): item is Mergeable & { sourceId: string } => {
+                return (
+                    item.isOfType("equipment", "consumable", "treasure") &&
+                    item.isIdentified &&
+                    !!item.sourceId
+                );
+            }),
+            R.prop("sourceId")
         );
 
-        const splitItem = (event: MouseEvent) => {
-            this.#onSplitItem(event, actor);
-        };
+        const sources = R.pipe(
+            await Promise.all(
+                R.keys(itemsBySource).map(async (uuid) => {
+                    return [uuid, await fromUuid<Mergeable>(uuid)] as const;
+                })
+            ),
+            R.filter((args): args is [ItemUUID, Mergeable] => !!args[1]),
+            R.mapToObj(([uuid, item]) => [uuid, item.toObject()])
+        );
 
-        for (const el of elements) {
-            const quantity = Number(el.innerText);
-            if (isNaN(quantity) || quantity <= 1) continue;
+        const allItems = R.pipe(
+            itemsBySource,
+            R.pick(R.keys(sources)),
+            R.mapValues((items = [], uuid) => {
+                const source = sources[uuid];
 
-            const btn = createHTMLElement("a", {
-                content: el.innerText,
-                dataset: { tooltip: this.localizePath("sheet.split") },
-            });
+                return items.filter((item) => {
+                    const diff = foundry.utils.diffObject(source, item.toObject()) as DeepPartial<
+                        Mergeable["_source"]
+                    >;
 
-            btn.addEventListener("click", splitItem);
+                    delete diff.ownership;
+                    delete diff._id;
+                    delete diff._stats;
+                    delete diff.system?.equipped;
+                    delete diff.system?.identification;
+                    delete diff.system?.quantity;
 
-            el.replaceChildren(btn);
+                    if (foundry.utils.isEmpty(diff.system)) {
+                        delete diff.system;
+                    }
+
+                    return foundry.utils.isEmpty(diff);
+                });
+            }),
+            R.entries(),
+            R.filter((args): args is [ItemUUID, NonEmptyArray<Mergeable>] => args[1].length > 1)
+        );
+
+        if (!allItems.length) {
+            btn.disabled = false;
+            return this.warning("merge.none");
         }
+
+        const content = R.pipe(
+            allItems,
+            R.map(([uuid]) => {
+                const source = sources[uuid];
+                return `<label class="item">
+                    <img src="${source.img}">
+                    <div class="name">${source.name}</div>
+                    <input type="checkbox" name="${uuid}">
+                </label>`;
+            })
+        );
+
+        const result = await waitDialog<Record<ItemUUID, boolean>>({
+            classes: ["toolbelt-merge-items"],
+            content: content.join(""),
+            i18n: this.localizeKey("merge"),
+            title: this.localize("merge.title", actor),
+            yes: {
+                icon: "fa-solid fa-merge",
+            },
+        });
+
+        btn.disabled = false;
+
+        if (!result) return;
+
+        const selected = R.keys(R.pickBy(result, R.isTruthy));
+        if (!selected.length) return;
+
+        const deletes: string[] = [];
+        const updates = R.pipe(
+            allItems,
+            R.filter(([uuid]) => selected.includes(uuid)),
+            R.map(([_, items]) => {
+                const biggest = R.firstBy(items, (item) => item.quantity);
+                const total = R.sumBy(items, (item) => item.quantity);
+
+                deletes.push(...items.map((item) => item.id).filter((id) => id !== biggest.id));
+
+                return {
+                    _id: biggest.id,
+                    "system.quantity": total,
+                };
+            })
+        );
+
+        await actor.deleteEmbeddedDocuments("Item", deletes);
+        await actor.updateEmbeddedDocuments("Item", updates);
     }
 
     async #onSplitItem(event: MouseEvent, actor: ActorPF2e) {
@@ -113,7 +260,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         if (!item?.isOfType("physical") || item.quantity <= 1) return;
 
         const result = await waitDialog<{ quantity: number }>({
-            classes: ["toolbelt-split"],
+            classes: ["toolbelt-split-item"],
             content: [
                 {
                     type: "number",
@@ -185,6 +332,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 }
 
 type ToolSettings = {
+    mergeItems: boolean;
     partyAsObserved: boolean;
     splitItem: boolean;
 };
