@@ -13,6 +13,7 @@ import {
     EffectPF2e,
     EncounterPF2e,
     EquipmentPF2e,
+    executeWhenReady,
     getFirstActiveToken,
     includesAny,
     isPrimaryOwner,
@@ -512,76 +513,78 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     #actorPrepareData(actor: CreaturePF2e, wrapped: libWrapper.RegisterCallback) {
         wrapped();
 
-        if (!game.ready) return;
+        executeWhenReady(() => {
+            // a master forces all slaves to refresh
+            const slaves = getSlavesInMemory(actor, false);
+            if (slaves.length) {
+                for (const slave of slaves) {
+                    slave.reset();
+                    slave.sheet.render();
 
-        // a master forces all slaves to refresh
-        const slaves = getSlavesInMemory(actor, false);
-        if (slaves.length) {
-            for (const slave of slaves) {
-                slave.reset();
-                slave.sheet.render();
-
-                for (const token of slave.getActiveTokens()) {
-                    token.renderFlags.set({ refreshBars: true });
+                    for (const token of slave.getActiveTokens()) {
+                        token.renderFlags.set({ refreshBars: true });
+                    }
                 }
+
+                return;
             }
 
-            return;
-        }
+            // a slave copies its master's stats
+            const data = getShareDataInMemory(actor);
+            const master = data?.master;
+            if (!master) return;
 
-        // a slave copies its master's stats
-        const data = getShareDataInMemory(actor);
-        const master = data?.master;
-        if (!master) return;
-
-        if (data.health) {
-            actor.system.attributes.hp = foundry.utils.mergeObject(
-                new game.pf2e.StatisticModifier("hp"),
-                master.system.attributes.hp
-            );
-        }
-
-        // the following is only for characters
-        if (!master.isOfType("character") || !actor.isOfType("character")) return;
-
-        if (data.heroPoints) {
-            actor.system.resources.heroPoints = foundry.utils.deepClone(
-                master.system.resources.heroPoints
-            );
-        }
-
-        if (data.spellcasting) {
-            actor.system.resources.focus = foundry.utils.deepClone(master.system.resources.focus);
-        }
-
-        if (data.skills) {
-            const Statistic = getStatisticCls(actor);
-
-            for (const [slug, skill] of R.entries(CONFIG.PF2E.skills)) {
-                const { rank } = master.skills[slug];
-                const currentRank = actor.skills[slug].rank;
-                if (currentRank >= rank) continue;
-
-                const attribute = skill.attribute;
-
-                const statistic = new Statistic(actor, {
-                    slug,
-                    label: skill.label,
-                    attribute,
-                    domains: [slug, `${attribute}-based`, "skill-check", "all"],
-                    modifiers: [],
-                    lore: false,
-                    rank,
-                    check: { type: "skill-check" },
-                });
-
-                actor.skills[slug] = statistic;
-                actor.system.skills[slug] = foundry.utils.mergeObject(
-                    statistic.getTraceData() as CharacterSkillData,
-                    { attribute, rank }
+            if (data.health) {
+                actor.system.attributes.hp = foundry.utils.mergeObject(
+                    new game.pf2e.StatisticModifier("hp"),
+                    master.system.attributes.hp
                 );
             }
-        }
+
+            // the following is only for characters
+            if (!master.isOfType("character") || !actor.isOfType("character")) return;
+
+            if (data.heroPoints) {
+                actor.system.resources.heroPoints = foundry.utils.deepClone(
+                    master.system.resources.heroPoints
+                );
+            }
+
+            if (data.spellcasting) {
+                actor.system.resources.focus = foundry.utils.deepClone(
+                    master.system.resources.focus
+                );
+            }
+
+            if (data.skills) {
+                const Statistic = getStatisticCls(actor);
+
+                for (const [slug, skill] of R.entries(CONFIG.PF2E.skills)) {
+                    const { rank } = master.skills[slug];
+                    const currentRank = actor.skills[slug].rank;
+                    if (currentRank >= rank) continue;
+
+                    const attribute = skill.attribute;
+
+                    const statistic = new Statistic(actor, {
+                        slug,
+                        label: skill.label,
+                        attribute,
+                        domains: [slug, `${attribute}-based`, "skill-check", "all"],
+                        modifiers: [],
+                        lore: false,
+                        rank,
+                        check: { type: "skill-check" },
+                    });
+
+                    actor.skills[slug] = statistic;
+                    actor.system.skills[slug] = foundry.utils.mergeObject(
+                        statistic.getTraceData() as CharacterSkillData,
+                        { attribute, rank }
+                    );
+                }
+            }
+        });
     }
 
     #actorPrepareBaseData(actor: CreaturePF2e, wrapped: libWrapper.RegisterCallback) {
