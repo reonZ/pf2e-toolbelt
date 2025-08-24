@@ -12,6 +12,12 @@
         -   the initial process to check which items can be merged can take a bit of time depending on how many items are in the inventory as it requires to fetch compendium sources and test against them, the button is disabled until it is finished to avoid multi click
 -   `Better Merchant`:
     -   add `Buy Item` buttons to the merchant sheet to buy items without having to drag & drop them
+-   `Share Data`:
+    -   the `Skills Proficiencies` option now also share the master's `item` modifiers for skills & perception
+    -   fix race condition between master and bound actors `prepareData`
+        -   it would happen if you created the master after the bound actor in your world
+        -   it would prevent the bound actor from "copying" its master's data as it was already processed
+        -   the fix may have caused other issues though, so let's keep an eye open
 -   `Underground`:
     -   now also force tiles to be behind tokens with negative elevation
 
