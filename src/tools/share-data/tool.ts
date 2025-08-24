@@ -21,6 +21,7 @@ import {
     ModifierPF2e,
     ModifierType,
     MODULE,
+    PerceptionStatistic,
     R,
     registerWrapper,
     WeaponPF2e,
@@ -513,6 +514,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     #actorPrepareData(actor: CreaturePF2e, wrapped: libWrapper.RegisterCallback) {
         wrapped();
 
+        // this one is to avoid race condition with masters created later in the world
         executeWhenReady(() => {
             // a master forces all slaves to refresh
             const slaves = getSlavesInMemory(actor, false);
@@ -557,14 +559,51 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             }
 
             if (data.skills) {
+                const masterPerception = master.perception;
+                const slavePerception = actor.perception;
+
+                // we add the master's item modifiers to perception
+                if (masterPerception && slavePerception) {
+                    const PerceptionStatistic =
+                        slavePerception.constructor as ConstructorOf<PerceptionStatistic>;
+
+                    const modifiers = R.pipe(
+                        masterPerception.check.modifiers,
+                        R.filter((modifier) => modifier.type === "item"),
+                        R.map((modifier) => modifier.clone())
+                    );
+
+                    const perception = new PerceptionStatistic(actor, {
+                        slug: "perception",
+                        label: "PF2E.PerceptionLabel",
+                        attribute: "wis",
+                        rank: actor.system.perception.rank,
+                        domains: ["perception", "all"],
+                        check: { type: "perception-check", modifiers },
+                        senses: actor.system.perception.senses,
+                    });
+
+                    actor.perception = perception;
+                    actor.system.perception = foundry.utils.mergeObject(perception.getTraceData(), {
+                        attribute: perception.attribute ?? "wis",
+                        rank: actor.system.perception.rank,
+                    });
+                }
+
                 const Statistic = getStatisticCls(actor);
 
                 for (const [slug, skill] of R.entries(CONFIG.PF2E.skills)) {
-                    const { rank } = master.skills[slug];
+                    const { check, rank } = master.skills[slug];
                     const currentRank = actor.skills[slug].rank;
                     if (currentRank >= rank) continue;
 
                     const attribute = skill.attribute;
+                    // we add item modifiers from master
+                    const modifiers = R.pipe(
+                        check.modifiers ?? [],
+                        R.filter((modifier) => modifier.type === "item"),
+                        R.map((modifier) => modifier.clone())
+                    );
 
                     const statistic = new Statistic(actor, {
                         slug,
@@ -574,7 +613,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         modifiers: [],
                         lore: false,
                         rank,
-                        check: { type: "skill-check" },
+                        check: { type: "skill-check", modifiers },
                     });
 
                     actor.skills[slug] = statistic;

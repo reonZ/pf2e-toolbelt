@@ -809,8 +809,8 @@
                     "hint": "Select a master with whom this actor will share data."
                 },
                 "skills": {
-                    "label": "Skills Proficiencies",
-                    "hint": "Use the master's skills proficiencies."
+                    "label": "Skills Proficiencies & Modifiers",
+                    "hint": "Use the master's skills proficiencies. Also add the master's item modifiers for skills and perception."
                 },
                 "spellcasting": {
                     "label": "Spellcasting",
