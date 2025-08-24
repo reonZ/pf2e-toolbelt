@@ -1,18 +1,29 @@
-import { createHook, createToggleableWrapper, TokenPF2e } from "module-helpers";
+import {
+    activateHooksAndWrappers,
+    createHook,
+    createToggleableWrapper,
+    TileDocumentPF2e,
+    toggleHooksAndWrappers,
+    TokenPF2e,
+} from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class UndergroundTool extends ModuleTool<ToolSettings> {
-    #drawCanvasGroupHook = createHook(
-        "drawPrimaryCanvasGroup",
-        this.#onDrawPrimaryCanvasGroup.bind(this)
-    );
-
-    #refreshElevationWrapper = createToggleableWrapper(
-        "WRAPPER",
-        "CONFIG.Token.objectClass.prototype._refreshElevation",
-        this.#tokenRefreshElevation,
-        { context: this }
-    );
+    #hooks = [
+        createHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.Token.objectClass.prototype._refreshElevation",
+            this.#tokenRefreshElevation,
+            { context: this }
+        ),
+        createToggleableWrapper(
+            "WRAPPER",
+            "CONFIG.Tile.documentClass.prototype.prepareBaseData",
+            this.#tileDocumentPrepareBaseData,
+            { context: this }
+        ),
+    ];
 
     #drawCanvas = foundry.utils.debounce(() => {
         canvas.tokens.draw();
@@ -30,12 +41,9 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "world",
                 onChange: (value) => {
-                    this.#drawCanvasGroupHook.toggle(value);
-                    this.#refreshElevationWrapper.toggle(value);
+                    toggleHooksAndWrappers(this.#hooks, value);
 
-                    if (canvas.ready) {
-                        canvas.primary.background.elevation = value ? -Number.MAX_VALUE : 0;
-                    }
+                    canvas.primary.background.elevation = value ? -Number.MAX_VALUE : 0;
 
                     this.#drawCanvas();
                 },
@@ -83,13 +91,16 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
 
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
-
-        this.#drawCanvasGroupHook.activate();
-        this.#refreshElevationWrapper.activate();
+        activateHooksAndWrappers(this.#hooks);
     }
 
-    #onDrawPrimaryCanvasGroup() {
-        canvas.primary.background.elevation = -Number.MAX_VALUE;
+    #tileDocumentPrepareBaseData(tile: TileDocumentPF2e, wrapped: libWrapper.RegisterCallback) {
+        tile.elevation = -Number.MAX_VALUE;
+        wrapped();
+    }
+
+    #onDrawPrimaryCanvasGroup(group: PrimaryCanvasGroup) {
+        group.background.elevation = -Number.MAX_VALUE;
     }
 
     #tokenRefreshElevation(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
