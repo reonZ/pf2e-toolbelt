@@ -1,13 +1,21 @@
 import {
+    ActorPF2e,
+    ActorSheetPF2e,
     belongToPartyAlliance,
     CharacterPF2e,
     CharacterSheetPF2e,
+    createHook,
+    createHTMLElement,
     createToggleableWrapper,
     CreatureSheetData,
     FamiliarPF2e,
     FamiliarSheetPF2e,
+    htmlClosest,
+    htmlQuery,
     NPCSheetPF2e,
+    renderActorSheets,
     toggleHooksAndWrappers,
+    waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
@@ -33,6 +41,8 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
+    #renderActorSheetHook = createHook("renderActorSheet", this.#onRenderActorSheet.bind(this));
+
     get key(): "betterSheet" {
         return "betterSheet";
     }
@@ -48,11 +58,92 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     toggleHooksAndWrappers(this.#partyAsObservedHooks, !game.user.isGM && value);
                 },
             },
+            {
+                key: "splitItem",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: (value) => {
+                    this.#renderActorSheetHook.toggle(value);
+                    renderActorSheets();
+                },
+            },
         ];
     }
 
     ready(isGM: boolean): void {
+        this.#renderActorSheetHook.toggle(this.settings.splitItem);
         toggleHooksAndWrappers(this.#partyAsObservedHooks, !isGM && this.settings.partyAsObserved);
+    }
+
+    #onRenderActorSheet(sheet: ActorSheetPF2e<ActorPF2e>, $html: JQuery) {
+        const actor = sheet.actor;
+        if (!actor.isOwner) return;
+
+        const html = $html[0];
+        const inventory = htmlQuery(html, `.tab.inventory section.inventory-list`);
+        if (!inventory) return;
+
+        const elements = inventory.querySelectorAll<HTMLElement>(
+            ".items [data-item-id] .quantity span"
+        );
+
+        const splitItem = (event: MouseEvent) => {
+            this.#onSplitItem(event, actor);
+        };
+
+        for (const el of elements) {
+            const quantity = Number(el.innerText);
+            if (isNaN(quantity) || quantity <= 1) continue;
+
+            const btn = createHTMLElement("a", {
+                content: el.innerText,
+                dataset: { tooltip: this.localizePath("sheet.split") },
+            });
+
+            btn.addEventListener("click", splitItem);
+
+            el.replaceChildren(btn);
+        }
+    }
+
+    async #onSplitItem(event: MouseEvent, actor: ActorPF2e) {
+        const itemId = htmlClosest(event.currentTarget, "[data-item-id]")?.dataset.itemId ?? "";
+        const item = actor.items.get(itemId);
+        if (!item?.isOfType("physical") || item.quantity <= 1) return;
+
+        const result = await waitDialog<{ quantity: number }>({
+            classes: ["toolbelt-split"],
+            content: [
+                {
+                    type: "number",
+                    inputConfig: {
+                        name: "quantity",
+                        min: 0,
+                        max: item.quantity,
+                        value: Math.floor(item.quantity / 2),
+                        autofocus: true,
+                    },
+                },
+            ],
+            data: item,
+            i18n: this.localizeKey("split"),
+            yes: {
+                icon: "fa-solid fa-split",
+            },
+        });
+
+        if (!result) return;
+
+        const quantity = Math.min(result.quantity, item.quantity);
+        if (quantity < 1) return;
+
+        await item.update({ "system.quantity": item.quantity - quantity });
+
+        const source = item.toObject();
+        source.system.quantity = quantity;
+
+        await actor.createEmbeddedDocuments("Item", [source]);
     }
 
     #npcSheetPF2eTemplate(sheet: NPCSheetPF2e): string {
@@ -95,6 +186,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
 type ToolSettings = {
     partyAsObserved: boolean;
+    splitItem: boolean;
 };
 
 export { BetterSheetTool };

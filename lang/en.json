@@ -128,6 +128,10 @@
                 "partyAsObserved": {
                     "name": "Party Alliance as Observed",
                     "hint": "Allow players to observe actor sheets while having the 'Limited' permission as long as they belong to the 'party' alliance. Not to be confused with the 'Party' actor."
+                },
+                "splitItem": {
+                    "name": "Allow Item Split",
+                    "hint": "Click on the item quantity number in an actor sheet to split it into multiple entries."
                 }
             },
             "betterTemplate": {
@@ -437,6 +441,18 @@
                 "quantity": "Negative number for infinite stock",
                 "tags": "Service Tags",
                 "title": "Service - {label}"
+            }
+        },
+        "betterSheet": {
+            "sheet": {
+                "split": "Split Item"
+            },
+            "split": {
+                "quantity": {
+                    "label": "New Stack Quantity"
+                },
+                "title": "Split Item - {name}",
+                "yes": "Split"
             }
         },
         "betterTemplate": {
