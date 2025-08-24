@@ -13,6 +13,7 @@ import {
     EquipmentPF2e,
     FamiliarPF2e,
     FamiliarSheetPF2e,
+    FlatModifierSource,
     htmlClosest,
     htmlQuery,
     NPCSheetPF2e,
@@ -22,6 +23,7 @@ import {
     TreasurePF2e,
     waitDialog,
     waitTimeout,
+    WeaponSource,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
@@ -48,7 +50,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
     ];
 
     #renderSheetSettingUpdate = foundry.utils.debounce(() => {
-        this.#renderActorSheetHook.toggle(this.settings.splitItem || this.settings.mergeItems);
+        this.#renderActorSheetHook.toggle(this.renderActorSheetEnabled);
         renderActorSheets();
     }, 1);
 
@@ -67,6 +69,15 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 scope: "world",
                 onChange: (value) => {
                     toggleHooksAndWrappers(this.#partyAsObservedHooks, !game.user.isGM && value);
+                },
+            },
+            {
+                key: "improvised",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: () => {
+                    this.#renderSheetSettingUpdate();
                 },
             },
             {
@@ -90,8 +101,12 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ];
     }
 
+    get renderActorSheetEnabled(): boolean {
+        return this.settings.splitItem || this.settings.mergeItems || this.settings.improvised;
+    }
+
     ready(isGM: boolean): void {
-        this.#renderActorSheetHook.toggle(this.settings.splitItem || this.settings.mergeItems);
+        this.#renderActorSheetHook.toggle(this.renderActorSheetEnabled);
         toggleHooksAndWrappers(this.#partyAsObservedHooks, !isGM && this.settings.partyAsObserved);
     }
 
@@ -110,7 +125,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             });
             const li = createHTMLElement("li", { content: btn });
 
-            btn.addEventListener("click", () => this.#onMergeItems(actor, btn));
+            btn.addEventListener("click", () => this.#mergeItems(actor, btn));
 
             htmlQuery(inventory, ".currency")?.append(li);
         }
@@ -121,7 +136,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             );
 
             const splitItem = (event: MouseEvent) => {
-                this.#onSplitItem(event, actor);
+                this.#splitItem(event, actor);
             };
 
             for (const el of elements) {
@@ -138,9 +153,45 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 el.replaceChildren(btn);
             }
         }
+
+        if (actor.isOfType("character") && this.settings.improvised) {
+            const btn = createHTMLElement("a", {
+                content: `<i class="fa-solid fa-hammer-war"></i>`,
+                dataset: { tooltip: this.localizePath("sheet.improvised") },
+                style: { marginRight: "0.1em" },
+            });
+
+            btn.addEventListener("click", () => this.#createImprovisedWeapon(actor));
+
+            htmlQuery(inventory, ".inventory-list header .item-controls")?.prepend(btn);
+        }
     }
 
-    async #onMergeItems(actor: ActorPF2e, btn: HTMLButtonElement) {
+    async #createImprovisedWeapon(actor: ActorPF2e) {
+        const source: DeepPartial<WeaponSource> = {
+            name: this.localize("improvised.label"),
+            system: {
+                category: "simple",
+                damage: {
+                    die: "d4",
+                    damageType: "bludgeoning",
+                },
+                rules: [
+                    {
+                        key: "FlatModifier",
+                        selector: "{item|_id}-attack",
+                        value: -2,
+                        type: "item",
+                    },
+                ] as FlatModifierSource[],
+            },
+            type: "weapon",
+        };
+
+        await actor.createEmbeddedDocuments("Item", [source]);
+    }
+
+    async #mergeItems(actor: ActorPF2e, btn: HTMLButtonElement) {
         type Mergeable =
             | EquipmentPF2e<ActorPF2e>
             | ConsumablePF2e<ActorPF2e>
@@ -254,7 +305,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         await actor.updateEmbeddedDocuments("Item", updates);
     }
 
-    async #onSplitItem(event: MouseEvent, actor: ActorPF2e) {
+    async #splitItem(event: MouseEvent, actor: ActorPF2e) {
         const itemId = htmlClosest(event.currentTarget, "[data-item-id]")?.dataset.itemId ?? "";
         const item = actor.items.get(itemId);
         if (!item?.isOfType("physical") || item.quantity <= 1) return;
@@ -332,6 +383,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 }
 
 type ToolSettings = {
+    improvised: boolean;
     mergeItems: boolean;
     partyAsObserved: boolean;
     splitItem: boolean;

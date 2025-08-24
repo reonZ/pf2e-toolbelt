@@ -125,8 +125,12 @@
             },
             "betterSheet": {
                 "title": "Better Actor Sheet",
+                "improvised": {
+                    "name": "Improvised Weapon Button",
+                    "hint": "Add a button in the inventory of character actors to create an improvised weapon on the fly."
+                },
                 "mergeItems": {
-                    "name": "Allow Item Merging",
+                    "name": "Items Merging Button",
                     "hint": "Add a merge button in the inventory tab to merging stacks of items."
                 },
                 "partyAsObserved": {
@@ -448,12 +452,16 @@
             }
         },
         "betterSheet": {
+            "improvised": {
+                "label": "Improvised Weapon"
+            },
             "merge": {
                 "none": "There are no items to merge in the inventory.",
                 "title": "Merge Items - {name}",
                 "yes": "Merge"
             },
             "sheet": {
+                "improvised": "Create Improvised Weapon",
                 "merge": "Merge Items",
                 "split": "Split Item"
             },
