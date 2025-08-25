@@ -1,7 +1,8 @@
 # 3.10.1
 
 -   `Better Actor Sheet`:
-    -   `Split Item` now reset the uses to their max value in the new stack
+    -   `Split Item`:
+        -   now reset the uses to their max value in the new stack
 
 # 3.10.0
 
