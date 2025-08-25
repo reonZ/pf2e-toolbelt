@@ -200,11 +200,6 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
     }
 
     async #mergeItems(actor: ActorPF2e, btn: HTMLButtonElement) {
-        type Mergeable =
-            | EquipmentPF2e<ActorPF2e>
-            | ConsumablePF2e<ActorPF2e>
-            | TreasurePF2e<ActorPF2e>;
-
         btn.disabled = true;
         await waitTimeout();
 
@@ -218,34 +213,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             }),
             R.groupBy(R.prop("sourceId")),
             R.values(),
-            R.map((items): Mergeable[] => {
-                const sorted = R.sortBy(items, [R.prop("quantity"), "asc"]);
-                const [biggest] = sorted.splice(0, 1);
-                const source = biggest.toObject();
-
-                return [
-                    biggest,
-                    ...sorted.filter((item) => {
-                        const diff = foundry.utils.diffObject(
-                            source,
-                            item.toObject()
-                        ) as DeepPartial<Mergeable["_source"]>;
-
-                        delete diff.ownership;
-                        delete diff._id;
-                        delete diff._stats;
-                        delete diff.system?.equipped;
-                        delete diff.system?.identification;
-                        delete diff.system?.quantity;
-
-                        if (foundry.utils.isEmpty(diff.system)) {
-                            delete diff.system;
-                        }
-
-                        return foundry.utils.isEmpty(diff);
-                    }),
-                ];
-            }),
+            R.flatMap((items): NonEmptyArray<Mergeable>[] => getIdenticalItems(items)),
             R.filter((items): items is NonEmptyArray<Mergeable> => items.length > 1)
         );
 
@@ -261,12 +229,12 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 return `<label class="item">
                     <img src="${source.img}">
                     <div class="name">${source.name}</div>
-                    <input type="checkbox" name="${source.uuid}">
+                    <input type="checkbox" name="${source.id}">
                 </label>`;
             })
         );
 
-        const result = await waitDialog<Record<ItemUUID, boolean>>({
+        const result = await waitDialog<Record<string, boolean>>({
             classes: ["toolbelt-merge-items"],
             content: content.join(""),
             i18n: this.localizeKey("merge"),
@@ -286,7 +254,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         const deletes: string[] = [];
         const updates = R.pipe(
             itemsBySource,
-            R.filter((items) => selected.includes(items[0].uuid)),
+            R.filter((items) => selected.includes(items[0].id)),
             R.map((items) => {
                 const biggest = items[0];
                 const total = R.sumBy(items, (item) => item.quantity);
@@ -380,6 +348,39 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         return data;
     }
 }
+
+function getIdenticalItems(items: NonEmptyArray<Mergeable>): NonEmptyArray<Mergeable>[] {
+    const sorted = R.sortBy(items, [R.prop("quantity"), "asc"]);
+    const [biggest] = sorted.splice(0, 1);
+    const source = biggest.toObject();
+
+    const [identical, others] = R.partition(sorted, (item) => {
+        const diff = foundry.utils.diffObject(source, item.toObject()) as DeepPartial<
+            Mergeable["_source"]
+        >;
+
+        delete diff.ownership;
+        delete diff._id;
+        delete diff._stats;
+        delete diff.system?.equipped;
+        delete diff.system?.identification;
+        delete diff.system?.quantity;
+
+        if (foundry.utils.isEmpty(diff.system)) {
+            delete diff.system;
+        }
+
+        return foundry.utils.isEmpty(diff);
+    });
+
+    if (others.length > 1) {
+        return [[biggest, ...identical], ...getIdenticalItems(others as NonEmptyArray<Mergeable>)];
+    } else {
+        return [[biggest, ...identical]];
+    }
+}
+
+type Mergeable = EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e> | TreasurePF2e<ActorPF2e>;
 
 type ToolSettings = {
     improvised: boolean;
