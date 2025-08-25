@@ -1,3 +1,9 @@
+# 3.10.3
+
+-   `Better Actor Sheet`:
+    -   `Merge Items`:
+        -   fix remaining uses value when merging only full consumables
+
 # 3.10.2
 
 -   `Better Actor Sheet`:
