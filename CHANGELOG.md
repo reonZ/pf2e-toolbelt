@@ -1,3 +1,10 @@
+# 3.10.2
+
+-   `Better Actor Sheet`:
+    -   `Merge Items`:
+        -   now allows merging items with different uses values
+        -   now calculates the total quantity and uses of the merged consumables for the resulting stack
+
 # 3.10.1
 
 -   `Better Actor Sheet`:
