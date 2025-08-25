@@ -208,7 +208,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         btn.disabled = true;
         await waitTimeout();
 
-        const itemsBySource: Record<ItemUUID, Mergeable[]> = R.groupBy(
+        const itemsBySource = R.pipe(
             actor.inventory.filter((item): item is Mergeable & { sourceId: string } => {
                 return (
                     item.isOfType("equipment", "consumable", "treasure") &&
@@ -216,61 +216,52 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     !!item.sourceId
                 );
             }),
-            R.prop("sourceId")
-        );
+            R.groupBy(R.prop("sourceId")),
+            R.values(),
+            R.map((items): Mergeable[] => {
+                const sorted = R.sortBy(items, [R.prop("quantity"), "asc"]);
+                const [biggest] = sorted.splice(0, 1);
+                const source = biggest.toObject();
 
-        const sources = R.pipe(
-            await Promise.all(
-                R.keys(itemsBySource).map(async (uuid) => {
-                    return [uuid, await fromUuid<Mergeable>(uuid)] as const;
-                })
-            ),
-            R.filter((args): args is [ItemUUID, Mergeable] => !!args[1]),
-            R.mapToObj(([uuid, item]) => [uuid, item.toObject()])
-        );
+                return [
+                    biggest,
+                    ...sorted.filter((item) => {
+                        const diff = foundry.utils.diffObject(
+                            source,
+                            item.toObject()
+                        ) as DeepPartial<Mergeable["_source"]>;
 
-        const allItems = R.pipe(
-            itemsBySource,
-            R.pick(R.keys(sources)),
-            R.mapValues((items = [], uuid) => {
-                const source = sources[uuid];
+                        delete diff.ownership;
+                        delete diff._id;
+                        delete diff._stats;
+                        delete diff.system?.equipped;
+                        delete diff.system?.identification;
+                        delete diff.system?.quantity;
 
-                return items.filter((item) => {
-                    const diff = foundry.utils.diffObject(source, item.toObject()) as DeepPartial<
-                        Mergeable["_source"]
-                    >;
+                        if (foundry.utils.isEmpty(diff.system)) {
+                            delete diff.system;
+                        }
 
-                    delete diff.ownership;
-                    delete diff._id;
-                    delete diff._stats;
-                    delete diff.system?.equipped;
-                    delete diff.system?.identification;
-                    delete diff.system?.quantity;
-
-                    if (foundry.utils.isEmpty(diff.system)) {
-                        delete diff.system;
-                    }
-
-                    return foundry.utils.isEmpty(diff);
-                });
+                        return foundry.utils.isEmpty(diff);
+                    }),
+                ];
             }),
-            R.entries(),
-            R.filter((args): args is [ItemUUID, NonEmptyArray<Mergeable>] => args[1].length > 1)
+            R.filter((items): items is NonEmptyArray<Mergeable> => items.length > 1)
         );
 
-        if (!allItems.length) {
+        if (!itemsBySource.length) {
             btn.disabled = false;
             return this.warning("merge.none");
         }
 
         const content = R.pipe(
-            allItems,
-            R.map(([uuid]) => {
-                const source = sources[uuid];
+            itemsBySource,
+            R.map((items) => {
+                const source = items[0];
                 return `<label class="item">
                     <img src="${source.img}">
                     <div class="name">${source.name}</div>
-                    <input type="checkbox" name="${uuid}">
+                    <input type="checkbox" name="${source.uuid}">
                 </label>`;
             })
         );
@@ -294,13 +285,13 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
         const deletes: string[] = [];
         const updates = R.pipe(
-            allItems,
-            R.filter(([uuid]) => selected.includes(uuid)),
-            R.map(([_, items]) => {
-                const biggest = R.firstBy(items, (item) => item.quantity);
+            itemsBySource,
+            R.filter((items) => selected.includes(items[0].uuid)),
+            R.map((items) => {
+                const biggest = items[0];
                 const total = R.sumBy(items, (item) => item.quantity);
 
-                deletes.push(...items.map((item) => item.id).filter((id) => id !== biggest.id));
+                deletes.push(...items.slice(1).map((item) => item.id));
 
                 return {
                     _id: biggest.id,
