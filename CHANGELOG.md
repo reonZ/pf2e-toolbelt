@@ -1,3 +1,9 @@
+# 3.10.4
+
+-   `Better Actor Sheet`:
+    -   `Merge Items`:
+        -   fix consumables quantity being short by 1 with remaining uses
+
 # 3.10.3
 
 -   `Better Actor Sheet`:
