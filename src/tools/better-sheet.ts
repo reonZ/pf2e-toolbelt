@@ -203,7 +203,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         btn.disabled = true;
         await waitTimeout();
 
-        const itemsBySource = R.pipe(
+        const identicalItems = R.pipe(
             actor.inventory.filter((item): item is Mergeable & { sourceId: string } => {
                 return (
                     item.isOfType("equipment", "consumable", "treasure") &&
@@ -217,13 +217,13 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             R.filter((items): items is NonEmptyArray<Mergeable> => items.length > 1)
         );
 
-        if (!itemsBySource.length) {
+        if (!identicalItems.length) {
             btn.disabled = false;
             return this.warning("merge.none");
         }
 
         const content = R.pipe(
-            itemsBySource,
+            identicalItems,
             R.map((items) => {
                 const source = items[0];
                 return `<label class="item">
@@ -253,7 +253,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
         const deletes: string[] = [];
         const updates = R.pipe(
-            itemsBySource,
+            identicalItems,
             R.filter((items) => selected.includes(items[0].id)),
             R.map((items) => {
                 const biggest = items[0];
