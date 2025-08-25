@@ -308,6 +308,10 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         const source = item.toObject();
         source.system.quantity = quantity;
 
+        if ("uses" in source.system) {
+            source.system.uses.value = source.system.uses.max;
+        }
+
         await actor.createEmbeddedDocuments("Item", [source]);
     }
 
