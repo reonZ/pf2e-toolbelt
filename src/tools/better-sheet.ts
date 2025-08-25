@@ -275,7 +275,12 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     );
 
                     update["system.quantity"] = Math.floor(uses / max);
-                    update["system.uses.value"] = uses % max;
+
+                    const remains = uses % max;
+
+                    if (remains > 0) {
+                        update["system.uses.value"] = remains;
+                    }
                 } else {
                     update["system.quantity"] = R.sumBy(items, (item) => item.quantity);
                 }
