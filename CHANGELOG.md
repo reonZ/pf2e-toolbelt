@@ -1,3 +1,24 @@
+# 3.10.0
+
+-   `Better Actor Sheet`:
+    -   `Improvised Weapon Button`:
+        -   add the `improvised` other tag
+        -   add the `Thrown 10ft.` trait
+        -   remove the `Rule Element` as the tag already take care of it
+        -   change the `Hands` to `1+`
+        -   now open the weapon sheet to the `Details` tab when created
+    -   rework `Merge Items`:
+        -   no longer use source items to diff check (items still need a `sourceId`)
+            -   this makes the initial check process way faster than the previous iteration of the feature
+        -   now pick the inventory item with the highest quantity and use it as the source to compare the other items
+            -   this makes it possible to merge items that are actually identical but are different from the source item
+        -   it now allows merging of multiple different item stacks of the same source
+            -   e.g. 2 arrow stacks are identical but different from 2 other arrow stacks, they will be merged into 2 separate stacks
+-   `Underground`:
+    -   add `Background Tiles` setting (disabled)
+        -   it so happen that this feature can conflict with other modules working with tiles so it is now its own setting
+    -   the `Enabled` setting now requires a reload when changed
+
 # 3.9.0
 
 -   add `Better Actor Sheet` tool:
