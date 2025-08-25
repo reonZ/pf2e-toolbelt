@@ -3,13 +3,12 @@ import {
     createHook,
     createToggleableWrapper,
     TileDocumentPF2e,
-    toggleHooksAndWrappers,
     TokenPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class UndergroundTool extends ModuleTool<ToolSettings> {
-    #hooks = [
+    #enabledHooks = [
         createHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
         createToggleableWrapper(
             "WRAPPER",
@@ -17,13 +16,14 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
             this.#tokenRefreshElevation,
             { context: this }
         ),
-        createToggleableWrapper(
-            "WRAPPER",
-            "CONFIG.Tile.documentClass.prototype.prepareBaseData",
-            this.#tileDocumentPrepareBaseData,
-            { context: this }
-        ),
     ];
+
+    #tilesPrepareBaseDataWrapper = createToggleableWrapper(
+        "WRAPPER",
+        "CONFIG.Tile.documentClass.prototype.prepareBaseData",
+        this.#tileDocumentPrepareBaseData,
+        { context: this }
+    );
 
     #drawCanvas = foundry.utils.debounce(() => {
         canvas.tokens.draw();
@@ -40,13 +40,14 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {
-                    toggleHooksAndWrappers(this.#hooks, value);
-
-                    canvas.primary.background.elevation = value ? -Number.MAX_VALUE : 0;
-
-                    this.#drawCanvas();
-                },
+                requiresReload: true,
+            },
+            {
+                key: "tiles",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                requiresReload: true,
             },
             {
                 key: "mode",
@@ -91,7 +92,9 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
 
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
-        activateHooksAndWrappers(this.#hooks);
+
+        activateHooksAndWrappers(this.#enabledHooks);
+        this.#tilesPrepareBaseDataWrapper.toggle(this.settings.tiles);
     }
 
     #tileDocumentPrepareBaseData(tile: TileDocumentPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -154,10 +157,11 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
 }
 
 type ToolSettings = {
-    enabled: boolean;
-    mode: "normal" | "greyscale" | "sepia";
     alpha: number;
     contrast: number;
+    enabled: boolean;
+    mode: "normal" | "greyscale" | "sepia";
+    tiles: boolean;
 };
 
 export { UndergroundTool };

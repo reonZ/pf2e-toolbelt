@@ -285,6 +285,14 @@
             },
             "underground": {
                 "title": "Underground",
+                "alpha": {
+                    "name": "Opacity",
+                    "hint": "Opacity value when the token has a negative elevation."
+                },
+                "contrast": {
+                    "name": "Contrast",
+                    "hint": "Contrast value when the token has a negative elevation."
+                },
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Will allow tokens with negative elevation to remain visible on the board."
@@ -298,13 +306,9 @@
                         "sepia": "Sepia Filter"
                     }
                 },
-                "contrast": {
-                    "name": "Contrast",
-                    "hint": "Contrast value when the token has a negative elevation."
-                },
-                "alpha": {
-                    "name": "Opacity",
-                    "hint": "Opacity value when the token has a negative elevation."
+                "tiles": {
+                    "name": "Background Tiles",
+                    "hint": "This will also make sure that tiles are drawn behind tokens with negative elevation. NOTE that this may conflict with other modules that also work with tiles."
                 }
             },
             "unided": {
