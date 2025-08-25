@@ -13,7 +13,6 @@ import {
     EquipmentPF2e,
     FamiliarPF2e,
     FamiliarSheetPF2e,
-    FlatModifierSource,
     htmlClosest,
     htmlQuery,
     NPCSheetPF2e,
@@ -23,6 +22,7 @@ import {
     TreasurePF2e,
     waitDialog,
     waitTimeout,
+    WeaponSheetPF2e,
     WeaponSource,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -176,19 +176,27 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     die: "d4",
                     damageType: "bludgeoning",
                 },
-                rules: [
-                    {
-                        key: "FlatModifier",
-                        selector: "{item|_id}-attack",
-                        value: -2,
-                        type: "item",
-                    },
-                ] as FlatModifierSource[],
+                traits: {
+                    otherTags: ["improvised"],
+                    value: ["thrown-10"],
+                    rarity: "common",
+                },
+                usage: {
+                    value: "held-in-one-plus-hands",
+                },
             },
             type: "weapon",
         };
 
-        await actor.createEmbeddedDocuments("Item", [source]);
+        const [item] = await actor.createEmbeddedDocuments("Item", [source]);
+
+        if (item) {
+            Hooks.once("renderWeaponSheetPF2e", (sheet: WeaponSheetPF2e) => {
+                sheet.activateTab("details");
+            });
+
+            item.sheet.render(true);
+        }
     }
 
     async #mergeItems(actor: ActorPF2e, btn: HTMLButtonElement) {
