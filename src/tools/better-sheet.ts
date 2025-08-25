@@ -257,14 +257,32 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             R.filter((items) => selected.includes(items[0].id)),
             R.map((items) => {
                 const biggest = items[0];
-                const total = R.sumBy(items, (item) => item.quantity);
+
+                const update: {
+                    _id: string;
+                    "system.quantity": number;
+                    "system.uses.value"?: number;
+                } = {
+                    _id: biggest.id,
+                    "system.quantity": 0,
+                };
+
+                if (biggest.isOfType("consumable")) {
+                    const max = biggest.uses.max;
+                    const uses = R.sumBy(
+                        items as ConsumablePF2e[],
+                        (item) => (item.quantity - 1) * max + item.uses.value
+                    );
+
+                    update["system.quantity"] = Math.floor(uses / max);
+                    update["system.uses.value"] = uses % max;
+                } else {
+                    update["system.quantity"] = R.sumBy(items, (item) => item.quantity);
+                }
 
                 deletes.push(...items.slice(1).map((item) => item.id));
 
-                return {
-                    _id: biggest.id,
-                    "system.quantity": total,
-                };
+                return update;
             })
         );
 
@@ -369,6 +387,14 @@ function getIdenticalItems(items: NonEmptyArray<Mergeable>): NonEmptyArray<Merge
         delete diff.system?.equipped;
         delete diff.system?.identification;
         delete diff.system?.quantity;
+
+        if (diff.system && "uses" in diff.system) {
+            delete diff.system.uses?.value;
+
+            if (foundry.utils.isEmpty(diff.system.uses)) {
+                delete diff.system.uses;
+            }
+        }
 
         if (foundry.utils.isEmpty(diff.system)) {
             delete diff.system;
