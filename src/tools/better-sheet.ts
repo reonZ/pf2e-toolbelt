@@ -273,14 +273,10 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                         items as ConsumablePF2e[],
                         (item) => (item.quantity - 1) * max + item.uses.value
                     );
-
-                    update["system.quantity"] = Math.floor(uses / max);
-
                     const remains = uses % max;
 
-                    if (remains > 0) {
-                        update["system.uses.value"] = remains;
-                    }
+                    update["system.quantity"] = Math.ceil(uses / max);
+                    update["system.uses.value"] = remains || max;
                 } else {
                     update["system.quantity"] = R.sumBy(items, (item) => item.quantity);
                 }
