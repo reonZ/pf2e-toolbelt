@@ -247,7 +247,7 @@
                 "title": "Resource Tracker",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Enabled this tool on your client. The tracker can be toggled on/off via controls on the left UI"
+                    "hint": "Enabled this tool in your world. The tracker can be toggled on/off via controls on the left UI"
                 }
             },
             "rollTracker": {
