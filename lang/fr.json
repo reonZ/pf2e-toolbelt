@@ -123,6 +123,25 @@
           "hint": "L'enregistrement de l'historique de déplacement devrait-il être bloqué ? Cela rend les actions de déplacement successives au cours d'un même tour moins confuses."
         }
       },
+      "betterSheet": {
+        "title": "Meilleure feuille d'acteur",
+        "improvised": {
+          "name": "Bouton d'arme improvisée",
+          "hint": "Ajoutez un bouton dans l'inventaire des acteurs des personnages pour créer une arme improvisée à la volée."
+        },
+        "mergeItems": {
+          "name": "Bouton de fusion d'objets",
+          "hint": "Ajoutez un bouton de fusion dans l'onglet inventaire pour fusionner des piles d'objets."
+        },
+        "partyAsObserved": {
+          "name": "Observer le groupe allié",
+          "hint": "Autorise les joueurs à consulter les fiches d'acteur en ayant les droits 'Limité' tant qu'ils appartiennent à l'alliance 'Groupe'. À ne pas confondre avec l'acteur 'Groupe'."
+        },
+        "splitItem": {
+          "name": "Autoriser la division des objets",
+          "hint": "Cliquez sur le nombre d'objets sur une feuille d'acteur pour le diviser en plusieurs entrées."
+        }
+      },
       "betterTemplate": {
         "title": "Meilleurs gabarits",
         "target": {
@@ -266,6 +285,14 @@
       },
       "underground": {
         "title": "Souterrain",
+        "alpha": {
+          "name": "Opacité",
+          "hint": "Valeur d'opacité lorsque le jeton a une élévation négative."
+        },
+        "contrast": {
+          "name": "Contraste",
+          "hint": "Valeur de contraste lorsque le jeton a une élévation négative."
+        },
         "enabled": {
           "name": "Activé",
           "hint": "Permettra aux jetons avec une élévation négative de rester visibles sur la scène."
@@ -279,13 +306,9 @@
             "sepia": "Filtre sépia"
           }
         },
-        "contrast": {
-          "name": "Contraste",
-          "hint": "Valeur de contraste lorsque le jeton a une élévation négative."
-        },
-        "alpha": {
-          "name": "Opacité",
-          "hint": "Valeur d'opacité lorsque le jeton a une élévation négative."
+        "tiles": {
+          "name": "Tuiles d'arrière-plan",
+          "hint": "Cela garantira également que les tuiles se trouvent derrière les les jetons ayant une élévation négative. NOTE : cela peut entrer en conflit avec d'autres modules opérant sur les tuiles."
         }
       },
       "unided": {
@@ -360,6 +383,13 @@
         "error": "Une erreur s'est produite lors de la tentative d'importation les services."
       },
       "item": {
+        "buy": {
+          "confirm": {
+            "content": "<strong>{buyer}</strong> souhaite-t-il acheter : <strong>{item}</strong> ?",
+            "title": "Acheter l'objet : {item}"
+          },
+          "noTarget": "Vous devez sélectionner un acteur valide pour acheter chez ce marchand"
+        },
         "error": "Une erreur s'est produite lors de la tentative de traitement d'un meilleur échange d'objet marchand : <strong>{reason}</strong>.",
         "noStock": "<strong>{actor}</strong> ne peut pas fournir la quantité demandée de <strong>{item}</strong>.",
         "unwilling": "<strong>{actor}</strong> ne veut pas se séparer de <strong>{item}</strong>.",
@@ -423,6 +453,28 @@
         "quantity": "Nombre négatif pour un stock infini",
         "tags": "Étiquettes de service",
         "title": "Service - {label}"
+      }
+    },
+    "betterSheet": {
+      "improvised": {
+        "label": "Arme improvisée"
+      },
+      "merge": {
+        "none": "Il n'y a aucun objet à fusionner dans l'inventaire.",
+        "title": "Fusionner les objets : {name}",
+        "yes": "Fusionner"
+      },
+      "sheet": {
+        "improvised": "Créer une arme improvisée",
+        "merge": "Fusionner les objets",
+        "split": "Diviser l'objet"
+      },
+      "split": {
+        "quantity": {
+          "label": "Nouvelle quantité de la pile"
+        },
+        "title": "Objet divisé : {name}",
+        "yes": "Diviser"
       }
     },
     "betterTemplate": {
@@ -761,8 +813,8 @@
           "hint": "Sélectionnez un maître avec lequel cet acteur partagera les données."
         },
         "skills": {
-          "label": "Maîtrises de compétence",
-          "hint": "Utiliser la maîtrise des compétences du maître."
+          "label": "Maîtrise des compétences & modificateurs",
+          "hint": "Utilisez les compétences du maître. Ajoute aussi les modificateurs d'objet du maître pour les compétences et la perception."
         },
         "spellcasting": {
           "label": "Incantation",
