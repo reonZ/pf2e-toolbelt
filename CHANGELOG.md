@@ -1,3 +1,13 @@
+# 3.11.0
+
+-   `Giveth`:
+    -   add `Party` members to the list of targets you can giveth inventory items
+-   `Resource Tracker`:
+    -   update the `Enabled` setting hint text
+-   `Target Helper`:
+    -   update save reroll to support `Mythic Points`
+    -   fix localization of hero point rerolled message
+
 # 3.10.4
 
 -   `Better Actor Sheet`:
