@@ -33,6 +33,11 @@ class TargetSaveModel extends abstract.DataModel<null, TargetSaveSchema> {
             ),
             modifiers: new fields.ArrayField(
                 new fields.SchemaField({
+                    excluded: new fields.BooleanField({
+                        required: false,
+                        nullable: false,
+                        initial: false,
+                    }),
                     label: new fields.StringField({
                         required: true,
                         nullable: false,
@@ -142,6 +147,7 @@ type TargetSaveSchema = {
 };
 
 type TargetSaveModifier = {
+    excluded: fields.BooleanField<boolean, boolean, false, false, true>;
     label: fields.StringField<string, string, true, false, false>;
     modifier: fields.NumberField<number, number, true, false, false>;
     slug: fields.StringField<string, string, true, false, false>;

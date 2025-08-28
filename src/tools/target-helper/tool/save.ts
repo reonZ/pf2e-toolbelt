@@ -288,11 +288,23 @@ async function rerollSave(
     const modifiers = foundry.utils.deepClone(targetSave.modifiers);
 
     if (result.reroll === "mythic") {
-        modifiers.findSplice((modifier) => modifier.slug === "proficiency", {
+        const proficiencyIdx = modifiers.findIndex((modifier) => modifier.slug === "proficiency");
+
+        const mythic = {
+            excluded: false,
             label: game.i18n.localize("PF2E.TraitMythic"),
             modifier: 10 + (pwolVariant ? 0 : actor.level),
             slug: "proficiency",
-        });
+        };
+
+        if (proficiencyIdx !== -1) {
+            const proficiency = modifiers[proficiencyIdx];
+
+            proficiency.excluded = true;
+            modifiers.splice(proficiencyIdx + 1, 0, mythic);
+        } else {
+            modifiers.push(mythic);
+        }
     }
 
     const rollData: SaveRollData = {

@@ -281,16 +281,25 @@ async function getTargetRowData(
             const modifiers = (() => {
                 if (!targetSave || (!showBreakdowns && !isTargetFriendly)) return [];
 
-                const mods = targetSave.modifiers.map(({ label, modifier }) => {
-                    const significant = significantList.findSplice(
-                        ({ name, value }) => name === label && modifier === value
-                    );
-                    return {
-                        name: label.replace(/(.+) \d+/, "$1"),
-                        value: modifier,
-                        css: significant?.significance ?? "NONE",
-                    };
-                });
+                const mods = targetSave.modifiers.map(
+                    ({ excluded, label, modifier }): TooltipData["modifiers"][number] => {
+                        const significant = significantList.findSplice(
+                            ({ name, value }) => name === label && modifier === value
+                        );
+
+                        const classes: string[] = [significant?.significance ?? "NONE"];
+
+                        if (excluded) {
+                            classes.push("excluded");
+                        }
+
+                        return {
+                            name: label.replace(/(.+) \d+/, "$1"),
+                            value: modifier,
+                            css: classes.join(" "),
+                        };
+                    }
+                );
 
                 if (!significantList.length || (!showSignificant && !isTargetFriendly)) {
                     return mods;
@@ -406,7 +415,7 @@ type TooltipData = {
     adjustment: string | undefined;
     canReroll: boolean | undefined;
     check: string;
-    modifiers: { name: string; value: number; css: modifiersMatter.SIGNIFICANCE }[];
+    modifiers: { name: string; value: number; css: string }[];
     rerolled: RerollDetails | undefined;
     result: string | undefined;
 };

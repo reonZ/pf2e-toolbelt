@@ -330,6 +330,10 @@
             }
         }
 
+        .excluded {
+            text-decoration: line-through;
+        }
+
         .ESSENTIAL {
             color: var(--pf2emm-color-essential);
         }
