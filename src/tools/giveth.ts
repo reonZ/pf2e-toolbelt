@@ -1,4 +1,5 @@
 import {
+    actorIsPartyMember,
     ActorPF2e,
     ActorSheetPF2e,
     createEmitable,
@@ -180,7 +181,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         return (
             source?.isOfType("npc", "character") &&
             target?.isOfType("npc", "character") &&
-            target.hasPlayerOwner &&
+            (target.hasPlayerOwner || actorIsPartyMember(target)) &&
             source.isOwner &&
             !target.isOwner
         );
