@@ -855,7 +855,6 @@
             },
             "reroll": {
                 "title": "Save Check Reroll",
-                "noPoints": "You need at least 1 Hero Point to Reroll.",
                 "yes": "Reroll",
                 "no": "Cancel",
                 "keeley": "Low Reroll"

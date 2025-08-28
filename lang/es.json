@@ -584,7 +584,6 @@
       },
       "reroll": {
         "title": "Repetir tirada de salvación",
-        "noPoints": "Necesitas al menos 1 punto de héroe para repetir la tirada.",
         "yes": "Repetir tirada",
         "no": "Cancelar",
         "keeley": "Repetir bajo"

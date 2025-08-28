@@ -707,7 +707,6 @@
       },
       "reroll": {
         "title": "Rerrolar teste de salvamento",
-        "noPoints": "Você precisa de pelo menos 1 Ponto de Heroismo para rerrolar.",
         "yes": "Rerrolar",
         "no": "Cancelar",
         "keeley": "Rerrolagem Baixa"

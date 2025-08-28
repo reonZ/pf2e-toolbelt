@@ -12,7 +12,7 @@ import {
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
 
-const REROLL_TYPE = ["hero", "new", "lower", "higher"] as const;
+const REROLL_TYPE = ["hero", "mythic", "new", "lower", "higher"] as const;
 
 class TargetSaveModel extends abstract.DataModel<null, TargetSaveSchema> {
     static defineSchema(): TargetSaveSchema {
@@ -41,6 +41,11 @@ class TargetSaveModel extends abstract.DataModel<null, TargetSaveSchema> {
                     modifier: new fields.NumberField({
                         required: true,
                         nullable: false,
+                    }),
+                    slug: new fields.StringField({
+                        required: true,
+                        nullable: false,
+                        blank: false,
                     }),
                 }),
                 {
@@ -139,6 +144,7 @@ type TargetSaveSchema = {
 type TargetSaveModifier = {
     label: fields.StringField<string, string, true, false, false>;
     modifier: fields.NumberField<number, number, true, false, false>;
+    slug: fields.StringField<string, string, true, false, false>;
 };
 
 type DegreeAdjustments = {

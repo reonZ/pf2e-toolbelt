@@ -855,7 +855,6 @@
       },
       "reroll": {
         "title": "Relancer le test de sauvegarde",
-        "noPoints": "Vous avez besoin d'au moins 1 point d'héroïsme pour relancer.",
         "yes": "Relancer",
         "no": "Annuler",
         "keeley": "Relance basse"

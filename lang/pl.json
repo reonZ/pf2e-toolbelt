@@ -787,7 +787,6 @@
             },
             "reroll": {
                 "title": "Przerzuć ponowny test rzutu obronnego",
-                "noPoints": "Potrzebujesz co najmniej 1 Punktu Bohaterstwa, aby wykonać przerzut.",
                 "yes": "Ponowny rzut",
                 "no": "Anuluj",
                 "keeley": "Niższy przerzut"

@@ -1,5 +1,4 @@
 import {
-    CharacterPF2e,
     ChatMessagePF2e,
     CheckContextChatFlag,
     CheckRoll,
@@ -8,6 +7,7 @@ import {
     DegreeAdjustmentAmount,
     DegreeOfSuccess,
     DegreeOfSuccessString,
+    ErrorPF2e,
     eventToRollParams,
     extractNotes,
     getActiveModule,
@@ -16,9 +16,11 @@ import {
     RollNotePF2e,
     RollNoteSource,
     SaveType,
+    signedInteger,
     TokenDocumentPF2e,
     waitDialog,
 } from "module-helpers";
+import { getCheckRollClass } from "module-helpers/src";
 import { getItem, TargetHelperTool } from ".";
 import { RerollType, TargetsData } from "..";
 
@@ -88,7 +90,7 @@ async function rollSaves(
                     dosAdjustments: context.dosAdjustments,
                     modifiers: modifiers
                         .filter((modifier) => modifier.enabled)
-                        .map(({ label, modifier }) => ({ label, modifier })),
+                        .map(({ label, modifier, slug }) => ({ label, modifier, slug })),
                     notes: context.notes,
                     private: isPrivate,
                     roll: JSON.stringify(roll.toJSON()),
@@ -149,9 +151,14 @@ async function rerollSave(
     if (!dataSave || !actor || !targetSave || targetSave.rerolled) return;
 
     const rerolls = R.entries(TargetHelperTool.REROLL);
+    const isCharacter = actor.isOfType("character");
 
-    if (!actor.isOfType("character") || actor.heroPoints.value <= 0) {
+    if (!isCharacter || actor.heroPoints.value <= 0) {
         rerolls.findSplice(([type]) => type === "hero");
+    }
+
+    if (!isCharacter || actor.system.resources.mythicPoints.value <= 0) {
+        rerolls.findSplice(([type]) => type === "mythic");
     }
 
     const options = rerolls.map(([type, { icon, reroll }], i) => {
@@ -175,39 +182,80 @@ async function rerollSave(
 
     if (!result) return;
 
-    const reroll = result.reroll;
-    const isHeroReroll = reroll === "hero";
-    const keep = isHeroReroll ? "new" : reroll;
+    const keep = R.isIncludedIn(result.reroll, ["hero", "mythic"]) ? "new" : result.reroll;
+    const resourceKey =
+        result.reroll === "hero"
+            ? "hero-points"
+            : result.reroll === "mythic"
+            ? "mythic-points"
+            : "";
 
-    if (isHeroReroll) {
-        const { value, max } = (actor as CharacterPF2e).heroPoints;
+    const resource = actor.getResource(resourceKey);
 
-        if (value < 1) {
-            this.warning("reroll.noPoints");
+    if (resource && isCharacter) {
+        if (resource.value < 1) {
+            ui.notifications.warn("PF2E.RerollMenu.WarnNoResource", {
+                localize: true,
+                format: {
+                    name: actor.name,
+                    resource: resource.label,
+                },
+            });
             return;
         }
 
-        await actor.update({
-            "system.resources.heroPoints.value": Math.clamp(value - 1, 0, max),
-        });
+        await actor.updateResource(resource.slug, resource.value - 1);
     }
 
+    /**
+     * reworked version of
+     * https://github.com/foundryvtt/pf2e/blob/e28d75364626c4b396c02f702afa2c12de0cf6ee/src/module/system/check/check.ts#L509-L510
+     */
     const oldRoll = Roll.fromJSON(targetSave.roll) as Rolled<CheckRoll>;
-    const unevaluatedNewRoll = oldRoll.clone() as CheckRoll;
+    const pwolVariant = game.pf2e.settings.variants.pwol.enabled;
+
+    const unevaluatedNewRoll = ((): CheckRoll => {
+        if (resource?.slug !== "mythic-points" || !actor.isOfType("character"))
+            return oldRoll.clone();
+        // Create a new CheckRoll in case of a mythic point reroll
+        const proficiencyModifier = actor
+            .getStatistic(targetSave.statistic)
+            ?.modifiers.find((m) => m.slug === "proficiency");
+        if (!proficiencyModifier) {
+            throw ErrorPF2e(
+                `Failed to reroll check with a mythic point. Check is missing a proficiency modifier!`
+            );
+        }
+        // Set flag proficiency modifier to mythic modifier value
+        const mythicModifierValue = 10 + (pwolVariant ? 0 : actor.level);
+        const proficiencyModifierValue = proficiencyModifier.modifier;
+        proficiencyModifier.modifier = mythicModifierValue;
+        proficiencyModifier.label = game.i18n.localize("PF2E.TraitMythic");
+        // Calculate the new total modifier
+        const options = foundry.utils.deepClone(oldRoll.options);
+        options.totalModifier =
+            (options.totalModifier ?? 0) - proficiencyModifierValue + mythicModifierValue;
+        const CheckRoll = getCheckRollClass();
+        return new CheckRoll(
+            `${options.dice}${signedInteger(options.totalModifier, { emptyStringZero: true })}`,
+            oldRoll.data,
+            options
+        );
+    })();
     unevaluatedNewRoll.options.isReroll = true;
 
     Hooks.callAll(
         "pf2e.preReroll",
         Roll.fromJSON(targetSave.roll),
         unevaluatedNewRoll,
-        isHeroReroll,
+        resource,
         keep
     );
 
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
-    await roll3dDice(newRoll, target, targetSave.private);
+    Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, keep);
 
-    Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, isHeroReroll, keep);
+    await roll3dDice(newRoll, target, targetSave.private);
 
     const keptRoll =
         (keep === "higher" && oldRoll.total > newRoll.total) ||
@@ -220,7 +268,6 @@ async function rerollSave(
         keptRoll.options.degreeOfSuccess = success.value;
     }
 
-    const extraRollOptions = data.extraRollOptions;
     const domains = actor.saves?.[dataSave.statistic]?.domains ?? [];
     const outcome = DEGREE_STRINGS[keptRoll.degreeOfSuccess!];
 
@@ -231,20 +278,30 @@ async function rerollSave(
         }),
         R.filter((note) => {
             const test = note.predicate.test([
-                ...extraRollOptions,
+                ...data.extraRollOptions,
                 ...(note.rule?.item.getRollOptions("parent") ?? []),
             ]);
             return test && (!note.outcome.length || (outcome && note.outcome.includes(outcome)));
         })
     );
 
+    const modifiers = foundry.utils.deepClone(targetSave.modifiers);
+
+    if (result.reroll === "mythic") {
+        modifiers.findSplice((modifier) => modifier.slug === "proficiency", {
+            label: game.i18n.localize("PF2E.TraitMythic"),
+            modifier: 10 + (pwolVariant ? 0 : actor.level),
+            slug: "proficiency",
+        });
+    }
+
     const rollData: SaveRollData = {
         die: (keptRoll.terms[0] as foundry.dice.terms.NumericTerm).total,
         dosAdjustments: foundry.utils.deepClone(targetSave.dosAdjustments),
-        modifiers: foundry.utils.deepClone(targetSave.modifiers),
+        modifiers,
         notes: notes.map((note) => note.toObject()),
         private: targetSave.private,
-        rerolled: reroll,
+        rerolled: result.reroll,
         roll: JSON.stringify(keptRoll.toJSON()),
         significantModifiers: window.pf2eMm?.getSignificantModifiersOfMessage({
             ...message,
@@ -286,7 +343,7 @@ type SaveRollData = {
     modifiers: { label: string; modifier: number }[];
     notes: RollNoteSource[];
     private: boolean;
-    rerolled?: "hero" | "new" | "lower" | "higher";
+    rerolled?: RerollType;
     roll: string;
     significantModifiers?: {
         appliedTo: "roll" | "dc";

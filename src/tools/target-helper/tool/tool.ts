@@ -75,7 +75,12 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         hero: {
             icon: "fa-solid fa-hospital-symbol",
             reroll: "PF2E.RerollMenu.HeroPoint",
-            rerolled: "PF2E.RerollMenu.MessageHeroPoint",
+            rerolled: "PF2E.RerollMenu.MessageHeroPoints",
+        },
+        mythic: {
+            icon: "fa-solid fa-circle-m",
+            reroll: "PF2E.RerollMenu.MythicPoint",
+            rerolled: "PF2E.RerollMenu.MessageMythicPoints",
         },
         new: {
             icon: "fa-solid fa-dice",
