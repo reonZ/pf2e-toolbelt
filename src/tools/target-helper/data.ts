@@ -63,6 +63,10 @@ class TargetsData {
         return this.#flag.saveVariants[this.variantId];
     }
 
+    get isPrivate(): boolean {
+        return !!this.#flag.private;
+    }
+
     get itemUUID(): ItemUUID | null {
         return this.#flag.item;
     }

@@ -37,6 +37,10 @@ class TargetsDataModel extends abstract.DataModel<null, TargetsDataSchema> {
                 nullable: false,
                 initial: () => [],
             }),
+            private: new fields.BooleanField({
+                required: false,
+                nullable: false,
+            }),
             saveVariants: new fields.TypedObjectField(
                 new fields.EmbeddedDataField(TargetsSaveModel),
                 {
@@ -84,6 +88,7 @@ type TargetsDataSchema = {
     isRegen: fields.BooleanField<boolean, boolean, false, false, true>;
     item: fields.DocumentUUIDField<ItemUUID, false, true, true>;
     options: ArrayField<fields.StringField>;
+    private: fields.BooleanField<boolean, boolean, false, false, false>;
     saveVariants: RecordField<
         fields.EmbeddedDataField<TargetsSaveModel, false, false, false>,
         false

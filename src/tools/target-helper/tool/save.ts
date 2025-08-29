@@ -78,6 +78,7 @@ async function rollSaves(
         return new Promise<void>((resolve) => {
             const callback: CheckRollCallback = async (roll, success, msg) => {
                 const isPrivate =
+                    data.isPrivate ||
                     msg.whisper.filter((userId) => game.users.get(userId)?.isGM).length > 0;
 
                 await roll3dDice(roll, target, isPrivate);
