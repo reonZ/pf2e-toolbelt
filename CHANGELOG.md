@@ -1,3 +1,9 @@
+# 3.11.1
+
+-   `Target Helper`:
+    -   add a global `private` property which will make every save rolled for the message "private"
+        -   this doesn't change the behaviour of "private" save rolled for the module
+
 # 3.11.0
 
 -   `Giveth`:
