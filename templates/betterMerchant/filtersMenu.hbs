@@ -78,7 +78,7 @@
         <label class="ratio">
             {{@root.i18n 'ratio'}}
             <input type="number" name="ratio" value="{{filter.ratio}}" min="0" max="10" step="0.5">
-            {{#if (and isDefault (eq section.type 'buy'))}}
+            {{#if (and isDefault (eq type 'buy'))}}
             <i class="fa-solid fa-coin" {{{@root.i18n.tooltip 'treasure' }}}></i>
             {{/if}}
         </label>
