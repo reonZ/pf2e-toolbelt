@@ -1,6 +1,5 @@
 import {
     AbstractEffectPF2e,
-    ActorPF2e,
     addListener,
     createHook,
     EffectsPanel,
@@ -57,7 +56,7 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #onRemoveEffect(event: MouseEvent, effect: AbstractEffectPF2e<ActorPF2e>) {
+    #onRemoveEffect(event: MouseEvent, effect: AbstractEffectPF2e) {
         if (!event.shiftKey) return;
 
         event.preventDefault();
