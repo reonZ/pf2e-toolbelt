@@ -1,3 +1,7 @@
+# 3.11.2
+
+-   fix not using fallback to test if a localization key exist, preventing some localization for languages without a localization file
+
 # 3.11.1
 
 -   `Target Helper`:
