@@ -75,6 +75,14 @@ class GivethTool extends ModuleTool<ToolSettings> {
         ];
     }
 
+    get api(): Record<string, any> {
+        return {
+            canDropEffectOnActor: (item: ItemPF2e, actor: ActorPF2e): boolean => {
+                return this.#shouldHandleEffectDrop(item, actor);
+            },
+        };
+    }
+
     ready(isGM: boolean): void {
         this._configurate();
     }
@@ -129,6 +137,14 @@ class GivethTool extends ModuleTool<ToolSettings> {
         });
     }
 
+    #shouldHandleEffectDrop(item: ItemPF2e, actor: ActorPF2e): boolean {
+        return (
+            item.isOfType("condition", "effect") &&
+            !actor.isOwner &&
+            (this.settings.effect === "all" || isAllyActor(actor))
+        );
+    }
+
     async #actorSheetHandleDroppedItem(
         actorSheet: ActorSheetPF2e<ActorPF2e>,
         wrapped: libWrapper.RegisterCallback,
@@ -138,11 +154,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
     ): Promise<ItemPF2e[]> {
         const actor = actorSheet.actor;
 
-        if (
-            item.isOfType("condition", "effect") &&
-            !actor.isOwner &&
-            (this.settings.effect === "all" || isAllyActor(actor))
-        ) {
+        if (this.#shouldHandleEffectDrop(item, actor)) {
             this.#givethEmitable.call({
                 type: "effect",
                 actor,
