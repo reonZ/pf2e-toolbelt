@@ -111,7 +111,7 @@
                 "title": "Better Movement",
                 "teleport": {
                     "name": "Teleport Tokens",
-                    "hint": "Clicking on the board while holding the defined keybind will instanlty teleport the selected tokens to location without any travel.",
+                    "hint": "Clicking on the board while holding the defined keybind will instantly teleport the selected tokens to location without any travel.",
                     "choices": {
                         "disabled": "Disabled",
                         "enabled": "Enabled",
