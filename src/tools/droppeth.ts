@@ -82,6 +82,14 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         return [this.#droppethKeybind.configs];
     }
 
+    get api(): Record<string, any> {
+        return {
+            droppethRequest: (options: DroppethOptions) => {
+                this.#droppethItemEmitable.call(options);
+            },
+        };
+    }
+
     _configurate(): void {
         const enabled = this.settings.enabled;
 
