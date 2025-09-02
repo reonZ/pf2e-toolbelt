@@ -98,6 +98,22 @@
         "dropped": {
           "name": "Pas d'Encombrement lâché",
           "hint": "L'équipement lâché dans l'inventaire d'un acteur ne sera pas pris en compte dans le calcul de l'Encombrement."
+        },
+        "improvised": {
+          "name": "Bouton d'arme improvisée",
+          "hint": "Ajoutez un bouton dans l'inventaire des acteurs des personnages pour créer une arme improvisée à la volée."
+        },
+        "mergeItems": {
+          "name": "Bouton de fusion d'objets",
+          "hint": "Ajoutez un bouton de fusion dans l'onglet inventaire pour fusionner des piles d'objets."
+        },
+        "partyAsObserved": {
+          "name": "Observer le groupe allié",
+          "hint": "Autorise les joueurs à consulter les fiches d'acteur en ayant les droits 'Limité' tant qu'ils appartiennent à l'alliance 'Groupe'. À ne pas confondre avec l'acteur 'Groupe'."
+        },
+        "splitItem": {
+          "name": "Autoriser la division des objets",
+          "hint": "Cliquez sur le nombre d'objets sur une feuille d'acteur pour le diviser en plusieurs entrées."
         }
       },
       "betterMerchant": {
@@ -125,21 +141,9 @@
       },
       "betterSheet": {
         "title": "Meilleure feuille d'acteur",
-        "improvised": {
-          "name": "Bouton d'arme improvisée",
-          "hint": "Ajoutez un bouton dans l'inventaire des acteurs des personnages pour créer une arme improvisée à la volée."
-        },
-        "mergeItems": {
-          "name": "Bouton de fusion d'objets",
-          "hint": "Ajoutez un bouton de fusion dans l'onglet inventaire pour fusionner des piles d'objets."
-        },
         "partyAsObserved": {
           "name": "Observer le groupe allié",
           "hint": "Autorise les joueurs à consulter les fiches d'acteur en ayant les droits 'Limité' tant qu'ils appartiennent à l'alliance 'Groupe'. À ne pas confondre avec l'acteur 'Groupe'."
-        },
-        "splitItem": {
-          "name": "Autoriser la division des objets",
-          "hint": "Cliquez sur le nombre d'objets sur une feuille d'acteur pour le diviser en plusieurs entrées."
         }
       },
       "betterTemplate": {
@@ -346,6 +350,28 @@
         "context": "Révéler le sort aux joueurs"
       }
     },
+    "betterInventory": {
+      "improvised": {
+        "label": "Arme improvisée"
+      },
+      "merge": {
+        "none": "Il n'y a aucun objet à fusionner dans l'inventaire.",
+        "title": "Fusionner les objets : {name}",
+        "yes": "Fusionner"
+      },
+      "sheet": {
+        "improvised": "Créer une arme improvisée",
+        "merge": "Fusionner les objets",
+        "split": "Diviser l'objet"
+      },
+      "split": {
+        "quantity": {
+          "label": "Nouvelle quantité de la pile"
+        },
+        "title": "Objet divisé : {name}",
+        "yes": "Diviser"
+      }
+    },
     "betterMerchant": {
       "browserFilter": {
         "create": "Créer un filtre",
@@ -453,28 +479,6 @@
         "quantity": "Nombre négatif pour un stock infini",
         "tags": "Étiquettes de service",
         "title": "Service - {label}"
-      }
-    },
-    "betterSheet": {
-      "improvised": {
-        "label": "Arme improvisée"
-      },
-      "merge": {
-        "none": "Il n'y a aucun objet à fusionner dans l'inventaire.",
-        "title": "Fusionner les objets : {name}",
-        "yes": "Fusionner"
-      },
-      "sheet": {
-        "improvised": "Créer une arme improvisée",
-        "merge": "Fusionner les objets",
-        "split": "Diviser l'objet"
-      },
-      "split": {
-        "quantity": {
-          "label": "Nouvelle quantité de la pile"
-        },
-        "title": "Objet divisé : {name}",
-        "yes": "Diviser"
       }
     },
     "betterTemplate": {

@@ -98,6 +98,22 @@
                 "dropped": {
                     "name": "No Dropped Bulk",
                     "hint": "Dropped equipment in an actor's inventory won't be accounted for bulk value calculation."
+                },
+                "improvised": {
+                    "name": "Improvised Weapon Button",
+                    "hint": "Add a button in the inventory of character actors to create an improvised weapon on the fly."
+                },
+                "mergeItems": {
+                    "name": "Items Merging Button",
+                    "hint": "Add a merge button in the inventory tab to merging stacks of items."
+                },
+                "partyAsObserved": {
+                    "name": "Party Alliance as Observed",
+                    "hint": "Allow players to observe actor sheets while having the 'Limited' permission as long as they belong to the 'party' alliance. Not to be confused with the 'Party' actor."
+                },
+                "splitItem": {
+                    "name": "Allow Item Split",
+                    "hint": "Click on the item quantity number in an actor sheet to split it into multiple entries."
                 }
             },
             "betterMerchant": {
@@ -125,21 +141,9 @@
             },
             "betterSheet": {
                 "title": "Better Actor Sheet",
-                "improvised": {
-                    "name": "Improvised Weapon Button",
-                    "hint": "Add a button in the inventory of character actors to create an improvised weapon on the fly."
-                },
-                "mergeItems": {
-                    "name": "Items Merging Button",
-                    "hint": "Add a merge button in the inventory tab to merging stacks of items."
-                },
                 "partyAsObserved": {
                     "name": "Party Alliance as Observed",
                     "hint": "Allow players to observe actor sheets while having the 'Limited' permission as long as they belong to the 'party' alliance. Not to be confused with the 'Party' actor."
-                },
-                "splitItem": {
-                    "name": "Allow Item Split",
-                    "hint": "Click on the item quantity number in an actor sheet to split it into multiple entries."
                 }
             },
             "betterTemplate": {
@@ -346,6 +350,28 @@
                 "context": "Reveal spell to Players"
             }
         },
+        "betterInventory": {
+            "improvised": {
+                "label": "Improvised Weapon"
+            },
+            "merge": {
+                "none": "There are no items to merge in the inventory.",
+                "title": "Merge Items - {name}",
+                "yes": "Merge"
+            },
+            "sheet": {
+                "improvised": "Create Improvised Weapon",
+                "merge": "Merge Items",
+                "split": "Split Item"
+            },
+            "split": {
+                "quantity": {
+                    "label": "New Stack Quantity"
+                },
+                "title": "Split Item - {name}",
+                "yes": "Split"
+            }
+        },
         "betterMerchant": {
             "browserFilter": {
                 "create": "Create Filter",
@@ -453,28 +479,6 @@
                 "quantity": "Negative number for infinite stock",
                 "tags": "Service Tags",
                 "title": "Service - {label}"
-            }
-        },
-        "betterSheet": {
-            "improvised": {
-                "label": "Improvised Weapon"
-            },
-            "merge": {
-                "none": "There are no items to merge in the inventory.",
-                "title": "Merge Items - {name}",
-                "yes": "Merge"
-            },
-            "sheet": {
-                "improvised": "Create Improvised Weapon",
-                "merge": "Merge Items",
-                "split": "Split Item"
-            },
-            "split": {
-                "quantity": {
-                    "label": "New Stack Quantity"
-                },
-                "title": "Split Item - {name}",
-                "yes": "Split"
             }
         },
         "betterTemplate": {
