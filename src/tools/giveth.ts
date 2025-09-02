@@ -121,7 +121,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         const source = app.item.actor;
         const target = app.options.targetActor;
 
-        if (app.options.isPurchase || !this.#ShouldHandleItemTransfer(source, target)) return;
+        if (app.options.isPurchase || !this.#shouldHandleItemTransfer(source, target)) return;
 
         updateItemTransferDialog($html[0], {
             title: this.localize("dialog.title"),
@@ -162,7 +162,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         _containerId?: string,
         newStack = true
     ): boolean {
-        if (item.quantity >= 1 && this.#ShouldHandleItemTransfer(actor, target)) {
+        if (item.quantity >= 1 && this.#shouldHandleItemTransfer(actor, target)) {
             this.#givethEmitable.call({
                 type: "item",
                 item,
@@ -177,7 +177,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         return false;
     }
 
-    #ShouldHandleItemTransfer(source: Maybe<ActorPF2e>, target: Maybe<ActorPF2e>) {
+    #shouldHandleItemTransfer(source: Maybe<ActorPF2e>, target: Maybe<ActorPF2e>) {
         return (
             source?.isOfType("npc", "character") &&
             target?.isOfType("npc", "character") &&
