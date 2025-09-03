@@ -82,6 +82,8 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
     }
 
     async openTracker(item?: ItemPF2e) {
+        if (!game.user.isGM) return;
+
         const application = this.application;
 
         if (application) {
