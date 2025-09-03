@@ -160,12 +160,16 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
             const dataElement = htmlQuery(itemElement, ".data");
             if (!dataElement) return;
 
+            const controlsElement = htmlQuery(dataElement, ".item-controls");
             const siblingElement = htmlQuery(
-                dataElement,
+                controlsElement,
                 `[data-action="${isGM ? "edit-item" : "delete-item"}"]`
             );
+
             if (siblingElement) {
                 siblingElement.before(toggleElement);
+            } else if (controlsElement) {
+                controlsElement.appendChild(toggleElement);
             } else {
                 const imgElement = htmlQuery(dataElement, ".item-image");
                 imgElement?.after(toggleElement);
