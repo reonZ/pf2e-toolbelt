@@ -1,3 +1,23 @@
+# 3.12.0
+
+-   bump the system minimum compatibility version to `7.4.3` and foundry's to `13.348`
+-   `Better Inventory`:
+    -   move all the inventory related features previously in `Better Actor Sheet` in this tool
+        -   all moved settings have been reset
+-   `Better Merchant`:
+    -   fix buy treasure icon not showing
+-   `Droppeth`:
+    -   add the missing `droppethRequest` api function that was available in v12
+-   `Giveth`:
+    -   update the `Enabled` setting description to include the fact that party members are now also taken into account
+    -   add the missing `canDropEffectOnActor` api function that was available in v12
+-   `Hero Actions`:
+    -   update the `Private Draw` setting description
+-   `Identify`:
+    -   try to always add the `Identify Item` in the item controls section if it exists
+    -   fix players being able to open the `Identification Tracker` through api function
+-   fix some typos in the english localization
+
 # 3.11.2
 
 -   fix not using fallback to test if a localization key exist, preventing some localization for languages without a localization file
@@ -6,7 +26,7 @@
 
 -   `Target Helper`:
     -   add a global `private` property which will make every save rolled for the message "private"
-        -   this doesn't change the behaviour of "private" save rolled for the module
+        -   this doesn't change the behavior of "private" save rolled for the module
 
 # 3.11.0
 
@@ -78,7 +98,7 @@
         -   the initial process to check which items can be merged can take a bit of time depending on how many items are in the inventory as it requires to fetch compendium sources and test against them, the button is disabled until it is finished to avoid multi click
 -   `Better Merchant`:
     -   add `Buy Item` buttons to the merchant sheet to buy items without having to drag & drop them
--   `Share Data`:
+-   `Shared Data`:
     -   the `Skills Proficiencies` option now also share the master's `item` modifiers for skills & perception
     -   fix race condition between master and bound actors `prepareData`
         -   it would happen if you created the master after the bound actor in your world
@@ -362,7 +382,7 @@
 -   remove `Spells Summary` tool
 -   remove `Stances` tool
 -   remove `De-targeting` tool
--   the `Better Merchant`, `Hero Actions`, `Identify`, `Roll Tracker` and `Share Data` tools will be re-implemented at a later date
+-   the `Better Merchant`, `Hero Actions`, `Identify`, `Roll Tracker` and `Shared Data` tools will be re-implemented at a later date
 
 # 2.35.1
 
@@ -698,7 +718,7 @@
     -   add support for all types of handwraps now that the system recognize them
 -   `Better Browser`:
     -   remove the `Remove Bestiary Duplicates` setting/feature now that duplicate monsters have been removed from the system
--   `Share Data`:
+-   `Shared Data`:
     -   replace `Turn Start/End` with `Time Events`
         -   it now handles turn start/end, initiative change and rest-for-the-night
         -   it now handles frequency recharge (doesn't work with frequency of `turn`)
@@ -1064,8 +1084,8 @@
 -   `Better Merchant`:
     -   you can now disable the default filters
         -   the default filter will never be chosen as the filter for the transaction if disabled
-        -   this won't change the `Use Default Purse` behaviour of the other filters and will still make sure the default purse has enough gold for the transaction
--   `Share Data`:
+        -   this won't change the `Use Default Purse` behavior of the other filters and will still make sure the default purse has enough gold for the transaction
+-   `Shared Data`:
     -   a master can now share its hero points with another character actor
 -   `Target Helper`:
     -   re-formatted the save tooltip structure based on the different metagame settings (let's hope i got it right this time)
@@ -1130,7 +1150,7 @@
     -   revisited the design and ergonomics of the sheet UI
     -   some styling improvement were made to the different dialogs used
     -   you can now "safely" use the `Private` and `Allow Trade` settings together
-        -   users who don't own targetted characters will not be shown the list of their actions (and therefor can't select which one they want to receive)
+        -   users who don't own targeted characters will not be shown the list of their actions (and therefor can't select which one they want to receive)
         -   when receiving a trade request, the user will have to select which action they want to give without knowing what they are offered
     -   a new `Hero Set Variant` setting has been added
         -   when set to 0, the feature will work as before: a character is allowed to have 1 hero action per hero point available
@@ -1243,7 +1263,7 @@
     -   you can now drag & drop save-check inline links onto a damage chat message
         -   this will add the save directly into the damage message
         -   only links that have a DC and are of type reflex, will or fortitude will be draggable
-        -   the damage message musn't already have a `save` module entry
+        -   the damage message mustn't already have a `save` module entry
         -   you must be the author of the damage message (or GM)
 
 # 1.40.2
@@ -1294,7 +1314,7 @@
 -   `Multi Cast` updates:
     -   fixed the popup title not containing the actor's name
 -   `Target Token Helper` updates:
-    -   optimized the `Block` button behaviour for the target rows
+    -   optimized the `Block` button behavior for the target rows
 
 # 1.38.0
 
@@ -1666,7 +1686,7 @@
 -   changed `Target Token Helper`, this is no longer a GM only feature, it now enables the global feature to your world but requires client settings to enable its different parts
 -   added `Target Token Helper - Chat` client setting: damage chat messages will have extra application damage rows for each owned token that was targeted during the roll
 -   added a new `Select All Targeted Tokens` button to damage chat messages that have more than one owned targeted token
--   added `Target Token Helper - Template` client setting: when placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template (with various criterias)
+-   added `Target Token Helper - Template` client setting: when placing a template on the board, a new dialog will pop allowing you to target all the tokens inside the template (with various criteria)
 
 # 1.14.0
 
