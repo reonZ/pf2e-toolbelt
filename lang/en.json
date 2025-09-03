@@ -206,7 +206,7 @@
                 },
                 "private": {
                     "name": "Private Draw",
-                    "hint": "When enabled, the chat message generated will be private to other players."
+                    "hint": "Make the message generated when drawing hero actions private instead. If enabled, trades will be blind to all participants."
                 },
                 "table": {
                     "name": "Table UUID",
