@@ -3,6 +3,7 @@ import {
     createEmitable,
     createHook,
     createToggleableWrapper,
+    isActionMessage,
     isSpellMessage,
     MODULE,
     refreshLatestMessages,
@@ -14,7 +15,6 @@ import { sharedMessageRenderHTML } from "tools";
 import {
     getCurrentTargets,
     getSaveLinkData,
-    isActionMessage,
     isAreaMessage,
     isDamageMessage,
     prepareActionMessage,

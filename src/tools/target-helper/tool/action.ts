@@ -126,9 +126,4 @@ async function renderActionMessage(
     }
 }
 
-function isActionMessage(message: ChatMessagePF2e): boolean {
-    const type = message.getFlag("pf2e", "origin.type") as string | undefined;
-    return !!type && ["feat", "action"].includes(type);
-}
-
-export { isActionMessage, prepareActionMessage, renderActionMessage };
+export { prepareActionMessage, renderActionMessage };

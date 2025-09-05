@@ -58,8 +58,12 @@
             },
             "anonymous": {
                 "title": "Anonymous",
+                "action": {
+                    "name": "Anonymize NPC Actions",
+                    "hint": "Actions sent to chat by a non-player owned actor will be anonymized for players."
+                },
                 "spell": {
-                    "name": "Anonymize NPC spells",
+                    "name": "Anonymize NPC Spells",
                     "hint": "Spells casted by a non-player owned actor will be anonymized for players."
                 }
             },
@@ -345,9 +349,13 @@
             }
         },
         "anonymous": {
+            "action": {
+                "header": "Is using an ability..",
+                "context": "Reveal Action to Players"
+            },
             "spell": {
                 "header": "Is casting a spell..",
-                "context": "Reveal spell to Players"
+                "context": "Reveal Spell to Players"
             }
         },
         "betterInventory": {

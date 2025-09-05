@@ -3,13 +3,31 @@ import {
     ChatMessagePF2e,
     createHook,
     htmlQuery,
+    isActionMessage,
     isSpellMessage,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedMessageRenderHTML } from "./_shared";
 
+const ANONYMOUS: {
+    type: "action" | "spell";
+    icon: string;
+    test: (message: Maybe<ChatMessagePF2e>) => message is ChatMessagePF2e;
+}[] = [
+    {
+        type: "action",
+        icon: "",
+        test: isValidActionMessage,
+    },
+    {
+        type: "spell",
+        icon: "fa-solid fa-wand-magic-sparkles",
+        test: isValidSpellMessage,
+    },
+];
+
 class AnonymousTool extends ModuleTool<ToolSettings> {
-    #getChatContextOptionsHooks = createHook(
+    #getChatContextOptionsHook = createHook(
         "getChatMessageContextOptions",
         this.#onGetChatMessageContextOptions.bind(this)
     );
@@ -25,6 +43,13 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
+                key: "action",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                requiresReload: true,
+            },
+            {
                 key: "spell",
                 type: Boolean,
                 default: false,
@@ -35,9 +60,9 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        if (this.settings.spell) {
+        if (this.settings.spell || this.settings.action) {
             this.#messageRenderHTMLWrapper.activate();
-            this.#getChatContextOptionsHooks.toggle(isGM);
+            this.#getChatContextOptionsHook.toggle(isGM);
         }
     }
 
@@ -47,24 +72,30 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
             return game.messages.get(messageId ?? "");
         };
 
-        options.push({
-            name: this.localizePath("spell.context"),
-            icon: `<i class="fa-solid fa-wand-magic-sparkles"></i>`,
-            condition: (el) => {
-                const message = getMessage(el);
-                return isValidSpellMessage(message) && !this.getFlag(message, "revealed");
-            },
-            callback: (el) => {
-                const message = getMessage(el);
-                if (message) {
-                    this.setFlag(message, "revealed", true);
-                }
-            },
-        });
+        for (const { icon, test, type } of ANONYMOUS) {
+            options.push({
+                name: this.localizePath(`${type}.context`),
+                icon: `<i class="${icon}"></i>`,
+                condition: (el) => {
+                    const msg = getMessage(el);
+                    return this.settings[type] && test(msg) && !this.getFlag(msg, "revealed");
+                },
+                callback: (el) => {
+                    const message = getMessage(el);
+                    if (message) {
+                        this.setFlag(message, "revealed", true);
+                    }
+                },
+            });
+        }
     }
 
     async #messageRenderHTML(message: ChatMessagePF2e, html: HTMLElement) {
-        if (!isValidSpellMessage(message) || this.getFlag(message, "revealed")) return;
+        if (this.getFlag(message, "revealed")) return;
+
+        const isSpell = this.settings.spell && isValidSpellMessage(message);
+        const isAction = !isSpell && this.settings.action && isValidActionMessage(message);
+        if (!isSpell && !isAction) return;
 
         const chatCard = htmlQuery(html, ".chat-card");
         if (!chatCard) return;
@@ -74,12 +105,13 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
             return;
         }
 
+        const type = isSpell ? "spell" : "action";
         const header = htmlQuery(chatCard, ".card-header");
         const cardContent = htmlQuery(chatCard, ".card-content");
         const footer = htmlQuery(chatCard, ":scope > footer");
 
         if (header) {
-            const txt = this.localize("spell.header");
+            const txt = this.localize(`${type}.header`);
             header.innerHTML = `<h3>${txt}</h3>`;
         }
 
@@ -88,14 +120,23 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 }
 
+function isValidActionMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
+    return isValideMessage(message) && isActionMessage(message);
+}
+
 function isValidSpellMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
-    if (!message || !isSpellMessage(message)) return false;
+    return isValideMessage(message) && isSpellMessage(message);
+}
+
+function isValideMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
+    if (!message) return false;
 
     const actor = message.item?.actor;
     return !!actor && !actor.hasPlayerOwner;
 }
 
 type ToolSettings = {
+    action: boolean;
     spell: boolean;
 };
 
