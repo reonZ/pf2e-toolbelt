@@ -287,6 +287,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (!el) return;
 
             const btn = createHTMLElement("a", {
+                classes: ["actionable-use"],
                 content: `<i class='fa-solid fa-play'></i>`,
                 dataset: {
                     tooltip: "PF2E.Action.Use",
@@ -296,9 +297,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 },
             });
 
-            btn.addEventListener("click", (event) => {
-                usePhysicalItem(event, item);
-            });
+            if (!item.quantity || (isConsumable && item.uses.value <= 0)) {
+                btn.classList.add("disabled");
+            } else {
+                btn.addEventListener("click", (event) => {
+                    usePhysicalItem(event, item);
+                });
+            }
 
             htmlQuery(el, ".item-controls")?.prepend(btn);
         });

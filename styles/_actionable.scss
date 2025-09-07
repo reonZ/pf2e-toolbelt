@@ -51,3 +51,12 @@
         }
     }
 }
+
+.sheet.actor {
+    a.actionable-use {
+        &.disabled {
+            pointer-events: none;
+            color: rgba(0, 0, 0, 0.5);
+        }
+    }
+}
