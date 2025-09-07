@@ -71,19 +71,19 @@
                 "title": "Automatic Rune Progression",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Should your world use the Automatic Rune Progression Variant."
+                    "hint": "Should your world use this Variant. It automatically updates weapons and armors giving them fundamental runes/improvements at the appropriate level."
                 },
                 "force": {
                     "name": "Force Update",
-                    "hint": "When enabled, the runes will always be updated based on actor level. When disabled only the runes that are currently at a lower value than what they should be for that level will be upgraded."
+                    "hint": "When enabled, the runes/grade will always be updated based on actor level. When disabled only the runes/grade that are currently at a lower value than what they should be for that level will be upgraded."
                 },
                 "price": {
-                    "name": "No Rune Price",
-                    "hint": "Should fundamental rune prices be subtracted from the weapon price."
+                    "name": "No Rune/Improvement Price",
+                    "hint": "Should fundamental rune/improvement prices be subtracted from the weapon price."
                 },
                 "shield": {
-                    "name": "Shield Rune",
-                    "hint": "Should reinforcing runes also be added to shields."
+                    "name": "Shield Rune/Improvement",
+                    "hint": "Should shields also be updated."
                 }
             },
             "betterEffectsPanel": {
