@@ -9,7 +9,6 @@ import {
     R,
     ShieldPF2e,
     WeaponPF2e,
-    ZeroToFive,
     ZeroToFour,
     ZeroToSix,
 } from "module-helpers";
@@ -176,12 +175,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const level = actor.level;
 
         if (isSF2e(weapon)) {
-            const expected = getExpectedGrade(level, [2, 4, 10, 12, 16, 19]);
-
-            if (force || GRADES.indexOf(weapon.system.grade ?? "commercial") < expected) {
-                weapon.system.grade = GRADES[expected];
-            }
-
+            updateItemGrade(level, force, weapon);
             return;
         }
 
@@ -239,12 +233,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const level = actor.level;
 
         if (isSF2e(armor)) {
-            const expected = getExpectedGrade(level, [5, 8, 11, 14, 18, 20]);
-
-            if (force || GRADES.indexOf(armor.system.grade ?? "commercial") < expected) {
-                armor.system.grade = GRADES[expected];
-            }
-
+            updateItemGrade(level, force, armor);
             return;
         }
 
@@ -305,11 +294,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const level = actor.level;
 
         if (isSF2e(shield)) {
-            const expected = getExpectedGrade(level, [5, 8, 11, 14, 18, 20]);
-
-            if (force || GRADES.indexOf(shield.system.grade ?? "commercial") < expected) {
-                shield.system.grade = GRADES[expected];
-            }
+            updateItemGrade(level, force, shield);
         } else {
             // 4, 7, 10, 13, 16, 19
             const expected = Math.min(Math.ceil((level - 3) / 3), 6) as ZeroToSix;
@@ -345,11 +330,37 @@ class ArpTool extends ModuleTool<ToolSettings> {
     }
 }
 
-function updateItemPriceByGrade(coins: Coins, item: WeaponPF2e | ArmorPF2e | ShieldPF2e) {
+function getExpectedGrade(level: number, type: ItemCategory): number {
+    const improvements = CONFIG.PF2E[`${type}Improvements`];
+
+    for (let i = 0; i < 6; i++) {
+        const nextGrade = GRADES[i + 1];
+        const nextLevel = improvements[nextGrade].level;
+
+        if (level < nextLevel) {
+            return i;
+        }
+    }
+
+    return 6;
+}
+
+function updateItemGrade(level: number, force: boolean, item: ItemType) {
+    const type = item.type as ItemCategory;
+    const expected = getExpectedGrade(level, type);
+
+    if (force || GRADES.indexOf(item.system.grade ?? "commercial") < expected) {
+        item.system.grade = GRADES[expected];
+    }
+
+    return;
+}
+
+function updateItemPriceByGrade(coins: Coins, item: ItemType) {
     const grade = item.system.grade;
 
     if (R.isIncludedIn(grade, GRADES)) {
-        const type = item.type as "weapon" | "armor" | "shield";
+        const type = item.type as ItemCategory;
         (coins as { gp: number }).gp -= CONFIG.PF2E[`${type}Improvements`][grade].credits / 10;
         item.system.price.value = new game.pf2e.Coins(coins);
     }
@@ -393,19 +404,6 @@ function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
     return !traits.value.includes("alchemical") && !traits.value.includes("bomb");
 }
 
-function getExpectedGrade(
-    level: number,
-    thresholds: [number, number, number, number, number, number]
-): ZeroToSix {
-    for (let i = 0; i < thresholds.length; i++) {
-        if (level < thresholds[i]) {
-            return i as ZeroToFive;
-        }
-    }
-
-    return 6;
-}
-
 function isHandwrap(weapon: WeaponPF2e<ActorPF2e>): boolean {
     const { slug, traits } = weapon._source.system;
     return slug === HANDWRAPS_SLUG || traits.otherTags.includes(HANDWRAPS_SLUG);
@@ -426,6 +424,10 @@ function hasHandwrap(actor: ActorPF2e): boolean {
         );
     });
 }
+
+type ItemType = WeaponPF2e | ArmorPF2e | ShieldPF2e;
+
+type ItemCategory = "weapon" | "armor" | "shield";
 
 type ToolSettings = {
     enabled: boolean;
