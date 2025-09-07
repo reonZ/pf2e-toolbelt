@@ -297,6 +297,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 },
             });
 
+            if (isConsumable) {
+                el.setAttribute("data-actionable-use", "true");
+            }
+
             if (!item.quantity || (isConsumable && item.uses.value <= 0)) {
                 btn.classList.add("disabled");
             } else {
