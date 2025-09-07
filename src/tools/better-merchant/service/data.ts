@@ -151,7 +151,7 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
     ): this["_source"] {
         const source = super._initializeSource(data, options);
 
-        source.tags = source.tags.map((x) => x.toLocaleLowerCase());
+        source.tags = source.tags.map((x) => x.toLocaleLowerCase(game.i18n.lang));
 
         return source;
     }

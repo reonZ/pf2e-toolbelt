@@ -35,7 +35,7 @@ class ServiceFilterModel
     ): this["_source"] {
         const source = super._initializeSource(data, options);
 
-        source.tag = source.tag.toLocaleLowerCase();
+        source.tag = source.tag.toLocaleLowerCase(game.i18n.lang);
 
         return source;
     }
