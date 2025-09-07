@@ -24,6 +24,7 @@ import {
     FeatSheetPF2e,
     getActionGlyph,
     htmlQuery,
+    InventoryItem,
     isCastConsumable,
     isDefaultActionIcon,
     isScriptMacro,
@@ -33,6 +34,7 @@ import {
     MODULE,
     NPCPF2e,
     NPCSheetData,
+    PhysicalItemPF2e,
     R,
     renderCharacterSheets,
     renderItemSheets,
@@ -263,15 +265,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const items = R.pipe(
             data.inventory.sections,
-            R.intersectionWith(["consumable", "equipment"], (section, type) => {
+            R.intersectionWith(["consumable", "equipment", "backpack"], (section, type) => {
                 return section.types.includes(type);
             }),
-            R.flatMap((section) =>
-                section.items.map(({ item }) => {
-                    return item as EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e>;
-                })
-            ),
-            R.filter((item) => item.isIdentified)
+            R.flatMap((section) => getSectionItems(section.items)),
+            R.filter((item): item is EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e> => {
+                return item.isOfType("equipment", "consumable") && item.isIdentified;
+            })
         );
 
         const panel = htmlQuery(html, `.tab[data-tab="inventory"] .inventory-pane`);
@@ -609,6 +609,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             throw MODULE.Error(err);
         }
     }
+}
+
+function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItemPF2e[] {
+    return items.flatMap(({ item, heldItems }) => {
+        return heldItems?.length ? [item, ...getSectionItems(heldItems)] : [item];
+    });
 }
 
 type DropZoneData = {
