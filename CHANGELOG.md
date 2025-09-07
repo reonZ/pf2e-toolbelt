@@ -1,3 +1,20 @@
+# 3.13.0
+
+-   `Actionable`:
+    -   now disable the added `use` button if
+        -   the item has a quantity of `0`
+        -   the consumable has no use remaining
+    -   now also add the `use` button in the `Containers` section of the inventory
+-   `Anonymous`:
+    -   add `Anonymize NPC Actions` setting
+        -   it does and works the same as the `Anonymize NPC Spells` setting for actions sent to chat
+-   `Automatic Rune Progression`:
+    -   now updates the `Grade` of weapons/armors/shields with the `Tech` and `Analog` traits
+        -   NOTE that there is currently a bug in the system with the price of armor improvements and until it is fixed, armors price will not be updated by the module as the values are not matching
+        -   update the settings names and descriptions to reflect the change
+-   `Target Helper`:
+    -   no longer display the reroll icon in a target row
+
 # 3.12.0
 
 -   bump the system minimum compatibility version to `7.4.3` and foundry's to `13.348`
