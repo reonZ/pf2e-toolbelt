@@ -12,10 +12,10 @@
         {{#if (and isOwner save.canReroll)}}
         <a class="reroll" data-action="reroll-save" data-statistic="{{save.statistic}}"
             data-tooltip="{{save.tooltip}}" {{save.visibility}}>
-            <i class="fa-solid fa-rotate rotate"></i>
             <i class="save {{save.icon}}"></i>
-            <span
-                class="degree {{#if showSuccess}}show{{/if}} {{save.success}}">{{save.value}}</span>
+            <span class="degree {{#if showSuccess}}show{{/if}} {{save.success}}">
+                {{save.value}}
+            </span>
         </a>
         {{else if save.value includeZero=true}}
         <span class="observe" data-tooltip="{{save.tooltip}}" {{save.visibility}}>
