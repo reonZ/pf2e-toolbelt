@@ -2,9 +2,14 @@ import {
     activateHooksAndWrappers,
     ActorPF2e,
     ArmorPF2e,
+    Coins,
     createToggleableWrapper,
+    includesAny,
+    PhysicalItemPF2e,
+    R,
     ShieldPF2e,
     WeaponPF2e,
+    ZeroToFive,
     ZeroToFour,
     ZeroToSix,
 } from "module-helpers";
@@ -13,6 +18,16 @@ import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
+
+const GRADES = [
+    "commercial",
+    "tactical",
+    "advanced",
+    "superior",
+    "elite",
+    "ultimate",
+    "paragon",
+] as const;
 
 class ArpTool extends ModuleTool<ToolSettings> {
     #baseWrappers = [
@@ -159,6 +174,17 @@ class ArpTool extends ModuleTool<ToolSettings> {
 
         const force = this.settings.force;
         const level = actor.level;
+
+        if (isSF2e(weapon)) {
+            const expected = getExpectedGrade(level, [2, 4, 10, 12, 16, 19]);
+
+            if (force || GRADES.indexOf(weapon.system.grade ?? "commercial") < expected) {
+                weapon.system.grade = GRADES[expected];
+            }
+
+            return;
+        }
+
         const expectedPotency: ZeroToFour = level < 2 ? 0 : level < 10 ? 1 : level < 16 ? 2 : 3;
         const expectedStriking: ZeroToFour = level < 4 ? 0 : level < 12 ? 1 : level < 19 ? 2 : 3;
 
@@ -178,6 +204,11 @@ class ArpTool extends ModuleTool<ToolSettings> {
 
         const coins = weapon.price.value.toObject();
         if (!coins.gp) return;
+
+        if (isSF2e(weapon)) {
+            updateItemPriceByGrade(coins, weapon);
+            return;
+        }
 
         const potency = weapon.system.runes.potency;
         const striking = weapon.system.runes.striking;
@@ -206,6 +237,17 @@ class ArpTool extends ModuleTool<ToolSettings> {
 
         const force = this.settings.force;
         const level = actor.level;
+
+        if (isSF2e(armor)) {
+            const expected = getExpectedGrade(level, [5, 8, 11, 14, 18, 20]);
+
+            if (force || GRADES.indexOf(armor.system.grade ?? "commercial") < expected) {
+                armor.system.grade = GRADES[expected];
+            }
+
+            return;
+        }
+
         const expectedPotency: ZeroToFour = level < 5 ? 0 : level < 11 ? 1 : level < 18 ? 2 : 3;
         const expectedResilient: ZeroToFour = level < 8 ? 0 : level < 14 ? 1 : level < 20 ? 2 : 3;
 
@@ -225,6 +267,11 @@ class ArpTool extends ModuleTool<ToolSettings> {
 
         const coins = armor.price.value.toObject();
         if (!coins.gp) return;
+
+        if (isSF2e(armor)) {
+            updateItemPriceByGrade(coins, armor);
+            return;
+        }
 
         const potency = armor.system.runes.potency;
         const resiliency = armor.system.runes.resilient;
@@ -254,15 +301,22 @@ class ArpTool extends ModuleTool<ToolSettings> {
             return;
         }
 
-        // 4, 7, 10, 13, 16, 19
-        const expected = Math.min(Math.ceil((actor.level - 3) / 3), 6) as ZeroToSix;
+        const force = this.settings.force;
+        const level = actor.level;
 
-        if (this.settings.force || shield.system.runes.reinforcing < expected) {
-            // const hpData = ArpTool.SHIELD_HP[expected];
-            // const maxHp = Math.min(shield._source.system.hp.max + hpData.extra, hpData.max);
+        if (isSF2e(shield)) {
+            const expected = getExpectedGrade(level, [5, 8, 11, 14, 18, 20]);
 
-            shield.system.runes.reinforcing = expected;
-            // shield.system.hp.value = maxHp - (shield.system.hp.max - shield.system.hp.value);
+            if (force || GRADES.indexOf(shield.system.grade ?? "commercial") < expected) {
+                shield.system.grade = GRADES[expected];
+            }
+        } else {
+            // 4, 7, 10, 13, 16, 19
+            const expected = Math.min(Math.ceil((level - 3) / 3), 6) as ZeroToSix;
+
+            if (force || shield.system.runes.reinforcing < expected) {
+                shield.system.runes.reinforcing = expected;
+            }
         }
 
         wrapped();
@@ -276,6 +330,11 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const coins = shield.price.value.toObject();
         if (!coins.gp) return;
 
+        if (isSF2e(shield)) {
+            updateItemPriceByGrade(coins, shield);
+            return;
+        }
+
         const reinforcing = shield.system.runes.reinforcing;
 
         if (reinforcing) {
@@ -283,6 +342,16 @@ class ArpTool extends ModuleTool<ToolSettings> {
         }
 
         shield.system.price.value = new game.pf2e.Coins(coins);
+    }
+}
+
+function updateItemPriceByGrade(coins: Coins, item: WeaponPF2e | ArmorPF2e | ShieldPF2e) {
+    const grade = item.system.grade;
+
+    if (R.isIncludedIn(grade, GRADES)) {
+        const type = item.type as "weapon" | "armor" | "shield";
+        (coins as { gp: number }).gp -= CONFIG.PF2E[`${type}Improvements`][grade].credits / 10;
+        item.system.price.value = new game.pf2e.Coins(coins);
     }
 }
 
@@ -302,6 +371,10 @@ function isValidShield(shield: ShieldPF2e<ActorPF2e>): boolean {
     return !shield._source.system.specific;
 }
 
+function isSF2e(item: PhysicalItemPF2e<ActorPF2e>): boolean {
+    return includesAny(item._source.system.traits.value, ["tech", "analog"]);
+}
+
 function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
     const { specific, category, group, baseItem, traits } = weapon._source.system;
 
@@ -318,6 +391,19 @@ function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
     }
 
     return !traits.value.includes("alchemical") && !traits.value.includes("bomb");
+}
+
+function getExpectedGrade(
+    level: number,
+    thresholds: [number, number, number, number, number, number]
+): ZeroToSix {
+    for (let i = 0; i < thresholds.length; i++) {
+        if (level < thresholds[i]) {
+            return i as ZeroToFive;
+        }
+    }
+
+    return 6;
 }
 
 function isHandwrap(weapon: WeaponPF2e<ActorPF2e>): boolean {
