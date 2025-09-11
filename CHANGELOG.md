@@ -1,3 +1,10 @@
+# 3.13.1
+
+-   `Share Data`:
+    -   expose the `getMasterInMemory` and `getSlavesInMemory` functions to the API
+    -   now sort masters by alphabetical order in the dropdown
+    -   fix master having an invalid master id in its data creating conflicts during updates
+
 # 3.13.0
 
 -   `Actionable`:
