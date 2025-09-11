@@ -58,6 +58,10 @@
       },
       "anonymous": {
         "title": "Anonyme",
+        "action": {
+          "name": "Anonymiser les actions des PNJ",
+          "hint": "Les actions envoyées dans la conversation par un acteur non détenu par un joueur seront anonymisées pour les joueurs."
+        },
         "spell": {
           "name": "Anonymiser les sorts des PNJ",
           "hint": "Les sorts lancés par un acteur non détenu par un joueur seront anonymisés pour les joueurs."
@@ -67,19 +71,19 @@
         "title": "Progression automatique des runes",
         "enabled": {
           "name": "Activé",
-          "hint": "Votre monde utilise t-il la variante de progression automatique des runes ?"
+          "hint": "Si votre monde utilise cette variante, elle met automatiquement à jour les armes et armures en leur attribuant des runes et améliorations fondamentales au niveau approprié."
         },
         "force": {
           "name": "Forcer la mise à jour",
-          "hint": "Lorsque cette option est activée, les runes sont toujours mises à jour en fonction du niveau de l'acteur. Lorsqu'elle est désactivée, seules les runes dont la valeur est inférieure à celle attendue pour ce niveau sont mises à jour."
+          "hint": "Lorsque cette option est activée, les runes et la qualité sont toujours mis à jour en fonction du niveau de l'acteur. Lorsqu'elle est désactivée, seules les runes et la qualité dont la valeur est inférieure à celle attendue pour ce niveau sont mises à jour."
         },
         "price": {
-          "name": "Pas de prix des runes",
-          "hint": "Les prix des runes fondamentales doivent-ils être soustraits du prix de l'arme ?"
+          "name": "Pas de rune/d'amélioration dans le prix",
+          "hint": "Le prix des runes fondamentales/améliorations seront soustraits du prix de l'arme."
         },
         "shield": {
-          "name": "Rune de bouclier",
-          "hint": "Les runes de renforcement devraient-elles également être ajoutées aux boucliers ?"
+          "name": "Rune/amélioration de bouclier",
+          "hint": "Les boucliers seront aussi mis à jour."
         }
       },
       "betterEffectsPanel": {
@@ -178,6 +182,22 @@
           "hint": "L'objet lâché doit-il émettre de la lumière ? Ce n'est le cas que si un seul objet est présent dans l'acteur de butin."
         }
       },
+      "giveth": {
+        "title": "Donner",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Votre monde devrait-il permettre aux acteurs des joueurs de pouvoir donner des objets d'inventaire à d'autres acteurs appartenant à des joueurs."
+        },
+        "effect": {
+          "name": "Inclure les effets/états",
+          "hint": "Les joueurs devraient-ils également pouvoir appliquer des effets et des états sur des acteurs qu'ils ne possèdent pas ?",
+          "choices": {
+            "disabled": "Désactivé",
+            "ally": "Alliés seulement",
+            "all": "Tous les acteurs"
+          }
+        }
+      },
       "heroActions": {
         "title": "Actions héroïques",
         "count": {
@@ -190,7 +210,7 @@
         },
         "private": {
           "name": "Tirage privé",
-          "hint": "Lorsque cette option est activée, le message de discussion généré sera privé pour les autres joueurs."
+          "hint": "Rendre le message généré lors du tirage des actions d'héroïsme privé. Si cette option est activée, les échanges seront invisibles pour tous les participants."
         },
         "table": {
           "name": "Table UUID",
@@ -205,7 +225,7 @@
         "title": "Identifier",
         "delay": {
           "name": "Délai de 24 heures",
-          "hint": "En cas d'activation, un personnage devra attendre 24h en cas d'échec pour identifier un objet avant de pouvoir refaire une tentative. Sinon, il sera réinitialisé lors de la prochaine journée."
+          "hint": "Lorsque cette option est activée, un personnage devra attendre 24 heures après avoir échoué à identifier un objet avant de pouvoir effectuer une nouvelle tentative. Autrement, le délai sera réinitialisé le jour suivant."
         },
         "enabled": {
           "name": "Activé",
@@ -231,27 +251,11 @@
           "hint": "Ajoute un bouton aux messages de dégâts permettant de les injecter dans un message de dégâts précédent."
         }
       },
-      "giveth": {
-        "title": "Donner",
-        "enabled": {
-          "name": "Activé",
-          "hint": "Votre monde devrait-il permettre aux acteurs des joueurs de pouvoir donner des objets d'inventaire à d'autres acteurs appartenant à des joueurs."
-        },
-        "effect": {
-          "name": "Inclure les effets/états",
-          "hint": "Les joueurs devraient-ils également pouvoir appliquer des effets et des états sur des acteurs qu'ils ne possèdent pas ?",
-          "choices": {
-            "disabled": "Désactivé",
-            "ally": "Alliés seulement",
-            "all": "Tous les acteurs"
-          }
-        }
-      },
       "resourceTracker": {
         "title": "Suivi des ressources",
         "enabled": {
           "name": "Activé",
-          "hint": "Cet outil doit être activé sur votre client. Le suivi peut être activé/désactivé via les commandes de l'interface utilisateur de gauche."
+          "hint": "Cet outil est activé dans votre monde. Le compteur peut être activé/désactivé via les commandes de gauche de l'IU."
         }
       },
       "rollTracker": {
@@ -303,7 +307,7 @@
         },
         "mode": {
           "name": "Filtre appliqué",
-          "hint": "Quel type de filtre doit être appliqué aux jetons avec une élévation inférieure à 0.",
+          "hint": "Quel type de filtre doit être appliqué aux jetons avec une élévation négative.",
           "choices": {
             "normal": "Pas de filtre",
             "greyscale": "Filtre en niveaux de gris",
@@ -319,11 +323,11 @@
         "title": "Définir une image non identifiée",
         "create": {
           "name": "Lors de la création d'un objet",
-          "hint": "Définissez automatiquement l'image non identifiée des éléments pour qu'elle soit identique à l'image normale lorsque l'élément est créé/importé."
+          "hint": "Définissez automatiquement l'image non identifiée des objets pour qu'elle soit identique à l'image normale lorsque l'objet est créé/importé."
         },
         "update": {
           "name": "Lors de la mise à jour de l'objet",
-          "hint": "Mise à jour automatique de l'image non identifiée lorsque l'image régulière de l'objet est mise à jour."
+          "hint": "Mise à jour automatique de l'image non identifiée lorsque l'image de l'objet ordinaire est mise à jour."
         }
       }
     },
@@ -345,6 +349,10 @@
       }
     },
     "anonymous": {
+      "action": {
+        "header": "Utilise une capacité.",
+        "context": "Révéler l'action aux joueurs"
+      },
       "spell": {
         "header": "Is casting a spell..",
         "context": "Révéler le sort aux joueurs"
@@ -406,7 +414,7 @@
       "importServices": {
         "title": "Importer des services - {name}",
         "yes": "Importer",
-        "error": "Une erreur s'est produite lors de la tentative d'importation les services."
+        "error": "Une erreur s'est produite en tentant d'importer les services."
       },
       "item": {
         "buy": {
@@ -416,7 +424,7 @@
           },
           "noTarget": "Vous devez sélectionner un acteur valide pour acheter chez ce marchand"
         },
-        "error": "Une erreur s'est produite lors de la tentative de traitement d'un meilleur échange d'objet marchand : <strong>{reason}</strong>.",
+        "error": "Une erreur s'est produite en tentant d'effectuer l'échange d'objet de meilleur marchand : <strong>{reason}</strong>.",
         "noStock": "<strong>{actor}</strong> ne peut pas fournir la quantité demandée de <strong>{item}</strong>.",
         "unwilling": "<strong>{actor}</strong> ne veut pas se séparer de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> n'est pas intéressé par l'achat de <strong>{item}</strong>.",
@@ -449,7 +457,7 @@
       },
       "service": {
         "buy": "<strong>{buyer}</strong> a engagé les services de <strong>{seller}</strong>.",
-        "error": "Une erreur s'est produite lors de la tentative de traitement d'un meilleur service marchand ({service}) : <strong>{reason}</strong>.",
+        "error": "Une erreur s'est produite en tentant de traiter un service ({service}) avec meilleur marchand  : <strong>{reason}</strong>.",
         "give": "<strong>{seller}</strong> offre ses services à <strong>{buyer}</strong> gratuitement.",
         "noBuyer": "Vous devez sélectionner un personnage/PNJ/groupe que vous possédez comme cible du service.",
         "noFunds": "<strong>{buyer}</strong> ne dispose pas des fonds nécessaires pour engager les services de <strong>{seller}</strong>.",
@@ -464,7 +472,7 @@
           "content": "Êtes-vous certain de vouloir supprimer ce service ?"
         },
         "enabled": "Activé",
-        "error": "Une erreur s'est produite lors de la tentative de traitement de la demande de service",
+        "error": "Une erreur s'est produite en tentant de traiter la demande de service",
         "export": "Exporter le service",
         "give": "<strong>{seller}</strong> offre ses services à <strong>{buyer}</strong> gratuitement.",
         "macro": {
@@ -544,7 +552,7 @@
         "mustDiscard": "Le personnage doit défausser {nb} actions pour s'engager dans un échange.",
         "noOther": "Il n'y a aucun autre personnage avec des actions de héros disponibles pour échanger.",
         "notGM": "Vous devez être un MJ pour donner des actions de héros.",
-        "tradeError": "Une erreur s'est produite lors de la tentative de traitement de l'échange entre <strong>{sender}</strong> et <strong>{receiver}</strong>."
+        "tradeError": "Une erreur s'est produite en tentant de traiter l'échange entre <strong>{sender}</strong> et <strong>{receiver}</strong>."
       },
       "giveActions": {
         "asDrawn": "Définir comme tirée lorsqu'elle est donnée",
