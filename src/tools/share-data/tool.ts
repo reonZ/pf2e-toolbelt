@@ -632,7 +632,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         // we are a master, we skip
         if (getSlavesInMemory(actor)?.size) return;
 
-        const flag = this.getFlag<ShareDataSource>(actor, "data");
+        const flag = foundry.utils.deepClone(this.getFlag<ShareDataSource>(actor, "data"));
         const data = flag ? new ShareDataModel(flag) : undefined;
         const master = data?.master;
 

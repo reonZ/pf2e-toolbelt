@@ -15,12 +15,10 @@ function isValidSlave(actor: unknown): actor is CreaturePF2e<null> {
 }
 
 function isValidMaster(actor: unknown, id?: string): actor is CreaturePF2e<null> {
-    return (
-        isValidActor(actor) &&
-        (!id || actor.id !== id) &&
-        !getMasterInMemory(actor) &&
-        !getMasterId(actor)
-    );
+    if (!isValidActor(actor) || (id && actor.id === id) || getMasterInMemory(actor)) return false;
+
+    const masterId = getMasterId(actor);
+    return !masterId || !game.actors.get(masterId);
 }
 
 function getMasterId(actor: CreaturePF2e): string | undefined {
