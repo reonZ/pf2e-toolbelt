@@ -148,6 +148,10 @@
                 "partyAsObserved": {
                     "name": "Party Alliance as Observed",
                     "hint": "Allow players to observe actor sheets while having the 'Limited' permission as long as they belong to the 'party' alliance. Not to be confused with the 'Party' actor."
+                },
+                "scribble": {
+                    "name": "Handwritten Character Sheet",
+                    "hint": "A restyling of the character sheet to appear as it was written by hand."
                 }
             },
             "betterTemplate": {

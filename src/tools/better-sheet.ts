@@ -48,8 +48,22 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     toggleHooksAndWrappers(this.#partyAsObservedHooks, !game.user.isGM && value);
                 },
             },
+            // {
+            //     key: "scribble",
+            //     type: Boolean,
+            //     default: false,
+            //     scope: "user",
+            //     onChange: (value) => {
+            //         document.body.classList.toggle("pf2e-toolbelt-scribble", value);
+            //         renderCharacterSheets();
+            //     },
+            // },
         ];
     }
+
+    // init(isGM: boolean): void {
+    //     document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
+    // }
 
     ready(isGM: boolean): void {
         toggleHooksAndWrappers(this.#partyAsObservedHooks, !isGM && this.settings.partyAsObserved);
@@ -94,6 +108,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 }
 
 type ToolSettings = {
+    scribble: boolean;
     partyAsObserved: boolean;
 };
 

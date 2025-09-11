@@ -69,6 +69,11 @@ for (const tool of TOOLS) {
 Hooks.once("init", () => {
     const isGM = userIsGM();
 
+    CONFIG.fontDefinitions["Handlee"] = {
+        editor: true,
+        fonts: [{ urls: [`modules/${MODULE.id}/fonts/Handlee/Handlee-Regular.ttf`] }],
+    };
+
     registerModuleKeybinds(
         R.pipe(
             TOOLS,
