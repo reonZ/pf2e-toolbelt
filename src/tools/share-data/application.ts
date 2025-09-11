@@ -108,7 +108,7 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
 
         return {
             masterId: master?.id,
-            masters,
+            masters: R.sortBy(masters, R.prop("name")),
             options,
         } satisfies ShareDataContext;
     }
