@@ -148,6 +148,10 @@
         "partyAsObserved": {
           "name": "Observer le groupe allié",
           "hint": "Autorise les joueurs à consulter les fiches d'acteur en ayant les droits 'Limité' tant qu'ils appartiennent à l'alliance 'Groupe'. À ne pas confondre avec l'acteur 'Groupe'."
+        },
+        "scribble": {
+          "name": "Feuille de personnage écrite à la main",
+          "hint": "Avec ce style, la feuille de personnage semble avoir été écrite à la main."
         }
       },
       "betterTemplate": {
