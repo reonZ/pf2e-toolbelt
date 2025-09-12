@@ -193,19 +193,14 @@ async function rerollSave(
 
     const resource = actor.getResource(resourceKey);
 
-    if (resource && isCharacter) {
-        if (resource.value < 1) {
-            ui.notifications.warn("PF2E.RerollMenu.WarnNoResource", {
-                localize: true,
-                format: {
-                    name: actor.name,
-                    resource: resource.label,
-                },
-            });
-            return;
-        }
-
-        await actor.updateResource(resource.slug, resource.value - 1);
+    if (resource && isCharacter && resource.value < 1) {
+        return ui.notifications.warn("PF2E.RerollMenu.WarnNoResource", {
+            localize: true,
+            format: {
+                name: actor.name,
+                resource: resource.label,
+            },
+        });
     }
 
     /**
