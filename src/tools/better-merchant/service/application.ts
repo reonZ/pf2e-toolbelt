@@ -163,12 +163,12 @@ class ServiceMenu extends ModuleToolApplication<BetterMerchantTool> {
     }
 
     #updateService() {
-        const submitEvent = new SubmitEvent("submit");
-        this.element.dispatchEvent(submitEvent);
+        const event = new Event("change");
+        this.element.dispatchEvent(event);
     }
 
     #editImage(img: HTMLImageElement) {
-        const filePicker = new FilePicker({
+        const filePicker = new foundry.applications.apps.FilePicker.implementation({
             current: img.dataset.src,
             type: "image",
             callback: (path) => {
