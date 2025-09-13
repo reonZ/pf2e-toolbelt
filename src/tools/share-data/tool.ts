@@ -76,7 +76,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         ];
     }
 
-    get api(): toolbelt.ToolbeltApi["shareData"] {
+    get api(): toolbelt.Api["shareData"] {
         return {
             getMasterInMemory,
             getSlavesInMemory,

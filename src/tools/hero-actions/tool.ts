@@ -117,7 +117,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         ];
     }
 
-    get api(): toolbelt.ToolbeltApi["heroActions"] {
+    get api(): toolbelt.Api["heroActions"] {
         return {
             canTrade: this.canTrade.bind(this),
             discardHeroActions: this.discardHeroActions.bind(this),

@@ -68,7 +68,7 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
         ];
     }
 
-    get api(): toolbelt.ToolbeltApi["identify"] {
+    get api(): toolbelt.Api["identify"] {
         return {
             openTracker: this.openTracker.bind(this),
             requestIdentify: this.requestIdentify.bind(this),
