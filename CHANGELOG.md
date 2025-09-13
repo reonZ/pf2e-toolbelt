@@ -1,3 +1,10 @@
+# 3.13.2
+
+-   `Better Merchant`:
+    -   fix browser reload when updating the image of a service on firefox
+-   `Target Helper`:
+    -   consume the resource later in the reroll workflow
+
 # 3.13.1
 
 -   `Share Data`:
