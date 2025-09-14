@@ -1,3 +1,8 @@
+# 3.13.3
+
+-   `Target Helper`:
+    -   fix reroll error with keeley variant rule
+
 # 3.13.2
 
 -   `Better Merchant`:
