@@ -144,6 +144,7 @@
         }
       },
       "betterSheet": {
+        "title": "Better Actor Sheet",
         "partyAsObserved": {
           "name": "Grupo de alianza como observado",
           "hint": "Permite a los jugadores observar las hojas de actor con el permiso \"Limitado\" siempre que pertenezcan a la alianza del grupo. No confundir con el actor del grupo."
