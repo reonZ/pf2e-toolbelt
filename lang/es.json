@@ -58,6 +58,10 @@
       },
       "anonymous": {
         "title": "Anónimo",
+        "action": {
+          "name": "Anonimizar acciones de los PNJ",
+          "hint": "Las acciones enviadas al chat por un actor que no sea propiedad del jugador serán anonimizadas para los jugadores."
+        },
         "spell": {
           "name": "Anonimizar conjuros de PNJ",
           "hint": "Los conjuros lanzados por un actor que no es propiedad del jugador serán anonimizados para los jugadores."
@@ -67,19 +71,19 @@
         "title": "Progresión automática de runas",
         "enabled": {
           "name": "Activado",
-          "hint": "¿Debería tu mundo utilizar la variante de progresión automática de runas?"
+          "hint": "Si tu mundo usa esta variante, actualiza automáticamente las armas y armaduras, otorgándoles runas/mejoras fundamentales según el nivel adecuado."
         },
         "force": {
           "name": "Forzar actualización",
-          "hint": "Al habilitar esta opción, las runas se actualizarán siempre según el nivel del actor. Al deshabilitarla, solo se actualizarán las runas con un valor inferior al que deberían para ese nivel."
+          "hint": "Al habilitar esta opción, las runas y el grado se actualizarán siempre según el nivel del actor. Al deshabilitarla, solo se actualizarán las runas y el grado que tengan un valor inferior al que deberían para ese nivel."
         },
         "price": {
-          "name": "Sin precio de runa",
-          "hint": "¿Se deben restar los precios de las runas fundamentales del precio del arma?"
+          "name": "Sin precio de runa/mejora",
+          "hint": "¿Se deben restar los precios de las runas/mejoras fundamentales del precio del arma?"
         },
         "shield": {
-          "name": "Runa de escudo",
-          "hint": "¿También deberían añadirse runas de refuerzo a los escudos?"
+          "name": "Runa de escudo/mejora",
+          "hint": "¿Deberían actualizarse también los escudos?"
         }
       },
       "betterEffectsPanel": {
@@ -98,6 +102,22 @@
         "dropped": {
           "name": "Sin peso por lo soltado",
           "hint": "El equipo \"soltado\" en el inventario de un actor no se tendrá en cuenta para el cálculo del peso total."
+        },
+        "improvised": {
+          "name": "Botón de arma improvisada",
+          "hint": "Añade un botón en el inventario de actores de personajes para crear un arma improvisada sobre la marcha."
+        },
+        "mergeItems": {
+          "name": "Botón de fusión de objetos",
+          "hint": "Agregue un botón de fusión en la pestaña de inventario para fusionar pilas de objetos."
+        },
+        "partyAsObserved": {
+          "name": "Grupo de alianza como observado",
+          "hint": "Permite a los jugadores observar las hojas de actor con el permiso \"Limitado\" siempre que pertenezcan a la alianza del grupo. No confundir con el actor del grupo."
+        },
+        "splitItem": {
+          "name": "Permitir división de objetos",
+          "hint": "Haga clic en el número de cantidad del objeto en una hoja de actor para dividirlo en varias entradas."
         }
       },
       "betterMerchant": {
@@ -111,7 +131,7 @@
         "title": "Mejor movimiento",
         "teleport": {
           "name": "Teletransportar fichas",
-          "hint": "Al hacer clic en el tablero mientras se mantiene presionada la combinación de teclas definida, se teletransportarán instantáneamente las fichas seleccionadas a la ubicación sin necesidad de viajar.",
+          "hint": "Al hacer clic en el tablero mientras se mantiene presionada la tecla definida, se teletransportarán instantáneamente los token seleccionados a la ubicación sin viaje.",
           "choices": {
             "disabled": "Desactivado",
             "enabled": "Activado",
@@ -121,6 +141,16 @@
         "history": {
           "name": "Sin registro histórico",
           "hint": "¿Debería estar prohibido el registro del historial de movimientos para ti? Esto simplifica la confusión en los movimientos sucesivos de un mismo turno."
+        }
+      },
+      "betterSheet": {
+        "partyAsObserved": {
+          "name": "Grupo de alianza como observado",
+          "hint": "Permite a los jugadores observar las hojas de actor con el permiso \"Limitado\" siempre que pertenezcan a la alianza del grupo. No confundir con el actor del grupo."
+        },
+        "scribble": {
+          "name": "Hoja de personaje escrita a mano",
+          "hint": "Un rediseño de la hoja del personaje para que parezca como si hubiera sido escrita a mano."
         }
       },
       "betterTemplate": {
@@ -155,22 +185,11 @@
           "hint": "¿Debería el objeto soltado emitir luz? Esto solo ocurrirá si hay un solo objeto presente en el actor de botín."
         }
       },
-      "mergeDamage": {
-        "title": "Fusionar daños",
-        "merge": {
-          "name": "Botón de fusión",
-          "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
-        },
-        "inject": {
-          "name": "Botón de inyección",
-          "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
-        }
-      },
       "giveth": {
         "title": "Entregar",
         "enabled": {
           "name": "Activado",
-          "hint": "¿Debería tu mundo permitir que los actores de tus jugadores puedan dar elementos de inventario a otros actores propiedad de los jugadores?"
+          "hint": "¿Debería su mundo permitir que sus jugadores actores puedan dar objetos de inventario a otros actores propiedad de jugadores o miembros del grupo?"
         },
         "effect": {
           "name": "Incluir efectos/condiciones",
@@ -182,14 +201,78 @@
           }
         }
       },
+      "heroActions": {
+        "title": "Acciones de héroe",
+        "count": {
+          "name": "Establecer variante de héroe",
+          "hint": "Si es 0, los personajes solo pueden tener una acción de héroe por punto de héroe. De lo contrario, el número de acciones de héroe se disociará del número de puntos de héroe disponibles y los personajes volverán a asignar las acciones de héroe en el conjunto."
+        },
+        "enabled": {
+          "name": "Activado",
+          "hint": "¿Debería tu mundo utilizar las acciones del mazo de puntos de héroe?"
+        },
+        "private": {
+          "name": "Sorteo privado",
+          "hint": "En su lugar, haz que el mensaje generado al sortear las acciones del héroe sea privado. Si se activa, los intercambios serán invisibles para todos los participantes."
+        },
+        "table": {
+          "name": "Tabla UUID",
+          "hint": "Identificador único de la tabla que desea usar en su mundo. Para obtener el UUID de una tabla (en un compendio o en el directorio de tablas desplegables), simplemente abra la tabla y haga clic izquierdo en 📔 junto a su nombre."
+        },
+        "trade": {
+          "name": "Permitir intercambio",
+          "hint": "Cuando esté habilitado, los personajes podrán intercambiar acciones entre sí."
+        }
+      },
+      "identify": {
+        "title": "Identificar",
+        "delay": {
+          "name": "24 horas de retraso",
+          "hint": "Al habilitar esta función, un personaje deberá esperar 24 horas tras no poder identificar un objeto antes de poder intentarlo de nuevo. De lo contrario, se reiniciará al día siguiente."
+        },
+        "enabled": {
+          "name": "Activado",
+          "hint": "Te ayudará a administrar objetos no identificados en tu mundo y a realizar un seguimiento de qué objetos están identificados."
+        },
+        "identifyPartials": {
+          "name": "Identificar automáticamente artículos similares",
+          "hint": "¿También se deben identificar objetos \"similares\" al utilizar la opción \"Identificar automáticamente objetos conocidos\"?"
+        },
+        "playerRequest": {
+          "name": "Permitir solicitud de jugador",
+          "hint": "¿Deberían los jugadores poder solicitar la identificación de los objetos?"
+        }
+      },
+      "mergeDamage": {
+        "title": "Fusionar daños",
+        "merge": {
+          "name": "Botón de fusión",
+          "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
+        },
+        "inject": {
+          "name": "Botón de inyección",
+          "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
+        }
+      },
       "resourceTracker": {
-        "title": "Rastreador de recursos"
+        "title": "Rastreador de recursos",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Habilita esta herramienta en tu mundo. El rastreador se puede activar o desactivar mediante los controles de la interfaz izquierda."
+        }
       },
       "rollTracker": {
         "title": "Rastreador de tiradas",
         "enabled": {
           "name": "Activado",
           "hint": "Realiza un seguimiento de los dados para ver si tus jugadores realmente tienen tanta mala suerte."
+        }
+      },
+      "shareData": {
+        "title": "Datos compartidos",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Los actores podrán vincular/compartir sus datos entre sí."
         }
       },
       "targetHelper": {
@@ -213,37 +296,41 @@
       },
       "underground": {
         "title": "Subterráneo",
+        "alpha": {
+          "name": "Opacidad",
+          "hint": "Valor de opacidad cuando la ficha tiene una elevación negativa."
+        },
+        "contrast": {
+          "name": "Contraste",
+          "hint": "Valor de contraste cuando la ficha tiene una elevación negativa."
+        },
         "enabled": {
           "name": "Activado",
           "hint": "Permitirá que las fichas con elevación negativa permanezcan visibles en el tablero."
         },
         "mode": {
           "name": "Filtro aplicado",
-          "hint": "¿Qué tipo de filtro se debe aplicar a las fichas con una elevación inferior a 0?",
+          "hint": "¿Qué tipo de filtro se debe aplicar a los tokens con una elevación negativa?",
           "choices": {
             "normal": "Sin filtro",
             "greyscale": "Filtro de escala de grises",
             "sepia": "Filtro sepia"
           }
         },
-        "contrast": {
-          "name": "Contraste",
-          "hint": "Valor de contraste cuando la ficha tiene una elevación negativa."
-        },
-        "alpha": {
-          "name": "Opacidad",
-          "hint": "Valor de opacidad cuando la ficha tiene una elevación negativa."
+        "tiles": {
+          "name": "Casillas de fondo",
+          "hint": "Esto también garantizará que los token se dibujen detrás de los token con elevación negativa. Tenga en cuenta que esto puede entrar en conflicto con otros módulos que también funcionan con token."
         }
       },
       "unided": {
         "title": "Establecer imagen de \"No identificado\"",
         "create": {
           "name": "Al crear el objeto",
-          "hint": "Establece automáticamente la imagen de \"no identificado\" de los objetos para que sea la misma que la imagen normal cuando se crea o importa el objeto."
+          "hint": "Establece automáticamente la imagen no identificada de los objetos para que sea la misma que la imagen normal cuando se crea o importa el objeto."
         },
         "update": {
           "name": "Al actualizar el objeto",
-          "hint": "Actualiza automáticamente la imagen de \"no identificado\" cuando se actualice la imagen normal del objeto."
+          "hint": "Actualiza automáticamente la imagen no identificada cuando se actualice la imagen normal del objeto."
         }
       }
     },
@@ -265,9 +352,35 @@
       }
     },
     "anonymous": {
+      "action": {
+        "header": "Está usando una habilidad...",
+        "context": "Revelar la acción a los jugadores"
+      },
       "spell": {
         "header": "Está lanzando un conjuro...",
         "context": "Revelar conjuro a los jugadores"
+      }
+    },
+    "betterInventory": {
+      "improvised": {
+        "label": "Arma improvisada"
+      },
+      "merge": {
+        "none": "No hay objetos para fusionar en el inventario.",
+        "title": "Fusionar objetos - {name}",
+        "yes": "Fusionar"
+      },
+      "sheet": {
+        "improvised": "Crear un arma improvisada",
+        "merge": "Fusionar objetos",
+        "split": "Dividir objeto"
+      },
+      "split": {
+        "quantity": {
+          "label": "Nueva cantidad de pila"
+        },
+        "title": "Dividir objeto - {name}",
+        "yes": "Dividir"
       }
     },
     "betterMerchant": {
@@ -301,9 +414,22 @@
         "title": "Filtros de artículo - {name}",
         "treasure": "Los tesoros que lleguen a este filtro siempre se comprarán por el 100% de su precio."
       },
+      "importServices": {
+        "title": "Importar servicios - {name}",
+        "yes": "Importar",
+        "error": "Se produjo un error al intentar importar los servicios."
+      },
       "item": {
-        "error": "Se produjo un error al intentar procesar un intercambio de artículos de mejor comerciante: <strong>{reason}</strong>.",
+        "buy": {
+          "confirm": {
+            "content": "¿Quiere <strong>{buyer}</strong> comprar <strong>{item}</strong>?",
+            "title": "Comprar objeto- {item}"
+          },
+          "noTarget": "Debes seleccionar un actor válido para comprarle a este comerciante."
+        },
+        "error": "Se produjo un error al intentar procesar un intercambio de un objeto de \"mejor comerciante\": <strong>{reason}</strong>.",
         "noStock": "<strong>{actor}</strong> no puede proporcionar la cantidad solicitada de <strong>{item}</strong>.",
+        "unwilling": "<strong>{actor}</strong> no está dispuesto a separarse de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> no está interesado en comprar <strong>{item}</strong>.",
         "sell": {
           "title": "Sell Items",
@@ -322,6 +448,7 @@
       "sheetServices": {
         "add": "Agregar servicio",
         "buy": "Solicitar servicio",
+        "copied": "Los servicios <strong>{name}</strong> se han copiado al portapapeles.",
         "delete": "Eliminar servicio",
         "edit": "Editar servicio",
         "enabled": "Alternar servicio",
@@ -333,14 +460,16 @@
       },
       "service": {
         "buy": "<strong>{buyer}</strong> contrató los servicios de <strong>{seller}</strong>.",
-        "error": "Se produjo un error al intentar procesar un servicio de mejor comerciante ({service}): <strong>{reason}</strong>.",
+        "error": "Se produjo un error al intentar procesar el \"mejor servicio comercial\" ({service}): <strong>{reason}</strong>.",
         "give": "<strong>{seller}</strong> ofrece sus servicios a <strong>{buyer}</strong> de forma gratuita.",
         "noBuyer": "Debes seleccionar un personaje/NPC/grupo tuyo como objetivo del servicio.",
         "noFunds": "<strong>{buyer}</strong> no tiene los fondos para contratar los servicios de <strong>{seller}</strong>.",
-        "noStock": "<strong>{seller}</strong> ya no ofrece ese servicio."
+        "noStock": "<strong>{seller}</strong> ya no ofrece ese servicio.",
+        "unwilling": "<strong>{seller}</strong> ya no está dispuesto a ofrecer ese servicio."
       },
       "serviceMenu": {
         "buy": "<strong>{buyer}</strong> contrató los servicios de <strong>{seller}</strong>.",
+        "copied": "El servicio <strong>{label}</strong> se ha copiado al portapapeles.",
         "delete": {
           "title": "Eliminar servicio",
           "content": "¿Está seguro de que desea eliminar este servicio?"
@@ -415,6 +544,124 @@
           "item": "{source} entrega {quantity} × {item} a {target}.",
           "container": "{source} entrega {item} y todo su contenido a {target}."
         }
+      }
+    },
+    "heroActions": {
+      "error": {
+        "onlyCharacter": "Las acciones de héroe solo son compatibles con actores de personajes.",
+        "notEnoughPoint": "El personaje no tiene suficientes puntos de héroe.",
+        "noDetails": "No se pudieron encontrar los detalles de esta acción de héroe.",
+        "noAction": "El personaje no tiene ninguna acción de héroe.",
+        "mustDiscard": "El personaje debe descartar {nb} acciones para participar en un intercambio.",
+        "noOther": "No hay ningún otro personaje con acciones de héroe disponible para intercambiar.",
+        "notGM": "Tienes que ser un MJ para otorgar acciones de héroe.",
+        "tradeError": "Se produjo un error al intentar procesar el intercambio entre <strong>{sender}</strong> y <strong>{receiver}</strong>."
+      },
+      "giveActions": {
+        "asDrawn": "Establecer como sorteado cuando se da",
+        "drawn": "Ya sorteado",
+        "no": "Cancelar",
+        "title": "Dar acciones de héroe",
+        "withMessage": "Generar mensaje de chat",
+        "yes": "Dar acciones"
+      },
+      "message": {
+        "drawn": "Ha sorteado ({nb}) acción(es) de héroe",
+        "given": "Se le dio ({nb}) acción(es) de héroe",
+        "discarded": "Ha descartado ({nb}) acción(es) de héroe",
+        "used": {
+          "heroPoints": "Punto de héroe",
+          "mythicPoints": "Punto mítico",
+          "message": "Gasta un {type} para usar"
+        },
+        "exchanged": "Intercambió una acción de héroe con {name}",
+        "offer": "Ofrecido: {link}",
+        "receive": "Recibido: {link}"
+      },
+      "removeActions": {
+        "all": "Todos los personajes",
+        "no": "Cancelar",
+        "removed": "Se eliminaron las acciones de héroe de personajes seleccionados.",
+        "title": "Eliminar acciones de héroe",
+        "yes": "Eliminar"
+      },
+      "sheet": {
+        "action": {
+          "use": "Usar",
+          "discard": "Desechar"
+        },
+        "draw": "Sortear {nb}",
+        "give": "Dar",
+        "label": "Acciones de héroe",
+        "redraw": "Volver a sortear",
+        "trade": "Intercambiar"
+      },
+      "table": {
+        "noDraw": "No se pudo sortear ninguna acción de la tabla para <strong>{name}</strong>.",
+        "notFound": "No se pudo encontrar ninguna tabla \"Hero Point Deck\" en este mundo.",
+        "noFormulaCompendium": "La tabla \"Hero Deck\" no tiene fórmula y es una tabla compendio.",
+        "drawError": "Se produjo un error durante el sorteo de una acción de héroe, la tabla puede contener resultados no conformes."
+      },
+      "trade": {
+        "no": "Cancelar",
+        "rejected": "El intercambio entre <strong>{sender}</strong> y <strong>{receiver}</strong> fue rechazado.",
+        "request": {
+          "title": "Acción de héroe - Solicitud de intercambio",
+          "flavor": "El personaje <strong>{sender}</strong> quiere comerciar con <strong>{receiver}</strong>",
+          "give": "Ofrece: {give}",
+          "want": "Quiere: {want}",
+          "yes": "Aceptar",
+          "no": "Rechazar"
+        },
+        "select": "Selecciona el personaje con el que intercambiar",
+        "title": "Intercambiar acción del héroe",
+        "yes": "Enviar"
+      },
+      "trigger": "Desencadenar"
+    },
+    "identify": {
+      "request": {
+        "hint": "Solicitar una identificación del objeto para",
+        "proceed": "¿Quieres continuar?",
+        "sent": "Se ha enviado una solicitud de identificación de objeto al MJ."
+      },
+      "tracker": {
+        "auto": {
+          "content": "Identifica los objetos que ya conocen los miembros del grupo:<br><ul>{items}</ul>",
+          "label": "Auto",
+          "none": "No hay objetos para identificar automáticamente",
+          "title": "Identificación automática",
+          "tooltip": "Identificar automáticamente objetos conocidos"
+        },
+        "clock": {
+          "backward": "Retroceder el tiempo 10 minutos",
+          "forward": "Adelantar el tiempo 10 minutos",
+          "open": "Abrir el menú del reloj mundial"
+        },
+        "failed": {
+          "daily": "No ha podido identificar este objeto hoy",
+          "delay": "No ha podido identificar este objeto:<br>{hours}h restantes"
+        },
+        "identified": "Ya identificado",
+        "known": {
+          "full": "Ya se identificó este objeto",
+          "partial": "Ha identificado un objeto similar:<br>{item}",
+          "recall": "Puede gastar una sola acción de recordar conocimiento y tener éxito automáticamente."
+        },
+        "misidentify": "Activar o desactivar la identificación errónea",
+        "request-checks": "Solicitar prueba",
+        "reset": {
+          "label": "Reiniciar",
+          "tooltip": "Revertir cambios actuales"
+        },
+        "save": {
+          "content": "Guarde los cambios actuales e identifique automáticamente los siguientes objetos:<br><ul>{items}</ul>",
+          "label": "Actualizar",
+          "title": "Actualizar cambios",
+          "tooltip": "Actualizar los cambios actuales e identificar los objetos"
+        },
+        "send-to-chat": "Enviar al chat",
+        "title": "Rastreador de identificación de objetos"
       }
     },
     "mergeDamage": {
@@ -561,6 +808,45 @@
           "before": "Los registros anteriores a <strong>{time}</strong> han sido borrados."
         }
       }
+    },
+    "shareData": {
+      "config": {
+        "armorRunes": {
+          "label": "Runas de armadura",
+          "hint": "Utilice la potencia de la armadura/brazaletes invertidos del maestro y las runas resilientes."
+        },
+        "health": {
+          "label": "Puntos de salud",
+          "hint": "Comparte puntos de salud y resistencia con su amo."
+        },
+        "heroPoints": {
+          "label": "Puntos de héroe",
+          "hint": "Utilice los puntos de héroe del maestro."
+        },
+        "master": {
+          "label": "Maestro",
+          "hint": "Seleccione un maestro con el que este actor compartirá datos."
+        },
+        "skills": {
+          "label": "Competencias y modificadores de habilidades",
+          "hint": "Usa las competencias de las habilidades del maestro. Añade también los modificadores de objetos del maestro para las habilidades y la percepción."
+        },
+        "spellcasting": {
+          "label": "Lanzamiento de conjuros",
+          "hint": "Utiliza la habilidad de lanzamiento de conjuros del maestro y su reserva de concentración."
+        },
+        "timeEvents": {
+          "label": "Eventos temporales",
+          "hint": "Cada vez que el turno del maestro comienza o termina, o la iniciativa cambia, los eventos también se activarán para este actor. Además, se usará al maestro para calcular la duración restante de los efectos."
+        },
+        "title": "Datos compartidos - {name}",
+        "unable": "No es posible vincular a este actor con un maestro.",
+        "weaponRunes": {
+          "label": "Runas de armas",
+          "hint": "Utilice las runas fundamentales y de propiedad de las armas y vendas invertidas del maestro."
+        }
+      },
+      "share": "Compartir"
     },
     "targetHelper": {
       "check-card": {
