@@ -84,14 +84,23 @@ async function rollSaves(
                 await roll3dDice(roll, target, isPrivate);
 
                 const context = msg.getFlag("pf2e", "context") as CheckContextChatFlag;
-                const modifiers = msg.getFlag("pf2e", "modifiers") as RawModifier[];
+
+                const modifiers = R.pipe(
+                    msg.getFlag("pf2e", "modifiers") as RawModifier[],
+                    R.filter((modifier) => !!modifier.enabled),
+                    R.map((modifier): SaveRollData["modifiers"][number] => {
+                        return {
+                            label: modifier.label,
+                            modifier: modifier.modifier,
+                            slug: modifier.slug ?? "unknown",
+                        };
+                    })
+                );
 
                 const rollData: SaveRollData = {
                     die: (roll.terms[0] as foundry.dice.terms.NumericTerm).total,
                     dosAdjustments: context.dosAdjustments,
-                    modifiers: modifiers
-                        .filter((modifier) => modifier.enabled)
-                        .map(({ label, modifier, slug }) => ({ label, modifier, slug })),
+                    modifiers,
                     notes: context.notes,
                     private: isPrivate,
                     roll: JSON.stringify(roll.toJSON()),
@@ -324,6 +333,7 @@ async function rerollSave(
         rollData.modifiers.push({
             label: this.localize("reroll.keeley"),
             modifier: 10,
+            slug: "keeley-add-10",
         });
     }
 
@@ -348,7 +358,7 @@ async function rerollSave(
 type SaveRollData = {
     die: number;
     dosAdjustments?: Record<string, { label: string; amount: DegreeAdjustmentAmount }>;
-    modifiers: { label: string; modifier: number }[];
+    modifiers: { label: string; modifier: number; slug: string }[];
     notes: RollNoteSource[];
     private: boolean;
     rerolled?: RerollType;
