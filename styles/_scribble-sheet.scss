@@ -1,0 +1,714 @@
+@mixin hidden() {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@mixin dropShadow($blur: 4) {
+    filter: drop-shadow(0 0 #{$blur}px var(--color-shadow-primary));
+}
+
+@mixin fontFamily2($spacing: false, $color: false) {
+    font-family: var(--font-family-2);
+
+    @if $color {
+        color: var(--text-color);
+    }
+
+    @if $spacing {
+        letter-spacing: #{$spacing}px;
+    }
+}
+
+@mixin handDrawnBorders($thickness: 1) {
+    border-top-left-radius: 255px 15px;
+    border-top-right-radius: 15px 225px;
+    border-bottom-right-radius: 225px 15px;
+    border-bottom-left-radius: 15px 255px;
+    border: solid #{$thickness}px var(--border-color);
+}
+
+@mixin handDrawnInput($thickness: 1, $height: false) {
+    border-bottom-right-radius: 30px 3px;
+    border-bottom-left-radius: 120px 1px;
+    border-bottom: #{$thickness}px solid var(--border-color);
+    background: none;
+    box-shadow: none;
+    padding-bottom: 0;
+    font-family: var(--font-family);
+    font-weight: normal;
+    color: var(--text-color);
+
+    @if $height {
+        height: $height;
+    }
+}
+
+@mixin handDrawButton($border: 1) {
+    @include handDrawnBorders($border);
+
+    box-shadow: none;
+    background: url("/modules/pf2e-toolbelt/images/scribble/scribble-mask-75.webp");
+    color: var(--text-color);
+    font-family: var(--font-family);
+
+    &:hover {
+        box-shadow: inset 0 0 3px 0px var(--color-shadow-primary);
+    }
+}
+
+@mixin scribbleMask() {
+    mask-image: url("/modules/pf2e-toolbelt/images/scribble/scribble-mask.webp");
+    mask-position: center;
+}
+
+@mixin handDrawnTag($border: false, $letter: 1, $mask: false) {
+    @include fontFamily2($letter);
+
+    font-size: var(--font-size-11);
+
+    @if $mask {
+        @include scribbleMask();
+    }
+
+    @if $border {
+        @include handDrawnBorders($border);
+    }
+}
+
+@mixin iconImg($url, $size: contain) {
+    background-size: $size;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url($url);
+
+    &::before,
+    &::after,
+    path {
+        @include hidden();
+    }
+}
+
+body.pf2e-toolbelt-scribble .sheet.actor.character {
+    --border-color: #41403e;
+    --border-color-light: #41403e94;
+    --font-family: "Handlee";
+    --font-family-2: "Neucha";
+    --text-color: var(--color-cool-4);
+    --text-color-disabled: var(--text-light-disabled);
+
+    background: url("/ui/parchment.jpg") repeat;
+
+    a:hover {
+        color: var(--text-color);
+        text-shadow: 0 0 4px var(--color-warm-2);
+    }
+
+    $icons: (
+        "fa-ellipsis-v": "manage",
+        "fa-search": "search",
+        "fa-edit": "edit",
+        "fa-circle": "circle-empty",
+        "fa-circle-xmark": "circle-x",
+        "fa-hospital-symbol": "circle-h",
+        "fa-circle-m": "circle-m",
+        "fa-share-all": "share",
+        "fa-circle-user": "circle-user",
+        "fa-user-gear": "user-config",
+        "fa-xmark": "cancel",
+    );
+
+    @each $class, $icon in ($icons) {
+        i.#{$class} {
+            @include iconImg("/modules/pf2e-toolbelt/images/scribble/icons/#{$icon}.webp");
+
+            &:hover {
+                @include dropShadow();
+            }
+        }
+    }
+}
+
+body.pf2e-toolbelt-scribble .sheet.actor.character header.window-header {
+    @include handDrawnBorders(2);
+
+    margin: 2px 2px 0;
+    color: var(--text-color);
+    font-family: var(--font-family);
+    background: none;
+
+    $icons: "fa-share-all", "fa-circle-user", "fa-user-gear", "fa-xmark";
+
+    @each $icon in $icons {
+        i.#{$icon} {
+            font-size: 1.2em;
+        }
+    }
+}
+
+body.pf2e-toolbelt-scribble .sheet.actor.character section.window-content form.crb-style {
+    background: none;
+    color: var(--text-color);
+    font-family: var(--font-family);
+
+    grid:
+        "sidebar header" 4rem
+        "sidebar nav" minmax(min-content, max-content)
+        "sidebar content" 1fr / 14.375rem 1fr;
+
+    .tags:not(.package-overview) .tag,
+    .tags:not(.package-overview) .tag option {
+        @include handDrawnTag(0, 0.8, true);
+    }
+
+    .tags.light > .tag,
+    .tags > .tag.light {
+        @include handDrawnTag(1, 0.5);
+
+        color: var(--text-color);
+        mask: none;
+
+        &.unallocated {
+            opacity: 0.7;
+        }
+    }
+
+    .tags.paizo-style {
+        gap: 2px;
+
+        .tag {
+            border-width: 2px;
+        }
+    }
+
+    .pf-rank {
+        @include handDrawnTag(1, 1, true);
+    }
+
+    .d20-svg {
+        svg {
+            @include iconImg("/modules/pf2e-toolbelt/images/scribble/icons/d20.webp");
+        }
+    }
+
+    .details-label {
+        color: var(--text-color);
+        font-family: var(--font-family);
+    }
+
+    .details-input {
+        @include handDrawnInput(1);
+    }
+
+    select {
+        font-family: var(--font-family);
+        padding: 1px 1px 0;
+    }
+
+    section.major {
+        > header,
+        > .subsection > header {
+            color: var(--text-color);
+            font-family: var(--font-family);
+            border-color: var(--border-color);
+
+            button {
+                @include handDrawnBorders(1);
+                @include fontFamily2(1, true);
+
+                background: url("/modules/pf2e-toolbelt/images/scribble/scribble-mask-75.webp");
+                font-weight: 600;
+                padding: 0 0.3em;
+            }
+        }
+    }
+
+    nav.sheet-navigation {
+        .item {
+            border-radius: 108px 72px 111px;
+        }
+    }
+
+    header.char-header {
+        color: var(--text-color);
+        padding-left: 1rem;
+
+        .char-details {
+            color: var(--text-color);
+            font-family: var(--font-family);
+
+            h1.char-name {
+                input[type="text"],
+                span.non-editable {
+                    @include handDrawnInput(2);
+
+                    color: var(--text-color);
+                    font-family: var(--font-family);
+                }
+            }
+
+            .dots {
+                align-items: center;
+
+                .label {
+                    color: var(--text-color);
+                }
+
+                [data-resource] {
+                    font-size: 1.5em;
+                }
+            }
+        }
+
+        .char-level {
+            .exp-data {
+                .exp-input input {
+                    @include handDrawnInput(1, 1.4em);
+
+                    border-bottom-right-radius: 50px 3px;
+                    border-bottom-left-radius: 29px 4px;
+                }
+            }
+
+            .level {
+                background-image: url("/modules/pf2e-toolbelt/images/scribble/level-25.webp");
+
+                label,
+                input {
+                    color: var(--text-color);
+                    font-family: var(--font-family);
+                }
+
+                label {
+                    line-height: 0.5;
+                    margin-top: 1px;
+                }
+
+                input {
+                    background: none;
+                    box-shadow: none;
+                }
+            }
+
+            progress {
+                box-shadow: none;
+                border: none;
+                height: 8px;
+
+                &::-moz-progress-bar {
+                    border-top-left-radius: 395px 340px;
+                }
+
+                &::-webkit-progress-bar {
+                    border-top-left-radius: 395px 340px;
+                }
+
+                &::-webkit-progress-value {
+                    border-top-left-radius: 395px 340px;
+                    background: url("/modules/pf2e-toolbelt/images/scribble/scribble-mask.webp");
+                }
+            }
+        }
+    }
+
+    nav.sheet-navigation {
+        @include handDrawnBorders(1);
+
+        position: relative;
+        box-shadow: none;
+        background: none;
+        border-left: none;
+        border-right: none;
+        border-color: var(--border-color-light);
+
+        .panel-title {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1.2em;
+            font-family: "Neucha";
+        }
+
+        .item {
+            box-shadow: none;
+            background: none;
+            color: black;
+            font-size: 1.2em;
+
+            $icons: (
+                "character": 100%,
+                "inventory": 100%,
+                "spellcasting": 100%,
+                "crafting": 110%,
+                "proficiencies": 110%,
+                "feats": 110%,
+                "effects": 110%,
+                "biography": 110%,
+            );
+
+            @each $icon, $size in $icons {
+                &[data-tab="#{$icon}"] {
+                    i {
+                        @include iconImg(
+                            "/modules/pf2e-toolbelt/images/scribble/icons/#{$icon}.webp",
+                            $size
+                        );
+                    }
+                }
+            }
+
+            &[data-tab="character"] {
+                font-size: 1.4em;
+            }
+
+            &[data-tab="actions"] {
+                @include iconImg("/modules/pf2e-toolbelt/images/scribble/icons/actions.webp", 86%);
+
+                span {
+                    @include hidden();
+                }
+            }
+
+            &[data-tab="pfs"] {
+                @include iconImg("/modules/pf2e-toolbelt/images/scribble/icons/pfs.webp", 86%);
+            }
+
+            &:not([data-tab="actions"]):not([data-tab="pfs"]) {
+                &:hover,
+                &.active {
+                    background: none;
+                    color: black;
+                }
+            }
+
+            &[data-tab="actions"],
+            &[data-tab="pfs"] {
+                &:hover,
+                &.active {
+                    transform: scale(1.4);
+                }
+            }
+
+            &:hover,
+            &.active {
+                box-shadow: none;
+                transform: scale(1.4);
+
+                &:not([data-tab="actions"]):not([data-tab="pfs"]) {
+                    background: none;
+                    color: black;
+                }
+
+                &[data-tab="actions"],
+                &[data-tab="pfs"] {
+                    transform: scale(1.4);
+                }
+            }
+
+            &.active {
+                filter: drop-shadow(0 0 1px var(--color-warm-2));
+            }
+        }
+
+        .manage-tabs {
+            color: var(--text-color);
+        }
+    }
+
+    aside {
+        font-family: var(--font-family);
+        background: none;
+
+        input[type="number"],
+        input[type="text"] {
+            color: var(--text-color);
+            font-size: var(--font-size-22);
+        }
+
+        select {
+            @include scribbleMask();
+            @include handDrawnBorders(2);
+
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+
+        > img {
+            content: url("/modules/pf2e-toolbelt/images/scribble/logo.webp");
+            height: 58px;
+            filter: contrast(0.6);
+        }
+
+        .sidebar {
+            header {
+                h2 {
+                    border-color: var(--border-color);
+                    color: var(--text-color);
+                    font-family: var(--font-family);
+                }
+
+                button {
+                    @include handDrawButton(1);
+
+                    padding-block: var(--space-3) var(--space-1);
+                }
+            }
+
+            a.roll-icon {
+                svg path {
+                    fill: var(--text-color);
+                }
+
+                &[data-action="roll-check"] {
+                    i {
+                        @include iconImg(
+                            "/modules/pf2e-toolbelt/images/scribble/icons/perception.webp"
+                        );
+
+                        color: var(--text-color);
+                    }
+                }
+
+                &.rest {
+                    i {
+                        @include iconImg("/modules/pf2e-toolbelt/images/scribble/icons/rest.webp");
+                    }
+                }
+
+                &.dailies {
+                    i {
+                        @include iconImg(
+                            "/modules/pf2e-toolbelt/images/scribble/icons/dailies.webp"
+                        );
+                    }
+                }
+
+                &.disabled {
+                    opacity: 0.4;
+                }
+            }
+
+            .sidebar_label {
+                color: var(--text-color);
+                font-family: var(--font-family);
+            }
+
+            .armor-class {
+                .ac,
+                .shield {
+                    .data-value {
+                        h2,
+                        input {
+                            font-family: var(--font-family);
+                        }
+
+                        input {
+                            font-size: var(--font-size-22);
+                        }
+                    }
+
+                    &.hp {
+                        background-image: url("/modules/pf2e-toolbelt/images/scribble/shield-25.webp");
+                        background-size: contain;
+                    }
+                }
+
+                .ac {
+                    background-image: url("/modules/pf2e-toolbelt/images/scribble/fat-shield-25.webp");
+                    background-size: contain;
+                    background-position-y: bottom;
+                }
+
+                .shield.hp {
+                    .data-value {
+                        input {
+                            background: transparent;
+                        }
+                    }
+                }
+
+                .shield-stats {
+                    ul {
+                        li {
+                            .shield-label {
+                                svg {
+                                    path {
+                                        fill: #00000038;
+                                    }
+
+                                    text {
+                                        fill: black;
+                                        font-family: var(--font-family);
+                                    }
+                                }
+                            }
+
+                            .data-value {
+                                @include handDrawnBorders(1);
+
+                                box-shadow: none;
+                                color: var(--text-color);
+                                padding: 1px 0 0;
+                            }
+                        }
+                    }
+                }
+
+                .shield-max-status {
+                    .max {
+                        .data-value {
+                            color: var(--text-color);
+                            font-family: var(--font-family);
+                        }
+                    }
+
+                    .status {
+                        color: var(--text-color);
+
+                        i {
+                            font-size: 1.5em;
+                        }
+                    }
+                }
+            }
+
+            .data-value {
+                h2 {
+                    color: var(--text-color);
+                    font-size: var(--font-size-22);
+                    font-family: var(--font-family);
+                }
+            }
+
+            .hitpoints {
+                .hp-big {
+                    .container.current-hp {
+                        background: none;
+                        border: none;
+                        margin-top: var(--space-12);
+                        padding: 0;
+                    }
+
+                    .data-value {
+                        margin: 0;
+
+                        input {
+                            @include handDrawnInput(1);
+
+                            margin: 0;
+                            border-bottom-left-radius: 79px 3px;
+                        }
+
+                        h2 {
+                            margin: 1px 0 0;
+                        }
+                    }
+                }
+
+                .hp-small {
+                    gap: 0.4rem;
+
+                    i.fa-regular,
+                    i.fa-solid {
+                        color: var(--text-color);
+                    }
+                }
+            }
+
+            .roll-data {
+                h3,
+                .modifier {
+                    color: var(--text-color);
+                }
+
+                .modifier {
+                    &.hover {
+                        text-decoration-color: var(--text-color);
+                    }
+                }
+            }
+        }
+    }
+
+    .sheet-body {
+        .sheet-content {
+            > .tab.active.character {
+                .subsection {
+                    gap: 0.2rem;
+                }
+
+                .subsection.details {
+                    hr {
+                        display: none;
+                    }
+
+                    .image-container {
+                        @include handDrawnBorders(2);
+
+                        margin-left: -2px;
+                        margin-top: -2px;
+
+                        .actor-image {
+                            filter: grayscale(1);
+                            mask-image: url("/modules/pf2e-toolbelt/images/scribble/scribble-mask.webp");
+                            mask-position: center;
+                            mask-size: 100% 100%;
+                            box-shadow: none;
+                        }
+                    }
+
+                    .abcd .detail h3 {
+                        @include handDrawnInput(1);
+                        line-height: 1.5;
+                        padding-top: 0;
+                    }
+                }
+
+                .subsection.languages {
+                    gap: 0.4rem;
+                }
+
+                .subsection.speeds {
+                    .speed {
+                        .label {
+                            @include fontFamily2(1, true);
+
+                            font-size: 1.2em;
+                            font-variant: normal;
+                        }
+
+                        .value {
+                            color: var(--text-color);
+                            font-family: var(--font-family);
+                            padding: 0;
+                        }
+                    }
+                }
+
+                .subsection.attributes ul {
+                    grid-template-rows: 1fr;
+                    grid-template-columns: repeat(6, 1fr);
+                    gap: 0;
+
+                    .abbreviation {
+                        @include fontFamily2(false, true);
+                    }
+
+                    h3.modifier {
+                        background: url("/modules/pf2e-toolbelt/images/scribble/attr-frame.webp");
+                        background-position: center;
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        border: none;
+                        height: 3.7rem;
+                        color: var(--text-color);
+                        font-family: var(--font-family);
+                    }
+
+                    .label {
+                        opacity: 0.6;
+                        @include fontFamily2(0.5, true);
+                    }
+                }
+            }
+        }
+    }
+}

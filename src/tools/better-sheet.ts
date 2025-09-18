@@ -7,6 +7,7 @@ import {
     FamiliarPF2e,
     FamiliarSheetPF2e,
     NPCSheetPF2e,
+    renderCharacterSheets,
     toggleHooksAndWrappers,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -48,22 +49,24 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     toggleHooksAndWrappers(this.#partyAsObservedHooks, !game.user.isGM && value);
                 },
             },
-            // {
-            //     key: "scribble",
-            //     type: Boolean,
-            //     default: false,
-            //     scope: "user",
-            //     onChange: (value) => {
-            //         document.body.classList.toggle("pf2e-toolbelt-scribble", value);
-            //         renderCharacterSheets();
-            //     },
-            // },
+            {
+                key: "scribble",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                // TODO this goes away once the feature is released
+                config: false,
+                onChange: (value) => {
+                    document.body.classList.toggle("pf2e-toolbelt-scribble", value);
+                    renderCharacterSheets();
+                },
+            },
         ];
     }
 
-    // init(isGM: boolean): void {
-    //     document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
-    // }
+    init(isGM: boolean): void {
+        document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
+    }
 
     ready(isGM: boolean): void {
         toggleHooksAndWrappers(this.#partyAsObservedHooks, !isGM && this.settings.partyAsObserved);

@@ -74,6 +74,11 @@ Hooks.once("init", () => {
         fonts: [{ urls: [`modules/${MODULE.id}/fonts/Handlee/Handlee-Regular.ttf`] }],
     };
 
+    CONFIG.fontDefinitions["Neucha"] = {
+        editor: true,
+        fonts: [{ urls: [`modules/${MODULE.id}/fonts/Neucha/Neucha-Regular.ttf`] }],
+    };
+
     registerModuleKeybinds(
         R.pipe(
             TOOLS,
