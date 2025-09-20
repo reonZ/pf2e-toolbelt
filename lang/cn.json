@@ -3,11 +3,11 @@
         "settings": {
             "actionable": {
                 "item": {
-                    "hint": "为装备或消耗品新增添加应用于自身效果或宏的设置栏。",
-                    "name": "物品效果/宏"
+                    "hint": "为装备或消耗品新增添加宏的设置栏。",
+                    "name": "物品宏"
                 },
                 "use": {
-                    "hint": "给消耗品添加一个额外的“使用”键，并在使用后发送对应信息。",
+                    "hint": "给消耗品添加一个额外的“使用”键，并在使用后生成对应信息。",
                     "name": "使用消耗品"
                 },
                 "action": {
@@ -16,31 +16,31 @@
                 },
                 "apply": {
                     "name": "自动应用于自身",
-                    "hint": "自应用效果的使用键会自动将效应应用。"
+                    "hint": "应用于自身效果的使用键会自动将效应应用。"
                 },
                 "title": "动作项",
                 "spell": {
-                    "name": "法术效果/宏",
-                    "hint": "为法术新增添加应用于自身效果或宏的设置栏。"
+                    "name": "法术宏",
+                    "hint": "为法术新增添加宏的设置栏。"
                 }
             },
             "arp": {
                 "enabled": {
-                    "hint": "需要你的世界开启自动符文升级变体（在核心系统设置）。",
+                    "hint": "如果你的世界使用该变体规则。该功能会自动更新武器和护甲，在对应等级赋予他们基础符文/材料品质提升。",
                     "name": "启用"
                 },
                 "title": "自动符文升级",
                 "force": {
                     "name": "强制更新",
-                    "hint": "当启用此项，符文将始终基于角色等级更新。禁用时，只有低于当前等级应有值的符文才会被升级。"
+                    "hint": "当启用此项，符文/材料品质将始终基于角色等级更新。禁用时，只有低于当前等级应有值的符文/材料品质才会被升级。"
                 },
                 "price": {
-                    "name": "忽略符文价格",
-                    "hint": "是否在武器价格中忽略基础符文价格。"
+                    "name": "忽略符文/材料品质提升价格",
+                    "hint": "是否在武器价格中忽略基础符文/材料品质提升价格。"
                 },
                 "shield": {
-                    "name": "盾牌符文",
-                    "hint": "是否自动给盾牌添加强固符文。"
+                    "name": "盾牌符文/材料品质提升",
+                    "hint": "是否自动更新盾牌。"
                 }
             },
             "betterInventory": {
@@ -48,10 +48,26 @@
                     "hint": "货币重量不被计入负载。",
                     "name": "无重量货币"
                 },
-                "title": "更轻便的库存",
+                "title": "更便利的库存",
                 "dropped": {
                     "name": "丢弃物忽略负载",
                     "hint": "一名角色丢弃的装备不会纳入负载值计算。"
+                },
+                "improvised": {
+                    "name": "临时武器按钮",
+                    "hint": "在玩家角色的库存中添加按钮，以便随时创建临时武器。"
+                },
+                "mergeItems": {
+                    "name": "物品合并按钮",
+                    "hint": "在库存标题栏添加合并按钮，以合并同类物品堆叠。"
+                },
+                "partyAsObserved": {
+                    "hint": "允许玩家查看“受限”权限的角色卡，只要该角色属于队伍的盟友即可。注意不要与“团队”角色混淆。",
+                    "name": "查看队伍盟友许可"
+                },
+                "splitItem": {
+                    "name": "允许分割物品",
+                    "hint": "点击角色卡中物品数量的数字，可以将其分割为多个物品堆叠。"
                 }
             },
             "betterMovement": {
@@ -66,7 +82,7 @@
                 },
                 "title": "更便捷的移动",
                 "history": {
-                    "name": "禁止记录",
+                    "name": "禁止记录历史",
                     "hint": "是否禁止记录你的移动历史。这会使同一回合内的连续移动操作不那么混乱。"
                 }
             },
@@ -75,6 +91,10 @@
                 "spell": {
                     "name": "匿名化NPC法术",
                     "hint": "由非玩家所有的角色释放的法术会对玩家匿名化。"
+                },
+                "action": {
+                    "name": "匿名化NPC动作",
+                    "hint": "非玩家拥有的角色发送到聊天的动作将对玩家匿名化。"
                 }
             },
             "conditionManager": {
@@ -82,7 +102,7 @@
                     "name": "启用",
                     "hint": "拖拽状态时按住设定好的快捷键，即可以打开状态管理栏设置其持续时间。"
                 },
-                "title": "状态管理器"
+                "title": "状态管理"
             },
             "betterEffectsPanel": {
                 "remove": {
@@ -103,7 +123,7 @@
                     "name": "同步容器内容物",
                     "hint": "当容器从一名角色转移至另一名角色身上时，是否同步转移其内容物。"
                 },
-                "title": "更便利的交易"
+                "title": "更便利的交换"
             },
             "droppeth": {
                 "title": "丢弃物品",
@@ -113,7 +133,7 @@
                 },
                 "light": {
                     "name": "光源",
-                    "hint": "丢弃的物品会发光。仅在战利品角色中存在物品时才会发光。"
+                    "hint": "若丢弃的物品会发光，则仅在战利品角色中存在物品时才会发光。"
                 }
             },
             "mergeDamage": {
@@ -130,7 +150,7 @@
             "giveth": {
                 "enabled": {
                     "name": "启用",
-                    "hint": "你的世界是否允许玩家操控的角色将物品给予其他玩家操控的角色。"
+                    "hint": "你的世界是否允许玩家操控的角色将库存物品传递给其他玩家拥有或是团队成员的角色。"
                 },
                 "effect": {
                     "choices": {
@@ -141,10 +161,22 @@
                     "name": "包括效应/状态",
                     "hint": "玩家是否也可以将效果或状态拖给其他玩家操控的角色。"
                 },
-                "title": "交易物品"
+                "title": "传递管理"
             },
             "resourceTracker": {
-                "title": "资源跟踪器"
+                "title": "资源跟踪器",
+                "offline": {
+                    "name": "显示离线资源",
+                    "hint": "显示来自离线用户的共享资源。"
+                },
+                "show": {
+                    "hint": "如果资源跟踪器部件显示在您的界面中。可以通过左侧UI上的控件切换开/关。",
+                    "name": "显示跟踪器"
+                },
+                "enabled": {
+                    "name": "启用",
+                    "hint": "在你的世界启用该工具。该追踪器可以通过左侧UI控件切换开/关。"
+                }
             },
             "targetHelper": {
                 "title": "目标助手",
@@ -157,7 +189,8 @@
                     "hint": "缩小额外目标的伤害按钮。"
                 },
                 "checks": {
-                    "name": "更新检查信息"
+                    "name": "更新检查信息",
+                    "hint": "将简单的内联保存信息升级为该功能可以使用的格式，同时添加更多详细信息。"
                 },
                 "enabled": {
                     "name": "启用",
@@ -169,7 +202,7 @@
                     "name": "启用",
                     "hint": "允许负高度的指示物在场景可见。"
                 },
-                "title": "地下",
+                "title": "地下生物显示",
                 "mode": {
                     "name": "应用滤镜",
                     "choices": {
@@ -177,7 +210,7 @@
                         "greyscale": "灰度滤镜",
                         "sepia": "褐色滤镜"
                     },
-                    "hint": "对高度低于0以下的指示物使用什么滤镜。"
+                    "hint": "对高度为负的指示物应用什么滤镜。"
                 },
                 "contrast": {
                     "name": "对比度",
@@ -186,6 +219,10 @@
                 "alpha": {
                     "name": "不透明度",
                     "hint": "指示物具备负高度时的不透明度。"
+                },
+                "tiles": {
+                    "name": "背景贴图",
+                    "hint": "该功能会确保贴图绘制于负高度标记后面。注意，这可能与其他作用于贴图的模组冲突。"
                 }
             },
             "unided": {
@@ -198,11 +235,85 @@
                     "name": "在物品更新时",
                     "hint": "在物品的正常图像更新时自动更新其未鉴定图像。"
                 }
+            },
+            "betterMerchant": {
+                "enabled": {
+                    "hint": "为系统默认商人添加自定义功能。",
+                    "name": "启用"
+                },
+                "title": "更自定义的商人"
+            },
+            "identify": {
+                "title": "鉴定",
+                "delay": {
+                    "name": "24小时冷却",
+                    "hint": "启用后，若未能成功鉴定物品，则角色需要等待24小时才能再次尝试。除此以外，鉴定冷却将在次日自动重置。"
+                },
+                "enabled": {
+                    "name": "启用",
+                    "hint": "该功能将帮助你管理世界中未被鉴定的物品，并跟踪哪些物品已被鉴定。"
+                },
+                "identifyPartials": {
+                    "name": "自动鉴定类似物品",
+                    "hint": "使用'自动鉴定已知物品'选项时，是否也应鉴定‘类似’物品。"
+                },
+                "playerRequest": {
+                    "hint": "是否允许玩家发出鉴定物品的请求。",
+                    "name": "允许玩家请求"
+                }
+            },
+            "heroActions": {
+                "enabled": {
+                    "name": "启用",
+                    "hint": "是否在你的世界启用英雄点卡牌动作。"
+                },
+                "private": {
+                    "name": "私密抽取",
+                    "hint": "私密化生成的英雄动作抽取消息。若启用该功能，动作交换信息将不对所有参与者公开。"
+                },
+                "table": {
+                    "name": "随机表 UUID",
+                    "hint": "你希望在世界中所使用随机表的唯一标识符。要获取（在合集包或随机表目录中）随机表的UUID，只需打开表格并点击左上角名称旁的📔即可。"
+                },
+                "trade": {
+                    "name": "允许交易",
+                    "hint": "启用时，玩家角色间允许交换英雄点动作。"
+                },
+                "title": "英雄动作",
+                "count": {
+                    "hint": "若为0，则每个英雄点只能有一个英雄动作。否则，每次抽取的英雄动作数量将与英雄点的可用数量分离，角色必须从设置中重新抽取英雄动作。",
+                    "name": "英雄动作上限设置"
+                }
+            },
+            "rollTracker": {
+                "title": "掷骰追踪",
+                "enabled": {
+                    "name": "启用",
+                    "hint": "追踪掷骰，看看你的玩家是否真的那么倒霉。"
+                }
+            },
+            "shareData": {
+                "enabled": {
+                    "name": "启用",
+                    "hint": "角色将可以与另一名角色链接/共享他们的数据。"
+                },
+                "title": "共享数据"
+            },
+            "betterSheet": {
+                "title": "更好的角色卡",
+                "scribble": {
+                    "name": "手写角色卡",
+                    "hint": "重设角色卡显示风格，使其看起来像是手绘制成的。"
+                },
+                "partyAsObserved": {
+                    "name": "查看队伍盟友许可",
+                    "hint": "允许玩家查看“受限”权限的角色卡，只要该角色属于队伍的盟友即可。注意不要与“团队”角色混淆。"
+                }
             }
         },
         "actionable": {
             "action": {
-                "cancel": "<strong>{name}</strong> 动作被其宏取消。",
+                "cancel": "<strong>{name}</strong>动作被其宏取消。",
                 "label": "应用于自身的效应/宏",
                 "hint": "单个被应用于使用该动作的角色的效应物品，或该动作使用时执行的宏"
             },
@@ -243,8 +354,12 @@
         },
         "anonymous": {
             "spell": {
-                "header": "正在施放一个法术..",
+                "header": "正在施放法术..",
                 "context": "对玩家揭示法术"
+            },
+            "action": {
+                "header": "正在使用能力…",
+                "context": "对玩家揭示动作"
             }
         },
         "betterTemplate": {
@@ -317,7 +432,7 @@
             "resource": {
                 "title": {
                     "create": "创建新资源",
-                    "edit": "资源详情"
+                    "edit": "编辑资源"
                 },
                 "name": {
                     "label": "资源名称",
@@ -332,10 +447,10 @@
                 "steps": {
                     "step1": "[点击]",
                     "step2": "[Shift-点击]",
-                    "label": "点击步进数值",
+                    "label": "步进数值",
                     "step3": "[Ctrl-点击]"
                 },
-                "edit": "[右键点击] 资源详情",
+                "edit": "[右键点击] 编辑资源",
                 "delete": "删除该资源？",
                 "shared": "对其他人可见？",
                 "yes": {
@@ -371,6 +486,7 @@
             },
             "reroll": {
                 "title": "重骰豁免检定",
+                "noPoints": "你需要至少1点英雄点重骰此检定。",
                 "yes": "重骰",
                 "no": "取消",
                 "keeley": "低值重骰"
@@ -393,6 +509,389 @@
                 "adjustment": "调整值： {value}"
             },
             "unnamed": "未命名"
+        },
+        "betterMerchant": {
+            "item": {
+                "sell": {
+                    "prompt": "你想要出售多少物品？",
+                    "title": "出售物品"
+                },
+                "unided": "没有哪个神志清醒的人会想随便买些未经鉴定的物品。",
+                "noStock": "<strong>{actor}</strong>无法提供所请求数量的<strong>{item}</strong>。",
+                "error": "尝试为更自定义的商人处理物品交易时出现错误：<strong>{reason}</strong>。",
+                "unwilling": "<strong>{actor}</strong>不愿意拿出<strong>{item}</strong>。",
+                "refuse": "<strong>{actor}</strong>对购买<strong>{item}</strong>不感兴趣。",
+                "buy": {
+                    "confirm": {
+                        "content": "<strong>{buyer}</strong>是否要购买<strong>{item}</strong>？",
+                        "title": "购买物品 - {item}"
+                    },
+                    "noTarget": "你必须选择一个有效角色才能从商人处购买物品"
+                }
+            },
+            "browserPull": {
+                "add": "添加至商人卡",
+                "wait": "请等待物品处理完毕。",
+                "all": "全选/全否",
+                "owned": "该物品已在商人的库存中",
+                "selected": "选择",
+                "title": "添加物品 - {name}",
+                "confirm": "<div>你确定要将所选物品（已选： <strong>{nb}</strong>件）添加到商人吗？</div><div>该过程需要花费几秒钟，具体取决于物品数量。</div>",
+                "finished": "已将物品添加到商人角色中。",
+                "limit": "你已经到达上限了！"
+            },
+            "filtersMenu": {
+                "delete": {
+                    "title": "删除筛选项",
+                    "content": "你确定你要删除该筛选项吗？"
+                },
+                "service": "服务筛选项",
+                "enabled": "启用",
+                "ratio": "价格比率",
+                "tag": "标签",
+                "buy": "购买筛选项",
+                "sell": "出售筛选项",
+                "title": "物品筛选项 - {name}",
+                "treasure": "到达该过滤项的宝物总是会以原价被购买"
+            },
+            "sheet": {
+                "filters": "设置筛选项",
+                "browser": "从合集包浏览导入",
+                "infiniteAll": {
+                    "tooltip": "商人售卖的物品永远不会被卖空（这不会影响宝物或服务）",
+                    "label": "无限库存"
+                }
+            },
+            "serviceMenu": {
+                "delete": {
+                    "title": "删除服务",
+                    "content": "你确定你要删除该服务？"
+                },
+                "enabled": "启用",
+                "export": "导出服务",
+                "buy": "<strong>{buyer}</strong>雇佣了<strong>{seller}</strong>的服务。",
+                "copied": "服务<strong>{label}</strong>已被复制到剪贴板。",
+                "error": "在尝试处理服务请求时出现错误",
+                "give": "<strong>{seller}</strong>免费向<strong>{buyer}</strong>提供服务。",
+                "macro": {
+                    "label": "在服务上执行的宏",
+                    "drop": "拖拽宏至此"
+                },
+                "name": "名称",
+                "noBuyer": "你必须选择一个你拥有的玩家角色/NPC/团队作为服务的对象。",
+                "noFunds": "<strong>{buyer}</strong>没有足够资金雇佣<strong>{seller}</strong>的服务。",
+                "none": "无法找到该服务",
+                "noStock": "<strong>{seller}</strong>不再提供该服务。",
+                "quantity": "负数表示无限库存",
+                "tags": "服务特征",
+                "title": "服务 - {label}"
+            },
+            "browserFilter": {
+                "create": "创建筛选项",
+                "edit": "编辑筛选项",
+                "empty": "没有创建不包含筛选条件…筛选项的必要。"
+            },
+            "importServices": {
+                "title": "导入服务 - {name}",
+                "yes": "导入",
+                "error": "尝试导入服务时出现错误。"
+            },
+            "sheetServices": {
+                "delete": "删除服务",
+                "edit": "编辑服务",
+                "export": "导出服务",
+                "import": "导入服务",
+                "label": "服务",
+                "buy": "请求服务",
+                "add": "创建服务",
+                "copied": "<strong>{name}</strong>服务已被复制到剪贴板。",
+                "enabled": "开启/关闭服务",
+                "free": "免费",
+                "give": "免费服务"
+            },
+            "service": {
+                "unwilling": "<strong>{seller}</strong>不愿意再提供该服务。",
+                "buy": "<strong>{buyer}</strong>雇佣了<strong>{seller}</strong>的服务。",
+                "error": "在尝试处理更自定义的商人的服务（{service}）时出现错误：<strong>{reason}</strong>。",
+                "give": "<strong>{seller}</strong>免费向<strong>{buyer}</strong>提供服务。",
+                "noBuyer": "你必须选择一个你拥有的玩家角色/NPC/团队作为服务的对象。",
+                "noFunds": "<strong>{buyer}</strong>没有足够资金雇佣<strong>{seller}</strong>的服务。",
+                "noStock": "<strong>{seller}</strong>不再提供该服务。"
+            }
+        },
+        "rollTracker": {
+            "tracker": {
+                "left": "掷骰次数",
+                "bottom": "掷骰值",
+                "mode": {
+                    "all": {
+                        "label": "所有检定"
+                    },
+                    "attack-roll": {
+                        "label": "攻击掷骰"
+                    },
+                    "attack-roll-outcome": {
+                        "label": "攻击结果",
+                        "bottom": "掷骰结果"
+                    },
+                    "skill-check": {
+                        "label": "技能检定"
+                    },
+                    "saving-throw": {
+                        "label": "豁免检定"
+                    },
+                    "saving-throw-outcome": {
+                        "label": "豁免结果",
+                        "bottom": "强韧|反射|意志"
+                    },
+                    "flat-check": {
+                        "label": "纯骰检定"
+                    },
+                    "skill-check-1": {
+                        "label": "技能（前半）",
+                        "bottom": "技能检定"
+                    },
+                    "skill-check-2": {
+                        "label": "技能（后半）",
+                        "bottom": "技能检定"
+                    },
+                    "perception-check": {
+                        "label": "察觉检定"
+                    },
+                    "initiative": {
+                        "label": "先攻检定"
+                    }
+                },
+                "stats": {
+                    "mode": "众数",
+                    "total": "总掷骰次数",
+                    "mean": "平均数",
+                    "median": "中位数"
+                },
+                "info": {
+                    "session": {
+                        "tooltip": "在当前团期结束前，不会有新的结果显示",
+                        "label": "当前正在团期中"
+                    },
+                    "paused": {
+                        "label": "记录已暂停",
+                        "tooltip": "你的世界中没有任何掷骰被记录"
+                    }
+                },
+                "filter": {
+                    "all": "所有时间",
+                    "session": "团期",
+                    "encounter": "遭遇",
+                    "time": "时间范围"
+                },
+                "options": {
+                    "from": "从",
+                    "to": "到"
+                },
+                "controls": {
+                    "play": "继续记录",
+                    "pause": "暂停记录",
+                    "start": "开始团期",
+                    "end": "结束团期",
+                    "delete": "清除记录",
+                    "session": "直至本次团期结束前，玩家将不会看到任何新的结果"
+                }
+            },
+            "clear": {
+                "title": "清空记录",
+                "yes": "清除",
+                "no": "取消",
+                "hint": "你要清除到该日期为止的记录吗？"
+            },
+            "confirm": {
+                "start": "新团期已在<strong>{time}</strong>开启。",
+                "end": "本次团期已在<strong>{time}</strong>结束。",
+                "pause": "掷骰记录已暂停。",
+                "play": "已继续记录掷骰。",
+                "delete": {
+                    "all": "记录已被清除。",
+                    "before": "<strong>{time}</strong>之前的记录已被清除。"
+                }
+            }
+        },
+        "heroActions": {
+            "error": {
+                "onlyCharacter": "英雄动作仅兼容玩家角色",
+                "noDetails": "找不到这个英雄动作的详细信息。",
+                "notEnoughPoint": "该角色没有足够的英雄点",
+                "mustDiscard": "角色必须丢弃{nb}个动作才能进行交换。",
+                "noOther": "没有其他拥有英雄动作的角色可以进行交换。",
+                "noAction": "该角色不拥有任何英雄动作。",
+                "notGM": "你需要成为GM才能授予英雄动作。",
+                "tradeError": "尝试处理<strong>{sender}</strong>和<strong>{receiver}</strong>之间的交换时出现错误。"
+            },
+            "giveActions": {
+                "no": "取消",
+                "title": "授予英雄动作",
+                "withMessage": "生成聊天信息",
+                "yes": "授予动作",
+                "asDrawn": "授予时设置为抽取",
+                "drawn": "已抽取"
+            },
+            "message": {
+                "used": {
+                    "heroPoints": "英雄点",
+                    "mythicPoints": "神话点",
+                    "message": "花费一点{type}使用"
+                },
+                "exchanged": "与{name}交换一个英雄动作",
+                "offer": "给出：{link}",
+                "receive": "得到：{link}",
+                "drawn": "已抽取（{nb}）个英雄动作",
+                "given": "被授予（{nb}）个英雄动作",
+                "discarded": "已丢弃（{nb}）个英雄动作"
+            },
+            "removeActions": {
+                "all": "所有玩家角色",
+                "no": "取消",
+                "removed": "英雄动作已从选定角色中被移除。",
+                "title": "移除英雄动作",
+                "yes": "移除"
+            },
+            "sheet": {
+                "action": {
+                    "use": "使用",
+                    "discard": "丢弃"
+                },
+                "label": "英雄动作",
+                "draw": "抽取 {nb}",
+                "give": "授予",
+                "redraw": "重抽",
+                "trade": "交换"
+            },
+            "trade": {
+                "no": "取消",
+                "rejected": "<strong>{sender}</strong>与<strong>{receiver}</strong>之间的动作交换被拒绝了。",
+                "request": {
+                    "title": "英雄动作 - 交换请求",
+                    "flavor": "玩家角色<strong>{sender}</strong>想要与<strong>{receiver}</strong>进行交换",
+                    "give": "给出：{give}",
+                    "want": "想要：{want}",
+                    "yes": "同意",
+                    "no": "拒绝"
+                },
+                "select": "选择你要进行交换的玩家角色",
+                "title": "交换英雄动作",
+                "yes": "发送"
+            },
+            "trigger": "触发",
+            "table": {
+                "noDraw": "无法为<strong>{name}</strong>从随机表中抽取英雄动作。",
+                "notFound": "该游戏世界无法找到英雄点卡牌表。",
+                "drawError": "在抽取英雄动作的时候出现错误，动作表中可能包含不符合规则的项目。",
+                "noFormulaCompendium": "英雄点卡牌表没有公式，并且是一个合集表。"
+            }
+        },
+        "identify": {
+            "tracker": {
+                "send-to-chat": "发送至聊天",
+                "title": "物品鉴定追踪",
+                "save": {
+                    "label": "更新结果",
+                    "tooltip": "更新当前修改并鉴定物品",
+                    "content": "保存当前修改并自动鉴定以下物品：<br><ul>{items}</ul>",
+                    "title": "更新修改"
+                },
+                "clock": {
+                    "open": "打开世界时钟菜单",
+                    "backward": "将时间往后拨10分钟",
+                    "forward": "将时间往前进10分钟"
+                },
+                "failed": {
+                    "daily": "今日未能鉴定出该物品",
+                    "delay": "未能鉴定出该物品：<br>还剩{hours}小时冷却完毕"
+                },
+                "auto": {
+                    "none": "这里没有能自动鉴定的物品",
+                    "title": "自动鉴定",
+                    "tooltip": "自动鉴定已知物品",
+                    "content": "鉴定团队成员已知的物品：<br><ul>{items}</ul>",
+                    "label": "自动鉴定"
+                },
+                "identified": "已鉴定",
+                "known": {
+                    "full": "已鉴定该物品",
+                    "partial": "已鉴定相似物品：<br>{item}",
+                    "recall": "是否花费一个回忆知识动作<br>并自动成功"
+                },
+                "reset": {
+                    "tooltip": "恢复当前修改",
+                    "label": "重置修改"
+                },
+                "misidentify": "未鉴定开关",
+                "request-checks": "请求检定"
+            },
+            "request": {
+                "hint": "请求为一件物品进行鉴定",
+                "proceed": "你要继续鉴定吗？",
+                "sent": "物品鉴定请求已经发送给GM。"
+            }
+        },
+        "shareData": {
+            "config": {
+                "armorRunes": {
+                    "label": "护甲符文",
+                    "hint": "使用来源角色绑定的护甲/护腕的潜能符文与韧性符文。"
+                },
+                "health": {
+                    "label": "健康池",
+                    "hint": "与来源角色共享生命值与耐力值。"
+                },
+                "heroPoints": {
+                    "label": "英雄点",
+                    "hint": "使用来源角色的英雄点。"
+                },
+                "master": {
+                    "label": "来源角色",
+                    "hint": "选择一位要与本角色共享数据的来源角色。"
+                },
+                "skills": {
+                    "label": "技能熟练度 & 调整值",
+                    "hint": "使用来源角色的技能熟练度。同时技能与察觉检定获得来源角色的物品调整值。"
+                },
+                "spellcasting": {
+                    "label": "施法",
+                    "hint": "使用来源角色的施法熟练度与聚能池。"
+                },
+                "timeEvents": {
+                    "hint": "每当来源角色的回合开始/结束或先攻变化时，相关事件也将令本角色触发。它还将使用来源角色来计算效果的剩余持续时间。",
+                    "label": "事件时点"
+                },
+                "title": "共享数据 - {name}",
+                "unable": "该角色无法作为来源角色被链接。",
+                "weaponRunes": {
+                    "label": "武器符文",
+                    "hint": "使用来源角色绑定的缠手带/武器的基础符文与性能符文。"
+                }
+            },
+            "share": "共享"
+        },
+        "betterInventory": {
+            "improvised": {
+                "label": "临时武器"
+            },
+            "sheet": {
+                "improvised": "创建临时武器",
+                "merge": "合并物品",
+                "split": "分割物品"
+            },
+            "merge": {
+                "none": "库存中没有可以合并的物品。",
+                "title": "合并物品 - {name}",
+                "yes": "合并"
+            },
+            "split": {
+                "title": "分割物品 - {name}",
+                "yes": "分割",
+                "quantity": {
+                    "label": "新物品堆的物品数"
+                }
+            }
         }
     },
     "LEVIKTIMES": {
