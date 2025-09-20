@@ -20,8 +20,7 @@ import {
     userIsGM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { ItemTransferDialog, MoveLootFormData } from "trade-dialog";
-import { createTradeMessage } from ".";
+import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData } from ".";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createHook("deleteToken", this.#onDeleteToken.bind(this));
@@ -197,10 +196,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
                 return;
             }
 
-            const tradeData = await initiateTrade(item, {
-                title: this.localize("dialog.title"),
-                prompt: this.localize("dialog.prompt"),
-            });
+            const tradeData = await this.#initiateTrade(item);
 
             if (tradeData) {
                 options.quantity = tradeData.quantity;
@@ -307,34 +303,28 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             userId,
         });
     }
-}
 
-async function initiateTrade(
-    item: PhysicalItemPF2e,
-    { prompt, targetActor, title }: InitiateTradeOptions = {}
-): Promise<MoveLootFormData | null> {
-    if (item.quantity <= 0) {
-        return null;
+    async #initiateTrade(item: PhysicalItemPF2e): Promise<TradeQuantityDialogData | null> {
+        if (item.quantity <= 0) {
+            return null;
+        }
+
+        if (item.isOfType("backpack") || item.quantity === 1) {
+            return { quantity: 1, newStack: false };
+        }
+
+        return createTradeQuantityDialog({
+            button: {
+                action: "droppeth",
+                icon: "fa-solid fa-arrow-down-to-bracket",
+                label: this.localize("dialog.button"),
+            },
+            item,
+            prompt: this.localize("dialog.prompt"),
+            title: this.localize("dialog.title", { item: item.name }),
+        });
     }
-
-    if (item.isOfType("backpack") || item.quantity === 1) {
-        return { quantity: 1, newStack: false, isPurchase: false };
-    }
-
-    return new ItemTransferDialog(item, {
-        targetActor,
-        lockStack: !targetActor?.inventory.findStackableItem(item._source),
-        title,
-        prompt,
-        button: title,
-    }).resolve();
 }
-
-type InitiateTradeOptions = {
-    targetActor?: ActorPF2e;
-    title?: string;
-    prompt?: string;
-};
 
 type DroppethOptions = {
     item: PhysicalItemPF2e;

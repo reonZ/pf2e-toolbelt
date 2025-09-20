@@ -513,8 +513,9 @@
         },
         "droppeth": {
             "dialog": {
-                "title": "Droppeth Item",
-                "prompt": "How many items do you wish to droppeth?"
+                "button": "Droppeth",
+                "prompt": "How many items do you wish to droppeth?",
+                "title": "Droppeth {item}"
             },
             "error": {
                 "out-of-bounds": "Couldn't create droppeth token at provided location.",

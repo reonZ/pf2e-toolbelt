@@ -1,6 +1,7 @@
 import {
     ActionCost,
     ActorPF2e,
+    createFormData,
     getActionGlyph,
     getPreferredName,
     PhysicalItemPF2e,
@@ -63,6 +64,68 @@ async function createTradeMessage({
     });
 }
 
+async function createTradeQuantityDialog(
+    options: TradeQuantityDialogOptions
+): Promise<TradeQuantityDialogData | null> {
+    const data = {
+        ...options,
+        quantity: options.item.quantity,
+        mode: "gift",
+        rootId: "item-transfer-dialog",
+    };
+
+    const content = await foundry.applications.handlebars.renderTemplate(
+        "systems/pf2e/templates/popups/item-transfer-dialog.hbs",
+        data
+    );
+
+    return new Promise((resolve) => {
+        foundry.applications.api.DialogV2.wait({
+            buttons: [
+                {
+                    ...options.button,
+                    type: "submit",
+                    callback: (event, button, dialog) => {
+                        const data = createFormData(dialog.element) as TradeQuantityDialogData;
+                        resolve(data);
+                    },
+                },
+            ],
+            content,
+            id: "item-transfer-dialog",
+            position: {
+                width: 450,
+            },
+            window: {
+                icon: options.button.icon,
+                contentClasses: ["standard-form"],
+                title: options.title,
+            },
+            close: () => {
+                resolve(null);
+            },
+        });
+    });
+}
+
+type TradeQuantityDialogOptions = {
+    button: {
+        action: string;
+        icon: string;
+        label: string;
+    };
+    item: PhysicalItemPF2e;
+    lockStack?: boolean;
+    prompt: string;
+    targetActor?: ActorPF2e;
+    title: string;
+};
+
+type TradeQuantityDialogData = {
+    quantity: number;
+    newStack?: boolean;
+};
+
 type TradeMessageOptions = {
     /** localization key */
     cost?: string | number | null | ActionCost;
@@ -75,5 +138,5 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export { createTradeMessage };
-export type { TradeMessageOptions };
+export { createTradeMessage, createTradeQuantityDialog };
+export type { TradeMessageOptions, TradeQuantityDialogData };
