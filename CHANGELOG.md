@@ -1,3 +1,18 @@
+# 3.14.0
+
+-   this is a system `7.5.1` release
+-   `Better Merchant`:
+    -   update to work with the lates system changes
+    -   fix `Search Text` field not being saved when creating/editing a filter
+-   `Better Trade`:
+    -   `With Container Content`:
+        -   can no longer work when trading with another actor that you aren't the owner of (because of the new system trade)
+        -   will only work if the container itself has a quantity of exactly `1`
+-   `Droppeth`:
+    -   use the new trade quantity dialog window
+-   `Giveth`:
+    -   the feature now only allows a player to give an effect/condition to another non-owned player actor as the system now has its own trade workflow
+
 # 3.13.3
 
 -   `Target Helper`:
@@ -496,7 +511,7 @@
 
 # 2.32.0
 
--   this is a system `6.10.0` release
+-   ` 7..5.0``6.1.0 ` release release
 -   `Condition Manager`:
     -   no longer disable the `Show token icon?` option from the effect
         -   the latest system changes now also hides the effect from the `Effects Panel`
