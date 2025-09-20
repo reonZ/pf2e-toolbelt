@@ -14,7 +14,6 @@ import {
     createHTMLElement,
     createToggleableWrapper,
     EquipmentFilters,
-    ErrorPF2e,
     FlagData,
     FlagDataArray,
     getPreferredName,
@@ -36,8 +35,13 @@ import {
     waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { createTradeMessage, sharedActorTransferItemToActor, TradeMessageOptions } from "tools";
-import { ItemTransferDialog } from "trade-dialog";
+import {
+    createTradeMessage,
+    createTradeQuantityDialog,
+    sharedActorTransferItemToActor,
+    TradeMessageOptions,
+    TradeQuantityDialogData,
+} from "tools";
 import {
     BrowserPullMenu,
     BuyDefaultFilterModel,
@@ -70,7 +74,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     #wrappers = [
         createToggleableWrapper(
-            "OVERRIDE",
+            "MIXED",
             [
                 "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.moveItemBetweenActors",
                 "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.moveItemBetweenActors",
@@ -238,52 +242,86 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         );
     }
 
-    /**
-     * slightly changed version of
-     * https://github.com/foundryvtt/pf2e/blob/dfb9e2b53fc36a3525dec1706d24ec2bbafa6322/src/module/actor/sheet/base.ts#L1281
-     */
     async #actorSheetPF2eMoveItemBetweenActors(
         sheet: ActorSheetPF2e<ActorPF2e>,
+        wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
         item: PhysicalItemPF2e,
         targetActor: ActorPF2e
     ) {
         const sourceActor = item.actor;
         if (!sourceActor || !targetActor) {
-            throw ErrorPF2e("Unexpected missing actor(s)");
+            return wrapped(event, item, targetActor);
         }
 
-        const containerId = htmlClosest(
-            event.target,
-            "[data-is-container]"
-        )?.dataset.containerId?.trim();
-        const stackable = !!targetActor.inventory.findStackableItem(item._source);
-        const isPurchase = sourceActor.isOfType("loot") && sourceActor.isMerchant;
-        const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
-        const filter = isPurchase ? this.getInMemory<ItemFilterModel>(item, "filter") : undefined;
+        const isPurchase = isMerchant(sourceActor) && isCustomer(targetActor);
         const isSelling = !isPurchase && isMerchant(targetActor) && isCustomer(sourceActor);
 
-        // If more than one item can be moved, show a popup to ask how many to move
-        const result = await new ItemTransferDialog(item, {
-            infinite,
-            isPurchase,
-            lockStack: !stackable,
-            prompt: isSelling ? this.localize("item.sell.prompt") : undefined,
-            ratio: filter?.ratio,
-            targetActor,
-            title: isSelling ? this.localize("item.sell.title") : undefined,
-        }).resolve();
+        if (!isPurchase && !isSelling) {
+            return wrapped(event, item, targetActor);
+        }
+
+        const result = await this.#initiateTrade(sourceActor, targetActor, item, isPurchase);
 
         if (result !== null) {
+            const containerId = htmlClosest(
+                event.target,
+                "[data-is-container]"
+            )?.dataset.containerId?.trim();
+
             sourceActor.transferItemToActor(
                 targetActor,
                 item as PhysicalItemPF2e<ActorPF2e>,
                 result.quantity,
                 containerId,
                 result.newStack,
-                result.isPurchase
+                isPurchase
             );
         }
+    }
+
+    async #initiateTrade(
+        sourceActor: ActorPF2e,
+        targetActor: ActorPF2e,
+        item: PhysicalItemPF2e,
+        isPurchase: boolean
+    ): Promise<TradeQuantityDialogData | null> {
+        const actorName = targetActor.name;
+        const stackable = !!targetActor.inventory.findStackableItem(item);
+        const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
+
+        if (!infinite && item.quantity <= 1) {
+            return {
+                quantity: item.quantity,
+                newStack: true,
+            };
+        }
+
+        const title = isPurchase
+            ? game.i18n.format("PF2E.ItemTransferDialog.Title.purchase", { item: item.name })
+            : this.localize("item.sell.prompt", { item: item.name });
+
+        const prompt = isPurchase
+            ? game.i18n.format("PF2E.ItemTransferDialog.Prompt.purchase", { actor: actorName })
+            : this.localize("item.sell.prompt", { actor: actorName });
+
+        const label = isPurchase
+            ? game.i18n.localize("PF2E.ItemTransferDialog.Button.purchase")
+            : this.localize("item.sell.button");
+
+        return createTradeQuantityDialog({
+            button: {
+                action: isPurchase ? "buy" : "sell",
+                icon: "fa-solid fa-coins",
+                label,
+            },
+            item: infinite ? item.clone({ "system.quantity": 9999 }) : item,
+            prompt,
+            quantity: infinite ? Math.min(item.quantity, item.system.price.per) : item.quantity,
+            title,
+            lockStack: !stackable,
+            targetActor,
+        });
     }
 
     #transferItemToActor(source: ActorPF2e, ...args: ActorTransferItemArgs): boolean {
@@ -721,7 +759,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
             case "from-browser": {
                 const label = this.localize("browserPull.add");
-                const callback = () => {
+                const callback = async () => {
                     new BrowserPullMenu(this, actor).render(true);
                 };
                 return this.openEquipmentTab({ actor, label, callback });
@@ -900,8 +938,8 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         btn.addEventListener(
             "click",
             async (event) => {
-                await this.browser.close();
                 data.callback(event);
+                this.browser.close();
             },
             { once: true }
         );
@@ -1009,7 +1047,7 @@ type EventBetterAction = EventItemAction | EventSheetAction | EventSheetServiceA
 type BrowserData = {
     actor: LootPF2e;
     label: string;
-    callback: (event: MouseEvent) => void;
+    callback: (event: MouseEvent) => Promise<void>;
 };
 
 type BetterMerchantSettings = {

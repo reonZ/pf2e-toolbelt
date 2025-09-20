@@ -5,6 +5,7 @@ import {
     getActionGlyph,
     getPreferredName,
     PhysicalItemPF2e,
+    R,
 } from "module-helpers";
 
 async function createTradeMessage({
@@ -69,8 +70,8 @@ async function createTradeQuantityDialog(
 ): Promise<TradeQuantityDialogData | null> {
     const data = {
         ...options,
-        quantity: options.item.quantity,
-        mode: "gift",
+        mode: R.isBoolean(options.lockStack) ? "" : "gift",
+        quantity: options.quantity ?? options.item.quantity,
         rootId: "item-transfer-dialog",
     };
 
@@ -117,6 +118,7 @@ type TradeQuantityDialogOptions = {
     item: PhysicalItemPF2e;
     lockStack?: boolean;
     prompt: string;
+    quantity?: number;
     targetActor?: ActorPF2e;
     title: string;
 };

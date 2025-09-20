@@ -95,15 +95,15 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return localizeIfExist(this.key, ...args);
     }
 
-    info(...args: NotificationArgs): number {
+    info(...args: NotificationArgs): Notification {
         return info(this.key, ...args);
     }
 
-    warning(...args: NotificationArgs): number {
+    warning(...args: NotificationArgs): Notification {
         return warning(this.key, ...args);
     }
 
-    error(...args: NotificationArgs): number {
+    error(...args: NotificationArgs): Notification {
         return error(this.key, ...args);
     }
 
@@ -268,7 +268,7 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
         return this.tool.localizeIfExist(this.key, ...args);
     }
 
-    info(...args: NotificationArgs): number {
+    info(...args: NotificationArgs): Notification {
         return this.tool.info(this.key, ...args);
     }
 

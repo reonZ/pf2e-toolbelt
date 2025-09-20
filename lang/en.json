@@ -429,8 +429,9 @@
                 "unwilling": "<strong>{actor}</strong> isn't willing to part from <strong>{item}</strong>.",
                 "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>.",
                 "sell": {
-                    "title": "Sell Items",
-                    "prompt": "How many items do you wish to sell?"
+                    "button": "Sell",
+                    "prompt": "Does {actor} wish to purchase this item?",
+                    "title": "Sell {item}"
                 },
                 "unided": "Nobody sane would want to buy some random unidentified item."
             },
