@@ -210,12 +210,7 @@
             },
             "giveth": {
                 "title": "Przekazywanie",
-                "enabled": {
-                    "name": "Włączone",
-                    "hint": "Czy świat powinien umożliwiać graczom przekazywanie przedmiotów z ekwipunku innym graczom."
-                },
                 "effect": {
-                    "name": "Uwzględnienie efektów/stanów",
                     "hint": "Czy gracze powinni mieć również możliwość zrzucania efektów i stanów na aktorów, których nie posiadają.",
                     "choices": {
                         "disabled": "Wyłączone",
@@ -456,20 +451,6 @@
                 "content": {
                     "item": "Upuszczono {quantity} × {item} na ziemię przez {source}.",
                     "container": "Upuszczono {item} i całą jego zawartość przez {source}."
-                }
-            }
-        },
-        "giveth": {
-            "error": "Wystąpił błąd podczas przetwarzania żądania <strong>Przekazania</strong>.",
-            "dialog": {
-                "title": "Przekaż Przedmiot",
-                "prompt": "Ile przedmiotów chcesz przekazać?"
-            },
-            "message": {
-                "subtitle": "Przekaż Przedmiot",
-                "content": {
-                    "item": "{source} przekazuje {quantity} × {item} do {target}.",
-                    "container": "{source} przekazuje {item} i całą jego zawartość do {target}."
                 }
             }
         },

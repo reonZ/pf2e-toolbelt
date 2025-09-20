@@ -188,12 +188,7 @@
       },
       "giveth": {
         "title": "Donner",
-        "enabled": {
-          "name": "Activé",
-          "hint": "Votre monde devrait-il permettre aux acteurs des joueurs de pouvoir donner des objets d'inventaire à d'autres acteurs appartenant à des joueurs."
-        },
         "effect": {
-          "name": "Inclure les effets/états",
           "hint": "Les joueurs devraient-ils également pouvoir appliquer des effets et des états sur des acteurs qu'ils ne possèdent pas ?",
           "choices": {
             "disabled": "Désactivé",
@@ -530,20 +525,6 @@
         "content": {
           "item": "{source} a déposé {quantity} × {item} sur le sol.",
           "container": "{source} a déposé {item} et tout son contenu."
-        }
-      }
-    },
-    "giveth": {
-      "error": "Une erreur s'est produite en tentant de traiter une demande de joueur de <strong>déposer au sol</strong>.",
-      "dialog": {
-        "title": "Objet déposé au sol",
-        "prompt": "Combien d'objets souhaitez-vous donner ?"
-      },
-      "message": {
-        "subtitle": "Donner un objet",
-        "content": {
-          "item": "{source} a donné {quantity} × {item} à {target}.",
-          "container": "{source} a donné {item} et tout son contenu à {target}."
         }
       }
     },

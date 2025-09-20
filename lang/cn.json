@@ -148,17 +148,12 @@
                 }
             },
             "giveth": {
-                "enabled": {
-                    "name": "启用",
-                    "hint": "你的世界是否允许玩家操控的角色将库存物品传递给其他玩家拥有或是团队成员的角色。"
-                },
                 "effect": {
                     "choices": {
                         "ally": "仅限盟友",
                         "disabled": "关闭",
                         "all": "所有角色"
                     },
-                    "name": "包括效应/状态",
                     "hint": "玩家是否也可以将效果或状态拖给其他玩家操控的角色。"
                 },
                 "title": "传递管理"
@@ -399,20 +394,6 @@
                 "content": {
                     "item": "{source} 丢弃了 {quantity} × {item} 在地上。",
                     "container": "{source} 丢弃了 {item} 与其所有内容物。"
-                }
-            }
-        },
-        "giveth": {
-            "dialog": {
-                "title": "传递物品",
-                "prompt": "你希望传递多少物品？"
-            },
-            "error": "在尝试处理一位玩家的 <strong>传递</strong> 请求时出现错误。",
-            "message": {
-                "subtitle": "传递物品",
-                "content": {
-                    "container": "{source} 传递了 {item} 与其中所有内容物给 {target}。",
-                    "item": "{source} 传递了 {quantity} × {item} 给 {target}。"
                 }
             }
         },

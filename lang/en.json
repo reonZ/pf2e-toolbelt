@@ -188,12 +188,8 @@
             },
             "giveth": {
                 "title": "Giveth",
-                "enabled": {
-                    "name": "Enabled",
-                    "hint": "Should your world allow your players actors to be able to give inventory items to other player-owned or party member actors."
-                },
                 "effect": {
-                    "name": "Include Effects/Conditions",
+                    "name": "Effects/Conditions",
                     "hint": "Should players also be able to drop effects & conditions onto actors they do not own.",
                     "choices": {
                         "disabled": "Disabled",
@@ -530,20 +526,6 @@
                 "content": {
                     "item": "{source} droppeth {quantity} × {item} on the ground.",
                     "container": "{source} droppeth {item} and all its content."
-                }
-            }
-        },
-        "giveth": {
-            "error": "Something went wrong when trying to process a player <strong>Giveth</strong> request.",
-            "dialog": {
-                "title": "Giveth Item",
-                "prompt": "How many items do you wish to giveth?"
-            },
-            "message": {
-                "subtitle": "Giveth Item",
-                "content": {
-                    "item": "{source} giveth {quantity} × {item} to {target}.",
-                    "container": "{source} giveth {item} and all its content to {target}."
                 }
             }
         },

@@ -188,12 +188,7 @@
       },
       "giveth": {
         "title": "Entregar",
-        "enabled": {
-          "name": "Activado",
-          "hint": "¿Debería su mundo permitir que sus jugadores actores puedan dar objetos de inventario a otros actores propiedad de jugadores o miembros del grupo?"
-        },
         "effect": {
-          "name": "Incluir efectos/condiciones",
           "hint": "¿Deberían también los jugadores poder aplicar efectos y condiciones a actores que no son de su propiedad?.",
           "choices": {
             "disabled": "Desactivado",
@@ -530,20 +525,6 @@
         "content": {
           "item": "{source} suelta {quantity} × {item} en el suelo.",
           "container": "{source} suelta {item} y todo su contenido."
-        }
-      }
-    },
-    "giveth": {
-      "error": "Algo salió mal al intentar procesar una solicitud de <strong>entrega</strong> del jugador.",
-      "dialog": {
-        "title": "Entregar objeto",
-        "prompt": "¿Cuántos objetos deseas entregar?"
-      },
-      "message": {
-        "subtitle": "Entregar objeto",
-        "content": {
-          "item": "{source} entrega {quantity} × {item} a {target}.",
-          "container": "{source} entrega {item} y todo su contenido a {target}."
         }
       }
     },

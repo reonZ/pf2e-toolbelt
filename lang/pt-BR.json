@@ -187,12 +187,7 @@
       },
       "giveth": {
         "title": "Giveth",
-        "enabled": {
-          "name": "Habilitado",
-          "hint": "Seu mundo deve permitir que seus jogadores atores possam dar itens de inventário para outros atores de propriedade de jogadores?"
-        },
         "effect": {
-          "name": "Incluir efeitos/condições",
           "hint": "Os jogadores também deveriam poder aplicar efeitos e condições em atores que não são seus?",
           "choices": {
             "disabled": "Desabilitado",
@@ -439,20 +434,6 @@
         "content": {
           "item": "{source} larga {quantity} × {item} no chão.",
           "container": "{source} remove {item} e todo seu conteúdo."
-        }
-      }
-    },
-    "giveth": {
-      "error": "Algo deu errado ao tentar processar uma solicitação <strong>Giveth</strong> do jogador.",
-      "dialog": {
-        "title": "Dar Item",
-        "prompt": "Quantos itens você deseja doar?"
-      },
-      "message": {
-        "subtitle": "Dá Item",
-        "content": {
-          "item": "{source} dá {quantity} × {item} para {target}.",
-          "container": "{source} dá {item} e todo seu conteúdo para {target}."
         }
       }
     },
