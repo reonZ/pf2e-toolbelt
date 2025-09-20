@@ -2,7 +2,7 @@
 
 -   this is a system `7.5.1` release
 -   `Better Merchant`:
-    -   update to work with the lates system changes
+    -   update to work with the latest system changes
     -   fix `Search Text` field not being saved when creating/editing a filter
 -   `Better Trade`:
     -   `With Container Content`:
