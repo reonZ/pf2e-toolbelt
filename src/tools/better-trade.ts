@@ -54,7 +54,7 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
     ): boolean {
         if (
             item.isOfType("backpack") &&
-            item.quantity >= 1 &&
+            item.quantity === 1 &&
             item.contents.size > 0 &&
             actor.canUserModify(game.user, "update") &&
             target.canUserModify(game.user, "update") &&

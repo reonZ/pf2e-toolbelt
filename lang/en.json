@@ -165,7 +165,7 @@
                 "title": "Better Trade",
                 "withContent": {
                     "name": "With Container Content",
-                    "hint": "When a container is moved from one actor to another, should its content go with it."
+                    "hint": "When a container is moved from one actor to another, should its content go with it. NOTE this doesn't work when using the system trade functionality."
                 }
             },
             "conditionManager": {
