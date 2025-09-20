@@ -13,7 +13,6 @@ import {
     createEmitable,
     createHTMLElement,
     createToggleableWrapper,
-    createTradeMessage,
     EquipmentFilters,
     ErrorPF2e,
     FlagData,
@@ -34,11 +33,10 @@ import {
     renderActorSheets,
     toggleHooksAndWrappers,
     toggleSummary,
-    TradeMessageOptions,
     waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedActorTransferItemToActor } from "tools/_shared";
+import { createTradeMessage, sharedActorTransferItemToActor, TradeMessageOptions } from "tools";
 import { ItemTransferDialog } from "trade-dialog";
 import {
     BrowserPullMenu,

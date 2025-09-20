@@ -5,7 +5,6 @@ import {
     createHook,
     createToggleableWrapper,
     createToggleKeybind,
-    createTradeMessage,
     getTradeData,
     isPrimaryUpdater,
     itemIsOfType,
@@ -22,6 +21,7 @@ import {
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { ItemTransferDialog, MoveLootFormData } from "trade-dialog";
+import { createTradeMessage } from ".";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createHook("deleteToken", this.#onDeleteToken.bind(this));

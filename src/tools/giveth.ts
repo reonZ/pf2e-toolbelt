@@ -5,18 +5,17 @@ import {
     createEmitable,
     createHook,
     createToggleableWrapper,
-    createTradeMessage,
     DropCanvasItemDataPF2e,
     giveItemToActor,
+    htmlQuery,
     isAllyActor,
     ItemPF2e,
     ItemTransferDialog,
     PhysicalItemPF2e,
-    updateItemTransferDialog,
     userIsGM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedActorTransferItemToActor } from ".";
+import { createTradeMessage, sharedActorTransferItemToActor } from ".";
 
 class GivethTool extends ModuleTool<ToolSettings> {
     #givethEmitable = createEmitable(this.key, (options: GivethOptions, userId: string) => {
@@ -199,6 +198,39 @@ class GivethTool extends ModuleTool<ToolSettings> {
         );
     }
 }
+
+function updateItemTransferDialog(
+    html: HTMLElement,
+    { button, prompt, title, noStack }: UpdateItemTransferDialogOptions
+) {
+    const titleElement = htmlQuery(html, ":scope > header h4");
+    if (titleElement) {
+        titleElement.innerText = title;
+    }
+
+    const buttonElement = htmlQuery(html, "form button");
+    if (buttonElement) {
+        buttonElement.innerText = button ?? title;
+    }
+
+    const questionElement = htmlQuery(html, "form > label");
+    if (questionElement) {
+        questionElement.innerText = prompt;
+    }
+
+    if (noStack) {
+        const input = htmlQuery(html, "[name='newStack']");
+        input?.previousElementSibling?.remove();
+        input?.remove();
+    }
+}
+
+type UpdateItemTransferDialogOptions = {
+    title: string;
+    button?: string;
+    prompt: string;
+    noStack?: boolean;
+};
 
 type GiveItemOptions = {
     type: "item";
