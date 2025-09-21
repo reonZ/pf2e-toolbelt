@@ -11,7 +11,7 @@
 -   `Droppeth`:
     -   use the new trade quantity dialog window
 -   `Giveth`:
-    -   the feature now only allows a player to give an effect/condition to another non-owned player actor as the system now has its own trade workflow
+    -   the feature now only allows a player to give an effect/condition to another player-owned actor as the system now has its own trade workflow
 
 # 3.13.3
 
