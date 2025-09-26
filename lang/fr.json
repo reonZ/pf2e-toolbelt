@@ -189,6 +189,7 @@
       "giveth": {
         "title": "Donner",
         "effect": {
+          "name": "Effets/États",
           "hint": "Les joueurs devraient-ils également pouvoir appliquer des effets et des états sur des acteurs qu'ils ne possèdent pas ?",
           "choices": {
             "disabled": "Désactivé",
@@ -428,8 +429,9 @@
         "unwilling": "<strong>{actor}</strong> ne veut pas se séparer de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> n'est pas intéressé par l'achat de <strong>{item}</strong>.",
         "sell": {
-          "title": "Vendre des articles",
-          "prompt": "Combien d'objets souhaitez-vous vendre ?"
+          "button": "Vendre",
+          "prompt": "Combien d'objets souhaitez-vous vendre ?",
+          "title": "Vendre des articles"
         },
         "unided": "Personne de sensé ne voudrait acheter un objet quelconque non identifié."
       },
@@ -512,8 +514,9 @@
     },
     "droppeth": {
       "dialog": {
-        "title": "Objet déposé au sol",
-        "prompt": "Combien d'objets souhaitez-vous déposer ?"
+        "button": "Dépose",
+        "prompt": "Combien d'objets souhaitez-vous déposer ?",
+        "title": "Objet déposé au sol"
       },
       "error": {
         "out-of-bounds": "Impossible de créer un jeton de dépôt au sol à l'emplacement fourni.",
