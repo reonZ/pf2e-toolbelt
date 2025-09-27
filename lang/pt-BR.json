@@ -148,7 +148,8 @@
         "partyAsObserved": {
         },
         "scribble": {
-          "name": "Ficha de Personagem Manuscrita"
+          "name": "Ficha de Personagem Manuscrita",
+          "hint": "Uma reformulação da ficha de personagem para que pareça como se tivesse sido escrita à mão."
         }
       },
       "betterTemplate": {
@@ -198,15 +199,24 @@
       "heroActions": {
         "title": "Ações Heroicas",
         "count": {
+          "name": "Variante do conjunto de heróis",
+          "hint": "Se for 0, os personagens só poderão ter uma ação heroica por ponto heroico. Caso contrário, o número de ações heroicas será dissociado do número de pontos heroicos disponíveis e os personagens redefinirão as ações heroicas em conjunto."
         },
         "enabled": {
+          "name": "Habilitado",
           "hint": "Seu mundo deve usar as ações do Baralho de Pontos Heroicos."
         },
         "private": {
+          "name": "Sorteio Privado",
+          "hint": "Em vez disso, torne privada a mensagem gerada ao desenhar ações de heróis. Se ativado, as trocas serão ocultadas para todos os participantes."
         },
         "table": {
+          "name": "Tabela UUID",
+          "hint": "Identificador único da tabela que você deseja usar no seu mundo. Para obter o UUID de uma tabela (em um compêndio ou no diretório Rollable Tables), basta abrir a tabela e clicar com o botão esquerdo do mouse em 📔 ao lado do seu nome."
         },
         "trade": {
+          "name": "Permitir comércio",
+          "hint": "Quando ativado, os personagens poderão trocar ações entre si."
         }
       },
       "identify": {
@@ -303,6 +313,8 @@
           }
         },
         "tiles": {
+          "name": "Azulejos de fundo",
+          "hint": "Isso também garantirá que os blocos sejam desenhados atrás de fichas com elevação negativa. OBSERVAÇÃO: isso pode entrar em conflito com outros módulos que também funcionam com blocos."
         }
       },
       "unided": {
@@ -336,6 +348,8 @@
     },
     "anonymous": {
       "action": {
+        "header": "Está usando uma habilidade..",
+        "context": "Revelar ação aos jogadores"
       },
       "spell": {
         "header": "Está conjurando uma magia...",
@@ -344,14 +358,24 @@
     },
     "betterInventory": {
       "improvised": {
+        "label": "Arma improvisada"
       },
       "merge": {
+        "none": "Não há itens para mesclar no inventário.",
+        "title": "Mesclar Itens - {name}",
+        "yes": "Mesclar"
       },
       "sheet": {
+        "improvised": "Criar arma improvisada",
+        "merge": "Mesclar itens",
+        "split": "Dividir Item"
       },
       "split": {
         "quantity": {
-        }
+          "label": "Nova quantidade de pilha"
+        },
+        "title": "Item Dividido - {nome}",
+        "yes": "Dividir"
       }
     },
     "betterMerchant": {
@@ -393,13 +417,17 @@
       "item": {
         "buy": {
           "confirm": {
-          }
+            "content": "<strong>{buyer}</strong> quer comprar <strong>{item}</strong>?",
+            "title": "Comprar item - {item}"
+          },
+          "noTarget": "Você deve selecionar um ator válido para comprar deste comerciante"
         },
         "error": "Ocorreu um erro ao tentar processar uma troca melhor de item do comerciante: <strong>{reason}</strong>.",
         "noStock": "<strong>{actor}</strong> não pode fornecer a quantidade solicitada de <strong>{item}</strong>.",
         "unwilling": "<strong>{actor}</strong> não está disposto a se separar de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> não está interessado em comprar <strong>{item}</strong>.",
         "sell": {
+          "button": "Vender",
           "prompt": "Quantos itens você deseja vender?",
           "title": "Vender itens"
         },
@@ -484,6 +512,7 @@
     },
     "droppeth": {
       "dialog": {
+        "button": "Droppeth",
         "prompt": "Quantos itens você deseja dropar?",
         "title": "Item Droppeth"
       },
@@ -502,29 +531,76 @@
     },
     "heroActions": {
       "error": {
-        "notEnoughPoint": "O personagem não tem pontos heroicos suficientes"
+        "onlyCharacter": "Ações de Heróis são compatíveis apenas com atores de personagens",
+        "notEnoughPoint": "O personagem não tem pontos heroicos suficientes",
+        "noDetails": "Não foi possível encontrar os detalhes desta Ação de Herói.",
+        "noAction": "O personagem não tem nenhuma Ação de Herói.",
+        "mustDiscard": "O personagem deve descartar {nb} ações para realizar uma troca.",
+        "noOther": "Não há nenhum outro personagem com Ações de Herói disponíveis para troca.",
+        "notGM": "Você precisa ser um Mestre para dar Ações de Herói.",
+        "tradeError": "Ocorreu um erro ao tentar processar a negociação entre <strong>{sender}</strong> e <strong>{receiver}</strong>."
       },
       "giveActions": {
+        "asDrawn": "Definir como desenhado quando fornecido",
+        "drawn": "Já desenhado",
+        "no": "Cancelar",
+        "title": "Dê ações de herói",
+        "withMessage": "Gerar mensagem de bate-papo",
+        "yes": "Dar Ações"
       },
       "message": {
+        "drawn": "Desenhou ({nb}) Ação de Herói",
+        "given": "Foi dada ({nb}) Ação de Herói",
+        "discarded": "Descartou ({nb}) Ação de Herói",
         "used": {
-        }
+          "heroPoints": "Ponto de Herói",
+          "mythicPoints": "Ponto Mítico",
+          "message": "Gasta um {tipo} para usar"
+        },
+        "exchanged": "Trocou uma Ação de Herói com {name}",
+        "offer": "Oferecido: {link}",
+        "receive": "Recebido: {link}"
       },
       "removeActions": {
+        "all": "Todos os personagens",
+        "no": "Cancelar",
+        "removed": "Ações de Herói foram removidas de Personagens selecionados.",
+        "title": "Remover ações do herói",
+        "yes": "Remover"
       },
       "sheet": {
         "action": {
-        }
+          "use": "Usar",
+          "discard": "Descartar"
+        },
+        "draw": "Desenhar {nb}",
+        "give": "Dar",
+        "label": "Ações do Herói",
+        "redraw": "Redesenhar",
+        "trade": "Troca"
       },
       "table": {
-        "notFound": "Não foi possível encontrar nenhuma mesa de Deck de Pontos Heroicos neste mundo."
+        "noDraw": "Nenhuma ação pôde ser extraída da tabela para <strong>{name}</strong>.",
+        "notFound": "Não foi possível encontrar nenhuma mesa de Deck de Pontos Heroicos neste mundo.",
+        "noFormulaCompendium": "A tabela do Hero Deck não tem fórmula e é uma tabela de compêndio.",
+        "drawError": "Ocorreu um erro durante o sorteio de uma Ação de Herói, a tabela pode conter resultados não conformes."
       },
       "trade": {
+        "no": "Cancelar",
+        "rejected": "A troca entre <strong>{sender}</strong> e <strong>{receiver}</strong> foi rejeitada.",
         "request": {
+          "title": "Ação de Herói - Solicitação de Troca",
+          "flavor": "O personagem <strong>{sender}</strong> quer negociar com <strong>{receiver}</strong>",
           "give": "Ofertas: {give}",
-          "want": "Desejos: {want}"
-        }
-      }
+          "want": "Desejos: {want}",
+          "yes": "Aceitar",
+          "no": "Rejeitar"
+        },
+        "select": "Selecione o personagem com quem deseja negociar",
+        "title": "Ação do Herói do Comércio",
+        "yes": "Enviar"
+      },
+      "trigger": "Acionar"
     },
     "identify": {
       "request": {
