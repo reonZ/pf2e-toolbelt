@@ -58,6 +58,10 @@
       },
       "anonymous": {
         "title": "Anônimo",
+        "action": {
+          "name": "Anonimizar ações de PDM",
+          "hint": "Ações enviadas no chat por um ator que não seja pertença a um jogador serão anonimizadas para os jogadores."
+        },
         "spell": {
           "name": "Anonimizar magias de PDMs",
           "hint": "Magias conjuradas por um ator que não pertença a um jogador serão anonimizados para os jogadores."
@@ -98,6 +102,22 @@
         "dropped": {
           "name": "Sem peso de itens largados",
           "hint": "Equipamentos largados não serão contabilizados no cálculo do volume."
+        },
+        "improvised": {
+          "name": "Botão de arma improvisada",
+          "hint": "Adiciona um botão no inventário de atores para criar uma arma improvisada rapidamente."
+        },
+        "mergeItems": {
+          "name": "Botão de mesclagem de itens",
+          "hint": "Adiciona um botão de mesclagem na aba de Inventário para mesclar pilhas de itens."
+        },
+        "partyAsObserved": {
+          "name": "Aliança de Grupo como Observador",
+          "hint": "Permita que jogadores observem fichas de ator com a permissão \"Limitada\", desde que pertençam à aliança \"Grupo\". Não confundir com o ator \"Grupo\"."
+        },
+        "splitItem": {
+          "name": "Permitir divisão de itens",
+          "hint": "Clique no número da quantidade do item em uma planilha de ator para dividi-lo em várias entradas."
         }
       },
       "betterMerchant": {
@@ -123,6 +143,14 @@
           "hint": "O registro de movimentos será bloqueado para você, tornando ações de movimento sucessivas menos confusas."
         }
       },
+      "betterSheet": {
+        "title": "Ficha de Ator Melhorada",
+        "partyAsObserved": {
+        },
+        "scribble": {
+          "name": "Ficha de Personagem Manuscrita"
+        }
+      },
       "betterTemplate": {
         "title": "Modelos Melhores",
         "target": {
@@ -141,7 +169,7 @@
         "title": "Gerente de Condições",
         "enabled": {
           "name": "Habilitado",
-          "hint": "Arraste uma condição enquanto mantém pressionada a tecla de atalho definida para abrir o gerenciador de condições, permitindo que você defina sua duração."
+          "hint": "Arraste uma condição enquanto pressiona a tecla de atalho definida para abrir o gerenciador de condições, permitindo que você defina a sua duração."
         }
       },
       "droppeth": {
@@ -152,7 +180,33 @@
         },
         "light": {
           "name": "Fonte de luz",
-          "hint": "O item derrubado deve emitir luz. Isso só ocorrerá se houver um único item presente no agente de saque."
+          "hint": "O item derrubado deve emitir luz. Isso só ocorrerá se houver um único item presente no ator de espólio."
+        }
+      },
+      "giveth": {
+        "title": "Giveth",
+        "effect": {
+          "name": "Efeitos/Condições",
+          "hint": "Os jogadores também deveriam poder aplicar efeitos e condições em atores que não são seus?",
+          "choices": {
+            "disabled": "Desabilitado",
+            "ally": "Somente aliados",
+            "all": "Todos os atores"
+          }
+        }
+      },
+      "heroActions": {
+        "title": "Ações Heroicas",
+        "count": {
+        },
+        "enabled": {
+          "hint": "Seu mundo deve usar as ações do Baralho de Pontos Heroicos."
+        },
+        "private": {
+        },
+        "table": {
+        },
+        "trade": {
         }
       },
       "identify": {
@@ -183,17 +237,6 @@
         "inject": {
           "name": "Injetar Botão",
           "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam injetadas em uma mensagem de dano anterior."
-        }
-      },
-      "giveth": {
-        "title": "Giveth",
-        "effect": {
-          "hint": "Os jogadores também deveriam poder aplicar efeitos e condições em atores que não são seus?",
-          "choices": {
-            "disabled": "Desabilitado",
-            "ally": "Somente aliados",
-            "all": "Todos os atores"
-          }
         }
       },
       "resourceTracker": {
@@ -238,6 +281,14 @@
       },
       "underground": {
         "title": "Subterrâneo",
+        "alpha": {
+          "name": "Opacidade",
+          "hint": "Valor de opacidade quando o token tem uma elevação negativa."
+        },
+        "contrast": {
+          "name": "Contraste",
+          "hint": "Valor de contraste quando o token tem uma elevação negativa."
+        },
         "enabled": {
           "name": "Habilitado",
           "hint": "Permitirá que tokens com elevação negativa permaneçam visíveis no tabuleiro."
@@ -251,13 +302,7 @@
             "sepia": "Filtro Sépia"
           }
         },
-        "contrast": {
-          "name": "Contraste",
-          "hint": "Valor de contraste quando o token tem uma elevação negativa."
-        },
-        "alpha": {
-          "name": "Opacidade",
-          "hint": "Valor de opacidade quando o token tem uma elevação negativa."
+        "tiles": {
         }
       },
       "unided": {
@@ -290,9 +335,23 @@
       }
     },
     "anonymous": {
+      "action": {
+      },
       "spell": {
         "header": "Está conjurando uma magia...",
         "context": "Revelar feitiço para jogadores"
+      }
+    },
+    "betterInventory": {
+      "improvised": {
+      },
+      "merge": {
+      },
+      "sheet": {
+      },
+      "split": {
+        "quantity": {
+        }
       }
     },
     "betterMerchant": {
@@ -332,13 +391,17 @@
         "error": "Ocorreu um erro ao tentar importar os serviços."
       },
       "item": {
+        "buy": {
+          "confirm": {
+          }
+        },
         "error": "Ocorreu um erro ao tentar processar uma troca melhor de item do comerciante: <strong>{reason}</strong>.",
         "noStock": "<strong>{actor}</strong> não pode fornecer a quantidade solicitada de <strong>{item}</strong>.",
         "unwilling": "<strong>{actor}</strong> não está disposto a se separar de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> não está interessado em comprar <strong>{item}</strong>.",
         "sell": {
-          "title": "Vender itens",
-          "prompt": "Quantos itens você deseja vender?"
+          "prompt": "Quantos itens você deseja vender?",
+          "title": "Vender itens"
         },
         "unided": "Ninguém em sã consciência iria querer comprar um item aleatório e não identificado."
       },
@@ -421,8 +484,8 @@
     },
     "droppeth": {
       "dialog": {
-        "title": "Item Droppeth",
-        "prompt": "Quantos itens você deseja dropar?"
+        "prompt": "Quantos itens você deseja dropar?",
+        "title": "Item Droppeth"
       },
       "error": {
         "out-of-bounds": "Não foi possível criar o token droppeth no local fornecido.",
@@ -434,6 +497,32 @@
         "content": {
           "item": "{source} larga {quantity} × {item} no chão.",
           "container": "{source} remove {item} e todo seu conteúdo."
+        }
+      }
+    },
+    "heroActions": {
+      "error": {
+        "notEnoughPoint": "O personagem não tem pontos heroicos suficientes"
+      },
+      "giveActions": {
+      },
+      "message": {
+        "used": {
+        }
+      },
+      "removeActions": {
+      },
+      "sheet": {
+        "action": {
+        }
+      },
+      "table": {
+        "notFound": "Não foi possível encontrar nenhuma mesa de Deck de Pontos Heroicos neste mundo."
+      },
+      "trade": {
+        "request": {
+          "give": "Ofertas: {give}",
+          "want": "Desejos: {want}"
         }
       }
     },
@@ -458,7 +547,7 @@
         },
         "failed": {
           "daily": "Não conseguiu identificar este item hoje",
-          "delay": "Não foi possível identificar este item:<br>{horas}h restantes"
+          "delay": "Não foi possível identificar este item:<br>{hours}h restantes"
         },
         "identified": "Já identificado",
         "known": {
@@ -517,7 +606,7 @@
           "step3": "[Control-Clique]"
         },
         "timeout": {
-          "label": "Tempo limite (segundos)",
+          "label": "Tempo limite (seconds)",
           "tooltip": "Tempo passou em seu mundo antes que o valor do recurso fosse diminuído em 1"
         },
         "edit": "[Clique com o botão direito] Editar recurso",
@@ -548,14 +637,14 @@
             "bottom": "Resultado da Rolagem"
           },
           "saving-throw": {
-            "label": "Salvar testes"
+            "label": "Salvamentos"
           },
           "saving-throw-outcome": {
-            "label": "Salvar resultados",
+            "label": "Resultados de Salvamentos",
             "bottom": "Fortitude|Reflexo|Vontade"
           },
           "flat-check": {
-            "label": "Testes básicos"
+            "label": "Testes Simples"
           },
           "skill-check": {
             "label": "Testes de Perícia"
