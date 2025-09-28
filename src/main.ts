@@ -115,6 +115,36 @@ Hooks.once("init", () => {
         tool._initialize(isGM);
         tool.init(isGM);
     }
+
+    // registerWrapper(
+    //     "WRAPPER",
+    //     "game.pf2e.RuleElements.builtin.TokenLight.prototype.getLightData",
+    //     function (
+    //         this: TokenLightRuleElement,
+    //         wrapped: libWrapper.RegisterCallback
+    //     ): LightSourceData | null {
+    //         const scene = game.scenes.current;
+    //         const source = wrapped() as LightSourceData | null;
+    //         if (!scene || !source || source.negative) return source;
+
+    //         console.log(this);
+
+    //         source.alpha *= 1 - scene.lightLevel;
+    //         if (source.alpha < 0.1) return source;
+
+    //         const sceneLights = scene.lights
+    //             .filter((light) => !light.config.negative)
+    //             .map((light) => light.object?.lightSource)
+    //             .filter(R.isTruthy);
+
+    //         console.log(sceneLights);
+
+    //         for (const light of sceneLights) {
+    //         }
+
+    //         return source;
+    //     }
+    // );
 });
 
 Hooks.once("setup", () => {
