@@ -1,3 +1,8 @@
+# 3.14.1
+
+-   `Shared Data`:
+    -   fix bound actor effects not expiring during `turn-start` event if the `origin` of the effect is self
+
 # 3.14.0
 
 -   this is a system `7.5.1` release
