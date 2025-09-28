@@ -51,10 +51,19 @@ function calculateRemainingDuration(
         const fightyActor = effect.actor?.isOfType("familiar")
             ? effect.actor.master ?? effect.actor
             : effect.actor;
-        const atTurnStart = () =>
-            startInitiative === currentInitiative &&
-            combatant.actor ===
-                (effect.origin ?? getMasterInMemory(fightyActor as CreaturePF2e) ?? fightyActor);
+
+        // this part is heavily modified
+        const atTurnStart = () => {
+            if (startInitiative !== currentInitiative) return false;
+
+            const master = effect.actor?.combatant
+                ? null
+                : getMasterInMemory(fightyActor as CreaturePF2e);
+
+            const origin = effect.origin === effect.actor ? master : effect.origin;
+
+            return combatant.actor === (origin ?? master ?? fightyActor);
+        };
 
         result.expired =
             expiry === "turn-start"
