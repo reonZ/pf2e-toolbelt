@@ -60,7 +60,7 @@ function calculateRemainingDuration(
                 ? null
                 : getMasterInMemory(fightyActor as CreaturePF2e);
 
-            const origin = effect.origin === effect.actor ? master : effect.origin;
+            const origin = (effect.origin === effect.actor && master) || effect.origin;
 
             return combatant.actor === (origin ?? master ?? fightyActor);
         };
