@@ -1,3 +1,8 @@
+# 3.14.2
+
+-   `Shared Data`:
+    -   small code revision of last update to avoid potential issues
+
 # 3.14.1
 
 -   `Shared Data`:
