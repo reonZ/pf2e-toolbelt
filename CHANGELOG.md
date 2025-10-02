@@ -1,3 +1,8 @@
+# 3.14.3
+
+-   `Target Helper`:
+    -   fix hero/mythic point not being consumed when rerolling a save
+
 # 3.14.2
 
 -   `Shared Data`:
