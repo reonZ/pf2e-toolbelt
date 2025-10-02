@@ -348,6 +348,10 @@ async function rerollSave(
 
     const updates = { [target.id]: rollData };
 
+    if (resource && isCharacter) {
+        await actor.updateResource(resource.slug, resource.value - 1);
+    }
+
     this.updateMessageEmitable.call({
         message,
         saves: updates,

@@ -1,5 +1,4 @@
 import {
-    ActorPF2e,
     ChatMessagePF2e,
     createEmitable,
     createHook,
@@ -199,7 +198,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 
     async #updateMessage(
-        { message, applied, saves, variantId, rerolled }: UpdateMessageOptions,
+        { message, applied, saves, variantId }: UpdateMessageOptions,
         userId: string
     ) {
         const flag = this.getTargetsFlagData(message);
@@ -213,14 +212,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
         if (saves) {
             data.updateSaves(saves);
-        }
-
-        if (rerolled) {
-            const actor = await fromUuid<ActorPF2e>(rerolled.actor);
-            const resource = actor?.getResource(rerolled.resource);
-            if (!actor?.isOfType("character") || !resource || resource.value < 1) return;
-
-            await actor.updateResource(resource.slug, resource.value - 1);
         }
 
         data.setFlag();
@@ -304,10 +295,6 @@ type UpdateMessageOptions = {
     message: ChatMessagePF2e;
     saves?: Record<string, SaveRollData>;
     variantId?: string;
-    rerolled?: {
-        actor: ActorUUID;
-        resource: "hero-points" | "mythic-points";
-    };
 };
 
 type MessageApplied = Record<string, toolbelt.targetHelper.MessageTargetApplied>;
