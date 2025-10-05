@@ -189,6 +189,7 @@
       "giveth": {
         "title": "Entregar",
         "effect": {
+          "name": "Efectos/Condiciones",
           "hint": "¿Deberían también los jugadores poder aplicar efectos y condiciones a actores que no son de su propiedad?.",
           "choices": {
             "disabled": "Desactivado",
@@ -428,8 +429,9 @@
         "unwilling": "<strong>{actor}</strong> no está dispuesto a separarse de <strong>{item}</strong>.",
         "refuse": "<strong>{actor}</strong> no está interesado en comprar <strong>{item}</strong>.",
         "sell": {
-          "title": "Sell Items",
-          "prompt": "¿Cuantos quieres vender?"
+          "button": "Vender",
+          "prompt": "¿Cuantos quieres vender?",
+          "title": "Sell Items"
         },
         "unided": "Nadie en su sano juicio querría comprar algún artículo al azar y no identificado."
       },
@@ -512,8 +514,9 @@
     },
     "droppeth": {
       "dialog": {
-        "title": "Objeto soltado",
-        "prompt": "¿Cuántos artículos deseas soltar?"
+        "button": "Soltar",
+        "prompt": "¿Cuántos artículos deseas soltar?",
+        "title": "Objeto soltado"
       },
       "error": {
         "out-of-bounds": "No se pudo crear la ficha soltada en la ubicación proporcionada.",
