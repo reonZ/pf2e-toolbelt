@@ -98,7 +98,9 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
     }
 
     #tileDocumentPrepareBaseData(tile: TileDocumentPF2e, wrapped: libWrapper.RegisterCallback) {
-        tile.elevation = -Number.MAX_VALUE;
+        if (tile.elevation <= 0) {
+            tile.elevation = -Number.MAX_VALUE;
+        }
         wrapped();
     }
 

@@ -316,7 +316,7 @@
                 },
                 "tiles": {
                     "name": "Background Tiles",
-                    "hint": "This will also make sure that tiles are drawn behind tokens with negative elevation. NOTE that this may conflict with other modules that also work with tiles."
+                    "hint": "Scene tiles with an elevation of 0 or less will always be drawn behind tokens with negative elevation. NOTE that this might conflict with other modules that also work with tiles."
                 }
             },
             "unided": {
