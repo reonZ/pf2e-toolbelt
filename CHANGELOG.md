@@ -1,3 +1,8 @@
+# 3.14.4
+
+-   `Underground`:
+    -   the `Background Tiles` feature now only affects tiles that themselves have an elevation of `0` or less
+
 # 3.14.3
 
 -   `Target Helper`:
