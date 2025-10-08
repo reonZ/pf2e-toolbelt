@@ -316,7 +316,7 @@
         },
         "tiles": {
           "name": "Kafelki tła",
-          "hint": "Dzięki temu kafelki będą rysowane za tokenami o ujemnej wysokości. UWAGA: może to powodować konflikt z innymi modułami, które również korzystają z kafelków."
+          "hint": "Kafelki sceny o wysokości 0 lub mniejszej będą zawsze rysowane za tokenami o ujemnej wysokości. Należy pamiętać, że może to powodować konflikt z innymi modułami, które również działają z kafelkami."
         }
       },
       "unided": {
