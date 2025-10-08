@@ -606,9 +606,8 @@ body.pf2e-toolbelt-scribble .sheet.actor.character section.window-content form.c
                 .hp-small {
                     gap: 0.4rem;
 
-                    i.fa-regular,
-                    i.fa-solid {
-                        color: var(--text-color);
+                    a.inactive {
+                        opacity: 0.5;
                     }
                 }
             }
