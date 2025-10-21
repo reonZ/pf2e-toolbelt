@@ -316,7 +316,7 @@
         },
         "tiles": {
           "name": "Tuiles d'arrière-plan",
-          "hint": "Cela garantira également que les tuiles se trouvent derrière les les jetons ayant une élévation négative. NOTE : cela peut entrer en conflit avec d'autres modules opérant sur les tuiles."
+          "hint": "Les tuiles de scène dont l'élévation est inférieure ou égale à 0 seront toujours dessinées derrière les jetons dont l'élévation est négative. ATTENTION : cela peut entrer en conflit avec d'autres modules qui utilisent également des tuiles."
         }
       },
       "unided": {
