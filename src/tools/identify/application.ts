@@ -16,6 +16,7 @@ import {
     isCastConsumable,
     ItemPF2e,
     MagicTradition,
+    MapOfArrays,
     PhysicalItemPF2e,
     PhysicalItemType,
     R,
@@ -135,7 +136,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         );
 
         const spellLists: Record<string, IdentifySpellList> = {};
-        const itemGroups: Partial<Record<PhysicalItemType, IdentifyGroupItem[]>> = {};
+        const itemGroups = new MapOfArrays<IdentifyGroupItem, PhysicalItemType>();
 
         const useDelay = this.settings.delay;
         const { worldTime, date, time } = getShortDateTime();
@@ -332,8 +333,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                     uuid: itemUUID,
                 };
 
-                const itemGroup = (itemGroups[itemType] ??= []);
-                itemGroup.push(groupItem);
+                itemGroups.add(itemType, groupItem);
             })
         );
 
@@ -341,14 +341,15 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
             time,
             date,
             actors: characters,
-            itemGroups: R.pipe(
-                R.entries(itemGroups),
-                R.map(([type, items]) => ({
-                    type,
-                    label: game.i18n.localize(`TYPES.Item.${type}`),
-                    items: R.sortBy(items, R.prop("name")),
-                })),
-                R.sortBy(R.prop("label"))
+            itemGroups: R.sortBy(
+                itemGroups.map((items, type): IdentifyContextItemGroup => {
+                    return {
+                        type,
+                        label: game.i18n.localize(`TYPES.Item.${type}`),
+                        items: R.sortBy(items, R.prop("name")),
+                    };
+                }),
+                R.prop("label")
             ),
         };
     }
@@ -837,11 +838,13 @@ type IdentifyContext = {
     actors: CharacterPF2e[];
     date: string;
     time: string;
-    itemGroups: {
-        type: PhysicalItemType;
-        label: string;
-        items: IdentifyGroupItem[];
-    }[];
+    itemGroups: IdentifyContextItemGroup[];
+};
+
+type IdentifyContextItemGroup = {
+    type: PhysicalItemType;
+    label: string;
+    items: IdentifyGroupItem[];
 };
 
 type IdentifyRenderOptions = ApplicationRenderOptions & {
