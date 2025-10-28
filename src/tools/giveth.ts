@@ -1,8 +1,8 @@
 import {
     ActorPF2e,
     ActorSheetPF2e,
+    createCreatureSheetWrapper,
     createEmitable,
-    createToggleableWrapper,
     DropCanvasItemDataPF2e,
     isAllyActor,
     ItemPF2e,
@@ -17,14 +17,10 @@ class GivethTool extends ModuleTool<ToolSettings> {
         }
     });
 
-    #handleDroppedItemWrapper = createToggleableWrapper(
+    #handleDroppedItemWrapper = createCreatureSheetWrapper(
         "MIXED",
-        [
-            "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._handleDroppedItem",
-            "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype._handleDroppedItem",
-            "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype._handleDroppedItem",
-        ],
-        this.#actorSheetHandleDroppedItem,
+        "_handleDroppedItem",
+        this.#creatureSheetHandleDroppedItem,
         { context: this }
     );
 
@@ -85,7 +81,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         );
     }
 
-    async #actorSheetHandleDroppedItem(
+    async #creatureSheetHandleDroppedItem(
         actorSheet: ActorSheetPF2e<ActorPF2e>,
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
