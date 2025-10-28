@@ -1,19 +1,31 @@
 .actor.sheet section.window-content {
-    .image-container .hover-icon {
-        &.show-players {
-            bottom: auto;
-            top: 0;
-        }
+    .image-container .hover-icon.show-players {
+        bottom: auto;
+        top: 0;
     }
 
-    .inventory-list {
-        > header {
-            .item-name {
-                a.disabled {
-                    opacity: 0.4;
-                }
-            }
-        }
+    .item-name a.disabled {
+        opacity: 0.4;
+    }
+
+    .spellcasting-entry .action-header .item-name.with-sort {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.spellcasting-entry.preparation > .window-content form > header h1.with-sort {
+    justify-content: start;
+    align-items: center;
+    gap: 0.1em;
+
+    > a {
+        font-size: 0.8em;
+    }
+
+    .flexible-available {
+        flex: 1;
+        text-align: end;
     }
 }
 

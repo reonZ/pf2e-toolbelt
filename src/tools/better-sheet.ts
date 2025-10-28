@@ -8,16 +8,22 @@ import {
     createHTMLElement,
     createToggleableHook,
     createToggleableWrapper,
+    CreaturePF2e,
     CreatureSheetData,
     FamiliarPF2e,
     FamiliarSheetPF2e,
     htmlQuery,
+    isInstanceOf,
+    ItemPF2e,
     NPCSheetPF2e,
     PhysicalItemType,
     R,
     renderActorSheets,
     renderCharacterSheets,
     sortByLocaleCompare,
+    SpellcastingEntryPF2e,
+    SpellCollection,
+    SpellPreparationSheet,
     splitStr,
     toggleHooksAndWrappers,
 } from "module-helpers";
@@ -51,7 +57,10 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         this.#showPlayersOnRender.bind(this)
     );
 
-    #sortListHook = createToggleableHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this));
+    #sortListHooks = [
+        createToggleableHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this)),
+        createToggleableHook("renderSpellPreparationSheet", this.#addSpellbookSortList.bind(this)),
+    ];
 
     get key(): "betterSheet" {
         return "betterSheet";
@@ -99,7 +108,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "user",
                 onChange: (value: boolean) => {
-                    this.#sortListHook.toggle(value);
+                    toggleHooksAndWrappers(this.#sortListHooks, value);
                     renderActorSheets();
                 },
             },
@@ -110,7 +119,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
 
         this.#showPlayersHook.toggle(isGM && this.settings.showPlayers);
-        this.#sortListHook.toggle(this.settings.sortList);
+        toggleHooksAndWrappers(this.#sortListHooks, this.settings.sortList);
     }
 
     ready(isGM: boolean): void {
@@ -189,10 +198,118 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         const html = $html[0];
         const actor = sheet.actor;
 
-        this.#addinventorySortList(html, actor);
+        this.#addInventorySortList(html, actor);
+        this.#addSpellcastingSortList(html, actor);
     }
 
-    #addinventorySortList(html: HTMLElement, actor: ActorPF2e) {
+    #createSortBtn(disabled: boolean) {
+        return createHTMLElement("a", {
+            classes: disabled ? ["disabled"] : [],
+            content: `<i class="fa-solid fa-arrow-up-a-z"></i>`,
+            dataset: {
+                tooltip: this.localizePath("sortList.sheet.tooltip"),
+            },
+        });
+    }
+
+    async #sortCollectionSpells(collection: SpellCollection<CreaturePF2e>) {
+        const updates = R.pipe(
+            collection.contents,
+            R.groupBy((spell) => (spell.isCantrip ? 0 : spell.rank)),
+            R.values(),
+            R.flatMap((group) => {
+                group.sort((a, b) => a._source.name.localeCompare(b._source.name));
+                return group;
+            }),
+            R.map((item, index) => {
+                return { _id: item.id, sort: 50000 * index };
+            })
+        );
+
+        await collection.actor.updateEmbeddedDocuments("Item", updates);
+    }
+
+    async #sortPrepCollection(entry: SpellcastingEntryPF2e<CreaturePF2e>) {
+        const actor = entry.actor;
+        const cached: Record<string, ItemPF2e | undefined> = {};
+
+        const updates = R.mapValues(entry.system.slots, (slot) => {
+            return {
+                prepared: slot.prepared.sort((a, b) => {
+                    if (a.id === null && b.id === null) return 0;
+                    if (a.id === null) return 1;
+                    if (b.id === null) return -1;
+
+                    const spellA = (cached[a.id] ??= actor.items.get(a.id));
+                    const spellB = (cached[b.id] ??= actor.items.get(b.id));
+
+                    if (!spellA && spellB) return 0;
+                    if (!spellA) return 1;
+                    if (!spellB) return -1;
+
+                    return spellA.name.localeCompare(spellB.name);
+                }),
+            };
+        });
+
+        await entry.update({ "system.slots": updates });
+    }
+
+    #addSpellbookSortList(sheet: SpellPreparationSheet<CreaturePF2e>, $html: JQuery) {
+        if (!sheet.isEditable) return;
+
+        const html = $html[0];
+        const actor = sheet.actor;
+        const name = htmlQuery(html, ".sheet-header h1");
+        const btn = this.#createSortBtn(false);
+
+        name?.classList.add("with-sort");
+        name?.prepend(btn);
+
+        btn.addEventListener("click", async () => {
+            const collectionId = htmlQuery(html, `[data-entry-id]`)?.dataset.entryId;
+            const collection = actor.spellcasting.collections.get(collectionId ?? "");
+
+            if (collection) {
+                await this.#sortCollectionSpells(collection);
+            }
+        });
+    }
+
+    #addSpellcastingSortList(html: HTMLElement, actor: ActorPF2e) {
+        if (!actor.isOfType("character")) return;
+
+        const spellcasting = htmlQuery(html, `.tab[data-tab="spellcasting"] .known-spells`);
+        const sections = spellcasting?.querySelectorAll<HTMLElement>(".spellcasting-entry");
+
+        for (const section of sections ?? []) {
+            const collectionId = section.dataset.itemId;
+            const collection = actor.spellcasting.collections.get(collectionId ?? "");
+            if (!collection) return;
+
+            const entry = collection.entry as unknown as SpellcastingEntryPF2e<CreaturePF2e>;
+            if (!isInstanceOf(entry, "SpellcastingEntryPF2e")) return;
+
+            const name = htmlQuery(section, ".action-header .item-name");
+            const disabled = collection.size === 0 || entry.isFlexible;
+            const btn = this.#createSortBtn(disabled);
+
+            name?.classList.add("with-sort");
+            name?.prepend(btn);
+
+            if (disabled) return;
+
+            btn.addEventListener("click", async () => {
+                if (entry.isPrepared) {
+                    await this.#sortPrepCollection(entry);
+                } else {
+                    await this.#sortCollectionSpells(collection);
+                }
+            });
+        }
+    }
+
+    #addInventorySortList(html: HTMLElement, actor: ActorPF2e) {
         const isLoot = actor.isOfType("loot");
         const inventorySelector = isLoot ? ".sheet-body.inventory" : `.tab[data-tab="inventory"]`;
         const inventory = htmlQuery(html, inventorySelector + " .inventory-list");
@@ -204,18 +321,13 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             const itemsList = header.nextElementSibling as HTMLElement | undefined;
             if (!itemsList || !itemsList.classList.contains("items")) continue;
 
-            const hasItems = itemsList.children.length > 0;
+            const disabled = itemsList.children.length === 0;
             const name = htmlQuery(header, ".item-name");
-            const btn = createHTMLElement("a", {
-                classes: hasItems ? [] : ["disabled"],
-                content: `<i class="fa-solid fa-arrow-up-a-z"></i>`,
-                dataset: {
-                    tooltip: this.localizePath("sortList.sheet.tooltip"),
-                },
-            });
+            const btn = this.#createSortBtn(disabled);
 
             name?.prepend(btn);
-            if (!hasItems) continue;
+
+            if (disabled) continue;
 
             btn.addEventListener("click", async () => {
                 if (isLoot && header.classList.contains("services")) {
@@ -228,17 +340,16 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 }
 
                 const types = splitStr<PhysicalItemType>(itemsList.dataset.itemTypes ?? "");
-                const items = R.pipe(
+                const updates = R.pipe(
                     types,
                     R.map((type) => type in actor.itemTypes && actor.itemTypes[type]),
                     R.filter(R.isTruthy),
                     R.flat(),
-                    R.sort((a, b) => a._source.name.localeCompare(b._source.name))
+                    R.sort((a, b) => a._source.name.localeCompare(b._source.name)),
+                    R.map((item, index) => {
+                        return { _id: item.id, sort: 50000 * index };
+                    })
                 );
-
-                const updates = items.map((item, index) => {
-                    return { _id: item.id, sort: 50000 * index };
-                });
 
                 await actor.updateEmbeddedDocuments("Item", updates);
             });
