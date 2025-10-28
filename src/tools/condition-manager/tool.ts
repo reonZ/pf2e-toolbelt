@@ -1,9 +1,9 @@
-import { ActorPF2e, createHook, createToggleKeybind, ItemPF2e } from "module-helpers";
+import { ActorPF2e, createToggleableHook, createToggleKeybind, ItemPF2e } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { ConditionManager } from ".";
 
 class ConditionManagerTool extends ModuleTool<ToolSettings> {
-    #preCreateItemHook = createHook("preCreateItem", this.#onPreCreateItem.bind(this));
+    #preCreateItemHook = createToggleableHook("preCreateItem", this.#onPreCreateItem.bind(this));
 
     #manageKeybind = createToggleKeybind({
         name: "manage",

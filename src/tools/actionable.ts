@@ -11,7 +11,7 @@ import {
     ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
-    createHook,
+    createToggleableHook,
     createHTMLElement,
     createHTMLElementContent,
     createToggleableWrapper,
@@ -49,7 +49,7 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
-    #renderCharacterSheetPF2eHook = createHook(
+    #renderCharacterSheetPF2eHook = createToggleableHook(
         [
             "renderCharacterSheetPF2e", //
             "renderNPCSheetPF2e",
@@ -57,7 +57,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         this.#onRenderSheetPF2e.bind(this)
     );
 
-    #createChatMessageHook = createHook("createChatMessage", this.#onCreateChatMessage.bind(this));
+    #createChatMessageHook = createToggleableHook(
+        "createChatMessage",
+        this.#onCreateChatMessage.bind(this)
+    );
 
     #actionWrappers = [
         createToggleableWrapper(

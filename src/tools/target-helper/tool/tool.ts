@@ -1,7 +1,7 @@
 import {
     ChatMessagePF2e,
     createEmitable,
-    createHook,
+    createToggleableHook,
     createToggleableWrapper,
     isActionMessage,
     isSpellMessage,
@@ -58,7 +58,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         context: this,
     });
 
-    #preCreateChatMessageHook = createHook(
+    #preCreateChatMessageHook = createToggleableHook(
         "preCreateChatMessage",
         this.#onPreCreateChatMessage.bind(this)
     );

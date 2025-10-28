@@ -5,7 +5,7 @@ import {
     ChatMessageFlagsPF2e,
     ChatMessagePF2e,
     ChatMessageSourcePF2e,
-    createHook,
+    createToggleableHook,
     createHTMLElement,
     DamageDamageContextFlag,
     DamageInstance,
@@ -33,8 +33,11 @@ const _cached: { injected?: string; icons: PartialRecord<ButtonType, string> } =
 
 class MergeDamageTool extends ModuleTool<ToolSettings> {
     #hooks = [
-        createHook("renderChatMessageHTML", this.#onRenderChatMessage.bind(this)),
-        createHook("diceSoNiceMessageProcessed", this.#onDiceSoNiceMessageProcessed.bind(this)),
+        createToggleableHook("renderChatMessageHTML", this.#onRenderChatMessage.bind(this)),
+        createToggleableHook(
+            "diceSoNiceMessageProcessed",
+            this.#onDiceSoNiceMessageProcessed.bind(this)
+        ),
     ];
 
     static ICONS: Record<ButtonType, string> = {

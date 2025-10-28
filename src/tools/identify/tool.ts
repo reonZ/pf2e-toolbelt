@@ -3,7 +3,7 @@ import {
     ActorSheetPF2e,
     confirmDialog,
     createEmitable,
-    createHook,
+    createToggleableHook,
     createHTMLElement,
     htmlClosest,
     htmlQuery,
@@ -17,7 +17,10 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { IdentifyTracker } from ".";
 
 class IdentifyTool extends ModuleTool<IdentifySettings> {
-    #actorSheetHook = createHook("renderActorSheetPF2e", this.#onRenderActorSheetPF2e.bind(this));
+    #actorSheetHook = createToggleableHook(
+        "renderActorSheetPF2e",
+        this.#onRenderActorSheetPF2e.bind(this)
+    );
     #requestEmitable = createEmitable(this.key, this.#onRequestIdentify.bind(this));
 
     get key(): "identify" {

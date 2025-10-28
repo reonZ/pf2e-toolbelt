@@ -1,7 +1,7 @@
 import {
     ChatLogPF2e,
     ChatMessagePF2e,
-    createHook,
+    createToggleableHook,
     htmlQuery,
     isActionMessage,
     isSpellMessage,
@@ -27,7 +27,7 @@ const ANONYMOUS: {
 ];
 
 class AnonymousTool extends ModuleTool<ToolSettings> {
-    #getChatContextOptionsHook = createHook(
+    #getChatContextOptionsHook = createToggleableHook(
         "getChatMessageContextOptions",
         this.#onGetChatMessageContextOptions.bind(this)
     );

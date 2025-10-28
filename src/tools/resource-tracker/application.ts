@@ -3,7 +3,7 @@ import {
     ApplicationConfiguration,
     ApplicationPosition,
     ApplicationRenderOptions,
-    createHook,
+    createToggleableHook,
     createHTMLElement,
     getUsersSetting,
     htmlClosest,
@@ -16,7 +16,7 @@ import { Resource, ResourceCollection, ResourceModel, ResourceTrackerTool } from
 import { ModuleToolApplication } from "module-tool";
 
 class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
-    #userConnectedHook = createHook("userConnected", () => this.render());
+    #userConnectedHook = createToggleableHook("userConnected", () => this.render());
 
     #setPosition = R.funnel(
         () => {

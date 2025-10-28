@@ -1,6 +1,6 @@
 import {
     activateHooksAndWrappers,
-    createHook,
+    createToggleableHook,
     createToggleableWrapper,
     TileDocumentPF2e,
     TokenPF2e,
@@ -9,7 +9,7 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class UndergroundTool extends ModuleTool<ToolSettings> {
     #enabledHooks = [
-        createHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
+        createToggleableHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.Token.objectClass.prototype._refreshElevation",

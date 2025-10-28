@@ -1,5 +1,5 @@
 import {
-    createHook,
+    createToggleableHook,
     getTemplateTokens,
     isHoldingModifierKey,
     MeasuredTemplateDocumentPF2e,
@@ -9,7 +9,7 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterTemplateTool extends ModuleTool<ToolSettings> {
-    #createMeasuredTemplateHook = createHook(
+    #createMeasuredTemplateHook = createToggleableHook(
         "createMeasuredTemplate",
         this.#onCreateMeasuredTemplate.bind(this)
     );

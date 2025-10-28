@@ -2,7 +2,7 @@ import {
     ActorPF2e,
     CanvasPF2e,
     createEmitable,
-    createHook,
+    createToggleableHook,
     createToggleableWrapper,
     createToggleKeybind,
     getTradeData,
@@ -23,8 +23,8 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData } from ".";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
-    #deleteTokenHook = createHook("deleteToken", this.#onDeleteToken.bind(this));
-    #dropCanvasDataHook = createHook("dropCanvasData", this.#onDropCanvasData.bind(this));
+    #deleteTokenHook = createToggleableHook("deleteToken", this.#onDeleteToken.bind(this));
+    #dropCanvasDataHook = createToggleableHook("dropCanvasData", this.#onDropCanvasData.bind(this));
 
     #droppethItemEmitable = createEmitable(this.key, this.#droppethItem.bind(this));
 

@@ -1,9 +1,9 @@
-import { createHook, ItemPF2e, ItemSourcePF2e } from "module-helpers";
+import { createToggleableHook, ItemPF2e, ItemSourcePF2e } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class UnidedTool extends ModuleTool<ToolSettings> {
-    #preCreateItemHook = createHook("preCreateItem", this.#onPrecreateItem.bind(this));
-    #preUpdateItemHook = createHook("preUpdateItem", this.#onPreUpdateItem.bind(this));
+    #preCreateItemHook = createToggleableHook("preCreateItem", this.#onPrecreateItem.bind(this));
+    #preUpdateItemHook = createToggleableHook("preUpdateItem", this.#onPreUpdateItem.bind(this));
 
     get key(): "unided" {
         return "unided";

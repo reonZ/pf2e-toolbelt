@@ -4,7 +4,7 @@ import {
     Bulk,
     ConsumablePF2e,
     createButtonElement,
-    createHook,
+    createToggleableHook,
     createHTMLElement,
     createToggleableWrapper,
     EquipmentPF2e,
@@ -43,7 +43,10 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         renderActorSheets();
     }, 1);
 
-    #renderActorSheetHook = createHook("renderActorSheet", this.#onRenderActorSheet.bind(this));
+    #renderActorSheetHook = createToggleableHook(
+        "renderActorSheet",
+        this.#onRenderActorSheet.bind(this)
+    );
 
     get key(): "betterInventory" {
         return "betterInventory";

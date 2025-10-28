@@ -1,14 +1,14 @@
 import {
     AbstractEffectPF2e,
     addListener,
-    createHook,
+    createToggleableHook,
     EffectsPanel,
     EffectsPanelViewData,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
-    #renderEffectsPanelHook = createHook(
+    #renderEffectsPanelHook = createToggleableHook(
         "renderEffectsPanel",
         this.#onRenderEffectsPanel.bind(this)
     );

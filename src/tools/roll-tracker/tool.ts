@@ -2,7 +2,7 @@ import {
     ChatContextFlag,
     ChatMessagePF2e,
     CheckContextChatFlag,
-    createHook,
+    createToggleableHook,
     DEGREE_STRINGS,
     EncounterPF2e,
     getUserSetting,
@@ -24,11 +24,11 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
     #application?: RollTracker;
 
     #hooks = [
-        createHook("createChatMessage", this.#onCreateChatMessage.bind(this)),
-        createHook("pf2e-toolbelt.rollSave", ({ rollMessage }: RollSaveHook) => {
+        createToggleableHook("createChatMessage", this.#onCreateChatMessage.bind(this)),
+        createToggleableHook("pf2e-toolbelt.rollSave", ({ rollMessage }: RollSaveHook) => {
             this.#onCreateChatMessage(rollMessage, {}, game.userId);
         }),
-        createHook("pf2e-toolbelt.rerollSave", this.#onRerollSave.bind(this)),
+        createToggleableHook("pf2e-toolbelt.rerollSave", this.#onRerollSave.bind(this)),
     ];
 
     get key(): "rollTracker" {

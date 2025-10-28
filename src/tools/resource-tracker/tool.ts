@@ -1,9 +1,18 @@
-import { createHook, getWorldTime, PositionModel, settingPath, userIsGM } from "module-helpers";
+import {
+    createToggleableHook,
+    getWorldTime,
+    PositionModel,
+    settingPath,
+    userIsGM,
+} from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { Resource, ResourceCollection, ResourceTracker } from ".";
 
 class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
-    #updateWorldTimeHook = createHook("updateWorldTime", this.#onUpdateWorldTime.bind(this));
+    #updateWorldTimeHook = createToggleableHook(
+        "updateWorldTime",
+        this.#onUpdateWorldTime.bind(this)
+    );
     #application: ResourceTracker | null = null;
     #resources!: ResourceCollection;
 
