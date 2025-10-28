@@ -1,3 +1,4 @@
+import { MAPPED_TOOLS } from "main";
 import {
     ActorPF2e,
     ActorSheetPF2e,
@@ -12,11 +13,16 @@ import {
     FamiliarSheetPF2e,
     htmlQuery,
     NPCSheetPF2e,
+    PhysicalItemType,
+    R,
     renderActorSheets,
     renderCharacterSheets,
+    sortByLocaleCompare,
+    splitStr,
     toggleHooksAndWrappers,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { BetterMerchantTool } from "./better-merchant";
 
 class BetterSheetTool extends ModuleTool<ToolSettings> {
     #partyAsObservedHooks = [
@@ -40,10 +46,12 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
-    #renderActorSheetHook = createToggleableHook(
+    #showPlayersHook = createToggleableHook(
         "renderActorSheetPF2e",
-        this.#onRenderActorSheetPF2e.bind(this)
+        this.#showPlayersOnRender.bind(this)
     );
+
+    #sortListHook = createToggleableHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this));
 
     get key(): "betterSheet" {
         return "betterSheet";
@@ -61,17 +69,6 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
-                key: "showPlayers",
-                type: Boolean,
-                default: false,
-                scope: "user",
-                gmOnly: true,
-                onChange: (value: boolean) => {
-                    this.#renderActorSheetHook.toggle(game.user.isGM && value);
-                    renderActorSheets();
-                },
-            },
-            {
                 key: "scribble",
                 type: Boolean,
                 default: false,
@@ -83,15 +80,37 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     renderCharacterSheets();
                 },
             },
+            {
+                key: "showPlayers",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                gmOnly: true,
+                onChange: (value: boolean) => {
+                    if (game.user.isGM) {
+                        this.#showPlayersHook.toggle(value);
+                        renderActorSheets();
+                    }
+                },
+            },
+            {
+                key: "sortList",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: (value: boolean) => {
+                    this.#sortListHook.toggle(value);
+                    renderActorSheets();
+                },
+            },
         ];
     }
 
     init(isGM: boolean): void {
         document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
 
-        if (isGM) {
-            this.#renderActorSheetHook.toggle(this.settings.showPlayers);
-        }
+        this.#showPlayersHook.toggle(isGM && this.settings.showPlayers);
+        this.#sortListHook.toggle(this.settings.sortList);
     }
 
     ready(isGM: boolean): void {
@@ -135,7 +154,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         return data;
     }
 
-    #onRenderActorSheetPF2e(sheet: ActorSheetPF2e<ActorPF2e>, $html: JQuery) {
+    #showPlayersOnRender(sheet: ActorSheetPF2e<ActorPF2e>, $html: JQuery) {
         const html = $html[0];
         const imgPanel = htmlQuery(html, ".image-container");
         if (!imgPanel) return;
@@ -163,11 +182,74 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
         imgPanel.appendChild(btn);
     }
+
+    #sortListOnRender(sheet: ActorSheetPF2e<ActorPF2e>, $html: JQuery) {
+        if (!sheet.isEditable) return;
+
+        const html = $html[0];
+        const actor = sheet.actor;
+
+        this.#addinventorySortList(html, actor);
+    }
+
+    #addinventorySortList(html: HTMLElement, actor: ActorPF2e) {
+        const isLoot = actor.isOfType("loot");
+        const inventorySelector = isLoot ? ".sheet-body.inventory" : `.tab[data-tab="inventory"]`;
+        const inventory = htmlQuery(html, inventorySelector + " .inventory-list");
+        if (!inventory) return;
+
+        const headers = inventory.querySelectorAll(":scope > header");
+
+        for (const header of headers) {
+            const itemsList = header.nextElementSibling as HTMLElement | undefined;
+            if (!itemsList || !itemsList.classList.contains("items")) continue;
+
+            const hasItems = itemsList.children.length > 0;
+            const name = htmlQuery(header, ".item-name");
+            const btn = createHTMLElement("a", {
+                classes: hasItems ? [] : ["disabled"],
+                content: `<i class="fa-solid fa-arrow-up-a-z"></i>`,
+                dataset: {
+                    tooltip: this.localizePath("sortList.sheet.tooltip"),
+                },
+            });
+
+            name?.prepend(btn);
+            if (!hasItems) continue;
+
+            btn.addEventListener("click", async () => {
+                if (isLoot && header.classList.contains("services")) {
+                    const tool = MAPPED_TOOLS.betterMerchant as BetterMerchantTool;
+                    const services = tool.getServices(actor);
+
+                    sortByLocaleCompare(services, "label");
+                    await services.setFlag();
+                    return;
+                }
+
+                const types = splitStr<PhysicalItemType>(itemsList.dataset.itemTypes ?? "");
+                const items = R.pipe(
+                    types,
+                    R.map((type) => type in actor.itemTypes && actor.itemTypes[type]),
+                    R.filter(R.isTruthy),
+                    R.flat(),
+                    R.sort((a, b) => a._source.name.localeCompare(b._source.name))
+                );
+
+                const updates = items.map((item, index) => {
+                    return { _id: item.id, sort: 50000 * index };
+                });
+
+                await actor.updateEmbeddedDocuments("Item", updates);
+            });
+        }
+    }
 }
 
 type ToolSettings = {
     scribble: boolean;
     showPlayers: boolean;
+    sortList: boolean;
     partyAsObserved: boolean;
 };
 

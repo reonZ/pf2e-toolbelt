@@ -404,6 +404,7 @@ function getIdenticalItems(items: NonEmptyArray<Mergeable>): NonEmptyArray<Merge
             }
         }
 
+        // due to a mistake in the system some items may end up with this dead property after a player trade
         if (diff.system && "container" in diff.system) {
             delete diff.system.container;
         }

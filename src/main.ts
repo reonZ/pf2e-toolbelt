@@ -6,7 +6,6 @@ import {
     registerModuleSettings,
     userIsGM,
 } from "module-helpers";
-import { ModuleTool } from "module-tool";
 import {
     ActionableTool,
     AnonymousTool,
@@ -32,7 +31,7 @@ import {
     UnidedTool,
 } from "tools";
 
-const TOOLS: ModuleTool[] = [
+const TOOLS = [
     new ActionableTool(),
     new AnonymousTool(),
     new ArpTool(),
@@ -55,16 +54,14 @@ const TOOLS: ModuleTool[] = [
     new ShareDataTool(),
     new TargetHelperTool(),
     new UndergroundTool(),
-];
+] as const;
+
+const MAPPED_TOOLS = R.mapToObj(TOOLS, (tool) => [tool.key, tool] as const);
 
 MODULE.register("pf2e-toolbelt");
 // MODULE.enableDebugMode();
 
-for (const tool of TOOLS) {
-    MODULE.apiExpose({
-        [tool.key]: tool.api,
-    });
-}
+MODULE.apiExpose(R.mapValues(MAPPED_TOOLS, (tool) => tool.api));
 
 Hooks.once("init", () => {
     const isGM = userIsGM();
@@ -164,3 +161,5 @@ Hooks.once("ready", () => {
 });
 
 MODULE.devExpose({ tools: R.mapToObj(TOOLS, (tool) => [tool.key, tool]) });
+
+export { MAPPED_TOOLS };

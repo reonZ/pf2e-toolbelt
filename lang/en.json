@@ -157,6 +157,10 @@
                 "showPlayers": {
                     "name": "Show Avatar to Players",
                     "hint": "Adds a 'Show Player' button in the actor sheets avatar panel."
+                },
+                "sortList": {
+                    "name": "Sort List Button",
+                    "hint": "Adds sorting buttons to different lists on the actor sheet."
                 }
             },
             "betterTemplate": {
@@ -497,6 +501,13 @@
                 "quantity": "Negative number for infinite stock",
                 "tags": "Service Tags",
                 "title": "Service - {label}"
+            }
+        },
+        "betterSheet": {
+            "sortList": {
+                "sheet": {
+                    "tooltip": "Sort Content"
+                }
             }
         },
         "betterTemplate": {

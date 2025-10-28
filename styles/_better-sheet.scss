@@ -1,7 +1,19 @@
-.actor.sheet section.window-content .image-container .hover-icon {
-    &.show-players {
-        bottom: auto;
-        top: 0;
+.actor.sheet section.window-content {
+    .image-container .hover-icon {
+        &.show-players {
+            bottom: auto;
+            top: 0;
+        }
+    }
+
+    .inventory-list {
+        > header {
+            .item-name {
+                a.disabled {
+                    opacity: 0.4;
+                }
+            }
+        }
     }
 }
 
