@@ -26,32 +26,30 @@
         }
 
         .dice-result {
-            .dice-total {
-                .pf2e-toolbelt-target-buttons {
-                    position: absolute;
-                    left: 1px;
-                    bottom: 1px;
-                    display: flex;
-                    gap: 1px;
-                    align-items: center;
+            .pf2e-toolbelt-target-buttons {
+                position: absolute;
+                left: 1px;
+                bottom: 1px;
+                display: flex;
+                gap: 1px;
+                align-items: center;
 
-                    button {
-                        height: 1.4rem;
-                        width: 1.4rem;
-                        min-height: revert;
+                button {
+                    height: 1.4rem;
+                    width: 1.4rem;
+                    min-height: revert;
+                }
+
+                .pf2e-toolbelt-target-toggleDamageRows {
+                    &.expanded {
+                        .expand {
+                            display: none;
+                        }
                     }
 
-                    .pf2e-toolbelt-target-toggleDamageRows {
-                        &.expanded {
-                            .expand {
-                                display: none;
-                            }
-                        }
-
-                        &:not(.expanded) {
-                            .collapse {
-                                display: none;
-                            }
+                    &:not(.expanded) {
+                        .collapse {
+                            display: none;
                         }
                     }
                 }
