@@ -143,6 +143,18 @@ async function renderSpellCardLikeMessage(
         },
         true
     );
+
+    // TODO remove when the system fixes the bug
+    const clearTemplatesBtn = htmlQuery(msgContent, `[data-action="spell-template-clear"]`);
+    if (clearTemplatesBtn && clearTemplatesBtn.classList.contains("hidden")) {
+        const hasTemplates = !!canvas.scene?.templates.some(
+            (template) => template.message === message && template.isOwner
+        );
+
+        if (hasTemplates) {
+            clearTemplatesBtn.classList.remove("hidden");
+        }
+    }
 }
 
 let BASIC_SAVE_REGEX: RegExp;
