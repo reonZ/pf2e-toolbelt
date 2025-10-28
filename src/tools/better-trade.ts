@@ -1,8 +1,12 @@
 import {
     ActorPF2e,
     ContainerPF2e,
+    createCreatureSheetWrapper,
     createEmitable,
+    CreaturePF2e,
+    DropCanvasItemDataPF2e,
     giveItemToActor,
+    ItemPF2e,
     PhysicalItemPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -21,6 +25,13 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         { context: this, priority: 100 }
     );
 
+    #onDropItemWrapper = createCreatureSheetWrapper(
+        "WRAPPER",
+        "_onDropItem",
+        this.#creatureSheetOnDropItem,
+        { context: this }
+    );
+
     get key(): "betterTrade" {
         return "betterTrade";
     }
@@ -28,11 +39,23 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
     get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
+                key: "invertTrade",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                playerOnly: true,
+                onChange: (value: boolean) => {
+                    if (!game.user.isGM) {
+                        this.#onDropItemWrapper.toggle(value);
+                    }
+                },
+            },
+            {
                 key: "withContent",
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {
+                onChange: (value: boolean) => {
                     this.#transferItemToActorWrapper.toggle(value);
                     this.#transferContainerEmitable.toggle(value);
                 },
@@ -44,6 +67,12 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         if (this.settings.withContent) {
             this.#transferItemToActorWrapper.activate();
             this.#transferContainerEmitable.activate();
+        }
+    }
+
+    ready(isGM: boolean): void {
+        if (!isGM && this.settings.invertTrade) {
+            this.#onDropItemWrapper.activate();
         }
     }
 
@@ -66,6 +95,21 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         }
 
         return false;
+    }
+
+    async #creatureSheetOnDropItem(
+        actor: CreaturePF2e,
+        wrapped: libWrapper.RegisterCallback,
+        event: DragEvent,
+        data: DropCanvasItemDataPF2e
+    ): Promise<ItemPF2e[]> {
+        const newEvent = new DragEvent("drop", {
+            altKey: event.altKey,
+            shiftKey: !event.shiftKey,
+            dataTransfer: event.dataTransfer,
+        });
+
+        return wrapped(newEvent, data);
     }
 }
 

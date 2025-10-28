@@ -182,7 +182,8 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         const self = this;
 
         for (const setting of this.settingsSchema) {
-            if (setting.gmOnly && !isGM) continue;
+            if (isGM && setting.playerOnly) continue;
+            if (!isGM && setting.gmOnly) continue;
 
             const key = this.getSettingKey(setting.key);
             this.#settings[key] = getSetting(key);

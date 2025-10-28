@@ -1,5 +1,6 @@
 {
     "LEVIKTIMES": {
+        "playerOnly": "Player Only",
         "gmOnly": "GM Only",
         "reloadRequired": "Requires Reload",
         "emiting": {
@@ -163,6 +164,10 @@
             },
             "betterTrade": {
                 "title": "Better Trade",
+                "invertTrade": {
+                    "name": "Invert Trade Modifier",
+                    "hint": "Players will no longer have to hold 'shift' to give an item without initiating a trade. (Holding 'shift' will initiate the trade request)"
+                },
                 "withContent": {
                     "name": "With Container Content",
                     "hint": "When a container is moved from one actor to another, should its content go with it. NOTE this doesn't work when using the system trade functionality."
