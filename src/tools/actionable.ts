@@ -23,6 +23,7 @@ import {
     FeatPF2e,
     FeatSheetPF2e,
     getActionGlyph,
+    getItemSourceId,
     htmlQuery,
     InventoryItem,
     isCastConsumable,
@@ -504,15 +505,20 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         } else if (
             sheetItem.isOfType("feat") &&
             droppedItem.isOfType("feat") &&
-            droppedItem.category === "classfeature" &&
-            droppedItem.sourceId &&
-            droppedItem.sourceId !== sheetItem.sourceId
+            droppedItem.category === "classfeature"
         ) {
+            const droppedSourceId = getItemSourceId(droppedItem);
+
+            if (!droppedSourceId || droppedSourceId === getItemSourceId(sheetItem)) {
+                throw ErrorPF2e("Invalid item drop");
+            }
+
             const feats = sheetItem._source.system.subfeatures?.suppressedFeatures ?? [];
-            if (!feats.includes(droppedItem.sourceId)) {
-                const newFeatures = [...feats, droppedItem.sourceId];
+            if (!feats.includes(droppedSourceId)) {
+                const newFeatures = [...feats, droppedSourceId];
                 await sheetItem.update({ "system.subfeatures.suppressedFeatures": newFeatures });
             }
+
             return;
         }
 

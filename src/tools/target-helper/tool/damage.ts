@@ -1,5 +1,4 @@
 import {
-    actorItems,
     addListenerAll,
     ChatMessagePF2e,
     createHTMLElement,
@@ -8,6 +7,7 @@ import {
     ErrorPF2e,
     extractEphemeralEffects,
     getChoiceSetSelection,
+    getItemSourceId,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
@@ -204,8 +204,8 @@ async function renderDamageMessage(
                         return save.success;
                     }
 
-                    for (const item of actorItems(targetActor, "feat")) {
-                        const sourceId = item.sourceId;
+                    for (const item of targetActor.itemTypes.feat) {
+                        const sourceId = getItemSourceId(item);
                         if (!sourceId) continue;
 
                         if (sourceId === TargetHelperTool.THIRD_PATH_TO_PERFECTION) {
