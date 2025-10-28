@@ -8,6 +8,7 @@ import {
     createHTMLElement,
     createToggleableWrapper,
     EquipmentPF2e,
+    getItemSourceId,
     htmlClosest,
     htmlQuery,
     InventoryBulk,
@@ -242,15 +243,16 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         await waitTimeout();
 
         const identicalItems = R.pipe(
-            actor.inventory.filter((item): item is Mergeable & { sourceId: string } => {
+            actor.inventory.filter((item): item is Mergeable => {
                 return (
                     item.isOfType("equipment", "consumable", "treasure") &&
                     item.isIdentified &&
-                    !!item.sourceId
+                    !!getItemSourceId(item)
                 );
             }),
-            R.groupBy(R.prop("sourceId")),
+            R.groupBy((item) => getItemSourceId(item)),
             R.values(),
+            R.filter((items) => items.length > 1),
             R.flatMap((items): NonEmptyArray<Mergeable>[] => getIdenticalItems(items)),
             R.filter((items): items is NonEmptyArray<Mergeable> => items.length > 1)
         );
@@ -383,6 +385,7 @@ function getIdenticalItems(items: NonEmptyArray<Mergeable>): NonEmptyArray<Merge
             Mergeable["_source"]
         >;
 
+        delete diff.sort;
         delete diff.ownership;
         delete diff._id;
         delete diff._stats;
@@ -396,6 +399,10 @@ function getIdenticalItems(items: NonEmptyArray<Mergeable>): NonEmptyArray<Merge
             if (foundry.utils.isEmpty(diff.system.uses)) {
                 delete diff.system.uses;
             }
+        }
+
+        if (diff.system && "container" in diff.system) {
+            delete diff.system.container;
         }
 
         if (foundry.utils.isEmpty(diff.system)) {
