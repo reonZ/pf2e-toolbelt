@@ -59,11 +59,11 @@
       "anonymous": {
         "title": "Anonimowy",
         "action": {
-          "name": "Anonimizuj akcje BNów",
+          "name": "Ukryj akcje Bohaterów Niezależnych",
           "hint": "Działania wysyłane na czat przez podmiot niebędący graczem zostaną utajnione dla graczy."
         },
         "spell": {
-          "name": "Ukryj zaklęcia BN",
+          "name": "Ukryj zaklęcia Bohaterów Niezależnych",
           "hint": "Zaklęcia rzucane przez postacie niebędące własnością graczy będą dla graczy ukryte."
         }
       },
@@ -350,7 +350,7 @@
     },
     "anonymous": {
       "action": {
-        "header": "Czy używanie zdolności...",
+        "header": "Używa zdolności...",
         "context": "Ujawnij akcję graczom"
       },
       "spell": {
