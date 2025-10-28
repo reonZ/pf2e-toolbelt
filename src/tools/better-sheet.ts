@@ -1,12 +1,18 @@
 import {
+    ActorPF2e,
+    ActorSheetPF2e,
     belongToPartyAlliance,
     CharacterPF2e,
     CharacterSheetPF2e,
+    createHTMLElement,
+    createToggleableHook,
     createToggleableWrapper,
     CreatureSheetData,
     FamiliarPF2e,
     FamiliarSheetPF2e,
+    htmlQuery,
     NPCSheetPF2e,
+    renderActorSheets,
     renderCharacterSheets,
     toggleHooksAndWrappers,
 } from "module-helpers";
@@ -34,6 +40,11 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
+    #renderActorSheetHook = createToggleableHook(
+        "renderActorSheetPF2e",
+        this.#onRenderActorSheetPF2e.bind(this)
+    );
+
     get key(): "betterSheet" {
         return "betterSheet";
     }
@@ -45,8 +56,19 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {
+                onChange: (value: boolean) => {
                     toggleHooksAndWrappers(this.#partyAsObservedHooks, !game.user.isGM && value);
+                },
+            },
+            {
+                key: "showPlayers",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                gmOnly: true,
+                onChange: (value: boolean) => {
+                    this.#renderActorSheetHook.toggle(game.user.isGM && value);
+                    renderActorSheets();
                 },
             },
             {
@@ -56,7 +78,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 scope: "user",
                 // TODO this goes away once the feature is released
                 config: false,
-                onChange: (value) => {
+                onChange: (value: boolean) => {
                     document.body.classList.toggle("pf2e-toolbelt-scribble", value);
                     renderCharacterSheets();
                 },
@@ -66,6 +88,10 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
     init(isGM: boolean): void {
         document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
+
+        if (isGM) {
+            this.#renderActorSheetHook.toggle(this.settings.showPlayers);
+        }
     }
 
     ready(isGM: boolean): void {
@@ -108,10 +134,40 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
         return data;
     }
+
+    #onRenderActorSheetPF2e(sheet: ActorSheetPF2e<ActorPF2e>, $html: JQuery) {
+        const html = $html[0];
+        const imgPanel = htmlQuery(html, ".image-container");
+        if (!imgPanel) return;
+
+        const actor = sheet.actor;
+        const btn = createHTMLElement("a", {
+            classes: ["hover-icon", "show-players"],
+            content: `<i class="fa-fw fa-solid fa-eye"></i></a>`,
+            dataset: {
+                tooltip: "JOURNAL.ActionShow",
+            },
+        });
+
+        btn.addEventListener("click", () => {
+            game.socket.emit("shareImage", {
+                image: actor.img,
+                title: "test title",
+                uuid: actor.uuid,
+            });
+
+            ui.notifications.info("JOURNAL.ActionShowSuccess", {
+                format: { mode: "image", title: actor.name, which: "all" },
+            });
+        });
+
+        imgPanel.appendChild(btn);
+    }
 }
 
 type ToolSettings = {
     scribble: boolean;
+    showPlayers: boolean;
     partyAsObserved: boolean;
 };
 

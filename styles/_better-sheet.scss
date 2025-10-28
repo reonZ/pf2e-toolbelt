@@ -1,3 +1,10 @@
+.actor.sheet section.window-content .image-container .hover-icon {
+    &.show-players {
+        bottom: auto;
+        top: 0;
+    }
+}
+
 .application.dialog.pf2e-toolbelt.toolbelt-split-item {
     .form-fields {
         flex: 0;

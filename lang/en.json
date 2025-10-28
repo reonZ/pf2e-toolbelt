@@ -153,6 +153,10 @@
                 "scribble": {
                     "name": "Handwritten Character Sheet",
                     "hint": "A restyling of the character sheet to appear as it was written by hand."
+                },
+                "showPlayers": {
+                    "name": "Show Avatar to Players",
+                    "hint": "Adds a 'Show Player' button in the actor sheets avatar panel."
                 }
             },
             "betterTemplate": {
