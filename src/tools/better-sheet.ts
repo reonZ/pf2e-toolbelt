@@ -198,13 +198,20 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         const html = $html[0];
         const actor = sheet.actor;
 
+        this.#addActionsSortList(html, actor);
         this.#addInventorySortList(html, actor);
         this.#addSpellcastingSortList(html, actor);
     }
 
     #createSortBtn(disabled: boolean) {
+        const classes = ["with-sort-btn"];
+
+        if (disabled) {
+            classes.push("disabled");
+        }
+
         return createHTMLElement("a", {
-            classes: disabled ? ["disabled"] : [],
+            classes,
             content: `<i class="fa-solid fa-arrow-up-a-z"></i>`,
             dataset: {
                 tooltip: this.localizePath("sortList.sheet.tooltip"),
@@ -291,7 +298,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             if (!isInstanceOf(entry, "SpellcastingEntryPF2e")) return;
 
             const name = htmlQuery(section, ".action-header .item-name");
-            const disabled = collection.size === 0 || entry.isFlexible;
+            const disabled = collection.size < 2 || entry.isFlexible;
             const btn = this.#createSortBtn(disabled);
 
             name?.classList.add("with-sort");
@@ -309,6 +316,36 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         }
     }
 
+    #addActionsSortList(html: HTMLElement, actor: ActorPF2e) {
+        if (!actor.isOfType("npc")) return;
+
+        const actionsTab = htmlQuery(html, `.tab[data-tab="main"]`);
+
+        for (const type of ["action", "passive"] as const) {
+            const section = htmlQuery(actionsTab, `.section-container.${type}s`);
+            const name = htmlQuery(section, ".section-header h4");
+            const disabled = (htmlQuery(section, ".item-list")?.children.length ?? 0) < 2;
+            const btn = this.#createSortBtn(disabled);
+
+            name?.prepend(btn);
+
+            if (disabled) continue;
+
+            btn.addEventListener("click", async () => {
+                const updates = R.pipe(
+                    actor.itemTypes.action,
+                    R.filter((item) => (type === "action" ? !!item.actionCost : !item.actionCost)),
+                    R.sort((a, b) => a.name.localeCompare(b.name)),
+                    R.map((item, index) => {
+                        return { _id: item.id, sort: 50000 * index };
+                    })
+                );
+
+                await actor.updateEmbeddedDocuments("Item", updates);
+            });
+        }
+    }
+
     #addInventorySortList(html: HTMLElement, actor: ActorPF2e) {
         const isLoot = actor.isOfType("loot");
         const inventorySelector = isLoot ? ".sheet-body.inventory" : `.tab[data-tab="inventory"]`;
@@ -321,7 +358,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             const itemsList = header.nextElementSibling as HTMLElement | undefined;
             if (!itemsList || !itemsList.classList.contains("items")) continue;
 
-            const disabled = itemsList.children.length === 0;
+            const disabled = itemsList.children.length < 2;
             const name = htmlQuery(header, ".item-name");
             const btn = this.#createSortBtn(disabled);
 
