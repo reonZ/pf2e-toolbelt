@@ -42,6 +42,7 @@ const TOOLS = [
     new BetterMovementyTool(),
     new BetterTemplateTool(),
     new BetterTradeTool(),
+    // new BetterUITool(),
     new ConditionManagerTool(),
     new DroppethTool(),
     new GivethTool(),

@@ -181,6 +181,13 @@
                     "hint": "When a container is moved from one actor to another, should its content go with it. NOTE this doesn't work when using the system trade functionality."
                 }
             },
+            "betterUI": {
+                "title": "Better User Interface",
+                "unscaleTokenHUD": {
+                    "name": "Unscale Token HUD",
+                    "hint": "Revert the canvas scaling of the token HUD"
+                }
+            },
             "conditionManager": {
                 "title": "Condition Manager",
                 "enabled": {
