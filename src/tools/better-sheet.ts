@@ -14,7 +14,6 @@ import {
     FamiliarSheetPF2e,
     htmlQuery,
     isInstanceOf,
-    ItemPF2e,
     NPCSheetPF2e,
     PhysicalItemType,
     R,
@@ -238,19 +237,14 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
     async #sortPrepCollection(entry: SpellcastingEntryPF2e<CreaturePF2e>) {
         const actor = entry.actor;
-        const cached: Record<string, ItemPF2e | undefined> = {};
 
         const updates = R.mapValues(entry.system.slots, (slot) => {
             return {
                 prepared: slot.prepared.sort((a, b) => {
-                    if (a.id === null && b.id === null) return 0;
-                    if (a.id === null) return 1;
-                    if (b.id === null) return -1;
+                    const spellA = a.id ? actor.items.get(a.id) : null;
+                    const spellB = b.id ? actor.items.get(b.id) : null;
 
-                    const spellA = (cached[a.id] ??= actor.items.get(a.id));
-                    const spellB = (cached[b.id] ??= actor.items.get(b.id));
-
-                    if (!spellA && spellB) return 0;
+                    if (!spellA && !spellB) return 0;
                     if (!spellA) return 1;
                     if (!spellB) return -1;
 
