@@ -12,6 +12,9 @@
 
         .inventory {
             padding: var(--padding) calc(var(--padding) * 2) 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
 
             .coins {
                 display: grid;
@@ -56,6 +59,10 @@
                             no-repeat;
                     }
                 }
+            }
+
+            .info {
+                font-size: 1.4em;
             }
         }
 

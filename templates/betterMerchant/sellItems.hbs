@@ -8,6 +8,9 @@
         </div>
         {{/each}}
     </div>
+    <div class="info" {{{@root.i18n.tooltip 'info' }}}>
+        <i class="fa-solid fa-circle-info"></i>
+    </div>
 </div>
 <div class="groups">
     {{#each groups as |group|}}
@@ -22,8 +25,7 @@
         <div class="item" data-item-id="{{item.id}}">
             <img src="{{item.img}}">
             <div class="name">{{item.name}}</div>
-            <div class="price {{item.diff}}" {{#if item.diff}} data-tooltip="{{item.originalPrice}}"
-                {{/if}}>
+            <div class="price {{item.diff}}" data-tooltip="{{item.originalPrice}}">
                 {{item.price}}
             </div>
             <div class="quantity">{{item.quantity}}</div>
