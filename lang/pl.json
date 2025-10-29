@@ -1,5 +1,6 @@
 {
   "LEVIKTIMES": {
+    "playerOnly": "Tylko gracz",
     "gmOnly": "Tylko MG",
     "reloadRequired": "Wymaga przeładowania",
     "emiting": {
@@ -152,6 +153,14 @@
         "scribble": {
           "name": "Ręcznie wypełniona karta postaci",
           "hint": "Zmiana wyglądu karty postaci, aby wyglądała jakby została napisana ręcznie."
+        },
+        "showPlayers": {
+          "name": "Pokaż awatar graczom",
+          "hint": "Dodaje przycisk 'Pokaż gracza' w panelu awatarów kart aktorów."
+        },
+        "sortList": {
+          "name": "Przycisk sortowania listy",
+          "hint": "Dodaje przyciski sortowania do różnych list w karcie aktora."
         }
       },
       "betterTemplate": {
@@ -163,6 +172,10 @@
       },
       "betterTrade": {
         "title": "Ulepszona Wymiana",
+        "invertTrade": {
+          "name": "Modyfikator odwrócenia handlu",
+          "hint": "Gracze nie będą już musieli przytrzymywać klawisza „Shift”, aby przekazać przedmiot bez inicjowania wymiany. (Przytrzymanie klawisza „Shift” spowoduje zainicjowanie żądania wymiany)"
+        },
         "withContent": {
           "name": "Z zawartością pojemnika",
           "hint": "Kiedy pojemnik jest przenoszony z jednego aktora do drugiego, jego zawartość powinna być przenoszona razem z nim."
@@ -488,6 +501,13 @@
         "quantity": "Liczba ujemna dla nieskończonych zasobów",
         "tags": "Tagi usług",
         "title": "Usługa - {label}"
+      }
+    },
+    "betterSheet": {
+      "sortList": {
+        "sheet": {
+          "tooltip": "Sortuj zawartość"
+        }
       }
     },
     "betterTemplate": {
