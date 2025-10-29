@@ -1,3 +1,159 @@
+#pf2e-toolbelt-better-merchant-sellItems {
+    --header-background: #ffffff2e;
+    --img-border: #ffd70063;
+    --color-cheap: #ff3232;
+    --color-expensive: #06c50d;
+    --padding: 0.5em;
+
+    max-height: 80%;
+
+    .window-content {
+        padding: 0;
+
+        .inventory {
+            padding: var(--padding) calc(var(--padding) * 2) 0;
+
+            .coins {
+                display: grid;
+                grid-template-columns: auto repeat(4, 1fr);
+                align-items: center;
+                gap: 1em;
+                width: fit-content;
+
+                .denomination {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5em;
+
+                    .image {
+                        box-shadow: 0 0 0 1px #9f725b, 0 0 0 2px var(--tertiary), 0 0 0 3px #956d58;
+                        height: 1.8em;
+                        width: 1.8em;
+                        background-size: cover !important;
+                    }
+
+                    .value {
+                        width: 3em;
+                    }
+
+                    &.pp .image {
+                        background: url("../../../systems/pf2e/icons/equipment/treasure/currency/platinum-pieces.webp")
+                            no-repeat;
+                    }
+
+                    &.gp .image {
+                        background: url("../../../systems/pf2e/icons/equipment/treasure/currency/gold-pieces.webp")
+                            no-repeat;
+                    }
+
+                    &.sp .image {
+                        background: url("../../../systems/pf2e/icons/equipment/treasure/currency/silver-pieces.webp")
+                            no-repeat;
+                    }
+
+                    &.cp .image {
+                        background: url("../../../systems/pf2e/icons/equipment/treasure/currency/copper-pieces.webp")
+                            no-repeat;
+                    }
+                }
+            }
+        }
+
+        .groups {
+            margin-block: var(--padding);
+            padding-inline: var(--padding);
+            overflow-y: auto;
+        }
+
+        .empty {
+            text-align: center;
+            font-size: 1.4em;
+            padding: 0.5em;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+        }
+
+        .header,
+        .item {
+            display: grid;
+            align-items: center;
+            gap: 0.5em;
+            grid-template-columns:
+                [img-start] 2em
+                [img-end name-start] 1fr
+                [name-end price-start] 7em
+                [price-end qty-start] 5em
+                [qty-end controls-start] 2em
+                [controls-end];
+
+            .price {
+                grid-column: price;
+                text-align: center;
+            }
+
+            .quantity {
+                grid-column: qty;
+                text-align: center;
+            }
+
+            .controls {
+                grid-column: controls;
+            }
+        }
+
+        .header {
+            background: var(--header-background);
+            padding-block: 0.3em;
+            border-radius: 2px;
+            margin-bottom: 0.2em;
+
+            .name {
+                grid-column: img / name;
+                margin-left: 0.5em;
+            }
+
+            .price,
+            .quantity {
+                text-transform: capitalize;
+            }
+
+            &:not(:first-child) {
+                margin-top: 0.6em;
+            }
+        }
+
+        .item {
+            border-radius: 2px;
+
+            img {
+                grid-column: img;
+                border: 1px solid var(--img-border);
+                border-radius: 4px;
+            }
+
+            .name {
+                grid-column: name;
+            }
+
+            .price {
+                &.expensive {
+                    color: var(--color-expensive);
+                }
+
+                &.cheap {
+                    color: var(--color-cheap);
+                }
+            }
+        }
+
+        .items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2em;
+        }
+    }
+}
+
 #pf2e-toolbelt-better-merchant-browserPull {
     --even-background-color: var(--color-dark-2);
 
@@ -376,7 +532,7 @@
     }
 }
 
-.sheet.actor.loot form {
+.sheet.actor.loot form.better-merchant {
     section.content section.inventory section.inventory-list {
         .price,
         .price span {
@@ -398,15 +554,46 @@
             }
         }
 
+        header:not(.services),
         .items {
-            .item-controls :only-child {
-                margin-right: 0.1em;
+            .item-controls {
+                flex-basis: 4.5rem;
+
+                :only-child {
+                    margin-right: 0.1em;
+                }
+            }
+        }
+
+        &.is-player {
+            header {
+                &.services {
+                    .item-controls {
+                        flex-basis: 1.5rem;
+                    }
+                }
+
+                &:not(.services) {
+                    padding-right: 1.5rem;
+                }
+            }
+
+            .items {
+                .item-controls {
+                    flex-basis: 1.5rem;
+                }
             }
         }
     }
 }
 
 body.theme-light {
+    #pf2e-toolbelt-better-merchant-sellItems {
+        --header-background: #00000029;
+        --img-border: #89750a;
+        --color-cheap: #0f9114;
+    }
+
     #pf2e-toolbelt-better-merchant-browserPull {
         --even-background-color: #2222222e;
     }

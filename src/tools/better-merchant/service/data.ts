@@ -141,6 +141,8 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
             isFree: enrichedPrice.copperValue === 0,
             isInfinite: this.quantity < 0,
             label: this.label,
+            notForSell: !filter,
+            originalPrice: ratio === 1 ? undefined : this.enrichedPrice,
             priceUpdate: ratio > 1 ? "expensive" : ratio < 1 ? "cheap" : "",
         };
     }
@@ -165,6 +167,8 @@ type ServiceTemplate = ServiceSource & {
     isFree: boolean;
     isInfinite: boolean;
     label: string;
+    notForSell: boolean;
+    originalPrice: CoinsPF2e | undefined;
     priceUpdate: "expensive" | "cheap" | "";
 };
 

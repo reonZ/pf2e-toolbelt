@@ -286,6 +286,9 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
         options: ApplicationRenderOptions
     ): void {
         content.innerHTML = result;
+        content.dataset.tooltipDirection = "UP";
+        content.dataset.tooltipClass = "pf2e";
+
         this._activateListeners(content);
     }
 

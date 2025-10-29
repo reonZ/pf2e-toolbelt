@@ -37,14 +37,18 @@
             {{#if service.isFree}}
             <div class="price">{{@root.i18n 'free'}}</div>
             {{else}}
-            <span class="price{{#if @root.isGM}} {{service.priceUpdate}}{{/if}}">
+            <span class="price{{#if @root.isGM}} {{service.priceUpdate}}{{/if}}" {{#if @root.isGM}}
+                data-tooltip="{{service.originalPrice}}" {{/if}}>
                 {{service.enrichedPrice}}
             </span>
             {{/if}}
-            <span class="quantity">
-                {{#if service.isInfinite}}
-                {{@root.infinity}}
-                {{else}}
+            {{#if service.notForSell}}
+            <span class="quantity" data-tooltip="{{@root.none.tooltip}}">{{@root.none.label}}</span>
+            {{else if service.isInfinite}}
+            <span class="quantity"
+                data-tooltip="{{@root.infinity.tooltip}}">{{@root.infinity.label}}</span>
+            {{else}}
+            <span class="quantity" if>
                 {{!-- decrease btn --}}
                 {{#if @root.isGM}}
                 <a class="decrease{{#if service.isInfinite}} disabled{{/if}}"
@@ -56,9 +60,8 @@
                 {{#if @root.isGM}}
                 <a class="increase" data-better-action="increase-service">+</a>
                 {{/if}}
-                {{/if}}
-
             </span>
+            {{/if}}
             <div class="item-controls{{#if @root.isGM}} large{{/if}}">
                 {{#if service.quantity}}
                 <a data-better-action="buy-service" {{{@root.i18n.tooltip 'buy' }}}>

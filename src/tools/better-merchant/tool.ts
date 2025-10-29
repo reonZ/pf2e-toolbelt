@@ -17,6 +17,7 @@ import {
     FlagData,
     FlagDataArray,
     getPreferredName,
+    getSelectedActor,
     giveItemToActor,
     htmlClosest,
     htmlQuery,
@@ -48,6 +49,7 @@ import {
     DefaultFilterModel,
     FiltersMenu,
     ItemFilterModel,
+    SellItemsMenu,
     ServiceFilterModel,
     ServiceMenu,
     ServiceModel,
@@ -104,6 +106,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     ];
 
     static INFINITY = "∞";
+    static NONE = "–";
 
     get key(): "betterMerchant" {
         return "betterMerchant";
@@ -225,17 +228,14 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                     item instanceof Item &&
                     item.isOfType("physical") &&
                     item.isIdentified &&
-                    isCustomer(item.actor)
+                    isOwnedCustomer(item.actor)
                 );
             }),
             R.map((item): TestItemData | undefined => {
                 const filter = filters.find((x) => x.testFilter(item));
                 if (!filter) return;
 
-                const buyPrice = game.pf2e.Coins.fromPrice(item.price, item.quantity).scale(
-                    filter.ratio
-                );
-
+                const buyPrice = calculatePhysicalItemPrice(item, filter);
                 return { buyPrice, item };
             }),
             R.filter(R.isTruthy)
@@ -254,8 +254,8 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return wrapped(event, item, targetActor);
         }
 
-        const isPurchase = isMerchant(sourceActor) && isCustomer(targetActor);
-        const isSelling = !isPurchase && isMerchant(targetActor) && isCustomer(sourceActor);
+        const isPurchase = isMerchant(sourceActor) && isOwnedCustomer(targetActor);
+        const isSelling = !isPurchase && isMerchant(targetActor) && isOwnedCustomer(sourceActor);
 
         if (!isPurchase && !isSelling) {
             return wrapped(event, item, targetActor);
@@ -286,7 +286,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         item: PhysicalItemPF2e,
         isPurchase: boolean
     ): Promise<TradeQuantityDialogData | null> {
-        const actorName = targetActor.name;
         const stackable = !!targetActor.inventory.findStackableItem(item);
         const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
 
@@ -299,11 +298,13 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         const title = isPurchase
             ? game.i18n.format("PF2E.ItemTransferDialog.Title.purchase", { item: item.name })
-            : this.localize("item.sell.prompt", { item: item.name });
+            : this.localize("item.sell.title", { item: item.name });
 
         const prompt = isPurchase
-            ? game.i18n.format("PF2E.ItemTransferDialog.Prompt.purchase", { actor: actorName })
-            : this.localize("item.sell.prompt", { actor: actorName });
+            ? game.i18n.format("PF2E.ItemTransferDialog.Prompt.purchase", {
+                  actor: targetActor.name,
+              })
+            : this.localize("item.sell.prompt", { actor: sourceActor.name });
 
         const label = isPurchase
             ? game.i18n.localize("PF2E.ItemTransferDialog.Button.purchase")
@@ -327,8 +328,8 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     #transferItemToActor(source: ActorPF2e, ...args: ActorTransferItemArgs): boolean {
         const [target, item, quantity, containerId, newStack, isPurchase] = args;
 
-        const merchantSelling = isMerchant(source) && isCustomer(target);
-        const merchantBuying = !merchantSelling && isMerchant(target) && isCustomer(source);
+        const merchantSelling = isMerchant(source) && isOwnedCustomer(target);
+        const merchantBuying = !merchantSelling && isMerchant(target) && isOwnedCustomer(source);
         if (!merchantSelling && !merchantBuying) return false;
 
         const error = (reason: string, data?: Record<string, string>): boolean => {
@@ -365,7 +366,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
 
             if (isPurchase) {
-                const price = game.pf2e.Coins.fromPrice(item.price, realQty).scale(filter.ratio);
+                const price = calculatePhysicalItemPrice(item, filter, realQty);
 
                 if (customer.inventory.coins.copperValue < price.copperValue) {
                     ui.notifications.warn(
@@ -426,7 +427,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return error("filter");
         }
 
-        const price = game.pf2e.Coins.fromPrice(item.price, realQty).scale(filter.ratio);
+        const price = calculatePhysicalItemPrice(item, filter, realQty);
 
         if (merchantSelling && !free) {
             if (!(await buyer.inventory.removeCoins(price))) {
@@ -503,12 +504,22 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             ? this.getServices(actor)
             : this.getServices(actor).filter((service) => service.canBePurchased);
 
+        html.classList.add("better-merchant");
+        inventoryList?.classList.toggle("is-player", !isGM);
+
         if (isGM || services.length) {
             const filters = this.getAllFilters(actor, "service");
             const content = await this.render("sheetServices", {
-                services: await Promise.all(services.map((service) => service.toTemplate(filters))),
-                infinity: BetterMerchantTool.INFINITY,
+                infinity: {
+                    label: BetterMerchantTool.INFINITY,
+                    tooltip: this.localize("sheet.infiniteAll.label"),
+                },
                 isGM,
+                none: {
+                    label: BetterMerchantTool.NONE,
+                    tooltip: this.localize("sheet.none"),
+                },
+                services: await Promise.all(services.map((service) => service.toTemplate(filters))),
             });
 
             const servicesElement = createHTMLElement("div", { content });
@@ -518,6 +529,8 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const itemFilters = this.getAllFilters(actor, "sell");
         const infiniteAll = this.getFlag(actor, "infiniteAll");
         const items = inventoryList?.querySelectorAll<HTMLElement>(".items > [data-item-id]");
+        const infiniteAllLabel = this.localize("sheet.infiniteAll.label");
+        const notForSellLabel = this.localize("sheet.none");
 
         for (const el of items ?? []) {
             const itemId = el.dataset.itemId as string;
@@ -533,15 +546,19 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 const priceElement = htmlQuery(el, ".price span");
 
                 if (priceElement) {
+                    priceElement.dataset.tooltip = priceElement.innerText;
                     priceElement.innerText = item.price.value.scale(ratio).toString();
                     priceElement.classList.add(ratio < 1 ? "cheap" : "expensive");
                 }
             }
 
-            if (infiniteAll) {
-                const quantityElement = htmlQuery(el, ".quantity");
-
-                if (quantityElement) {
+            const quantityElement = htmlQuery(el, ".quantity");
+            if (quantityElement) {
+                if (!filter) {
+                    quantityElement.dataset.tooltip = notForSellLabel;
+                    quantityElement.innerHTML = BetterMerchantTool.NONE;
+                } else if (infiniteAll) {
+                    quantityElement.dataset.tooltip = infiniteAllLabel;
                     quantityElement.innerHTML = BetterMerchantTool.INFINITY;
                 }
             }
@@ -555,6 +572,8 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 htmlQuery(el, ".data")?.appendChild(controls);
             }
 
+            if (!filter && !isGM) continue;
+
             const buyBtn = createHTMLElement("a", {
                 content: `<i class="fa-fw fa-solid fa-coins"></i>`,
                 dataset: {
@@ -566,16 +585,17 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             controls?.prepend(buyBtn);
         }
 
-        if (!isGM) return $html;
-
         const sheetElement = createHTMLElement("div", {
             classes: ["gm-settings"],
             content: await this.render("sheet", {
                 infiniteAll,
+                isGM,
             }),
         });
 
         htmlQuery(html, ".sheet-sidebar .image-container")?.after(sheetElement);
+
+        if (!isGM) return $html;
 
         if (infiniteAll) {
             const bulkElement = htmlQuery(html, ".total-bulk span");
@@ -602,17 +622,31 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     ) {
         wrapped($html);
 
-        const actor = sheet.actor;
-        if (!actor.isMerchant) return;
+        const merchant = sheet.actor;
+        if (!merchant.isMerchant) return;
 
         const html = $html[0];
 
         addListenerAll(html, "[data-better-action]:not(.disabled)", (el, event) =>
-            this.#onBetterAction(actor, el)
+            this.#onBetterAction(merchant, el)
         );
 
         addListener(html, `input[name="infiniteAll"]`, "change", (el: HTMLInputElement) => {
-            this.setFlag(actor, "infiniteAll", el.checked);
+            this.setFlag(merchant, "infiniteAll", el.checked);
+        });
+
+        const sellBtn = htmlQuery(html, `[data-better-action="sell-items"]`);
+        // we remove the disabled attribute added by foundry because players can't technically edit the sheet
+        sellBtn?.removeAttribute("disabled");
+
+        sellBtn?.addEventListener("click", () => {
+            const seller = getSelectedActor(isCustomer);
+
+            if (!seller) {
+                return this.warning("sheet.sellItems.noSelection");
+            }
+
+            new SellItemsMenu(this, merchant, seller).render(true);
         });
     }
 
@@ -644,7 +678,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     }
 
     #buyService(actor: LootPF2e, serviceId: string) {
-        const buyer = getServiceBuyer();
+        const buyer = getSelectedActor(isServiceCustomer);
 
         if (!buyer) {
             return this.warning("service.noBuyer");
@@ -681,7 +715,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     }
 
     async #buyItem(actor: LootPF2e, item: PhysicalItemPF2e<LootPF2e>) {
-        const target = R.only(canvas.tokens.controlled)?.actor ?? game.user.character;
+        const target = getSelectedActor();
 
         if (!target?.isOfType("character", "npc", "party", "vehicle")) {
             return this.warning("item.buy.noTarget");
@@ -694,19 +728,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             if (!result) return;
         }
 
-        const event = new DragEvent("dragstart", {
-            dataTransfer: new DataTransfer(),
-        });
-
-        const data = {
-            fromInventory: true,
-            itemType: item.type,
-            type: "Item",
-            uuid: item.uuid,
-        };
-
-        event.dataTransfer?.setData("text/plain", JSON.stringify(data));
-        target.sheet._onDrop(event);
+        simulateDropItem(item, target);
     }
 
     async #onBetterAction(actor: LootPF2e, target: HTMLElement) {
@@ -768,7 +790,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             case "give-service": {
                 if (!game.user.isGM) return;
 
-                const buyer = getServiceBuyer();
+                const buyer = getSelectedActor(isServiceCustomer);
 
                 if (!buyer) {
                     return this.warning("service.noBuyer");
@@ -798,7 +820,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
 
             case "setup-filters": {
-                return new FiltersMenu(actor, this).render(true);
+                return new FiltersMenu(this, actor).render(true);
             }
 
             case "toggle-service-enabled": {
@@ -966,23 +988,40 @@ function getServiceIdFromElement(target: HTMLElement): string {
     return htmlClosest(target, "[data-service-id]")?.dataset.serviceId ?? "";
 }
 
-function getServiceBuyer(): ActorPF2e | null {
-    const isValidBuyer = (actor: Maybe<ActorPF2e>): actor is ActorPF2e => {
-        return !!actor?.isOfType("npc", "character", "party") && actor.isOwner;
-    };
-
-    const selected = R.only(canvas.tokens.controlled)?.document.actor;
-
-    if (isValidBuyer(selected)) {
-        return selected;
-    }
-
-    const assigned = game.user.character;
-    return isValidBuyer(assigned) ? assigned : null;
+function isCustomer(actor: Maybe<ActorPF2e>): actor is ActorPF2e {
+    return !!actor?.isOfType("character", "npc", "vehicle", "party");
 }
 
-function isCustomer(actor: Maybe<ActorPF2e>): actor is CharacterPF2e | NPCPF2e {
-    return !!actor?.isOfType("character", "npc", "vehicle", "party") && actor.isOwner;
+function isOwnedCustomer(actor: Maybe<ActorPF2e>): actor is ActorPF2e {
+    return isCustomer(actor) && actor.isOwner;
+}
+
+function isServiceCustomer(actor: Maybe<ActorPF2e>) {
+    return !!actor?.isOfType("npc", "character", "party");
+}
+
+function calculatePhysicalItemPrice(
+    item: PhysicalItemPF2e,
+    filter: DefaultFilterModel | ItemFilterModel,
+    qty?: number
+) {
+    return game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity).scale(filter.ratio);
+}
+
+function simulateDropItem(item: PhysicalItemPF2e, target: ActorPF2e) {
+    const event = new DragEvent("dragstart", {
+        dataTransfer: new DataTransfer(),
+    });
+
+    const data = {
+        fromInventory: true,
+        itemType: item.type,
+        type: "Item",
+        uuid: item.uuid,
+    };
+
+    event.dataTransfer?.setData("text/plain", JSON.stringify(data));
+    target.sheet._onDrop(event);
 }
 
 type TestItemData = toolbelt.betterMerchant.TestItemData;
@@ -1064,5 +1103,5 @@ type FilterTypes = {
 
 type MerchantFilters<T extends FilterType> = [...FilterTypes[T][], DefaultFilterModel];
 
-export { BetterMerchantTool, FILTER_TYPES };
+export { BetterMerchantTool, FILTER_TYPES, simulateDropItem };
 export type { FilterType, FilterTypes, MerchantFilters };

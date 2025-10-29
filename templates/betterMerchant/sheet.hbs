@@ -1,5 +1,13 @@
 <div class="loot-distribution">
     <div>
+        <button type="button" data-better-action="sell-items">
+            <i class="fa-solid fa-sack-dollar"></i>
+            {{@root.i18n 'sellItems.button'}}
+        </button>
+    </div>
+    {{#if isGM}}
+    <hr>
+    <div>
         <button type="button" data-better-action="from-browser">
             <i class="fa-solid fa-person-dolly"></i>
             {{@root.i18n 'browser'}}
@@ -11,7 +19,9 @@
             {{@root.i18n 'filters'}}
         </button>
     </div>
+    {{/if}}
 </div>
+{{#if isGM}}
 <div class="form-group">
     <label>
         <span>{{@root.i18n 'infiniteAll.label'}}</span>
@@ -19,3 +29,4 @@
     </label>
     <input type="checkbox" name="infiniteAll" {{checked infiniteAll}}>
 </div>
+{{/if}}

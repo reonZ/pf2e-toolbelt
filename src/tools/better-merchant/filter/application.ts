@@ -29,8 +29,8 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
     };
 
     constructor(
-        actor: LootPF2e,
         tool: BetterMerchantTool,
+        actor: LootPF2e,
         options?: DeepPartial<ApplicationConfiguration>
     ) {
         super(tool, options);

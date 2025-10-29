@@ -432,8 +432,8 @@
             "item": {
                 "buy": {
                     "confirm": {
-                        "content": "Does <strong>{buyer}</strong> want to buy <strong>{item}</strong>?",
-                        "title": "Buy Item - {item}"
+                        "content": "Does <strong>{buyer}</strong> wish to purchase <strong>{item}</strong>?",
+                        "title": "Purchase Item - {item}"
                     },
                     "noTarget": "You must select a valid actor to buy from this merchant"
                 },
@@ -443,7 +443,7 @@
                 "refuse": "<strong>{actor}</strong> isn't interested in buying <strong>{item}</strong>.",
                 "sell": {
                     "button": "Sell",
-                    "prompt": "Does {actor} wish to purchase this item?",
+                    "prompt": "Does {actor} wish to sell this item?",
                     "title": "Sell {item}"
                 },
                 "unided": "Nobody sane would want to buy some random unidentified item."
@@ -454,7 +454,17 @@
                 "infiniteAll": {
                     "label": "Infinite Stocks",
                     "tooltip": "The merchant will never run out of items to sell (does nothing to Treasures or Services)"
+                },
+                "none": "Not for sell",
+                "sellItems": {
+                    "button": "Sell Items",
+                    "noSelection": "You must select a valid selling actor."
                 }
+            },
+            "sellItems": {
+                "empty": "<strong>{name}</strong> doesn't seem to be interested by anything you would have to offer.",
+                "title": "Sell Items - {name}",
+                "sell": "Sell Item"
             },
             "sheetServices": {
                 "add": "Add Service",
