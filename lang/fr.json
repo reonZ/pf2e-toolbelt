@@ -1,5 +1,6 @@
 {
   "LEVIKTIMES": {
+    "playerOnly": "Joueur uniquement",
     "gmOnly": "MJ uniquement",
     "reloadRequired": "Nécessite le rechargement",
     "emiting": {
@@ -152,6 +153,14 @@
         "scribble": {
           "name": "Feuille de personnage écrite à la main",
           "hint": "Avec ce style, la feuille de personnage semble avoir été écrite à la main."
+        },
+        "showPlayers": {
+          "name": "Montrer l'avatar aux joueurs",
+          "hint": "Ajoute un bouton 'Montrer au joueur' dans le panneau de l'avatar des feuilles d'acteurs."
+        },
+        "sortList": {
+          "name": "Bouton de tri de la liste",
+          "hint": "Ajoute des boutons de tri à différentes listes de la fiche d'acteur."
         }
       },
       "betterTemplate": {
@@ -163,6 +172,10 @@
       },
       "betterTrade": {
         "title": "Meilleur commerce",
+        "invertTrade": {
+          "name": "Modificateur d'échange inversé",
+          "hint": "Les joueurs n'auront plus besoin de maintenir 'Maj' enfoncé pour donner un objet sans initier un échange. (Maintenir 'Maj' initiera la demande d'échange)"
+        },
         "withContent": {
           "name": "Avec le contenu du contenant",
           "hint": "Lorsqu'un contenant est déplacé d'un acteur à un autre, son contenu doit-il l'accompagner ?"
@@ -488,6 +501,13 @@
         "quantity": "Nombre négatif pour un stock infini",
         "tags": "Étiquettes de service",
         "title": "Service - {label}"
+      }
+    },
+    "betterSheet": {
+      "sortList": {
+        "sheet": {
+          "tooltip": "Trier le contenu"
+        }
       }
     },
     "betterTemplate": {
