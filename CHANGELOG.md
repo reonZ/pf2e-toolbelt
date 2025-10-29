@@ -1,3 +1,40 @@
+# 3.15.0
+
+-   `Better Actor Sheet`:
+    -   add new `Show Avatar to Players` gm-only setting
+        -   add an extra button in the avatar panel of actor sheets to directly send the avatar image to players
+    -   add new `Sort List Button` setting
+        -   this feature adds sorting buttons to different lists on the actor sheet
+            -   inventory sections of all actors
+            -   spellcasting entries of character
+            -   prepared spellcasting spellbook
+            -   actions/passives of npc
+-   `Better Inventory`:
+    -   fix not being able to merge items after a system trade between players
+-   `Better Merchant`:
+    -   add new `Sell Items` button to the sheet
+        -   it opens a window containing all available items to sell to the merchant
+            -   items that are non-identified, have a quantity of 0, belong to the `coins` stack group or do not match any filter on the merchant are not shown in this window
+            -   the assumed ratio used for the color coding of the prices is `0.5` for items and `1` for treasure
+    -   now display the original price of items when hovering over the modified one in the list (if it was changed by a filter)
+        -   only display the tooltip of services for the GM
+    -   now indicate that the merchant isn't willing to sell one of its items/services
+        -   this occur when the item doesn't match any filter
+        -   the quantity is replaced by a `–`
+    -   add tooltip to both the `–` and `∞` quantity values in the sheet
+    -   fix treasures not selling for full price when reaching the default filter
+    -   fix weird merchant buy prompt message
+    -   fix some styling issues on the sheet
+        -   most notably on player clients
+-   `Better Trade`:
+    -   add new `Invert Trade Modifier` player-only setting
+        -   players will no longer have to hold 'shift' to give an item without initiating a trade
+        -   holding 'shift' will initiate the trade request
+-   `Target Helper`:
+    -   fix styling of target buttons of damage chat messages that don't have a `Dice Total` section (i.e. persistent damage cards)
+    -   fix `Clear Placed Templates` button disappearing whenever a spell chat message is being updated
+        -   this is actually a system issue and is a temporary workaround until fixed
+
 # 3.14.4
 
 -   `Underground`:
