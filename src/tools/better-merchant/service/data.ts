@@ -8,7 +8,7 @@ import {
     R,
     TagsField,
 } from "module-helpers";
-import { DefaultFilterModel, MerchantFilters, ServiceFilterModel } from "..";
+import { MerchantFilters } from "..";
 import fields = foundry.data.fields;
 
 const COINS = ["pp", "gp", "sp", "cp"] as const;
@@ -112,13 +112,6 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
         return foundry.applications.ux.TextEditor.implementation.enrichHTML(this.description);
     }
 
-    getFilteredPrice(filter: ServiceFilterModel | DefaultFilterModel | undefined) {
-        const price = this.enrichedPrice;
-        const ratio = filter?.ratio ?? 1;
-
-        return ratio === 1 ? price : price.scale(ratio);
-    }
-
     toExport(): Omit<ServiceSource, "id" | "enabled"> {
         const data = this.toJSON() as WithPartial<ServiceSource, "id" | "enabled">;
 
@@ -131,7 +124,7 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
     async toTemplate(filters: ServiceFilters): Promise<ServiceTemplate> {
         const filter = this.testFilters(filters);
         const ratio = filter?.ratio ?? 1;
-        const enrichedPrice = this.getFilteredPrice(filter);
+        const enrichedPrice = filter?.calculatePrice(this)?.value ?? this.enrichedPrice;
 
         return {
             ...this,

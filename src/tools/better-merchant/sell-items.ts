@@ -73,10 +73,11 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
                 const filter = filters.find((x) => x.testFilter(item));
                 if (!filter) return;
 
-                const ratio = filter.ratio;
+                const ratio = filter.getRatio(item);
                 const originalPrice = item.price.value;
                 const price = ratio === 1 ? originalPrice : originalPrice.scale(ratio);
-                const diff = ratio < 0.5 ? "cheap" : ratio > 0.5 ? "expensive" : "";
+                const diffRatio = item.isOfType("treasure") ? 1 : 0.5;
+                const diff = ratio < diffRatio ? "cheap" : ratio > diffRatio ? "expensive" : "";
 
                 return {
                     diff,

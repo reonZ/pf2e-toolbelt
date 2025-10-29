@@ -46,10 +46,11 @@ import {
 import {
     BrowserPullMenu,
     BuyDefaultFilterModel,
-    DefaultFilterModel,
     FiltersMenu,
     ItemFilterModel,
+    SellDefaultFilterModel,
     SellItemsMenu,
+    ServiceDefaultFilterModel,
     ServiceFilterModel,
     ServiceMenu,
     ServiceModel,
@@ -61,11 +62,11 @@ const FILTER_TYPES = {
         filter: ItemFilterModel,
     },
     sell: {
-        default: DefaultFilterModel,
+        default: SellDefaultFilterModel,
         filter: ItemFilterModel,
     },
     service: {
-        default: DefaultFilterModel,
+        default: ServiceDefaultFilterModel,
         filter: ServiceFilterModel,
     },
 };
@@ -165,8 +166,16 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         ) as FlagDataArray<FilterTypes[T], LootPF2e>;
     }
 
-    getDefaultFilter(actor: LootPF2e, type: FilterType): FlagData<DefaultFilterModel> | undefined {
-        return this.getDataFlag(actor, FILTER_TYPES[type].default, "default", type);
+    getDefaultFilter<T extends FilterType>(
+        actor: LootPF2e,
+        type: T
+    ): FlagData<DefaultFilterTypes[T]> | undefined {
+        return this.getDataFlag(
+            actor,
+            FILTER_TYPES[type].default as any,
+            "default",
+            type
+        ) as FlagData<DefaultFilterTypes[T]>;
     }
 
     getAllFilters<T extends FilterType>(actor: LootPF2e, type: T): MerchantFilters<T> {
@@ -235,7 +244,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 const filter = filters.find((x) => x.testFilter(item));
                 if (!filter) return;
 
-                const buyPrice = calculatePhysicalItemPrice(item, filter);
+                const buyPrice = filter.calculatePrice(item).value;
                 return { buyPrice, item };
             }),
             R.filter(R.isTruthy)
@@ -366,7 +375,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
 
             if (isPurchase) {
-                const price = calculatePhysicalItemPrice(item, filter, realQty);
+                const price = filter.calculatePrice(item, realQty).value;
 
                 if (customer.inventory.coins.copperValue < price.copperValue) {
                     ui.notifications.warn(
@@ -427,7 +436,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return error("filter");
         }
 
-        const price = calculatePhysicalItemPrice(item, filter, realQty);
+        const price = filter.calculatePrice(item, realQty).value;
 
         if (merchantSelling && !free) {
             if (!(await buyer.inventory.removeCoins(price))) {
@@ -538,7 +547,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             if (!item) continue;
 
             const filter = itemFilters.find((filter) => filter.testFilter(item));
-            const ratio = filter?.ratio ?? 1;
+            const ratio = filter?.getRatio(item) ?? 1;
 
             this.setInMemory(item, { filter });
 
@@ -697,7 +706,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return this.warning("service.unwilling", { seller: actor.name });
         }
 
-        const price = service.getFilteredPrice(filter);
+        const price = filter.calculatePrice(service).value;
 
         if (buyer.inventory.coins.copperValue < price.copperValue) {
             return this.warning("service.noFunds", {
@@ -885,9 +894,9 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 return error("filter");
             }
 
-            const price = service.getFilteredPrice(filter);
+            const calculatedPrice = filter.calculatePrice(service);
 
-            if (!(await buyer.inventory.removeCoins(price))) {
+            if (!(await buyer.inventory.removeCoins(calculatedPrice.value))) {
                 return error("funds");
             }
 
@@ -896,8 +905,8 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 await services.setFlag();
             }
 
-            macroServiceData.usedPrice = price;
-            macroServiceData.serviceRatio = filter?.ratio ?? 1;
+            macroServiceData.usedPrice = calculatedPrice.value;
+            macroServiceData.serviceRatio = calculatedPrice.ratio;
             macroServiceData.quantity = service.quantity;
         }
 
@@ -1000,14 +1009,6 @@ function isServiceCustomer(actor: Maybe<ActorPF2e>) {
     return !!actor?.isOfType("npc", "character", "party");
 }
 
-function calculatePhysicalItemPrice(
-    item: PhysicalItemPF2e,
-    filter: DefaultFilterModel | ItemFilterModel,
-    qty?: number
-) {
-    return game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity).scale(filter.ratio);
-}
-
 function simulateDropItem(item: PhysicalItemPF2e, target: ActorPF2e) {
     const event = new DragEvent("dragstart", {
         dataTransfer: new DataTransfer(),
@@ -1097,11 +1098,15 @@ type LootSheetDataPF2e = Awaited<ReturnType<LootSheetPF2e<LootPF2e>["getData"]>>
 
 type FilterType = keyof typeof FILTER_TYPES;
 
+type DefaultFilterTypes = {
+    [k in FilterType]: InstanceType<(typeof FILTER_TYPES)[k]["default"]>;
+};
+
 type FilterTypes = {
     [k in FilterType]: InstanceType<(typeof FILTER_TYPES)[k]["filter"]>;
 };
 
-type MerchantFilters<T extends FilterType> = [...FilterTypes[T][], DefaultFilterModel];
+type MerchantFilters<T extends FilterType> = [...FilterTypes[T][], DefaultFilterTypes[T]];
 
 export { BetterMerchantTool, FILTER_TYPES, simulateDropItem };
 export type { FilterType, FilterTypes, MerchantFilters };

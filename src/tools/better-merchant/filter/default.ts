@@ -1,4 +1,4 @@
-import { IdField } from "module-helpers";
+import { CoinsPF2e, IdField } from "module-helpers";
 import fields = foundry.data.fields;
 import abstract = foundry.abstract;
 
@@ -33,7 +33,9 @@ function generateBaseFilterFields(ratio: number = 1): BaseFilterSchema {
     };
 }
 
-class DefaultFilterModel extends abstract.DataModel<null, DefaultFilterSchema> {
+abstract class DefaultFilterModel<
+    T extends abstract.DataModel = abstract.DataModel
+> extends abstract.DataModel<null, DefaultFilterSchema> {
     static defineSchema(): DefaultFilterSchema {
         return generateDefaultFilterFields();
     }
@@ -49,9 +51,22 @@ class DefaultFilterModel extends abstract.DataModel<null, DefaultFilterSchema> {
     testFilter() {
         return this.enabled;
     }
+
+    getRatio(entry: T): number {
+        return this.ratio;
+    }
+
+    abstract calculatePrice(entry: T, qty?: number): CalulatedFilterPrice;
 }
 
-interface DefaultFilterModel extends ModelPropsFromSchema<DefaultFilterSchema> {}
+interface DefaultFilterModel<T extends abstract.DataModel = abstract.DataModel>
+    extends ModelPropsFromSchema<DefaultFilterSchema> {}
+
+type CalulatedFilterPrice = {
+    ratio: number;
+    original: CoinsPF2e;
+    value: CoinsPF2e;
+};
 
 type DefaultFilterSchema = {
     enabled: fields.BooleanField<boolean, boolean, false, false, true>;
@@ -64,8 +79,10 @@ type BaseFilterSchema = DefaultFilterSchema & {
 };
 
 interface IMerchantFilter<T extends abstract.DataModel> {
-    testFilter: (instance: T) => boolean;
+    testFilter(instance: T): boolean;
+    calculatePrice(item: T, qty?: number): CalulatedFilterPrice;
+    getRatio(entry: T): number;
 }
 
 export { DefaultFilterModel, generateBaseFilterFields, generateDefaultFilterFields };
-export type { BaseFilterSchema, DefaultFilterSchema, IMerchantFilter };
+export type { BaseFilterSchema, CalulatedFilterPrice, DefaultFilterSchema, IMerchantFilter };

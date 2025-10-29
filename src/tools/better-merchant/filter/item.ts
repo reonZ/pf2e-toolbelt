@@ -1,6 +1,7 @@
 import { ActorPF2e, EquipmentFilters, PhysicalItemPF2e, R } from "module-helpers";
 import {
     BaseFilterSchema,
+    CalulatedFilterPrice,
     DefaultFilterModel,
     DefaultFilterSchema,
     generateBaseFilterFields,
@@ -9,9 +10,24 @@ import {
 } from ".";
 import fields = foundry.data.fields;
 
-class BuyDefaultFilterModel extends DefaultFilterModel {
+class BuyDefaultFilterModel extends DefaultFilterModel<PhysicalItemPF2e<ActorPF2e>> {
     static defineSchema(): DefaultFilterSchema {
         return generateDefaultFilterFields(0.5);
+    }
+
+    getRatio(item: PhysicalItemPF2e<ActorPF2e>): number {
+        return item.isOfType("treasure") ? 1 : this.ratio;
+    }
+
+    calculatePrice(item: PhysicalItemPF2e<ActorPF2e>, qty?: number): CalulatedFilterPrice {
+        const ratio = this.getRatio(item);
+        return calculateItemPrice(this, item, qty, ratio);
+    }
+}
+
+class SellDefaultFilterModel extends DefaultFilterModel<PhysicalItemPF2e<ActorPF2e>> {
+    calculatePrice(item: PhysicalItemPF2e<ActorPF2e>, qty?: number): CalulatedFilterPrice {
+        return calculateItemPrice(this, item, qty);
     }
 }
 
@@ -137,6 +153,29 @@ class ItemFilterModel
     testFilter(item: PhysicalItemPF2e<ActorPF2e>): boolean {
         return this.enabled && this.testItem(item);
     }
+
+    getRatio(item: PhysicalItemPF2e<ActorPF2e>): number {
+        return this.ratio;
+    }
+
+    calculatePrice(item: PhysicalItemPF2e<ActorPF2e>, qty?: number): CalulatedFilterPrice {
+        return calculateItemPrice(this, item, qty);
+    }
+}
+
+function calculateItemPrice(
+    filter: BuyDefaultFilterModel | SellDefaultFilterModel | ItemFilterModel,
+    item: PhysicalItemPF2e<ActorPF2e>,
+    qty: number | undefined,
+    ratio = filter.getRatio(item)
+): CalulatedFilterPrice {
+    const original = game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity);
+
+    return {
+        original,
+        ratio,
+        value: original.scale(ratio),
+    };
 }
 
 interface ItemFilterModel extends ModelPropsFromSchema<ItemFilterSchema> {}
@@ -151,4 +190,4 @@ type ItemFilterSchema = BaseFilterSchema & {
     >;
 };
 
-export { BuyDefaultFilterModel, ItemFilterModel };
+export { BuyDefaultFilterModel, ItemFilterModel, SellDefaultFilterModel };

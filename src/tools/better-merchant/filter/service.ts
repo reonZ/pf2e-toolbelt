@@ -1,7 +1,19 @@
 import { LevelField } from "module-helpers";
-import { BaseFilterSchema, generateBaseFilterFields, IMerchantFilter } from ".";
+import {
+    BaseFilterSchema,
+    CalulatedFilterPrice,
+    DefaultFilterModel,
+    generateBaseFilterFields,
+    IMerchantFilter,
+} from ".";
 import { ServiceModel } from "..";
 import fields = foundry.data.fields;
+
+class ServiceDefaultFilterModel extends DefaultFilterModel<ServiceModel> {
+    calculatePrice(service: ServiceModel): CalulatedFilterPrice {
+        return calculateServicePrice(this, service);
+    }
+}
 
 class ServiceFilterModel
     extends foundry.abstract.DataModel<null, ServiceFilterSchema>
@@ -29,6 +41,14 @@ class ServiceFilterModel
         );
     }
 
+    getRatio(entry: ServiceModel): number {
+        return this.ratio;
+    }
+
+    calculatePrice(service: ServiceModel): CalulatedFilterPrice {
+        return calculateServicePrice(this, service);
+    }
+
     protected _initializeSource(
         data: object,
         options?: DataModelConstructionOptions<null> | undefined
@@ -41,6 +61,20 @@ class ServiceFilterModel
     }
 }
 
+function calculateServicePrice(
+    filter: ServiceDefaultFilterModel | ServiceFilterModel,
+    service: ServiceModel
+): CalulatedFilterPrice {
+    const original = service.enrichedPrice;
+    const ratio = filter?.getRatio(service) ?? 1;
+
+    return {
+        original,
+        ratio,
+        value: ratio === 1 ? original : original.scale(ratio),
+    };
+}
+
 interface ServiceFilterModel extends ModelPropsFromSchema<ServiceFilterSchema> {}
 
 type ServiceFilterSchema = BaseFilterSchema & {
@@ -48,4 +82,4 @@ type ServiceFilterSchema = BaseFilterSchema & {
     tag: fields.StringField<string, string, false, false, true>;
 };
 
-export { ServiceFilterModel };
+export { ServiceDefaultFilterModel, ServiceFilterModel };
