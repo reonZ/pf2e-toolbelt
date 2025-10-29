@@ -127,10 +127,15 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
     protected _onClickAction(event: PointerEvent, target: HTMLElement) {
         const action = target.dataset.action as EventAction;
 
-        if (action === "sell-item") {
-            const parent = htmlClosest(target, "[data-item-id]");
-            const itemId = parent?.dataset.itemId;
-            const item = this.seller.items.get(itemId ?? "");
+        const getItem = () => {
+            const itemId = htmlClosest(target, "[data-item-id]")?.dataset.itemId;
+            return this.seller.items.get(itemId ?? "");
+        };
+
+        if (action === "open-sheet") {
+            getItem()?.sheet.render(true);
+        } else if (action === "sell-item") {
+            const item = getItem();
 
             if (item?.isOfType("physical") && item.quantity > 0) {
                 simulateDropItem(item, this.merchant);
@@ -139,7 +144,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
     }
 }
 
-type EventAction = "sell-item";
+type EventAction = "open-sheet" | "sell-item";
 
 type SellingItem = {
     diff: "cheap" | "expensive" | "";

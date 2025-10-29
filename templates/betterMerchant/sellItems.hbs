@@ -24,7 +24,9 @@
         {{#each group.items as |item|}}
         <div class="item" data-item-id="{{item.id}}">
             <img src="{{item.img}}">
-            <div class="name">{{item.name}}</div>
+            <div class="name">
+                <a data-action="open-sheet">{{item.name}}</a>
+            </div>
             <div class="price {{item.diff}}" data-tooltip="{{item.originalPrice}}">
                 {{item.price}}
             </div>
