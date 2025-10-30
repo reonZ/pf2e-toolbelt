@@ -181,6 +181,13 @@
           "hint": "Kiedy pojemnik jest przenoszony z jednego aktora do drugiego, jego zawartość powinna być przenoszona razem z nim."
         }
       },
+      "betterUI": {
+        "title": "Lepszy Interfejs Użytkownika",
+        "unscaleTokenHUD": {
+          "name": "Usuń skalowanie HUD tokenu",
+          "hint": "Przywróć skalowanie obszaru roboczego HUD tokenu"
+        }
+      },
       "conditionManager": {
         "title": "Menedżer Stanów",
         "enabled": {
@@ -454,7 +461,18 @@
         "infiniteAll": {
           "label": "Nieskończone zapasy",
           "tooltip": "Kupcowi nigdy nie zabraknie przedmiotów do sprzedaży (nie ma wpływu na Skarby ani Usługi)."
+        },
+        "none": "Nie na sprzedaż",
+        "sellItems": {
+          "button": "Sprzedaj przedmioty",
+          "noSelection": "Należy wybrać prawidłowego sprzedającego."
         }
+      },
+      "sellItems": {
+        "empty": "<strong>{name}</strong> nie wydaje się być zainteresowany niczym, co masz do zaoferowania.",
+        "info": "Poniższe ceny są podane w kolorach na podstawie zakładanego stosunku <u>1</u> dla skarbów i <u>0.5</u> dla pozostałych przedmiotów.",
+        "title": "Sprzedaj przedmioty - {name}",
+        "sell": "Sprzedaj przedmiot\n"
       },
       "sheetServices": {
         "add": "Dodaj usługę",
