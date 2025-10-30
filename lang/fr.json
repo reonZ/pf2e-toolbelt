@@ -181,6 +181,13 @@
           "hint": "Lorsqu'un contenant est déplacé d'un acteur à un autre, son contenu doit-il l'accompagner ?"
         }
       },
+      "betterUI": {
+        "title": "Interface utilisateur améliorée",
+        "unscaleTokenHUD": {
+          "name": "Token HUD non mis à l'échelle",
+          "hint": "Rétablir la mise à l'échelle de Token HUD"
+        }
+      },
       "conditionManager": {
         "title": "Gestionnaire d'état",
         "enabled": {
@@ -432,8 +439,8 @@
       "item": {
         "buy": {
           "confirm": {
-            "content": "<strong>{buyer}</strong> souhaite-t-il acheter : <strong>{item}</strong> ?",
-            "title": "Acheter l'objet : {item}"
+            "content": "Est-ce que <strong>{buyer}</strong> souhaite acheter <strong>{item}</strong> ?",
+            "title": "Acheter l'objet - {item}"
           },
           "noTarget": "Vous devez sélectionner un acteur valide pour acheter chez ce marchand"
         },
@@ -443,7 +450,7 @@
         "refuse": "<strong>{actor}</strong> n'est pas intéressé par l'achat de <strong>{item}</strong>.",
         "sell": {
           "button": "Vendre",
-          "prompt": "Combien d'objets souhaitez-vous vendre ?",
+          "prompt": "{acteur} souhaite-t-il vendre cet objet ?",
           "title": "Vendre des articles"
         },
         "unided": "Personne de sensé ne voudrait acheter un objet quelconque non identifié."
@@ -454,7 +461,18 @@
         "infiniteAll": {
           "label": "Stocks infinis",
           "tooltip": "Le marchand ne sera jamais à court d'articles à vendre (ne fait rien aux trésors ou aux services)"
+        },
+        "none": "Pas à vendre",
+        "sellItems": {
+          "button": "Vendre les objets",
+          "noSelection": "Vous devez sélectionner un acteur vendeur valide."
         }
+      },
+      "sellItems": {
+        "empty": "<strong>{name}</strong> ne semble pas intéressé par quoi que ce soit que vous ayez à offrir.",
+        "info": "Les prix suivants sont colorés en fonction d'un ratio supposé de <u>1</u> pour les trésors et de <u>0,5</u> pour les autres objets.",
+        "title": "Vente des objets - {name}",
+        "sell": "Vendre l'objet"
       },
       "sheetServices": {
         "add": "Ajouter un service",
