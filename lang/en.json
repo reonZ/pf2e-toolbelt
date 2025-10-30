@@ -470,7 +470,7 @@
             },
             "sellItems": {
                 "empty": "<strong>{name}</strong> doesn't seem to be interested by anything you would have to offer.",
-                "info": "The following prices are colored based on an assumed ratio of <u>1</u> for treasures and <u>0.5</u> for the other items.",
+                "info": "The following prices are colored based on an assumed ratio of <u>{treasure}</u> for treasures and <u>{item}</u> for the other items.",
                 "title": "Sell Items - {name}",
                 "sell": "Sell Item"
             },

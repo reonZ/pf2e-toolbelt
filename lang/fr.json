@@ -470,7 +470,7 @@
       },
       "sellItems": {
         "empty": "<strong>{name}</strong> ne semble pas intéressé par quoi que ce soit que vous ayez à offrir.",
-        "info": "Les prix suivants sont colorés en fonction d'un ratio supposé de <u>1</u> pour les trésors et de <u>0,5</u> pour les autres objets.",
+        "info": "Les prix suivants sont colorés en fonction d'un ratio supposé de <u>{treasure}</u> pour les trésors et de <u>{item}</u> pour les autres objets.",
         "title": "Vente des objets - {name}",
         "sell": "Vendre l'objet"
       },

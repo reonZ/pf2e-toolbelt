@@ -63,6 +63,8 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
         const merchant = this.merchant;
         const seller = this.seller;
         const filters = this.tool.getAllFilters(merchant, "buy");
+        const defaultFilter = this.tool.getDefaultFilter(merchant, "buy");
+        const defaultRatio = defaultFilter?.enabled ? defaultFilter.ratio : 1;
 
         const groups = R.pipe(
             seller.inventory.contents,
@@ -103,10 +105,15 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
         );
 
         const ActorSheet = seller.sheet.constructor as typeof ActorSheetPF2e<ActorPF2e>;
+        const info = this.localize("info", {
+            item: defaultRatio,
+            treasure: Math.max(1, defaultRatio),
+        });
 
         return {
             inventory: {
                 coins: ActorSheet["coinsToSheetData"](seller.inventory.coins),
+                info,
             },
             groups,
         };
@@ -165,6 +172,7 @@ type ItemsGroup = {
 type SellItemsContext = {
     inventory: {
         coins: CoinageSummary;
+        info: string;
     };
     groups: ItemsGroup[];
 };
