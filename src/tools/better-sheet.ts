@@ -352,7 +352,9 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             const itemsList = header.nextElementSibling as HTMLElement | undefined;
             if (!itemsList || !itemsList.classList.contains("items")) continue;
 
-            const disabled = itemsList.children.length < 2;
+            const types = splitStr<PhysicalItemType>(itemsList.dataset.itemTypes ?? "");
+            const hasContainer = !!types.findSplice((type) => type === "backpack");
+            const disabled = itemsList.children.length < (hasContainer ? 1 : 2);
             const name = htmlQuery(header, ".item-name");
             const btn = this.#createSortBtn(disabled);
 
@@ -370,12 +372,15 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     return;
                 }
 
-                const types = splitStr<PhysicalItemType>(itemsList.dataset.itemTypes ?? "");
+                if (hasContainer) {
+                }
+
                 const updates = R.pipe(
                     types,
                     R.map((type) => type in actor.itemTypes && actor.itemTypes[type]),
                     R.filter(R.isTruthy),
                     R.flat(),
+                    R.filter((item) => !item.isInContainer),
                     R.sort((a, b) => a._source.name.localeCompare(b._source.name)),
                     R.map((item, index) => {
                         return { _id: item.id, sort: 50000 * index };
