@@ -15,6 +15,7 @@ import {
     htmlQuery,
     isInstanceOf,
     NPCSheetPF2e,
+    PhysicalItemPF2e,
     PhysicalItemType,
     R,
     renderActorSheets,
@@ -202,7 +203,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         this.#addSpellcastingSortList(html, actor);
     }
 
-    #createSortBtn(disabled: boolean) {
+    #createSortBtn(disabled: boolean, label = "tooltip") {
         const classes = ["with-sort-btn"];
 
         if (disabled) {
@@ -213,7 +214,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             classes,
             content: `<i class="fa-solid fa-arrow-up-a-z"></i>`,
             dataset: {
-                tooltip: this.localizePath("sortList.sheet.tooltip"),
+                tooltip: this.localizePath(`sortList.sheet.${label}`),
             },
         });
     }
@@ -354,9 +355,11 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
             const types = splitStr<PhysicalItemType>(itemsList.dataset.itemTypes ?? "");
             const hasContainer = !!types.findSplice((type) => type === "backpack");
-            const disabled = itemsList.children.length < (hasContainer ? 1 : 2);
             const name = htmlQuery(header, ".item-name");
-            const btn = this.#createSortBtn(disabled);
+            const disabled = hasContainer
+                ? actor.itemTypes.backpack.every((container) => container.contents.size < 2)
+                : itemsList.children.length < 2;
+            const btn = this.#createSortBtn(disabled, hasContainer ? "container" : undefined);
 
             name?.prepend(btn);
 
@@ -372,8 +375,13 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     return;
                 }
 
-                if (hasContainer) {
-                }
+                const sortItems = (a: PhysicalItemPF2e, b: PhysicalItemPF2e): number => {
+                    return a._source.name.localeCompare(b._source.name);
+                };
+
+                const mapItems = (item: PhysicalItemPF2e, index: number) => {
+                    return { _id: item.id, sort: 50000 * index };
+                };
 
                 const updates = R.pipe(
                     types,
@@ -381,11 +389,21 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     R.filter(R.isTruthy),
                     R.flat(),
                     R.filter((item) => !item.isInContainer),
-                    R.sort((a, b) => a._source.name.localeCompare(b._source.name)),
-                    R.map((item, index) => {
-                        return { _id: item.id, sort: 50000 * index };
-                    })
+                    R.sort(sortItems),
+                    R.map(mapItems)
                 );
+
+                if (hasContainer) {
+                    for (const container of actor.itemTypes.backpack) {
+                        updates.push(
+                            ...R.pipe(
+                                container.contents.contents,
+                                R.sort(sortItems),
+                                R.map(mapItems)
+                            )
+                        );
+                    }
+                }
 
                 await actor.updateEmbeddedDocuments("Item", updates);
             });

@@ -524,7 +524,8 @@
         "betterSheet": {
             "sortList": {
                 "sheet": {
-                    "tooltip": "Sort Content"
+                    "tooltip": "Sort Content",
+                    "container": "Sort Containers' Content"
                 }
             }
         },
