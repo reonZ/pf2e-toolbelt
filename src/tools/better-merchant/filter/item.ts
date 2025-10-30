@@ -16,7 +16,8 @@ class BuyDefaultFilterModel extends DefaultFilterModel<PhysicalItemPF2e<ActorPF2
     }
 
     getRatio(item: PhysicalItemPF2e<ActorPF2e>): number {
-        return item.isOfType("treasure") ? 1 : this.ratio;
+        const ratio = this.ratio;
+        return item.isOfType("treasure") ? Math.max(ratio, 1) : ratio;
     }
 
     calculatePrice(item: PhysicalItemPF2e<ActorPF2e>, qty?: number): CalulatedFilterPrice {
