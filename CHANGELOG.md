@@ -1,11 +1,17 @@
-# 3.16.0
+# 3.16.1
 
 -   `Better Actor Sheet`:
+    -   `Show Avatar to Players`:
+        -   fix popup window showing a debug title instead of character names
+
+# 3.16.0
+
     -   `Sort List Button`:
         -   now sort containers' content instead of the containers themselves
         -   improve the disabling state of the button for spellcasting entries
         -   fix button missing on some spellcasting entries
         -   fix items being sorted inside containers when clicking on the other sections of the inventory
+
 -   `Better Merchant`:
     -   the ratio for bought treasures when reaching the default filter will now be the highest value between the filter ratio and `1` instead of always being `1`
     -   `Sell Items`:
