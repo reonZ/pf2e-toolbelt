@@ -1,3 +1,18 @@
+# 3.16.0
+
+-   `Better Actor Sheet`:
+    -   `Sort List Button`:
+        -   now sort containers' content instead of the containers themselves
+        -   improve the disabling state of the button for spellcasting entries
+        -   fix button missing on some spellcasting entries
+        -   fix items being sorted inside containers when clicking on the other sections of the inventory
+-   `Better Merchant`:
+    -   the ratio for bought treasures when reaching the default filter will now be the highest value between the filter ratio and `1` instead of always being `1`
+    -   `Sell Items`:
+        -   the assumed ratio for price coloring now uses the default filter (if enabled) instead of the arbitrary `0.5`
+            -   if not enabled, then a ratio of `1` will be used
+            -   it is reflected in the `Info` tooltip
+
 # 3.15.0
 
 -   `Better Actor Sheet`:
