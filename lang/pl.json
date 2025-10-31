@@ -470,7 +470,7 @@
       },
       "sellItems": {
         "empty": "<strong>{name}</strong> nie wydaje się być zainteresowany niczym, co masz do zaoferowania.",
-        "info": "Poniższe ceny są podane w kolorach na podstawie zakładanego stosunku <u>1</u> dla skarbów i <u>0.5</u> dla pozostałych przedmiotów.",
+        "info": "Poniższe ceny są podane w kolorach w oparciu o zakładany stosunek <u>{treasure}</u> dla skarbów i <u>{item}</u> dla pozostałych przedmiotów.",
         "title": "Sprzedaj przedmioty - {name}",
         "sell": "Sprzedaj przedmiot\n"
       },
@@ -524,7 +524,8 @@
     "betterSheet": {
       "sortList": {
         "sheet": {
-          "tooltip": "Sortuj zawartość"
+          "tooltip": "Sortuj zawartość",
+          "container": "Sortuj zawartość pojemników"
         }
       }
     },
