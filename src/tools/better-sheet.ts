@@ -180,7 +180,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         btn.addEventListener("click", () => {
             game.socket.emit("shareImage", {
                 image: actor.img,
-                title: "test title",
+                title: actor.name,
                 uuid: actor.uuid,
             });
 
