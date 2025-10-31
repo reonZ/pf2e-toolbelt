@@ -262,16 +262,20 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
         const html = $html[0];
         const actor = sheet.actor;
+        const collectionId = htmlQuery(html, `[data-entry-id]`)?.dataset.entryId;
+        const collection = actor.spellcasting.collections.get(collectionId ?? "");
+        if (!collection) return;
+
         const name = htmlQuery(html, ".sheet-header h1");
-        const btn = this.#createSortBtn(false);
+        const disabled = collectionIsDisabled(collection);
+        const btn = this.#createSortBtn(disabled);
 
         name?.classList.add("with-sort");
         name?.prepend(btn);
 
-        btn.addEventListener("click", async () => {
-            const collectionId = htmlQuery(html, `[data-entry-id]`)?.dataset.entryId;
-            const collection = actor.spellcasting.collections.get(collectionId ?? "");
+        if (disabled) return;
 
+        btn.addEventListener("click", async () => {
             if (collection) {
                 await this.#sortCollectionSpells(collection);
             }
@@ -287,19 +291,27 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         for (const section of sections ?? []) {
             const collectionId = section.dataset.itemId;
             const collection = actor.spellcasting.collections.get(collectionId ?? "");
-            if (!collection) return;
+            if (!collection) continue;
 
             const entry = collection.entry as unknown as SpellcastingEntryPF2e<CreaturePF2e>;
-            if (!isInstanceOf(entry, "SpellcastingEntryPF2e")) return;
+            if (!isInstanceOf(entry, "SpellcastingEntryPF2e")) continue;
 
             const name = htmlQuery(section, ".action-header .item-name");
-            const disabled = collection.size < 2 || entry.isFlexible;
+
+            const disabled = entry.isFlexible
+                ? true
+                : entry.isPrepared
+                ? R.values(entry.system.slots).every(({ prepared }) => {
+                      return prepared.filter((slot) => slot.id).length < 2;
+                  })
+                : collectionIsDisabled(collection);
+
             const btn = this.#createSortBtn(disabled);
 
             name?.classList.add("with-sort");
             name?.prepend(btn);
 
-            if (disabled) return;
+            if (disabled) continue;
 
             btn.addEventListener("click", async () => {
                 if (entry.isPrepared) {
@@ -409,6 +421,16 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             });
         }
     }
+}
+
+function collectionIsDisabled(collection: SpellCollection<CreaturePF2e>): boolean {
+    const groups = R.pipe(
+        collection.contents,
+        R.groupBy((spell) => (spell.isCantrip ? 0 : spell.rank)),
+        R.values()
+    );
+
+    return groups.every((spells) => spells.length < 2);
 }
 
 type ToolSettings = {
