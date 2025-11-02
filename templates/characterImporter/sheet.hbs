@@ -1,0 +1,80 @@
+<div class="importer-header">
+    <div class="title">
+        {{@root.i18n 'title'}}
+    </div>
+    <div class="import">
+        <div class="label">
+            {{@root.i18n (concat 'import.label.' (ifThen data 'update' 'import'))}}
+        </div>
+        <a data-action="import-code">
+            {{@root.i18n 'import.code'}}
+        </a>
+        <a data-action="import-file">
+            {{@root.i18n 'import.file'}}
+        </a>
+        <a {{#if data}} data-action="delete-data" {{else}} class="disabled" {{/if}}
+            {{{@root.i18n.tooltip 'import.delete' }}}>
+            <i class="fa-solid fa-trash"></i>
+        </a>
+    </div>
+</div>
+<div class="data">
+    {{#each core as |entry|}}
+    {{> 'entry' entry}}
+    {{/each}}
+</div>
+
+{{#*inline 'entry'}}
+<div class="entry" data-item-type="{{itemType}}">
+    <img src="{{img}}">
+    <div class="header">
+        <div class="section">
+            <div class="label">
+                {{localize (concat 'TYPES.Item.' itemType)}}:
+            </div>
+            <div>
+                {{ifThen source source '––'}}
+            </div>
+        </div>
+        <div class="controls">
+            {{#each actions as |action|}}
+            <a class="action" data-action="entry-{{action.type}}">
+                <i class="{{action.icon}}" data-tooltip="{{action.label}}"></i>
+            </a>
+            {{/each}}
+        </div>
+    </div>
+    <div class="index">
+        <div class="section">
+            <div class="label">
+                {{@root.i18n (ifThen isOverride 'data.entry.override' 'data.entry.match') }}:
+            </div>
+            <div class="value">
+                {{#if selection}}
+                <a data-action="open-sheet" data-item-uuid="{{selection.uuid}}"
+                    data-tooltip="{{localize 'CONTROLS.CommonOpenSheet'}}">
+                    {{selection.name}}
+                </a>
+                {{else}}
+                <span>––</span>
+                {{/if}}
+            </div>
+        </div>
+        <div class="section">
+            <div class="label">
+                {{@root.i18n 'data.entry.current'}}:
+            </div>
+            <div class="value">
+                {{#if current}}
+                <a data-action="open-sheet" data-item-uuid="{{current.uuid}}"
+                    data-tooltip="{{localize 'CONTROLS.CommonOpenSheet'}}">
+                    {{current.name}}
+                </a>
+                {{else}}
+                <span>––</span>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+{{/inline}}

@@ -188,6 +188,18 @@
                     "hint": "Revert the canvas scaling of the token HUD"
                 }
             },
+            "characterImporter": {
+                "title": "Character Importer",
+                "enabled": {
+                    "name": "Enabled",
+                    "hint": "Allow users to import a character from pathbuilder through steps.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "gm": "GM Only",
+                        "all": "All Users"
+                    }
+                }
+            },
             "conditionManager": {
                 "title": "Condition Manager",
                 "enabled": {
@@ -539,6 +551,52 @@
                 "self": "Include Self",
                 "title": "Template Helper",
                 "yes": "Target"
+            }
+        },
+        "characterImporter": {
+            "deleteData": {
+                "content": "Are you sure you want to delete the import data from this character?<br><br>NOTE: This will not update the character itself.",
+                "title": "Delete Import Data"
+            },
+            "import": {
+                "code": {
+                    "title": "Paste JSON Code",
+                    "yes": "Parse JSON"
+                },
+                "file": {
+                    "title": "Select JSON File",
+                    "yes": "Parse File"
+                }
+            },
+            "sheet": {
+                "level": {
+                    "cancel": "Close character importer menu",
+                    "import": "Open character importer menu"
+                },
+                "import": {
+                    "label": {
+                        "import": "Import",
+                        "update": "Update"
+                    },
+                    "code": "From Code",
+                    "delete": "Delete Import Data",
+                    "file": "From File"
+                },
+                "data": {
+                    "entry": {
+                        "action": {
+                            "install": "Add {match} to Character",
+                            "refresh": "Refresh Item on Character",
+                            "replace": "Replace with {match}",
+                            "revert": "Remove Override"
+                        },
+                        "current": "Current",
+                        "drop": "Drop {key}",
+                        "match": "Match",
+                        "override": "Override"
+                    }
+                },
+                "title": "Character Importer"
             }
         },
         "conditionManager": {

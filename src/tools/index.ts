@@ -11,6 +11,7 @@ export * from "./better-sheet";
 export * from "./better-template";
 export * from "./better-trade";
 export * from "./better-ui";
+export * from "./character-importer";
 export * from "./condition-manager";
 export * from "./droppeth";
 export * from "./giveth";

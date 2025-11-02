@@ -121,7 +121,7 @@
 
             .price,
             .quantity {
-                text-transform: capitalize;
+                text-transform: uppercase;
             }
 
             &:not(:first-child) {

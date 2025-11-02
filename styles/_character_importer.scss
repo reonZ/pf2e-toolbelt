@@ -1,0 +1,166 @@
+.sheet.actor.character {
+    .char-header .char-level {
+        position: relative;
+
+        .character-importer {
+            position: absolute;
+            z-index: 100;
+            bottom: 0;
+            left: 0;
+            font-size: 1.1em;
+            transform: translateX(-50%);
+        }
+    }
+
+    form.importing-character {
+        .char-header .char-level .character-importer {
+            .import {
+                display: none;
+            }
+        }
+
+        .sheet-navigation,
+        .sheet-content {
+            display: none;
+        }
+
+        .sheet-body {
+            overflow: hidden;
+        }
+    }
+
+    form:not(.importing-character) {
+        .char-header .char-level .character-importer {
+            .cancel {
+                display: none;
+            }
+        }
+    }
+}
+
+.sheet.actor.character .pf2e-toolbelt-character-importer {
+    --outer-padding: 0.4rem;
+
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .importer-header {
+        --header-border: 1px solid #ffffff3d;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        white-space: nowrap;
+        background: url("/systems/pf2e/assets/sheet/border-pattern.webp") repeat-x top,
+            url("/systems/pf2e/assets/sheet/border-pattern.webp") repeat-x bottom,
+            var(--color-pf-secondary);
+        color: var(--text-light);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.15rem var(--outer-padding);
+
+        .title {
+            font-weight: bold;
+            margin-left: 0.2rem;
+        }
+
+        .import {
+            width: fit-content;
+            justify-self: end;
+            padding-inline: 0.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+
+            a {
+                border: var(--header-border);
+                border-radius: 4px;
+                padding: 0.15rem 0.4rem 0.1rem;
+                text-align: center;
+            }
+        }
+    }
+
+    .data {
+        --entry-border: 1px solid #0000008f;
+
+        overflow-y: auto;
+        padding: 0.3rem var(--outer-padding);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .entry {
+            display: grid;
+            grid-template-columns: 50px 1fr;
+            grid-template-rows: 1fr 1fr;
+            align-items: center;
+            border: var(--entry-border);
+            border-radius: 4px;
+            box-shadow: 0 0 4px #00000087;
+
+            img {
+                grid-row: 1 / -1;
+                border: none;
+                border-right: var(--entry-border);
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            .header,
+            .index {
+                gap: 0.2rem;
+                height: 100%;
+                padding-inline: var(--outer-padding);
+
+                .value {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+
+            .section {
+                display: flex;
+                align-items: center;
+                gap: 0.2rem;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                border-bottom: var(--entry-border);
+                justify-content: space-between;
+                padding-right: 0;
+
+                .controls {
+                    height: 100%;
+                    display: flex;
+
+                    a {
+                        height: 100%;
+                        width: 1.35rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-left: var(--entry-border);
+                        border-bottom-left-radius: 4px;
+                    }
+                }
+            }
+
+            .index {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                align-items: center;
+
+                a {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+}
