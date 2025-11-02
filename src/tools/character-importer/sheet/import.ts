@@ -1,5 +1,5 @@
 import { CharacterPF2e, MODULE, R, waitDialog } from "module-helpers";
-import { CharacterImporterTool, fromPathbuilder, ImportDataModel } from "..";
+import { CharacterImporterTool, fromPathbuilder, ImportDataModel, ImportFeatEntry } from "..";
 
 async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fromFile: boolean) {
     const code = await (fromFile ? importFromFile : importFromJSON).call(this);
@@ -7,17 +7,56 @@ async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fro
 
     try {
         const parsed = JSON.parse(code) as unknown;
-        const current = this.getImportData(actor)?.toObject() ?? {};
+        const current = this.getImportData(actor)?.toObject();
+        const imported = await fromPathbuilder(parsed);
 
-        const data = new ImportDataModel(
-            foundry.utils.mergeObject(current, await fromPathbuilder(parsed))
-        );
+        if (imported.feats) {
+            const currentFeats = current?.feats ?? [];
+
+            const featEntriesEqual = (a: ImportFeatEntry, b: ImportFeatEntry): boolean => {
+                return (
+                    a.category === b.category &&
+                    a.level === b.level &&
+                    a.match === b.match &&
+                    a.value === b.value &&
+                    // make sure that both have a parent or neither
+                    !!a.parent === !!b.parent
+                );
+            };
+
+            for (const feat of imported.feats) {
+                const current = currentFeats.find((current) => {
+                    if (!featEntriesEqual(feat, current)) return false;
+                    // they both don't have parent
+                    if (!current.parent) return true;
+
+                    if (
+                        R.isIncludedIn(current.parent, ImportDataModel.coreEntries) ||
+                        R.isIncludedIn(feat.parent, ImportDataModel.coreEntries)
+                    ) {
+                        return current.parent === feat.parent;
+                    }
+
+                    const currentParent = currentFeats[Number(current.parent)];
+                    const importedParent = imported.feats![Number(feat.parent)];
+
+                    return featEntriesEqual(currentParent, importedParent);
+                });
+
+                if (current?.override) {
+                    feat.override = current.override;
+                }
+            }
+        }
+
+        const data = new ImportDataModel(foundry.utils.mergeObject(current ?? {}, imported));
 
         if (data.invalid) {
             throw MODULE.Error("an error occured when parsing pathbuilder JSON data.");
         }
 
         await this.setFlag(actor, "data", data);
+        this.info("import.success");
     } catch (error) {
         console.error(error);
     }

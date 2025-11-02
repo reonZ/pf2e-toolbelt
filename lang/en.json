@@ -563,10 +563,12 @@
                     "title": "Paste JSON Code",
                     "yes": "Parse JSON"
                 },
+                "fail": "The character import failed.",
                 "file": {
                     "title": "Select JSON File",
                     "yes": "Parse File"
-                }
+                },
+                "success": "The character import was successful."
             },
             "sheet": {
                 "level": {
