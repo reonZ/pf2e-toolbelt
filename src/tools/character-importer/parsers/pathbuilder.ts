@@ -1,4 +1,4 @@
-import { FeatOrFeatureCategory, OneToTen, R } from "module-helpers";
+import { FeatOrFeatureCategory, OneToTen, R, sluggify } from "module-helpers";
 import { getCoreUuidFromPack, getFeatUuidFromPack } from ".";
 import {
     ImportDataCoreKey,
@@ -25,7 +25,7 @@ const FEAT_CATEGORIES: Record<string, FeatOrFeatureCategory> = {
 async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
     const data = raw && R.isPlainObject(raw) && R.isPlainObject(raw.build) ? raw.build : {};
     const classe = await parseCoreEntry(data, "class");
-    const classParentKey = classe ? `${game.pf2e.system.sluggify(classe.value)}-feat` : null;
+    const classParentKey = classe ? `${sluggify(classe.value)}-feat` : null;
 
     const featsPromises = (R.isArray(data.feats) ? data.feats : []).map(
         async (entry, i, feats): Promise<DataFeatEntrySource | undefined> => {
@@ -34,7 +34,7 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
             const [value, _, categoryValue, level, child, choice, parent] = entry;
             if (!R.isString(value) || !R.isString(categoryValue) || !R.isNumber(level)) return;
 
-            const sluggifiedCategory = game.pf2e.system.sluggify(categoryValue);
+            const sluggifiedCategory = sluggify(categoryValue);
             const categoryK = sluggifiedCategory === classParentKey ? "class" : sluggifiedCategory;
             const category = FEAT_CATEGORIES[categoryK];
             if (!category) return;
@@ -46,8 +46,8 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
                   })
                 : undefined;
 
-            const parentCategory = foundParent ? game.pf2e.system.sluggify(foundParent[2]) : "";
-            const parentIsCore = parentCategory in ImportDataModel.coreEntries;
+            const parentCategory = foundParent ? sluggify(foundParent[2]) : "";
+            const parentIsCore = R.isIncludedIn(parentCategory, ImportDataModel.coreEntries);
 
             return {
                 level: Math.clamp(level, 1, 10) as OneToTen,
@@ -61,7 +61,7 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
         }
     );
 
-    // we need to process feats in 2 steps because we want to use index as parent and we need to filter out
+    // we need to process feats in 2 steps because we want to use index as parent and we need to filter out first
     const feats = R.pipe(
         await Promise.all(featsPromises),
         R.filter(R.isTruthy),
@@ -73,7 +73,7 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
             });
 
             if (R.isNumber(index)) {
-                feat.parent = String(index);
+                feat.parent = String(index) as `${number}`;
             }
         })
     );

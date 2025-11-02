@@ -3,37 +3,62 @@
         {{@root.i18n 'title'}}
     </div>
     <div class="import">
-        <div class="label">
-            {{@root.i18n (concat 'import.label.' (ifThen data 'update' 'import'))}}
-        </div>
         <a data-action="import-code">
+            <i class="fa-solid fa-laptop-code"></i>
             {{@root.i18n 'import.code'}}
         </a>
         <a data-action="import-file">
+            <i class="fa-solid fa-file-import"></i>
             {{@root.i18n 'import.file'}}
         </a>
-        <a {{#if data}} data-action="delete-data" {{else}} class="disabled" {{/if}}
+        <a {{#if hasData}} data-action="delete-data" {{else}} class="disabled" {{/if}}
             {{{@root.i18n.tooltip 'import.delete' }}}>
             <i class="fa-solid fa-trash"></i>
         </a>
     </div>
+    <div class="menu">
+        {{#each menu as |entry|}}
+        <a class="entry" data-action="select-tab" data-tab="{{entry.type}}">
+            <i class="{{entry.icon}}"></i>
+            <span>{{@root.i18n 'menu' entry.type}}</span>
+        </a>
+        {{/each}}
+    </div>
 </div>
-<div class="data">
+<div class="data" data-tab="core">
     {{#each core as |entry|}}
     {{> 'entry' entry}}
     {{/each}}
 </div>
+<div class="data" data-tab="feats">
+    feats
+</div>
+<div class="data" data-tab="inventory">
+    inventory
+</div>
+<div class="data" data-tab="skills">
+    skills
+</div>
+<div class="data" data-tab="spells">
+    spells
+</div>
+<div class="data" data-tab="details">
+    details
+</div>
+
 
 {{#*inline 'entry'}}
-<div class="entry" data-item-type="{{itemType}}">
+<div class="entry{{#if parent}} child{{/if}}" data-item-type="{{itemType}}" {{#if index
+    includeZero=true}} data-index="{{index}}" {{/if}} {{#if parent}} data-parent="{{parent}}"
+    {{/if}}>
     <img src="{{img}}">
     <div class="header">
         <div class="section">
             <div class="label">
-                {{localize (concat 'TYPES.Item.' itemType)}}:
+                {{label}}:
             </div>
-            <div>
-                {{ifThen source source '––'}}
+            <div class="value">
+                {{ifThen source.label source.label '––'}}
             </div>
         </div>
         <div class="controls">
@@ -47,7 +72,7 @@
     <div class="index">
         <div class="section">
             <div class="label">
-                {{@root.i18n (ifThen isOverride 'data.entry.override' 'data.entry.match') }}:
+                {{@root.i18n 'data.entry' (ifThen isOverride 'override' 'match')}}:
             </div>
             <div class="value">
                 {{#if selection}}
@@ -76,5 +101,11 @@
             </div>
         </div>
     </div>
+    {{#if level}}
+    <div class="level">{{level}}</div>
+    {{/if}}
 </div>
+{{#each children as |child|}}
+{{> 'entry' child}}
+{{/each}}
 {{/inline}}

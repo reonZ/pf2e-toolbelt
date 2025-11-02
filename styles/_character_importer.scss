@@ -47,38 +47,63 @@
     flex-direction: column;
 
     .importer-header {
-        --header-border: 1px solid #ffffff3d;
+        --header-border: 1px solid #ffffff40;
 
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
         align-items: center;
-        justify-content: space-between;
         white-space: nowrap;
-        background: url("/systems/pf2e/assets/sheet/border-pattern.webp") repeat-x top,
-            url("/systems/pf2e/assets/sheet/border-pattern.webp") repeat-x bottom,
+        background: url(/systems/pf2e/assets/sheet/border-pattern.webp) repeat-x top,
+            url(/systems/pf2e/assets/sheet/border-pattern.webp) repeat-x bottom,
             var(--color-pf-secondary);
         color: var(--text-light);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.15rem var(--outer-padding);
+        border-bottom: 1px solid hsla(0, 0%, 100%, 0.5);
+        border-top: var(--header-border);
 
         .title {
-            font-weight: bold;
-            margin-left: 0.2rem;
+            text-transform: uppercase;
+            padding-left: 0.5rem;
+        }
+
+        a {
+            padding-block: 0.2rem;
+            text-align: center;
+
+            i {
+                font-size: 0.95em;
+            }
+
+            &:not(:last-child) {
+                border-right: var(--header-border);
+            }
         }
 
         .import {
-            width: fit-content;
-            justify-self: end;
-            padding-inline: 0.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
 
             a {
-                border: var(--header-border);
-                border-radius: 4px;
-                padding: 0.15rem 0.4rem 0.1rem;
-                text-align: center;
+                padding-inline: 0.5rem;
+
+                &:first-child {
+                    border-left: var(--header-border);
+                }
+            }
+        }
+
+        .menu {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            align-items: center;
+            border-top: var(--header-border);
+
+            a {
+                &.selected {
+                    background: #ff00ba52;
+                }
             }
         }
     }
@@ -91,16 +116,26 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
 
         .entry {
+            --scale: 1;
+
+            position: relative;
             display: grid;
-            grid-template-columns: 50px 1fr;
+            grid-template-columns: calc(50px * var(--scale)) 1fr;
             grid-template-rows: 1fr 1fr;
             align-items: center;
             border: var(--entry-border);
             border-radius: 4px;
-            box-shadow: 0 0 4px #00000087;
+            box-shadow: 0 0 4px #0000009e;
+
+            > * {
+                pointer-events: none;
+            }
+
+            a {
+                pointer-events: all;
+            }
 
             img {
                 grid-row: 1 / -1;
@@ -115,18 +150,20 @@
                 gap: 0.2rem;
                 height: 100%;
                 padding-inline: var(--outer-padding);
+                overflow: hidden;
 
-                .value {
-                    white-space: nowrap;
+                .section {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.2rem;
                     overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-            }
 
-            .section {
-                display: flex;
-                align-items: center;
-                gap: 0.2rem;
+                    .value {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
             }
 
             .header {
@@ -141,13 +178,17 @@
                     display: flex;
 
                     a {
-                        height: 100%;
+                        height: calc(100% + 1px);
                         width: 1.35rem;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         border-left: var(--entry-border);
                         border-bottom-left-radius: 4px;
+
+                        i.fa-lock {
+                            opacity: 0.9;
+                        }
                     }
                 }
             }
@@ -161,6 +202,64 @@
                     text-decoration: underline;
                 }
             }
+
+            .level {
+                position: absolute;
+                font-size: 1.5em;
+                bottom: 0;
+                left: 0;
+                color: var(--text-light);
+                background: rgb(0 0 0 / 74%);
+                height: 2ch;
+                width: 2ch;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 50%;
+                transform: translate(-25%, 25%);
+                box-shadow: inset 0 0 4px 0px #ffffffc4;
+            }
+
+            &:has(+ .entry.child) {
+                border-bottom-right-radius: 0;
+                clip-path: inset(-10px -10px 0px -10px);
+            }
+
+            &:has(+ .entry:not(.child)) {
+                margin-bottom: 0.5rem;
+            }
+
+            &.child {
+                --scale: 0.95;
+
+                align-self: end;
+                width: calc(100% * var(--scale));
+                font-size: calc(1em * var(--scale));
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+                border-top: 0;
+
+                img {
+                    border-top-left-radius: 0;
+                }
+
+                &:has(+ .entry.child) {
+                    border-bottom-left-radius: 0;
+                    clip-path: inset(0px -10px 0px -10px);
+
+                    img {
+                        border-bottom-left-radius: 0;
+                    }
+                }
+
+                &:not(:has(+ .entry.child)) {
+                    clip-path: inset(0px -10px -10px -10px);
+                }
+            }
+        }
+
+        &:not(.selected) {
+            display: none;
         }
     }
 }

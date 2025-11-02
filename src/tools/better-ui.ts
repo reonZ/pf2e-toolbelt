@@ -82,13 +82,6 @@ class BetterUITool extends ModuleTool<ToolSettings> {
         const height = (worldHeight / uiScale) * (gridSize / 100);
         const left = worldLeft + (worldWidth - width) / 2;
         const top = worldTop + (worldHeight - height) / 2;
-
-        console.log({
-            width,
-            height,
-            left,
-            top,
-        });
     }
 }
 

@@ -574,10 +574,6 @@
                     "import": "Open character importer menu"
                 },
                 "import": {
-                    "label": {
-                        "import": "Import",
-                        "update": "Update"
-                    },
                     "code": "From Code",
                     "delete": "Delete Import Data",
                     "file": "From File"
@@ -586,8 +582,9 @@
                     "entry": {
                         "action": {
                             "install": "Add {match} to Character",
-                            "refresh": "Refresh Item on Character",
-                            "replace": "Replace with {match}",
+                            "locked": "Cannot be Refreshed",
+                            "refresh": "Refresh Current Item",
+                            "replace": "Replace Current with {match}",
                             "revert": "Remove Override"
                         },
                         "current": "Current",
@@ -595,6 +592,14 @@
                         "match": "Match",
                         "override": "Override"
                     }
+                },
+                "menu": {
+                    "core": "Core",
+                    "feats": "Feats",
+                    "inventory": "Items",
+                    "skills": "Skills",
+                    "spells": "Spells",
+                    "details": "Details"
                 },
                 "title": "Character Importer"
             }

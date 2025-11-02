@@ -1,4 +1,4 @@
-import { FeatOrFeatureCategory, R } from "module-helpers";
+import { FeatOrFeatureCategory, R, sluggify } from "module-helpers";
 import { ImportDataCoreKey } from "..";
 
 const CORE_PACKS: Record<ImportDataCoreKey, string> = {
@@ -21,7 +21,7 @@ async function getUuidFromPack(value: string, packName: string): Promise<ItemUUI
     const pack = game.packs.get(`pf2e.${packName}`);
     if (!pack) return null;
 
-    const slug = game.pf2e.system.sluggify(value);
+    const slug = sluggify(value);
     const collection = await pack.getIndex({ fields: ["system.slug"] });
     const entry = collection.find((entry) => entry.system?.slug === slug);
 

@@ -9,7 +9,7 @@ import {
     renderCharacterSheets,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { createSheetMenu, ImportDataModel, removeSheetMenu } from ".";
+import { createSheetContent, ImportDataModel, removeSheetContent } from ".";
 
 const ENABLED_SETTING = ["disabled", "gm", "all"] as const;
 
@@ -70,7 +70,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
         if (this.getInMemory(actor, "importing")) {
             sheet.form.classList.add("importing-character");
-            createSheetMenu.call(this, actor, html);
+            createSheetContent.call(this, actor, html);
         }
 
         levelEl?.appendChild(btn);
@@ -81,9 +81,9 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
             this.setInMemory(actor, "importing", importing);
 
             if (importing) {
-                createSheetMenu.call(this, actor, html);
+                createSheetContent.call(this, actor, html);
             } else {
-                removeSheetMenu(html);
+                removeSheetContent(html);
             }
         });
     }
