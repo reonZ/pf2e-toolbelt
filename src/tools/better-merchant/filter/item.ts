@@ -1,4 +1,4 @@
-import { ActorPF2e, EquipmentFilters, PhysicalItemPF2e, R } from "module-helpers";
+import { ActorPF2e, EquipmentFilters, PhysicalItemPF2e, R, sluggify } from "module-helpers";
 import {
     BaseFilterSchema,
     CalulatedFilterPrice,
@@ -139,7 +139,7 @@ class ItemFilterModel
 
         // Source
         const filterSource = source?.selected;
-        const itemSource = game.pf2e.system.sluggify(item.system.publication?.title ?? "").trim();
+        const itemSource = sluggify(item.system.publication?.title ?? "").trim();
         if (R.isArray(filterSource) && filterSource.length && !filterSource.includes(itemSource))
             return false;
 

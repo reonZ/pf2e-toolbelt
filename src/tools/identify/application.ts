@@ -21,6 +21,7 @@ import {
     PhysicalItemType,
     R,
     SkillSlug,
+    sluggify,
 } from "module-helpers";
 import { ModuleToolApplication } from "module-tool";
 import { IdentifiedItemModel, IdentifiedItemSource, IdentifyTool } from ".";
@@ -186,11 +187,11 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                         ? scrollWandSpell.traditions
                         : undefined;
                 const itemSlug = scrollWandSpell
-                    ? scrollWandSpell.slug ?? game.pf2e.system.sluggify(scrollWandSpell.name)
-                    : item.slug ?? game.pf2e.system.sluggify(data.name);
+                    ? scrollWandSpell.slug ?? sluggify(scrollWandSpell.name)
+                    : item.slug ?? sluggify(data.name);
                 const partialSlug =
                     isConsumable && !scrollWandSpell
-                        ? game.pf2e.system.sluggify(data.name.replace(PARTIAL_SLUGH_REGEX, ""))
+                        ? sluggify(data.name.replace(PARTIAL_SLUGH_REGEX, ""))
                         : undefined;
                 const locked =
                     !isIdentified && hasLockedItems && !this.#unlockedUUIDs.includes(itemUUID);
@@ -802,7 +803,7 @@ function getSpellList(actor: CharacterPF2e): IdentifySpellList {
 
         for (const spell of entry.spells ?? []) {
             if (spell.rarity !== "common" || !tradition) {
-                known.add(spell.slug ?? game.pf2e.system.sluggify(spell.name));
+                known.add(spell.slug ?? sluggify(spell.name));
             }
         }
     }

@@ -24,6 +24,7 @@ import {
     PerceptionStatistic,
     R,
     registerWrapper,
+    sluggify,
     WeaponPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -700,7 +701,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
                     const construct = (options: DeferredValueParams = {}): ModifierPF2e | null => {
                         const label = armorBonus > bracerBonus ? armor!.name : bracers!.name;
-                        const slug = game.pf2e.system.sluggify(label);
+                        const slug = sluggify(label);
 
                         const modifierType: ModifierType =
                             selector === "saving-throw"
