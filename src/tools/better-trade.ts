@@ -103,6 +103,16 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         event: DragEvent,
         data: DropCanvasItemDataPF2e
     ): Promise<ItemPF2e[]> {
+        if (
+            data.type !== "Item" ||
+            !("fromInventory" in data) ||
+            !data.fromInventory ||
+            !data.uuid ||
+            fromUuidSync<ItemPF2e>(data.uuid)?.actor === actor
+        ) {
+            return wrapped(event, data);
+        }
+
         const newEvent = new DragEvent("drop", {
             altKey: event.altKey,
             shiftKey: !event.shiftKey,
