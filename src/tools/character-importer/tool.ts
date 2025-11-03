@@ -28,7 +28,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
             {
                 key: "enabled",
                 type: String,
-                default: "disabbled",
+                default: "disabled",
                 choices: ENABLED_SETTING,
                 scope: "world",
                 // TODO remove when/if released
