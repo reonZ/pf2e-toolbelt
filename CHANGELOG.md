@@ -1,3 +1,8 @@
+# 3.16.2
+
+-   `Better Trade`:
+    -   fix `Invert Trade Modifier` interfering with all sorts of drag & drop actions that are unrelated to a trade
+
 # 3.16.1
 
 -   `Better Actor Sheet`:
