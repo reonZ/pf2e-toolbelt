@@ -101,11 +101,9 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         actor: CreaturePF2e,
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
-        data: DropCanvasItemDataPF2e
+        data: DropCanvasItemDataPF2e & { fromInventory?: boolean }
     ): Promise<ItemPF2e[]> {
         if (
-            data.type !== "Item" ||
-            !("fromInventory" in data) ||
             !data.fromInventory ||
             !data.uuid ||
             fromUuidSync<ItemPF2e>(data.uuid)?.actor === actor
