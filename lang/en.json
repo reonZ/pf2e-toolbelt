@@ -156,7 +156,7 @@
                 },
                 "showPlayers": {
                     "name": "Show Avatar to Players",
-                    "hint": "Adds a 'Show Player' button in the actor sheets avatar panel."
+                    "hint": "Adds a 'Show Players' button in the actor sheets avatar panel."
                 },
                 "sortList": {
                     "name": "Sort List Button",
