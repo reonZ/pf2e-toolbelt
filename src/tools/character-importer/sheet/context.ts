@@ -34,7 +34,7 @@ function prepareContext(
     actor: CharacterPF2e,
     data: ImportDataModel
 ): ImportDataContext {
-    const core: ImportDataEntry[] = data.coreEntries.map((itemType) => {
+    const core: ImportDataEntry[] = ImportDataModel.coreEntries.map((itemType) => {
         return prepareCoreEntry.call(this, actor, data, itemType);
     });
 
@@ -100,8 +100,8 @@ function prepareEntry(
 ): ImportDataEntry {
     const isFeat = itemType === "feat";
     const isOverride = !!entry.override;
-    const uuid = entry.override ?? entry.match;
-    const selection = uuid ? fromUuidSync<CompendiumIndexData>(uuid) : null;
+    const selection = ImportDataModel.getSelection(entry);
+    const uuid = selection?.uuid;
     const matchLabel = this.localize("sheet.data.entry", isOverride ? "override" : "match");
 
     const label = game.i18n.localize(

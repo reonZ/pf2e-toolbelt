@@ -36,11 +36,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
         return R.keys(CONFIG.PF2E.featCategories);
     }
 
-    get coreEntries() {
-        return ImportDataModel.coreEntries;
-    }
-
-    get entries() {
+    static get allEntries() {
         return [...this.coreEntries, "feats"] as const;
     }
 
@@ -66,10 +62,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
                     parent: new fields.StringField({
                         validate: (value) => {
                             if (!R.isString(value) || !value.trim()) return false;
-                            return (
-                                R.isIncludedIn(value, ImportDataModel.coreEntries) ||
-                                !isNaN(Number(value))
-                            );
+                            return ImportDataModel.isCoreEntry(value) || !isNaN(Number(value));
                         },
                     }),
                 })
@@ -82,13 +75,32 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
         };
     }
 
-    isCoreEntry(value: unknown): value is ImportDataCoreKey {
-        return R.isString(value) && R.isIncludedIn(value, this.coreEntries);
+    static isValidEntry(value: unknown): value is ImportDataEntryKey {
+        return R.isString(value) && R.isIncludedIn(value, ImportDataModel.allEntries);
     }
 
-    getSelection(entry: ImportEntry): CompendiumIndexData | null {
+    static isCoreEntry(value: unknown): value is ImportDataCoreKey {
+        return R.isString(value) && R.isIncludedIn(value, ImportDataModel.coreEntries);
+    }
+
+    static getSelection(entry: ImportEntry, doc: true): Promise<ItemPF2e | null>;
+    static getSelection(entry: ImportEntry, doc?: boolean): CompendiumIndexData | null;
+    static getSelection(entry: ImportEntry, doc?: boolean) {
         const uuid = entry.override ?? entry.match;
-        return uuid ? fromUuidSync<CompendiumIndexData>(uuid) : null;
+        if (!uuid) return null;
+
+        return doc ? fromUuid<ItemPF2e>(uuid) : fromUuidSync<CompendiumIndexData>(uuid);
+    }
+
+    getEntry(itemType: "feat", index?: number | string): ImportFeatEntry | undefined;
+    getEntry<T extends ImportDataEntryKey>(itemType: ImportDataCoreKey): ImportEntry | undefined;
+    getEntry(itemType: string, index?: number | string): ImportEntry | undefined;
+    getEntry(itemType: string, index?: number | string) {
+        if (itemType === "feat") {
+            const num = R.isString(index) ? Number(index.trim() || -1) : index;
+            return R.isNumber(num) ? this.feats.at(num) : undefined;
+        }
+        return ImportDataModel.isCoreEntry(itemType) ? this[itemType] : undefined;
     }
 
     getCurrentFeat(
@@ -96,7 +108,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
         entry: ImportFeatEntry,
         matchLevel: boolean
     ): ItemPF2e | null {
-        const selection = this.getSelection(entry);
+        const selection = ImportDataModel.getSelection(entry);
         if (!selection) return null;
 
         const actorLevel = actor.level;
@@ -129,7 +141,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
             ? R.isNumber(index)
                 ? this.updateFeatOverride(index, value)
                 : false
-            : R.isIncludedIn(itemType, this.coreEntries)
+            : ImportDataModel.isCoreEntry(itemType)
             ? this.updateCoreOverride(itemType, value)
             : false;
     }

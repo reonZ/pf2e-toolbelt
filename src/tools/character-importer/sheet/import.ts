@@ -31,8 +31,8 @@ async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fro
                     if (!current.parent) return true;
 
                     if (
-                        R.isIncludedIn(current.parent, ImportDataModel.coreEntries) ||
-                        R.isIncludedIn(feat.parent, ImportDataModel.coreEntries)
+                        ImportDataModel.isCoreEntry(current.parent) ||
+                        ImportDataModel.isCoreEntry(feat.parent)
                     ) {
                         return current.parent === feat.parent;
                     }

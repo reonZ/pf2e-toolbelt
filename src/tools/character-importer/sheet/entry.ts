@@ -1,4 +1,4 @@
-import { CharacterPF2e, FlagData, htmlClosest, MODULE, R } from "module-helpers";
+import { CharacterPF2e, FlagData, htmlClosest, MODULE } from "module-helpers";
 import { CharacterImporterTool, ImportDataContextActionType, ImportDataModel } from "..";
 
 const ERROR_ACCESSING = "an error occured while accessing import data.";
@@ -44,7 +44,7 @@ async function onEntryReplace(
     itemType: string,
     index: number
 ) {
-    if (R.isIncludedIn(itemType, data.coreEntries)) {
+    if (ImportDataModel.isCoreEntry(itemType)) {
         return onEntryInstall(actor, data, itemType, index);
     }
 }
@@ -59,7 +59,7 @@ async function onEntryRefresh(
     //     (r) => typeof r.key === "string" && ["ChoiceSet", "GrantItem"].includes(r.key),
     // );
     // if (enabled) item.refreshFromCompendium();
-    // if (R.isIncludedIn(itemType, data.coreEntries)) {
+    // if (ImportDataModel.isCoreEntry(itemType)) {
     //     return onEntryInstall(actor, data, itemType, index);
     // }
 }
@@ -70,19 +70,16 @@ async function onEntryInstall(
     itemType: string,
     index: number
 ) {
-    if (!R.isIncludedIn(itemType, data.entries)) {
+    if (!ImportDataModel.isValidEntry(itemType)) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
-    const entry = itemType === "feats" ? data.feats.at(index) : data[itemType];
-
+    const entry = data.getEntry(itemType, index);
     if (!entry) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
-    const uuid = entry.override ?? entry.match;
-    const item = uuid ? await fromUuid(uuid) : null;
-
+    const item = await ImportDataModel.getSelection(entry, true);
     if (!item) {
         throw MODULE.Error("couldn't retrieve matching item.");
     }

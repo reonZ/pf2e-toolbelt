@@ -47,7 +47,7 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
                 : undefined;
 
             const parentCategory = foundParent ? sluggify(foundParent[2]) : "";
-            const parentIsCore = R.isIncludedIn(parentCategory, ImportDataModel.coreEntries);
+            const parentIsCore = ImportDataModel.isCoreEntry(parentCategory);
 
             return {
                 level: Math.clamp(level, 1, 10) as OneToTen,
