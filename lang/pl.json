@@ -188,6 +188,18 @@
           "hint": "Przywróć skalowanie obszaru roboczego HUD tokenu"
         }
       },
+      "characterImporter": {
+        "title": "Importer postaci",
+        "enabled": {
+          "name": "Włączone",
+          "hint": "Umożliwia użytkownikom importowanie postaci z programu Pathbuilder poprzez kolejne kroki.",
+          "choices": {
+            "disabled": "Wyłączone\n",
+            "gm": "Tylko MG",
+            "all": "Wszyscy użytkownicy"
+          }
+        }
+      },
       "conditionManager": {
         "title": "Menedżer Stanów",
         "enabled": {
@@ -539,6 +551,59 @@
         "self": "Uwzględnij siebie",
         "title": "Pomocnik Szablonów",
         "yes": "Cel"
+      }
+    },
+    "characterImporter": {
+      "deleteData": {
+        "content": "Czy na pewno chcesz usunąć dane importowane z tej postaci?<br><br>UWAGA: Nie spowoduje to aktualizacji samej postaci.",
+        "title": "Usuń importowane dane"
+      },
+      "import": {
+        "code": {
+          "title": "Wklej kod JSON",
+          "yes": "Parsowanie JSON"
+        },
+        "fail": "Nie powiodło się importowanie postaci.",
+        "file": {
+          "title": "Wybierz plik JSON",
+          "yes": "Parsowanie pliku"
+        },
+        "success": "Import postaci zakończył się powodzeniem."
+      },
+      "sheet": {
+        "level": {
+          "cancel": "Zamknij menu importu postaci",
+          "import": "Otwórz menu importu postaci"
+        },
+        "import": {
+          "code": "Z kodu\n",
+          "delete": "Usuń importowane dane",
+          "file": "Z pliku\n\n"
+        },
+        "data": {
+          "entry": {
+            "action": {
+              "install": "Dodaj {match} do postaci",
+              "locked": "Nie można odświeżyć",
+              "refresh": "Odśwież bieżący element",
+              "replace": "Zastąp bieżące przez {match}",
+              "revert": "Usuń zastąpienie"
+            },
+            "current": "Bieżące",
+            "drop": "Upuść {key}",
+            "match": "Dopasowanie",
+            "override": "Zastąpienie"
+          }
+        },
+        "menu": {
+          "core": "Główny",
+          "feats": "Atuty",
+          "inventory": "Przedmioty\n",
+          "skills": "Umiejętności",
+          "spells": "Zaklęcia",
+          "details": "Szczegóły\n"
+        },
+        "title": "Importer postaci\n"
       }
     },
     "conditionManager": {
