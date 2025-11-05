@@ -1,11 +1,12 @@
 import {
+    AttributeString,
     CharacterPF2e,
     FeatOrFeatureCategory,
     FeatPF2e,
     getItemSlug,
     ItemPF2e,
+    KeyedRecordField,
     ModelPropFromDataField,
-    OneToTen,
     R,
     sluggify,
 } from "module-helpers";
@@ -28,21 +29,33 @@ class ImportSchemaField<
 }
 
 class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
-    static get coreEntries() {
-        return ["ancestry", "heritage", "background", "class"] as const;
-    }
+    static coreEntries = ["ancestry", "heritage", "background", "class"] as const;
+    static allEntries = [...this.coreEntries, "feats"] as const;
+    static attributeKeys = ["str", "dex", "con", "int", "wis", "cha"] as const;
+    static attributeLevels = ["1", "5", "10", "15", "20"] as const;
 
     static get featCategories() {
         return R.keys(CONFIG.PF2E.featCategories);
     }
 
-    static get allEntries() {
-        return [...this.coreEntries, "feats"] as const;
-    }
-
     static defineSchema(): ImportDataSchema {
         return {
             name: new fields.StringField(),
+            attributes: new KeyedRecordField(
+                new fields.StringField({
+                    required: true,
+                    nullable: false,
+                    blank: false,
+                    choices: ImportDataModel.attributeLevels,
+                }),
+                new fields.ArrayField(
+                    new fields.StringField({
+                        nullable: false,
+                        blank: false,
+                        choices: ImportDataModel.attributeKeys,
+                    })
+                )
+            ),
             feats: new fields.ArrayField(
                 new ImportSchemaField({
                     ...createEntryFieldData(),
@@ -50,7 +63,6 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
                         required: true,
                         nullable: false,
                         min: 1,
-                        max: 10,
                         step: 1,
                     }),
                     category: new fields.StringField({
@@ -67,6 +79,12 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
                     }),
                 })
             ),
+            level: new fields.NumberField({
+                required: true,
+                nullable: false,
+                min: 1,
+                step: 1,
+            }),
             ...R.pipe(
                 ImportDataModel.coreEntries,
                 R.map((key) => [key, new ImportSchemaField(createEntryFieldData())] as const),
@@ -198,7 +216,10 @@ function getLevel(item: ItemPF2e | null) {
     return getLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
 }
 
-type ImportDataSource = DeepPartial<SourceFromSchema<ImportDataSchema>>;
+type ImportDataSource = WithPartial<
+    SourceFromSchema<ImportDataSchema>,
+    ImportDataCoreKey | "level"
+>;
 
 type ImportDataEntrySource = SourceFromSchema<EntryImportFieldSchema>;
 type ImportDataFeatEntrySource = SourceFromSchema<FeatEntryImportFieldSchema>;
@@ -220,7 +241,7 @@ type FeatEntryImportField = ImportSchemaField<FeatEntryImportFieldSchema>;
 
 type FeatEntryImportFieldSchema = EntryImportFieldSchema & {
     category: fields.StringField<FeatOrFeatureCategory, FeatOrFeatureCategory, true, false, false>;
-    level: fields.NumberField<OneToTen, OneToTen, true, false, false>;
+    level: fields.NumberField<number, number, true, false, false>;
     parent: fields.StringField<FeatEntryParent, FeatEntryParent, false, false, false>;
 };
 
@@ -228,12 +249,19 @@ type FeatEntryParent = ImportDataCoreKey | `${number}`;
 
 type ImportDataSchema = {
     ancestry: EntryImportField;
+    attributes: KeyedRecordField<
+        fields.StringField<AttributeLevel, AttributeLevel, true, false, false>,
+        fields.ArrayField<fields.StringField<AttributeString, AttributeString>>
+    >;
     background: EntryImportField;
     class: EntryImportField;
     feats: fields.ArrayField<FeatEntryImportField>;
     heritage: EntryImportField;
+    level: fields.NumberField<number, number, true, false, false>;
     name: fields.StringField;
 };
+
+type AttributeLevel = (typeof ImportDataModel)["attributeLevels"][number];
 
 type ImportDataCoreKey = (typeof ImportDataModel)["coreEntries"][number];
 type ImportDataEntryKey = ImportDataCoreKey | "feat";
@@ -242,6 +270,7 @@ export { ImportDataModel };
 export type {
     EntryImportData,
     FeatEntryParent,
+    AttributeLevel,
     ImportDataCoreKey,
     ImportDataEntryKey,
     ImportDataEntrySource,

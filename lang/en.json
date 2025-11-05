@@ -581,6 +581,11 @@
                     "file": "From File"
                 },
                 "data": {
+                    "core": {
+                        "attributes": {
+                            "warning": "The imported data doesn't reach the last boost threshold (level {level}).<br>You may want to update it."
+                        }
+                    },
                     "entry": {
                         "action": {
                             "install": "Add {match} to Character",

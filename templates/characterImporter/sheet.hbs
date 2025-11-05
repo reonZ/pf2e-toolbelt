@@ -26,7 +26,13 @@
     </div>
 </div>
 <div class="data" data-tab="core">
-    {{#each core as |entry|}}
+    {{#if core.warning}}
+    <div class="warning">{{{core.warning}}}</div>
+    {{/if}}
+    <div class="attributes" style="--attr: {{core.attributes.length}};">
+
+    </div>
+    {{#each core.items as |entry|}}
     {{> 'entry' entry}}
     {{/each}}
 </div>
@@ -48,8 +54,8 @@
 
 
 {{#*inline 'entry'}}
-<div class="entry{{#if parent}} child{{/if}}" data-item-type="{{itemType}}" {{#if index
-    includeZero=true}} data-index="{{index}}" {{/if}} {{#if parent}} data-parent="{{parent}}"
+<div class="entry{{#if parent}} child{{/if}}" data-droppable data-item-type="{{itemType}}" {{#if
+    index includeZero=true}} data-index="{{index}}" {{/if}} {{#if parent}} data-parent="{{parent}}"
     {{/if}}>
     <img src="{{img}}">
     <div class="header">

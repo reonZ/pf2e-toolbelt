@@ -1,6 +1,7 @@
 import { FeatOrFeatureCategory, OneToTen, R, sluggify } from "module-helpers";
 import { getCoreUuidFromPack, getFeatUuidFromPack } from ".";
 import {
+    AttributeLevel,
     ImportDataCoreKey,
     ImportDataEntrySource,
     ImportDataFeatEntrySource,
@@ -78,13 +79,35 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
         })
     );
 
+    const boosts = foundry.utils.getProperty(data, "abilities.breakdown.mapLevelledBoosts");
+    const attributes = R.pipe(
+        R.isPlainObject(boosts) ? boosts : {},
+        R.entries(),
+        R.filter((entry): entry is [AttributeLevel, unknown[]] => {
+            return R.isIncludedIn(entry[0], ImportDataModel.attributeLevels) && R.isArray(entry[1]);
+        }),
+        R.mapToObj(([key, value]) => {
+            return [
+                key,
+                R.pipe(
+                    value,
+                    R.filter((v) => R.isString(v)),
+                    R.map((v) => v.toLowerCase()),
+                    R.filter((v) => R.isIncludedIn(v, ImportDataModel.attributeKeys))
+                ),
+            ] as const;
+        })
+    );
+
     const source: ImportDataSource = {
-        name: R.isString(data.name) ? data.name : "",
         ancestry: await parseCoreEntry(data, "ancestry"),
-        heritage: await parseCoreEntry(data, "heritage"),
+        attributes,
         background: await parseCoreEntry(data, "background"),
         class: classe,
         feats: feats as ImportDataFeatEntrySource[],
+        heritage: await parseCoreEntry(data, "heritage"),
+        level: R.isNumber(data.level) ? data.level : undefined,
+        name: R.isString(data.name) ? data.name : "",
     };
 
     return source;

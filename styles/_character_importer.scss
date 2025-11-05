@@ -110,12 +110,32 @@
 
     .data {
         --entry-border: 1px solid #0000008f;
+        --row-spacing: 0.5rem;
 
         overflow-y: auto;
         padding: 0.3rem var(--outer-padding);
         flex: 1;
         display: flex;
         flex-direction: column;
+
+        .warning {
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            box-shadow: inset 0 0 3px var(--primary);
+            margin-bottom: var(--row-spacing);
+            text-align: center;
+
+            &:not(:first-child) {
+                margin-top: var(--row-spacing);
+            }
+        }
+
+        .attributes {
+            display: grid;
+            grid-template-columns: auto repeat(var(--attr), 1fr);
+        }
 
         .entry {
             --scale: 1;
@@ -226,7 +246,7 @@
             }
 
             &:has(+ .entry:not(.child)) {
-                margin-bottom: 0.5rem;
+                margin-bottom: var(--row-spacing);
             }
 
             &.child {

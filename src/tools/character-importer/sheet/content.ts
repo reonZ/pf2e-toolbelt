@@ -1,5 +1,4 @@
 import {
-    addListener,
     addListenerAll,
     CharacterPF2e,
     confirmDialog,
@@ -48,18 +47,26 @@ function removeSheetContent(html: HTMLElement) {
 }
 
 function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e) {
-    const selectTab = (type: ImportMenuType) => {
-        const tabs = html.querySelectorAll<HTMLElement>("[data-tab]");
-
-        for (const tab of tabs) {
-            tab.classList.toggle("selected", tab.dataset.tab === type);
-        }
-    };
-
     {
-        const inMemorytab = this.getInMemory<ImportMenuType>(actor, "tab");
-        const selectedtab = R.isIncludedIn(inMemorytab, MENU_TYPES) ? inMemorytab : MENU_TYPES[0];
-        selectTab(selectedtab);
+        const { key, scroll } = this.getInMemory<InMemoryTab>(actor, "tab") ?? {};
+        const isTabKey = R.isIncludedIn(key, MENU_TYPES);
+        const tabKey = isTabKey ? key : MENU_TYPES[0];
+
+        const nav = htmlQuery(html, `.menu .entry[data-tab="${tabKey}"]`);
+        const tab = htmlQuery(html, `.data[data-tab="${tabKey}"]`);
+
+        nav?.classList.add("selected");
+        tab?.classList.add("selected");
+
+        if (isTabKey && tab && R.isNumber(scroll) && scroll) {
+            requestAnimationFrame(() => {
+                tab.scrollTop = scroll;
+            });
+        }
+
+        if (!isTabKey) {
+            this.setInMemory<InMemoryTab>(actor, "tab", { key: tabKey });
+        }
     }
 
     addListenerAll(html, "[data-action]", async (el) => {
@@ -89,16 +96,34 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
             }
 
             case "select-tab": {
-                return selectTab(el.dataset.tab as ImportMenuType);
+                const key = el.dataset.tab as ImportMenuType;
+                const tabs = html.querySelectorAll<HTMLElement>("[data-tab]");
+
+                for (const tab of tabs) {
+                    tab.scrollTop = 0;
+                    tab.classList.toggle("selected", tab.dataset.tab === key);
+                }
+
+                return this.setInMemory<InMemoryTab>(actor, "tab", { key });
             }
         }
     });
+
+    const onScroll = (el: HTMLElement) => {
+        const key = el.dataset.tab as ImportMenuType;
+
+        if (this.getInMemory<ImportMenuType>(actor, "tab.key") === key) {
+            this.setInMemory<number>(actor, "tab.scroll", el.scrollTop);
+        }
+    };
+
+    addListenerAll(html, ".data[data-tab]", "scroll", foundry.utils.debounce(onScroll, 200));
 
     const onDrop = (_: HTMLElement, event: DragEvent) => {
         event.stopPropagation();
         event.preventDefault();
 
-        const entry = htmlClosest(event.target, "[data-item-type]");
+        const entry = htmlClosest(event.target, "[data-droppable][data-item-type]");
         if (!entry) return;
 
         try {
@@ -127,7 +152,7 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
         }
     };
 
-    addListener(html, ".data", "drop", onDrop, true);
+    addListenerAll(html, ".data", "drop", onDrop, true);
 }
 
 async function onEntryDrop(
@@ -154,5 +179,10 @@ type EventAction =
     | "import-file"
     | "open-sheet"
     | "select-tab";
+
+type InMemoryTab = {
+    key: ImportMenuType;
+    scroll?: number;
+};
 
 export { createSheetContent, removeSheetContent };
