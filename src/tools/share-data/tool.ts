@@ -25,6 +25,7 @@ import {
     R,
     registerWrapper,
     sluggify,
+    Statistic,
     WeaponPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -601,24 +602,16 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 const Statistic = getStatisticCls(actor);
 
                 for (const [slug, skill] of R.entries(CONFIG.PF2E.skills)) {
-                    const { check, rank } = master.skills[slug];
+                    const { check, domains, rank } = master.skills[slug];
                     const currentRank = actor.skills[slug].rank;
                     const attribute = skill.attribute;
 
                     // we add item modifiers from master
                     const modifiers = R.pipe(
-                        check.modifiers ?? [],
+                        check.modifiers,
                         R.filter((modifier) => modifier.type === "item"),
                         R.map((modifier) => modifier.clone())
                     );
-
-                    const domains = [
-                        slug,
-                        `${attribute}-based`,
-                        "skill-check",
-                        `${attribute}-based`,
-                        "all",
-                    ];
 
                     const statistic = new Statistic(actor, {
                         slug,
@@ -628,7 +621,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         modifiers: [],
                         lore: false,
                         rank: Math.max(rank, currentRank),
-                        check: { type: "skill-check", modifiers },
+                        check: { type: check.type, modifiers },
                     });
 
                     actor.skills[slug] = statistic;
@@ -740,14 +733,11 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         wrapped();
 
         if (data.spellcasting) {
-            const Statistic = getStatisticCls(actor);
-
-            actor.spellcasting.base = new Statistic(actor, {
-                slug: "base-spellcasting",
-                label: "PF2E.Actor.Creature.Spellcasting.Label",
-                rank: master.system.proficiencies.spellcasting.rank,
-                domains: ["all", "spell-attack-dc"],
-                check: { type: "attack-roll" },
+            Object.defineProperty(actor.spellcasting, "base", {
+                get(): Statistic {
+                    return master.spellcasting.base;
+                },
+                enumerable: true,
             });
         }
     }

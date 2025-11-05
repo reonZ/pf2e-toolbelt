@@ -927,7 +927,7 @@
                 },
                 "spellcasting": {
                     "label": "Spellcasting",
-                    "hint": "Use the master's spellcasting proficiency and it's focus pool."
+                    "hint": "Use the master's spellcasting statistic and it's focus pool."
                 },
                 "timeEvents": {
                     "label": "Time Events",
