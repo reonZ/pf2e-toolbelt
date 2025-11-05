@@ -917,6 +917,10 @@
                     "label": "Hero Points",
                     "hint": "Use the master's hero points."
                 },
+                "languages": {
+                    "label": "Languages",
+                    "hint": "Add master's languages to this actor."
+                },
                 "master": {
                     "label": "Master",
                     "hint": "Select a master with whom this actor will share data."

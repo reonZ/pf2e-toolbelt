@@ -552,6 +552,18 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 );
             }
 
+            if (data.languages) {
+                actor.system.details.languages.value = R.pipe(
+                    actor.system.details.languages.value,
+                    R.concat(master.system.details.languages.value),
+                    R.unique()
+                );
+                actor.system.details.languages.details = [
+                    actor.system.details.languages.details,
+                    master.system.details.languages.details,
+                ].join("; ");
+            }
+
             // the following is only for characters
             if (!master.isOfType("character") || !actor.isOfType("character")) return;
 

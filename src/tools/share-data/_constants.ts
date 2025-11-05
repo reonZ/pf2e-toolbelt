@@ -1,4 +1,4 @@
-const BASE_SHARE_DATA = ["health", "timeEvents"] as const;
+const BASE_SHARE_DATA = ["health", "languages", "timeEvents"] as const;
 
 const CHARACTER_MASTER_SHARE_DATA = ["armorRunes"] as const;
 
