@@ -188,6 +188,18 @@
           "hint": "Rétablir la mise à l'échelle de Token HUD"
         }
       },
+      "characterImporter": {
+        "title": "Importateur de personnages",
+        "enabled": {
+          "name": "Activé",
+          "hint": "Autoriser les utilisateurs à importer un personnage depuis Pathbuilder étape par étape.",
+          "choices": {
+            "disabled": "Désactivé",
+            "gm": "MJ seulement",
+            "all": "Tous les utilisateurs"
+          }
+        }
+      },
       "conditionManager": {
         "title": "Gestionnaire d'état",
         "enabled": {
@@ -539,6 +551,59 @@
         "self": "S'inclure",
         "title": "Assistant de gabarit",
         "yes": "Cible"
+      }
+    },
+    "characterImporter": {
+      "deleteData": {
+        "content": "Êtes-vous sûr de vouloir supprimer les données d'importation de ce personnage ?<br><br>NOTE : Cela ne mettra pas à jour le personnage lui-même.",
+        "title": "Supprimer les données d'importation"
+      },
+      "import": {
+        "code": {
+          "title": "Coller le code JSON",
+          "yes": "Analyser le JSON"
+        },
+        "fail": "L'importation du personnage a échoué.",
+        "file": {
+          "title": "Sélectionner un fichier JSON",
+          "yes": "Analyser le fichier"
+        },
+        "success": "L'importation du personnage a réussi."
+      },
+      "sheet": {
+        "level": {
+          "cancel": "Fermer le menu d'importation de personnages",
+          "import": "Ouvrir le menu d'importation de personnages"
+        },
+        "import": {
+          "code": "À partir du code",
+          "delete": "Supprimer les données d'importation",
+          "file": "À partir d'un fichier"
+        },
+        "data": {
+          "entry": {
+            "action": {
+              "install": "Ajouter {match} au personnage",
+              "locked": "Impossible d'actualiser",
+              "refresh": "Actualiser l'objet actuel",
+              "replace": "Remplacer l'actuel par {match}",
+              "revert": "Supprimer le remplacement"
+            },
+            "current": "Actuel",
+            "drop": "Déposer {clé}",
+            "match": "Correspondance",
+            "override": "Remplacer"
+          }
+        },
+        "menu": {
+          "core": "Core",
+          "feats": "Dons",
+          "inventory": "Objets",
+          "skills": "Compétences",
+          "spells": "Sorts",
+          "details": "Détails"
+        },
+        "title": "Importateur de personnages"
       }
     },
     "conditionManager": {
