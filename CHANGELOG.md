@@ -1,3 +1,11 @@
+# 3.17.0
+
+-   `Shared Data`:
+    -   add support to share `Languages`:
+        -   all the master's languages (and details) will be added to the bound actor
+    -   now completely redirect the master's base spellcasting statistic to the bound character instead of just copying its proficiency
+    -   fix master item modifiers only being added when a skill proficiency is boosted
+
 # 3.16.2
 
 -   `Better Trade`:
