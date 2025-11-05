@@ -156,7 +156,7 @@
         },
         "showPlayers": {
           "name": "Pokaż awatar graczom",
-          "hint": "Dodaje przycisk 'Pokaż gracza' w panelu awatarów kart aktorów."
+          "hint": "Dodaje przycisk 'Pokaż graczy' w panelu awatarów kart aktorów."
         },
         "sortList": {
           "name": "Przycisk sortowania listy",
@@ -581,6 +581,11 @@
           "file": "Z pliku\n\n"
         },
         "data": {
+          "core": {
+            "attributes": {
+              "warning": "Zaimportowane dane nie osiągają ostatniego progu wzmocnienia (poziom {level}).<br>Możesz chcieć to zaktualizować."
+            }
+          },
           "entry": {
             "action": {
               "install": "Dodaj {match} do postaci",
@@ -912,6 +917,10 @@
           "label": "Punkty Bohaterstwa",
           "hint": "Użyj Punktów Bohaterstwa mistrza."
         },
+        "languages": {
+          "label": "Języki\n",
+          "hint": "Dodaj języki mistrza do tego aktora."
+        },
         "master": {
           "label": "Mistrz",
           "hint": "Wybierz mistrza, z którą ten aktor będzie udostępniać dane."
@@ -922,7 +931,7 @@
         },
         "spellcasting": {
           "label": "Rzucanie zaklęć",
-          "hint": "Wykorzystaj biegłość mistrza w rzucaniu zaklęć oraz jego pulę skupienia."
+          "hint": "Użyj statystyki rzucania zaklęć mistrza i jego Puli Skupienia."
         },
         "timeEvents": {
           "label": "Wydarzenia czasowe",
