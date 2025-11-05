@@ -603,9 +603,8 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 for (const [slug, skill] of R.entries(CONFIG.PF2E.skills)) {
                     const { check, rank } = master.skills[slug];
                     const currentRank = actor.skills[slug].rank;
-                    if (currentRank >= rank) continue;
-
                     const attribute = skill.attribute;
+
                     // we add item modifiers from master
                     const modifiers = R.pipe(
                         check.modifiers ?? [],
@@ -613,14 +612,22 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         R.map((modifier) => modifier.clone())
                     );
 
+                    const domains = [
+                        slug,
+                        `${attribute}-based`,
+                        "skill-check",
+                        `${attribute}-based`,
+                        "all",
+                    ];
+
                     const statistic = new Statistic(actor, {
                         slug,
                         label: skill.label,
                         attribute,
-                        domains: [slug, `${attribute}-based`, "skill-check", "all"],
+                        domains,
                         modifiers: [],
                         lore: false,
-                        rank,
+                        rank: Math.max(rank, currentRank),
                         check: { type: "skill-check", modifiers },
                     });
 
