@@ -78,11 +78,12 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
         btn.addEventListener("click", () => {
             const importing = sheet.form.classList.toggle("importing-character");
 
-            this.setInMemory(actor, "importing", importing);
-
             if (importing) {
+                this.setInMemory(actor, "importing", true);
                 createSheetContent.call(this, actor, html);
             } else {
+                this.deleteInMemory(actor, "importing");
+                this.deleteInMemory(actor, "tab");
                 removeSheetContent(html);
             }
         });
