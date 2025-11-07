@@ -156,7 +156,7 @@
         },
         "showPlayers": {
           "name": "Montrer l'avatar aux joueurs",
-          "hint": "Ajoute un bouton 'Montrer au joueur' dans le panneau de l'avatar des feuilles d'acteurs."
+          "hint": "Ajoute un bouton 'Montrer aux joueurs' sur le panneau avatar des feuilles d'acteurs."
         },
         "sortList": {
           "name": "Bouton de tri de la liste",
@@ -581,6 +581,11 @@
           "file": "À partir d'un fichier"
         },
         "data": {
+          "core": {
+            "attributes": {
+              "warning": "Les données importées n'atteignent pas le dernier seuil de prime (niveau {level}).<br>Vous pourriez vouloir les mettre à jour."
+            }
+          },
           "entry": {
             "action": {
               "install": "Ajouter {match} au personnage",
@@ -912,6 +917,10 @@
           "label": "Points d'héroïsme",
           "hint": "Utilise les points d'héroïsme du maître."
         },
+        "languages": {
+          "label": "Langues",
+          "hint": "Ajouter les langues du maître à cet acteur."
+        },
         "master": {
           "label": "Maître",
           "hint": "Sélectionnez un maître avec lequel cet acteur partagera les données."
@@ -922,7 +931,7 @@
         },
         "spellcasting": {
           "label": "Incantation",
-          "hint": "Utilise la maîtrise d'incantation du maître et sa réserve de focalisation."
+          "hint": "Utilisez les statistiques d'incantation et la réserve de focalisation du maître."
         },
         "timeEvents": {
           "label": "Événements temporels",
