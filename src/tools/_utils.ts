@@ -2,6 +2,7 @@ import {
     ActionCost,
     ActorPF2e,
     createFormData,
+    enrichHTML,
     getActionGlyph,
     getPreferredName,
     PhysicalItemPF2e,
@@ -27,7 +28,7 @@ async function createTradeMessage({
         seller: sourceName,
         buyer: targetName,
         quantity: quantity ?? 1,
-        item: await foundry.applications.ux.TextEditor.implementation.enrichHTML(item.link),
+        item: await enrichHTML(item.link),
     };
 
     const glyph = getActionGlyph(

@@ -1,6 +1,7 @@
 import {
     Coins,
     CoinsPF2e,
+    enrichHTML,
     IdField,
     isScriptMacro,
     LevelField,
@@ -109,7 +110,7 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
     }
 
     getEnrichedDescription(): Promise<string> {
-        return foundry.applications.ux.TextEditor.implementation.enrichHTML(this.description);
+        return enrichHTML(this.description);
     }
 
     toExport(): Omit<ServiceSource, "id" | "enabled"> {

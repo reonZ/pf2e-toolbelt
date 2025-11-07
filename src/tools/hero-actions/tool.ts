@@ -10,6 +10,7 @@ import {
     createToggleableWrapper,
     DialogV2RenderCallback,
     displayEmiting,
+    enrichHTML,
     FlagDataArray,
     getMythicOrHeroPoints,
     htmlClosest,
@@ -665,9 +666,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
             if (!details) return;
 
             const textElement = createHTMLElement("div", {
-                content: await foundry.applications.ux.TextEditor.implementation.enrichHTML(
-                    details.description
-                ),
+                content: await enrichHTML(details.description),
             });
 
             htmlQuery(summary, ".item-description")?.append(textElement);
@@ -849,7 +848,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         }
 
         const result = await waitDialog<{ action?: DocumentUUID }>({
-            content: await foundry.applications.ux.TextEditor.implementation.enrichHTML(content),
+            content: await enrichHTML(content),
             i18n: this.localizeKey("trade.request"),
             onRender: (event, dialog) => {
                 addListenerAll(dialog.element, "[data-action='description']", async (el) => {
