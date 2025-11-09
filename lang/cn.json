@@ -123,7 +123,11 @@
                     "name": "同步容器内容物",
                     "hint": "当容器从一名角色转移至另一名角色身上时，是否同步转移其内容物。注意，该功能在使用系统交易功能时不生效。"
                 },
-                "title": "更便利的交换"
+                "title": "更便利的交换",
+                "invertTrade": {
+                    "hint": "玩家在进行交换时无需再长按shift键选择物品。（此时长按shift键会直接触发交换请求）",
+                    "name": "反转交换控键"
+                }
             },
             "droppeth": {
                 "title": "丢弃物品",
@@ -222,7 +226,7 @@
                 },
                 "tiles": {
                     "name": "背景贴图",
-                    "hint": "该功能会确保贴图绘制于负高度标记后面。注意，这可能与其他作用于贴图的模组冲突。"
+                    "hint": "高度为0或更低的场景贴图将始终绘制于负高度指示物图层下。注意，该功能可能与其他作用于贴图的模组冲突。"
                 }
             },
             "unided": {
@@ -308,7 +312,34 @@
                 "partyAsObserved": {
                     "name": "查看队伍盟友许可",
                     "hint": "允许玩家查看“受限”权限的角色卡，只要该角色属于队伍的盟友即可。注意不要与“团队”角色混淆。"
+                },
+                "showPlayers": {
+                    "name": "展示肖像给玩家",
+                    "hint": "在角色卡肖像面板上添加“展示给玩家”按钮。"
+                },
+                "sortList": {
+                    "hint": "在角色卡的各个列表中添加整理按钮。",
+                    "name": "整理列表按钮"
                 }
+            },
+            "betterUI": {
+                "title": "更美观的用户界面",
+                "unscaleTokenHUD": {
+                    "hint": "撤销指示物HUD的画布缩放设置",
+                    "name": "指示物HUD固定缩放"
+                }
+            },
+            "characterImporter": {
+                "enabled": {
+                    "name": "启用",
+                    "hint": "允许用户按步骤导入在Pathbuilder车好的角色。",
+                    "choices": {
+                        "all": "全体用户",
+                        "disabled": "禁用",
+                        "gm": "仅限GM"
+                    }
+                },
+                "title": "角色导入"
             }
         },
         "actionable": {
@@ -514,7 +545,7 @@
         "betterMerchant": {
             "item": {
                 "sell": {
-                    "prompt": "{actor}是否想要购买该物品？",
+                    "prompt": "{actor}是否想要出售该物品？",
                     "title": "出售{item}",
                     "button": "出售"
                 },
@@ -562,6 +593,11 @@
                 "infiniteAll": {
                     "tooltip": "商人售卖的物品永远不会被卖空（这不会影响宝物或服务）",
                     "label": "无限库存"
+                },
+                "none": "不对外出售",
+                "sellItems": {
+                    "noSelection": "你必须选择一个有效的销售角色。",
+                    "button": "出售物品"
                 }
             },
             "serviceMenu": {
@@ -619,6 +655,12 @@
                 "noBuyer": "你必须选择一个你拥有的玩家角色/NPC/团队作为服务的对象。",
                 "noFunds": "<strong>{buyer}</strong>没有足够资金雇佣<strong>{seller}</strong>的服务。",
                 "noStock": "<strong>{seller}</strong>不再提供该服务。"
+            },
+            "sellItems": {
+                "empty": "<strong>{name}</strong>似乎对你所提供的任何东西都不感兴趣。",
+                "info": "以下价格是基于一个假设比率标注的，即宝物的价格比率为<u>{treasure}</u>，其他物品的价格比率为 <u>{item}</u>。",
+                "title": "出售物品 - {name}",
+                "sell": "出售物品"
             }
         },
         "rollTracker": {
@@ -858,7 +900,7 @@
                 },
                 "spellcasting": {
                     "label": "施法",
-                    "hint": "使用来源角色的施法熟练度与聚能池。"
+                    "hint": "使用来源角色的施法数据与聚能池。"
                 },
                 "timeEvents": {
                     "hint": "每当来源角色的回合开始/结束或先攻变化时，相关事件也将令本角色触发。它还将使用来源角色来计算效果的剩余持续时间。",
@@ -869,6 +911,10 @@
                 "weaponRunes": {
                     "label": "武器符文",
                     "hint": "使用来源角色绑定的缠手带/武器的基础符文与性能符文。"
+                },
+                "languages": {
+                    "label": "语言",
+                    "hint": "将来源角色所掌握的语言添加至本角色。"
                 }
             },
             "share": "共享"
@@ -894,6 +940,72 @@
                     "label": "新物品堆的物品数"
                 }
             }
+        },
+        "betterSheet": {
+            "sortList": {
+                "sheet": {
+                    "tooltip": "整理内容",
+                    "container": "整理容器内容物"
+                }
+            }
+        },
+        "characterImporter": {
+            "import": {
+                "code": {
+                    "title": "粘贴JSON代码",
+                    "yes": "解析JSON代码"
+                },
+                "fail": "角色导入失败。",
+                "file": {
+                    "title": "选择JSON文件",
+                    "yes": "解析文件"
+                },
+                "success": "角色导入成功。"
+            },
+            "sheet": {
+                "import": {
+                    "delete": "删除导入数据",
+                    "code": "来自代码",
+                    "file": "来自文件"
+                },
+                "level": {
+                    "import": "打开角色导入菜单",
+                    "cancel": "关闭角色导入菜单"
+                },
+                "data": {
+                    "entry": {
+                        "action": {
+                            "install": "将{match}添加到角色中",
+                            "refresh": "刷新当前物品",
+                            "locked": "无法刷新",
+                            "replace": "将当前数据替换为{match}",
+                            "revert": "取消覆盖设置"
+                        },
+                        "current": "当前",
+                        "drop": "删除{key}",
+                        "match": "替换",
+                        "override": "覆盖"
+                    },
+                    "core": {
+                        "attributes": {
+                            "warning": "导入数据未达到最新的提升阈值（{level}级）。<br>您可能需要更新它。"
+                        }
+                    }
+                },
+                "menu": {
+                    "skills": "技能",
+                    "spells": "法术",
+                    "feats": "专长",
+                    "inventory": "物品",
+                    "core": "核心",
+                    "details": "详情"
+                },
+                "title": "角色导入"
+            },
+            "deleteData": {
+                "title": "删除导入数据",
+                "content": "你确定要从这个角色中删除导入数据吗？<br><br>注意：该操作不会更新角色本身。"
+            }
         }
     },
     "LEVIKTIMES": {
@@ -902,6 +1014,7 @@
             "label": "发送",
             "noGm": "GM必须在线才能执行此请求。"
         },
-        "gmOnly": "仅限GM"
+        "gmOnly": "仅限GM",
+        "playerOnly": "仅限玩家"
     }
 }
