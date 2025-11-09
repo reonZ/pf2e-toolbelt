@@ -558,10 +558,11 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     R.concat(master.system.details.languages.value),
                     R.unique()
                 );
-                actor.system.details.languages.details = [
-                    actor.system.details.languages.details,
-                    master.system.details.languages.details,
-                ].join("; ");
+                // we can't do that because the system fills the details field with the prepared data instead of the source
+                // actor.system.details.languages.details = [
+                //     actor.system.details.languages.details,
+                //     master.system.details.languages.details,
+                // ].join("; ");
             }
 
             // the following is only for characters
