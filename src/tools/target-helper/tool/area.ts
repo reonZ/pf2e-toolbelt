@@ -1,14 +1,16 @@
 import {
-    calculateSaveDC,
-    CharacterPF2e,
     ChatMessagePF2e,
-    EXTRA_AREA_OPTIONS,
+    CreaturePF2e,
     htmlQuery,
+    isAreaOrAutoFireType,
     ItemPF2e,
+    MeleePF2e,
     WeaponPF2e,
 } from "module-helpers";
 import { renderSpellCardLikeMessage, TargetHelperTool, TargetsFlagData } from ".";
 import { SaveVariantsSource, TargetsData, TargetsDataSource } from "..";
+
+const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 
 function prepareAreaMessage(
     this: TargetHelperTool,
@@ -37,40 +39,49 @@ async function renderAreaMessage(
     html: HTMLElement,
     flag: TargetsFlagData
 ) {
-    const weapon = message.item;
+    const item = message.item;
     const msgContent = htmlQuery(html, ".message-content");
-    if (!msgContent || !isValidWeapon(weapon)) return;
+    if (!msgContent || !isValidItem(item)) return;
 
     const data = new TargetsData(flag);
     const save = data.save;
     if (!save) return;
 
-    return renderSpellCardLikeMessage.call(this, message, msgContent, flag, weapon, (event) => {
-        const action = weapon.actor.system.actions.find((a) => a.item.uuid === weapon?.uuid);
-        action?.damage?.({ options: EXTRA_AREA_OPTIONS });
-    });
+    return renderSpellCardLikeMessage.call(
+        this,
+        message,
+        msgContent,
+        flag,
+        item,
+        `.message-buttons [data-action="roll-area-save"]`,
+        `.message-buttons [data-action="roll-area-damage"]`
+    );
 }
 
 function isAreaMessage(message: ChatMessagePF2e): boolean {
-    return message.flags["sf2e-anachronism"]?.type === "area-fire";
+    return isAreaOrAutoFireType(message.flags.pf2e.context?.type ?? "");
 }
 
 function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | null {
-    const weapon = message.item;
-    if (!isValidWeapon(weapon)) return null;
+    const item = message.item;
+    if (!isValidItem(item)) return null;
 
-    const savingThrow = calculateSaveDC(weapon);
+    const strike = item.actor.system.actions?.find((strike) => strike.item === item);
+    if (!strike || !strike.statistic) return null;
+
     return {
         null: {
             basic: true,
-            dc: savingThrow.dc.value,
+            dc: strike.statistic.dc.value,
             statistic: "reflex",
         },
     };
 }
 
-function isValidWeapon(item: Maybe<ItemPF2e>): item is WeaponPF2e<CharacterPF2e> {
-    return !!item?.isOfType("weapon") && !!item.actor?.isOfType("character");
+function isValidItem(
+    item: Maybe<ItemPF2e>
+): item is WeaponPF2e<CreaturePF2e> | MeleePF2e<CreaturePF2e> {
+    return !!item?.isOfType("weapon", "melee") && !!item.actor?.isOfType("creature");
 }
 
-export { getAreaSaveVariants, isAreaMessage, prepareAreaMessage, renderAreaMessage };
+export { isAreaMessage, prepareAreaMessage, renderAreaMessage };

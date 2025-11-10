@@ -8,6 +8,7 @@ import {
     htmlClosest,
     htmlQuery,
     ItemPF2e,
+    MeleePF2e,
     MODULE,
     R,
     registerUpstreamHook,
@@ -68,8 +69,9 @@ async function renderSpellCardLikeMessage(
     message: ChatMessagePF2e,
     msgContent: HTMLElement,
     flag: TargetsFlagData,
-    item: SpellPF2e | WeaponPF2e,
-    rollDamage: (event: PointerEvent) => void
+    item: SpellPF2e | WeaponPF2e | MeleePF2e,
+    saveBtnSelector: string,
+    damageBtnSelector: string
 ): Promise<void> {
     const data = new TargetsData(flag, item.isOfType("spell") ? item.variantId : null);
     const save = data.save;
@@ -77,12 +79,8 @@ async function renderSpellCardLikeMessage(
 
     await addTargetsHeaders.call(this, message, data, msgContent);
 
-    const cardBtns = htmlQuery(msgContent, ".card-buttons");
-    const saveBtn = htmlQuery<HTMLButtonElement>(
-        cardBtns,
-        `[data-action="spell-save"], [data-action="roll-area-save"]`
-    );
-    if (!saveBtn) return;
+    const saveBtn = htmlQuery(msgContent, saveBtnSelector);
+    if (!(saveBtn instanceof HTMLButtonElement)) return;
 
     const buttonsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
     const fakeSaveBtn = saveBtn.cloneNode(true) as HTMLButtonElement;
@@ -106,20 +104,12 @@ async function renderSpellCardLikeMessage(
         buttonsWrapper.append(rollSavesBtn);
     }
 
-    const damageBtn = htmlQuery(
-        cardBtns,
-        `[data-action="spell-damage"], [data-action="roll-area-damage"]`
-    );
+    const damageBtn = htmlQuery(msgContent, damageBtnSelector);
     if (!damageBtn) return;
-
-    delete damageBtn.dataset.action;
 
     damageBtn.addEventListener(
         "click",
         (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
             // we cache the data & add the spell just in case
             const cached = data.toJSON({
                 type: "damage",
@@ -138,23 +128,9 @@ async function renderSpellCardLikeMessage(
 
             // we clean up the spell message as we are not gonna use it anymore
             this.unsetFlag(message);
-
-            rollDamage(event);
         },
         true
     );
-
-    // TODO remove when the system fixes the bug
-    const clearTemplatesBtn = htmlQuery(msgContent, `[data-action="spell-template-clear"]`);
-    if (clearTemplatesBtn && clearTemplatesBtn.classList.contains("hidden")) {
-        const hasTemplates = !!canvas.scene?.templates.some(
-            (template) => template.message === message && template.isOwner
-        );
-
-        if (hasTemplates) {
-            clearTemplatesBtn.classList.remove("hidden");
-        }
-    }
 }
 
 let BASIC_SAVE_REGEX: RegExp;

@@ -1,12 +1,6 @@
 import { ActorPF2e, ChatMessagePF2e, htmlQuery, R, SpellPF2e } from "module-helpers";
-import {
-    renderSpellCardLikeMessage,
-    SaveVariantsSource,
-    TargetHelperTool,
-    TargetsDataSource,
-    TargetsFlagData,
-    TargetsSaveSource,
-} from "..";
+import { renderSpellCardLikeMessage, TargetHelperTool, TargetsFlagData } from ".";
+import { SaveVariantsSource, TargetsDataSource, TargetsSaveSource } from "..";
 
 function prepareSpellMessage(
     this: TargetHelperTool,
@@ -36,9 +30,15 @@ async function renderSpellMessage(
     if (!msgContent || !spell) return;
     if (spell.hasVariants && !spell.variantId) return;
 
-    return renderSpellCardLikeMessage.call(this, message, msgContent, flag, spell, (event) => {
-        spell.rollDamage(event);
-    });
+    return renderSpellCardLikeMessage.call(
+        this,
+        message,
+        msgContent,
+        flag,
+        spell,
+        `.card-buttons [data-action="spell-save"]`,
+        `.card-buttons [data-action="spell-damage"]`
+    );
 }
 
 function getMessageSpell(message: ChatMessagePF2e): SpellPF2e<ActorPF2e> | null {

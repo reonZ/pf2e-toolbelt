@@ -1,6 +1,7 @@
 .chat-message {
     .message-content {
-        .card-buttons {
+        .card-buttons,
+        .message-buttons {
             .pf2e-toolbelt-target-buttons {
                 display: flex;
                 gap: 1px;
