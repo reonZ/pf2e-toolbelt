@@ -1,3 +1,8 @@
+# 3.18.1
+
+-   `Target Helper`:
+    -   fix issue with character actors `Auto Fire` not being handled
+
 # 3.18.0
 
 -   this is a system `7.7.0` release
