@@ -1,3 +1,14 @@
+# 3.18.0
+
+-   this is a system `7.7.0` release
+-   `Better Inventory`:
+    -   expose `mergeItems` function to the API
+    -   expose `splitItem` function to the API
+-   `Shared Data`:
+    -   no longer share the `Details` field as updating the bound actor languages will save the merged data into its source resulting in doubling the master's details on every update
+-   `Target Helper`:
+    -   add support for the `Area Fire` and `Auto Fire` messages
+
 # 3.17.0
 
 -   `Shared Data`:
