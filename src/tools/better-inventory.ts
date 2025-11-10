@@ -101,8 +101,8 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
 
     get api(): Record<string, any> {
         return {
-            mergeItems: this.#mergeItems,
-            splitItem: this.#splitItem,
+            mergeItems: this.#mergeItems.bind(this),
+            splitItem: this.#splitItem.bind(this),
         };
     }
 
