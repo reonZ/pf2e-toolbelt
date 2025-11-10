@@ -101,6 +101,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
 
     get api(): Record<string, any> {
         return {
+            mergeItems: this.#mergeItems,
             splitItem: this.#splitItem,
         };
     }
@@ -248,8 +249,11 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    async #mergeItems(actor: ActorPF2e, btn: HTMLButtonElement) {
-        btn.disabled = true;
+    async #mergeItems(
+        actor: ActorPF2e,
+        btn?: HTMLButtonElement | HTMLAnchorElement
+    ): Promise<void> {
+        btn?.setAttribute("disabled", "true");
         await waitTimeout();
 
         const identicalItems = R.pipe(
@@ -268,8 +272,9 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         );
 
         if (!identicalItems.length) {
-            btn.disabled = false;
-            return this.warning("merge.none");
+            btn?.removeAttribute("disabled");
+            this.warning("merge.none");
+            return;
         }
 
         const content = R.pipe(
@@ -294,8 +299,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
             },
         });
 
-        btn.disabled = false;
-
+        btn?.removeAttribute("disabled");
         if (!result) return;
 
         const selected = R.keys(R.pickBy(result, R.isTruthy));
