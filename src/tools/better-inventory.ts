@@ -4,14 +4,15 @@ import {
     Bulk,
     ConsumablePF2e,
     createButtonElement,
-    createToggleableHook,
     createHTMLElement,
+    createToggleableHook,
     createToggleableWrapper,
     EquipmentPF2e,
     getItemSourceId,
     htmlClosest,
     htmlQuery,
     InventoryBulk,
+    ItemPF2e,
     MODULE,
     R,
     renderActorSheets,
@@ -98,6 +99,12 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         ];
     }
 
+    get api(): Record<string, any> {
+        return {
+            splitItem: this.#splitItem,
+        };
+    }
+
     get renderActorSheetEnabled(): boolean {
         return this.settings.splitItem || this.settings.mergeItems || this.settings.improvised;
     }
@@ -177,10 +184,6 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                 ".items [data-item-id] .quantity span"
             );
 
-            const splitItem = (event: MouseEvent) => {
-                this.#splitItem(event, actor);
-            };
-
             for (const el of elements) {
                 const quantity = Number(el.innerText);
                 if (isNaN(quantity) || quantity <= 1) continue;
@@ -190,7 +193,11 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                     dataset: { tooltip: this.localizePath("sheet.split") },
                 });
 
-                btn.addEventListener("click", splitItem);
+                btn.addEventListener("click", () => {
+                    const itemId = htmlClosest(el, "[data-item-id]")?.dataset.itemId ?? "";
+                    const item = actor.items.get(itemId);
+                    this.#splitItem(item);
+                });
 
                 el.replaceChildren(btn);
             }
@@ -334,10 +341,9 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         await actor.updateEmbeddedDocuments("Item", updates);
     }
 
-    async #splitItem(event: MouseEvent, actor: ActorPF2e) {
-        const itemId = htmlClosest(event.currentTarget, "[data-item-id]")?.dataset.itemId ?? "";
-        const item = actor.items.get(itemId);
-        if (!item?.isOfType("physical") || item.quantity <= 1) return;
+    async #splitItem(item: Maybe<ItemPF2e>) {
+        const actor = item?.actor;
+        if (!actor || actor.pack || !item.isOfType("physical") || item.quantity <= 1) return;
 
         const result = await waitDialog<{ quantity: number }>({
             classes: ["toolbelt-split-item"],

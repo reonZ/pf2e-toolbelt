@@ -86,8 +86,6 @@ function prepareCoreTab(
             ? null
             : this.localize("sheet.data.core.attributes.warning", { level: levelThreshold * 5 });
 
-    console.log(dataLevel, actorLevel);
-
     return {
         attributes,
         items: cores,
