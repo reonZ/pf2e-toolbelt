@@ -1,6 +1,7 @@
 # 3.18.0
 
 -   this is a system `7.7.0` release
+-   some internal changes to match the latest system update
 -   `Better Inventory`:
     -   expose `mergeItems` function to the API
     -   expose `splitItem` function to the API
