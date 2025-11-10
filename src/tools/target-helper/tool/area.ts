@@ -67,12 +67,15 @@ function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | nul
     if (!isValidItem(item)) return null;
 
     const strike = item.actor.system.actions?.find((strike) => strike.item === item);
-    if (!strike || !strike.statistic) return null;
+    if (!strike) return null;
+
+    const statistic = strike.statistic ?? strike.altUsages?.at(0)?.statistic;
+    if (!statistic) return null;
 
     return {
         null: {
             basic: true,
-            dc: strike.statistic.dc.value,
+            dc: statistic.dc.value,
             statistic: "reflex",
         },
     };
