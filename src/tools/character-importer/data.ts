@@ -41,7 +41,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
     static defineSchema(): ImportDataSchema {
         return {
             name: new fields.StringField(),
-            attributes: new KeyedRecordField(
+            boosts: new KeyedRecordField(
                 new fields.StringField({
                     required: true,
                     nullable: false,
@@ -249,7 +249,7 @@ type FeatEntryParent = ImportDataCoreKey | `${number}`;
 
 type ImportDataSchema = {
     ancestry: EntryImportField;
-    attributes: KeyedRecordField<
+    boosts: KeyedRecordField<
         fields.StringField<AttributeLevel, AttributeLevel, true, false, false>,
         fields.ArrayField<fields.StringField<AttributeString, AttributeString>>
     >;

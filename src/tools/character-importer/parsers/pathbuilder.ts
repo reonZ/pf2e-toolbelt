@@ -79,9 +79,9 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
         })
     );
 
-    const boosts = foundry.utils.getProperty(data, "abilities.breakdown.mapLevelledBoosts");
-    const attributes = R.pipe(
-        R.isPlainObject(boosts) ? boosts : {},
+    const rawBoosts = foundry.utils.getProperty(data, "abilities.breakdown.mapLevelledBoosts");
+    const boosts = R.pipe(
+        R.isPlainObject(rawBoosts) ? rawBoosts : {},
         R.entries(),
         R.filter((entry): entry is [AttributeLevel, unknown[]] => {
             return R.isIncludedIn(entry[0], ImportDataModel.attributeLevels) && R.isArray(entry[1]);
@@ -101,7 +101,7 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
 
     const source: ImportDataSource = {
         ancestry: await parseCoreEntry(data, "ancestry"),
-        attributes,
+        boosts,
         background: await parseCoreEntry(data, "background"),
         class: classe,
         feats: feats as ImportDataFeatEntrySource[],

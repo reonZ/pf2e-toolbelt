@@ -132,7 +132,7 @@
             }
         }
 
-        .attributes {
+        .boosts {
             display: grid;
             grid-template-columns: auto repeat(var(--attr), 1fr);
         }
