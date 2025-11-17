@@ -1,6 +1,7 @@
 import {
     AttributeString,
     CharacterPF2e,
+    createRecordFieldStringKey,
     FeatOrFeatureCategory,
     FeatPF2e,
     getItemSlug,
@@ -8,6 +9,8 @@ import {
     KeyedRecordField,
     ModelPropFromDataField,
     R,
+    RecordFieldStringKey,
+    SchemaField,
     sluggify,
 } from "module-helpers";
 import fields = foundry.data.fields;
@@ -41,24 +44,40 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
     static defineSchema(): ImportDataSchema {
         return {
             name: new fields.StringField(),
-            boosts: new KeyedRecordField(
-                new fields.StringField({
-                    required: true,
+            attributes: new fields.SchemaField(
+                {
+                    ancestry: new fields.SchemaField({
+                        boosts: createBoostField(),
+                        flaws: createBoostField(),
+                    }),
+                    background: createBoostField(),
+                    class: createBoostField(),
+                    levels: new KeyedRecordField(
+                        createRecordFieldStringKey({ choices: ImportDataModel.attributeLevels }),
+                        new fields.ArrayField(
+                            new fields.StringField({
+                                nullable: false,
+                                blank: false,
+                                choices: ImportDataModel.attributeKeys,
+                            })
+                        )
+                    ),
+                    values: new KeyedRecordField(
+                        createRecordFieldStringKey({ choices: ImportDataModel.attributeKeys }),
+                        new fields.NumberField({
+                            nullable: false,
+                            step: 1,
+                        })
+                    ),
+                },
+                {
+                    required: false,
                     nullable: false,
-                    blank: false,
-                    choices: ImportDataModel.attributeLevels,
-                }),
-                new fields.ArrayField(
-                    new fields.StringField({
-                        nullable: false,
-                        blank: false,
-                        choices: ImportDataModel.attributeKeys,
-                    })
-                )
+                }
             ),
             feats: new fields.ArrayField(
                 new ImportSchemaField({
-                    ...createEntryFieldData(),
+                    ...createEntryField(),
                     level: new fields.NumberField({
                         required: true,
                         nullable: false,
@@ -87,7 +106,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
             }),
             ...R.pipe(
                 ImportDataModel.coreEntries,
-                R.map((key) => [key, new ImportSchemaField(createEntryFieldData())] as const),
+                R.map((key) => [key, new ImportSchemaField(createEntryField())] as const),
                 R.mapToObj(([key, field]) => [key, field])
             ),
         };
@@ -191,7 +210,17 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
 
 interface ImportDataModel extends ModelPropsFromSchema<ImportDataSchema> {}
 
-function createEntryFieldData(): EntryImportFieldSchema {
+function createBoostField(): ImportDataBoost {
+    return new fields.ArrayField(
+        new fields.StringField({
+            nullable: false,
+            blank: false,
+            choices: ImportDataModel.attributeKeys,
+        })
+    );
+}
+
+function createEntryField(): EntryImportFieldSchema {
     return {
         value: new fields.StringField(),
         match: new fields.DocumentUUIDField({
@@ -247,12 +276,25 @@ type FeatEntryImportFieldSchema = EntryImportFieldSchema & {
 
 type FeatEntryParent = ImportDataCoreKey | `${number}`;
 
+type ImportDataBoost = fields.ArrayField<fields.StringField<AttributeString, AttributeString>>;
+
+type ImportDataAttributesSchema = {
+    ancestry: fields.SchemaField<{
+        boosts: ImportDataBoost;
+        flaws: ImportDataBoost;
+    }>;
+    background: ImportDataBoost;
+    class: ImportDataBoost;
+    levels: KeyedRecordField<RecordFieldStringKey<AttributeLevel>, ImportDataBoost>;
+    values: KeyedRecordField<
+        RecordFieldStringKey<AttributeString>,
+        fields.NumberField<number, number, true, false, false>
+    >;
+};
+
 type ImportDataSchema = {
     ancestry: EntryImportField;
-    boosts: KeyedRecordField<
-        fields.StringField<AttributeLevel, AttributeLevel, true, false, false>,
-        fields.ArrayField<fields.StringField<AttributeString, AttributeString>>
-    >;
+    attributes: SchemaField<ImportDataAttributesSchema, false, false, true>;
     background: EntryImportField;
     class: EntryImportField;
     feats: fields.ArrayField<FeatEntryImportField>;

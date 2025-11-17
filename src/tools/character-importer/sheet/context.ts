@@ -65,11 +65,11 @@ function prepareCoreTab(
         return prepared;
     });
 
-    const boosts = R.pipe(
-        data.boosts,
+    const levelBoosts = R.pipe(
+        data.attributes.levels,
         R.entries(),
         R.filter(([level]) => Number(level) <= actorLevel),
-        R.map(([level, boosts]): ImportDataBoosts => {
+        R.map(([level, boosts]): ImportDataLevelBoosts => {
             return {
                 level,
                 values: ImportDataModel.attributeKeys.map((key) => {
@@ -87,7 +87,9 @@ function prepareCoreTab(
             : this.localize("sheet.data.core.attributes.warning", { level: levelThreshold * 5 });
 
     return {
-        boosts,
+        attributes: {
+            levels: levelBoosts,
+        },
         items: cores,
         warning,
     };
@@ -202,7 +204,9 @@ function boostIsPartial(
 
 type ImportDataContext = {
     core: {
-        boosts: ImportDataBoosts[];
+        attributes: {
+            levels: ImportDataLevelBoosts[];
+        };
         items: ImportDataEntry[];
         warning: string | null;
     };
@@ -210,7 +214,7 @@ type ImportDataContext = {
     menu: typeof MENU;
 };
 
-type ImportDataBoosts = {
+type ImportDataLevelBoosts = {
     level: AttributeLevel;
     values: ("boost" | "partial" | null)[];
 };

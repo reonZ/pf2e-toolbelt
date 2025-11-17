@@ -1,4 +1,4 @@
-import { FeatOrFeatureCategory, OneToTen, R, sluggify } from "module-helpers";
+import { AttributeString, FeatOrFeatureCategory, OneToTen, R, sluggify } from "module-helpers";
 import { getCoreUuidFromPack, getFeatUuidFromPack } from ".";
 import {
     AttributeLevel,
@@ -79,29 +79,58 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
         })
     );
 
+    const getBoosts = (boosts: unknown): AttributeString[] => {
+        if (!R.isArray(boosts)) return [];
+
+        return R.pipe(
+            boosts,
+            R.filter((v) => R.isString(v)),
+            R.map((v) => v.toLowerCase()),
+            R.filter((v) => R.isIncludedIn(v, ImportDataModel.attributeKeys))
+        );
+    };
+
     const rawBoosts = foundry.utils.getProperty(data, "abilities.breakdown.mapLevelledBoosts");
-    const boosts = R.pipe(
+    const levelsBoosts = R.pipe(
         R.isPlainObject(rawBoosts) ? rawBoosts : {},
         R.entries(),
-        R.filter((entry): entry is [AttributeLevel, unknown[]] => {
-            return R.isIncludedIn(entry[0], ImportDataModel.attributeLevels) && R.isArray(entry[1]);
+        R.filter((entry): entry is [AttributeLevel, unknown] => {
+            return R.isIncludedIn(entry[0], ImportDataModel.attributeLevels);
         }),
-        R.mapToObj(([key, value]) => {
-            return [
-                key,
-                R.pipe(
-                    value,
-                    R.filter((v) => R.isString(v)),
-                    R.map((v) => v.toLowerCase()),
-                    R.filter((v) => R.isIncludedIn(v, ImportDataModel.attributeKeys))
-                ),
-            ] as const;
+        R.mapToObj(([key, boosts]) => {
+            return [key, getBoosts(boosts)] as const;
         })
+    );
+
+    const getBoostsAtPath = (path: BoostsPath): AttributeString[] => {
+        const boosts = foundry.utils.getProperty(data, `abilities.breakdown.${path}`);
+        return getBoosts(boosts);
+    };
+
+    const attributes = R.pipe(
+        ImportDataModel.attributeKeys,
+        R.map((attr) => {
+            const raw = foundry.utils.getProperty(data, `abilities.${attr}`);
+            const value = R.isNumber(raw) ? raw : 10;
+            const mod = Math.floor((value - 10) / 2);
+
+            return [attr, mod] as const;
+        }),
+        R.mapToObj(([attr, mod]) => [attr, mod])
     );
 
     const source: ImportDataSource = {
         ancestry: await parseCoreEntry(data, "ancestry"),
-        boosts,
+        attributes: {
+            ancestry: {
+                boosts: getBoostsAtPath("ancestryBoosts"),
+                flaws: getBoostsAtPath("ancestryFlaws"),
+            },
+            background: getBoostsAtPath("backgroundBoosts"),
+            class: getBoostsAtPath("classBoosts"),
+            levels: levelsBoosts,
+            values: attributes,
+        },
         background: await parseCoreEntry(data, "background"),
         class: classe,
         feats: feats as ImportDataFeatEntrySource[],
@@ -137,6 +166,8 @@ type RawFeatEntry = [
     "childChoice" | "parentChoice" | "standardChoice" | undefined,
     string | undefined | null
 ];
+
+type BoostsPath = "ancestryBoosts" | "ancestryFlaws" | "backgroundBoosts" | "classBoosts";
 
 type DataEntrySource = WithPartial<ImportDataEntrySource, "override">;
 
