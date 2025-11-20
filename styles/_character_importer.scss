@@ -40,6 +40,9 @@
 
 .sheet.actor.character .pf2e-toolbelt-character-importer {
     --outer-padding: 0.4rem;
+    --color-boost: #316549;
+    --color-boost-dark: #1b3c2a;
+    --color-boost-flaw: #5e0000;
 
     overflow: hidden;
     height: 100%;
@@ -132,9 +135,97 @@
             }
         }
 
-        .boosts {
+        .entry,
+        .attributes {
+            border: var(--entry-border);
+            border-radius: 4px;
+            box-shadow: 0 0 4px #0000009e;
+        }
+
+        .attributes {
             display: grid;
-            grid-template-columns: auto repeat(var(--attr), 1fr);
+            grid-template-columns: minmax(7em, auto) repeat(6, 1fr);
+            grid-auto-rows: 1fr;
+            align-items: center;
+            margin-bottom: 0.5em;
+
+            .title {
+                font-weight: bold;
+                border-bottom: var(--entry-border);
+
+                &.controls {
+                    display: flex;
+
+                    a {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-right: var(--entry-border);
+                        width: 1.7em;
+                        font-size: 1.2em;
+                    }
+                }
+            }
+
+            .label {
+                padding-inline: 0.3em;
+            }
+
+            .attribute {
+                text-align: center;
+                text-transform: uppercase;
+
+                .boost {
+                    position: relative;
+                    font-family: Signika, sans-serif;
+                    border-radius: 3px;
+                    border: 1px solid var(--color-boost);
+                    font-size: 0.84em;
+                    margin-inline: 0.15em;
+                    opacity: 0.4;
+
+                    i {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        transform: translate(-30%, -30%);
+                        text-shadow: 0 0 3px black, 0 0 3px black;
+                    }
+
+                    &.Boost,
+                    &.Partial {
+                        color: var(--color-boost);
+                    }
+
+                    &.Boost.selected,
+                    &.KeyIcon.selected {
+                        background: var(--color-boost);
+                    }
+
+                    &.Boost.locked,
+                    &.Partial.selected {
+                        background: var(--color-boost-dark);
+                    }
+
+                    &.Flaw {
+                        background: var(--color-boost-flaw);
+                        border: 1px solid var(--color-boost-flaw);
+                    }
+
+                    &.selected {
+                        color: var(--text-light);
+                        opacity: 1;
+                    }
+                }
+            }
+
+            .mod {
+                text-align: center;
+                font-family: Eczar, Georgia, serif;
+                line-height: 1.4;
+                font-weight: bold;
+                font-size: 1.1em;
+            }
         }
 
         .entry {
@@ -145,9 +236,6 @@
             grid-template-columns: calc(50px * var(--scale)) 1fr;
             grid-template-rows: 1fr 1fr;
             align-items: center;
-            border: var(--entry-border);
-            border-radius: 4px;
-            box-shadow: 0 0 4px #0000009e;
 
             > * {
                 pointer-events: none;

@@ -49,6 +49,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
                     ancestry: new fields.SchemaField({
                         boosts: createBoostField(),
                         flaws: createBoostField(),
+                        locked: createBoostField(),
                     }),
                     background: createBoostField(),
                     class: createBoostField(),
@@ -282,6 +283,7 @@ type ImportDataAttributesSchema = {
     ancestry: fields.SchemaField<{
         boosts: ImportDataBoost;
         flaws: ImportDataBoost;
+        locked: ImportDataBoost;
     }>;
     background: ImportDataBoost;
     class: ImportDataBoost;

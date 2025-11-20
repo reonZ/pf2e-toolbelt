@@ -30,6 +30,7 @@ import {
     setFlagProperty,
     setInMemory,
     setSetting,
+    templatePath,
     unsetFlag,
     unsetFlagProperty,
     updateSourceFlag,
@@ -175,6 +176,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         ...path: string[]
     ): FlagDataArray<T, D> {
         return getDataFlagArray(doc, Model, this.key, ...path);
+    }
+
+    templatePath(...path: string[]): string {
+        return templatePath(this.key, ...path);
     }
 
     _initialize(isGM: boolean) {

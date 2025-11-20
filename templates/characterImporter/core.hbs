@@ -1,0 +1,75 @@
+{{#if warning}}
+<div class="warning">
+    {{{warning}}}
+</div>
+{{/if}}
+{{#if attributes}}
+<div class="attributes">
+    {{!-- titles --}}
+    <div class="title controls">
+        <a data-action="assign-attributes" {{{@root.i18n.tooltip 'data.core.attributes.assign' }}}>
+            <i class="fa-sharp-duotone fa-solid fa-calculator"></i>
+        </a>
+        <a data-action="override-attributes" {{{@root.i18n.tooltip 'data.core.attributes.override'
+            }}}>
+            <i class="fa-regular fa-calendar-lines-pen"></i>
+        </a>
+        &nbsp;
+    </div>
+    {{#each attributes.labels as |slug|}}
+    <div class="title attribute">
+        {{localize (concat 'PF2E.AbilityId.' slug)}}
+    </div>
+    {{/each}}
+    {{!-- ancestry --}}
+    {{#if attributes.ancestry.flaws}}
+    {{> 'boosts' attributes.ancestry.flaws}}
+    {{/if}}
+    {{> 'boosts' attributes.ancestry.boosts}}
+    {{!-- background --}}
+    {{> 'boosts' attributes.background}}
+    {{!-- class --}}
+    {{#if classItem}}
+    {{> 'boosts' attributes.class}}
+    {{/if}}
+    {{!-- levels boosts --}}
+    {{#each attributes.levels as |entry|}}
+    {{> 'boosts' entry}}
+    {{/each}}
+    {{!-- totals --}}
+    <div class="label">
+        {{localize 'PF2E.ModifierTitle'}}
+    </div>
+    {{#each attributes.totals as |mod|}}
+    <div class="mod">
+        {{numberFormat mod decimals=0 sign=true}}
+    </div>
+    {{/each}}
+</div>
+{{/if}}
+{{#each entries as |entry|}}
+{{> 'entry' entry}}
+{{/each}}
+
+{{#*inline 'boosts'}}
+<div class="label">
+    {{label}}
+</div>
+{{#each boosts as |boost|}}
+<div class="attribute">
+    {{#if boost}}
+    <div
+        class="boost {{boost.type}}{{#if boost.locked}} locked{{/if}}{{#if boost.selected}} selected{{/if}}">
+        {{#if boost.locked}}
+        <i class="fa-solid fa-lock"></i>
+        {{else if (eq boost.type 'KeyIcon')}}
+        <i class="fa-solid fa-fw fa-key key-attribute"></i>
+        {{/if}}
+        {{localize (concat 'PF2E.Actor.Character.AttributeBuilder.' boost.type)}}
+    </div>
+    {{else}}
+    &nbsp;
+    {{/if}}
+</div>
+{{/each}}
+{{/inline}}

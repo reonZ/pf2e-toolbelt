@@ -14,6 +14,7 @@ import { createSheetContent, ImportDataModel, removeSheetContent } from ".";
 const ENABLED_SETTING = ["disabled", "gm", "all"] as const;
 
 class CharacterImporterTool extends ModuleTool<ToolSettings> {
+    #loaded = false;
     #sheetRenderHook = createToggleableHook(
         "renderCharacterSheetPF2e",
         this.#onRenderCharacterSheetPF2e.bind(this)
@@ -33,10 +34,15 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
                 scope: "world",
                 // TODO remove when/if released
                 config: false,
-                onChange: (value: ToolSettings["enabled"]) => {
-                    this.#sheetRenderHook.toggle(
-                        value === "all" || (value === "gm" && game.user.isGM)
-                    );
+                onChange: async (value: ToolSettings["enabled"]) => {
+                    const activate = value === "all" || (value === "gm" && game.user.isGM);
+
+                    this.#sheetRenderHook.toggle(activate);
+
+                    if (activate) {
+                        await this.#loadTemplates();
+                    }
+
                     renderCharacterSheets();
                 },
             },
@@ -45,12 +51,27 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
     init(isGM: boolean): void {
         const enabled = this.settings.enabled;
+        const activate = enabled === "all" || (enabled === "gm" && isGM);
 
-        this.#sheetRenderHook.toggle(enabled === "all" || (enabled === "gm" && isGM));
+        if (activate) {
+            this.#loadTemplates();
+        }
+
+        this.#sheetRenderHook.toggle(activate);
     }
 
     getImportData(actor: ActorPF2e): FlagData<ImportDataModel> | undefined {
         return this.getDataFlag(actor, ImportDataModel, "data", { strict: true });
+    }
+
+    async #loadTemplates(): Promise<void> {
+        if (this.#loaded) return;
+
+        this.#loaded = true;
+
+        const templates = ["core"].map((path) => this.templatePath(path));
+
+        return foundry.applications.handlebars.loadTemplates(templates.flat());
     }
 
     #onRenderCharacterSheetPF2e(sheet: CharacterSheetPF2e<CharacterPF2e>, $html: JQuery) {

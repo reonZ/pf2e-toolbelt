@@ -26,17 +26,7 @@
     </div>
 </div>
 <div class="data" data-tab="core">
-    {{#if core.warning}}
-    <div class="warning">{{{core.warning}}}</div>
-    {{/if}}
-    <div class="boosts" style="--attr: {{core.attributes.levels.length}};">
-        {{#each core.attributes.levels as |boost|}}
-        <div class="level">{{boost.level}}</div>
-        {{/each}}
-    </div>
-    {{#each core.items as |entry|}}
-    {{> 'entry' entry}}
-    {{/each}}
+    {{> (@root.partial 'core') core}}
 </div>
 <div class="data" data-tab="feats">
     feats

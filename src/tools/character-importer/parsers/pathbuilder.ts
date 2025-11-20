@@ -123,8 +123,9 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
             ancestry: {
-                boosts: getBoostsAtPath("ancestryBoosts"),
+                boosts: getBoostsAtPath("ancestryFree"),
                 flaws: getBoostsAtPath("ancestryFlaws"),
+                locked: getBoostsAtPath("ancestryBoosts"),
             },
             background: getBoostsAtPath("backgroundBoosts"),
             class: getBoostsAtPath("classBoosts"),
@@ -167,7 +168,12 @@ type RawFeatEntry = [
     string | undefined | null
 ];
 
-type BoostsPath = "ancestryBoosts" | "ancestryFlaws" | "backgroundBoosts" | "classBoosts";
+type BoostsPath =
+    | "ancestryBoosts"
+    | "ancestryFree"
+    | "ancestryFlaws"
+    | "backgroundBoosts"
+    | "classBoosts";
 
 type DataEntrySource = WithPartial<ImportDataEntrySource, "override">;
 

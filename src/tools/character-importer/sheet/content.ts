@@ -9,6 +9,7 @@ import {
     R,
 } from "module-helpers";
 import {
+    addCoreEventListeners,
     EntryEventAction,
     importData,
     ImportMenuType,
@@ -28,7 +29,7 @@ async function createSheetContent(
     removeSheetContent(html);
 
     const data = this.getImportData(actor);
-    const context = data ? prepareContext.call(this, actor, data) : {};
+    const context = await prepareContext.call(this, actor, data);
 
     const content = createHTMLElement("div", {
         classes: [SHEET_MENU_CLASS],
@@ -153,6 +154,8 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
     };
 
     addListenerAll(html, ".data", "drop", onDrop, true);
+
+    addCoreEventListeners.call(this, html, actor);
 }
 
 async function onEntryDrop(
