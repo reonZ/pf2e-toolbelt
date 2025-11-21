@@ -198,12 +198,13 @@
 
             .item {
                 display: grid;
-                grid-template-columns: 2.4em 1fr 9em 5em 1.5em 2.4em;
+                grid-template-columns: 2.4em 1fr 9em minmax(5em, auto) 1.5em 2.4em;
                 align-items: center;
                 justify-items: center;
                 gap: 0.25rem;
                 margin: 0;
                 padding-inline: 0.8em 0.3em;
+                height: 2.7em;
 
                 &:nth-child(odd) {
                     background-color: var(--even-background-color);
@@ -238,6 +239,10 @@
                 .tags,
                 .level {
                     justify-content: center;
+                }
+
+                .rank {
+                    grid-column: 4 / 6;
                 }
 
                 .owned {

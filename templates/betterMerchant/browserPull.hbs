@@ -1,28 +1,34 @@
 <div class="header">
-    <div>{{@root.i18n 'selected'}}: <span class="count">0</span>/{{results.length}}</div>
+    <div>{{@root.i18n 'selected'}}: <span class="count">0</span>/{{entries.length}}</div>
     <button type='button' data-action="add-to-merchant">
         {{@root.i18n 'add'}}
     </button>
     <a data-action="toggle-all">{{@root.i18n 'all'}}</a>
 </div>
 <ul class="items" data-tooltip-class="pf2e">
-    {{#each results as |item|}}
+    {{#each entries as |entry|}}
     <li class="item">
-        <img src="{{item.img}}">
-        <a class="name" data-action="open-sheet">{{item.name}}</a>
+        <img src="{{entry.img}}">
+        <a class="name" data-action="open-sheet">{{entry.name}}</a>
         <div class="tags paizo-style">
-            {{#if (ne item.rarity 'common')}}
-            <span class="tag rarity {{item.rarity}}" data-tooltip="PF2E.Rarity">
-                {{item.rarity}}
+            {{#if entry.rarity}}
+            <span class="tag rarity {{entry.rarity}}" data-tooltip="PF2E.Rarity">
+                {{entry.rarity}}
             </span>
             {{/if}}
         </div>
-        <div class="price" data-tooltip="PF2E.PriceLabel">{{item.price}}</div>
-        <div class="level" data-tooltip="PF2E.LevelLabel">{{item.level}}</div>
-        {{#if (includes @root.owned item.uuid)}}
+        {{#if entry.ranks.length}}
+        <select class="rank" name="rank" data-uuid="{{entry.uuid}}">
+            {{selectOptions entry.ranks}}
+        </select>
+        {{else}}
+        <div class="price" data-tooltip="PF2E.PriceLabel">{{entry.price}}</div>
+        <div class="level" data-tooltip="PF2E.LevelLabel">{{entry.level}}</div>
+        {{/if}}
+        {{#if entry.owned}}
         <i class="owned fa-solid fa-box" {{{@root.i18n.tooltip "owned" }}}></i>
         {{else}}
-        <input type="checkbox" name="selected-item" data-uuid="{{item.uuid}}">
+        <input type="checkbox" name="selected-item" data-uuid="{{entry.uuid}}">
         {{/if}}
     </li>
     {{/each}}

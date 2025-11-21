@@ -4,16 +4,16 @@ import {
     ActorTransferItemArgs,
     addListener,
     addListenerAll,
+    BrowserFilter,
+    BrowserTabs,
     CharacterPF2e,
     ChatMessagePF2e,
     CoinsPF2e,
     CompendiumBrowser,
-    CompendiumBrowserEquipmentTab,
     confirmDialog,
     createEmitable,
     createHTMLElement,
     createToggleableWrapper,
-    EquipmentFilters,
     FlagData,
     FlagDataArray,
     getPreferredName,
@@ -31,6 +31,8 @@ import {
     PhysicalItemPF2e,
     R,
     renderActorSheets,
+    SpellFilters,
+    TabName,
     toggleHooksAndWrappers,
     toggleSummary,
     waitDialog,
@@ -138,10 +140,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return game.pf2e.compendiumBrowser;
     }
 
-    get browserTab(): CompendiumBrowserEquipmentTab {
-        return this.browser.tabs.equipment;
-    }
-
     _configurate(): void {
         const enabled = this.settings.enabled;
 
@@ -152,6 +150,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     ready(isGM: boolean): void {
         this._configurate();
+    }
+
+    browserTab<T extends TabName>(tab: T): BrowserTabs[T] {
+        return this.browser.tabs[tab];
     }
 
     getFilters<T extends FilterType>(
@@ -207,19 +209,43 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return deleted;
     }
 
-    async openEquipmentTab(data: BrowserData, filters?: EquipmentFilters) {
+    async pullItemsFromBrowser(actor: LootPF2e, tab: "equipment" | "spell") {
+        const label = this.localize("browserPull.add");
+        const callback = async () => {
+            new BrowserPullMenu(this, actor, tab).render(true);
+        };
+
+        const filters =
+            tab === "spell"
+                ? foundry.utils.mergeObject<SpellFilters, DeepPartial<SpellFilters>>(
+                      await this.browserTab("spell").getFilterData(),
+                      {
+                          checkboxes: {
+                              category: {
+                                  selected: ["spell"],
+                                  options: { spell: { selected: true } },
+                              },
+                          },
+                      }
+                  )
+                : undefined;
+
+        return this.openBrowserTab(tab, { actor, label, callback }, filters);
+    }
+
+    async openBrowserTab(tab: TabName, data: BrowserData, filters?: BrowserFilter) {
         const browser = this.browser;
 
         if (browser.rendered) {
             await browser.close();
         }
 
-        Hooks.once("renderCompendiumBrowser", (_, html: HTMLElement) =>
-            this.#onBrowserRender(html, data)
-        );
+        Hooks.once("renderCompendiumBrowser", (tab: TabName, html: HTMLElement) => {
+            this.#onBrowserRender(html, data);
+        });
 
-        browser.openTab("equipment", {
-            filter: filters ?? (await this.browserTab.getFilterData()),
+        browser.openTab(tab, {
+            filter: filters ?? (await this.browserTab(tab).getFilterData()),
             hideNavigation: true,
         });
     }
@@ -756,6 +782,10 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 return this.#buyService(actor, serviceId);
             }
 
+            case "create-scrolls": {
+                return this.pullItemsFromBrowser(actor, "spell");
+            }
+
             case "create-service": {
                 const service = await this.createService(actor);
                 return new ServiceMenu(actor, service.id, this).render(true);
@@ -789,11 +819,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             }
 
             case "from-browser": {
-                const label = this.localize("browserPull.add");
-                const callback = async () => {
-                    new BrowserPullMenu(this, actor).render(true);
-                };
-                return this.openEquipmentTab({ actor, label, callback });
+                return this.pullItemsFromBrowser(actor, "equipment");
             }
 
             case "give-service": {
@@ -975,6 +1001,16 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             { once: true }
         );
 
+        requestAnimationFrame(() => {
+            const invalids = html.querySelectorAll<HTMLInputElement>(
+                `input[name="cantrip"], input[name="focus"], input[name="ritual"]`
+            );
+
+            for (const el of invalids) {
+                el.disabled = true;
+            }
+        });
+
         controls?.replaceWith(btn);
     }
 
@@ -1062,6 +1098,7 @@ type UseServiceOptions = {
 type EventItemAction = "buy-item";
 
 type EventSheetAction =
+    | "create-scrolls"
     | "create-service"
     | "export-services"
     | "from-browser"

@@ -173,7 +173,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
 
         const merchantFilter = filter.filter;
         const filterData = foundry.utils.mergeObject(
-            await this.tool.browserTab.getFilterData(),
+            await this.tool.browserTab("equipment").getFilterData(),
             merchantFilter
         );
 
@@ -205,7 +205,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
             this.render();
         };
 
-        this.tool.openEquipmentTab({ actor, label, callback }, filterData);
+        this.tool.openBrowserTab("equipment", { actor, label, callback }, filterData);
     }
 
     #addFilter(type: FilterType) {
@@ -230,11 +230,11 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
             addFilter(filter);
         };
 
-        this.tool.openEquipmentTab({ actor, label, callback });
+        this.tool.openBrowserTab("equipment", { actor, label, callback });
     }
 
     async #getEquipmentFilter(): Promise<Partial<EquipmentFilters>> {
-        const tab = this.tool.browserTab;
+        const tab = this.tool.browserTab("equipment");
         const filterData: Partial<EquipmentFilters> = foundry.utils.diffObject(
             await tab.getFilterData(),
             tab.filterData
