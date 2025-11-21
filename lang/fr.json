@@ -475,6 +475,7 @@
           "tooltip": "Le marchand ne sera jamais à court d'articles à vendre (ne fait rien aux trésors ou aux services)"
         },
         "none": "Pas à vendre",
+        "scrolls": "Créer des parchemins",
         "sellItems": {
           "button": "Vendre les objets",
           "noSelection": "Vous devez sélectionner un acteur vendeur valide."
@@ -583,6 +584,8 @@
         "data": {
           "core": {
             "attributes": {
+              "assign": "Attribuer des primes d'attribut",
+              "override": "Utiliser la méthode de saisie manuelle",
               "warning": "Les données importées n'atteignent pas le dernier seuil de prime (niveau {level}).<br>Vous pourriez vouloir les mettre à jour."
             }
           },
