@@ -475,6 +475,7 @@
           "tooltip": "Kupcowi nigdy nie zabraknie przedmiotów do sprzedaży (nie ma wpływu na Skarby ani Usługi)."
         },
         "none": "Nie na sprzedaż",
+        "scrolls": "Tworzenie zwojów",
         "sellItems": {
           "button": "Sprzedaj przedmioty",
           "noSelection": "Należy wybrać prawidłowego sprzedającego."
@@ -583,6 +584,8 @@
         "data": {
           "core": {
             "attributes": {
+              "assign": "Przypisywanie wzmocnień atrybutów",
+              "override": "Użyj metody ręcznego wprowadzania danych",
               "warning": "Zaimportowane dane nie osiągają ostatniego progu wzmocnienia (poziom {level}).<br>Możesz chcieć to zaktualizować."
             }
           },
