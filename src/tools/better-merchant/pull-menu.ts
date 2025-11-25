@@ -70,8 +70,8 @@ class BrowserPullMenu extends ModuleToolApplication<BetterMerchantTool> {
     async _prepareContext(options: ApplicationRenderOptions): Promise<BrowserPullContext> {
         const entries = R.map(this.#results, (data): ItemEntry => {
             const ranks: RequiredSelectOptions = R.isNumber(data.rank)
-                ? R.range(data.rank, 11).map((value) => {
-                      return { value, label: getSpellRankLabel(value) };
+                ? R.range(data.rank, 11).map((rank) => {
+                      return { value: String(rank), label: getSpellRankLabel(rank) };
                   })
                 : [];
 

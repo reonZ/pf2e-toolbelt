@@ -1,9 +1,14 @@
 import {
     ActorPF2e,
     ActorSheetPF2e,
+    ChoiceSetRuleElement,
+    ConditionPF2e,
+    ConditionSource,
     createCreatureSheetWrapper,
     createEmitable,
     DropCanvasItemDataPF2e,
+    EffectPF2e,
+    EffectSource,
     isAllyActor,
     ItemPF2e,
     userIsGM,
@@ -11,11 +16,7 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class GivethTool extends ModuleTool<ToolSettings> {
-    #givethEmitable = createEmitable(this.key, (options: GivethOptions, userId: string) => {
-        if (options.type === "effect") {
-            this.#givethEffect(options, userId);
-        }
-    });
+    #givethEmitable = createEmitable(this.key, this.#givethEffect.bind(this));
 
     #handleDroppedItemWrapper = createCreatureSheetWrapper(
         "MIXED",
@@ -65,15 +66,11 @@ class GivethTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #givethEffect({ data, actor }: GiveEffectOptions, userId: string) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.setData("text/plain", JSON.stringify(data));
-
-        const event = new DragEvent("drop", { dataTransfer });
-        actor.sheet._onDrop(event);
+    #givethEffect({ source, actor }: GiveEffectOptions, userId: string) {
+        actor.createEmbeddedDocuments("Item", [source]);
     }
 
-    #shouldHandleEffectDrop(item: ItemPF2e, actor: ActorPF2e): boolean {
+    #shouldHandleEffectDrop(item: ItemPF2e, actor: ActorPF2e): item is EffectPF2e | ConditionPF2e {
         return (
             item.isOfType("condition", "effect") &&
             !actor.isOwner &&
@@ -85,31 +82,63 @@ class GivethTool extends ModuleTool<ToolSettings> {
         actorSheet: ActorSheetPF2e<ActorPF2e>,
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
-        item: ItemPF2e,
+        originalItem: ItemPF2e,
         data: DropCanvasItemDataPF2e
     ): Promise<ItemPF2e[]> {
         const actor = actorSheet.actor;
 
-        if (this.#shouldHandleEffectDrop(item, actor)) {
-            this.#givethEmitable.call({
-                type: "effect",
-                actor,
-                data,
-            });
-            return [item];
+        if (!this.#shouldHandleEffectDrop(originalItem, actor)) {
+            return wrapped(event, originalItem, data);
         }
 
-        return wrapped(event, item, data);
+        if (!originalItem.system.rules.some((rule) => rule.key === "ChoiceSet")) {
+            this.#givethEmitable.call({
+                actor,
+                source: originalItem.toObject(),
+            });
+
+            return [originalItem];
+        }
+
+        const RuleCls = game.pf2e.RuleElements.builtin.ChoiceSet as typeof ChoiceSetRuleElement;
+        if (!RuleCls) return [originalItem];
+
+        const ItemCls = getDocumentClass("Item");
+        const item = new ItemCls(originalItem.toObject(), { parent: actor });
+        const itemSource = item._source as EffectSource | ConditionSource;
+        const itemUpdates: EmbeddedDocumentUpdateData[] = [];
+
+        for (const [sourceIndex, source] of item.system.rules.entries()) {
+            if (source.key !== "ChoiceSet") continue;
+
+            try {
+                const rule = new RuleCls(source, { parent: item, sourceIndex });
+                const ruleSource = itemSource.system.rules[sourceIndex];
+
+                await rule.preCreate({
+                    ruleSource,
+                    itemSource,
+                    tempItems: [],
+                    itemUpdates,
+                    operation: {},
+                    pendingItems: [],
+                });
+            } catch (error) {}
+        }
+
+        this.#givethEmitable.call({
+            actor,
+            source: itemSource,
+        });
+
+        return [originalItem];
     }
 }
 
 type GiveEffectOptions = {
-    type: "effect";
-    data: DropCanvasItemDataPF2e;
+    source: EffectSource | ConditionSource;
     actor: ActorPF2e;
 };
-
-type GivethOptions = GiveEffectOptions;
 
 type ToolSettings = {
     effect: "disabled" | "ally" | "all";
