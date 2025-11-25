@@ -222,7 +222,7 @@
         "title": "Przekazywanie",
         "effect": {
           "name": "Efekty / Stany",
-          "hint": "Czy gracze powinni mieć również możliwość zrzucania efektów i stanów na aktorów, których nie posiadają.",
+          "hint": "Czy gracze powinni mieć możliwość nakładania efektów i stanów na postacie, których nie posiadają?",
           "choices": {
             "disabled": "Wyłączone",
             "ally": "Tylko sojusznicy",
