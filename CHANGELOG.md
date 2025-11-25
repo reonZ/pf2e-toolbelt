@@ -1,3 +1,12 @@
+# 3.19.0
+
+-   `Better Merchant`:
+    -   add new `Create Scrolls` feature
+        -   it will open the compendium browser to the spells tab and allow you to filter down spells
+        -   once done, you can select which spells you want to be turned into scrolls and at which heightened level
+-   `Giveth`:
+    -   if the dragged effect contains `ChoiceSet` rules, the module will now simulate their selection directly on the client before sending everything to the GM
+
 # 3.18.1
 
 -   `Target Helper`:
