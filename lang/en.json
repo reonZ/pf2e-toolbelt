@@ -222,7 +222,7 @@
                 "title": "Giveth",
                 "effect": {
                     "name": "Effects/Conditions",
-                    "hint": "Should players also be able to drop effects & conditions onto actors they do not own.",
+                    "hint": "Should players be able to drop effects & conditions onto actors they do not own.",
                     "choices": {
                         "disabled": "Disabled",
                         "ally": "Allies Only",
