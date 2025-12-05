@@ -1,3 +1,12 @@
+# 3.20.0
+
+-   this is a system `7.8.0` version release
+-   `Shared Data`:
+    -   the module will now prevent HP/SP damage from being reverted when clicking on the `Undo` button
+        -   the module will instead send a message to the chat informing the user that it must be done manually
+        -   other things like removing persistent damage will still occur
+-   fix trade related features' dialog not allowing the user to set a quantity
+
 # 3.19.0
 
 -   `Better Merchant`:
