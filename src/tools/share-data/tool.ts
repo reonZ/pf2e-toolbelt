@@ -410,14 +410,6 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 });
 
                 return;
-            } else {
-                if (hpUpdate) {
-                    appliedDamage.updates.push(hpUpdate);
-                }
-
-                if (spUpdates) {
-                    appliedDamage.updates.push(spUpdates);
-                }
             }
         }
 
