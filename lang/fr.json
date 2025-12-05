@@ -222,7 +222,7 @@
         "title": "Donner",
         "effect": {
           "name": "Effets/États",
-          "hint": "Les joueurs devraient-ils également pouvoir appliquer des effets et des états sur des acteurs qu'ils ne possèdent pas ?",
+          "hint": "Les joueurs peuvent glisser des effets & des états sur des personnages qui ne leur appartiennent pas.",
           "choices": {
             "disabled": "Désactivé",
             "ally": "Alliés seulement",
@@ -947,7 +947,10 @@
           "hint": "Utilisez les runes fondamentales & de propriété des armes/bandelettes investies par le maître."
         }
       },
-      "share": "Partager"
+      "share": "Partager",
+      "undo": {
+        "msg": "Les dégâts aux PV ne peuvent pas être annulés pour un acteur lié. Cela doit être modifié manuellement."
+      }
     },
     "targetHelper": {
       "check-card": {
