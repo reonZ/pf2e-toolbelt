@@ -1,6 +1,7 @@
 import {
     ActorPF2e,
     ActorSourcePF2e,
+    AppliedDamageFlag,
     CharacterPF2e,
     CharacterSkill,
     CharacterSkillData,
@@ -104,40 +105,26 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
         const registerCreatureWrapper = (path: string, callback: libWrapper.RegisterCallback) => {
             registerToolWrapper(
-                ["character", "npc"].map((type) => path.replace("{type}", type)),
+                ["character", "npc"].map(
+                    (type) => `CONFIG.PF2E.Actor.documentClasses.${type}.prototype.${path}`
+                ),
                 callback
             );
         };
 
-        registerCreatureWrapper(
-            "CONFIG.PF2E.Actor.documentClasses.{type}.prototype.prepareBaseData",
-            this.#actorPrepareBaseData
-        );
+        registerCreatureWrapper("undoDamage", this.#actorUndoDamage);
 
-        registerCreatureWrapper(
-            "CONFIG.PF2E.Actor.documentClasses.{type}.prototype.prepareData",
-            this.#actorPrepareData
-        );
+        registerCreatureWrapper("prepareBaseData", this.#actorPrepareBaseData);
 
-        registerCreatureWrapper(
-            "CONFIG.PF2E.Actor.documentClasses.{type}.prototype.prepareDerivedData",
-            this.#actorPrepareDerivedData
-        );
+        registerCreatureWrapper("prepareData", this.#actorPrepareData);
 
-        registerCreatureWrapper(
-            "CONFIG.PF2E.Actor.documentClasses.{type}.prototype._preUpdate",
-            this.#actorPreUpdate
-        );
+        registerCreatureWrapper("prepareDerivedData", this.#actorPrepareDerivedData);
 
-        registerCreatureWrapper(
-            "CONFIG.PF2E.Actor.documentClasses.{type}.prototype._onUpdate",
-            this.#actorOnUpdate
-        );
+        registerCreatureWrapper("_preUpdate", this.#actorPreUpdate);
 
-        registerCreatureWrapper(
-            "CONFIG.PF2E.Actor.documentClasses.{type}.prototype._onDelete",
-            this.#actorOnDelete
-        );
+        registerCreatureWrapper("_onUpdate", this.#actorOnUpdate);
+
+        registerCreatureWrapper("_onDelete", this.#actorOnDelete);
 
         registerToolWrapper(
             "CONFIG.Combatant.documentClass.prototype.startTurn",
@@ -390,6 +377,51 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     #updateMaster({ master, ...updates }: UpdateMasterOptions) {
         if (!isValidMaster(master)) return;
         master.update(updates);
+    }
+
+    // we can't actually revert damage from a slave because of the diff, so we just cancel the hp update and warn the user
+    async #actorUndoDamage(
+        actor: CreaturePF2e,
+        wrapped: libWrapper.RegisterCallback,
+        appliedDamage: AppliedDamageFlag
+    ): Promise<void> {
+        const master = getMasterIfOption(actor, "health");
+
+        if (master) {
+            const hpUpdate = appliedDamage.updates.findSplice(
+                (update) => update.path === "system.attributes.hp.value"
+            );
+
+            const spUpdates = appliedDamage.updates.findSplice(
+                (update) => update.path === "system.attributes.hp.sp.value"
+            );
+
+            if (hpUpdate || spUpdates) {
+                await wrapped(appliedDamage);
+
+                const ChatMessageCls = getDocumentClass("ChatMessage");
+
+                const icon = `<i class="fa-solid fa-triangle-exclamation"></i>`;
+                const msg = this.localize("undo.msg");
+
+                ChatMessageCls.create({
+                    content: `${icon} <i>${msg}</i>`,
+                    speaker: ChatMessageCls.getSpeaker({ actor }),
+                });
+
+                return;
+            } else {
+                if (hpUpdate) {
+                    appliedDamage.updates.push(hpUpdate);
+                }
+
+                if (spUpdates) {
+                    appliedDamage.updates.push(spUpdates);
+                }
+            }
+        }
+
+        return wrapped(appliedDamage);
     }
 
     async #actorPreUpdate(

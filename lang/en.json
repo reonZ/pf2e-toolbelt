@@ -947,7 +947,10 @@
                     "hint": "Use the master's invested handwraps/weapon fundamental & property runes."
                 }
             },
-            "share": "Share"
+            "share": "Share",
+            "undo": {
+                "msg": "HP damage cannot be reverted from a bound actor and must be done manually."
+            }
         },
         "targetHelper": {
             "check-card": {
