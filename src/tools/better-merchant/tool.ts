@@ -351,12 +351,13 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 icon: "fa-solid fa-coins",
                 label,
             },
-            item: infinite ? item.clone({ "system.quantity": 9999 }) : item,
+            item,
+            lockStack: !stackable,
+            maxQuantity: infinite ? 9999 : item.quantity,
             prompt,
             quantity: infinite ? Math.min(item.quantity, item.system.price.per) : item.quantity,
-            title,
-            lockStack: !stackable,
             targetActor,
+            title,
         });
     }
 

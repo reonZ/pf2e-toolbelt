@@ -71,6 +71,7 @@ async function createTradeQuantityDialog(
 ): Promise<TradeQuantityDialogData | null> {
     const data = {
         ...options,
+        maxQuantity: options.maxQuantity ?? options.item.quantity,
         mode: R.isBoolean(options.lockStack) ? "" : "gift",
         quantity: options.quantity ?? options.item.quantity,
         rootId: "item-transfer-dialog",
@@ -118,6 +119,7 @@ type TradeQuantityDialogOptions = {
     };
     item: PhysicalItemPF2e;
     lockStack?: boolean;
+    maxQuantity?: number;
     prompt: string;
     quantity?: number;
     targetActor?: ActorPF2e;
