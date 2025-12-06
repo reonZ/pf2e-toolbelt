@@ -947,7 +947,10 @@
           "hint": "Wykorzystaj zainwestowane przez mistrza runy podstawowe i runy właściwości."
         }
       },
-      "share": "Współdzielenie"
+      "share": "Współdzielenie",
+      "undo": {
+        "msg": "Obrażenia PW nie mogą być cofnięte przez powiązanego aktora i muszą być wykonane ręcznie."
+      }
     },
     "targetHelper": {
       "check-card": {
