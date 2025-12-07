@@ -1,3 +1,8 @@
+# 3.20.1
+
+-   `Giveth`:
+    -   fix the feature not taking into account all the original dragged data after sending the request to the gm
+
 # 3.20.0
 
 -   this is a system `7.8.0` version release
