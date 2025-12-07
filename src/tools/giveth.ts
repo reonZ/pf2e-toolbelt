@@ -1,15 +1,18 @@
 import {
     ActorPF2e,
-    ActorSheetPF2e,
     ChoiceSetRuleElement,
     ConditionPF2e,
     ConditionSource,
     createCreatureSheetWrapper,
     createEmitable,
+    CreaturePF2e,
+    CreatureSheetPF2e,
     DropCanvasItemDataPF2e,
     EffectPF2e,
     EffectSource,
+    EffectTrait,
     isAllyActor,
+    isInstanceOf,
     ItemPF2e,
     userIsGM,
 } from "module-helpers";
@@ -66,8 +69,44 @@ class GivethTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #givethEffect({ source, actor }: GiveEffectOptions, userId: string) {
-        actor.createEmbeddedDocuments("Item", [source]);
+    #givethEffect({ actor, data, source }: GiveEffectOptions, userId: string): any {
+        /**
+         * https://github.com/foundryvtt/pf2e/blob/1465f7190b2b8454094c50fa6d06e9902e0a3c41/src/module/actor/sheet/base.ts#L1224
+         */
+        if (source.type === "condition") {
+            const value = data.value;
+            if (typeof value === "number" && source.system.value.isValued) {
+                source.system.value.value = value;
+            }
+
+            return actor.increaseCondition(source.system.slug, { value });
+        }
+
+        /**
+         * https://github.com/foundryvtt/pf2e/blob/1465f7190b2b8454094c50fa6d06e9902e0a3c41/src/module/actor/sheet/base.ts#L1238
+         */
+        const { level, value, context } = data;
+        if (typeof level === "number" && level >= 0) {
+            source.system.level.value = Math.floor(level);
+        }
+        if (
+            source.type === "effect" &&
+            source.system.badge?.type === "counter" &&
+            typeof value === "number"
+        ) {
+            source.system.badge.value = value;
+        }
+        source.system.context = context ?? null;
+        const originItem = fromUuidSync(context?.origin.item ?? "");
+        if (source.system.traits?.value.length === 0 && isInstanceOf(originItem, "SpellPF2e")) {
+            const spellTraits: string[] = originItem.system.traits.value;
+            const effectTraits = spellTraits.filter(
+                (t): t is EffectTrait => t in CONFIG.PF2E.effectTraits
+            );
+            source.system.traits.value.push(...effectTraits);
+        }
+
+        actor.sheet["_onDropItemCreate"](new Item.implementation(source).clone().toObject());
     }
 
     #shouldHandleEffectDrop(item: ItemPF2e, actor: ActorPF2e): item is EffectPF2e | ConditionPF2e {
@@ -79,7 +118,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
     }
 
     async #creatureSheetHandleDroppedItem(
-        actorSheet: ActorSheetPF2e<ActorPF2e>,
+        actorSheet: CreatureSheetPF2e<CreaturePF2e>,
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
         originalItem: ItemPF2e,
@@ -91,9 +130,13 @@ class GivethTool extends ModuleTool<ToolSettings> {
             return wrapped(event, originalItem, data);
         }
 
-        if (!originalItem.system.rules.some((rule) => rule.key === "ChoiceSet")) {
+        if (
+            originalItem.isOfType("condition") ||
+            !originalItem.system.rules.some((rule) => rule.key === "ChoiceSet")
+        ) {
             this.#givethEmitable.call({
                 actor,
+                data,
                 source: originalItem.toObject(),
             });
 
@@ -128,6 +171,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
 
         this.#givethEmitable.call({
             actor,
+            data,
             source: itemSource,
         });
 
@@ -136,8 +180,9 @@ class GivethTool extends ModuleTool<ToolSettings> {
 }
 
 type GiveEffectOptions = {
+    actor: CreaturePF2e;
+    data: DropCanvasItemDataPF2e;
     source: EffectSource | ConditionSource;
-    actor: ActorPF2e;
 };
 
 type ToolSettings = {
