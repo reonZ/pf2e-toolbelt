@@ -1,3 +1,8 @@
+# 3.20.2
+
+-   `Better Merchant`:
+    -   fix `Sell Items` feature not working because of the latest system currency changes
+
 # 3.20.1
 
 -   `Giveth`:
