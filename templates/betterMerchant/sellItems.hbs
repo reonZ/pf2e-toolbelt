@@ -1,8 +1,8 @@
 <div class="inventory">
     <div class="coins">
-        <div class="label">{{localize "PF2E.StackGroupCoins"}}</div>
-        {{#each inventory.coins as |value type|}}
-        <div class="denomination {{type}}">
+        <div class="label">{{localize "PF2E.CurrencyLabel"}}</div>
+        {{#each inventory.currency as |value unit|}}
+        <div class="denomination {{unit}}">
             <div class="image" data-tooltip="{{localize value.label}}"></div>
             <div class="value">{{value.value}}</div>
         </div>

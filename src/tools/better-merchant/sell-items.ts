@@ -1,11 +1,10 @@
 import {
     ActorPF2e,
-    ActorSheetPF2e,
     ApplicationClosingOptions,
     ApplicationConfiguration,
     ApplicationRenderOptions,
-    CoinageSummary,
     CoinsPF2e,
+    CurrencySummary,
     htmlClosest,
     LootPF2e,
     PhysicalItemType,
@@ -104,7 +103,6 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
             R.sortBy(R.prop("label"))
         );
 
-        const ActorSheet = seller.sheet.constructor as typeof ActorSheetPF2e<ActorPF2e>;
         const info = this.localize("info", {
             item: defaultRatio,
             treasure: Math.max(1, defaultRatio),
@@ -112,7 +110,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
 
         return {
             inventory: {
-                coins: ActorSheet["coinsToSheetData"](seller.inventory.coins),
+                currency: prepareCurrency(seller).units,
                 info,
             },
             groups,
@@ -151,6 +149,47 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
     }
 }
 
+const COIN_DENOMINATIONS = ["pp", "gp", "sp", "cp"] as const;
+
+/**
+ * https://github.com/foundryvtt/pf2e/blob/1465f7190b2b8454094c50fa6d06e9902e0a3c41/src/module/actor/sheet/base.ts#L313
+ */
+function prepareCurrency(actor: ActorPF2e): CurrencySummary {
+    const SYSTEM_ID = game.system.id;
+
+    const totalWealth = actor.inventory.totalWealth;
+    const currency = actor.inventory.currency;
+    const coins = new game.pf2e.Coins(R.pick(currency, COIN_DENOMINATIONS)); // just the pf2e values
+
+    // Figure out what coins to show for what systems. If both, simplify pf2e values to gold
+    const showPF2e = SYSTEM_ID === "pf2e" || COIN_DENOMINATIONS.some((d) => currency[d] > 0);
+    const showSF2e = SYSTEM_ID === "sf2e" || currency.credits || currency.upb;
+    const denominations =
+        showPF2e && showSF2e
+            ? (["gp", "credits", "upb"] as const)
+            : showPF2e
+            ? COIN_DENOMINATIONS
+            : (["credits", "upb"] as const);
+    if (showPF2e && showSF2e) {
+        currency.gp = coins.goldValue;
+        coins.sp = coins.pp = coins.cp = 0;
+    }
+
+    return {
+        units: denominations.reduce(
+            (accumulated, d) => ({
+                ...accumulated,
+                [d]: { value: currency[d], label: CONFIG.PF2E.currencies[d] },
+            }),
+            {} as CurrencySummary["units"]
+        ),
+        totalCurrency: coins
+            .plus({ sp: currency.credits + currency.upb })
+            .toString({ decimal: true }),
+        totalWealth: totalWealth.toString({ decimal: true }),
+    };
+}
+
 type EventAction = "open-sheet" | "sell-item";
 
 type SellingItem = {
@@ -171,7 +210,7 @@ type ItemsGroup = {
 
 type SellItemsContext = {
     inventory: {
-        coins: CoinageSummary;
+        currency: CurrencySummary["units"];
         info: string;
     };
     groups: ItemsGroup[];
