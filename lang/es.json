@@ -451,7 +451,7 @@
       "item": {
         "buy": {
           "confirm": {
-            "content": "¿Desea <strong>{buyer}</strong>  comprar <strong>{item}</strong>?",
+            "content": "¿Desea <strong>{buyer}</strong> comprar <strong>{item}</strong>?",
             "title": "Comprar artículo - {item}"
           },
           "noTarget": "Debes seleccionar un actor válido para comprarle a este comerciante."
