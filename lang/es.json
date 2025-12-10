@@ -347,7 +347,8 @@
           }
         },
         "tiles": {
-          "name": "Casillas de fondo"
+          "name": "Casillas de fondo",
+          "hint": "Las casillas de escena con una elevación de 0 o menos siempre se dibujarán detrás de los token con elevación negativa. Tenga en cuenta que esto podría entrar en conflicto con otros módulos que también funcionan con casillas."
         }
       },
       "unided": {
