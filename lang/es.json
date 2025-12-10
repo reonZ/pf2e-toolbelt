@@ -1,5 +1,6 @@
 {
   "LEVIKTIMES": {
+    "playerOnly": "Solo jugador",
     "gmOnly": "Sólo MJ",
     "reloadRequired": "Requiere recarga",
     "emiting": {
@@ -152,6 +153,14 @@
         "scribble": {
           "name": "Hoja de personaje escrita a mano",
           "hint": "Un rediseño de la hoja del personaje para que parezca como si hubiera sido escrita a mano."
+        },
+        "showPlayers": {
+          "name": "Mostrar avatar a los jugadores",
+          "hint": "Agrega un botón 'Mostrar a jugadores' en el panel de avatar de las hojas de actores."
+        },
+        "sortList": {
+          "name": "Botón Ordenar lista",
+          "hint": "Agrega botones de ordenación a diferentes listas en la hoja del actor."
         }
       },
       "betterTemplate": {
@@ -163,9 +172,32 @@
       },
       "betterTrade": {
         "title": "Mejor comercio",
+        "invertTrade": {
+          "name": "Invertir el modificador de comercio",
+          "hint": "Los jugadores ya no tendrán que mantener presionada la tecla \"Mayús\" para entregar un objeto sin iniciar un intercambio. (Mantener presionada la tecla \"Mayús\" iniciará la solicitud de intercambio)."
+        },
         "withContent": {
           "name": "Con el contenido de contenedores",
           "hint": "Cuando un contenedor se mueve de un actor a otro, ¿debe su contenido ir con él?"
+        }
+      },
+      "betterUI": {
+        "title": "Interfaz Better User",
+        "unscaleTokenHUD": {
+          "name": "HUD de tokens sin escala",
+          "hint": "Revertir la escala del lienzo del HUD del token"
+        }
+      },
+      "characterImporter": {
+        "title": "Importador de personajes",
+        "enabled": {
+          "name": "Activado",
+          "hint": "Permitir a los usuarios importar un personaje desde Pathbuilder a través de pasos.",
+          "choices": {
+            "disabled": "Desactivado",
+            "gm": "Sólo MJ",
+            "all": "Todos los usuarios"
+          }
         }
       },
       "conditionManager": {
@@ -190,7 +222,7 @@
         "title": "Entregar",
         "effect": {
           "name": "Efectos/Condiciones",
-          "hint": "¿Deberían también los jugadores poder aplicar efectos y condiciones a actores que no son de su propiedad?.",
+          "hint": "¿Deberían los jugadores poder aplicar efectos y condiciones a actores que no son de su propiedad?",
           "choices": {
             "disabled": "Desactivado",
             "ally": "Sólo aliados",
@@ -316,7 +348,7 @@
         },
         "tiles": {
           "name": "Casillas de fondo",
-          "hint": "Esto también garantizará que los token se dibujen detrás de los token con elevación negativa. Tenga en cuenta que esto puede entrar en conflicto con otros módulos que también funcionan con token."
+          "hint": "Las casillas de escena con una elevación de 0 o menos siempre se dibujarán detrás de los token con elevación negativa. Tenga en cuenta que esto podría entrar en conflicto con otros módulos que también funcionan con casillas."
         }
       },
       "unided": {
@@ -419,8 +451,8 @@
       "item": {
         "buy": {
           "confirm": {
-            "content": "¿Quiere <strong>{buyer}</strong> comprar <strong>{item}</strong>?",
-            "title": "Comprar objeto- {item}"
+            "content": "¿Desea <strong>{buyer}</strong> comprar <strong>{item}</strong>?",
+            "title": "Comprar artículo - {item}"
           },
           "noTarget": "Debes seleccionar un actor válido para comprarle a este comerciante."
         },
@@ -430,7 +462,7 @@
         "refuse": "<strong>{actor}</strong> no está interesado en comprar <strong>{item}</strong>.",
         "sell": {
           "button": "Vender",
-          "prompt": "¿Cuantos quieres vender?",
+          "prompt": "¿Desea {actor} vender este artículo?",
           "title": "Sell Items"
         },
         "unided": "Nadie en su sano juicio querría comprar algún artículo al azar y no identificado."
@@ -441,7 +473,19 @@
         "infiniteAll": {
           "label": "Existencias infinitas",
           "tooltip": "El comerciante nunca se quedará sin artículos para vender (no afecta a los tesoros ni a los servicios)"
+        },
+        "none": "No se vende",
+        "scrolls": "Crear pergaminos",
+        "sellItems": {
+          "button": "Vender artículos",
+          "noSelection": "Debes seleccionar un actor vendedor válido."
         }
+      },
+      "sellItems": {
+        "empty": "<strong>{name}</strong> no parece estar interesado en nada de lo que puedas ofrecer.",
+        "info": "Los siguientes precios están coloreados en función de una proporción asumida de <u>{treasure}</u> para los tesoros y <u>{item}</u> para los demás artículos.",
+        "title": "Vender artículos - {name}",
+        "sell": "Vender artículo"
       },
       "sheetServices": {
         "add": "Agregar servicio",
@@ -490,6 +534,14 @@
         "title": "Servicio - {label}"
       }
     },
+    "betterSheet": {
+      "sortList": {
+        "sheet": {
+          "tooltip": "Ordenar contenido",
+          "container": "Ordenar el contenido de los contenedores"
+        }
+      }
+    },
     "betterTemplate": {
       "target": {
         "all": "Ambos",
@@ -500,6 +552,66 @@
         "self": "Incluirse a sí mismo",
         "title": "Asistente de plantillas",
         "yes": "Objetivo"
+      }
+    },
+    "characterImporter": {
+      "deleteData": {
+        "content": "¿Estás seguro de que deseas eliminar los datos de importación de este personaje?<br><br>NOTA: Esto no actualizará el personaje en sí.",
+        "title": "Eliminar datos de importación"
+      },
+      "import": {
+        "code": {
+          "title": "Pegar código JSON",
+          "yes": "Analizar JSON"
+        },
+        "fail": "La importación del personaje falló.",
+        "file": {
+          "title": "Seleccionar archivo JSON",
+          "yes": "Analizar archivo"
+        },
+        "success": "La importación del personaje fue exitosa."
+      },
+      "sheet": {
+        "level": {
+          "cancel": "Cerrar el menú del importador de personajes",
+          "import": "Abrir el menú del importador de personajes"
+        },
+        "import": {
+          "code": "Desde el código",
+          "delete": "Eliminar datos de importación",
+          "file": "Desde archivo"
+        },
+        "data": {
+          "core": {
+            "attributes": {
+              "assign": "Asignar potenciadores de atributos",
+              "override": "Utilice el método de entrada manual",
+              "warning": "Los datos importados no alcanzan el último umbral de impulso (nivel {level}).<br>Es posible que desees actualizarlo."
+            }
+          },
+          "entry": {
+            "action": {
+              "install": "Añadir {match} al personaje",
+              "locked": "No se puede actualizar",
+              "refresh": "Actualizar elemento actual",
+              "replace": "Reemplazar Actual con {match}",
+              "revert": "Eliminar anulación"
+            },
+            "current": "Actual",
+            "drop": "Soltar {key}",
+            "match": "Coincidencia",
+            "override": "Anular"
+          }
+        },
+        "menu": {
+          "core": "Núcleo",
+          "feats": "Dotes",
+          "inventory": "Objetos",
+          "skills": "Habilidades",
+          "spells": "Conjuros",
+          "details": "Detalles"
+        },
+        "title": "Importador de personajes"
       }
     },
     "conditionManager": {
@@ -808,6 +920,10 @@
           "label": "Puntos de héroe",
           "hint": "Utilice los puntos de héroe del maestro."
         },
+        "languages": {
+          "label": "Idiomas",
+          "hint": "Añade los idiomas del maestro a este actor."
+        },
         "master": {
           "label": "Maestro",
           "hint": "Seleccione un maestro con el que este actor compartirá datos."
@@ -818,7 +934,7 @@
         },
         "spellcasting": {
           "label": "Lanzamiento de conjuros",
-          "hint": "Utiliza la habilidad de lanzamiento de conjuros del maestro y su reserva de concentración."
+          "hint": "Utilice la estadística de lanzamiento de conjuros del maestro y su reserva de foco."
         },
         "timeEvents": {
           "label": "Eventos temporales",
@@ -831,7 +947,10 @@
           "hint": "Utilice las runas fundamentales y de propiedad de las armas y vendas invertidas del maestro."
         }
       },
-      "share": "Compartir"
+      "share": "Compartir",
+      "undo": {
+        "msg": "El daño de PG no se puede revertir desde un actor vinculado y debe hacerse manualmente."
+      }
     },
     "targetHelper": {
       "check-card": {
