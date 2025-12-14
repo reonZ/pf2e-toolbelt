@@ -1,10 +1,16 @@
 li.chat-message {
-    &.pf2e-toolbelt-anonymous {
+    &.pf2e-toolbelt-anonymous-gm {
         .card-header,
         .card-content,
         footer {
             background: var(--visibility-gm-bg);
             outline: 1px dotted rgba(75, 74, 68, 0.5);
+        }
+    }
+
+    &.pf2e-toolbelt-anonymous-player {
+        .card-buttons {
+            margin-top: 0.3em;
         }
     }
 }

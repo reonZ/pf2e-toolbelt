@@ -96,9 +96,12 @@ async function renderCheckMessage(
         addSaveBtnListener.call(this, link, fakeBtn, message, data);
     }
 
-    if (!isOwner) return;
+    if (!isOwner) {
+        html.classList.add("pf2e-toolbelt-check-player");
+        return;
+    }
 
-    html.classList.add("pf2e-toolbelt-check");
+    html.classList.add("pf2e-toolbelt-check-gm");
 
     const setTargetsBtn = htmlQuery(msgContent, `[data-action="set-targets"]`);
     if (setTargetsBtn) {

@@ -128,9 +128,11 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         }
 
         if (game.user.isGM) {
-            html.classList.add("pf2e-toolbelt-anonymous");
+            html.classList.add("pf2e-toolbelt-anonymous-gm");
             return;
         }
+
+        html.classList.add("pf2e-toolbelt-anonymous-player");
 
         const type = isSpell ? "spell" : "action";
         const header = htmlQuery(chatCard, ".card-header");
