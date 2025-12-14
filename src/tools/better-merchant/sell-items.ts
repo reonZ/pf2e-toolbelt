@@ -110,7 +110,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
 
         return {
             inventory: {
-                currency: prepareCurrency(seller).units,
+                currency: prepareCurrency(seller),
                 info,
             },
             groups,
@@ -152,12 +152,12 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
 const COIN_DENOMINATIONS = ["pp", "gp", "sp", "cp"] as const;
 
 /**
+ * truncated version of
  * https://github.com/foundryvtt/pf2e/blob/1465f7190b2b8454094c50fa6d06e9902e0a3c41/src/module/actor/sheet/base.ts#L313
  */
-function prepareCurrency(actor: ActorPF2e): CurrencySummary {
+function prepareCurrency(actor: ActorPF2e): CurrencySummary["units"] {
     const SYSTEM_ID = game.system.id;
 
-    const totalWealth = actor.inventory.totalWealth;
     const currency = actor.inventory.currency;
     const coins = new game.pf2e.Coins(R.pick(currency, COIN_DENOMINATIONS)); // just the pf2e values
 
@@ -175,19 +175,13 @@ function prepareCurrency(actor: ActorPF2e): CurrencySummary {
         coins.sp = coins.pp = coins.cp = 0;
     }
 
-    return {
-        units: denominations.reduce(
-            (accumulated, d) => ({
-                ...accumulated,
-                [d]: { value: currency[d], label: CONFIG.PF2E.currencies[d] },
-            }),
-            {} as CurrencySummary["units"]
-        ),
-        totalCurrency: coins
-            .plus({ sp: currency.credits + currency.upb })
-            .toString({ decimal: true }),
-        totalWealth: totalWealth.toString({ decimal: true }),
-    };
+    return denominations.reduce(
+        (accumulated, d) => ({
+            ...accumulated,
+            [d]: { value: currency[d], label: CONFIG.PF2E.currencies[d] },
+        }),
+        {} as CurrencySummary["units"]
+    );
 }
 
 type EventAction = "open-sheet" | "sell-item";
