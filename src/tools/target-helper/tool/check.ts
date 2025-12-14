@@ -10,6 +10,7 @@ import {
     SaveType,
     splitListString,
 } from "module-helpers";
+import { TRAITS_BLACKLIST } from "tools";
 import {
     addRollSavesListener,
     addSaveBtnListener,
@@ -65,8 +66,14 @@ async function renderCheckMessage(
 
     const flavor = htmlQuery(html, ".message-header .flavor-text");
     const saveLabel = firstElementWithText(msgContent.lastElementChild);
+
     const label =
         firstElementWithText(flavor) ?? firstElementWithText(msgContent.firstElementChild);
+
+    const baseTraits = item?.traitChatData() ?? [];
+    const traits = canObserve
+        ? baseTraits
+        : baseTraits.filter((trait) => !R.isIncludedIn(trait.value, TRAITS_BLACKLIST));
 
     msgContent.innerHTML = await this.render("check-card", {
         item: canObserve ? item : null,
@@ -75,7 +82,7 @@ async function renderCheckMessage(
         speaker: message.speaker,
         label: label?.outerHTML || "",
         save: saveLabel?.outerHTML || "",
-        traits: item?.traitChatData(),
+        traits,
     });
 
     flavor?.remove();
