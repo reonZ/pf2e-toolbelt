@@ -1,3 +1,14 @@
+# 3.21.0
+
+-   `Anonymous`:
+    -   add new `Show Traits` world setting:
+        -   when the module anonymize a message, should traits still be displayed
+    -   now display traits of anonymized messages (make use of the `Show Traits` setting)
+    -   now auto-reveal spell messages if a party member has it currently prepared
+    -   add missing `Reveal Action to Players` context menu option icon
+-   `Target Helper`:
+    -   the upgraded check message traits now make use of the `Anonymous` `Show Traits` setting
+
 # 3.20.2
 
 -   `Better Merchant`:
