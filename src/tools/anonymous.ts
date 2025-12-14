@@ -2,9 +2,13 @@ import {
     ChatLogPF2e,
     ChatMessagePF2e,
     createToggleableHook,
+    CreaturePF2e,
     htmlQuery,
     isActionMessage,
     isSpellMessage,
+    R,
+    SpellcastingEntrySlots,
+    SpellPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedMessageRenderHTML } from "./_shared";
@@ -100,6 +104,21 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         const chatCard = htmlQuery(html, ".chat-card");
         if (!chatCard) return;
 
+        const cardContent = htmlQuery(chatCard, ".card-content");
+
+        if (isSpell) {
+            const members = partyKnowsSpell(message.item).map((actor) => actor.name);
+
+            if (members.length) {
+                const label = this.localize("revealed");
+                const msg = `<strong>${label}</strong> ${members.join(", ")}`;
+                const line = `<p class="item-block-line">${msg}</p>`;
+
+                cardContent?.insertAdjacentHTML("afterbegin", line);
+                return;
+            }
+        }
+
         if (game.user.isGM) {
             html.classList.add("pf2e-toolbelt-anonymous");
             return;
@@ -108,7 +127,6 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         const type = isSpell ? "spell" : "action";
         const header = htmlQuery(chatCard, ".card-header");
         const tags = htmlQuery(header, ":scope > .tags")?.outerHTML ?? "";
-        const cardContent = htmlQuery(chatCard, ".card-content");
         const footer = htmlQuery(chatCard, ":scope > footer");
 
         if (header) {
@@ -121,11 +139,34 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 }
 
+function partyKnowsSpell(spell: SpellPF2e): CreaturePF2e[] {
+    const sourceId = spell.sourceId;
+    const members = game.actors.party?.members ?? [];
+
+    return members.filter((actor) => {
+        return actor.itemTypes.spell.some((spell) => {
+            if (spell.sourceId !== sourceId) return false;
+
+            const entry = spell.spellcasting;
+            if (!entry) return false;
+
+            return (
+                entry.category !== "prepared" ||
+                R.values(entry.system?.slots ?? ({} as SpellcastingEntrySlots)).some((slot) => {
+                    slot.prepared.some((prepared) => prepared.id === spell.id);
+                })
+            );
+        });
+    });
+}
+
 function isValidActionMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
     return isValideMessage(message) && isActionMessage(message);
 }
 
-function isValidSpellMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
+function isValidSpellMessage(
+    message: Maybe<ChatMessagePF2e>
+): message is ChatMessagePF2e & { item: SpellPF2e } {
     return isValideMessage(message) && isSpellMessage(message);
 }
 

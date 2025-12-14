@@ -385,6 +385,7 @@
                 "header": "Is using an ability..",
                 "context": "Reveal Action to Players"
             },
+            "revealed": "Revealed By",
             "spell": {
                 "header": "Is casting a spell..",
                 "context": "Reveal Spell to Players"
