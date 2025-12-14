@@ -13,19 +13,19 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedMessageRenderHTML, TRAITS_BLACKLIST } from ".";
 
-const ANONYMOUS: {
+const CONTEXT_OPTIONS: {
     type: "action" | "spell";
     icon: string;
     test: (message: Maybe<ChatMessagePF2e>) => message is ChatMessagePF2e;
 }[] = [
     {
         type: "action",
-        icon: "",
+        icon: `<span class="action-glyph" style="height: 12px; width: 15px; margin-right: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px;">1</span>`,
         test: isValidActionMessage,
     },
     {
         type: "spell",
-        icon: "fa-solid fa-wand-magic-sparkles",
+        icon: `<i class="fa-solid fa-wand-magic-sparkles"></i>`,
         test: isValidSpellMessage,
     },
 ];
@@ -84,10 +84,10 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
             return game.messages.get(messageId ?? "");
         };
 
-        for (const { icon, test, type } of ANONYMOUS) {
+        for (const { icon, test, type } of CONTEXT_OPTIONS) {
             options.push({
                 name: this.localizePath(`${type}.context`),
-                icon: `<i class="${icon}"></i>`,
+                icon,
                 condition: (el) => {
                     const msg = getMessage(el);
                     return this.settings[type] && test(msg) && !this.getFlag(msg, "revealed");
