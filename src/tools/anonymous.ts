@@ -107,12 +107,13 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
 
         const type = isSpell ? "spell" : "action";
         const header = htmlQuery(chatCard, ".card-header");
+        const tags = htmlQuery(header, ":scope > .tags")?.outerHTML ?? "";
         const cardContent = htmlQuery(chatCard, ".card-content");
         const footer = htmlQuery(chatCard, ":scope > footer");
 
         if (header) {
             const txt = this.localize(`${type}.header`);
-            header.innerHTML = `<h3>${txt}</h3>`;
+            header.innerHTML = `${tags}<h3>${txt}</h3>`;
         }
 
         cardContent?.remove();
