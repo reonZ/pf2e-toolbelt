@@ -7,6 +7,8 @@ import {
     WeaponPF2e,
 } from "module-helpers";
 
+const TRAITS_BLACKLIST = ["curse", "death", "disease", "mythic"] as const;
+
 const sharedWeaponPrepareBaseData = createSharedWrapper<
     WeaponPF2e<ActorPF2e>,
     () => void,
@@ -72,4 +74,5 @@ export {
     sharedArmorPrepareBaseData,
     sharedMessageRenderHTML,
     sharedWeaponPrepareBaseData,
+    TRAITS_BLACKLIST,
 };

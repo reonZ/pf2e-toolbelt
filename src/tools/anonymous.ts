@@ -11,7 +11,7 @@ import {
     SpellPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedMessageRenderHTML } from "./_shared";
+import { sharedMessageRenderHTML, TRAITS_BLACKLIST } from ".";
 
 const ANONYMOUS: {
     type: "action" | "spell";
@@ -31,6 +31,8 @@ const ANONYMOUS: {
 ];
 
 class AnonymousTool extends ModuleTool<ToolSettings> {
+    #traitsBlacklist?: string[];
+
     #getChatContextOptionsHook = createToggleableHook(
         "getChatMessageContextOptions",
         this.#onGetChatMessageContextOptions.bind(this)
@@ -61,6 +63,12 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
                 requiresReload: true,
             },
         ];
+    }
+
+    get traitsBlacklist() {
+        return (this.#traitsBlacklist ??= TRAITS_BLACKLIST.map(
+            (trait) => CONFIG.PF2E.traitsDescriptions[trait]
+        ));
     }
 
     init(isGM: boolean): void {
@@ -126,12 +134,21 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
 
         const type = isSpell ? "spell" : "action";
         const header = htmlQuery(chatCard, ".card-header");
-        const tags = htmlQuery(header, ":scope > .tags")?.outerHTML ?? "";
         const footer = htmlQuery(chatCard, ":scope > footer");
+
+        const tags = htmlQuery(header, ":scope > .tags");
+
+        console.log(this.traitsBlacklist);
+        for (const child of (tags?.children ?? []) as HTMLElement[]) {
+            console.log(child.dataset.tooltip);
+            if (R.isIncludedIn(child.dataset.tooltip, this.traitsBlacklist)) {
+                child.remove();
+            }
+        }
 
         if (header) {
             const txt = this.localize(`${type}.header`);
-            header.innerHTML = `${tags}<h3>${txt}</h3>`;
+            header.innerHTML = `${tags?.outerHTML ?? ""}<h3>${txt}</h3>`;
         }
 
         cardContent?.remove();
