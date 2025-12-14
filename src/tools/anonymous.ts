@@ -138,9 +138,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
 
         const tags = htmlQuery(header, ":scope > .tags");
 
-        console.log(this.traitsBlacklist);
         for (const child of (tags?.children ?? []) as HTMLElement[]) {
-            console.log(child.dataset.tooltip);
             if (R.isIncludedIn(child.dataset.tooltip, this.traitsBlacklist)) {
                 child.remove();
             }
