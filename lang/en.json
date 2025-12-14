@@ -66,6 +66,15 @@
                 "spell": {
                     "name": "Anonymize NPC Spells",
                     "hint": "Spells casted by a non-player owned actor will be anonymized for players."
+                },
+                "traits": {
+                    "name": "Show Traits",
+                    "hint": "When the module anonymize a message, should traits still be displayed.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "all": "All Traits",
+                        "blacklist": "Use Blacklist"
+                    }
                 }
             },
             "arp": {

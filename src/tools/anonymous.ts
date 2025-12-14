@@ -13,6 +13,8 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedMessageRenderHTML, TRAITS_BLACKLIST } from ".";
 
+const TRAITS_SETTING = ["disabled", "all", "blacklist"] as const;
+
 const CONTEXT_OPTIONS: {
     type: "action" | "spell";
     icon: string;
@@ -60,6 +62,14 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
+                requiresReload: true,
+            },
+            {
+                key: "traits",
+                type: String,
+                default: "disabled",
+                scope: "world",
+                choices: TRAITS_SETTING,
                 requiresReload: true,
             },
         ];
@@ -138,17 +148,23 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         const header = htmlQuery(chatCard, ".card-header");
         const footer = htmlQuery(chatCard, ":scope > footer");
 
-        const tags = htmlQuery(header, ":scope > .tags");
-
-        for (const child of (tags?.children ?? []) as HTMLElement[]) {
-            if (R.isIncludedIn(child.dataset.tooltip, this.traitsBlacklist)) {
-                child.remove();
-            }
-        }
-
         if (header) {
-            const txt = this.localize(`${type}.header`);
-            header.innerHTML = `${tags?.outerHTML ?? ""}<h3>${txt}</h3>`;
+            const traits = this.settings.traits;
+            const tags = htmlQuery(header, ":scope > .tags");
+
+            header.innerHTML = `<h3>${this.localize(`${type}.header`)}</h3>`;
+
+            if (traits === "blacklist") {
+                for (const child of (tags?.children ?? []) as HTMLElement[]) {
+                    if (R.isIncludedIn(child.dataset.tooltip, this.traitsBlacklist)) {
+                        child.remove();
+                    }
+                }
+            }
+
+            if (traits !== "disabled") {
+                header.innerHTML = `${tags?.outerHTML ?? ""}${header.innerHTML}`;
+            }
         }
 
         cardContent?.remove();
@@ -197,6 +213,7 @@ function isValideMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessag
 type ToolSettings = {
     action: boolean;
     spell: boolean;
+    traits: (typeof TRAITS_SETTING)[number];
 };
 
 export { AnonymousTool };

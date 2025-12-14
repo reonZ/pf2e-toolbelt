@@ -70,10 +70,15 @@ async function renderCheckMessage(
     const label =
         firstElementWithText(flavor) ?? firstElementWithText(msgContent.firstElementChild);
 
+    const traitsSetting = game.toolbelt?.getToolSetting("anonymous", "traits");
     const baseTraits = item?.traitChatData() ?? [];
     const traits = canObserve
         ? baseTraits
-        : baseTraits.filter((trait) => !R.isIncludedIn(trait.value, TRAITS_BLACKLIST));
+        : traitsSetting === "all"
+        ? baseTraits
+        : traitsSetting === "blacklist"
+        ? baseTraits.filter((trait) => !R.isIncludedIn(trait.value, TRAITS_BLACKLIST))
+        : [];
 
     msgContent.innerHTML = await this.render("check-card", {
         item: canObserve ? item : null,

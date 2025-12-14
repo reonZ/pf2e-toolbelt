@@ -8,17 +8,12 @@ import {
 } from "module-helpers";
 
 const TRAITS_BLACKLIST = [
-    "arcane",
     "curse",
-    "death",
     "disease",
-    "divine",
     "fortune",
     "incapacitation",
     "misfortune",
     "mythic",
-    "occult",
-    "primal",
 ] as const;
 
 const sharedWeaponPrepareBaseData = createSharedWrapper<
