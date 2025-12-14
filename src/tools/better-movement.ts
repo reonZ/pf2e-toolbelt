@@ -9,6 +9,8 @@ import {
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
+const TELEPORT_SETTING = ["disabled", "enabled", "select"] as const;
+
 class BetterMovementyTool extends ModuleTool<ToolSettings> {
     #cancelTeleport: (() => void) | null = null;
 
@@ -93,7 +95,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
                 key: "teleport",
                 type: String,
                 default: "disabled",
-                choices: ["disabled", "enabled", "select"],
+                choices: TELEPORT_SETTING,
                 scope: "user",
                 gmOnly: true,
                 onChange: (value: ToolSettings["teleport"]) => {
@@ -350,7 +352,7 @@ type PositionUpdate = {
 };
 
 type ToolSettings = {
-    teleport: "disabled" | "enabled" | "select";
+    teleport: (typeof TELEPORT_SETTING)[number];
     history: boolean;
 };
 

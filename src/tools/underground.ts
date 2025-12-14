@@ -7,6 +7,8 @@ import {
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
+const MODE_SETTING = ["normal", "greyscale", "sepia"] as const;
+
 class UndergroundTool extends ModuleTool<ToolSettings> {
     #enabledHooks = [
         createToggleableHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
@@ -53,7 +55,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
                 key: "mode",
                 type: String,
                 default: "greyscale",
-                choices: ["normal", "greyscale", "sepia"],
+                choices: MODE_SETTING,
                 scope: "user",
                 onChange: () => {
                     this.#drawCanvas();
@@ -162,7 +164,7 @@ type ToolSettings = {
     alpha: number;
     contrast: number;
     enabled: boolean;
-    mode: "normal" | "greyscale" | "sepia";
+    mode: (typeof MODE_SETTING)[number];
     tiles: boolean;
 };
 

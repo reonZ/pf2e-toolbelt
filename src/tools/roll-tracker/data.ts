@@ -61,7 +61,7 @@ class UserRollModel extends foundry.abstract.DataModel<null, UserRollSchema> {
                 required: true,
                 nullable: false,
                 blank: false,
-                choices: () => ROLL_TYPES,
+                choices: ROLL_TYPES,
             }),
             value: new fields.NumberField({
                 required: true,

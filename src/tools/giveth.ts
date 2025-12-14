@@ -18,6 +18,8 @@ import {
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
+const EFFECT_SETTING = ["disabled", "ally", "all"] as const;
+
 class GivethTool extends ModuleTool<ToolSettings> {
     #givethEmitable = createEmitable(this.key, this.#givethEffect.bind(this));
 
@@ -37,7 +39,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
             {
                 key: "effect",
                 type: String,
-                choices: ["disabled", "ally", "all"],
+                choices: EFFECT_SETTING,
                 default: "ally",
                 scope: "world",
                 onChange: () => {
@@ -186,7 +188,7 @@ type GiveEffectOptions = {
 };
 
 type ToolSettings = {
-    effect: "disabled" | "ally" | "all";
+    effect: (typeof EFFECT_SETTING)[number];
 };
 
 export { GivethTool };
