@@ -349,22 +349,21 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         const actor = item?.actor;
         if (!actor || actor.pack || !item.isOfType("physical") || item.quantity <= 1) return;
 
+        const fields = foundry.applications.fields;
         const result = await waitDialog<{ quantity: number }>({
             classes: ["toolbelt-split-item"],
-            content: [
-                {
-                    type: "number",
-                    inputConfig: {
-                        name: "quantity",
-                        min: 0,
-                        max: item.quantity,
-                        value: Math.floor(item.quantity / 2),
-                        autofocus: true,
-                    },
-                },
-            ],
-            data: item,
+            content: fields.createFormGroup({
+                label: this.localize("split.quantity.label"),
+                input: fields.createNumberInput({
+                    name: "quantity",
+                    min: 0,
+                    max: item.quantity,
+                    step: 1,
+                    value: Math.floor(item.quantity / 2),
+                }),
+            }).outerHTML,
             i18n: this.localizeKey("split"),
+            title: item,
             yes: {
                 icon: "fa-solid fa-split",
             },
