@@ -1,3 +1,9 @@
+# 3.22.0
+
+-   `Target Helper`:
+    -   add a queue system to avoid concurrent message updates when multiple user try to roll saves or apply damage at the same time on the same message
+        -   this will hopefully prevent some occasion of updates being rolled back
+
 # 3.21.0
 
 -   `Anonymous`:
