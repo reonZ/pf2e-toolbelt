@@ -404,7 +404,13 @@ async function applyDamageFromMessage(
     toggleOffShieldBlock(message.id);
 
     // ADDED BY MODULE
-    onDamageApplied.call(this, message, data, token, rollIndex);
+    this.updateMessageEmitable.call({
+        message,
+        applied: {
+            rollIndex,
+            targetId: token.id,
+        },
+    });
 }
 
 /**
@@ -466,47 +472,6 @@ async function shiftAdjustDamage(
     }).render(true);
 }
 
-function onDamageApplied(
-    this: TargetHelperTool,
-    message: ChatMessagePF2e,
-    data: TargetsData,
-    target: TokenDocumentPF2e,
-    rollIndex: number
-) {
-    const targetId = target.id;
-    const splashIndex = data.splashIndex;
-
-    const targetApplied: MessageApplied[number] = {
-        [rollIndex]: true,
-    };
-
-    const applied: MessageApplied = {
-        [targetId]: targetApplied,
-    };
-
-    if (splashIndex !== -1) {
-        const regularIndex = data.regularIndex;
-
-        if (rollIndex === splashIndex) {
-            targetApplied[regularIndex] = true;
-        } else {
-            targetApplied[splashIndex] = true;
-
-            for (const otherTarget of data.targets) {
-                const otherId = otherTarget.id;
-                if (otherId === targetId) continue;
-
-                applied[otherId] = { [regularIndex]: true };
-            }
-        }
-    }
-
-    this.updateMessageEmitable.call({
-        message,
-        applied,
-    });
-}
-
 function isPersistentDamageMessage(message: ChatMessagePF2e): boolean {
     return !!message.rolls[0].options.evaluatePersistent;
 }
@@ -541,7 +506,5 @@ interface ApplyDamageFromMessageParams {
 type DamageMessage = ChatMessagePF2e & {
     rolls: Rolled<DamageRoll>[];
 };
-
-type MessageApplied = Record<string, toolbelt.targetHelper.MessageTargetApplied>;
 
 export { isDamageMessage, prepareDamageMessage, renderDamageMessage };

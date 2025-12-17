@@ -214,7 +214,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         const data = new TargetsData(flag, variantId);
 
         if (applied) {
-            data.update({ applied });
+            data.update({ applied: this.#applyDamageUpdates(data, applied) });
         }
 
         if (saves) {
@@ -222,6 +222,40 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         }
 
         data.setFlag();
+    }
+
+    #applyDamageUpdates(
+        data: TargetsData,
+        { rollIndex, targetId }: UpdateMessageApplied
+    ): MessageApplied {
+        const splashIndex = data.splashIndex;
+
+        const targetApplied: MessageApplied[number] = {
+            [rollIndex]: true,
+        };
+
+        const applied: MessageApplied = {
+            [targetId]: targetApplied,
+        };
+
+        if (splashIndex !== -1) {
+            const regularIndex = data.regularIndex;
+
+            if (rollIndex === splashIndex) {
+                targetApplied[regularIndex] = true;
+            } else {
+                targetApplied[splashIndex] = true;
+
+                for (const otherTarget of data.targets) {
+                    const otherId = otherTarget.id;
+                    if (otherId === targetId) continue;
+
+                    applied[otherId] = { [regularIndex]: true };
+                }
+            }
+        }
+
+        return applied;
     }
 
     #onDragStart(event: DragEvent) {
@@ -298,10 +332,15 @@ type ToolSettings = {
 };
 
 type UpdateMessageOptions = {
-    applied?: MessageApplied;
+    applied?: UpdateMessageApplied;
     message: ChatMessagePF2e;
     saves?: Record<string, SaveRollData>;
     variantId?: string;
+};
+
+type UpdateMessageApplied = {
+    targetId: string;
+    rollIndex: number;
 };
 
 type MessageApplied = Record<string, toolbelt.targetHelper.MessageTargetApplied>;
