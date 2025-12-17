@@ -501,15 +501,10 @@ function onDamageApplied(
         }
     }
 
-    if (isMessageOwner(message)) {
-        data.update({ applied });
-        data.setFlag();
-    } else {
-        this.updateMessageEmitable.emit({
-            message,
-            applied,
-        });
-    }
+    this.updateMessageEmitable.call({
+        message,
+        applied,
+    });
 }
 
 function isPersistentDamageMessage(message: ChatMessagePF2e): boolean {

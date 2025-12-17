@@ -41,11 +41,18 @@ import {
 import utils = foundry.utils;
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
+    #updateQueue = new foundry.utils.Semaphore(1);
+
     #debounceRefreshMessages = utils.debounce(() => {
         refreshLatestMessages(20);
     }, 100);
 
-    updateMessageEmitable = createEmitable(this.key, this.#updateMessage.bind(this));
+    updateMessageEmitable = createEmitable(
+        this.key,
+        (options: UpdateMessageOptions, userId: string) => {
+            this.#updateQueue.add(this.#updateMessage.bind(this), options, userId);
+        }
+    );
 
     #textEditorEnrichHTMLWrapper = createToggleableWrapper(
         "WRAPPER",
