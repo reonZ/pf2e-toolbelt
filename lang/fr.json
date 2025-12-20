@@ -66,6 +66,15 @@
         "spell": {
           "name": "Anonymiser les sorts des PNJ",
           "hint": "Les sorts lancés par un acteur non détenu par un joueur seront anonymisés pour les joueurs."
+        },
+        "traits": {
+          "name": "Afficher les traits",
+          "hint": "Lorsque le module anonymise un message, les traits doivent-ils être affichés ?",
+          "choices": {
+            "disabled": "Désactivé",
+            "all": "Tous les traits",
+            "blacklist": "Utiliser la liste noire"
+          }
         }
       },
       "arp": {
@@ -385,6 +394,7 @@
         "header": "Utilise une capacité.",
         "context": "Révéler l'action aux joueurs"
       },
+      "revealed": "Révélé par",
       "spell": {
         "header": "Is casting a spell..",
         "context": "Révéler le sort aux joueurs"
