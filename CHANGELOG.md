@@ -1,3 +1,8 @@
+# 3.22.1
+
+-   `Target Helper`:
+    -   fix queue function not awaiting the message update
+
 # 3.22.0
 
 -   `Target Helper`:
