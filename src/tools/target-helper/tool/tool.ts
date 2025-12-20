@@ -221,7 +221,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             data.updateSaves(saves);
         }
 
-        data.setFlag();
+        await data.setFlag();
     }
 
     #applyDamageUpdates(
