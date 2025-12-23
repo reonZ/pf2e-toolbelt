@@ -72,7 +72,7 @@
             },
             "betterMovement": {
                 "teleport": {
-                    "hint": "按住已设置的快捷键并点击场景，所选token无需移动立即传送至指定位置。",
+                    "hint": "按住已设置的绑定键并点击场景，所选token无需移动立即传送至指定位置。",
                     "name": "传送Token",
                     "choices": {
                         "disabled": "关闭",
@@ -98,7 +98,7 @@
                 },
                 "traits": {
                     "choices": {
-                        "all": "全部特征",
+                        "all": "显示全部特征",
                         "blacklist": "使用黑名单",
                         "disabled": "禁用"
                     },
@@ -109,7 +109,7 @@
             "conditionManager": {
                 "enabled": {
                     "name": "启用",
-                    "hint": "拖拽状态时按住设定好的快捷键，即可以打开状态管理栏设置其持续时间。"
+                    "hint": "拖拽状态时按住已设置的绑定键，即可以打开状态管理栏设置其持续时间。"
                 },
                 "title": "状态管理"
             },
@@ -372,7 +372,7 @@
             "betterMovement": {
                 "unselect": {
                     "name": "传送Token（自动取消选中）",
-                    "hint": "按住此键点击场景传送全部选中的token，同时在传送结束后取消所有选中token以便整个场景视野清晰无阻。"
+                    "hint": "按住此绑定键点击场景传送全部选中的指示物，同时在传送结束后取消所有选中指示物以便整个场景视野清晰无阻。"
                 },
                 "teleport": {
                     "name": "传送Token",
@@ -382,12 +382,12 @@
             "conditionManager": {
                 "manage": {
                     "name": "管理状态",
-                    "hint": "快捷键：长按并点击状态调出效果编辑界面，以调整其持续时间。"
+                    "hint": "绑定键：长按并点击状态调出效果编辑界面，以调整其持续时间。"
                 }
             },
             "droppeth": {
                 "droppeth": {
-                    "hint": "快捷键：将一件物品丢弃在地上。",
+                    "hint": "绑定键：将一件物品丢弃在地上。",
                     "name": "丢弃调整"
                 }
             }
@@ -400,7 +400,8 @@
             "action": {
                 "header": "正在使用能力…",
                 "context": "对玩家揭示动作"
-            }
+            },
+            "revealed": "揭示者"
         },
         "betterTemplate": {
             "target": {
