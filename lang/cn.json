@@ -95,6 +95,15 @@
                 "action": {
                     "name": "匿名化NPC动作",
                     "hint": "非玩家拥有的角色发送到聊天的动作将对玩家匿名化。"
+                },
+                "traits": {
+                    "choices": {
+                        "all": "全部特征",
+                        "blacklist": "使用黑名单",
+                        "disabled": "禁用"
+                    },
+                    "name": "特征显示",
+                    "hint": "当模组对聊天信息进行匿名化时，是否显示信息中所包含的特征。"
                 }
             },
             "conditionManager": {
