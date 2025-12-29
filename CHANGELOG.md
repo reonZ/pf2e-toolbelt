@@ -1,3 +1,8 @@
+# 3.23.0
+
+-   `Better Template`:
+    -   now automatically updates the message targets when the template is associated with a message and the `Target Helper` feature is enabled in your world
+
 # 3.22.1
 
 -   `Target Helper`:
