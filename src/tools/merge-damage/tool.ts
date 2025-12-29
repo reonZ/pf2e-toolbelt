@@ -89,11 +89,14 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         );
     }
 
-    getMessageTargets(message: ChatMessagePF2e) {
+    getMessageTargets(message: ChatMessagePF2e): TokenDocumentUUID[] {
         const targets = game.toolbelt!.api.targetHelper.getMessageTargets(message);
-        if (targets.length) return targets;
 
-        const target = message.getFlag("pf2e", "context.target.token") as string | undefined;
+        if (targets.length) {
+            return targets;
+        }
+
+        const target = message.getFlag("pf2e", "context.target.token") as Maybe<TokenDocumentUUID>;
         return target ? [target] : [];
     }
 

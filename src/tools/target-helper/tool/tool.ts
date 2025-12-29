@@ -167,7 +167,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     get api(): toolbelt.Api["targetHelper"] {
         return {
             getMessageTargets: this.getMessageTargets.bind(this),
-            setMessageFlagTargets: (updates: Record<string, any>, targets: string[]) => {
+            setMessageFlagTargets: (updates: Record<string, any>, targets: TokenDocumentUUID[]) => {
                 this.setFlagProperty(updates, "targets", targets);
                 return updates;
             },

@@ -137,8 +137,23 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
             );
         });
 
+        const messageId = template.flags.pf2e.messageId;
         const targetsIds = targets.map((token) => token.id);
+        const message = messageId && game.messages.get(messageId);
+
         canvas.tokens.setTargets(targetsIds);
+
+        if (message && game.toolbelt?.getToolSetting("targetHelper", "enabled")) {
+            const updates = game.toolbelt.api.targetHelper.setMessageFlagTargets(
+                {},
+                targets.map((token) => token.document.uuid)
+            );
+
+            if (updates) {
+                message.update(updates);
+            }
+        }
+
         returnAndDismiss();
     }
 }
