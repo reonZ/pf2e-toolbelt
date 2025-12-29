@@ -59,7 +59,7 @@ const TOOLS = [
     new UndergroundTool(),
 ] as const;
 
-const MAPPED_TOOLS = R.mapToObj(TOOLS, (tool) => [tool.key, tool] as const);
+const MAPPED_TOOLS = R.indexBy(TOOLS, R.prop("key"));
 
 MODULE.register("pf2e-toolbelt");
 // MODULE.enableDebugMode();
@@ -89,7 +89,7 @@ Hooks.once("init", () => {
                 }
             }),
             R.filter(R.isTruthy),
-            R.mapToObj(([key, entries]) => [key, entries])
+            R.fromEntries()
         )
     );
 
@@ -97,7 +97,7 @@ Hooks.once("init", () => {
         R.pipe(
             TOOLS,
             R.map((tool) => [tool.key, tool._getToolSettings()] as const),
-            R.mapToObj(([key, entries]) => [key, entries])
+            R.fromEntries()
         )
     );
 
@@ -163,6 +163,6 @@ Hooks.once("ready", () => {
     }
 });
 
-MODULE.devExpose({ tools: R.mapToObj(TOOLS, (tool) => [tool.key, tool]) });
+MODULE.devExpose({ tools: R.indexBy(TOOLS, R.prop("key")) });
 
 export { MAPPED_TOOLS };

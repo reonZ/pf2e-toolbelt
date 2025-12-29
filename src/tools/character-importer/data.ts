@@ -108,7 +108,7 @@ class ImportDataModel extends abstract.DataModel<null, ImportDataSchema> {
             ...R.pipe(
                 ImportDataModel.coreEntries,
                 R.map((key) => [key, new ImportSchemaField(createEntryField())] as const),
-                R.mapToObj(([key, field]) => [key, field])
+                R.fromEntries()
             ),
         };
     }

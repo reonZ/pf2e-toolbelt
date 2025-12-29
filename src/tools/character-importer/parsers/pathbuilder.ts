@@ -97,9 +97,10 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
         R.filter((entry): entry is [AttributeLevel, unknown] => {
             return R.isIncludedIn(entry[0], ImportDataModel.attributeLevels);
         }),
-        R.mapToObj(([key, boosts]) => {
+        R.map(([key, boosts]) => {
             return [key, getBoosts(boosts)] as const;
-        })
+        }),
+        R.fromEntries()
     );
 
     const getBoostsAtPath = (path: BoostsPath): AttributeString[] => {
@@ -116,7 +117,7 @@ async function fromPathbuilder(raw: unknown): Promise<ImportDataSource> {
 
             return [attr, mod] as const;
         }),
-        R.mapToObj(([attr, mod]) => [attr, mod])
+        R.fromEntries()
     );
 
     const source: ImportDataSource = {

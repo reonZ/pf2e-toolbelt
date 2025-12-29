@@ -53,16 +53,13 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
                 trim: true,
             }),
             price: new fields.SchemaField(
-                R.mapToObj(COINS, (coin) => {
-                    return [
-                        coin,
-                        new fields.NumberField({
-                            required: false,
-                            nullable: false,
-                            initial: 0,
-                            min: 0,
-                        }),
-                    ];
+                R.fromKeys(COINS, (coin) => {
+                    return new fields.NumberField({
+                        required: false,
+                        nullable: false,
+                        initial: 0,
+                        min: 0,
+                    });
                 }),
                 {
                     required: false,

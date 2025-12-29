@@ -17,15 +17,12 @@ class ShareDataModel extends abstract.DataModel<null, ShareDataSchema> {
 
         return {
             master: new fields.ForeignDocumentField(CreaturePF2eCls),
-            ...R.mapToObj(ALL_SHARE_DATA, (option) => {
-                return [
-                    option,
-                    new fields.BooleanField<boolean, boolean, false, false, true>({
-                        required: false,
-                        nullable: false,
-                        initial: false,
-                    }),
-                ] as const;
+            ...R.fromKeys(ALL_SHARE_DATA, (option) => {
+                return new fields.BooleanField<boolean, boolean, false, false, true>({
+                    required: false,
+                    nullable: false,
+                    initial: false,
+                });
             }),
         };
     }

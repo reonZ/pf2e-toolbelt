@@ -183,9 +183,10 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
     const data = this.getImportData(actor);
     if (!data) return;
 
-    const levels = R.mapToObj(
+    const levels = R.pullObject(
         getLevelsAttributes(data, actor),
-        ({ level, boosts }) => [level, boosts] as const
+        R.prop("level"),
+        R.prop("boosts")
     );
 
     await assignBoosts(actor.ancestry, data.attributes.ancestry.boosts);
@@ -253,7 +254,7 @@ async function assignBoosts(
     const update = R.pipe(
         match,
         R.map((key, index) => [index, { selected: key }] as const),
-        R.mapToObj(([index, update]) => [index, update])
+        R.fromEntries()
     );
 
     return item.update({ "system.boosts": update });

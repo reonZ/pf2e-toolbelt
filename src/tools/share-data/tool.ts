@@ -473,10 +473,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             );
 
             if (masterUpdates.length) {
-                const updates: Record<UpdateMasterPath, any> = R.mapToObj(
-                    masterUpdates,
-                    ([path, value]) => [path, value] as const
-                );
+                const updates = R.fromEntries(masterUpdates) as Record<UpdateMasterPath, any>;
 
                 if (master.isOwner) {
                     master.update(updates);
