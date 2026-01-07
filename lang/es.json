@@ -66,6 +66,15 @@
         "spell": {
           "name": "Anonimizar conjuros de PNJ",
           "hint": "Los conjuros lanzados por un actor que no es propiedad del jugador serán anonimizados para los jugadores."
+        },
+        "traits": {
+          "name": "Mostrar rasgos",
+          "hint": "Cuando el módulo anonimiza un mensaje, ¿deberían seguir mostrándose los rasgos?",
+          "choices": {
+            "disabled": "Desactivado",
+            "all": "Todos los rasgos",
+            "blacklist": "Usar lista negra"
+          }
         }
       },
       "arp": {
@@ -385,6 +394,7 @@
         "header": "Está usando una habilidad...",
         "context": "Revelar la acción a los jugadores"
       },
+      "revealed": "Revelado por",
       "spell": {
         "header": "Está lanzando un conjuro...",
         "context": "Revelar conjuro a los jugadores"
