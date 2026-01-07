@@ -296,7 +296,7 @@
                 "title": "Resource Tracker",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Enabled this tool in your world. The tracker can be toggled on/off via controls on the left UI."
+                    "hint": "Enable this tool in your world. The tracker can be toggled on/off via controls on the left UI."
                 }
             },
             "rollTracker": {
@@ -317,7 +317,7 @@
                 "title": "Target Helper",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Enabled the 'Target Helper' feature in your world."
+                    "hint": "Enable the 'Target Helper' feature in your world."
                 },
                 "small": {
                     "name": "Small Damage Buttons",
