@@ -16,7 +16,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
             "WRAPPER",
             "CONFIG.Token.objectClass.prototype._refreshElevation",
             this.#tokenRefreshElevation,
-            { context: this }
+            { context: this },
         ),
     ];
 
@@ -24,7 +24,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
         "WRAPPER",
         "CONFIG.Tile.documentClass.prototype.prepareBaseData",
         this.#tileDocumentPrepareBaseData,
-        { context: this }
+        { context: this },
     );
 
     #drawCanvas = foundry.utils.debounce(() => {
@@ -92,7 +92,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    init(isGM: boolean): void {
+    init(): void {
         if (!this.settings.enabled) return;
 
         activateHooksAndWrappers(this.#enabledHooks);

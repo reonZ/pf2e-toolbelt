@@ -1,14 +1,6 @@
-import {
-    DataModelCollection,
-    getWorldTime,
-    IdField,
-    localize,
-    MODULE,
-    R,
-    setSetting,
-} from "module-helpers";
-import fields = foundry.data.fields;
+import { getWorldTime, IdField, localize, MODULE, R, setSetting } from "module-helpers";
 import abstract = foundry.abstract;
+import fields = foundry.data.fields;
 
 class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
     static defineSchema(): ResourceSchema {
@@ -94,15 +86,12 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
 
     tooltip(direction: "increase" | "decrease") {
         const steps = R.pipe(
-            [
-                "step1",
-                ...(["step2", "step3"] as const).filter((step) => this[step] !== this.step1),
-            ] as const,
+            ["step1", ...(["step2", "step3"] as const).filter((step) => this[step] !== this.step1)] as const,
             R.map((step) => {
                 const value = this[step];
                 const click = localize("resourceTracker.resource.steps", step);
                 return localize("resourceTracker.resource", direction, { click, value });
-            })
+            }),
         );
 
         steps.unshift(localize("resourceTracker.resource.edit"));
@@ -112,7 +101,7 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
 
     updateSource(
         changes: Record<string, unknown> = {},
-        options?: Partial<DocumentSourceUpdateContext>
+        options?: Partial<DocumentSourceUpdateContext>,
     ): DeepPartial<this["_source"]> {
         const min = R.isNumber(changes.min) ? changes.min : this.min;
 
@@ -144,13 +133,32 @@ class ResourceModel extends abstract.DataModel<null, ResourceSchema> {
     }
 }
 
-class ResourceCollection extends DataModelCollection<ResourceModel> {
+class ResourceCollection extends Collection<ResourceModel> {
     #setting: string;
 
     constructor(setting: string, entries?: Resource[]) {
-        super(ResourceModel, entries);
+        const models = R.pipe(
+            entries ?? [],
+            R.map((entry) => {
+                if (entry instanceof ResourceModel) {
+                    return [entry.id, entry] as const;
+                }
+
+                const model = new ResourceModel(entry);
+                if (model.invalid) return;
+
+                return [model.id, model] as const;
+            }),
+            R.filter(R.isTruthy),
+        );
+
+        super(models);
 
         this.#setting = setting;
+    }
+
+    add(entry: ResourceModel): this {
+        return this.set(entry.id, entry);
     }
 
     save() {
@@ -179,5 +187,5 @@ type Resource = ModelPropsFromSchema<ResourceSchema>;
 
 MODULE.devExpose({ ResourceModel });
 
-export { ResourceModel, ResourceCollection };
+export { ResourceCollection, ResourceModel };
 export type { Resource };
