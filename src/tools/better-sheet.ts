@@ -36,26 +36,23 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             "OVERRIDE",
             "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.template",
             this.#characterSheetPF2eTemplate,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "OVERRIDE",
             "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.template",
             this.#npcSheetPF2eTemplate,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype.getData",
             this.#familiarSheetPF2eGetData,
-            { context: this }
+            { context: this },
         ),
     ];
 
-    #showPlayersHook = createToggleableHook(
-        "renderActorSheetPF2e",
-        this.#showPlayersOnRender.bind(this)
-    );
+    #showPlayersHook = createToggleableHook("renderActorSheetPF2e", this.#showPlayersOnRender.bind(this));
 
     #sortListHooks = [
         createToggleableHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this)),
@@ -145,7 +142,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
     async #familiarSheetPF2eGetData(
         sheet: FamiliarSheetPF2e<FamiliarPF2e>,
         wrapped: libWrapper.RegisterCallback,
-        options?: ActorSheetOptions
+        options?: ActorSheetOptions,
     ): Promise<CreatureSheetData<FamiliarPF2e>> {
         const data = (await wrapped(options)) as CreatureSheetData<FamiliarPF2e>;
 
@@ -199,6 +196,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         const actor = sheet.actor;
 
         this.#addActionsSortList(html, actor);
+        this.#addCraftingSortList(html, actor);
         this.#addInventorySortList(html, actor);
         this.#addSpellcastingSortList(html, actor);
     }
@@ -230,7 +228,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             }),
             R.map((item, index) => {
                 return { _id: item.id, sort: 50000 * index };
-            })
+            }),
         );
 
         await collection.actor.updateEmbeddedDocuments("Item", updates);
@@ -301,10 +299,10 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             const disabled = entry.isFlexible
                 ? true
                 : entry.isPrepared
-                ? R.values(entry.system.slots).every(({ prepared }) => {
-                      return prepared.filter((slot) => slot.id).length < 2;
-                  })
-                : collectionIsDisabled(collection);
+                  ? R.values(entry.system.slots).every(({ prepared }) => {
+                        return prepared.filter((slot) => slot.id).length < 2;
+                    })
+                  : collectionIsDisabled(collection);
 
             const btn = this.#createSortBtn(disabled);
 
@@ -345,12 +343,62 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     R.sort((a, b) => a.name.localeCompare(b.name)),
                     R.map((item, index) => {
                         return { _id: item.id, sort: 50000 * index };
-                    })
+                    }),
                 );
 
                 await actor.updateEmbeddedDocuments("Item", updates);
             });
         }
+    }
+
+    #addCraftingSortList(html: HTMLElement, actor: ActorPF2e) {
+        if (!actor.isOfType("character")) return;
+
+        const craftingTab = htmlQuery(html, `.tab[data-tab="crafting"]`);
+        if (!craftingTab) return;
+
+        this.#addCraftingFormulasSort(craftingTab, actor);
+        this.#addCraftingEntriesSort(craftingTab, actor);
+    }
+
+    #addCraftingEntriesSort(html: HTMLElement, actor: CharacterPF2e) {
+        const entries = html.querySelectorAll<HTMLElement>(".crafting-entry-list .crafting-entry[data-ability]");
+
+        for (const entry of entries) {
+            const header = htmlQuery(entry, ".action-header .item-name");
+            if (!header) continue;
+
+            const ability = actor.crafting.abilities.get(entry.dataset.ability ?? "");
+            if (!ability) continue;
+
+            const disabled = ability.preparedFormulaData.length === 0;
+            const btn = this.#createSortBtn(disabled);
+
+            header.prepend(btn);
+
+            if (disabled) continue;
+
+            btn.addEventListener("click", async () => {
+                const formulas = R.sortBy(ability.preparedFormulaData, ({ uuid }) => fromUuidSync(uuid)?.name ?? "");
+                ability.updateFormulas(formulas);
+            });
+        }
+    }
+
+    #addCraftingFormulasSort(html: HTMLElement, actor: CharacterPF2e) {
+        const crafting = htmlQuery(html, `.known-formulas`);
+        const header = htmlQuery(crafting, ":scope > header");
+        const disabled = actor.system.crafting.formulas.length === 0;
+        const btn = this.#createSortBtn(disabled);
+
+        header?.prepend(btn);
+
+        if (disabled) return;
+
+        btn.addEventListener("click", async () => {
+            const formulas = R.sortBy(actor.system.crafting.formulas, ({ uuid }) => fromUuidSync(uuid)?.name ?? "");
+            await actor.update({ "system.crafting.formulas": formulas });
+        });
     }
 
     #addInventorySortList(html: HTMLElement, actor: ActorPF2e) {
@@ -402,18 +450,12 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     R.flat(),
                     R.filter((item) => !item.isInContainer),
                     R.sort(sortItems),
-                    R.map(mapItems)
+                    R.map(mapItems),
                 );
 
                 if (hasContainer) {
                     for (const container of actor.itemTypes.backpack) {
-                        updates.push(
-                            ...R.pipe(
-                                container.contents.contents,
-                                R.sort(sortItems),
-                                R.map(mapItems)
-                            )
-                        );
+                        updates.push(...R.pipe(container.contents.contents, R.sort(sortItems), R.map(mapItems)));
                     }
                 }
 
@@ -427,7 +469,7 @@ function collectionIsDisabled(collection: SpellCollection<CreaturePF2e>): boolea
     const groups = R.pipe(
         collection.contents,
         R.groupBy((spell) => (spell.isCantrip ? 0 : spell.rank)),
-        R.values()
+        R.values(),
     );
 
     return groups.every((spells) => spells.length < 2);
