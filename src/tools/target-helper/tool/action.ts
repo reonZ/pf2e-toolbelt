@@ -18,13 +18,12 @@ import {
     TargetsFlagData,
 } from "..";
 
-const SAVE_LINK_REGEX =
-    /<a class="inline-check.+?".+?data-pf2-check="(?:reflex|will|fortitude)".+?<\/a>/g;
+const SAVE_LINK_REGEX = /<a class="inline-check.+?".+?data-pf2-check="(?:reflex|will|fortitude)".+?<\/a>/g;
 
 function prepareActionMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetsDataSource>
+    updates: DeepPartial<TargetsDataSource>,
 ): boolean {
     updates.type = "action";
 
@@ -46,7 +45,7 @@ async function renderActionMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
     html: HTMLElement,
-    flag: TargetsFlagData
+    flag: TargetsFlagData,
 ) {
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
@@ -55,9 +54,7 @@ async function renderActionMessage(
     const hasSave = data.hasSave;
 
     if (hasSave) {
-        await addTargetsHeaders.call(this, message, data, msgContent, [
-            "pf2e-toolbelt-target-actionRows",
-        ]);
+        await addTargetsHeaders.call(this, message, data, msgContent, ["pf2e-toolbelt-target-actionRows"]);
     }
 
     if (!isMessageOwner(message)) return;
@@ -92,11 +89,7 @@ async function renderActionMessage(
 
     footer.append(buttonsWrapper);
 
-    if (!data.save?.basic) return;
-
-    const damageLinks = msgContent.querySelectorAll<HTMLElement>(
-        ".inline-roll[data-formula][data-damage-roll]"
-    );
+    const damageLinks = msgContent.querySelectorAll<HTMLElement>(".inline-roll[data-formula][data-damage-roll]");
 
     for (const link of damageLinks) {
         link.addEventListener(
@@ -111,7 +104,7 @@ async function renderActionMessage(
                         // we feed all the data to the damage message
                         this.updateSourceFlag(damageMessage, cached);
                     },
-                    true
+                    true,
                 );
 
                 // we clean the message save related data
@@ -121,7 +114,7 @@ async function renderActionMessage(
 
                 data.setFlag();
             },
-            true
+            true,
         );
     }
 }
