@@ -296,7 +296,7 @@
         "title": "Suivi des ressources",
         "enabled": {
           "name": "Activé",
-          "hint": "Cet outil est activé dans votre monde. Le compteur peut être activé/désactivé via les commandes de gauche de l'IU."
+          "hint": "Activez cet outil dans votre monde. Le traqueur peut être activé/désactivé via les commandes de l'interface utilisateur située à gauche."
         }
       },
       "rollTracker": {
@@ -317,7 +317,7 @@
         "title": "Assistant de ciblage",
         "enabled": {
           "name": "Activé",
-          "hint": "Activé la fonctionnalité « Assistant de ciblage » dans votre monde."
+          "hint": "Activez l'«Assistant de ciblage» dans votre monde."
         },
         "small": {
           "name": "Petits boutons de dégâts",
