@@ -30,14 +30,7 @@ import {
     SaveRollData,
     TargetsFlagData,
 } from ".";
-import {
-    RerollType,
-    SaveDragData,
-    TargetsData,
-    TargetsDataModel,
-    TargetsDataSource,
-    TargetsSaveSource,
-} from "..";
+import { RerollType, SaveDragData, TargetsData, TargetsDataModel, TargetsDataSource, TargetsSaveSource } from "..";
 import utils = foundry.utils;
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
@@ -47,28 +40,22 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         refreshLatestMessages(20);
     }, 100);
 
-    updateMessageEmitable = createEmitable(
-        this.key,
-        (options: UpdateMessageOptions, userId: string) => {
-            this.#updateQueue.add(this.#updateMessage.bind(this), options, userId);
-        }
-    );
+    updateMessageEmitable = createEmitable(this.key, (options: UpdateMessageOptions, userId: string) => {
+        this.#updateQueue.add(this.#updateMessage.bind(this), options, userId);
+    });
 
     #textEditorEnrichHTMLWrapper = createToggleableWrapper(
         "WRAPPER",
         "CONFIG.ux.TextEditor.enrichHTML",
         this.#textEditorEnrichHTML,
-        { context: this }
+        { context: this },
     );
 
     #messageRenderHTMLWrapper = sharedMessageRenderHTML.register(this.#messageRenderHTML, {
         context: this,
     });
 
-    #preCreateChatMessageHook = createToggleableHook(
-        "preCreateChatMessage",
-        this.#onPreCreateChatMessage.bind(this)
-    );
+    #preCreateChatMessageHook = createToggleableHook("preCreateChatMessage", this.#onPreCreateChatMessage.bind(this));
 
     static INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
 
@@ -186,9 +173,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 
     _configurate(): void {
-        this.#messageRenderHTMLWrapper.toggle(
-            this.settings.enabled && (this.settings.targets || this.settings.checks)
-        );
+        this.#messageRenderHTMLWrapper.toggle(this.settings.enabled && (this.settings.targets || this.settings.checks));
         this.#debounceRefreshMessages();
     }
 
@@ -204,10 +189,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return this.getFlag(message, "save");
     }
 
-    async #updateMessage(
-        { message, applied, saves, variantId }: UpdateMessageOptions,
-        userId: string
-    ) {
+    async #updateMessage({ message, applied, saves, variantId }: UpdateMessageOptions, userId: string) {
         const flag = this.getTargetsFlagData(message);
         if (!flag) return;
 
@@ -224,10 +206,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         await data.setFlag();
     }
 
-    #applyDamageUpdates(
-        data: TargetsData,
-        { rollIndex, targetId }: UpdateMessageApplied
-    ): MessageApplied {
+    #applyDamageUpdates(data: TargetsData, { rollIndex, targetId }: UpdateMessageApplied): MessageApplied {
         const splashIndex = data.splashIndex;
 
         const targetApplied: MessageApplied[number] = {
@@ -268,7 +247,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
         dataTransfer.setData(
             "text/plain",
-            JSON.stringify({ ...saveData, type: `${MODULE.id}-check-roll` } satisfies SaveDragData)
+            JSON.stringify({ ...saveData, type: `${MODULE.id}-check-roll` } satisfies SaveDragData),
         );
     }
 
