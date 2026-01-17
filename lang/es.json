@@ -296,7 +296,7 @@
         "title": "Rastreador de recursos",
         "enabled": {
           "name": "Activado",
-          "hint": "Habilita esta herramienta en tu mundo. El rastreador se puede activar o desactivar mediante los controles de la interfaz izquierda."
+          "hint": "Activa esta herramienta en tu mundo. El rastreador se puede activar o desactivar mediante los controles de la interfaz izquierda."
         }
       },
       "rollTracker": {
@@ -317,7 +317,7 @@
         "title": "Asistente de objetivo",
         "enabled": {
           "name": "Activado",
-          "hint": "Habilitar la función 'Ayudante de objetivo' en tu mundo."
+          "hint": "Habilite la función 'Ayudante de objetivo' en su mundo."
         },
         "small": {
           "name": "Botones de daño pequeños",
