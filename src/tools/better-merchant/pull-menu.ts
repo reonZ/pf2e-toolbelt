@@ -13,6 +13,7 @@ import {
     LootPF2e,
     R,
     Rarity,
+    SYSTEM,
 } from "module-helpers";
 import { ModuleToolApplication } from "module-tool";
 import { BetterMerchantTool } from ".";
@@ -170,7 +171,7 @@ class BrowserPullMenu extends ModuleToolApplication<BetterMerchantTool> {
             if (item.isOfType("spell") && !item.isCantrip && !item.isFocusSpell && !item.isRitual) {
                 return createConsumableFromSpell(item, {
                     heightenedLevel: Math.max(rank ?? 0, item.baseRank),
-                    type: "scroll",
+                    type: SYSTEM.isSF2e ? "spell-gem" : "scroll",
                 });
             }
         };

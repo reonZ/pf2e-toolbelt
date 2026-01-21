@@ -10,7 +10,11 @@
     <div>
         <button type="button" data-better-action="create-scrolls">
             <i class="fa-solid fa-scroll"></i>
+            {{#if @root.isSF2e}}
+            {{@root.i18n 'gems'}}
+            {{else}}
             {{@root.i18n 'scrolls'}}
+            {{/if}}
         </button>
     </div>
     <div>

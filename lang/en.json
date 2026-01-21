@@ -480,6 +480,7 @@
             "sheet": {
                 "browser": "From Browser",
                 "filters": "Setup Filters",
+                "gems": "Create Spell Gems",
                 "infiniteAll": {
                     "label": "Infinite Stocks",
                     "tooltip": "The merchant will never run out of items to sell (does nothing to Treasures or Services)"
