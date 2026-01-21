@@ -480,6 +480,7 @@
       "sheet": {
         "browser": "Depuis le navigateur",
         "filters": "Configurer les filtres",
+        "gems": "Créer des gemmes de sort",
         "infiniteAll": {
           "label": "Stocks infinis",
           "tooltip": "Le marchand ne sera jamais à court d'articles à vendre (ne fait rien aux trésors ou aux services)"
