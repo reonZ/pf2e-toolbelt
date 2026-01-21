@@ -51,17 +51,11 @@ import {
 const BANDS_OF_FORCE_SLUGS = ["bands-of-force", "bands-of-force-greater", "bands-of-force-major"];
 
 class ShareDataTool extends ModuleTool<ShareDataSettings> {
-    #updateMasterEmitable = createEmitable(
-        this.localizeKey("master"),
-        this.#updateMaster.bind(this)
-    );
+    #updateMasterEmitable = createEmitable(this.localizeKey("master"), this.#updateMaster.bind(this));
 
     #slaveTurnEmitable = createEmitable(this.localizeKey("slave-turn"), this.#slaveTurn.bind(this));
 
-    #slaveInitiativeEmitable = createEmitable(
-        this.localizeKey("slave-initiative"),
-        this.#slaveInitiative.bind(this)
-    );
+    #slaveInitiativeEmitable = createEmitable(this.localizeKey("slave-initiative"), this.#slaveInitiative.bind(this));
 
     get key(): "shareData" {
         return "shareData";
@@ -89,26 +83,18 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
 
-        const registerToolWrapper = (
-            path: string | string[],
-            callback: libWrapper.RegisterCallback
-        ) => {
+        const registerToolWrapper = (path: string | string[], callback: libWrapper.RegisterCallback) => {
             registerWrapper("WRAPPER", path, callback, this);
         };
 
-        const registerToolOverride = (
-            path: string | string[],
-            callback: libWrapper.RegisterCallback
-        ) => {
+        const registerToolOverride = (path: string | string[], callback: libWrapper.RegisterCallback) => {
             registerWrapper("OVERRIDE", path, callback, this);
         };
 
         const registerCreatureWrapper = (path: string, callback: libWrapper.RegisterCallback) => {
             registerToolWrapper(
-                ["character", "npc"].map(
-                    (type) => `CONFIG.PF2E.Actor.documentClasses.${type}.prototype.${path}`
-                ),
-                callback
+                ["character", "npc"].map((type) => `CONFIG.PF2E.Actor.documentClasses.${type}.prototype.${path}`),
+                callback,
             );
         };
 
@@ -126,31 +112,19 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
         registerCreatureWrapper("_onDelete", this.#actorOnDelete);
 
-        registerToolWrapper(
-            "CONFIG.Combatant.documentClass.prototype.startTurn",
-            this.#combatantStartTurn
-        );
+        registerToolWrapper("CONFIG.Combatant.documentClass.prototype.startTurn", this.#combatantStartTurn);
 
-        registerToolWrapper(
-            "CONFIG.Combatant.documentClass.prototype.endTurn",
-            this.#combatantEndTurn
-        );
+        registerToolWrapper("CONFIG.Combatant.documentClass.prototype.endTurn", this.#combatantEndTurn);
 
-        registerToolWrapper(
-            "CONFIG.Combatant.documentClass.prototype._onUpdate",
-            this.#combatantOnUpdate
-        );
+        registerToolWrapper("CONFIG.Combatant.documentClass.prototype._onUpdate", this.#combatantOnUpdate);
 
-        registerToolOverride(
-            "CONFIG.Combat.documentClass.prototype.resetActors",
-            this.#combatResetActors
-        );
+        registerToolOverride("CONFIG.Combat.documentClass.prototype.resetActors", this.#combatResetActors);
 
         // we only have effect here despite the accessor being on AbstractEffectPF2e
         // because the system only ever use it for effects
         registerToolOverride(
             "CONFIG.PF2E.Item.documentClasses.effect.prototype.remainingDuration",
-            this.#effectRemainingDuration
+            this.#effectRemainingDuration,
         );
 
         // we do not activate this wrapper because afflictions aren't offcially in the system yet
@@ -159,19 +133,14 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         //     this.#afflictionRemainingStageDuration
         // );
 
-        sharedWeaponPrepareBaseData
-            .register(this.#weaponPrepareBaseData, { context: this, priority: 100 })
-            .activate();
+        sharedWeaponPrepareBaseData.register(this.#weaponPrepareBaseData, { context: this, priority: 100 }).activate();
 
         if (!isGM) return;
 
         this.#updateMasterEmitable.activate();
         this.#slaveTurnEmitable.activate();
 
-        Hooks.on(
-            "getCreatureSheetPF2eHeaderButtons",
-            this.#onGetCreatureSheetPF2eHeaderButtons.bind(this)
-        );
+        Hooks.on("getCreatureSheetPF2eHeaderButtons", this.#onGetCreatureSheetPF2eHeaderButtons.bind(this));
     }
 
     // afflictions aren't offcially in the system yet
@@ -205,9 +174,9 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             R.sortBy(
                 [(item) => item.system.runes.potency, "desc"],
                 [(item) => item.system.runes.striking, "desc"],
-                [(item) => item.system.runes.property.length, "desc"]
+                [(item) => item.system.runes.property.length, "desc"],
             ),
-            R.first()
+            R.first(),
         );
 
         if (masterWeapon) {
@@ -237,12 +206,12 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         R.flatMap((slave) => {
                             if (isInvalidNonCombatantSlave(slave)) return null;
                             return [slave, slave.isOfType("character") ? slave.familiar : null];
-                        })
+                        }),
                     );
 
                     return [actor, actor.familiar, ...extras];
                 })
-                .filter(R.isNonNull)
+                .filter(R.isNonNull),
         );
         resetActors(actors, { sheets: false, tokens: true });
     }
@@ -252,7 +221,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         wrapped: libWrapper.RegisterCallback,
         changed: DeepPartial<Combatant["_source"]>,
         operation: DatabaseUpdateOperation<EncounterPF2e>,
-        userId: string
+        userId: string,
     ) {
         wrapped(changed, operation, userId);
 
@@ -293,7 +262,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     async #combatantEndTurn(
         combatant: CombatantPF2e,
         wrapped: libWrapper.RegisterCallback,
-        options: { round: number }
+        options: { round: number },
     ) {
         await wrapped(options);
         await this.#combatantTurn("turn-end", combatant);
@@ -358,10 +327,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     /**
      * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/encounter/combatant.ts#L233
      */
-    async #performActorUpdates(
-        actor: CreaturePF2e,
-        event: "initiative-roll" | "turn-start"
-    ): Promise<void> {
+    async #performActorUpdates(actor: CreaturePF2e, event: "initiative-roll" | "turn-start"): Promise<void> {
         const actorUpdates: Record<string, unknown> = {};
         for (const rule of actor.rules ?? []) {
             await rule.onUpdateEncounter?.({ event, actorUpdates });
@@ -383,17 +349,15 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     async #actorUndoDamage(
         actor: CreaturePF2e,
         wrapped: libWrapper.RegisterCallback,
-        appliedDamage: AppliedDamageFlag
+        appliedDamage: AppliedDamageFlag,
     ): Promise<void> {
         const master = getMasterIfOption(actor, "health");
 
         if (master) {
-            const hpUpdate = appliedDamage.updates.findSplice(
-                (update) => update.path === "system.attributes.hp.value"
-            );
+            const hpUpdate = appliedDamage.updates.findSplice((update) => update.path === "system.attributes.hp.value");
 
             const spUpdates = appliedDamage.updates.findSplice(
-                (update) => update.path === "system.attributes.hp.sp.value"
+                (update) => update.path === "system.attributes.hp.sp.value",
             );
 
             if (hpUpdate || spUpdates) {
@@ -421,14 +385,14 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         wrapped: libWrapper.RegisterCallback,
         changes: DeepPartial<CharacterSource>,
         operation: CreatureDatabaseUpdateOperation,
-        userId: string
+        userId: string,
     ): Promise<boolean | void> {
         const flag = changes.flags?.[MODULE.id]?.[this.key] as Maybe<{
             "==data"?: ShareDataSource;
             data?: ShareDataSource;
         }>;
 
-        const newData = flag ? flag["==data"] ?? flag["data"] : undefined;
+        const newData = flag ? (flag["==data"] ?? flag["data"]) : undefined;
         const newMasterId = newData?.master;
 
         if (newMasterId !== undefined) {
@@ -448,7 +412,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 updateKeys.push(
                     "system.attributes.hp.value",
                     "system.attributes.hp.sp.value",
-                    "system.attributes.hp.temp"
+                    "system.attributes.hp.temp",
                 );
             }
 
@@ -469,7 +433,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     foundry.utils.deleteProperty(changes, path);
                     return [path, value];
                 }),
-                R.filter(R.isDefined)
+                R.filter(R.isDefined),
             );
 
             if (masterUpdates.length) {
@@ -490,7 +454,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         actor: CreaturePF2e,
         wrapped: libWrapper.RegisterCallback,
         operation: DatabaseDeleteOperation<null>,
-        userId: string
+        userId: string,
     ) {
         const master = getMasterInMemory(actor);
         const slaves = getSlavesInMemory(actor, false);
@@ -526,12 +490,10 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         wrapped: libWrapper.RegisterCallback,
         changes: DeepPartial<ActorSourcePF2e>,
         operation: CreatureDatabaseUpdateOperation,
-        userId: string
+        userId: string,
     ): Promise<boolean | void> {
         if (operation.previousShareMasterId) {
-            const previousMaster = game.actors.get<CreaturePF2e<null>>(
-                operation.previousShareMasterId
-            );
+            const previousMaster = game.actors.get<CreaturePF2e<null>>(operation.previousShareMasterId);
 
             if (previousMaster) {
                 removeSlaveFromMemory(previousMaster, actor);
@@ -569,7 +531,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             if (data.health) {
                 actor.system.attributes.hp = foundry.utils.mergeObject(
                     new game.pf2e.StatisticModifier("hp"),
-                    master.system.attributes.hp
+                    master.system.attributes.hp,
                 );
             }
 
@@ -577,7 +539,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 actor.system.details.languages.value = R.pipe(
                     actor.system.details.languages.value,
                     R.concat(master.system.details.languages.value),
-                    R.unique()
+                    R.unique(),
                 );
                 // we can't do that because the system fills the details field with the prepared data instead of the source
                 // actor.system.details.languages.details = [
@@ -590,15 +552,11 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             if (!master.isOfType("character") || !actor.isOfType("character")) return;
 
             if (data.heroPoints) {
-                actor.system.resources.heroPoints = foundry.utils.deepClone(
-                    master.system.resources.heroPoints
-                );
+                actor.system.resources.heroPoints = foundry.utils.deepClone(master.system.resources.heroPoints);
             }
 
             if (data.spellcasting) {
-                actor.system.resources.focus = foundry.utils.deepClone(
-                    master.system.resources.focus
-                );
+                actor.system.resources.focus = foundry.utils.deepClone(master.system.resources.focus);
             }
 
             if (data.skills) {
@@ -607,13 +565,12 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
                 // we add the master's item modifiers to perception
                 if (masterPerception && slavePerception) {
-                    const PerceptionStatistic =
-                        slavePerception.constructor as ConstructorOf<PerceptionStatistic>;
+                    const PerceptionStatistic = slavePerception.constructor as ConstructorOf<PerceptionStatistic>;
 
                     const modifiers = R.pipe(
                         masterPerception.check.modifiers,
                         R.filter((modifier) => modifier.type === "item"),
-                        R.map((modifier) => modifier.clone())
+                        R.map((modifier) => modifier.clone()),
                     );
 
                     const perception = new PerceptionStatistic(actor, {
@@ -644,7 +601,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     const modifiers = R.pipe(
                         check.modifiers,
                         R.filter((modifier) => modifier.type === "item"),
-                        R.map((modifier) => modifier.clone())
+                        R.map((modifier) => modifier.clone()),
                     );
 
                     const statistic = new Statistic(actor, {
@@ -661,7 +618,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     actor.skills[slug] = statistic;
                     actor.system.skills[slug] = foundry.utils.mergeObject(
                         statistic.getTraceData() as CharacterSkillData,
-                        { attribute, rank }
+                        { attribute, rank },
                     );
                 }
             }
@@ -688,7 +645,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         if (data.timeEvents) {
             actor.flags.pf2e.rollOptions.all = foundry.utils.mergeObject(
                 actor.flags.pf2e.rollOptions.all,
-                createEncounterRollOptions(master)
+                createEncounterRollOptions(master),
             );
         }
 
@@ -722,7 +679,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     return BANDS_OF_FORCE_SLUGS.includes(item.slug as any) && !!item.isInvested;
                 }),
                 R.sortBy([(item) => item.slug, "desc"]),
-                R.first()
+                R.first(),
             );
 
             const bracerBonus = (bracers ? BANDS_OF_FORCE_SLUGS.indexOf(bracers.slug) : -1) + 1;
@@ -741,8 +698,8 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                             selector === "saving-throw"
                                 ? "item"
                                 : includesAny(actor.system.traits.value, ["eidolon", "eldamon"])
-                                ? "potency"
-                                : "item";
+                                  ? "potency"
+                                  : "item";
 
                         const modifier = new game.pf2e.Modifier({
                             slug,
@@ -776,10 +733,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         }
     }
 
-    #onGetCreatureSheetPF2eHeaderButtons(
-        sheet: CreatureSheetPF2e<CreaturePF2e>,
-        buttons: ApplicationHeaderButton[]
-    ) {
+    #onGetCreatureSheetPF2eHeaderButtons(sheet: CreatureSheetPF2e<CreaturePF2e>, buttons: ApplicationHeaderButton[]) {
         const actor = sheet.actor;
         if (!isValidSlave(actor)) return;
 
@@ -814,7 +768,7 @@ function createCombatant(actor: CreaturePF2e, encounter: EncounterPF2e) {
 
     return new CombatantPF2e(
         { tokenId: token?.id, actorId: actor.id, hidden: false, sceneId: scene?.id },
-        { parent: encounter }
+        { parent: encounter },
     );
 }
 

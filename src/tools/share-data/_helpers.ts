@@ -17,7 +17,7 @@ const DURATION_UNITS: Readonly<Record<string, number>> = {
  */
 function calculateRemainingDuration(
     effect: AbstractEffectPF2e,
-    durationData: DurationData
+    durationData: DurationData,
 ): { expired: boolean; remaining: number } {
     if (durationData.unit === "encounter") {
         const isExpired = effect.system.expired;
@@ -34,12 +34,7 @@ function calculateRemainingDuration(
 
     // Prevent effects that expire at end of current turn or round from expiring immediately outside of encounters
     const addend =
-        !combatant &&
-        duration === 0 &&
-        unit === "rounds" &&
-        ["turn-end", "round-end"].includes(expiry ?? "")
-            ? 1
-            : 0;
+        !combatant && duration === 0 && unit === "rounds" && ["turn-end", "round-end"].includes(expiry ?? "") ? 1 : 0;
     const remaining = start + duration + addend - game.time.worldTime;
     const result = { remaining, expired: remaining <= 0 };
 
@@ -48,17 +43,13 @@ function calculateRemainingDuration(
         const currentInitiative = combatant.initiative ?? 0;
 
         // A familiar won't be represented in the encounter tracker: use the master in its place
-        const fightyActor = effect.actor?.isOfType("familiar")
-            ? effect.actor.master ?? effect.actor
-            : effect.actor;
+        const fightyActor = effect.actor?.isOfType("familiar") ? (effect.actor.master ?? effect.actor) : effect.actor;
 
         // this part is heavily modified
         const atTurnStart = () => {
             if (startInitiative !== currentInitiative) return false;
 
-            const master = effect.actor?.combatant
-                ? null
-                : getMasterInMemory(fightyActor as CreaturePF2e);
+            const master = effect.actor?.combatant ? null : getMasterInMemory(fightyActor as CreaturePF2e);
 
             const origin = (effect.origin === effect.actor && master) || effect.origin;
 
@@ -69,10 +60,10 @@ function calculateRemainingDuration(
             expiry === "turn-start"
                 ? atTurnStart()
                 : expiry === "turn-end"
-                ? currentInitiative < startInitiative
-                : expiry === "round-end"
-                ? remaining <= 0 && game.time.worldTime > start
-                : false;
+                  ? currentInitiative < startInitiative
+                  : expiry === "round-end"
+                    ? remaining <= 0 && game.time.worldTime > start
+                    : false;
     }
 
     return result;
@@ -98,9 +89,7 @@ function createEncounterRollOptions(actor: ActorPF2e): Record<string, boolean> {
     const { initiativeStatistic } = participant.flags.pf2e;
 
     const threat = encounter.metrics?.threat;
-    const numericThreat = { trivial: 0, low: 1, moderate: 2, severe: 3, extreme: 4 }[
-        threat ?? "trivial"
-    ];
+    const numericThreat = { trivial: 0, low: 1, moderate: 2, severe: 3, extreme: 4 }[threat ?? "trivial"];
 
     const entries = (
         [
@@ -122,10 +111,7 @@ function createEncounterRollOptions(actor: ActorPF2e): Record<string, boolean> {
 /**
  * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/actor/helpers.ts#L45
  */
-async function resetActors(
-    actors?: Iterable<ActorPF2e>,
-    options: ResetActorsRenderOptions = {}
-): Promise<void> {
+async function resetActors(actors?: Iterable<ActorPF2e>, options: ResetActorsRenderOptions = {}): Promise<void> {
     actors ??= [
         game.actors.contents,
         game.scenes.contents.flatMap((s) => s.tokens.contents).flatMap((t) => t.actor ?? []),
@@ -140,9 +126,7 @@ async function resetActors(
     game.pf2e.effectPanel.refresh();
 
     if (options.tokens) {
-        for (const token of R.unique(
-            Array.from(actors).flatMap((a) => a.getActiveTokens(true, true))
-        )) {
+        for (const token of R.unique(Array.from(actors).flatMap((a) => a.getActiveTokens(true, true)))) {
             token.simulateUpdate();
         }
     }
