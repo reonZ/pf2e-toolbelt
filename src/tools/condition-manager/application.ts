@@ -32,7 +32,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
     constructor(
         tool: ConditionManagerTool,
         condition: ConditionPF2e<ActorPF2e>,
-        options: DeepPartial<ApplicationConfiguration> = {}
+        options: DeepPartial<ApplicationConfiguration> = {},
     ) {
         super(tool, options);
 
@@ -76,9 +76,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
         const base = game.i18n.localize("TYPES.Item.effect");
         const label = `${base}: ${this.#condition.name}`;
 
-        return this.#origin && this.#origin !== this.#combatant
-            ? `${label} (${this.#origin.name})`
-            : label;
+        return this.#origin && this.#origin !== this.#combatant ? `${label} (${this.#origin.name})` : label;
     }
 
     async _prepareContext(options: ApplicationRenderOptions): Promise<RenderContext> {
@@ -99,7 +97,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
                     value: combatant.id,
                     label: isGM || combatant.playersCanSeeName ? combatant.name : anonLabel,
                 };
-            })
+            }),
         );
 
         const origin = combatants.length ? { combatants, selected: this.#origin!.id } : null;
@@ -175,9 +173,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
             } else if (input === "system.badge.value") {
                 const value = el.valueAsNumber;
 
-                this.#counter.value = isNaN(value)
-                    ? this.#counter.default
-                    : Math.max(el.valueAsNumber, 1);
+                this.#counter.value = isNaN(value) ? this.#counter.default : Math.max(el.valueAsNumber, 1);
             } else if (input === "system.duration.expiry") {
                 this.#duration.expiry = el.value as DurationData["expiry"];
             } else if (input === "system.duration.unit") {
