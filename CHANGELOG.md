@@ -4,7 +4,7 @@
   - add sort button to the crafting formulas table
   - add sort button to the `Advanced Alchemy` table
 - `Target Helper`:
-  - fix action messages with non-basic saves not having their data transfered to damage messages created by it
+  - fix action messages with non-basic saves not having their data transferred to damage messages created by it
 
 # 3.23.0
 
