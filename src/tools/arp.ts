@@ -8,6 +8,7 @@ import {
     PhysicalItemPF2e,
     R,
     ShieldPF2e,
+    SYSTEM,
     WeaponPF2e,
     ZeroToFour,
     ZeroToSix,
@@ -359,7 +360,7 @@ function updateItemPriceByGrade(coins: Coins, item: ItemType) {
 }
 
 function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is ActorPF2e {
-    return !!actor && !actor.getFlag(game.system.id, "disableABP") && (!isCharacter || actor.isOfType("character"));
+    return !!actor && !actor.getFlag(SYSTEM.id, "disableABP") && (!isCharacter || actor.isOfType("character"));
 }
 
 function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {

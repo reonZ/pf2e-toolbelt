@@ -45,6 +45,7 @@ import {
     toggleHooksAndWrappers,
     useAction,
     usePhysicalItem,
+    SYSTEM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
@@ -211,7 +212,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #onCreateChatMessage(origin: ChatMessagePF2e) {
-        if (!origin.isAuthor || origin.getFlag(game.system.id, "context.type") !== "self-effect") return;
+        if (!origin.isAuthor || origin.getFlag(SYSTEM.id, "context.type") !== "self-effect") return;
 
         const hookId = Hooks.on("renderChatMessageHTML", (message: ChatMessagePF2e, html: HTMLElement) => {
             if (message !== origin) return;
