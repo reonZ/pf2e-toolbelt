@@ -10,6 +10,7 @@ import {
     R,
     settingPath,
     setUserSetting,
+    SYSTEM,
     timestampToLocalTime,
     toggleHooksAndWrappers,
     tupleHasValue,
@@ -272,7 +273,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         if (!die || die.faces !== 20 || !R.isNumber(value)) return;
 
         const user = game.user;
-        const context = message.getFlag("pf2e", "context") as Maybe<ChatContextFlag>;
+        const context = message.getFlag(SYSTEM.id, "context") as Maybe<ChatContextFlag>;
 
         if (context && isCheckContextFlag(context)) {
             if (!user.isGM && context.rollMode === "selfroll") return;
@@ -287,7 +288,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
                 outcome: context.outcome,
                 session: this.settings.session,
                 isReroll: context.isReroll,
-                modifier: message.getFlag("pf2e", "modifierName") as string | undefined,
+                modifier: message.getFlag(SYSTEM.id, "modifierName") as string | undefined,
             });
         } else if (context?.type === "damage-roll") {
         } else if (message.rolls.length === 1 && message.rolls[0].dice.length === 1) {
