@@ -57,11 +57,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         id: IdentifyTracker.ID,
     };
 
-    constructor(
-        item: Maybe<ItemPF2e>,
-        tool: IdentifyTool,
-        options?: DeepPartial<ApplicationConfiguration>
-    ) {
+    constructor(item: Maybe<ItemPF2e>, tool: IdentifyTool, options?: DeepPartial<ApplicationConfiguration>) {
         super(tool, options);
 
         if (this.isValidItem(item)) {
@@ -98,8 +94,8 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         const itemUUID = R.isString(itemOrUUID)
             ? itemOrUUID
             : this.isValidItem(itemOrUUID)
-            ? itemOrUUID.uuid
-            : undefined;
+              ? itemOrUUID.uuid
+              : undefined;
 
         if (!itemUUID || this.#unlockedUUIDs.includes(itemUUID)) return;
 
@@ -110,16 +106,14 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
             return this.render();
         }
 
-        const elements = this.element.querySelectorAll<HTMLElement>(
-            `[data-item-uuid="${itemUUID}"]`
-        );
+        const elements = this.element.querySelectorAll<HTMLElement>(`[data-item-uuid="${itemUUID}"]`);
         for (const element of elements) {
             element.classList.remove("locked");
             element.removeEventListener("click", this.#onClickLocked);
         }
     }
 
-    protected _onClose(options: ApplicationClosingOptions): void {
+    protected _onClose(_options: ApplicationClosingOptions): void {
         this.#reset();
         this.#itemsUUIDs = [];
         this.#unlockedUUIDs = [];
@@ -129,12 +123,10 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         }
     }
 
-    async _prepareContext(options: IdentifyRenderOptions): Promise<IdentifyContext> {
+    async _prepareContext(_options: IdentifyRenderOptions): Promise<IdentifyContext> {
         const party = game.actors.party;
         const members = party?.members ?? [];
-        const characters = members.filter((actor): actor is CharacterPF2e =>
-            actor.isOfType("character")
-        );
+        const characters = members.filter((actor): actor is CharacterPF2e => actor.isOfType("character"));
 
         const spellLists: Record<string, IdentifySpellList> = {};
         const itemGroups = new MapOfArrays<IdentifyGroupItem, PhysicalItemType>();
@@ -145,7 +137,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         const items: PhysicalItemPF2e<ActorPF2e>[] = R.pipe(
             members,
             R.flatMap((actor) => actor.inventory.contents),
-            R.filter((item) => !item.isIdentified)
+            R.filter((item) => !item.isIdentified),
         );
 
         if (party) {
@@ -158,11 +150,11 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                     [...this.#itemsUUIDs, ...this.#unlockedUUIDs],
                     R.unique(),
                     R.difference(items.map((item) => item.uuid)),
-                    R.map((uuid) => fromUuid<PhysicalItemPF2e<ActorPF2e>>(uuid))
-                )
+                    R.map((uuid) => fromUuid<PhysicalItemPF2e<ActorPF2e>>(uuid)),
+                ),
             ),
             R.filter(R.isTruthy),
-            R.filter((item) => this.isValidItem(item))
+            R.filter((item) => this.isValidItem(item)),
         );
 
         const allItems = [...items, ...ghostItems];
@@ -180,26 +172,17 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                 const itemType = item.type as PhysicalItemType;
                 const data = item.system.identification.identified;
                 const isConsumable = item.isOfType("consumable");
-                const scrollWandSpell =
-                    isConsumable && isCastConsumable(item) && item.embeddedSpell;
+                const scrollWandSpell = isConsumable && isCastConsumable(item) && item.embeddedSpell;
                 const tradition =
-                    scrollWandSpell && scrollWandSpell.rarity === "common"
-                        ? scrollWandSpell.traditions
-                        : undefined;
+                    scrollWandSpell && scrollWandSpell.rarity === "common" ? scrollWandSpell.traditions : undefined;
                 const itemSlug = scrollWandSpell
-                    ? scrollWandSpell.slug ?? sluggify(scrollWandSpell.name)
-                    : item.slug ?? sluggify(data.name);
+                    ? (scrollWandSpell.slug ?? sluggify(scrollWandSpell.name))
+                    : (item.slug ?? sluggify(data.name));
                 const partialSlug =
-                    isConsumable && !scrollWandSpell
-                        ? sluggify(data.name.replace(PARTIAL_SLUGH_REGEX, ""))
-                        : undefined;
-                const locked =
-                    !isIdentified && hasLockedItems && !this.#unlockedUUIDs.includes(itemUUID);
+                    isConsumable && !scrollWandSpell ? sluggify(data.name.replace(PARTIAL_SLUGH_REGEX, "")) : undefined;
+                const locked = !isIdentified && hasLockedItems && !this.#unlockedUUIDs.includes(itemUUID);
 
-                const itemClasses: (string | boolean)[] = [
-                    isIdentified && "identified",
-                    locked && "locked",
-                ];
+                const itemClasses: (string | boolean)[] = [isIdentified && "identified", locked && "locked"];
 
                 const owner = {
                     name: actor.name,
@@ -207,123 +190,110 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                     icon: getOwnerIcon(actor),
                 };
 
-                const actors: IdentifyGroupItem["actors"] = characters.map(
-                    (actor): ItemActor | { id: string } => {
-                        const actorId = actor.id;
+                const actors: IdentifyGroupItem["actors"] = characters.map((actor): ItemActor | { id: string } => {
+                    const actorId = actor.id;
 
-                        if (isIdentified) {
-                            return { id: actorId };
+                    if (isIdentified) {
+                        return { id: actorId };
+                    }
+
+                    const failed = ((): number => {
+                        const fail = this.tool.getFlag(item, "failed", actorId);
+                        if (!R.isString(fail)) return 0;
+
+                        const failTime = DateTime.fromISO(fail);
+                        const diffTime = worldTime.diff(failTime, useDelay ? "hours" : "days");
+                        const removeFail = useDelay ? diffTime.hours >= 24 : diffTime.days >= 1;
+
+                        if (removeFail) {
+                            const toRemove = (this.#removedFaillures[itemUUID] ??= new Set());
+                            toRemove.add(actorId);
                         }
 
-                        const failed = ((): number => {
-                            const fail = this.tool.getFlag(item, "failed", actorId);
-                            if (!R.isString(fail)) return 0;
+                        return removeFail ? 0 : useDelay ? 24 - diffTime.hours : 1;
+                    })();
 
-                            const failTime = DateTime.fromISO(fail);
-                            const diffTime = worldTime.diff(failTime, useDelay ? "hours" : "days");
-                            const removeFail = useDelay ? diffTime.hours >= 24 : diffTime.days >= 1;
-
-                            if (removeFail) {
-                                const toRemove = (this.#removedFaillures[itemUUID] ??= new Set());
-                                toRemove.add(actorId);
-                            }
-
-                            return removeFail ? 0 : useDelay ? 24 - diffTime.hours : 1;
-                        })();
-
-                        const known = (() => {
-                            if (failed) {
-                                return false;
-                            }
-
-                            const identification = this.tool.getDataFlagArray(
-                                actor,
-                                IdentifiedItemModel,
-                                "identified",
-                                itemType
-                            );
-
-                            const full = identification.find((x) => x.itemSlug === itemSlug);
-
-                            if (full) {
-                                return true;
-                            }
-
-                            if (partialSlug) {
-                                const partial = identification.find(
-                                    (x) => x.partialSlug === partialSlug
-                                );
-
-                                if (partial?.itemName) {
-                                    return partial.itemName;
-                                }
-                            }
-
+                    const known = (() => {
+                        if (failed) {
                             return false;
-                        })();
-
-                        if (known !== false) {
-                            this.#knownItems.push({
-                                uuid: itemUUID,
-                                partial: R.isString(known),
-                            });
                         }
 
-                        const canRecallKnowledge = (() => {
-                            if (failed || known !== false || !scrollWandSpell) {
-                                return false;
+                        const identification = this.tool.getDataFlagArray(
+                            actor,
+                            IdentifiedItemModel,
+                            "identified",
+                            itemType,
+                        );
+
+                        const full = identification.find((x) => x.itemSlug === itemSlug);
+
+                        if (full) {
+                            return true;
+                        }
+
+                        if (partialSlug) {
+                            const partial = identification.find((x) => x.partialSlug === partialSlug);
+
+                            if (partial?.itemName) {
+                                return partial.itemName;
                             }
+                        }
 
-                            const list = (spellLists[actorId] ??= getSpellList(actor));
-                            const isTradition =
-                                !!tradition && list.traditions.some((x) => tradition.has(x));
+                        return false;
+                    })();
 
-                            return isTradition || list.known.includes(itemSlug);
-                        })();
+                    if (known !== false) {
+                        this.#knownItems.push({
+                            uuid: itemUUID,
+                            partial: R.isString(known),
+                        });
+                    }
 
-                        const tooltip = failed
-                            ? useDelay
-                                ? this.localize("failed.delay", { hours: failed })
-                                : this.localize("failed.daily")
-                            : typeof known === "string"
-                            ? this.localize("known.partial", { item: known })
-                            : known === true
+                    const canRecallKnowledge = (() => {
+                        if (failed || known !== false || !scrollWandSpell) {
+                            return false;
+                        }
+
+                        const list = (spellLists[actorId] ??= getSpellList(actor));
+                        const isTradition = !!tradition && list.traditions.some((x) => tradition.has(x));
+
+                        return isTradition || list.known.includes(itemSlug);
+                    })();
+
+                    const tooltip = failed
+                        ? useDelay
+                            ? this.localize("failed.delay", { hours: failed })
+                            : this.localize("failed.daily")
+                        : typeof known === "string"
+                          ? this.localize("known.partial", { item: known })
+                          : known === true
                             ? this.localize("known.full")
                             : canRecallKnowledge
-                            ? this.localize("known.recall")
-                            : "";
+                              ? this.localize("known.recall")
+                              : "";
 
-                        const update =
-                            !failed && known !== true
-                                ? this.#updates[itemUUID]?.[actorId]
-                                : undefined;
+                    const update = !failed && known !== true ? this.#updates[itemUUID]?.[actorId] : undefined;
 
-                        const canToggle = !isIdentified && !failed && known !== true;
+                    const canToggle = !isIdentified && !failed && known !== true;
 
-                        const actorClasses: (string | false)[] = [
-                            failed !== 0 && "failed",
-                            canToggle && "toggleable",
-                        ];
+                    const actorClasses: (string | false)[] = [failed !== 0 && "failed", canToggle && "toggleable"];
 
-                        return {
-                            id: actorId,
-                            known,
-                            update,
-                            tooltip,
-                            canToggle,
-                            canRecallKnowledge,
-                            failed: failed !== 0,
-                            css: actorClasses.filter(R.isString).join(" "),
-                        };
-                    }
-                );
+                    return {
+                        id: actorId,
+                        known,
+                        update,
+                        tooltip,
+                        canToggle,
+                        canRecallKnowledge,
+                        failed: failed !== 0,
+                        css: actorClasses.filter(R.isString).join(" "),
+                    };
+                });
 
                 const groupItem: IdentifyGroupItem = {
                     actors,
                     css: itemClasses.filter(R.isString).join(" "),
-                    identifyTooltip: isIdentified
-                        ? undefined
-                        : await createIdenticationTooltip(item),
+                    identifyTooltip: isIdentified ? undefined : await createIdenticationTooltip(item),
                     img: data.img,
                     isIdentified,
                     isLocked: locked,
@@ -335,7 +305,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                 };
 
                 itemGroups.add(itemType, groupItem);
-            })
+            }),
         );
 
         return {
@@ -350,12 +320,12 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                         items: R.sortBy(items, R.prop("name")),
                     };
                 }),
-                R.prop("label")
+                R.prop("label"),
             ),
         };
     }
 
-    protected _onFirstRender(context: object, options: ApplicationRenderOptions): void {
+    protected _onFirstRender(_context: object, _options: ApplicationRenderOptions): void {
         this.#hooks = (
             [
                 ["updateWorldTime", () => (this.render(), undefined)],
@@ -462,16 +432,12 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                 const cells: Element[] = [];
 
                 if (actorId) {
-                    const actorCells = html.querySelectorAll(
-                        `.highlight[data-actor-id="${actorId}"]`
-                    );
+                    const actorCells = html.querySelectorAll(`.highlight[data-actor-id="${actorId}"]`);
                     cells.push(...actorCells);
                 }
 
                 if (itemUuid) {
-                    const itemCells = html.querySelectorAll(
-                        `.highlight[data-item-uuid="${itemUuid}"]`
-                    );
+                    const itemCells = html.querySelectorAll(`.highlight[data-item-uuid="${itemUuid}"]`);
                     cells.push(...itemCells);
                 }
 
@@ -527,15 +493,11 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         const knownUUIDS = knownItems.map(({ uuid }) => uuid);
 
         const selectedList =
-            this.#unlockedUUIDs.length > 0
-                ? R.intersection(knownUUIDS, this.#unlockedUUIDs)
-                : knownUUIDS;
+            this.#unlockedUUIDs.length > 0 ? R.intersection(knownUUIDS, this.#unlockedUUIDs) : knownUUIDS;
 
         const items = R.pipe(
-            await Promise.all(
-                selectedList.map((itemUuid) => fromUuid<PhysicalItemPF2e<ActorPF2e>>(itemUuid))
-            ),
-            R.filter((item): item is PhysicalItemPF2e<ActorPF2e> => !!item && !item.isIdentified)
+            await Promise.all(selectedList.map((itemUuid) => fromUuid<PhysicalItemPF2e<ActorPF2e>>(itemUuid))),
+            R.filter((item): item is PhysicalItemPF2e<ActorPF2e> => !!item && !item.isIdentified),
         );
 
         if (!items.length) {
@@ -567,10 +529,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         const updateElements = htmlQueryAll(this.element, "[data-update]");
         const worldTime = game.pf2e.worldClock.worldTime.toString();
 
-        const identifyUpdates: Record<
-            string,
-            PartialRecord<PhysicalItemType, IdentifiedItemSource[]>
-        > = {};
+        const identifyUpdates: Record<string, PartialRecord<PhysicalItemType, IdentifiedItemSource[]>> = {};
 
         const failUpdates: Record<string, Record<string, Record<string, string | null>>> = {};
 
@@ -578,11 +537,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
             return (items[itemUuid] ??= await fromUuid(itemUuid));
         };
 
-        const addFailedUpdate = (
-            item: PhysicalItemPF2e<ActorPF2e>,
-            actorId: string,
-            remove: boolean
-        ) => {
+        const addFailedUpdate = (item: PhysicalItemPF2e<ActorPF2e>, actorId: string, remove: boolean) => {
             const itemActorUpdates = (failUpdates[item.actor.id] ??= {});
             const itemUpdates = (itemActorUpdates[item.id] ??= {});
 
@@ -594,8 +549,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         };
 
         const elementsUpdatesPromises = updateElements.map(async (updateElement) => {
-            const { actorId, itemUuid, update, type, itemSlug, itemName, partialSlug } =
-                updateElement.dataset;
+            const { actorId, itemUuid, update, type, itemSlug, itemName, partialSlug } = updateElement.dataset;
 
             if (!itemUuid || !actorId || !type || !itemSlug) return;
 
@@ -636,7 +590,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                 R.entries(identifyUpdates),
                 R.map(([actorId, update]) => {
                     return this.tool.setFlagProperty({ _id: actorId }, "identified", update);
-                })
+                }),
             );
 
             await Actor.updateDocuments(updates);
@@ -663,9 +617,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                         _id: itemId,
                     };
 
-                    const toId = toIdentify.findSplice(
-                        (item) => item.actor === actor && item.id === itemId
-                    );
+                    const toId = toIdentify.findSplice((item) => item.actor === actor && item.id === itemId);
 
                     if (toId) {
                         foundry.utils.setProperty(update, "system.identification", {
@@ -681,7 +633,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                 }
 
                 return actor.updateEmbeddedDocuments("Item", updates);
-            })
+            }),
         );
 
         if (toIdentify.length) {
@@ -717,12 +669,12 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                             ["system.identification.status"]: "identified",
                             ["system.identification.unidentified"]: data,
                         },
-                        "failed"
+                        "failed",
                     );
                 });
 
                 return actor.updateEmbeddedDocuments("Item", updates);
-            })
+            }),
         );
     }
 
@@ -754,7 +706,7 @@ function createDialogItemList(items: PhysicalItemPF2e[]) {
         items,
         R.sortBy((item) => item.system.identification.identified.name),
         R.map((item) => `<li>${item.system.identification.identified.name}</li>`),
-        R.join("")
+        R.join(""),
     );
 }
 
@@ -783,11 +735,7 @@ function getOwnerIcon(actor: ActorPF2e) {
 
     const traits = actor.traits;
 
-    return traits.has("eidolon")
-        ? EIDOLON_ICON
-        : traits.has("minion")
-        ? COMPANION_ICON
-        : ACTOR_TYPE_ICONS.character;
+    return traits.has("eidolon") ? EIDOLON_ICON : traits.has("minion") ? COMPANION_ICON : ACTOR_TYPE_ICONS.character;
 }
 
 function getSpellList(actor: CharacterPF2e): IdentifySpellList {

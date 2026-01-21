@@ -17,10 +17,7 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { IdentifyTracker } from ".";
 
 class IdentifyTool extends ModuleTool<IdentifySettings> {
-    #actorSheetHook = createToggleableHook(
-        "renderActorSheetPF2e",
-        this.#onRenderActorSheetPF2e.bind(this)
-    );
+    #actorSheetHook = createToggleableHook("renderActorSheetPF2e", this.#onRenderActorSheetPF2e.bind(this));
     #requestEmitable = createEmitable(this.key, this.#onRequestIdentify.bind(this));
 
     get key(): "identify" {
@@ -64,7 +61,7 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
                 type: Boolean,
                 default: true,
                 scope: "world",
-                onChange: (value: boolean) => {
+                onChange: () => {
                     this.configurate();
                 },
             },
@@ -79,9 +76,7 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
     }
 
     get application(): IdentifyTracker | undefined {
-        return foundry.applications.instances.get(IdentifyTracker.ID) as
-            | IdentifyTracker
-            | undefined;
+        return foundry.applications.instances.get(IdentifyTracker.ID) as IdentifyTracker | undefined;
     }
 
     async openTracker(item?: ItemPF2e) {
@@ -110,7 +105,7 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
         renderActorSheets();
     }
 
-    init(isGM: boolean): void {
+    init(): void {
         this._configurate();
     }
 
@@ -135,15 +130,11 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
         const listElement = htmlQuery(sheet.element[0], ".inventory-list");
         if (!listElement) return;
 
-        const itemsElements = listElement.querySelectorAll<HTMLLIElement>(
-            "li[data-item-id],li[data-subitem-id]"
-        );
+        const itemsElements = listElement.querySelectorAll<HTMLLIElement>("li[data-item-id],li[data-subitem-id]");
 
         for (const itemElement of itemsElements) {
             const { itemId, subitemId } = itemElement.dataset;
-            const realItemId = subitemId
-                ? htmlClosest(itemElement, "[data-item-id]")?.dataset.itemId
-                : itemId;
+            const realItemId = subitemId ? htmlClosest(itemElement, "[data-item-id]")?.dataset.itemId : itemId;
             const realItem = (actor as ActorPF2e).inventory.get(realItemId, { strict: true });
             const item = subitemId ? realItem.subitems.get(subitemId, { strict: true }) : realItem;
 
@@ -166,10 +157,7 @@ class IdentifyTool extends ModuleTool<IdentifySettings> {
             if (!dataElement) return;
 
             const controlsElement = htmlQuery(dataElement, ".item-controls");
-            const siblingElement = htmlQuery(
-                controlsElement,
-                `[data-action="${isGM ? "edit-item" : "delete-item"}"]`
-            );
+            const siblingElement = htmlQuery(controlsElement, `[data-action="${isGM ? "edit-item" : "delete-item"}"]`);
 
             if (siblingElement) {
                 siblingElement.before(toggleElement);
