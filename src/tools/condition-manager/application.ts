@@ -79,7 +79,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
         return this.#origin && this.#origin !== this.#combatant ? `${label} (${this.#origin.name})` : label;
     }
 
-    async _prepareContext(options: ApplicationRenderOptions): Promise<RenderContext> {
+    async _prepareContext(_options: ApplicationRenderOptions): Promise<RenderContext> {
         const isGM = game.user.isGM;
         const anonLabel = `<${this.tool.localize("anonymous")}>`;
 
@@ -119,7 +119,7 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
         };
     }
 
-    async _onClickAction(event: PointerEvent, target: HTMLElement) {
+    async _onClickAction(_event: PointerEvent, target: HTMLElement) {
         const action = target.dataset.action as "add" | "cancel";
 
         if (action === "add") {
