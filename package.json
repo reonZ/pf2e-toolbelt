@@ -1,6 +1,7 @@
 {
     "name": "pf2e-toolbelt",
     "scripts": {
+        "scss": "sass --style=compressed --quiet --no-charset styles/%npm_package_name%.scss:styles/%npm_package_name%.css",
         "build": "esbuild src/main.ts --bundle --keep-names --minify --sourcemap --outdir=scripts",
         "dev": "esbuild src/main.ts --bundle --keep-names --watch --sourcemap --outdir=scripts"
     },
@@ -15,6 +16,7 @@
     },
     "devDependencies": {
         "esbuild": "^0.20.1",
+        "sass": "^1.97.2",
         "typescript": "5.3.3"
     },
     "dependencies": {
