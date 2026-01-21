@@ -36,7 +36,7 @@ class BrowserPullMenu extends ModuleToolApplication<BetterMerchantTool> {
         tool: BetterMerchantTool,
         actor: LootPF2e,
         tab: "equipment" | "spell",
-        options: DeepPartial<ApplicationConfiguration> = {}
+        options: DeepPartial<ApplicationConfiguration> = {},
     ) {
         super(tool, options);
 
@@ -48,7 +48,7 @@ class BrowserPullMenu extends ModuleToolApplication<BetterMerchantTool> {
                 ? R.pipe(
                       actor.inventory.contents,
                       R.map((item) => item.sourceId),
-                      R.filter(R.isTruthy)
+                      R.filter(R.isTruthy),
                   )
                 : [];
 
@@ -159,10 +159,7 @@ class BrowserPullMenu extends ModuleToolApplication<BetterMerchantTool> {
             groups.push(entry);
         }
 
-        const getItemSource = async ({
-            uuid,
-            rank,
-        }: MenuSelection): Promise<ItemSourcePF2e | undefined> => {
+        const getItemSource = async ({ uuid, rank }: MenuSelection): Promise<ItemSourcePF2e | undefined> => {
             const item = await fromUuid<ItemPF2e>(uuid);
             if (!(item instanceof Item)) return;
 
@@ -179,10 +176,7 @@ class BrowserPullMenu extends ModuleToolApplication<BetterMerchantTool> {
         };
 
         for (const entries of groups) {
-            const sources = R.pipe(
-                await Promise.all(entries.map(getItemSource)),
-                R.filter(R.isTruthy)
-            );
+            const sources = R.pipe(await Promise.all(entries.map(getItemSource)), R.filter(R.isTruthy));
 
             await actor.createEmbeddedDocuments("Item", sources);
         }

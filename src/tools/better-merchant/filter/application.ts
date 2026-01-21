@@ -28,11 +28,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         tag: "form",
     };
 
-    constructor(
-        tool: BetterMerchantTool,
-        actor: LootPF2e,
-        options?: DeepPartial<ApplicationConfiguration>
-    ) {
+    constructor(tool: BetterMerchantTool, actor: LootPF2e, options?: DeepPartial<ApplicationConfiguration>) {
         super(tool, options);
 
         this.#actor = actor;
@@ -50,7 +46,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         return "filtersMenu";
     }
 
-    async _prepareContext(options: ApplicationRenderOptions): Promise<FiltersMenuContext> {
+    async _prepareContext(_options: ApplicationRenderOptions): Promise<FiltersMenuContext> {
         const sections = R.pipe(
             ["sell", "buy", "service"] as const,
             R.map((type): FilterSection => {
@@ -59,7 +55,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
                     filters: this.getFilters(type),
                     type,
                 } as FilterSection;
-            })
+            }),
         );
 
         return {
@@ -67,7 +63,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         };
     }
 
-    protected _onClickAction(event: PointerEvent, target: HTMLElement) {
+    protected _onClickAction(_event: PointerEvent, target: HTMLElement) {
         type EventAction = "add-filter" | "move-filter" | "edit-filter" | "delete-filter";
 
         const type = getSectionTypeFromElement(target);
@@ -174,7 +170,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         const merchantFilter = filter.filter;
         const filterData = foundry.utils.mergeObject(
             await this.tool.browserTab("equipment").getFilterData(),
-            merchantFilter
+            merchantFilter,
         );
 
         if (merchantFilter.ranges) {
@@ -237,7 +233,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         const tab = this.tool.browserTab("equipment");
         const filterData: Partial<EquipmentFilters> = foundry.utils.diffObject(
             await tab.getFilterData(),
-            tab.filterData
+            tab.filterData,
         );
 
         delete filterData.order;

@@ -148,7 +148,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         toggleHooksAndWrappers(this.#wrappers, enabled);
     }
 
-    ready(isGM: boolean): void {
+    ready(): void {
         this._configurate();
     }
 
@@ -229,7 +229,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             await browser.close();
         }
 
-        Hooks.once("renderCompendiumBrowser", (tab: TabName, html: HTMLElement) => {
+        Hooks.once("renderCompendiumBrowser", (_tab: TabName, html: HTMLElement) => {
             this.#onBrowserRender(html, data);
         });
 
@@ -266,7 +266,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     }
 
     async #actorSheetPF2eMoveItemBetweenActors(
-        sheet: ActorSheetPF2e<ActorPF2e>,
+        _sheet: ActorSheetPF2e<ActorPF2e>,
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
         item: PhysicalItemPF2e,
@@ -641,7 +641,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         const html = $html[0];
 
-        addListenerAll(html, "[data-better-action]:not(.disabled)", (el, event) => this.#onBetterAction(merchant, el));
+        addListenerAll(html, "[data-better-action]:not(.disabled)", (el) => this.#onBetterAction(merchant, el));
 
         addListener(html, `input[name="infiniteAll"]`, "change", (el: HTMLInputElement) => {
             this.setFlag(merchant, "infiniteAll", el.checked);
