@@ -81,11 +81,7 @@ class ItemFilterModel
 
         // Level
         const itemLevel = item.level;
-        if (
-            R.isPlainObject(level) &&
-            (itemLevel < (level.from ?? 0) || itemLevel > (level.to ?? 30))
-        )
-            return false;
+        if (R.isPlainObject(level) && (itemLevel < (level.from ?? 0) || itemLevel > (level.to ?? 30))) return false;
 
         // Price
         const filterPrice = ranges?.price?.values;
@@ -98,12 +94,7 @@ class ItemFilterModel
 
         // Item type
         const filterItemTypes = checkboxes?.itemTypes?.selected;
-        if (
-            R.isArray(filterItemTypes) &&
-            filterItemTypes.length &&
-            !filterItemTypes.includes(item.type)
-        )
-            return false;
+        if (R.isArray(filterItemTypes) && filterItemTypes.length && !filterItemTypes.includes(item.type)) return false;
 
         const itemCategory = "category" in item ? (item.category as string) : "";
         const itemGroup = "group" in item ? (item.group as string) : "";
@@ -129,24 +120,18 @@ class ItemFilterModel
         // Traits
         if (
             R.isPlainObject(traits) &&
-            !tab["filterTraits"](
-                [...item.traits],
-                traits.selected ?? [],
-                traits.conjunction ?? "and"
-            )
+            !tab["filterTraits"]([...item.traits], traits.selected ?? [], traits.conjunction ?? "and")
         )
             return false;
 
         // Source
         const filterSource = source?.selected;
         const itemSource = sluggify(item.system.publication?.title ?? "").trim();
-        if (R.isArray(filterSource) && filterSource.length && !filterSource.includes(itemSource))
-            return false;
+        if (R.isArray(filterSource) && filterSource.length && !filterSource.includes(itemSource)) return false;
 
         // Rarity
         const filterRarity = checkboxes?.rarity?.selected;
-        if (R.isArray(filterRarity) && filterRarity.length && !filterRarity.includes(item.rarity))
-            return false;
+        if (R.isArray(filterRarity) && filterRarity.length && !filterRarity.includes(item.rarity)) return false;
 
         return true;
     }
@@ -168,9 +153,9 @@ function calculateItemPrice(
     filter: BuyDefaultFilterModel | SellDefaultFilterModel | ItemFilterModel,
     item: PhysicalItemPF2e<ActorPF2e>,
     qty: number | undefined,
-    ratio = filter.getRatio(item)
+    ratio = filter.getRatio(item),
 ): CalulatedFilterPrice {
-    const original = game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity);
+    let original = game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity);
 
     return {
         original,
@@ -182,13 +167,7 @@ function calculateItemPrice(
 interface ItemFilterModel extends ModelPropsFromSchema<ItemFilterSchema> {}
 
 type ItemFilterSchema = BaseFilterSchema & {
-    filter: fields.ObjectField<
-        DeepPartial<EquipmentFilters>,
-        DeepPartial<EquipmentFilters>,
-        false,
-        false,
-        true
-    >;
+    filter: fields.ObjectField<DeepPartial<EquipmentFilters>, DeepPartial<EquipmentFilters>, false, false, true>;
 };
 
 export { BuyDefaultFilterModel, ItemFilterModel, SellDefaultFilterModel };
