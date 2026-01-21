@@ -22,6 +22,7 @@ import {
     R,
     refreshLatestMessages,
     toggleHooksAndWrappers,
+    SYSTEM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { isMessageOwner } from "tools";
@@ -82,7 +83,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     isDamageRoll(message: ChatMessagePF2e): boolean {
         return (
             this.getFlag<string>(message, "type") === "damage-roll" ||
-            message.getFlag("pf2e", "context.type") === "damage-roll"
+            message.getFlag(SYSTEM.id, "context.type") === "damage-roll"
         );
     }
 
@@ -93,7 +94,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             return targets;
         }
 
-        const target = message.getFlag("pf2e", "context.target.token") as Maybe<TokenDocumentUUID>;
+        const target = message.getFlag(SYSTEM.id, "context.target.token") as Maybe<TokenDocumentUUID>;
         return target ? [target] : [];
     }
 
@@ -136,13 +137,13 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             return data;
         }
 
-        const source = message.toObject() as PreCreate<ChatMessageSourcePF2e>;
+        const source = message.toObject() as WithRequired<PreCreate<ChatMessageSourcePF2e>, "flags">;
 
         delete source._id;
         delete source.timestamp;
         this.deleteFlagProperty(source, "splitted");
 
-        const sourceFlag = source.flags!.pf2e as ChatMessageFlagsPF2e["pf2e"] & {
+        const sourceFlag = source.flags[SYSTEM.id] as ChatMessageFlagsPF2e["pf2e"] & {
             context: DamageDamageContextFlag | SpellCastContextFlag;
             strike?: {
                 actor: string;
@@ -303,7 +304,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             }),
             speaker: targetMessage.speaker,
             flags: {
-                pf2e: {
+                [SYSTEM.id]: {
                     context: {
                         options: R.unique(data.flatMap(({ options }) => options)),
                     },
