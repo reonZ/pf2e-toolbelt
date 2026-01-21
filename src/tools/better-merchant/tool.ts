@@ -444,11 +444,11 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const price = filter.calculatePrice(item, realQty).value;
 
         if (merchantSelling && !free) {
-            if (!(await buyer.inventory.removeCoins(price))) {
+            if (!(await buyer.inventory.removeCurrency(price))) {
                 return error("funds");
             }
         } else if (!merchantSelling) {
-            await seller.inventory.addCoins(price);
+            await seller.inventory.addCurrency(price);
         }
 
         const data: TradeMessageOptions = {

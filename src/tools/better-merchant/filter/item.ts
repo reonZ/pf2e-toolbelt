@@ -157,6 +157,11 @@ function calculateItemPrice(
 ): CalulatedFilterPrice {
     let original = game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity);
 
+    // TODO we currently convert sp into credits until sf2e changes the way price is returned
+    if (game.system.id === "sf2e") {
+        original = new game.pf2e.Coins({ credits: original.sp });
+    }
+
     return {
         original,
         ratio,
