@@ -14,6 +14,7 @@ import {
     PhysicalItemPF2e,
     positionTokenFromCoords,
     R,
+    SYSTEM,
     TokenDocumentPF2e,
     TokenLightRuleElement,
     updateTradedItemSource,
@@ -32,7 +33,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         "WRAPPER",
         "CONFIG.Actor.documentClass.prototype._onEmbeddedDocumentChange",
         this.#actorOnEmbeddedDocumentChange,
-        { context: this }
+        { context: this },
     );
 
     #droppethKeybind = createToggleKeybind({
@@ -48,7 +49,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     static get DEFAULT_DATA(): { img: ImageFilePath; name: string } {
         return {
-            img: "systems/pf2e/icons/default-icons/backpack.svg",
+            img: `systems/${SYSTEM.id}/icons/default-icons/backpack.svg`,
             name: game.i18n.localize("TYPES.Actor.loot"),
         };
     }
@@ -127,11 +128,8 @@ class DroppethTool extends ModuleTool<ToolSettings> {
     }
 
     getLightSource(item?: PhysicalItemPF2e) {
-        const itemRules =
-            this.settings.light && item && item.quantity > 0 ? item.system.rules : undefined;
-        const lightRule = itemRules?.find(
-            (rule): rule is TokenLightRuleElement => rule.key === "TokenLight"
-        );
+        const itemRules = this.settings.light && item && item.quantity > 0 ? item.system.rules : undefined;
+        const lightRule = itemRules?.find((rule): rule is TokenLightRuleElement => rule.key === "TokenLight");
         return new foundry.data.LightData(lightRule?.value as foundry.data.LightSource).toObject();
     }
 
@@ -151,7 +149,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             const onlyItem = R.pipe(
                 actor.inventory.contents,
                 R.filter((item) => !item.isInContainer),
-                R.only()
+                R.only(),
             );
 
             const { img, name } = onlyItem ?? DroppethTool.DEFAULT_DATA;
@@ -265,7 +263,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         const tokenDocument = await actor.getTokenDocument(tokenSource, { parent: scene });
         const token = canvas.tokens.createObject(
             // @ts-expect-error
-            tokenDocument
+            tokenDocument,
         );
 
         const position = positionTokenFromCoords({ x, y }, token);
@@ -283,7 +281,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         await getDocumentClass("Token").create(
             // @ts-expect-error
             tokenDocument,
-            { parent: canvas.scene, keepId: true }
+            { parent: canvas.scene, keepId: true },
         );
 
         // no source actor so no update or message needed
@@ -293,10 +291,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         createTradeMessage({
             item: mainItem,
-            message: this.localizePath(
-                "message.content",
-                tradeData.contentSources.length ? "container" : "item"
-            ),
+            message: this.localizePath("message.content", tradeData.contentSources.length ? "container" : "item"),
             source: item.actor,
             subtitle: this.localize("message.subtitle"),
             quantity: tradeData.giveQuantity,

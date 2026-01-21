@@ -1,4 +1,4 @@
-import { FeatOrFeatureCategory, R, sluggify } from "module-helpers";
+import { FeatOrFeatureCategory, R, SYSTEM, sluggify } from "module-helpers";
 import { ImportDataCoreKey } from "..";
 
 const CORE_PACKS: Record<ImportDataCoreKey, string> = {
@@ -18,7 +18,7 @@ const FEATS_PACK = "feats-srd";
 async function getUuidFromPack(value: string, packName: string): Promise<ItemUUID | null> {
     if (!R.isTruthy(value)) return null;
 
-    const pack = game.packs.get(`pf2e.${packName}`);
+    const pack = game.packs.get(`${SYSTEM.id}.${packName}`);
     if (!pack) return null;
 
     const slug = sluggify(value);
@@ -33,10 +33,7 @@ async function getCoreUuidFromPack(value: string, category: ImportDataCoreKey) {
     return getUuidFromPack(value, pack);
 }
 
-async function getFeatUuidFromPack(
-    value: string,
-    category: FeatOrFeatureCategory
-): Promise<ItemUUID | null> {
+async function getFeatUuidFromPack(value: string, category: FeatOrFeatureCategory): Promise<ItemUUID | null> {
     const pack = FEAT_PACKS[category] ?? FEATS_PACK;
     return getUuidFromPack(value, pack);
 }

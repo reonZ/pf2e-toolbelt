@@ -7,6 +7,7 @@ import {
     getPreferredName,
     PhysicalItemPF2e,
     R,
+    SYSTEM,
 } from "module-helpers";
 
 async function createTradeMessage({
@@ -31,12 +32,10 @@ async function createTradeMessage({
         item: await enrichHTML(item.link),
     };
 
-    const glyph = getActionGlyph(
-        cost ?? (source.isOfType("loot") && target?.isOfType("loot") ? 2 : 1)
-    );
+    const glyph = getActionGlyph(cost ?? (source.isOfType("loot") && target?.isOfType("loot") ? 2 : 1));
 
     const flavor = await foundry.applications.handlebars.renderTemplate(
-        "./systems/pf2e/templates/chat/action/flavor.hbs",
+        `./systems/${SYSTEM.id}/templates/chat/action/flavor.hbs`,
         {
             action: { title: "PF2E.Actions.Interact.Title", subtitle, glyph },
             traits: [
@@ -46,15 +45,15 @@ async function createTradeMessage({
                     description: CONFIG.PF2E.traitsDescriptions.manipulate,
                 },
             ],
-        }
+        },
     );
 
     const content = await foundry.applications.handlebars.renderTemplate(
-        "./systems/pf2e/templates/chat/action/content.hbs",
+        `./systems/${SYSTEM.id}/templates/chat/action/content.hbs`,
         {
             imgPath: item.img,
             message: game.i18n.format(message, formattedMessageData).replace(/\b1 × /, ""),
-        }
+        },
     );
 
     return getDocumentClass("ChatMessage").create({
@@ -66,9 +65,7 @@ async function createTradeMessage({
     });
 }
 
-async function createTradeQuantityDialog(
-    options: TradeQuantityDialogOptions
-): Promise<TradeQuantityDialogData | null> {
+async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): Promise<TradeQuantityDialogData | null> {
     const data = {
         ...options,
         maxQuantity: options.maxQuantity ?? options.item.quantity,
@@ -78,8 +75,8 @@ async function createTradeQuantityDialog(
     };
 
     const content = await foundry.applications.handlebars.renderTemplate(
-        "systems/pf2e/templates/popups/item-transfer-dialog.hbs",
-        data
+        `systems/${SYSTEM.id}/templates/popups/item-transfer-dialog.hbs`,
+        data,
     );
 
     return new Promise((resolve) => {
@@ -88,7 +85,7 @@ async function createTradeQuantityDialog(
                 {
                     ...options.button,
                     type: "submit",
-                    callback: (event, button, dialog) => {
+                    callback: (_event, _button, dialog) => {
                         const data = createFormData(dialog.element) as TradeQuantityDialogData;
                         resolve(data);
                     },

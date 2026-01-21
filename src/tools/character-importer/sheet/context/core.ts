@@ -1,11 +1,4 @@
-import {
-    addListenerAll,
-    AttributeString,
-    CharacterPF2e,
-    ClassPF2e,
-    ItemPF2e,
-    R,
-} from "module-helpers";
+import { addListenerAll, AttributeString, CharacterPF2e, ClassPF2e, ItemPF2e, R, SYSTEM } from "module-helpers";
 import {
     AttributeLevel,
     CharacterImporterTool,
@@ -28,7 +21,7 @@ const ACTION_ICONS = {
 async function prepareCoreTab(
     this: CharacterImporterTool,
     actor: CharacterPF2e,
-    data: ImportDataModel
+    data: ImportDataModel,
 ): Promise<ImportDataCoreContext> {
     const actorLevel = actor.level;
     const dataLevel = data.level;
@@ -43,7 +36,7 @@ async function prepareCoreTab(
                 if (feat.parent !== itemType) return;
                 return prepareFeatEntry.call(this, actor, data, feat, index, false);
             }),
-            R.filter(R.isTruthy)
+            R.filter(R.isTruthy),
         );
 
         return prepared;
@@ -54,20 +47,14 @@ async function prepareCoreTab(
         R.map(({ level, boosts }): ImportDataBoostsEntry<"Boost" | "Partial"> => {
             return {
                 label: game.i18n.format("PF2E.LevelN", { level }),
-                boosts: R.map(
-                    ImportDataModel.attributeKeys,
-                    (key): ImportDataBoost<"Boost" | "Partial"> => {
-                        const selected = R.isIncludedIn(key, boosts);
-                        const type =
-                            selected && boostIsPartial(actor, key, Number(level))
-                                ? "Partial"
-                                : "Boost";
+                boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Boost" | "Partial"> => {
+                    const selected = R.isIncludedIn(key, boosts);
+                    const type = selected && boostIsPartial(actor, key, Number(level)) ? "Partial" : "Boost";
 
-                        return { locked: false, selected, type };
-                    }
-                ),
+                    return { locked: false, selected, type };
+                }),
             };
-        })
+        }),
     );
 
     const levelThreshold = Math.floor(actorLevel / 5);
@@ -78,13 +65,10 @@ async function prepareCoreTab(
 
     const attributesTotals = R.pipe(
         ImportDataModel.attributeKeys,
-        R.map((key) => data.attributes.values[key] ?? 0)
+        R.map((key) => data.attributes.values[key] ?? 0),
     );
 
-    const allAncestryBoosts = [
-        ...data.attributes.ancestry.boosts,
-        ...data.attributes.ancestry.locked,
-    ];
+    const allAncestryBoosts = [...data.attributes.ancestry.boosts, ...data.attributes.ancestry.locked];
     const ancestryBoosts: ImportDataBoostsEntry<"Boost"> = {
         boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Boost"> => {
             return {
@@ -96,22 +80,18 @@ async function prepareCoreTab(
         label: game.i18n.localize("TYPES.Item.ancestry"),
     };
 
-    const ancestryFlaws: ImportDataBoostsEntry<"Flaw"> | null = data.attributes.ancestry.flaws
-        .length
+    const ancestryFlaws: ImportDataBoostsEntry<"Flaw"> | null = data.attributes.ancestry.flaws.length
         ? {
               label: "",
-              boosts: R.map(
-                  ImportDataModel.attributeKeys,
-                  (key): ImportDataBoost<"Flaw"> | null => {
-                      if (!R.isIncludedIn(key, data.attributes.ancestry.flaws)) return null;
+              boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Flaw"> | null => {
+                  if (!R.isIncludedIn(key, data.attributes.ancestry.flaws)) return null;
 
-                      return {
-                          locked: true,
-                          selected: true,
-                          type: "Flaw",
-                      };
-                  }
-              ),
+                  return {
+                      locked: true,
+                      selected: true,
+                      type: "Flaw",
+                  };
+              }),
           }
         : null;
 
@@ -159,11 +139,7 @@ async function prepareCoreTab(
     };
 }
 
-function addCoreEventListeners(
-    this: CharacterImporterTool,
-    html: HTMLElement,
-    actor: CharacterPF2e
-) {
+function addCoreEventListeners(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e) {
     addListenerAll(html, "[data-action]", (el) => {
         const action = el.dataset.action as EventAction;
 
@@ -183,11 +159,7 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
     const data = this.getImportData(actor);
     if (!data) return;
 
-    const levels = R.pullObject(
-        getLevelsAttributes(data, actor),
-        R.prop("level"),
-        R.prop("boosts")
-    );
+    const levels = R.pullObject(getLevelsAttributes(data, actor), R.prop("level"), R.prop("boosts"));
 
     await assignBoosts(actor.ancestry, data.attributes.ancestry.boosts);
     await assignBoosts(actor.background, data.attributes.background);
@@ -204,17 +176,14 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
     await actor.update({ "system.build.attributes.boosts": levels });
 }
 
-async function assignBoosts(
-    item: ItemWithAssignableBoosts | null,
-    data: AttributeString[]
-): Promise<void> {
+async function assignBoosts(item: ItemWithAssignableBoosts | null, data: AttributeString[]): Promise<void> {
     if (!item) return;
 
     const boosts = validateBoosts(data);
     const recipiants = R.pipe(
         item._source.system.boosts,
         R.entries(),
-        R.filter(([index, { value }]) => value.length > 1)
+        R.filter(([index, { value }]) => value.length > 1),
     );
     if (!recipiants.length || !boosts.length) return;
 
@@ -224,7 +193,7 @@ async function assignBoosts(
         const assignables = R.pipe(
             recipiants,
             R.filter(([index, { value }]) => R.isIncludedIn(key, value)),
-            R.map(([index]) => Number(index))
+            R.map(([index]) => Number(index)),
         );
 
         if (!assigned.length) {
@@ -233,7 +202,7 @@ async function assignBoosts(
                     const arr: AttributeString[] = [];
                     arr[index] = key;
                     return arr;
-                })
+                }),
             );
             continue;
         }
@@ -246,15 +215,13 @@ async function assignBoosts(
         }
     }
 
-    const match = assigned.find(
-        (list) => list.length === recipiants.length && list.every(R.isTruthy)
-    );
+    const match = assigned.find((list) => list.length === recipiants.length && list.every(R.isTruthy));
     if (!match) return;
 
     const update = R.pipe(
         match,
         R.map((key, index) => [index, { selected: key }] as const),
-        R.fromEntries()
+        R.fromEntries(),
     );
 
     return item.update({ "system.boosts": update });
@@ -269,14 +236,11 @@ type ItemWithAssignableBoosts = {
     update(data: Record<string, unknown>): Promise<any>;
 };
 
-type AssignableBoosts = Record<
-    number | string,
-    { value: AttributeString[]; selected: AttributeString | null }
->;
+type AssignableBoosts = Record<number | string, { value: AttributeString[]; selected: AttributeString | null }>;
 
 function getLevelsAttributes(
     data: ImportDataModel,
-    actor: CharacterPF2e
+    actor: CharacterPF2e,
 ): { level: AttributeLevel; boosts: AttributeString[] }[] {
     const actorLevel = actor.level;
 
@@ -284,30 +248,27 @@ function getLevelsAttributes(
         data.attributes.levels,
         R.entries(),
         R.filter(([level]) => {
-            return (
-                R.isIncludedIn(level, ImportDataModel.attributeLevels) &&
-                Number(level) <= actorLevel
-            );
+            return R.isIncludedIn(level, ImportDataModel.attributeLevels) && Number(level) <= actorLevel;
         }),
         R.map(([level, boosts]): { level: AttributeLevel; boosts: AttributeString[] } => {
             return {
                 level,
                 boosts: validateBoosts(boosts),
             };
-        })
+        }),
     );
 }
 
 function validateBoosts(boosts: unknown): AttributeString[] {
     if (!R.isArray(boosts)) return [];
-    return R.filter(boosts, (key) => R.isIncludedIn(key, ImportDataModel.attributeKeys));
+    return R.filter(boosts, (key): key is AttributeString => R.isIncludedIn(key, ImportDataModel.attributeKeys));
 }
 
 function prepareEntry(
     this: CharacterImporterTool,
     itemType: ImportDataEntryKey,
     entry: ImportEntry,
-    current: ItemPF2e | null
+    current: ItemPF2e | null,
 ): ImportDataEntry {
     const isFeat = itemType === "feat";
     const isOverride = !!entry.override;
@@ -316,9 +277,7 @@ function prepareEntry(
     const matchLabel = this.localize("sheet.data.entry", isOverride ? "override" : "match");
 
     const label = game.i18n.localize(
-        isFeat
-            ? CONFIG.PF2E.featCategories[(entry as ImportFeatEntry).category]
-            : `TYPES.Item.${itemType}`
+        isFeat ? CONFIG.PF2E.featCategories[(entry as ImportFeatEntry).category] : `TYPES.Item.${itemType}`,
     );
 
     const actions = R.pipe(
@@ -334,14 +293,14 @@ function prepareEntry(
                 icon: ACTION_ICONS[type],
                 label: this.localize("sheet.data.entry.action", type, { match: matchLabel }),
             };
-        })
+        }),
     );
 
     return {
         actions,
         children: [],
         current,
-        img: selection?.img || `systems/pf2e/icons/default-icons/${itemType}.svg`,
+        img: selection?.img || `systems/${SYSTEM.id}/icons/default-icons/${itemType}.svg`,
         isOverride,
         itemType,
         label,
@@ -359,7 +318,7 @@ function prepareFeatEntry(
     data: ImportDataModel,
     entry: ImportFeatEntry,
     index: number,
-    matchLevel: boolean
+    matchLevel: boolean,
 ): ImportDataFeatEntry {
     const current = data.getCurrentFeat(actor, entry, matchLevel);
     const prepared = prepareEntry.call(this, "feat", entry, current);
@@ -386,7 +345,7 @@ function boostIsPartial(
     actor: CharacterPF2e,
     attribute: AttributeString,
     level: number,
-    isApex: boolean = false
+    isApex: boolean = false,
 ): boolean {
     const build = actor.system.build.attributes;
 

@@ -12,7 +12,7 @@ import {
 import { MerchantFilters } from "..";
 import fields = foundry.data.fields;
 
-const COINS = ["pp", "gp", "sp", "cp"] as const;
+const COINS = ["pp", "gp", "sp", "cp", "credits", "upb"] as const;
 
 const DEFAULT_SERVICE_ICON = "icons/commodities/currency/coins-plain-stack-gold.webp";
 
@@ -64,8 +64,8 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
                 {
                     required: false,
                     nullable: false,
-                    initial: { pp: 0, gp: 0, cp: 0, sp: 0 },
-                }
+                    initial: { pp: 0, gp: 0, cp: 0, sp: 0, credits: 0, upb: 0 },
+                },
             ),
             quantity: new fields.NumberField({
                 required: false,
@@ -140,7 +140,7 @@ class ServiceModel extends foundry.abstract.DataModel<null, ServiceSchema> {
 
     protected _initializeSource(
         data: object,
-        options?: DataModelConstructionOptions<null> | undefined
+        options?: DataModelConstructionOptions<null> | undefined,
     ): this["_source"] {
         const source = super._initializeSource(data, options);
 
