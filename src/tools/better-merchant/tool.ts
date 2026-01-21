@@ -88,19 +88,19 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 "CONFIG.Actor.sheetClasses.vehicle['pf2e.VehicleSheetPF2e'].cls.prototype.moveItemBetweenActors",
             ],
             this.#actorSheetPF2eMoveItemBetweenActors,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype._renderInner",
             this.#lootSheetPF2eRenderInner,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.Actor.sheetClasses.loot['pf2e.LootSheetPF2e'].cls.prototype.activateListeners",
             this.#lootSheetPF2eActivateListeners,
-            { context: this }
+            { context: this },
         ),
         sharedActorTransferItemToActor.register(this.#transferItemToActor, {
             context: this,
@@ -156,34 +156,23 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return this.browser.tabs[tab];
     }
 
-    getFilters<T extends FilterType>(
-        actor: LootPF2e,
-        type: T
-    ): FlagDataArray<FilterTypes[T], LootPF2e> {
-        return this.getDataFlagArray(
-            actor,
-            FILTER_TYPES[type].filter as any,
-            "filters",
-            type
-        ) as FlagDataArray<FilterTypes[T], LootPF2e>;
+    getFilters<T extends FilterType>(actor: LootPF2e, type: T): FlagDataArray<FilterTypes[T], LootPF2e> {
+        return this.getDataFlagArray(actor, FILTER_TYPES[type].filter as any, "filters", type) as FlagDataArray<
+            FilterTypes[T],
+            LootPF2e
+        >;
     }
 
-    getDefaultFilter<T extends FilterType>(
-        actor: LootPF2e,
-        type: T
-    ): FlagData<DefaultFilterTypes[T]> | undefined {
-        return this.getDataFlag(
-            actor,
-            FILTER_TYPES[type].default as any,
-            "default",
-            type
-        ) as FlagData<DefaultFilterTypes[T]>;
+    getDefaultFilter<T extends FilterType>(actor: LootPF2e, type: T): FlagData<DefaultFilterTypes[T]> | undefined {
+        return this.getDataFlag(actor, FILTER_TYPES[type].default as any, "default", type) as FlagData<
+            DefaultFilterTypes[T]
+        >;
     }
 
     getAllFilters<T extends FilterType>(actor: LootPF2e, type: T): MerchantFilters<T> {
         return R.filter(
             [...this.getFilters(actor, type), this.getDefaultFilter(actor, type)],
-            R.isTruthy
+            R.isTruthy,
         ) as MerchantFilters<T>;
     }
 
@@ -226,7 +215,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                                   options: { spell: { selected: true } },
                               },
                           },
-                      }
+                      },
                   )
                 : undefined;
 
@@ -251,8 +240,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     }
 
     testItemsForMerchant(merchant: ActorPF2e, items: ItemPF2e[]): TestItemData[] {
-        if (!(merchant instanceof Actor) || !isMerchant(merchant) || !items?.[Symbol.iterator])
-            return [];
+        if (!(merchant instanceof Actor) || !isMerchant(merchant) || !items?.[Symbol.iterator]) return [];
 
         const filters = this.getAllFilters(merchant, "buy");
 
@@ -273,7 +261,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 const buyPrice = filter.calculatePrice(item).value;
                 return { buyPrice, item };
             }),
-            R.filter(R.isTruthy)
+            R.filter(R.isTruthy),
         );
     }
 
@@ -282,7 +270,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
         item: PhysicalItemPF2e,
-        targetActor: ActorPF2e
+        targetActor: ActorPF2e,
     ) {
         const sourceActor = item.actor;
         if (!sourceActor || !targetActor) {
@@ -299,10 +287,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const result = await this.#initiateTrade(sourceActor, targetActor, item, isPurchase);
 
         if (result !== null) {
-            const containerId = htmlClosest(
-                event.target,
-                "[data-is-container]"
-            )?.dataset.containerId?.trim();
+            const containerId = htmlClosest(event.target, "[data-is-container]")?.dataset.containerId?.trim();
 
             sourceActor.transferItemToActor(
                 targetActor,
@@ -310,7 +295,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 result.quantity,
                 containerId,
                 result.newStack,
-                isPurchase
+                isPurchase,
             );
         }
     }
@@ -319,7 +304,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         sourceActor: ActorPF2e,
         targetActor: ActorPF2e,
         item: PhysicalItemPF2e,
-        isPurchase: boolean
+        isPurchase: boolean,
     ): Promise<TradeQuantityDialogData | null> {
         const stackable = !!targetActor.inventory.findStackableItem(item);
         const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
@@ -381,9 +366,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return error("unided");
         }
 
-        const [merchant, customer] = merchantSelling
-            ? [source, target]
-            : [target as LootPF2e, source];
+        const [merchant, customer] = merchantSelling ? [source, target] : [target as LootPF2e, source];
 
         const infiniteAll = this.getFlag(merchant, "infiniteAll");
         const realQty = infiniteAll ? quantity : Math.min(quantity, item.quantity);
@@ -408,7 +391,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                     ui.notifications.warn(
                         game.i18n.format("PF2E.loot.InsufficientFundsMessage", {
                             buyer: customer.name,
-                        })
+                        }),
                     );
                     return true;
                 }
@@ -433,10 +416,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return true;
     }
 
-    async #tradeItem(
-        { filterId, free, infinite, item, newStack, quantity, target }: TradeItemOptions,
-        userId: string
-    ) {
+    async #tradeItem({ filterId, free, infinite, item, newStack, quantity, target }: TradeItemOptions, userId: string) {
         const error = (reason: string) => {
             this.warning("item.error", { reason });
         };
@@ -455,9 +435,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         const merchantSelling = isMerchant(seller);
         const merchant = merchantSelling ? seller : (buyer as LootPF2e);
-        const filter = this.getAllFilters(merchant, merchantSelling ? "sell" : "buy").find(
-            (x) => x.id === filterId
-        );
+        const filter = this.getAllFilters(merchant, merchantSelling ? "sell" : "buy").find((x) => x.id === filterId);
 
         if (!filter) {
             return error("filter");
@@ -527,7 +505,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     async #lootSheetPF2eRenderInner(
         sheet: LootSheetPF2e<LootPF2e>,
         wrapped: libWrapper.RegisterCallback,
-        data: LootSheetDataPF2e
+        data: LootSheetDataPF2e,
     ): Promise<JQuery> {
         const $html = (await wrapped(data)) as JQuery;
         const actor = sheet.actor;
@@ -654,7 +632,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     #lootSheetPF2eActivateListeners(
         sheet: LootSheetPF2e<LootPF2e>,
         wrapped: libWrapper.RegisterCallback,
-        $html: JQuery
+        $html: JQuery,
     ) {
         wrapped($html);
 
@@ -663,9 +641,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         const html = $html[0];
 
-        addListenerAll(html, "[data-better-action]:not(.disabled)", (el, event) =>
-            this.#onBetterAction(merchant, el)
-        );
+        addListenerAll(html, "[data-better-action]:not(.disabled)", (el, event) => this.#onBetterAction(merchant, el));
 
         addListener(html, `input[name="infiniteAll"]`, "change", (el: HTMLInputElement) => {
             this.setFlag(merchant, "infiniteAll", el.checked);
@@ -699,7 +675,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             const parsed = JSON.parse(result.code);
             const toAdd = R.pipe(
                 Array.isArray(parsed) ? parsed : [parsed],
-                R.map((data) => new ServiceModel(data))
+                R.map((data) => new ServiceModel(data)),
             );
 
             if (!toAdd.length) return;
@@ -875,7 +851,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     #updateServiceFromElement(
         actor: LootPF2e,
         target: HTMLElement,
-        updates: (service: ServiceModel) => Record<string, unknown>
+        updates: (service: ServiceModel) => Record<string, unknown>,
     ) {
         const { service, services } = this.#getServiceDataFromElement(actor, target);
         if (!service) return;
@@ -952,7 +928,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         service: ServiceModel,
         seller: LootPF2e,
         trade: "give" | "buy" | null,
-        userId = game.userId
+        userId = game.userId,
     ) {
         const token = actor.getActiveTokens(false, true).at(0);
 
@@ -999,12 +975,12 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                 data.callback(event);
                 this.browser.close();
             },
-            { once: true }
+            { once: true },
         );
 
         requestAnimationFrame(() => {
             const invalids = html.querySelectorAll<HTMLInputElement>(
-                `input[name="cantrip"], input[name="focus"], input[name="ritual"]`
+                `input[name="cantrip"], input[name="focus"], input[name="ritual"]`,
             );
 
             for (const el of invalids) {
@@ -1017,7 +993,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
     #getServiceDataFromElement(
         actor: LootPF2e,
-        target: HTMLElement
+        target: HTMLElement,
     ): {
         services: FlagDataArray<ServiceModel, LootPF2e>;
         service: ServiceModel | undefined;

@@ -28,7 +28,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
         tool: BetterMerchantTool,
         merchant: LootPF2e,
         seller: ActorPF2e,
-        options?: DeepPartial<ApplicationConfiguration>
+        options?: DeepPartial<ApplicationConfiguration>,
     ) {
         super(tool, options);
 
@@ -68,8 +68,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
         const groups = R.pipe(
             seller.inventory.contents,
             R.map((item): SellingItem | undefined => {
-                if (!item.isIdentified || item.quantity <= 0 || item.system.stackGroup === "coins")
-                    return;
+                if (!item.isIdentified || item.quantity <= 0 || item.system.stackGroup === "coins") return;
 
                 const filter = filters.find((x) => x.testFilter(item));
                 if (!filter) return;
@@ -100,7 +99,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
                     label: game.i18n.localize(`TYPES.Item.${type}`),
                 };
             }),
-            R.sortBy(R.prop("label"))
+            R.sortBy(R.prop("label")),
         );
 
         const info = this.localize("info", {
@@ -117,10 +116,7 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
         };
     }
 
-    async _renderHTML(
-        context: SellItemsContext,
-        options: ApplicationRenderOptions
-    ): Promise<string> {
+    async _renderHTML(context: SellItemsContext, options: ApplicationRenderOptions): Promise<string> {
         if (foundry.utils.isEmpty(context.groups)) {
             const hint = this.localize("empty", this.merchant);
             return `<div class="empty">${hint}</div>`;
@@ -168,8 +164,8 @@ function prepareCurrency(actor: ActorPF2e): CurrencySummary["units"] {
         showPF2e && showSF2e
             ? (["gp", "credits", "upb"] as const)
             : showPF2e
-            ? COIN_DENOMINATIONS
-            : (["credits", "upb"] as const);
+              ? COIN_DENOMINATIONS
+              : (["credits", "upb"] as const);
     if (showPF2e && showSF2e) {
         currency.gp = coins.goldValue;
         coins.sp = coins.pp = coins.cp = 0;
@@ -180,7 +176,7 @@ function prepareCurrency(actor: ActorPF2e): CurrencySummary["units"] {
             ...accumulated,
             [d]: { value: currency[d], label: CONFIG.PF2E.currencies[d] },
         }),
-        {} as CurrencySummary["units"]
+        {} as CurrencySummary["units"],
     );
 }
 
