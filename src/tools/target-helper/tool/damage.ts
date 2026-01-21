@@ -31,7 +31,7 @@ import { TargetsData, TargetsDataSource } from "..";
 function prepareDamageMessage(
     this: TargetHelperTool,
     message: DamageMessage,
-    updates: DeepPartial<TargetsDataSource>
+    updates: DeepPartial<TargetsDataSource>,
 ): updates is WithRequired<DeepPartial<TargetsDataSource>, "type" | "isRegen"> {
     if (isPersistentDamageMessage(message)) return false;
 
@@ -77,7 +77,7 @@ async function renderDamageMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
     html: HTMLElement,
-    flag: TargetsFlagData
+    flag: TargetsFlagData,
 ) {
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent) return;
@@ -191,7 +191,7 @@ async function renderDamageMessage(
 
             clone.classList.toggle(
                 "applied",
-                !!applied[i] || (!!save?.basic && save.success === "criticalSuccess" && showResults)
+                !!applied[i] || (!!save?.basic && save.success === "criticalSuccess" && showResults),
             );
 
             if (save?.success && data.isBasicSave) {
@@ -270,7 +270,7 @@ function onDamageBtnClick(
     btn: HTMLElement,
     target: TokenDocumentPF2e,
     message: ChatMessagePF2e,
-    data: TargetsData
+    data: TargetsData,
 ) {
     type Action = "target-applyDamage" | "target-shieldBlock";
 
@@ -303,7 +303,7 @@ function onDamageBtnClick(
 function toggleOffShieldBlock(messageId: string) {
     for (const id of ["chat", "chat-popout", "chat-notifications"]) {
         const buttons = document.querySelectorAll(
-            `#${id} [data-message-id="${messageId}"] button[data-action$="shieldBlock"]`
+            `#${id} [data-message-id="${messageId}"] button[data-action$="shieldBlock"]`,
         );
 
         for (const button of buttons) {
@@ -329,10 +329,9 @@ async function applyDamageFromMessage(
         // ADDED BY MODULE
         token,
         data,
-    }: ApplyDamageFromMessageParams
+    }: ApplyDamageFromMessageParams,
 ) {
-    if (promptModifier)
-        return shiftAdjustDamage.call(this, message, multiplier, rollIndex, token, data);
+    if (promptModifier) return shiftAdjustDamage.call(this, message, multiplier, rollIndex, token, data);
 
     // MODIFIED BY THE MODULE
     const tokens = [token];
@@ -343,11 +342,9 @@ async function applyDamageFromMessage(
 
     const shieldBlockRequest = CONFIG.PF2E.chatDamageButtonShieldToggle;
     const roll = message.rolls.at(rollIndex);
-    if (!isInstanceOf(roll, "DamageRoll"))
-        throw ErrorPF2e("Unexpected error retrieving damage roll");
+    if (!isInstanceOf(roll, "DamageRoll")) throw ErrorPF2e("Unexpected error retrieving damage roll");
 
-    const damage =
-        multiplier < 0 ? multiplier * roll.total + addend : roll.alter(multiplier, addend);
+    const damage = multiplier < 0 ? multiplier * roll.total + addend : roll.alter(multiplier, addend);
 
     // Get origin roll options and apply damage to a contextual clone: this may influence condition IWR, for example
     const messageRollOptions = [...(message.flags.pf2e.context?.options ?? [])];
@@ -424,10 +421,10 @@ async function shiftAdjustDamage(
     rollIndex: number,
     // ADDED BY MODULE
     token: TokenDocumentPF2e,
-    data: TargetsData
+    data: TargetsData,
 ): Promise<void> {
     const content = await foundry.applications.handlebars.renderTemplate(
-        "systems/pf2e/templates/chat/damage/adjustment-dialog.hbs"
+        "systems/pf2e/templates/chat/damage/adjustment-dialog.hbs",
     );
     const AdjustmentDialog = class extends foundry.appv1.api.Dialog {
         override activateListeners($html: JQuery): void {
@@ -437,9 +434,7 @@ async function shiftAdjustDamage(
     };
     const isHealing = multiplier < 0;
     new AdjustmentDialog({
-        title: game.i18n.localize(
-            isHealing ? "PF2E.UI.shiftModifyHealingTitle" : "PF2E.UI.shiftModifyDamageTitle"
-        ),
+        title: game.i18n.localize(isHealing ? "PF2E.UI.shiftModifyHealingTitle" : "PF2E.UI.shiftModifyDamageTitle"),
         content,
         buttons: {
             ok: {
@@ -447,9 +442,7 @@ async function shiftAdjustDamage(
                 callback: async ($dialog: JQuery) => {
                     // In case of healing, multipler will have negative sign. The user will expect that positive
                     // modifier would increase healing value, while negative would decrease.
-                    const adjustment =
-                        (Number($dialog[0].querySelector("input")?.value) || 0) *
-                        Math.sign(multiplier);
+                    const adjustment = (Number($dialog[0].querySelector("input")?.value) || 0) * Math.sign(multiplier);
                     applyDamageFromMessage.call(this, {
                         message,
                         multiplier,

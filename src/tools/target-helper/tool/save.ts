@@ -32,7 +32,7 @@ function showGhostDiceOnPrivate() {
 function roll3dDice(
     roll: Rolled<CheckRoll>,
     target: TokenDocumentPF2e,
-    isPrivate: boolean
+    isPrivate: boolean,
 ): Promise<boolean> | undefined {
     if (!game.dice3d) return;
 
@@ -54,7 +54,7 @@ async function rollSaves(
     event: MouseEvent,
     message: ChatMessagePF2e,
     data: TargetsData,
-    targets: TokenDocumentPF2e[]
+    targets: TokenDocumentPF2e[],
 ) {
     const dataSave = data.save;
     if (!dataSave) return;
@@ -78,8 +78,7 @@ async function rollSaves(
         return new Promise<void>((resolve) => {
             const callback: CheckRollCallback = async (roll, success, msg) => {
                 const isPrivate =
-                    data.isPrivate ||
-                    msg.whisper.filter((userId) => game.users.get(userId)?.isGM).length > 0;
+                    data.isPrivate || msg.whisper.filter((userId) => game.users.get(userId)?.isGM).length > 0;
 
                 await roll3dDice(roll, target, isPrivate);
 
@@ -94,7 +93,7 @@ async function rollSaves(
                             modifier: modifier.modifier,
                             slug: modifier.slug ?? "unknown",
                         };
-                    })
+                    }),
                 );
 
                 const rollData: SaveRollData = {
@@ -153,7 +152,7 @@ async function rerollSave(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
     data: TargetsData,
-    target: TokenDocumentPF2e
+    target: TokenDocumentPF2e,
 ) {
     const dataSave = data.save;
     const actor = target.actor;
@@ -193,12 +192,7 @@ async function rerollSave(
     if (!result) return;
 
     const keep = R.isIncludedIn(result.reroll, ["hero", "mythic"]) ? "new" : result.reroll;
-    const resourceKey =
-        result.reroll === "hero"
-            ? "hero-points"
-            : result.reroll === "mythic"
-            ? "mythic-points"
-            : "";
+    const resourceKey = result.reroll === "hero" ? "hero-points" : result.reroll === "mythic" ? "mythic-points" : "";
 
     const resource = actor.getResource(resourceKey);
 
@@ -220,16 +214,13 @@ async function rerollSave(
     const pwolVariant = game.pf2e.settings.variants.pwol.enabled;
 
     const unevaluatedNewRoll = ((): CheckRoll => {
-        if (resource?.slug !== "mythic-points" || !actor.isOfType("character"))
-            return oldRoll.clone();
+        if (resource?.slug !== "mythic-points" || !actor.isOfType("character")) return oldRoll.clone();
         // Create a new CheckRoll in case of a mythic point reroll
         const proficiencyModifier = actor
             .getStatistic(targetSave.statistic)
             ?.modifiers.find((m) => m.slug === "proficiency");
         if (!proficiencyModifier) {
-            throw ErrorPF2e(
-                `Failed to reroll check with a mythic point. Check is missing a proficiency modifier!`
-            );
+            throw ErrorPF2e(`Failed to reroll check with a mythic point. Check is missing a proficiency modifier!`);
         }
         // Set flag proficiency modifier to mythic modifier value
         const mythicModifierValue = 10 + (pwolVariant ? 0 : actor.level);
@@ -238,24 +229,17 @@ async function rerollSave(
         proficiencyModifier.label = game.i18n.localize("PF2E.TraitMythic");
         // Calculate the new total modifier
         const options = foundry.utils.deepClone(oldRoll.options);
-        options.totalModifier =
-            (options.totalModifier ?? 0) - proficiencyModifierValue + mythicModifierValue;
+        options.totalModifier = (options.totalModifier ?? 0) - proficiencyModifierValue + mythicModifierValue;
         const CheckRoll = getCheckRollClass();
         return new CheckRoll(
             `${options.dice}${signedInteger(options.totalModifier, { emptyStringZero: true })}`,
             oldRoll.data,
-            options
+            options,
         );
     })();
     unevaluatedNewRoll.options.isReroll = true;
 
-    Hooks.callAll(
-        "pf2e.preReroll",
-        Roll.fromJSON(targetSave.roll),
-        unevaluatedNewRoll,
-        resource,
-        keep
-    );
+    Hooks.callAll("pf2e.preReroll", Roll.fromJSON(targetSave.roll), unevaluatedNewRoll, resource, keep);
 
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, keep);
@@ -263,8 +247,7 @@ async function rerollSave(
     await roll3dDice(newRoll, target, targetSave.private);
 
     const keptRoll =
-        (keep === "higher" && oldRoll.total > newRoll.total) ||
-        (keep === "lower" && oldRoll.total < newRoll.total)
+        (keep === "higher" && oldRoll.total > newRoll.total) || (keep === "lower" && oldRoll.total < newRoll.total)
             ? oldRoll
             : newRoll;
 
@@ -287,7 +270,7 @@ async function rerollSave(
                 ...(note.rule?.item.getRollOptions("parent") ?? []),
             ]);
             return test && (!note.outcome.length || (outcome && note.outcome.includes(outcome)));
-        })
+        }),
     );
 
     const modifiers = foundry.utils.deepClone(targetSave.modifiers);

@@ -15,7 +15,7 @@ const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 function prepareAreaMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    updates: DeepPartial<TargetsDataSource>
+    updates: DeepPartial<TargetsDataSource>,
 ): updates is WithRequired<DeepPartial<TargetsDataSource>, "type"> {
     const saveVariants = getAreaSaveVariants(message);
     if (!saveVariants) return false;
@@ -37,7 +37,7 @@ async function renderAreaMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
     html: HTMLElement,
-    flag: TargetsFlagData
+    flag: TargetsFlagData,
 ) {
     const item = message.item;
     const msgContent = htmlQuery(html, ".message-content");
@@ -54,7 +54,7 @@ async function renderAreaMessage(
         flag,
         item,
         `.message-buttons [data-action="roll-area-save"]`,
-        `.message-buttons [data-action="roll-area-damage"]`
+        `.message-buttons [data-action="roll-area-damage"]`,
     );
 }
 
@@ -81,9 +81,7 @@ function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | nul
     };
 }
 
-function isValidItem(
-    item: Maybe<ItemPF2e>
-): item is WeaponPF2e<CreaturePF2e> | MeleePF2e<CreaturePF2e> {
+function isValidItem(item: Maybe<ItemPF2e>): item is WeaponPF2e<CreaturePF2e> | MeleePF2e<CreaturePF2e> {
     return !!item?.isOfType("weapon", "melee") && !!item.actor?.isOfType("creature");
 }
 
