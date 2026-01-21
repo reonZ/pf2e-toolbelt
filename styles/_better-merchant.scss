@@ -29,7 +29,10 @@
                     gap: 0.5em;
 
                     .image {
-                        box-shadow: 0 0 0 1px #9f725b, 0 0 0 2px var(--tertiary), 0 0 0 3px #956d58;
+                        box-shadow:
+                            0 0 0 1px #9f725b,
+                            0 0 0 2px var(--tertiary),
+                            0 0 0 3px #956d58;
                         height: 1.8em;
                         width: 1.8em;
                         background-size: cover !important;
@@ -37,6 +40,16 @@
 
                     .value {
                         width: 3em;
+                    }
+
+                    &.credits .image {
+                        background: url("../../../icons/sundries/gaming/playing-cards-grey.webp")
+                            no-repeat;
+                    }
+
+                    &.upb .image {
+                        background: url("../../../systems/sf2e/icons/equipment/treasure/currency/upb.webp")
+                            no-repeat;
                     }
 
                     &.pp .image {
@@ -198,7 +211,9 @@
 
             .item {
                 display: grid;
-                grid-template-columns: 2.4em 1fr 9em minmax(5em, auto) 1.5em 2.4em;
+                grid-template-columns:
+                    2.4em 1fr 9em minmax(5em, auto)
+                    1.5em 2.4em;
                 align-items: center;
                 justify-items: center;
                 gap: 0.25rem;
