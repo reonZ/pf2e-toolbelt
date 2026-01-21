@@ -54,13 +54,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             "renderCharacterSheetPF2e", //
             "renderNPCSheetPF2e",
         ],
-        this.#onRenderSheetPF2e.bind(this)
+        this.#onRenderSheetPF2e.bind(this),
     );
 
-    #createChatMessageHook = createToggleableHook(
-        "createChatMessage",
-        this.#onCreateChatMessage.bind(this)
-    );
+    #createChatMessageHook = createToggleableHook("createChatMessage", this.#onCreateChatMessage.bind(this));
 
     #actionWrappers = [
         createToggleableWrapper(
@@ -70,7 +67,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 "CONFIG.Item.sheetClasses.feat['pf2e.FeatSheetPF2e'].cls.prototype._renderInner",
             ],
             this.#actionSheetRenderInner,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "OVERRIDE",
@@ -79,7 +76,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 "CONFIG.Item.sheetClasses.feat['pf2e.FeatSheetPF2e'].cls.prototype._onDrop",
             ],
             this.#actionSheetPF2eOnDrop,
-            { context: this }
+            { context: this },
         ),
     ];
 
@@ -91,7 +88,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 "CONFIG.Item.sheetClasses.equipment['pf2e.EquipmentSheetPF2e'].cls.prototype._renderInner",
             ],
             this.#itemSheetRenderInner,
-            { context: this }
+            { context: this },
         ),
     ];
 
@@ -100,13 +97,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             "WRAPPER",
             "CONFIG.Item.sheetClasses.spell['pf2e.SpellSheetPF2e'].cls.prototype._renderInner",
             this.#itemSheetRenderInner,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "MIXED",
             "CONFIG.PF2E.Item.documentClasses.spellcastingEntry.prototype.cast",
             this.#spellcastingEntryCast,
-            { context: this }
+            { context: this },
         ),
     ];
 
@@ -185,17 +182,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         toggleHooksAndWrappers(this.#actionWrappers, actionEnabled);
         toggleHooksAndWrappers(this.#itemWrappers, itemEnabled);
 
-        this.#renderCharacterSheetPF2eHook.toggle(
-            actionEnabled || itemEnabled || this.settings.use
-        );
+        this.#renderCharacterSheetPF2eHook.toggle(actionEnabled || itemEnabled || this.settings.use);
 
         if (!skipRenders) {
-            renderItemSheets([
-                "AbilitySheetPF2e",
-                "ConsumableSheetPF2e",
-                "EquipmentSheetPF2e",
-                "FeatSheetPF2e",
-            ]);
+            renderItemSheets(["AbilitySheetPF2e", "ConsumableSheetPF2e", "EquipmentSheetPF2e", "FeatSheetPF2e"]);
 
             renderCharacterSheets();
         }
@@ -223,26 +213,23 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     #onCreateChatMessage(origin: ChatMessagePF2e) {
         if (!origin.isAuthor || origin.getFlag("pf2e", "context.type") !== "self-effect") return;
 
-        const hookId = Hooks.on(
-            "renderChatMessageHTML",
-            (message: ChatMessagePF2e, html: HTMLElement) => {
-                if (message !== origin) return;
+        const hookId = Hooks.on("renderChatMessageHTML", (message: ChatMessagePF2e, html: HTMLElement) => {
+            if (message !== origin) return;
 
-                Hooks.off("renderChatMessageHTML", hookId);
+            Hooks.off("renderChatMessageHTML", hookId);
 
-                // we wait for the message to actually be added to the DOM
-                requestAnimationFrame(() => {
-                    const btn = htmlQuery(html, `button[data-action="applyEffect"]`);
-                    btn?.click();
-                });
-            }
-        );
+            // we wait for the message to actually be added to the DOM
+            requestAnimationFrame(() => {
+                const btn = htmlQuery(html, `button[data-action="applyEffect"]`);
+                btn?.click();
+            });
+        });
     }
 
     #onRenderSheetPF2e(
         sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         $html: JQuery,
-        data: CharacterSheetData | NPCSheetData
+        data: CharacterSheetData | NPCSheetData,
     ) {
         if (!sheet.isEditable) return;
 
@@ -260,7 +247,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #updateActorItems(
         sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         html: HTMLElement,
-        data: CharacterSheetData | NPCSheetData
+        data: CharacterSheetData | NPCSheetData,
     ) {
         if (!sheet.isEditable) return;
 
@@ -275,7 +262,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             R.flatMap((section) => getSectionItems(section.items)),
             R.filter((item): item is EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e> => {
                 return item.isOfType("equipment", "consumable") && item.isIdentified;
-            })
+            }),
         );
 
         const panel = htmlQuery(html, `.tab[data-tab="inventory"] .inventory-pane`);
@@ -322,7 +309,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #updateActorActions(
         sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         html: HTMLElement,
-        data: CharacterSheetData | NPCSheetData
+        data: CharacterSheetData | NPCSheetData,
     ) {
         const actor = sheet.actor as CreaturePF2e;
         const isCharacter = actor.isOfType("character");
@@ -333,7 +320,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const actions = R.pipe(
             actionGroups,
             R.values(),
-            R.flatMap((group) => group.actions)
+            R.flatMap((group) => group.actions),
         );
 
         const useLabel = game.i18n.localize("PF2E.Action.Use");
@@ -341,7 +328,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             html,
             isCharacter
                 ? `.tab[data-tab="actions"] .tab-content .tab[data-tab="encounter"]`
-                : `.tab[data-tab="main"] .actions.section-container .section-body`
+                : `.tab[data-tab="main"] .actions.section-container .section-body`,
         );
 
         const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
@@ -401,7 +388,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #renderDropzone(
         sheet: ItemSheetPF2e<ItemPF2e>,
         linked: Maybe<ItemPF2e | MacroPF2e>,
-        type: "action" | "item" | "spell"
+        type: "action" | "item" | "spell",
     ): Promise<HTMLElement> {
         const isEditable = sheet.isEditable;
         const dropzone = createHTMLElementContent({
@@ -439,7 +426,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #actionSheetRenderInner(
         sheet: AbilitySheetPF2e | FeatSheetPF2e,
         wrapped: libWrapper.RegisterCallback,
-        data: ItemSheetData<AbilityItemPF2e | FeatPF2e>
+        data: ItemSheetData<AbilityItemPF2e | FeatPF2e>,
     ): Promise<JQuery> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
@@ -450,10 +437,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const html = $html[0];
         const macro = await this.getActionMacro(item);
-        const dropzone = htmlQuery(
-            html,
-            `.tab[data-tab="details"] .form-group[data-drop-zone="self-applied-effect"]`
-        );
+        const dropzone = htmlQuery(html, `.tab[data-tab="details"] .form-group[data-drop-zone="self-applied-effect"]`);
 
         if (macro) {
             const newDropzone = createHTMLElementContent({
@@ -531,7 +515,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #itemSheetRenderInner(
         sheet: EquipmentSheetPF2e | ConsumableSheetPF2e | SpellSheetPF2e,
         wrapped: libWrapper.RegisterCallback,
-        data: ItemSheetData<EquipmentPF2e | ConsumablePF2e | SpellPF2e>
+        data: ItemSheetData<EquipmentPF2e | ConsumablePF2e | SpellPF2e>,
     ): Promise<JQuery> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
@@ -545,11 +529,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const tab = htmlQuery(html, `.tab[data-tab="details"]`);
         const dropzone = createHTMLElement("fieldset", {
             classes: ["linked"],
-            content: await this.#renderDropzone(
-                sheet,
-                macro,
-                item.isOfType("spell") ? "spell" : "item"
-            ),
+            content: await this.#renderDropzone(sheet, macro, item.isOfType("spell") ? "spell" : "item"),
         });
 
         tab?.prepend(dropzone);
@@ -558,10 +538,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     async #spellcastingEntryCast(
-        entry: SpellcastingEntryPF2e,
+        _entry: SpellcastingEntryPF2e,
         wrapped: libWrapper.RegisterCallback,
         spell: SpellPF2e<ActorPF2e>,
-        options: CastOptions = {}
+        options: CastOptions = {},
     ) {
         const actor = spell.actor;
         const macro = await this.getItemMacro(spell);
@@ -573,10 +553,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 spell,
                 options,
                 cast: (macroOptions: CastOptions = {}) => {
-                    return wrapped(
-                        spell,
-                        foundry.utils.mergeObject(options, macroOptions, { inplace: false })
-                    );
+                    return wrapped(spell, foundry.utils.mergeObject(options, macroOptions, { inplace: false }));
                 },
                 cancel: () => {
                     return this.warning("spell.cancel", { name: spell.name });
@@ -587,18 +564,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         wrapped(spell, options);
     }
 
-    async #resolveDroppedItem(
-        event: DragEvent,
-        effectOnly: true
-    ): Promise<Maybe<MacroPF2e | EffectPF2e>>;
-    async #resolveDroppedItem(
-        event: DragEvent,
-        effectOnly: false
-    ): Promise<Maybe<MacroPF2e | ItemPF2e>>;
-    async #resolveDroppedItem(
-        event: DragEvent,
-        effectOnly: boolean
-    ): Promise<Maybe<MacroPF2e | ItemPF2e>> {
+    async #resolveDroppedItem(event: DragEvent, effectOnly: true): Promise<Maybe<MacroPF2e | EffectPF2e>>;
+    async #resolveDroppedItem(event: DragEvent, effectOnly: false): Promise<Maybe<MacroPF2e | ItemPF2e>>;
+    async #resolveDroppedItem(event: DragEvent, effectOnly: boolean): Promise<Maybe<MacroPF2e | ItemPF2e>> {
         try {
             const dataString = event.dataTransfer?.getData("text/plain");
             const dropData = JSON.parse(dataString ?? "");
