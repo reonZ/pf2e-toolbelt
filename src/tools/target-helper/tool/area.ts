@@ -1,6 +1,7 @@
 import {
     ChatMessagePF2e,
     CreaturePF2e,
+    getMessageContext,
     htmlQuery,
     isAreaOrAutoFireType,
     ItemPF2e,
@@ -59,7 +60,8 @@ async function renderAreaMessage(
 }
 
 function isAreaMessage(message: ChatMessagePF2e): boolean {
-    return isAreaOrAutoFireType(message.flags.pf2e.context?.type ?? "");
+    const context = getMessageContext(message);
+    return isAreaOrAutoFireType(context?.type ?? "");
 }
 
 function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | null {

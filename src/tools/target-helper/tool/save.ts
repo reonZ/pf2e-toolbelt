@@ -11,12 +11,14 @@ import {
     eventToRollParams,
     extractNotes,
     getActiveModule,
+    getMessageContext,
     R,
     RawModifier,
     RollNotePF2e,
     RollNoteSource,
     SaveType,
     signedInteger,
+    SYSTEM,
     TokenDocumentPF2e,
     waitDialog,
 } from "module-helpers";
@@ -82,10 +84,9 @@ async function rollSaves(
 
                 await roll3dDice(roll, target, isPrivate);
 
-                const context = msg.getFlag("pf2e", "context") as CheckContextChatFlag;
-
+                const context = getMessageContext<CheckContextChatFlag>(msg);
                 const modifiers = R.pipe(
-                    msg.getFlag("pf2e", "modifiers") as RawModifier[],
+                    msg.getFlag(SYSTEM.id, "modifiers") as RawModifier[],
                     R.filter((modifier) => !!modifier.enabled),
                     R.map((modifier): SaveRollData["modifiers"][number] => {
                         return {

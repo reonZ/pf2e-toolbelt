@@ -8,12 +8,14 @@ import {
     extractEphemeralEffects,
     getChoiceSetSelection,
     getItemSourceId,
+    getMessageContext,
     htmlClosest,
     htmlQuery,
     htmlQueryAll,
     isInstanceOf,
     R,
     removeIndexFromArray,
+    SYSTEM,
     TokenDocumentPF2e,
 } from "module-helpers";
 import {
@@ -347,7 +349,8 @@ async function applyDamageFromMessage(
     const damage = multiplier < 0 ? multiplier * roll.total + addend : roll.alter(multiplier, addend);
 
     // Get origin roll options and apply damage to a contextual clone: this may influence condition IWR, for example
-    const messageRollOptions = [...(message.flags.pf2e.context?.options ?? [])];
+    const context = getMessageContext(message);
+    const messageRollOptions = [...(context?.options ?? [])];
     const originRollOptions = messageRollOptions
         .filter((o) => o.startsWith("self:"))
         .map((o) => o.replace(/^self/, "origin"));
@@ -395,7 +398,7 @@ async function applyDamageFromMessage(
             skipIWR: multiplier <= 0,
             rollOptions,
             shieldBlockRequest,
-            outcome: message.flags.pf2e.context?.outcome,
+            outcome: context?.outcome,
         });
     }
     toggleOffShieldBlock(message.id);
@@ -424,7 +427,7 @@ async function shiftAdjustDamage(
     data: TargetsData,
 ): Promise<void> {
     const content = await foundry.applications.handlebars.renderTemplate(
-        "systems/pf2e/templates/chat/damage/adjustment-dialog.hbs",
+        `systems/${SYSTEM.id}/templates/chat/damage/adjustment-dialog.hbs`,
     );
     const AdjustmentDialog = class extends foundry.appv1.api.Dialog {
         override activateListeners($html: JQuery): void {
