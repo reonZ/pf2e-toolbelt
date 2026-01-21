@@ -34,10 +34,7 @@ const _cached: { injected?: string; icons: PartialRecord<ButtonType, string> } =
 class MergeDamageTool extends ModuleTool<ToolSettings> {
     #hooks = [
         createToggleableHook("renderChatMessageHTML", this.#onRenderChatMessage.bind(this)),
-        createToggleableHook(
-            "diceSoNiceMessageProcessed",
-            this.#onDiceSoNiceMessageProcessed.bind(this)
-        ),
+        createToggleableHook("diceSoNiceMessageProcessed", this.#onDiceSoNiceMessageProcessed.bind(this)),
     ];
 
     static ICONS: Record<ButtonType, string> = {
@@ -100,11 +97,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         return target ? [target] : [];
     }
 
-    setMessageUpdateFlags(
-        updates: Record<string, unknown>,
-        message: ChatMessagePF2e,
-        data: MergeDataModel[]
-    ) {
+    setMessageUpdateFlags(updates: Record<string, unknown>, message: ChatMessagePF2e, data: MergeDataModel[]) {
         const targets = this.getMessageTargets(message);
         game.toolbelt!.api.targetHelper.setMessageFlagTargets(updates, targets);
 
@@ -164,9 +157,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         const tags = flavor.querySelector(":scope > h4.action + .tags")?.outerHTML.trim() ?? "";
         const modifiers = flavor.querySelector(":scope > .tags.modifiers")?.outerHTML.trim() ?? "";
         const options = sourceFlag.context.options.filter((option) => /^(item|self):/.test(option));
-        const notes = htmlQueryAll(flavor, ":scope > .notes > .roll-note").map((x) =>
-            x.outerHTML.trim()
-        );
+        const notes = htmlQueryAll(flavor, ":scope > .notes > .roll-note").map((x) => x.outerHTML.trim());
 
         return [
             new MergeDataModel({
@@ -287,9 +278,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                 group.notes.push(note);
             }
 
-            const exists = group.results.find(
-                (result) => result.outcome === outcome && result.modifiers === modifiers
-            );
+            const exists = group.results.find((result) => result.outcome === outcome && result.modifiers === modifiers);
 
             if (exists) {
                 exists.count++;
@@ -297,9 +286,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                 group.results.push({
                     outcome,
                     modifiers,
-                    label: game.i18n.localize(
-                        `PF2E.Check.Result.Degree.Attack.${outcome ?? DEGREE_STRINGS[2]}`
-                    ),
+                    label: game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${outcome ?? DEGREE_STRINGS[2]}`),
                     count: 1,
                 });
             }
@@ -359,7 +346,7 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
 
         for (const instance of instances) {
             const exists = groupedInstances.find(
-                (x) => x.type === instance.type && x.persistent === instance.persistent
+                (x) => x.type === instance.type && x.persistent === instance.persistent,
             );
 
             if (exists) {
@@ -393,7 +380,7 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
                     if (value <= prev.value) return prev;
                     return { value, index };
                 },
-                { value: 0, index: -1 }
+                { value: 0, index: -1 },
             );
 
             group.formulas = [group.formulas[index]];
@@ -402,7 +389,7 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
 
         const type = R.filter(
             [group.type, group.persistent ? "persistent" : undefined, ...group.materials],
-            R.isTruthy
+            R.isTruthy,
         ).join(",");
 
         group.formula = `(${group.formulas.join(" + ")})[${type}]`;
@@ -411,7 +398,7 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
 
     const showBreakdown = messageRoll.options.showBreakdown && otherRoll.options.showBreakdown;
     const ignoredResistances = ((messageRoll.options.ignoredResistances ?? []) as string[]).concat(
-        (otherRoll.options.ignoredResistances ?? []) as string[]
+        (otherRoll.options.ignoredResistances ?? []) as string[],
     );
 
     const roll = {
@@ -433,22 +420,19 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
                 evaluated: true,
                 terms: groupedInstances.map(({ formula }) => formula),
                 modifiers: [],
-                rolls: groupedInstances.map(
-                    ({ formula, total, term, type, materials, persistent }) => ({
-                        class: "DamageInstance",
-                        options: {
-                            flavor: R.filter(
-                                [type, persistent ? "persistent" : undefined, ...materials],
-                                R.isTruthy
-                            ).join(","),
-                        },
-                        dice: [],
-                        formula,
-                        total,
-                        terms: [term],
-                        evaluated: true,
-                    })
-                ),
+                rolls: groupedInstances.map(({ formula, total, term, type, materials, persistent }) => ({
+                    class: "DamageInstance",
+                    options: {
+                        flavor: R.filter([type, persistent ? "persistent" : undefined, ...materials], R.isTruthy).join(
+                            ",",
+                        ),
+                    },
+                    dice: [],
+                    formula,
+                    total,
+                    terms: [term],
+                    evaluated: true,
+                })),
                 results: groupedInstances.map(({ total }) => ({
                     result: total,
                     active: true,
@@ -469,7 +453,7 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
 }
 
 function createTermGroup(
-    terms: RollTermData[]
+    terms: RollTermData[],
 ): RollTermData & { class?: "Grouping"; term: ReturnType<ArithmeticExpression["toJSON"]> } {
     return {
         class: "Grouping",
