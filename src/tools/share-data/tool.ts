@@ -1,4 +1,5 @@
 import {
+    ActorFlagsPF2e,
     ActorPF2e,
     ActorSourcePF2e,
     AppliedDamageFlag,
@@ -19,6 +20,7 @@ import {
     includesAny,
     isPrimaryOwner,
     isPrimaryUpdater,
+    isSF2eItem,
     ModifierPF2e,
     ModifierType,
     MODULE,
@@ -27,6 +29,7 @@ import {
     registerWrapper,
     sluggify,
     Statistic,
+    SYSTEM,
     WeaponPF2e,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -46,6 +49,18 @@ import {
     ShareDataSource,
     ShareDataType,
 } from ".";
+
+const GRADES = {
+    null: { potency: 0, resilient: 0 },
+    undefined: { potency: 0, resilient: 0 },
+    commercial: { potency: 0, resilient: 0 },
+    tactical: { potency: 1, resilient: 0 },
+    advanced: { potency: 1, resilient: 1 },
+    superior: { potency: 2, resilient: 1 },
+    elite: { potency: 2, resilient: 2 },
+    ultimate: { potency: 3, resilient: 2 },
+    paragon: { potency: 3, resilient: 0 },
+};
 
 // they are ordered by armor bonus
 const BANDS_OF_FORCE_SLUGS = ["bands-of-force", "bands-of-force-greater", "bands-of-force-major"];
@@ -643,8 +658,8 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         this.setInMemory(actor, "data", data);
 
         if (data.timeEvents) {
-            actor.flags.pf2e.rollOptions.all = foundry.utils.mergeObject(
-                actor.flags.pf2e.rollOptions.all,
+            (actor.flags[SYSTEM.id] as ActorFlagsPF2e["pf2e"]).rollOptions.all = foundry.utils.mergeObject(
+                (actor.flags[SYSTEM.id] as ActorFlagsPF2e["pf2e"]).rollOptions.all,
                 createEncounterRollOptions(master),
             );
         }
@@ -672,7 +687,8 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
         if (data.armorRunes) {
             const wornArmor = master.wornArmor;
-            const armor = wornArmor?.isInvested ? wornArmor : undefined;
+            const wornArmorIsSF2e = !!wornArmor && isSF2eItem(wornArmor);
+            const armor = (wornArmorIsSF2e ? wornArmor.isEquipped : wornArmor?.isInvested) ? wornArmor : undefined;
             const bracers = R.pipe(
                 master.itemTypes.equipment,
                 R.filter((item): item is EquipmentPF2e<CharacterPF2e> & { slug: string } => {
@@ -687,11 +703,15 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             if (armor || bracerBonus) {
                 for (const selector of ["ac", "saving-throw"] as const) {
                     const runeType = selector === "ac" ? "potency" : "resilient";
-                    const armorBonus = armor?.system.runes[runeType] || 0;
-                    if (!armorBonus && !bracerBonus) continue;
+                    const armorBonus = wornArmorIsSF2e
+                        ? GRADES[armor?.system.grade as keyof typeof GRADES]?.[runeType]
+                        : armor?.system.runes[runeType];
+
+                    const armorValue = armorBonus ?? 0;
+                    if (!armorValue && !bracerBonus) continue;
 
                     const construct = (options: DeferredValueParams = {}): ModifierPF2e | null => {
-                        const label = armorBonus > bracerBonus ? armor!.name : bracers!.name;
+                        const label = armorValue > bracerBonus ? armor!.name : bracers!.name;
                         const slug = sluggify(label);
 
                         const modifierType: ModifierType =
@@ -704,7 +724,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         const modifier = new game.pf2e.Modifier({
                             slug,
                             label,
-                            modifier: Math.max(armorBonus, bracerBonus),
+                            modifier: Math.max(armorValue, bracerBonus),
                             type: modifierType,
                         });
 

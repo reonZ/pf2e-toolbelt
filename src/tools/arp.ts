@@ -4,8 +4,7 @@ import {
     ArmorPF2e,
     Coins,
     createToggleableWrapper,
-    includesAny,
-    PhysicalItemPF2e,
+    isSF2eItem,
     R,
     ShieldPF2e,
     SYSTEM,
@@ -167,7 +166,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const force = this.settings.force;
         const level = actor.level;
 
-        if (isSF2e(weapon)) {
+        if (isSF2eItem(weapon)) {
             updateItemGrade(level, force, weapon);
             return;
         }
@@ -192,7 +191,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const coins = weapon.price.value.toObject();
         if (!coins.gp) return;
 
-        if (isSF2e(weapon)) {
+        if (isSF2eItem(weapon)) {
             updateItemPriceByGrade(coins, weapon);
             return;
         }
@@ -225,7 +224,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const force = this.settings.force;
         const level = actor.level;
 
-        if (isSF2e(armor)) {
+        if (isSF2eItem(armor)) {
             updateItemGrade(level, force, armor);
             return;
         }
@@ -250,7 +249,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const coins = armor.price.value.toObject();
         if (!coins.gp) return;
 
-        if (isSF2e(armor)) {
+        if (isSF2eItem(armor)) {
             updateItemPriceByGrade(coins, armor);
             return;
         }
@@ -286,7 +285,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const force = this.settings.force;
         const level = actor.level;
 
-        if (isSF2e(shield)) {
+        if (isSF2eItem(shield)) {
             updateItemGrade(level, force, shield);
         } else {
             // 4, 7, 10, 13, 16, 19
@@ -308,7 +307,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         const coins = shield.price.value.toObject();
         if (!coins.gp) return;
 
-        if (isSF2e(shield)) {
+        if (isSF2eItem(shield)) {
             updateItemPriceByGrade(coins, shield);
             return;
         }
@@ -369,10 +368,6 @@ function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
 
 function isValidShield(shield: ShieldPF2e<ActorPF2e>): boolean {
     return !shield._source.system.specific;
-}
-
-function isSF2e(item: PhysicalItemPF2e<ActorPF2e>): boolean {
-    return includesAny(item._source.system.traits.value, ["tech", "analog"]);
 }
 
 function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {

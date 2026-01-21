@@ -1,4 +1,4 @@
-import { AbstractEffectPF2e, ActorPF2e, CreaturePF2e, DurationData, R } from "module-helpers";
+import { AbstractEffectPF2e, ActorPF2e, CombatantFlags, CreaturePF2e, DurationData, R, SYSTEM } from "module-helpers";
 import { getMasterInMemory } from ".";
 
 /**
@@ -86,8 +86,7 @@ function createEncounterRollOptions(actor: ActorPF2e): Record<string, boolean> {
 
     const initiativeRoll = Math.trunc(participant.initiative);
     const initiativeRank = participants.indexOf(participant) + 1;
-    const { initiativeStatistic } = participant.flags.pf2e;
-
+    const { initiativeStatistic } = participant.flags[SYSTEM.id] as CombatantFlags["pf2e"];
     const threat = encounter.metrics?.threat;
     const numericThreat = { trivial: 0, low: 1, moderate: 2, severe: 3, extreme: 4 }[threat ?? "trivial"];
 
