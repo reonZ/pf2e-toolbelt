@@ -611,6 +611,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     const { check, domains, rank } = master.skills[slug];
                     const currentRank = actor.skills[slug].rank;
                     const attribute = skill.attribute;
+                    const actualRank = Math.max(rank, currentRank);
 
                     // we add item modifiers from master
                     const modifiers = R.pipe(
@@ -626,14 +627,14 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         domains,
                         modifiers: [],
                         lore: false,
-                        rank: Math.max(rank, currentRank),
+                        rank: actualRank,
                         check: { type: check.type, modifiers },
                     });
 
                     actor.skills[slug] = statistic;
                     actor.system.skills[slug] = foundry.utils.mergeObject(
                         statistic.getTraceData() as CharacterSkillData,
-                        { attribute, rank },
+                        { attribute, rank: actualRank },
                     );
                 }
             }
