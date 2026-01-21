@@ -37,7 +37,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
 
     #getChatContextOptionsHook = createToggleableHook(
         "getChatMessageContextOptions",
-        this.#onGetChatMessageContextOptions.bind(this)
+        this.#onGetChatMessageContextOptions.bind(this),
     );
 
     #messageRenderHTMLWrapper = sharedMessageRenderHTML.register(this.#messageRenderHTML, {
@@ -76,9 +76,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 
     get traitsBlacklist() {
-        return (this.#traitsBlacklist ??= TRAITS_BLACKLIST.map(
-            (trait) => CONFIG.PF2E.traitsDescriptions[trait]
-        ));
+        return (this.#traitsBlacklist ??= TRAITS_BLACKLIST.map((trait) => CONFIG.PF2E.traitsDescriptions[trait]));
     }
 
     init(isGM: boolean): void {
@@ -199,9 +197,7 @@ function isValidActionMessage(message: Maybe<ChatMessagePF2e>): message is ChatM
     return isValideMessage(message) && isActionMessage(message);
 }
 
-function isValidSpellMessage(
-    message: Maybe<ChatMessagePF2e>
-): message is ChatMessagePF2e & { item: SpellPF2e } {
+function isValidSpellMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e & { item: SpellPF2e } {
     return isValideMessage(message) && isSpellMessage(message);
 }
 
