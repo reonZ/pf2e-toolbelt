@@ -18,15 +18,7 @@ import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
-const GRADES = [
-    "commercial",
-    "tactical",
-    "advanced",
-    "superior",
-    "elite",
-    "ultimate",
-    "paragon",
-] as const;
+const GRADES = ["commercial", "tactical", "advanced", "superior", "elite", "ultimate", "paragon"] as const;
 
 class ArpTool extends ModuleTool<ToolSettings> {
     #baseWrappers = [
@@ -39,13 +31,13 @@ class ArpTool extends ModuleTool<ToolSettings> {
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData",
             this.#weaponPrepareDerivedData,
-            { context: this }
+            { context: this },
         ),
         createToggleableWrapper(
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData",
             this.#armorPrepareDerivedData,
-            { context: this }
+            { context: this },
         ),
     ];
 
@@ -53,13 +45,13 @@ class ArpTool extends ModuleTool<ToolSettings> {
         "WRAPPER",
         "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData",
         this.#shieldPrepareBaseData,
-        { context: this }
+        { context: this },
     );
     #shieldPrepareDeriveDataWrapper = createToggleableWrapper(
         "WRAPPER",
         "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData",
         this.#shieldPrepareDerivedData,
-        { context: this }
+        { context: this },
     );
 
     static WEAPON_POTENCY_PRICE = {
@@ -146,7 +138,7 @@ class ArpTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    init(isGM: boolean): void {
+    init(): void {
         if (!this.settings.enabled) return;
 
         const priceEnabled = this.settings.price;
@@ -367,11 +359,7 @@ function updateItemPriceByGrade(coins: Coins, item: ItemType) {
 }
 
 function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is ActorPF2e {
-    return (
-        !!actor &&
-        !actor.getFlag("pf2e", "disableABP") &&
-        (!isCharacter || actor.isOfType("character"))
-    );
+    return !!actor && !actor.getFlag("pf2e", "disableABP") && (!isCharacter || actor.isOfType("character"));
 }
 
 function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
