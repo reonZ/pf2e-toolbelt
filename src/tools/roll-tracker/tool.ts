@@ -209,7 +209,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
             await Promise.all(
                 game.users.map((user) => {
                     return setUserSetting(user, `${this.key}.userRolls`, []);
-                })
+                }),
             );
 
             return this.info("confirm.delete.all");
@@ -217,7 +217,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
 
         const [encounters, sessions] = R.pipe(
             [this.settings.encounters, this.settings.sessions],
-            R.map((entries) => R.omitBy(entries, (entryTime) => entryTime < time))
+            R.map((entries) => R.omitBy(entries, (entryTime) => entryTime < time)),
         );
 
         await this.endSession();
@@ -231,7 +231,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
 
                 const rolls = currentRolls.filter((roll) => roll.time >= time);
                 return setUserSetting(user, `${this.key}.userRolls`, rolls);
-            })
+            }),
         );
 
         this.info("confirm.delete.before", { time: timestampToLocalTime(time) });
@@ -264,7 +264,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         };
     }
 
-    #onCreateChatMessage(message: ChatMessagePF2e, data: object, userId: string) {
+    #onCreateChatMessage(message: ChatMessagePF2e, _data: object, userId: string) {
         if (userId !== game.userId || !this.canRecord()) return;
 
         const die = message.rolls[0]?.dice[0];
@@ -291,13 +291,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
             });
         } else if (context?.type === "damage-roll") {
         } else if (message.rolls.length === 1 && message.rolls[0].dice.length === 1) {
-            if (
-                !user.isGM &&
-                !message.blind &&
-                message.whisper.length === 1 &&
-                message.whisper[0] === user.id
-            )
-                return;
+            if (!user.isGM && !message.blind && message.whisper.length === 1 && message.whisper[0] === user.id) return;
 
             this.addRoll({
                 value,
@@ -336,10 +330,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
 }
 
 function isCheckContextFlag(flag?: ChatContextFlag): flag is CheckContextChatFlag {
-    return (
-        !!flag &&
-        !tupleHasValue(["damage-roll", "spell-cast", "self-effect", "damage-taken"], flag.type)
-    );
+    return !!flag && !tupleHasValue(["damage-roll", "spell-cast", "self-effect", "damage-taken"], flag.type);
 }
 
 function createEndOfDayDate() {

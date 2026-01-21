@@ -69,18 +69,14 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         }
 
         const modes: RawRollMode[] = [];
-        const checkOutcomes = DEGREE_STRINGS.map((x) =>
-            game.i18n.localize(`PF2E.Check.Result.Degree.Check.${x}`)
-        );
+        const checkOutcomes = DEGREE_STRINGS.map((x) => game.i18n.localize(`PF2E.Check.Result.Degree.Check.${x}`));
 
         modes.push(
             createRollMode("all"),
             createRollMode("attack-roll"),
             {
                 type: "attack-roll-outcome",
-                entries: DEGREE_STRINGS.map((x) =>
-                    game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${x}`)
-                ),
+                entries: DEGREE_STRINGS.map((x) => game.i18n.localize(`PF2E.Check.Result.Degree.Attack.${x}`)),
                 rolls: (rolls) => {
                     return rolls.filter((roll) => roll.type === "attack-roll" && !!roll.outcome);
                 },
@@ -92,7 +88,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                             return rolls.filter((roll) => {
                                 return roll.outcome === outcome;
                             }).length;
-                        })
+                        }),
                     );
                 },
             },
@@ -101,9 +97,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                 type: "saving-throw-outcome",
                 entries: R.times(3, () => checkOutcomes).flat(),
                 rolls: (rolls) => {
-                    return rolls.filter(
-                        (roll) => roll.type === "saving-throw" && !!roll.modifier && !!roll.outcome
-                    );
+                    return rolls.filter((roll) => roll.type === "saving-throw" && !!roll.modifier && !!roll.outcome);
                 },
                 values: (rolls) => {
                     return R.pipe(
@@ -116,9 +110,9 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                                     return rolls.filter((roll) => {
                                         return roll.modifier === save && roll.outcome === outcome;
                                     }).length;
-                                })
+                                }),
                             );
-                        })
+                        }),
                     );
                 },
             },
@@ -127,9 +121,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                 const skills = (() => {
                     const skills = R.entries(CONFIG.PF2E.skills);
                     const half = Math.ceil(skills.length / 2);
-                    return index === "1"
-                        ? R.take(skills, half)
-                        : R.takeLast(skills, skills.length - half);
+                    return index === "1" ? R.take(skills, half) : R.takeLast(skills, skills.length - half);
                 })();
 
                 const slugs = skills.map(([slug]) => slug) as string[];
@@ -139,11 +131,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                     entries: skills.map(([_, { label }]) => game.i18n.localize(label)),
                     rolls: (rolls) => {
                         return rolls.filter((roll) => {
-                            return (
-                                roll.type === "skill-check" &&
-                                roll.modifier &&
-                                slugs.includes(roll.modifier)
-                            );
+                            return roll.type === "skill-check" && roll.modifier && slugs.includes(roll.modifier);
                         });
                     },
                     values: (rolls) => {
@@ -151,20 +139,18 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                             slugs,
                             R.flatMap((slug) => {
                                 return rolls.filter((roll) => roll.modifier === slug).length;
-                            })
+                            }),
                         );
                     },
                 };
             }),
             createRollMode("perception-check"),
             createRollMode("initiative"),
-            createRollMode("flat-check")
+            createRollMode("flat-check"),
         );
 
         return (this.#modes = modes.map(({ entries, rolls, type, values }) => {
-            const labels = (
-                this.localizeIfExist("mode", type, "bottom") ?? this.localize("bottom")
-            ).split("|");
+            const labels = (this.localizeIfExist("mode", type, "bottom") ?? this.localize("bottom")).split("|");
 
             return {
                 type,
@@ -194,15 +180,13 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         }
 
         if (this.#filter === "time") {
-            return rolls.filter(
-                (roll) => roll.time >= this.#time.from && roll.time <= this.#time.to
-            );
+            return rolls.filter((roll) => roll.time >= this.#time.from && roll.time <= this.#time.to);
         }
 
         return rolls;
     }
 
-    async _prepareContext(options: ApplicationRenderOptions): Promise<RollTrackerContext> {
+    async _prepareContext(_options: ApplicationRenderOptions): Promise<RollTrackerContext> {
         const { encounters, sessions } = this.#getTimedEventArrays();
         const mode = this.modes.find((mode) => mode.type === this.#mode) ?? this.modes[0];
 
@@ -221,7 +205,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
             game.users.contents,
             R.filter((user) => user.isGM),
             R.map((user) => user.id),
-            R.concat(["default"])
+            R.concat(["default"]),
         );
 
         const actors = game.actors.filter((actor) => {
@@ -232,7 +216,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                 R.pipe(
                     actor.ownership,
                     R.entries(),
-                    R.filter(([id, permission]) => (permission ?? 0) >= 3 && !excludes.includes(id))
+                    R.filter(([id, permission]) => (permission ?? 0) >= 3 && !excludes.includes(id)),
                 ).length < 2
             );
         });
@@ -288,14 +272,14 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                 values,
                 R.countBy(R.identity()),
                 R.entries(),
-                R.sortBy([([_, count]) => count, "desc"])
+                R.sortBy([([_, count]) => count, "desc"]),
             );
 
             const maxCount = modeEntries[0]?.[1] ?? 0;
             const modes = R.pipe(
                 modeEntries,
                 R.takeWhile(([_, count]) => count === maxCount),
-                R.map(([value]) => value)
+                R.map(([value]) => value),
             );
 
             return {
@@ -346,11 +330,7 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
         };
     }
 
-    protected _replaceHTML(
-        result: string,
-        content: HTMLElement,
-        options: ApplicationRenderOptions
-    ): void {
+    protected _replaceHTML(result: string, content: HTMLElement, _options: ApplicationRenderOptions): void {
         const scrollPosition = this.#list?.scrollTop;
 
         content.innerHTML = result;
@@ -414,9 +394,9 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
                     entries,
                     R.entries(),
                     R.map(([id, time]): TimedEventEntry => ({ id, time })),
-                    R.sortBy([R.prop("time"), "desc"])
+                    R.sortBy([R.prop("time"), "desc"]),
                 );
-            })
+            }),
         );
 
         return { encounters, sessions };
@@ -452,22 +432,17 @@ class RollTracker extends ModuleToolApplication<RollTrackerTool> {
             this.render();
         });
 
-        addListenerAll(
-            html,
-            ".sidebar .options input[type='date']",
-            "change",
-            (el: HTMLInputElement) => {
-                const input = el.name as "time-from" | "time-to";
+        addListenerAll(html, ".sidebar .options input[type='date']", "change", (el: HTMLInputElement) => {
+            const input = el.name as "time-from" | "time-to";
 
-                if (input === "time-from") {
-                    this.#time.from = new Date(`${el.value}T00:00:00`).getTime();
-                } else if (input === "time-to") {
-                    this.#time.to = new Date(`${el.value}T23:59:59`).getTime();
-                }
-
-                this.render();
+            if (input === "time-from") {
+                this.#time.from = new Date(`${el.value}T00:00:00`).getTime();
+            } else if (input === "time-to") {
+                this.#time.to = new Date(`${el.value}T23:59:59`).getTime();
             }
-        );
+
+            this.render();
+        });
     }
 }
 
@@ -487,7 +462,7 @@ function createRollMode<T extends RollType | "all">(type: T): RawRollMode {
                 R.range(0, 20),
                 R.map((face) => {
                     return rolls.filter((roll) => roll.value === face + 1).length;
-                })
+                }),
             );
         },
     };
@@ -526,12 +501,7 @@ type ContextGroupEntry = {
     ratio: number;
 };
 
-type ModeType =
-    | RollType
-    | "all"
-    | "attack-roll-outcome"
-    | "saving-throw-outcome"
-    | `skill-check-${1 | 2}`;
+type ModeType = RollType | "all" | "attack-roll-outcome" | "saving-throw-outcome" | `skill-check-${1 | 2}`;
 
 type FilterType = (typeof FILTERS)[number];
 
