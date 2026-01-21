@@ -11,7 +11,7 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 class BetterTemplateTool extends ModuleTool<ToolSettings> {
     #createMeasuredTemplateHook = createToggleableHook(
         "createMeasuredTemplate",
-        this.#onCreateMeasuredTemplate.bind(this)
+        this.#onCreateMeasuredTemplate.bind(this),
     );
 
     get key(): "betterTemplate" {
@@ -39,15 +39,11 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    init(isGM: boolean): void {
+    init(): void {
         this.#createMeasuredTemplateHook.toggle(this.settings.target);
     }
 
-    async #onCreateMeasuredTemplate(
-        template: MeasuredTemplateDocumentPF2e,
-        context: any,
-        userId: string
-    ) {
+    async #onCreateMeasuredTemplate(template: MeasuredTemplateDocumentPF2e, _context: any, userId: string) {
         const user = game.user;
 
         if (
@@ -60,9 +56,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
 
         const dismiss = this.settings.targetDismiss;
         const actor = template.actor;
-        const self: Token | null | undefined = !actor
-            ? undefined
-            : actor.token?.object ?? actor.getActiveTokens()[0];
+        const self: Token | null | undefined = !actor ? undefined : (actor.token?.object ?? actor.getActiveTokens()[0]);
 
         const result = await waitDialog<
             {
@@ -146,7 +140,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         if (message && game.toolbelt?.getToolSetting("targetHelper", "enabled")) {
             const updates = game.toolbelt.api.targetHelper.setMessageFlagTargets(
                 {},
-                targets.map((token) => token.document.uuid)
+                targets.map((token) => token.document.uuid),
             );
 
             if (updates) {
