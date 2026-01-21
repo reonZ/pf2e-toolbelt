@@ -4,6 +4,7 @@ import {
     isHoldingModifierKey,
     MeasuredTemplateDocumentPF2e,
     oppositeAlliance,
+    SYSTEM,
     waitDialog,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -131,7 +132,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
             );
         });
 
-        const messageId = template.flags.pf2e.messageId;
+        const messageId = template.getFlag(SYSTEM.id, "messageId") as string | undefined;
         const targetsIds = targets.map((token) => token.id);
         const message = messageId && game.messages.get(messageId);
 
