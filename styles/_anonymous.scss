@@ -2,6 +2,7 @@ li.chat-message {
     &.pf2e-toolbelt-anonymous-gm {
         .card-header,
         .card-content,
+        .flavor-text .action,
         footer {
             background: var(--visibility-gm-bg);
             outline: 1px dotted rgba(75, 74, 68, 0.5);

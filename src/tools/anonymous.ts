@@ -9,6 +9,7 @@ import {
     R,
     SpellcastingEntrySlots,
     SpellPF2e,
+    SYSTEM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedMessageRenderHTML, TRAITS_BLACKLIST } from ".";
@@ -23,12 +24,12 @@ const CONTEXT_OPTIONS: {
     {
         type: "action",
         icon: `<span class="action-glyph" style="height: 12px; width: 15px; margin-right: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px;">1</span>`,
-        test: isValidActionMessage,
+        test: (message) => isValideMessage(message) && isValidActionMessage(message),
     },
     {
         type: "spell",
         icon: `<i class="fa-solid fa-wand-magic-sparkles"></i>`,
-        test: isValidSpellMessage,
+        test: (message) => isValideMessage(message) && isValidCoreSpellMessage(message),
     },
 ];
 
@@ -86,7 +87,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #onGetChatMessageContextOptions(chat: ChatLogPF2e, options: ContextMenuEntry[]) {
+    #onGetChatMessageContextOptions(_chat: ChatLogPF2e, options: ContextMenuEntry[]) {
         const getMessage = (el: HTMLElement) => {
             const messageId = el.dataset.messageId;
             return game.messages.get(messageId ?? "");
@@ -111,18 +112,15 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 
     async #messageRenderHTML(message: ChatMessagePF2e, html: HTMLElement) {
-        if (this.getFlag(message, "revealed")) return;
+        if (this.getFlag(message, "revealed") || !isValideMessage(message)) return;
 
         const isSpell = this.settings.spell && isValidSpellMessage(message);
         const isAction = !isSpell && this.settings.action && isValidActionMessage(message);
         if (!isSpell && !isAction) return;
 
-        const chatCard = htmlQuery(html, ".chat-card");
-        if (!chatCard) return;
+        const isCoreSpell = isSpell && isSpellMessage(message);
 
-        const cardContent = htmlQuery(chatCard, ".card-content");
-
-        if (isSpell) {
+        if (isCoreSpell) {
             const members = partyKnowsSpell(message.item).map((actor) => actor.name);
 
             if (members.length) {
@@ -130,7 +128,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
                 const msg = `<strong>${label}</strong> ${members.join(", ")}`;
                 const line = `<p class="item-block-line">${msg}</p>`;
 
-                cardContent?.insertAdjacentHTML("afterbegin", line);
+                htmlQuery(html, ".card-content")?.insertAdjacentHTML("afterbegin", line);
                 return;
             }
         }
@@ -142,31 +140,46 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
 
         html.classList.add("pf2e-toolbelt-anonymous-player");
 
-        const type = isSpell ? "spell" : "action";
-        const header = htmlQuery(chatCard, ".card-header");
-        const footer = htmlQuery(chatCard, ":scope > footer");
+        const traits = this.settings.traits;
+        const isSpellDamage = isSpell && !isCoreSpell;
+        const tagsSelector = isSpellDamage ? ".flavor-text > .tags:not(.modifiers)" : ".card-header > .tags";
+        const tags = htmlQuery(html, tagsSelector);
 
-        if (header) {
-            const traits = this.settings.traits;
-            const tags = htmlQuery(header, ":scope > .tags");
-
-            header.innerHTML = `<h3>${this.localize(`${type}.header`)}</h3>`;
-
-            if (traits === "blacklist") {
-                for (const child of (tags?.children ?? []) as HTMLElement[]) {
-                    if (R.isIncludedIn(child.dataset.tooltip, this.traitsBlacklist)) {
-                        child.remove();
-                    }
+        if (traits === "blacklist") {
+            for (const child of (tags?.children ?? []) as HTMLElement[]) {
+                if (R.isIncludedIn(child.dataset.tooltip, this.traitsBlacklist)) {
+                    child.remove();
                 }
-            }
-
-            if (traits !== "disabled") {
-                header.innerHTML = `${tags?.outerHTML ?? ""}${header.innerHTML}`;
             }
         }
 
-        cardContent?.remove();
-        footer?.remove();
+        if (isSpellDamage) {
+            const action = htmlQuery(html, ".flavor-text > .action");
+
+            if (action) {
+                const label = this.localize("spell.damage");
+                action.innerHTML = `<strong>${label}</strong>`;
+            }
+
+            if (traits === "disabled") {
+                tags?.remove();
+            }
+        } else {
+            const cardHeader = htmlQuery(html, ".card-header");
+
+            if (cardHeader) {
+                const type = isSpell ? "spell" : "action";
+
+                cardHeader.innerHTML = `<h3>${this.localize(`${type}.header`)}</h3>`;
+
+                if (traits !== "disabled") {
+                    cardHeader.innerHTML = `${tags?.outerHTML ?? ""}${cardHeader.innerHTML}`;
+                }
+            }
+        }
+
+        htmlQuery(html, ".card-content")?.remove();
+        htmlQuery(html, ".chat-card > footer")?.remove();
     }
 }
 
@@ -193,12 +206,19 @@ function partyKnowsSpell(spell: SpellPF2e): CreaturePF2e[] {
     });
 }
 
-function isValidActionMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
-    return isValideMessage(message) && isActionMessage(message);
+function isValidActionMessage(message: ChatMessagePF2e): message is ChatMessagePF2e {
+    return isActionMessage(message);
 }
 
-function isValidSpellMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e & { item: SpellPF2e } {
-    return isValideMessage(message) && isSpellMessage(message);
+function isValidCoreSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
+    return isSpellMessage(message);
+}
+
+function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
+    return (
+        !!message.item?.isOfType("spell") &&
+        R.isIncludedIn(SYSTEM.getFlag(message, "context.type"), ["spell-cast", "damage-roll"])
+    );
 }
 
 function isValideMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {

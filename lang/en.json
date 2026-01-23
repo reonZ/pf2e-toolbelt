@@ -391,13 +391,14 @@
         },
         "anonymous": {
             "action": {
-                "header": "Is using an ability..",
-                "context": "Reveal Action to Players"
+                "context": "Reveal Action to Players",
+                "header": "Is using an ability.."
             },
             "revealed": "Revealed By",
             "spell": {
-                "header": "Is casting a spell..",
-                "context": "Reveal Spell to Players"
+                "damage": "Spell Damage",
+                "context": "Reveal Spell to Players",
+                "header": "Is casting a spell.."
             }
         },
         "betterInventory": {
