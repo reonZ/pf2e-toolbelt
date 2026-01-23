@@ -609,7 +609,8 @@
                     "noSelection": "你必须选择一个有效的销售角色。",
                     "button": "出售物品"
                 },
-                "scrolls": "创建卷轴"
+                "scrolls": "创建卷轴",
+                "gems": "创建法术宝石"
             },
             "serviceMenu": {
                 "delete": {
