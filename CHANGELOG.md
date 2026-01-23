@@ -1,6 +1,10 @@
-#
+# 3.26.0
 
+- this is a release for the version `0.0.3` of the `Starfinder Second Edition` system
 - more changes to support the `SF2e` system
+  - including some that were unnoticeable if you also had the `PF2e` system installed on your server
+- `Anonymous`:
+  - now also anonymize the name and traits of spell damage messages (so it doesn't get spoiled there)
 
 # 3.25.0
 
