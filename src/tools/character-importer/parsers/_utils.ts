@@ -18,7 +18,7 @@ const FEATS_PACK = "feats-srd";
 async function getUuidFromPack(value: string, packName: string): Promise<ItemUUID | null> {
     if (!R.isTruthy(value)) return null;
 
-    const pack = game.packs.get(`${SYSTEM.id}.${packName}`);
+    const pack = SYSTEM.getPack(packName);
     if (!pack) return null;
 
     const slug = sluggify(value);
