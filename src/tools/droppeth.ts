@@ -49,7 +49,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     static get DEFAULT_DATA(): { img: ImageFilePath; name: string } {
         return {
-            img: `systems/${SYSTEM.id}/icons/default-icons/backpack.svg`,
+            img: SYSTEM.getPath("icons/default-icons/backpack.svg"),
             name: game.i18n.localize("TYPES.Actor.loot"),
         };
     }

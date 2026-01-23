@@ -427,7 +427,7 @@ async function shiftAdjustDamage(
     data: TargetsData,
 ): Promise<void> {
     const content = await foundry.applications.handlebars.renderTemplate(
-        `systems/${SYSTEM.id}/templates/chat/damage/adjustment-dialog.hbs`,
+        SYSTEM.getPath("templates/chat/damage/adjustment-dialog.hbs"),
     );
     const AdjustmentDialog = class extends foundry.appv1.api.Dialog {
         override activateListeners($html: JQuery): void {

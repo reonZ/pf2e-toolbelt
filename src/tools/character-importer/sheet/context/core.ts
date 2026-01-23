@@ -300,7 +300,7 @@ function prepareEntry(
         actions,
         children: [],
         current,
-        img: selection?.img || `systems/${SYSTEM.id}/icons/default-icons/${itemType}.svg`,
+        img: selection?.img || SYSTEM.getPath(`icons/default-icons/${itemType}.svg`),
         isOverride,
         itemType,
         label,

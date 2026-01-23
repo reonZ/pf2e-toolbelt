@@ -35,7 +35,7 @@ async function createTradeMessage({
     const glyph = getActionGlyph(cost ?? (source.isOfType("loot") && target?.isOfType("loot") ? 2 : 1));
 
     const flavor = await foundry.applications.handlebars.renderTemplate(
-        `./systems/${SYSTEM.id}/templates/chat/action/flavor.hbs`,
+        SYSTEM.getPath("templates/chat/action/flavor.hb"),
         {
             action: { title: "PF2E.Actions.Interact.Title", subtitle, glyph },
             traits: [
@@ -49,7 +49,7 @@ async function createTradeMessage({
     );
 
     const content = await foundry.applications.handlebars.renderTemplate(
-        `./systems/${SYSTEM.id}/templates/chat/action/content.hbs`,
+        SYSTEM.getPath("templates/chat/action/content.hbs"),
         {
             imgPath: item.img,
             message: game.i18n.format(message, formattedMessageData).replace(/\b1 × /, ""),
@@ -75,7 +75,7 @@ async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): P
     };
 
     const content = await foundry.applications.handlebars.renderTemplate(
-        `systems/${SYSTEM.id}/templates/popups/item-transfer-dialog.hbs`,
+        SYSTEM.getPath("templates/popups/item-transfer-dialog.hbs"),
         data,
     );
 

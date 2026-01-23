@@ -126,18 +126,18 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
     #npcSheetPF2eTemplate(sheet: NPCSheetPF2e): string {
         if (sheet.isLootSheet) {
-            return `systems/${SYSTEM.id}/templates/actors/npc/loot-sheet.hbs`;
+            return SYSTEM.getPath("templates/actors/npc/loot-sheet.hbs");
         } else if (sheet.actor.limited && !belongToPartyAlliance(sheet.actor)) {
-            return `systems/${SYSTEM.id}/templates/actors/limited/npc-sheet.hbs`;
+            return SYSTEM.getPath("templates/actors/limited/npc-sheet.hbs");
         }
-        return `systems/${SYSTEM.id}/templates/actors/npc/sheet.hbs`;
+        return SYSTEM.getPath("templates/actors/npc/sheet.hbs");
     }
 
     #characterSheetPF2eTemplate(sheet: CharacterSheetPF2e<CharacterPF2e>): string {
         const actor = sheet.actor;
         const template = actor.limited && !belongToPartyAlliance(actor) ? "limited" : "sheet";
 
-        return `systems/${SYSTEM.id}/templates/actors/character/${template}.hbs`;
+        return SYSTEM.getPath(`templates/actors/character/${template}.hbs`);
     }
 
     async #familiarSheetPF2eGetData(
