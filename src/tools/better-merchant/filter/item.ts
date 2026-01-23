@@ -1,4 +1,4 @@
-import { ActorPF2e, EquipmentFilters, PhysicalItemPF2e, R, sluggify } from "module-helpers";
+import { ActorPF2e, EquipmentFilters, PhysicalItemPF2e, R, sluggify, SYSTEM } from "module-helpers";
 import {
     BaseFilterSchema,
     CalulatedFilterPrice,
@@ -157,9 +157,8 @@ function calculateItemPrice(
 ): CalulatedFilterPrice {
     let original = game.pf2e.Coins.fromPrice(item.price, qty ?? item.quantity);
 
-    // TODO we currently convert sp into credits until sf2e changes the way price is returned
-    if (game.system.id === "sf2e") {
-        original = new game.pf2e.Coins({ credits: original.sp });
+    if (SYSTEM.isSF2e) {
+        original = new game.pf2e.Coins({ credits: Math.ceil(original.copperValue / 10) });
     }
 
     return {

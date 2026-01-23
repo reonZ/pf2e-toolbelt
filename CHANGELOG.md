@@ -1,3 +1,7 @@
+#
+
+- more changes to support the `SF2e` system
+
 # 3.25.0
 
 - this is a `Starfinder Second Edition` system release for version `0.0.1`
@@ -5,7 +9,7 @@
 - `Better Merchant`:
   - `Create Scrolls` is converted into `Create Spell Gems` when running on the `SF2e` system
 - `Shared Data`:
-  - now also recover the master's armor potency/resilient bonus from `Tech` amors using their grade instead of runes
+  - now also recover the master's armor potency/resilient bonus from `Tech` armors using their grade instead of runes
   - fix the system version of skill ranks not being updated with the master's
     - this probably didn't have any impact beside not displaying the right proficiency in the actor sheet
 
