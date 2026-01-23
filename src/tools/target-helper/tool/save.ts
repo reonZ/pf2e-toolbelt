@@ -86,7 +86,7 @@ async function rollSaves(
 
                 const context = getMessageContext<CheckContextChatFlag>(msg);
                 const modifiers = R.pipe(
-                    msg.getFlag(SYSTEM.id, "modifiers") as RawModifier[],
+                    SYSTEM.getFlag<RawModifier[]>(msg, "modifiers"),
                     R.filter((modifier) => !!modifier.enabled),
                     R.map((modifier): SaveRollData["modifiers"][number] => {
                         return {

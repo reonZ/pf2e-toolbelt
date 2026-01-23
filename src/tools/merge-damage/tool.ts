@@ -83,7 +83,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     isDamageRoll(message: ChatMessagePF2e): boolean {
         return (
             this.getFlag<string>(message, "type") === "damage-roll" ||
-            message.getFlag(SYSTEM.id, "context.type") === "damage-roll"
+            SYSTEM.getFlag(message, "context.type") === "damage-roll"
         );
     }
 
@@ -94,7 +94,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             return targets;
         }
 
-        const target = message.getFlag(SYSTEM.id, "context.target.token") as Maybe<TokenDocumentUUID>;
+        const target = SYSTEM.getFlag<Maybe<TokenDocumentUUID>>(message, "context.target.token");
         return target ? [target] : [];
     }
 

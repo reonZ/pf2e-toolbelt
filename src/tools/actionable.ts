@@ -212,7 +212,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #onCreateChatMessage(origin: ChatMessagePF2e) {
-        if (!origin.isAuthor || origin.getFlag(SYSTEM.id, "context.type") !== "self-effect") return;
+        if (!origin.isAuthor || SYSTEM.getFlag(origin, "context.type") !== "self-effect") return;
 
         const hookId = Hooks.on("renderChatMessageHTML", (message: ChatMessagePF2e, html: HTMLElement) => {
             if (message !== origin) return;

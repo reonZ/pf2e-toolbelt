@@ -132,7 +132,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
             );
         });
 
-        const messageId = template.getFlag(SYSTEM.id, "messageId") as string | undefined;
+        const messageId = SYSTEM.getFlag<string | undefined>(template, "messageId");
         const targetsIds = targets.map((token) => token.id);
         const message = messageId && game.messages.get(messageId);
 

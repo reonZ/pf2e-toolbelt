@@ -359,7 +359,7 @@ function updateItemPriceByGrade(coins: Coins, item: ItemType) {
 }
 
 function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is ActorPF2e {
-    return !!actor && !actor.getFlag(SYSTEM.id, "disableABP") && (!isCharacter || actor.isOfType("character"));
+    return !!actor && !SYSTEM.getFlag(actor, "disableABP") && (!isCharacter || actor.isOfType("character"));
 }
 
 function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
