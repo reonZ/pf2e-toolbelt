@@ -175,10 +175,6 @@
         "invertTrade": {
           "name": "Modyfikator odwrócenia handlu",
           "hint": "Gracze nie będą już musieli przytrzymywać klawisza „Shift”, aby przekazać przedmiot bez inicjowania wymiany. (Przytrzymanie klawisza „Shift” spowoduje zainicjowanie żądania wymiany)"
-        },
-        "withContent": {
-          "name": "Z zawartością pojemnika",
-          "hint": "Kiedy pojemnik jest przenoszony z jednego aktora do drugiego, jego zawartość powinna być przenoszona razem z nim."
         }
       },
       "betterUI": {

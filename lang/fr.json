@@ -184,10 +184,6 @@
         "invertTrade": {
           "name": "Modificateur d'échange inversé",
           "hint": "Les joueurs n'auront plus besoin de maintenir 'Maj' enfoncé pour donner un objet sans initier un échange. (Maintenir 'Maj' initiera la demande d'échange)"
-        },
-        "withContent": {
-          "name": "Avec le contenu du contenant",
-          "hint": "Lorsqu'un contenant est déplacé d'un acteur à un autre, son contenu doit-il l'accompagner ?"
         }
       },
       "betterUI": {

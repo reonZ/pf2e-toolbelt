@@ -160,11 +160,7 @@
         }
       },
       "betterTrade": {
-        "title": "Comércio Melhorado",
-        "withContent": {
-          "name": "Com conteúdo de recipiente",
-          "hint": "Quando um recipiente é movido de um ator para outro, seu conteúdo deve ir junto?"
-        }
+        "title": "Comércio Melhorado"
       },
       "conditionManager": {
         "title": "Gerente de Condições",

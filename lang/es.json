@@ -184,10 +184,6 @@
         "invertTrade": {
           "name": "Invertir el modificador de comercio",
           "hint": "Los jugadores ya no tendrán que mantener presionada la tecla \"Mayús\" para entregar un objeto sin iniciar un intercambio. (Mantener presionada la tecla \"Mayús\" iniciará la solicitud de intercambio)."
-        },
-        "withContent": {
-          "name": "Con el contenido de contenedores",
-          "hint": "Cuando un contenedor se mueve de un actor a otro, ¿debe su contenido ir con él?"
         }
       },
       "betterUI": {
