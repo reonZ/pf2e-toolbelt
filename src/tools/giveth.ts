@@ -27,7 +27,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         "MIXED",
         "_handleDroppedItem",
         this.#creatureSheetHandleDroppedItem,
-        { context: this }
+        { context: this },
     );
 
     get key(): "giveth" {
@@ -40,7 +40,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
                 key: "effect",
                 type: String,
                 choices: EFFECT_SETTING,
-                default: "ally",
+                default: "disabled",
                 scope: "world",
                 onChange: () => {
                     this.configurate();
@@ -91,20 +91,14 @@ class GivethTool extends ModuleTool<ToolSettings> {
         if (typeof level === "number" && level >= 0) {
             source.system.level.value = Math.floor(level);
         }
-        if (
-            source.type === "effect" &&
-            source.system.badge?.type === "counter" &&
-            typeof value === "number"
-        ) {
+        if (source.type === "effect" && source.system.badge?.type === "counter" && typeof value === "number") {
             source.system.badge.value = value;
         }
         source.system.context = context ?? null;
         const originItem = fromUuidSync(context?.origin.item ?? "");
         if (source.system.traits?.value.length === 0 && isInstanceOf(originItem, "SpellPF2e")) {
             const spellTraits: string[] = originItem.system.traits.value;
-            const effectTraits = spellTraits.filter(
-                (t): t is EffectTrait => t in CONFIG.PF2E.effectTraits
-            );
+            const effectTraits = spellTraits.filter((t): t is EffectTrait => t in CONFIG.PF2E.effectTraits);
             source.system.traits.value.push(...effectTraits);
         }
 
@@ -124,7 +118,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
         originalItem: ItemPF2e,
-        data: DropCanvasItemDataPF2e
+        data: DropCanvasItemDataPF2e,
     ): Promise<ItemPF2e[]> {
         const actor = actorSheet.actor;
 
@@ -132,10 +126,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
             return wrapped(event, originalItem, data);
         }
 
-        if (
-            originalItem.isOfType("condition") ||
-            !originalItem.system.rules.some((rule) => rule.key === "ChoiceSet")
-        ) {
+        if (originalItem.isOfType("condition") || !originalItem.system.rules.some((rule) => rule.key === "ChoiceSet")) {
             this.#givethEmitable.call({
                 actor,
                 data,
