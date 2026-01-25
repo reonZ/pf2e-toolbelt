@@ -35,7 +35,7 @@ async function createTradeMessage({
     const glyph = getActionGlyph(cost ?? (source.isOfType("loot") && target?.isOfType("loot") ? 2 : 1));
 
     const flavor = await foundry.applications.handlebars.renderTemplate(
-        SYSTEM.getPath("templates/chat/action/flavor.hb"),
+        SYSTEM.getPath("templates/chat/action/flavor.hbs"),
         {
             action: { title: "PF2E.Actions.Interact.Title", subtitle, glyph },
             traits: [
