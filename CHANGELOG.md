@@ -1,3 +1,17 @@
+# 3.27.0
+
+- `Better Trade`:
+  - remove the `With Container Content` feature as the system now does handle it
+- `Droppeth`:
+  - you can now drop items directly from the compendiums
+    - it was previously somehow working if the item had already been cached
+- `Giveth`:
+  - set setting default value to `disabled`
+    - the setting not being disabled by default is a relic from the time the feature had a global `enabled` setting, before the system implemented its own trading workflow
+- `Merge Damage`:
+  - expose `injectDamageMessage` function to the API
+  - expose `mergeDamageMessages` function to the API
+
 # 3.26.0
 
 - this is a release for the version `0.0.3` of the `Starfinder Second Edition` system
