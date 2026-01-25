@@ -73,10 +73,18 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
     get api(): toolbelt.Api["mergeDamage"] {
         return {
+            injectDamageMessage: async (
+                targetMessage: ChatMessagePF2e,
+                originMessage: ChatMessagePF2e,
+                options?: { updateMessages?: boolean },
+            ): Promise<{ rolls: RollJSON[] } | undefined> => {
+                if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
+                return this.#injectDamage(targetMessage, originMessage, options);
+            },
             mergeDamageMessages: async (
                 targetMessage: ChatMessagePF2e,
                 originMessage: ChatMessagePF2e,
-                options?: { replaceMessages?: boolean },
+                options?: { updateMessages?: boolean },
             ): Promise<ChatMessagePF2e | undefined> => {
                 if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
                 return this.#mergeDamages(targetMessage, originMessage, options);
@@ -273,7 +281,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     async #mergeDamages(
         targetMessage: ChatMessagePF2e,
         originMessage: ChatMessagePF2e,
-        { replaceMessages = true }: { replaceMessages?: boolean } = {},
+        { updateMessages = true }: { updateMessages?: boolean } = {},
     ): Promise<ChatMessagePF2e | undefined> {
         const groups: Record<string, MessageGroup> = {};
         const damageLabel = game.i18n.localize("PF2E.DamageRoll");
@@ -333,7 +341,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
         const ChatMessagePF2e = getDocumentClass("ChatMessage");
 
-        if (replaceMessages) {
+        if (updateMessages) {
             await ChatMessage.deleteDocuments([targetMessage.id, originMessage.id]);
             return ChatMessagePF2e.create(messageData);
         } else {
@@ -341,21 +349,28 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    async #injectDamage(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF2e) {
+    async #injectDamage(
+        targetMessage: ChatMessagePF2e,
+        originMessage: ChatMessagePF2e,
+        { updateMessages = true }: { updateMessages?: boolean } = {},
+    ): Promise<{ rolls: RollJSON[] }> {
         const { rolls } = groupRolls(originMessage, targetMessage);
         const data = [
             ...this.getMessageData(originMessage), //
             ...this.getMessageData(targetMessage),
         ];
 
-        await targetMessage.delete();
-
         const updates = { rolls };
 
         this.setMessageUpdateFlags(updates, originMessage, data);
         this.setFlagProperty(updates, "injected", true);
 
-        originMessage.update(updates);
+        if (updateMessages) {
+            await targetMessage.delete();
+            originMessage.update(updates);
+        }
+
+        return updates;
     }
 }
 
