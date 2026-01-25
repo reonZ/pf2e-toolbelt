@@ -639,9 +639,11 @@
         "title": "Upuszczanie Przedmiotu"
       },
       "error": {
+        "actor": "Nie można utworzyć aktora upuszczającego.",
         "out-of-bounds": "Nie można utworzyć tokenu upuszczanego przedmiotu w podanej lokalizacji.",
         "unknown": "Wystąpił błąd podczas próby upuszczenia wybranych przedmiotów.",
-        "no-scene": "Nie ma sceny, na którą można by to upuścić."
+        "no-scene": "Nie ma sceny, na którą można by to upuścić.",
+        "quantity": "Możesz upuścić tylko przedmiot, którego ilość jest większa niż 0."
       },
       "message": {
         "subtitle": "Upuszczanie Przedmiotu",
