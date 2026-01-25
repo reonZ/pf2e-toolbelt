@@ -18,7 +18,6 @@ import {
     FlagDataArray,
     getPreferredName,
     getSelectedActor,
-    giveItemToActor,
     htmlClosest,
     htmlQuery,
     htmlQueryIn,
@@ -367,7 +366,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         }
 
         const [merchant, customer] = merchantSelling ? [source, target] : [target as LootPF2e, source];
-
         const infiniteAll = this.getFlag(merchant, "infiniteAll");
         const realQty = infiniteAll ? quantity : Math.min(quantity, item.quantity);
 
@@ -379,26 +377,16 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             ? this.getInMemory<ItemFilterModel>(item, "filter")
             : this.getAllFilters(merchant, "buy").find((x) => x.testFilter(item));
 
-        if (merchantSelling) {
-            if (!filter) {
-                return error("unwilling", { actor: merchant.name, item: item.name });
-            }
+        if (!filter) {
+            return error(merchantSelling ? "unwilling" : "refuse", { actor: merchant.name, item: item.name });
+        }
 
-            if (isPurchase) {
-                const price = filter.calculatePrice(item, realQty).value;
+        if (merchantSelling && isPurchase) {
+            const price = filter.calculatePrice(item, realQty).value;
 
-                if (customer.inventory.coins.copperValue < price.copperValue) {
-                    ui.notifications.warn(
-                        game.i18n.format("PF2E.loot.InsufficientFundsMessage", {
-                            buyer: customer.name,
-                        }),
-                    );
-                    return true;
-                }
-            }
-        } else {
-            if (!filter) {
-                return error("refuse", { actor: merchant.name, item: item.name });
+            if (customer.inventory.coins.copperValue < price.copperValue) {
+                ui.notifications.warn(game.i18n.format("PF2E.loot.InsufficientFundsMessage", { buyer: customer.name }));
+                return true;
             }
         }
 
@@ -441,6 +429,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             return error("filter");
         }
 
+        const isContainer = item.isOfType("backpack");
         const price = filter.calculatePrice(item, realQty).value;
 
         if (merchantSelling && !free) {
@@ -459,44 +448,37 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             userId,
         } as TradeMessageOptions satisfies Omit<TradeMessageOptions, "item" | "quantity">;
 
-        if (infinite) {
-            const itemSource = item.toObject();
+        if (!infinite) {
+            const remainingQty = item.quantity - realQty;
 
-            const createItem = async () => {
-                itemSource.system.quantity = realQty;
-                itemSource.system.equipped.carryType = "worn";
-
-                const [item] = await target.createEmbeddedDocuments("Item", [itemSource]);
-
-                data.item = item as PhysicalItemPF2e<ActorPF2e>;
-            };
-
-            if (!newStack) {
-                const existingItem = target.inventory.findStackableItem(itemSource);
-
-                if (existingItem) {
-                    await existingItem.update({
-                        "system.quantity": existingItem.quantity + realQty,
-                    });
-
-                    data.item = existingItem;
-                } else {
-                    await createItem();
-                }
+            if (remainingQty < 1) {
+                await item.delete();
             } else {
-                await createItem();
+                await item.update({ "system.quantity": remainingQty });
             }
+        }
+
+        const existingItem = !newStack && !isContainer && target.inventory.findStackableItem(item);
+
+        if (existingItem) {
+            await existingItem.update({ "system.quantity": existingItem.quantity + realQty });
 
             data.quantity = realQty;
+            data.item = existingItem;
         } else {
-            const added = await giveItemToActor(item, target, realQty, newStack);
+            const itemSource = item.toObject();
 
-            if (!added) {
+            itemSource.system.quantity = realQty;
+            itemSource.system.equipped.carryType = "worn";
+
+            const [newItem] = (await target.createEmbeddedDocuments("Item", [itemSource])) as PhysicalItemPF2e[];
+
+            if (!newItem) {
                 return error("added");
             }
 
-            data.item = added.item;
-            data.quantity = added.giveQuantity;
+            data.item = newItem;
+            data.quantity = newItem.quantity;
         }
 
         createTradeMessage(data);
