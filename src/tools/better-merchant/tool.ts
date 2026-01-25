@@ -1,7 +1,6 @@
 import {
     ActorPF2e,
     ActorSheetPF2e,
-    ActorTransferItemArgs,
     addListener,
     addListenerAll,
     BrowserFilter,
@@ -38,6 +37,7 @@ import {
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import {
+    ActorTransferItemArgs,
     createTradeMessage,
     createTradeQuantityDialog,
     sharedActorTransferItemToActor,

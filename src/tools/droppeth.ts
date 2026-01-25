@@ -5,19 +5,18 @@ import {
     createToggleableHook,
     createToggleableWrapper,
     createToggleKeybind,
-    getTradeData,
     isPrimaryUpdater,
     itemIsOfType,
     ItemPF2e,
     LootPF2e,
     LootSource,
     PhysicalItemPF2e,
+    PhysicalItemType,
     positionTokenFromCoords,
     R,
     SYSTEM,
     TokenDocumentPF2e,
     TokenLightRuleElement,
-    updateTradedItemSource,
     userIsGM,
 } from "module-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -65,7 +64,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
-                onChange: (value) => {
+                onChange: () => {
                     this._configurate();
                 },
             },
@@ -102,7 +101,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    ready(isGM: boolean): void {
+    ready(): void {
         this._configurate();
     }
 
@@ -172,7 +171,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         actor?.delete();
     }
 
-    #onDropCanvasData(canvas: CanvasPF2e, data: DropCanvasData): boolean {
+    #onDropCanvasData(_canvas: CanvasPF2e, data: DropCanvasData): boolean {
         if (data.type !== "Item" || !R.isString(data.uuid)) {
             return true;
         }
@@ -205,21 +204,31 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         return false;
     }
 
-    async #droppethItem({ item, quantity, x, y }: DroppethOptions, userId: string) {
+    async #droppethItem(options: DroppethOptions, userId: string) {
+        const error = (err: string) => {
+            this.error(`error.${err}`);
+        };
+
         const scene = canvas.scene;
+
         if (!scene) {
-            this.error("error.no-scene");
-            return;
+            return error("no-scene");
         }
 
-        const tradeData = getTradeData(item, quantity);
-        if (!tradeData) {
-            this.error("error.unknown");
-            return;
+        const item = options.item instanceof Item ? options.item : await fromUuid<PhysicalItemPF2e>(options.item.uuid);
+
+        if (!item) {
+            return error("unknown");
         }
 
+        const allowedQuantity = item.quantity;
+
+        if (allowedQuantity < 1) {
+            return error("quantity");
+        }
+
+        const owner = item.actor;
         const folder = await this.getDroppethFolder();
-
         const tokenId = foundry.utils.randomID();
         const tokenUuid = `${scene.uuid}.Token.${tokenId}`;
         const { name, img } = item;
@@ -228,8 +237,9 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             type: "loot",
             name,
             folder: folder?.id,
-            items: [tradeData.itemSource, ...tradeData.contentSources],
             img,
+            // item has no owner or is from the compendium so we add the source directly
+            items: !owner || item.pack ? [item.toObject()] : undefined,
             ownership: {
                 default: 3,
                 [userId]: 3,
@@ -238,15 +248,23 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         this.setFlagProperties(actorSource, { temporary: true, tokenUuid });
 
-        const actor = (await getDocumentClass("Actor").create(actorSource, {
-            keepEmbeddedIds: true,
-        })) as LootPF2e | undefined;
-        const mainItem = actor?.inventory.find((x) => x.id === tradeData.itemSource._id);
+        const actor = (await getDocumentClass("Actor").create(actorSource)) as LootPF2e | undefined;
 
-        if (!actor || !mainItem) {
-            this.error("error.unknown");
-            await actor?.delete();
-            return;
+        if (!actor) {
+            return error("actor");
+        }
+
+        // we transfer the item from its owner to the newly created droppeth actor
+        if (owner) {
+            await item.actor?.transferItemToActor(actor, item as PhysicalItemPF2e<ActorPF2e>, options.quantity ?? 1);
+        }
+
+        // we recover the main item (which is added first if container and its content)
+        const mainItem = actor.inventory.contents[0];
+
+        if (!mainItem) {
+            await actor.delete();
+            return error("unknown");
         }
 
         const tokenSource: DeepPartial<TokenDocumentPF2e["_source"]> = {
@@ -261,12 +279,8 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         };
 
         const tokenDocument = await actor.getTokenDocument(tokenSource, { parent: scene });
-        const token = canvas.tokens.createObject(
-            // @ts-expect-error
-            tokenDocument,
-        );
-
-        const position = positionTokenFromCoords({ x, y }, token);
+        const token = canvas.tokens.createObject(tokenDocument as any);
+        const position = positionTokenFromCoords({ x: options.x, y: options.y }, token);
 
         token.destroy({ children: true });
         tokenDocument.updateSource(position);
@@ -278,23 +292,17 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         }
 
         canvas.tokens.activate();
-        await getDocumentClass("Token").create(
-            // @ts-expect-error
-            tokenDocument,
-            { parent: canvas.scene, keepId: true },
-        );
+        await getDocumentClass("Token").create(tokenDocument as any, { parent: canvas.scene, keepId: true });
 
-        // no source actor so no update or message needed
-        if (!item.actor) return;
-
-        await updateTradedItemSource(item as PhysicalItemPF2e<ActorPF2e>, tradeData);
+        // no source actor so no exchange message needed
+        if (!owner) return;
 
         createTradeMessage({
             item: mainItem,
-            message: this.localizePath("message.content", tradeData.contentSources.length ? "container" : "item"),
-            source: item.actor,
+            message: this.localizePath("message.content", actor.inventory.size > 1 ? "container" : "item"),
+            source: owner,
             subtitle: this.localize("message.subtitle"),
-            quantity: tradeData.giveQuantity,
+            quantity: mainItem.quantity,
             userId,
         });
     }
@@ -322,7 +330,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 }
 
 type DroppethOptions = {
-    item: PhysicalItemPF2e;
+    item: PhysicalItemPF2e | { type: PhysicalItemType; uuid: ItemUUID };
     x: number;
     y: number;
     quantity?: number;

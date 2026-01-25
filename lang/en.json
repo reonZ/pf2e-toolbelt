@@ -639,9 +639,11 @@
                 "title": "Droppeth {item}"
             },
             "error": {
+                "actor": "Couldn't create droppeth actor.",
                 "out-of-bounds": "Couldn't create droppeth token at provided location.",
                 "unknown": "Something went wrong when trying to droppeth selected item(s).",
-                "no-scene": "There is no scene available to droppeth."
+                "no-scene": "There is no scene available to droppeth.",
+                "quantity": "You can only droppeth item with quantity greater than 0."
             },
             "message": {
                 "subtitle": "Droppeth Item",

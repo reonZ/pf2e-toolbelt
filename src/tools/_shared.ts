@@ -1,26 +1,15 @@
 import {
     ActorPF2e,
-    ActorTransferItemArgs,
     ArmorPF2e,
     ChatMessagePF2e,
     createSharedWrapper,
+    PhysicalItemPF2e,
     WeaponPF2e,
 } from "module-helpers";
 
-const TRAITS_BLACKLIST = [
-    "curse",
-    "disease",
-    "fortune",
-    "incapacitation",
-    "misfortune",
-    "mythic",
-] as const;
+const TRAITS_BLACKLIST = ["curse", "disease", "fortune", "incapacitation", "misfortune", "mythic"] as const;
 
-const sharedWeaponPrepareBaseData = createSharedWrapper<
-    WeaponPF2e<ActorPF2e>,
-    () => void,
-    () => void
->(
+const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, () => void, () => void>(
     "WRAPPER",
     "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData",
     function (registered, wrapped) {
@@ -29,14 +18,10 @@ const sharedWeaponPrepareBaseData = createSharedWrapper<
         }
 
         wrapped();
-    }
+    },
 );
 
-const sharedArmorPrepareBaseData = createSharedWrapper<
-    ArmorPF2e<ActorPF2e>,
-    () => void,
-    () => void
->(
+const sharedArmorPrepareBaseData = createSharedWrapper<ArmorPF2e<ActorPF2e>, () => void, () => void>(
     "WRAPPER",
     "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData",
     function (registered, wrapped) {
@@ -45,26 +30,22 @@ const sharedArmorPrepareBaseData = createSharedWrapper<
         }
 
         wrapped();
-    }
+    },
 );
 
 const sharedActorTransferItemToActor = createSharedWrapper<
     ActorPF2e,
     (...args: ActorTransferItemArgs) => boolean,
     (...args: ActorTransferItemArgs) => boolean
->(
-    "MIXED",
-    "CONFIG.Actor.documentClass.prototype.transferItemToActor",
-    function (registered, wrapped, args) {
-        for (const listener of registered) {
-            const cancel = listener(...args);
-            // we processed the item and should stop there
-            if (cancel) return;
-        }
-
-        return wrapped();
+>("MIXED", "CONFIG.Actor.documentClass.prototype.transferItemToActor", function (registered, wrapped, args) {
+    for (const listener of registered) {
+        const cancel = listener(...args);
+        // we processed the item and should stop there
+        if (cancel) return;
     }
-);
+
+    return wrapped();
+});
 
 const sharedMessageRenderHTML = createSharedWrapper<
     ChatMessagePF2e,
@@ -76,6 +57,15 @@ const sharedMessageRenderHTML = createSharedWrapper<
     return html;
 });
 
+type ActorTransferItemArgs = [
+    targetActor: ActorPF2e,
+    item: PhysicalItemPF2e<ActorPF2e>,
+    quantity: number,
+    containerId?: string,
+    newStack?: boolean,
+    isPurchase?: boolean | null,
+];
+
 export {
     sharedActorTransferItemToActor,
     sharedArmorPrepareBaseData,
@@ -83,3 +73,4 @@ export {
     sharedWeaponPrepareBaseData,
     TRAITS_BLACKLIST,
 };
+export type { ActorTransferItemArgs };
