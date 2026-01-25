@@ -66,6 +66,15 @@
         "spell": {
           "name": "Ukryj zaklęcia Bohaterów Niezależnych",
           "hint": "Zaklęcia rzucane przez postacie niebędące własnością graczy będą dla graczy ukryte."
+        },
+        "traits": {
+          "name": "Pokaż cechy",
+          "hint": "Czy po zamaskowaniu wiadomości przez moduł, cechy powinny nadal być wyświetlane?",
+          "choices": {
+            "disabled": "Wyłączone",
+            "all": "Wszystkie cechy",
+            "blacklist": "Użyj czarnej listy"
+          }
         }
       },
       "arp": {
@@ -308,7 +317,7 @@
         "title": "Pomocnik Celowania",
         "enabled": {
           "name": "Włączone",
-          "hint": "Włączono funkcję \"Pomocnik celowania\" na twoim świecie."
+          "hint": "Włącz funkcję \"Pomocnik celowania\" na twoim świecie."
         },
         "small": {
           "name": "Małe przyciski obrażeń",
@@ -382,12 +391,14 @@
     },
     "anonymous": {
       "action": {
-        "header": "Używa zdolności...",
-        "context": "Ujawnij akcję graczom"
+        "context": "Ujawnij akcję graczom",
+        "header": "Używa zdolności..."
       },
+      "revealed": "Ujawnione przez",
       "spell": {
-        "header": "Rzuca zaklęcie...",
-        "context": "Ujawnij zaklęcie graczom"
+        "damage": "Obrażenia zaklęcia",
+        "context": "Ujawnij zaklęcie graczom",
+        "header": "Rzuca zaklęcie..."
       }
     },
     "betterInventory": {
@@ -470,6 +481,7 @@
       "sheet": {
         "browser": "Z przeglądarki",
         "filters": "Konfiguracja filtrów",
+        "gems": "Stwórz klejnoty zaklęć",
         "infiniteAll": {
           "label": "Nieskończone zapasy",
           "tooltip": "Kupcowi nigdy nie zabraknie przedmiotów do sprzedaży (nie ma wpływu na Skarby ani Usługi)."
