@@ -387,13 +387,14 @@
     },
     "anonymous": {
       "action": {
-        "header": "Utilise une capacité.",
-        "context": "Révéler l'action aux joueurs"
+        "context": "Révéler l'action aux joueurs",
+        "header": "Utilise une capacité."
       },
       "revealed": "Révélé par",
       "spell": {
-        "header": "Is casting a spell..",
-        "context": "Révéler le sort aux joueurs"
+        "damage": "Dégâts de sort",
+        "context": "Révéler le sort aux joueurs",
+        "header": "Is casting a spell.."
       }
     },
     "betterInventory": {
