@@ -71,6 +71,19 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         ];
     }
 
+    get api(): toolbelt.Api["mergeDamage"] {
+        return {
+            mergeDamageMessages: async (
+                targetMessage: ChatMessagePF2e,
+                originMessage: ChatMessagePF2e,
+                options?: { replaceMessages?: boolean },
+            ): Promise<ChatMessagePF2e | undefined> => {
+                if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
+                return this.#mergeDamages(targetMessage, originMessage, options);
+            },
+        };
+    }
+
     init(): void {
         this._configurate();
     }
@@ -257,7 +270,11 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         });
     }
 
-    async #mergeDamages(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF2e) {
+    async #mergeDamages(
+        targetMessage: ChatMessagePF2e,
+        originMessage: ChatMessagePF2e,
+        { replaceMessages = true }: { replaceMessages?: boolean } = {},
+    ): Promise<ChatMessagePF2e | undefined> {
         const groups: Record<string, MessageGroup> = {};
         const damageLabel = game.i18n.localize("PF2E.DamageRoll");
 
@@ -295,8 +312,6 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
         const { rolls, showBreakdown } = groupRolls(targetMessage, originMessage);
 
-        await ChatMessage.deleteDocuments([targetMessage.id, originMessage.id]);
-
         const messageData: ChatMessageCreateData<ChatMessagePF2e> = {
             flavor: await this.render("merged", {
                 groups,
@@ -316,7 +331,14 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
         this.setMessageUpdateFlags(messageData, targetMessage, data);
 
-        getDocumentClass("ChatMessage").create(messageData);
+        const ChatMessagePF2e = getDocumentClass("ChatMessage");
+
+        if (replaceMessages) {
+            await ChatMessage.deleteDocuments([targetMessage.id, originMessage.id]);
+            return ChatMessagePF2e.create(messageData);
+        } else {
+            return new ChatMessagePF2e(messageData as any);
+        }
     }
 
     async #injectDamage(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF2e) {
