@@ -4,9 +4,7 @@ import {
     CheckRoll,
     CheckRollCallback,
     DEGREE_STRINGS,
-    DegreeAdjustmentAmount,
     DegreeOfSuccess,
-    DegreeOfSuccessString,
     ErrorPF2e,
     eventToRollParams,
     extractNotes,
@@ -15,8 +13,6 @@ import {
     R,
     RawModifier,
     RollNotePF2e,
-    RollNoteSource,
-    SaveType,
     signedInteger,
     SYSTEM,
     TokenDocumentPF2e,
@@ -343,42 +339,11 @@ async function rerollSave(
     });
 }
 
-type SaveRollData = {
-    die: number;
-    dosAdjustments?: Record<string, { label: string; amount: DegreeAdjustmentAmount }>;
-    modifiers: { label: string; modifier: number; slug: string }[];
-    notes: RollNoteSource[];
-    private: boolean;
-    rerolled?: RerollType;
-    roll: string;
-    significantModifiers?: {
-        appliedTo: "roll" | "dc";
-        name: string;
-        significance: "ESSENTIAL" | "HELPFUL" | "NONE" | "HARMFUL" | "DETRIMENTAL";
-        value: number;
-    }[];
-    statistic: SaveType;
-    success: DegreeOfSuccessString;
-    unadjustedOutcome?: DegreeOfSuccessString | null;
-    value: number;
-};
+type SaveRollData = toolbelt.targetHelper.MessageTargetSave;
 
-type RollSaveHook = {
-    roll: Rolled<CheckRoll>;
-    message: ChatMessagePF2e;
-    rollMessage: ChatMessagePF2e;
-    target: TokenDocumentPF2e;
-    data: SaveRollData;
-};
+type RollSaveHook = toolbelt.targetHelper.RollSaveHook;
 
-type RerollSaveHook = {
-    oldRoll: Rolled<CheckRoll>;
-    newRoll: Rolled<CheckRoll>;
-    keptRoll: Rolled<CheckRoll>;
-    message: ChatMessagePF2e;
-    target: TokenDocumentPF2e;
-    data: SaveRollData;
-};
+type RerollSaveHook = toolbelt.targetHelper.RerollSaveHook;
 
 export { rerollSave, rollSaves };
 export type { RerollSaveHook, RollSaveHook, SaveRollData };
