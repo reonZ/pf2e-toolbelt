@@ -44,6 +44,10 @@ export abstract class ModuleToolApplication<TTool extends ModuleTool> extends fo
         return this.tool.path(this.key, ...path);
     }
 
+    templatePath(...path: string[]): string {
+        return this.tool.templatePath(this.key, ...path);
+    }
+
     protected _renderHTML(context: fa.ApplicationRenderContext, options: fa.ApplicationRenderOptions): Promise<string> {
         return this.tool.render(this.key, context);
     }

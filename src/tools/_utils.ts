@@ -79,7 +79,7 @@ export async function createTradeQuantityDialog(
                     ...options.button,
                     type: "submit",
                     callback: (_event, _button, dialog) => {
-                        const data = createFormData(dialog.element) as TradeQuantityDialogData;
+                        const data = createFormData<TradeQuantityDialogData>(dialog.element);
                         resolve(data);
                     },
                 },

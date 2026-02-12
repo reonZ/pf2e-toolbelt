@@ -13,6 +13,7 @@ export * from "./better-trade";
 export * from "./condition-manager";
 export * from "./droppeth";
 export * from "./giveth";
+export * from "./identify";
 export * from "./share-data";
 export * from "./target-helper";
 export * from "./underground";

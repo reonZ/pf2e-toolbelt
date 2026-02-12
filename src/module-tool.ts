@@ -60,6 +60,10 @@ export abstract class ModuleTool<TSettings extends Record<string, any> = Record<
         return R.join([this.key, ...path], ".");
     }
 
+    templatePath(...path: string[]) {
+        return R.join([this.key, ...path], "/");
+    }
+
     getSettingKey<K extends keyof TSettings & string>(setting: K): string {
         return `${this.key}.${setting}`;
     }
