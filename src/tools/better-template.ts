@@ -9,7 +9,7 @@ import {
 } from "foundry-helpers";
 import { MeasuredTemplateDocumentPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { TargetHelperTool } from "./target-helper";
+import { targetHelperTool } from ".";
 
 export class BetterTemplateTool extends ModuleTool<ToolSettings> {
     #createMeasuredTemplateHook = new ToggleableHook(
@@ -126,9 +126,8 @@ export class BetterTemplateTool extends ModuleTool<ToolSettings> {
 
         canvas.tokens.setTargets(targetsIds);
 
-        const targetHelper = MAPPED_TOOLS.targetHelper as TargetHelperTool;
-        if (message && targetHelper.settings.enabled) {
-            const updates = targetHelper.setMessageFlagTargets(
+        if (message && targetHelperTool.settings.enabled) {
+            const updates = targetHelperTool.setMessageFlagTargets(
                 {},
                 targets.map((token) => token.document.uuid),
             );

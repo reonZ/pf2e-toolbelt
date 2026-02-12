@@ -12,6 +12,7 @@ import {
     ToggleableWrapper,
     toggleHooksAndWrappers,
 } from "foundry-helpers";
+import { ActorSheetOptions } from "foundry-helpers/src";
 import {
     ActorPF2e,
     ActorSheetPF2e,
@@ -29,8 +30,7 @@ import {
     SpellPreparationSheet,
 } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { BetterMerchantTool } from ".";
-import { ActorSheetOptions } from "foundry-helpers/src";
+import { betterMerchantTool } from ".";
 
 export class BetterSheetTool extends ModuleTool<ToolSettings> {
     #partyAsObservedHooks = [
@@ -429,8 +429,7 @@ export class BetterSheetTool extends ModuleTool<ToolSettings> {
 
             btn.addEventListener("click", async () => {
                 if (isLoot && header.classList.contains("services")) {
-                    const tool = MAPPED_TOOLS.betterMerchant as BetterMerchantTool;
-                    const services = tool.getServices(actor);
+                    const services = betterMerchantTool.getServices(actor);
 
                     sortByLocaleCompare(services, "label");
                     await services.setFlag();

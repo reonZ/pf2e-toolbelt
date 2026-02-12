@@ -1,6 +1,6 @@
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-export class TargetHelperTool extends ModuleTool<ToolSettings> {
+class TargetHelperTool extends ModuleTool<ToolSettings> {
     get key(): "targetHelper" {
         return "targetHelper";
     }
@@ -45,9 +45,13 @@ export class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 }
 
+export const targetHelperTool = new TargetHelperTool();
+
 type ToolSettings = {
     checks: boolean;
     enabled: boolean;
     small: boolean;
     targets: boolean;
 };
+
+export type { TargetHelperTool };

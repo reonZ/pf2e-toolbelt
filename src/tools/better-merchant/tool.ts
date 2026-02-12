@@ -1,3 +1,7 @@
 import { ModuleTool } from "module-tool";
 
-export class BetterMerchantTool extends ModuleTool {}
+class BetterMerchantTool extends ModuleTool {}
+
+export const betterMerchantTool = new BetterMerchantTool();
+
+export type { BetterMerchantTool };
