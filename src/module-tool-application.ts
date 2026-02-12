@@ -1,13 +1,12 @@
-import { Localize, Notifications } from "foundry-helpers";
+import { LocalizeArgs, NotificationArgs } from "foundry-helpers";
 import { ModuleTool } from "module-tool";
 
-export abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.applications.api.ApplicationV2 {
-    #localize?: Localize;
-    #notify?: Notifications;
+abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.applications.api.ApplicationV2 {
     #tool: TTool;
 
     constructor(tool: TTool, options: DeepPartial<fa.ApplicationConfiguration> = {}) {
         super(options);
+
         this.#tool = tool;
     }
 
@@ -25,14 +24,6 @@ export abstract class ModuleToolApplication<TTool extends ModuleTool> extends fo
         return this.tool.settings;
     }
 
-    get localize(): Localize {
-        return (this.#localize ??= this.tool.localize.sub(this.key));
-    }
-
-    get notify(): Notifications {
-        return (this.#notify ??= this.tool.notify.sub(this.key));
-    }
-
     setSetting<K extends keyof TTool["settings"] & string>(
         key: K,
         value: TTool["settings"][K],
@@ -46,6 +37,22 @@ export abstract class ModuleToolApplication<TTool extends ModuleTool> extends fo
 
     templatePath(...path: string[]): string {
         return this.tool.templatePath(this.key, ...path);
+    }
+
+    localizePath(...path: string[]): string {
+        return this.tool.localizePath(this.key, ...path);
+    }
+
+    localize(...args: LocalizeArgs): string {
+        return this.tool.localize(this.key, ...args);
+    }
+
+    localizeIfExist(...args: LocalizeArgs): string | undefined {
+        return this.tool.localizeIfExist(this.key, ...args);
+    }
+
+    info(...args: NotificationArgs): fa.ui.Notification {
+        return this.tool.info(this.key, ...args);
     }
 
     protected _renderHTML(context: fa.ApplicationRenderContext, options: fa.ApplicationRenderOptions): Promise<string> {
@@ -62,3 +69,5 @@ export abstract class ModuleToolApplication<TTool extends ModuleTool> extends fo
 
     protected _activateListeners(html: HTMLElement) {}
 }
+
+export { ModuleToolApplication };

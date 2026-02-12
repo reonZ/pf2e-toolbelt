@@ -1,7 +1,7 @@
 import { createFormData, enrichHTML, getActionGlyph, getPreferredName, R, SYSTEM } from "foundry-helpers";
 import { ActionCost, ActorPF2e, PhysicalItemPF2e } from "foundry-pf2e";
 
-export async function createTradeMessage({
+async function createTradeMessage({
     cost,
     item,
     message,
@@ -56,9 +56,7 @@ export async function createTradeMessage({
     });
 }
 
-export async function createTradeQuantityDialog(
-    options: TradeQuantityDialogOptions,
-): Promise<TradeQuantityDialogData | null> {
+async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): Promise<TradeQuantityDialogData | null> {
     const data = {
         ...options,
         maxQuantity: options.maxQuantity ?? options.item.quantity,
@@ -79,7 +77,7 @@ export async function createTradeQuantityDialog(
                     ...options.button,
                     type: "submit",
                     callback: (_event, _button, dialog) => {
-                        const data = createFormData<TradeQuantityDialogData>(dialog.element);
+                        const data = createFormData(dialog.element) as TradeQuantityDialogData;
                         resolve(data);
                     },
                 },
@@ -116,6 +114,11 @@ type TradeQuantityDialogOptions = {
     title: string;
 };
 
+type TradeQuantityDialogData = {
+    quantity: number;
+    newStack?: boolean;
+};
+
 type TradeMessageOptions = {
     /** localization key */
     cost?: string | number | null | ActionCost;
@@ -128,7 +131,5 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export type TradeQuantityDialogData = {
-    quantity: number;
-    newStack?: boolean;
-};
+export { createTradeMessage, createTradeQuantityDialog };
+export type { TradeMessageOptions, TradeQuantityDialogData };

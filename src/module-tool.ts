@@ -1,30 +1,34 @@
 import {
+    ClientDocument,
     deleteInMemory,
+    error,
     getFlag,
     getInMemory,
     getSetting,
     HandlebarsRenderData,
+    info,
     KeybindingActionConfig,
-    Localize,
     localize,
-    Notifications,
-    notify,
+    LocalizeArgs,
+    localizeIfExist,
+    localizePath,
+    NotificationArgs,
     R,
     RegisterSettingOptions,
     render,
     setFlag,
+    setFlagProperties,
     setFlagProperty,
     setInMemory,
     setSetting,
     Token,
     unsetFlag,
     unsetFlagProperty,
+    warning,
 } from "foundry-helpers";
-import { setFlagProperties } from "foundry-helpers/src";
+import DataField = foundry.data.fields.DataField;
 
-export abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
-    #localize?: Localize;
-    #notify?: Notifications;
+abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
     #settings: Record<string, any> = {};
 
     declare settings: TSettings;
@@ -38,14 +42,6 @@ export abstract class ModuleTool<TSettings extends Record<string, any> = Record<
 
     get api(): Record<string, any> {
         return {};
-    }
-
-    get localize(): Localize {
-        return (this.#localize ??= localize.sub(this.key));
-    }
-
-    get notify(): Notifications {
-        return (this.#notify ??= notify.sub(this.key));
     }
 
     init(isGM: boolean) {}
@@ -112,6 +108,30 @@ export abstract class ModuleTool<TSettings extends Record<string, any> = Record<
         return render(`${this.key}/${template}`, data);
     }
 
+    localizePath(...path: string[]): string {
+        return localizePath(this.key, ...path);
+    }
+
+    localize(...args: LocalizeArgs): string {
+        return localize(this.key, ...args);
+    }
+
+    localizeIfExist(...args: LocalizeArgs): string | undefined {
+        return localizeIfExist(this.key, ...args);
+    }
+
+    info(...args: NotificationArgs): fa.ui.Notification {
+        return info(this.key, ...args);
+    }
+
+    warning(...args: NotificationArgs): fa.ui.Notification {
+        return warning(this.key, ...args);
+    }
+
+    error(...args: NotificationArgs): fa.ui.Notification {
+        return error(this.key, ...args);
+    }
+
     _initialize(isGM: boolean) {
         const settings = {};
         const self = this;
@@ -159,7 +179,10 @@ export abstract class ModuleTool<TSettings extends Record<string, any> = Record<
 
 type ToolSetting<TSettings extends Record<string, any>> =
     TSettings extends Record<infer K, infer V>
-        ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> | foundry.data.fields.DataField }
+        ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> | DataField }
         : never;
 
-export type ToolSettingsList<TSettings extends Record<string, any>> = ReadonlyArray<ToolSetting<TSettings>>;
+type ToolSettingsList<TSettings extends Record<string, any>> = ReadonlyArray<ToolSetting<TSettings>>;
+
+export { ModuleTool };
+export type { ToolSettingsList };
