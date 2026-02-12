@@ -1,5 +1,22 @@
 import {
-    ActorFlagsPF2e,
+    ActorUUID,
+    ApplicationV1HeaderButton,
+    DatabaseDeleteOperation,
+    DatabaseUpdateOperation,
+    Emitable,
+    executeWhenReady,
+    getFirstActiveToken,
+    includesAny,
+    isPrimaryOwner,
+    isPrimaryUpdater,
+    isSF2eItem,
+    MODULE,
+    PerceptionStatistic,
+    R,
+    registerWrapper,
+    SYSTEM,
+} from "foundry-helpers";
+import {
     ActorPF2e,
     ActorSourcePF2e,
     AppliedDamageFlag,
@@ -8,47 +25,30 @@ import {
     CharacterSkillData,
     CharacterSource,
     CombatantPF2e,
-    createEmitable,
     CreaturePF2e,
     CreatureSheetPF2e,
     DeferredValueParams,
     EffectPF2e,
     EncounterPF2e,
     EquipmentPF2e,
-    executeWhenReady,
-    getFirstActiveToken,
-    includesAny,
-    isPrimaryOwner,
-    isPrimaryUpdater,
-    isSF2eItem,
-    ModifierPF2e,
+    Modifier,
     ModifierType,
-    MODULE,
-    PerceptionStatistic,
-    R,
-    registerWrapper,
-    sluggify,
     Statistic,
-    SYSTEM,
     WeaponPF2e,
-} from "module-helpers";
+} from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedWeaponPrepareBaseData } from "tools/_shared";
-import {
-    calculateRemainingDuration,
-    createEncounterRollOptions,
-    getMasterId,
-    getMasterInMemory,
-    getShareDataInMemory,
-    getSlavesInMemory,
-    isValidMaster,
-    isValidSlave,
-    resetActors,
-    ShareDataConfig,
-    ShareDataModel,
-    ShareDataSource,
-    ShareDataType,
-} from ".";
+import { sharedWeaponPrepareBaseData } from "tools";
+import { ShareDataConfig, ShareDataSource, ShareDataType, ShareData, zShareData } from ".";
+
+/**
+ * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/item/abstract-effect/values.ts#L2-L7
+ */
+const DURATION_UNITS: Readonly<Record<string, number>> = {
+    rounds: 6,
+    minutes: 60,
+    hours: 3600,
+    days: 86400,
+};
 
 const GRADES = {
     null: { potency: 0, resilient: 0 },
@@ -66,11 +66,9 @@ const GRADES = {
 const BANDS_OF_FORCE_SLUGS = ["bands-of-force", "bands-of-force-greater", "bands-of-force-major"];
 
 class ShareDataTool extends ModuleTool<ShareDataSettings> {
-    #updateMasterEmitable = createEmitable(this.localizeKey("master"), this.#updateMaster.bind(this));
-
-    #slaveTurnEmitable = createEmitable(this.localizeKey("slave-turn"), this.#slaveTurn.bind(this));
-
-    #slaveInitiativeEmitable = createEmitable(this.localizeKey("slave-initiative"), this.#slaveInitiative.bind(this));
+    #updateMasterEmitable = new Emitable(this.path("master"), this.#updateMaster, this);
+    #slaveTurnEmitable = new Emitable(this.path("slave-turn"), this.#slaveTurn, this);
+    #slaveInitiativeEmitable = new Emitable(this.path("slave-initiative"), this.#slaveInitiative, this);
 
     get key(): "shareData" {
         return "shareData";
@@ -90,8 +88,8 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
     get api(): toolbelt.Api["shareData"] {
         return {
-            getMasterInMemory,
-            getSlavesInMemory,
+            getMasterInMemory: this.getMasterInMemory.bind(this),
+            getSlavesInMemory: this.getSlavesInMemory.bind(this),
         };
     }
 
@@ -158,6 +156,64 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         Hooks.on("getCreatureSheetPF2eHeaderButtons", this.#onGetCreatureSheetPF2eHeaderButtons.bind(this));
     }
 
+    getShareDataInMemory(actor: CreaturePF2e): ShareData | undefined {
+        return this.getInMemory(actor, "data");
+    }
+
+    getShareData(actor: CreaturePF2e): ShareData {
+        const rawFlag = this.getFlag<ShareDataSource>(actor, "data");
+        const flag = R.isObjectType(rawFlag) ? foundry.utils.deepClone(rawFlag) : {};
+        return zShareData.parse(flag);
+    }
+
+    getMasterId(actor: CreaturePF2e): string | undefined {
+        return this.getFlag(actor, "data.master");
+    }
+
+    isValidActor(actor: unknown): actor is CreaturePF2e {
+        return (
+            !!actor &&
+            actor instanceof Actor &&
+            !actor.pack &&
+            game.actors.has(actor.id) &&
+            (actor as ActorPF2e).isOfType("character", "npc")
+        );
+    }
+
+    isValidMaster(actor: unknown, id?: string): actor is CreaturePF2e<null> {
+        if (!this.isValidActor(actor) || (id && actor.id === id) || this.getMasterInMemory(actor)) return false;
+
+        const masterId = this.getMasterId(actor);
+        return !masterId || !game.actors.get(masterId);
+    }
+
+    isValidSlave(actor: unknown): actor is CreaturePF2e<null> {
+        return this.isValidActor(actor) && !this.getInMemory(actor, "slaves");
+    }
+
+    getMasterInMemory(actor: CreaturePF2e): CreaturePF2e | undefined {
+        return this.getInMemory<CreaturePF2e | undefined>(actor, "data.master");
+    }
+
+    getSlavesInMemory(actor: CreaturePF2e, idOnly: false): CreaturePF2e[];
+    getSlavesInMemory(actor: CreaturePF2e, idOnly?: true): Set<ActorUUID> | undefined;
+    getSlavesInMemory(actor: CreaturePF2e, idOnly: boolean = true) {
+        const uuids = this.getInMemory<Set<ActorUUID>>(actor, "slaves");
+        if (idOnly) return uuids;
+
+        const slaves: CreaturePF2e[] = [];
+
+        for (const uuid of uuids ?? []) {
+            const slave = fromUuidSync<CreaturePF2e>(uuid);
+
+            if (this.isValidSlave(slave)) {
+                slaves.push(slave);
+            }
+        }
+
+        return slaves;
+    }
+
     // afflictions aren't offcially in the system yet
     // #afflictionRemainingStageDuration(item: AfflictionPF2e): {
     //     expired: boolean;
@@ -171,8 +227,65 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     //     return calculateRemainingDuration(item, stageDuration);
     // }
 
-    #effectRemainingDuration(item: EffectPF2e): { expired: boolean; remaining: number } {
-        return calculateRemainingDuration(item, item.system.duration);
+    /**
+     * add master as fightyActor for slaves too
+     * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/item/abstract-effect/helpers.ts#L5
+     */
+    #effectRemainingDuration(effect: EffectPF2e): { expired: boolean; remaining: number } {
+        const durationData = effect.system.duration;
+
+        if (durationData.unit === "encounter") {
+            const isExpired = effect.system.expired;
+            return { expired: !!isExpired, remaining: isExpired ? 0 : Infinity };
+        } else if (durationData.unit === "unlimited" || !effect.system.start) {
+            return { expired: false, remaining: Infinity };
+        }
+
+        const start = effect.system.start.value;
+        const { combatant } = game.combat ?? {};
+        const { unit, expiry } = durationData;
+
+        const duration = durationData.value * (DURATION_UNITS[durationData.unit] ?? 0);
+
+        // Prevent effects that expire at end of current turn or round from expiring immediately outside of encounters
+        const addend =
+            !combatant && duration === 0 && unit === "rounds" && ["turn-end", "round-end"].includes(expiry ?? "")
+                ? 1
+                : 0;
+        const remaining = start + duration + addend - game.time.worldTime;
+        const result = { remaining, expired: remaining <= 0 };
+
+        if (remaining === 0 && combatant?.actor) {
+            const startInitiative = effect.system.start.initiative ?? 0;
+            const currentInitiative = combatant.initiative ?? 0;
+
+            // A familiar won't be represented in the encounter tracker: use the master in its place
+            const fightyActor = effect.actor?.isOfType("familiar")
+                ? (effect.actor.master ?? effect.actor)
+                : effect.actor;
+
+            // this part is heavily modified
+            const atTurnStart = () => {
+                if (startInitiative !== currentInitiative) return false;
+
+                const master = effect.actor?.combatant ? null : this.getMasterInMemory(fightyActor as CreaturePF2e);
+
+                const origin = (effect.origin === effect.actor && master) || effect.origin;
+
+                return combatant.actor === (origin ?? master ?? fightyActor);
+            };
+
+            result.expired =
+                expiry === "turn-start"
+                    ? atTurnStart()
+                    : expiry === "turn-end"
+                      ? currentInitiative < startInitiative
+                      : expiry === "round-end"
+                        ? remaining <= 0 && game.time.worldTime > start
+                        : false;
+        }
+
+        return result;
     }
 
     // this is a shared wrapper listener
@@ -180,7 +293,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const actor = weapon.actor;
         if (!actor?.isOfType("character")) return;
 
-        const master = getMasterIfOption(actor, "weaponRunes");
+        const master = this.#getMasterIfOption(actor, "weaponRunes");
         if (!master?.isOfType("character")) return;
 
         const masterWeapon = R.pipe(
@@ -217,9 +330,9 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
                     // we add slaves and their familiars
                     const extras = R.pipe(
-                        getSlavesInMemory(actor, false),
+                        this.getSlavesInMemory(actor, false),
                         R.flatMap((slave) => {
-                            if (isInvalidNonCombatantSlave(slave)) return null;
+                            if (this.#isInvalidNonCombatantSlave(slave)) return null;
                             return [slave, slave.isOfType("character") ? slave.familiar : null];
                         }),
                     );
@@ -228,7 +341,31 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 })
                 .filter(R.isNonNull),
         );
-        resetActors(actors, { sheets: false, tokens: true });
+        this.#resetActors(actors, { sheets: false, tokens: true });
+    }
+
+    /**
+     * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/actor/helpers.ts#L45
+     */
+    async #resetActors(actors?: Iterable<ActorPF2e>, options: ResetActorsRenderOptions = {}): Promise<void> {
+        actors ??= [
+            game.actors.contents,
+            game.scenes.contents.flatMap((s) => s.tokens.contents).flatMap((t) => t.actor ?? []),
+        ].flat();
+        actors = R.unique(Array.from(actors));
+        options.sheets ??= true;
+
+        for (const actor of actors) {
+            actor.reset();
+            if (options.sheets) actor.render();
+        }
+        game.pf2e.effectPanel.refresh();
+
+        if (options.tokens) {
+            for (const token of R.unique(Array.from(actors).flatMap((a) => a.getActiveTokens(true, true)))) {
+                token.simulateUpdate();
+            }
+        }
     }
 
     #combatantOnUpdate(
@@ -245,7 +382,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const actor = combatant.actor;
         if (!actor?.isOfType("character", "npc")) return;
 
-        const slaves = getSlavesInMemory(actor, false);
+        const slaves = this.getSlavesInMemory(actor, false);
         if (!slaves.length) return;
 
         Promise.resolve().then(async () => {
@@ -264,7 +401,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
      * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/encounter/combatant.ts#L265
      */
     #slaveInitiative({ slave }: SlaveIntiativeOptions) {
-        if (isInvalidNonCombatantSlave(slave)) return;
+        if (this.#isInvalidNonCombatantSlave(slave)) return;
 
         const eventType = "initiative-roll";
         this.#performActorUpdates(slave, eventType).then(() => {
@@ -292,7 +429,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const { actor, encounter } = combatant;
         if (!encounter || !actor?.isOfType("character", "npc")) return;
 
-        const slaves = getSlavesInMemory(actor, false);
+        const slaves = this.getSlavesInMemory(actor, false);
         for (const slave of slaves) {
             if (isPrimaryOwner(slave)) {
                 await this.#slaveTurn({ encounter, eventType, slave });
@@ -308,9 +445,9 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
      * https://github.com/reonZ/pf2e-toolbelt/blob/83e091bdd46cc87c8b872cf11028a95a77bd3ad8/src/tools/share.ts#L267
      */
     async #slaveTurn({ encounter, eventType, slave }: SlaveTurnOptions) {
-        if (isInvalidNonCombatantSlave(slave)) return;
+        if (this.#isInvalidNonCombatantSlave(slave)) return;
 
-        const slaveCombatant = createCombatant(slave, encounter);
+        const slaveCombatant = this.#createCombatant(slave, encounter);
 
         if (eventType === "turn-end") {
             // Run condition end of turn effects, unless the actor is dead
@@ -356,7 +493,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     }
 
     #updateMaster({ master, ...updates }: UpdateMasterOptions) {
-        if (!isValidMaster(master)) return;
+        if (!this.isValidMaster(master)) return;
         master.update(updates);
     }
 
@@ -366,7 +503,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         wrapped: libWrapper.RegisterCallback,
         appliedDamage: AppliedDamageFlag,
     ): Promise<void> {
-        const master = getMasterIfOption(actor, "health");
+        const master = this.#getMasterIfOption(actor, "health");
 
         if (master) {
             const hpUpdate = appliedDamage.updates.findSplice((update) => update.path === "system.attributes.hp.value");
@@ -411,19 +548,19 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const newMasterId = newData?.master;
 
         if (newMasterId !== undefined) {
-            const previousMaster = getMasterInMemory(actor);
+            const previousMaster = this.getMasterInMemory(actor);
 
             if (previousMaster && previousMaster.id !== newMasterId) {
                 operation.previousShareMasterId = previousMaster.id;
             }
         }
 
-        const masterId = newMasterId ?? getMasterId(actor);
+        const masterId = newMasterId ?? this.getMasterId(actor);
         const master = masterId ? game.actors.get(masterId) : undefined;
-        if (isValidMaster(master)) {
+        if (this.isValidMaster(master)) {
             const updateKeys: UpdateMasterPath[] = [];
 
-            if (newData?.health ?? getShareOptionInMemory(actor, "health")) {
+            if (newData?.health ?? this.#getShareOptionInMemory(actor, "health")) {
                 updateKeys.push(
                     "system.attributes.hp.value",
                     "system.attributes.hp.sp.value",
@@ -431,11 +568,11 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                 );
             }
 
-            if (newData?.heroPoints ?? getShareOptionInMemory(actor, "heroPoints")) {
+            if (newData?.heroPoints ?? this.#getShareOptionInMemory(actor, "heroPoints")) {
                 updateKeys.push("system.resources.heroPoints.value");
             }
 
-            if (newData?.spellcasting ?? getShareOptionInMemory(actor, "spellcasting")) {
+            if (newData?.spellcasting ?? this.#getShareOptionInMemory(actor, "spellcasting")) {
                 updateKeys.push("system.resources.focus.value");
             }
 
@@ -471,18 +608,18 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         operation: DatabaseDeleteOperation<null>,
         userId: string,
     ) {
-        const master = getMasterInMemory(actor);
-        const slaves = getSlavesInMemory(actor, false);
+        const master = this.getMasterInMemory(actor);
+        const slaves = this.getSlavesInMemory(actor, false);
         const actorId = actor.id;
         const toRemove: string[] = [];
 
         if (master) {
-            removeSlaveFromMemory(master, actor);
+            this.#removeSlaveFromMemory(master, actor);
         }
 
         for (const slave of slaves) {
             // this user should unset the flag of all the slaves they are primary updater of
-            if (getMasterId(slave) === actorId && isPrimaryUpdater(slave)) {
+            if (this.getMasterId(slave) === actorId && isPrimaryUpdater(slave)) {
                 toRemove.push(slave.id);
             }
 
@@ -511,7 +648,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             const previousMaster = game.actors.get<CreaturePF2e<null>>(operation.previousShareMasterId);
 
             if (previousMaster) {
-                removeSlaveFromMemory(previousMaster, actor);
+                this.#removeSlaveFromMemory(previousMaster, actor);
             }
         }
 
@@ -524,7 +661,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         // this one is to avoid race condition with masters created later in the world
         executeWhenReady(() => {
             // a master forces all slaves to refresh
-            const slaves = getSlavesInMemory(actor, false);
+            const slaves = this.getSlavesInMemory(actor, false);
             if (slaves.length) {
                 for (const slave of slaves) {
                     slave.reset();
@@ -539,7 +676,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             }
 
             // a slave copies its master's stats
-            const data = getShareDataInMemory(actor);
+            const data = this.getShareDataInMemory(actor);
             const master = data?.master;
             if (!master) return;
 
@@ -645,11 +782,10 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         wrapped();
 
         // we are a master, we skip
-        if (getSlavesInMemory(actor)?.size) return;
+        if (this.getSlavesInMemory(actor)?.size) return;
 
-        const flag = foundry.utils.deepClone(this.getFlag<ShareDataSource>(actor, "data"));
-        const data = flag ? new ShareDataModel(flag) : undefined;
-        const master = data?.master;
+        const data = this.getShareData(actor);
+        const master = data.master;
 
         if (!master) {
             this.deleteInMemory(actor, "data");
@@ -659,13 +795,13 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         this.setInMemory(actor, "data", data);
 
         if (data.timeEvents) {
-            (actor.flags[SYSTEM.id] as ActorFlagsPF2e["pf2e"]).rollOptions.all = foundry.utils.mergeObject(
-                (actor.flags[SYSTEM.id] as ActorFlagsPF2e["pf2e"]).rollOptions.all,
-                createEncounterRollOptions(master),
+            actor.flags[SYSTEM.id].rollOptions.all = foundry.utils.mergeObject(
+                actor.flags[SYSTEM.id].rollOptions.all,
+                this.#createEncounterRollOptions(master),
             );
         }
 
-        const slaves = getSlavesInMemory(master);
+        const slaves = this.getSlavesInMemory(master);
 
         if (!slaves) {
             this.setInMemory(master, "slaves", new Set([actor.uuid]));
@@ -674,12 +810,50 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         }
     }
 
+    /**
+     * https://github.com/foundryvtt/pf2e/blob/b5cd5c73ee0c956fbb0c1385dd9d89c5026ec682/src/module/actor/helpers.ts#L199
+     */
+    #createEncounterRollOptions(actor: ActorPF2e): Record<string, boolean> {
+        const encounter = game.ready ? game.combat : null;
+        if (!encounter?.started) return {};
+
+        const participants = encounter.combatants.contents
+            .filter((c) => typeof c.initiative === "number")
+            .sort((a, b) => b.initiative! - a.initiative!); // Sort descending by initiative roll result
+        const participant = actor.combatant;
+        if (typeof participant?.initiative !== "number" || !participants.includes(participant)) {
+            return {};
+        }
+
+        const initiativeRoll = Math.trunc(participant.initiative);
+        const initiativeRank = participants.indexOf(participant) + 1;
+        const { initiativeStatistic } = participant.flags[SYSTEM.id];
+        const threat = encounter.metrics?.threat;
+        const numericThreat = { trivial: 0, low: 1, moderate: 2, severe: 3, extreme: 4 }[threat ?? "trivial"];
+
+        const entries = (
+            [
+                ["encounter", true],
+                [`encounter:threat:${numericThreat}`, !!threat],
+                [`encounter:threat:${threat}`, !!threat],
+                [`encounter:round:${encounter.round}`, true],
+                [`encounter:turn:${Number(encounter.turn) + 1}`, true],
+                ["self:participant:own-turn", encounter.combatant === participant],
+                [`self:participant:initiative:roll:${initiativeRoll}`, true],
+                [`self:participant:initiative:rank:${initiativeRank}`, true],
+                [`self:participant:initiative:stat:${initiativeStatistic}`, !!initiativeStatistic],
+            ] as const
+        ).filter(([, value]) => !!value);
+
+        return Object.fromEntries(entries);
+    }
+
     #actorPrepareDerivedData(actor: CreaturePF2e, wrapped: libWrapper.RegisterCallback) {
         if (!game.ready) {
             return wrapped();
         }
 
-        const data = getShareDataInMemory(actor);
+        const data = this.getShareDataInMemory(actor);
         const master = data?.master;
 
         if (!data || !master?.isOfType("character")) {
@@ -711,9 +885,9 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     const armorValue = armorBonus ?? 0;
                     if (!armorValue && !bracerBonus) continue;
 
-                    const construct = (options: DeferredValueParams = {}): ModifierPF2e | null => {
+                    const construct = (options: DeferredValueParams = {}): Modifier | null => {
                         const label = armorValue > bracerBonus ? armor!.name : bracers!.name;
-                        const slug = sluggify(label);
+                        const slug = SYSTEM.sluggify(label);
 
                         const modifierType: ModifierType =
                             selector === "saving-throw"
@@ -754,52 +928,54 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         }
     }
 
-    #onGetCreatureSheetPF2eHeaderButtons(sheet: CreatureSheetPF2e<CreaturePF2e>, buttons: ApplicationHeaderButton[]) {
+    #onGetCreatureSheetPF2eHeaderButtons(sheet: CreatureSheetPF2e<CreaturePF2e>, buttons: ApplicationV1HeaderButton[]) {
         const actor = sheet.actor;
-        if (!isValidSlave(actor)) return;
+        if (!this.isValidSlave(actor)) return;
 
         buttons.unshift({
             class: "share-data",
             icon: "fa-solid fa-share-all",
-            label: this.localizePath("share"),
+            label: this.localize.path("share"),
             onclick: () => {
                 new ShareDataConfig(actor, this).render(true);
             },
         });
     }
+
+    #getShareOptionInMemory(actor: CreaturePF2e, option: ShareDataType): boolean {
+        return !!this.getShareDataInMemory(actor)?.[option];
+    }
+
+    #getMasterIfOption(actor: CreaturePF2e, option: ShareDataType): CreaturePF2e | null {
+        const data = this.getShareDataInMemory(actor);
+        return data?.[option] ? data.master : null;
+    }
+
+    #createCombatant(actor: CreaturePF2e, encounter: EncounterPF2e) {
+        const scene = encounter.scene;
+        const token = getFirstActiveToken(actor, { scene });
+        const CombatantPF2e = getDocumentClass("Combatant");
+
+        return new CombatantPF2e(
+            { tokenId: token?.id, actorId: actor.id, hidden: false, sceneId: scene?.id },
+            { parent: encounter },
+        );
+    }
+
+    #isInvalidNonCombatantSlave(slave: CreaturePF2e): boolean {
+        return slave.inCombat || !this.#getShareOptionInMemory(slave, "timeEvents");
+    }
+
+    #removeSlaveFromMemory(master: CreaturePF2e, slave: CreaturePF2e) {
+        const slaves = this.getSlavesInMemory(master);
+        slaves?.delete(slave.uuid);
+    }
 }
+
+export const shareDataTool = new ShareDataTool();
 
 function getStatisticCls(actor: CreaturePF2e) {
     return actor.skills.acrobatics.constructor as ConstructorOf<CharacterSkill<CharacterPF2e>>;
-}
-
-function getShareOptionInMemory(actor: CreaturePF2e, option: ShareDataType): boolean {
-    return !!getShareDataInMemory(actor)?.[option];
-}
-
-function getMasterIfOption(actor: CreaturePF2e, option: ShareDataType): CreaturePF2e | null {
-    const data = getShareDataInMemory(actor);
-    return data?.[option] ? data.master : null;
-}
-
-function createCombatant(actor: CreaturePF2e, encounter: EncounterPF2e) {
-    const scene = encounter.scene;
-    const token = getFirstActiveToken(actor, { scene });
-    const CombatantPF2e = getDocumentClass("Combatant");
-
-    return new CombatantPF2e(
-        { tokenId: token?.id, actorId: actor.id, hidden: false, sceneId: scene?.id },
-        { parent: encounter },
-    );
-}
-
-function isInvalidNonCombatantSlave(slave: CreaturePF2e): boolean {
-    return slave.inCombat || !getShareOptionInMemory(slave, "timeEvents");
-}
-
-function removeSlaveFromMemory(master: CreaturePF2e, slave: CreaturePF2e) {
-    const slaves = getSlavesInMemory(master);
-    slaves?.delete(slave.uuid);
 }
 
 type ShareDataSettings = {
@@ -835,4 +1011,9 @@ type UpdateMasterOptions = {
 
 type UpdateMasterPath = Exclude<keyof UpdateMasterOptions, "master">;
 
-export { ShareDataTool };
+interface ResetActorsRenderOptions {
+    sheets?: boolean;
+    tokens?: boolean;
+}
+
+export type { ShareDataTool };

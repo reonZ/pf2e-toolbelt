@@ -1,44 +1,30 @@
 import {
-    ApplicationConfiguration,
-    ApplicationRenderContext,
-    ApplicationRenderOptions,
-    DataField,
-    DataFlagArgs,
-    deleteFlagProperty,
     deleteInMemory,
-    error,
-    FlagData,
-    FlagDataArray,
-    getDataFlag,
-    getDataFlagArray,
     getFlag,
     getInMemory,
-    getOrSetInMemory,
     getSetting,
-    info,
-    joinStr,
+    HandlebarsRenderData,
+    KeybindingActionConfig,
+    Localize,
     localize,
-    LocalizeArgs,
-    localizeIfExist,
-    localizePath,
-    NotificationArgs,
+    Notifications,
+    notify,
+    R,
     RegisterSettingOptions,
     render,
-    RenderTemplateData,
     setFlag,
-    setFlagProperties,
     setFlagProperty,
     setInMemory,
     setSetting,
-    templatePath,
+    Token,
     unsetFlag,
     unsetFlagProperty,
-    updateSourceFlag,
-    warning,
-} from "module-helpers";
-type Document = foundry.abstract.Document;
+} from "foundry-helpers";
+import { setFlagProperties } from "foundry-helpers/src";
 
-abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
+export abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
+    #localize?: Localize;
+    #notify?: Notifications;
     #settings: Record<string, any> = {};
 
     declare settings: TSettings;
@@ -54,6 +40,14 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return {};
     }
 
+    get localize(): Localize {
+        return (this.#localize ??= localize.sub(this.key));
+    }
+
+    get notify(): Notifications {
+        return (this.#notify ??= notify.sub(this.key));
+    }
+
     init(isGM: boolean) {}
     setup(isGM: boolean) {}
     ready(isGM: boolean) {}
@@ -62,50 +56,40 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     /** debounce version of _configurate */
     configurate = foundry.utils.debounce(this._configurate, 1);
 
+    path(...path: string[]) {
+        return R.join([this.key, ...path], ".");
+    }
+
     getSettingKey<K extends keyof TSettings & string>(setting: K): string {
         return `${this.key}.${setting}`;
     }
 
-    setSetting<K extends keyof TSettings & string>(
-        key: K,
-        value: TSettings[K]
-    ): Promise<TSettings[K]> {
+    setSetting<K extends keyof TSettings & string>(key: K, value: TSettings[K]): Promise<TSettings[K]> {
         return setSetting(this.getSettingKey(key), value);
     }
 
-    render<T extends Record<string, any>>(
-        template: string,
-        data?: T & RenderTemplateData
-    ): Promise<string> {
-        return render(`${this.key}/${template}`, data);
+    getFlag<T = boolean>(doc: ClientDocument, ...path: string[]): T | undefined {
+        return getFlag(doc, this.key, ...path);
     }
 
-    localizeKey(...path: string[]): string {
-        return joinStr(".", this.key, ...path);
+    setFlag<D extends ClientDocument, T>(doc: D, ...args: [...string[], T]): Promise<D> {
+        return setFlag(doc, this.key, ...args);
     }
 
-    localizePath(...path: string[]): string {
-        return localizePath(this.key, ...path);
+    unsetFlag<D extends ClientDocument>(doc: D, ...path: string[]): Promise<D | undefined> {
+        return unsetFlag(doc, this.key, ...path);
     }
 
-    localize(...args: LocalizeArgs): string {
-        return localize(this.key, ...args);
+    setFlagProperty<T extends object>(obj: T, ...args: [...string[], any]): T {
+        return setFlagProperty(obj, this.key, ...args);
     }
 
-    localizeIfExist(...args: LocalizeArgs): string | undefined {
-        return localizeIfExist(this.key, ...args);
+    setFlagProperties<T extends object>(obj: T, ...args: [...string[], properties: Record<string, any>]): T {
+        return setFlagProperties(obj, this.key, ...args);
     }
 
-    info(...args: NotificationArgs): Notification {
-        return info(this.key, ...args);
-    }
-
-    warning(...args: NotificationArgs): Notification {
-        return warning(this.key, ...args);
-    }
-
-    error(...args: NotificationArgs): Notification {
-        return error(this.key, ...args);
+    unsetFlagProperty<T extends object>(obj: T, ...path: [string, ...string[]]): T {
+        return unsetFlagProperty(obj, this.key, ...path);
     }
 
     getInMemory<T>(obj: ClientDocument | Token, ...path: string[]): T | undefined {
@@ -116,70 +100,12 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return setInMemory(obj, this.key, ...args);
     }
 
-    getOrSetInMemory<T>(obj: ClientDocument | Token, ...args: [...string[], () => T]): T {
-        return getOrSetInMemory(obj, this.key, ...args);
-    }
-
     deleteInMemory(obj: ClientDocument | Token, ...path: string[]): boolean {
         return deleteInMemory(obj, this.key, ...path);
     }
 
-    getFlag<T = boolean>(doc: Document, ...path: string[]): T | undefined {
-        return getFlag(doc, this.key, ...path);
-    }
-
-    setFlag<D extends Document, T>(doc: D, ...args: [...string[], T]): Promise<D> {
-        return setFlag(doc, this.key, ...args);
-    }
-
-    unsetFlag<D extends Document>(doc: D, ...path: string[]): Promise<D> {
-        return unsetFlag(doc, this.key, ...path);
-    }
-
-    setFlagProperty<T extends object>(obj: T, ...args: [...string[], any]): T {
-        return setFlagProperty(obj, this.key, ...args);
-    }
-
-    unsetFlagProperty<T extends object>(obj: T, ...path: [string, ...string[]]): T {
-        return unsetFlagProperty(obj, this.key, ...path);
-    }
-
-    deleteFlagProperty<T extends object>(obj: T, ...path: string[]): T {
-        return deleteFlagProperty(obj, this.key, ...path);
-    }
-
-    setFlagProperties<T extends object>(
-        obj: T,
-        ...args: [...string[], properties: Record<string, any>]
-    ): T {
-        return setFlagProperties(obj, this.key, ...args);
-    }
-
-    updateSourceFlag<T extends Document>(
-        doc: T,
-        ...args: [...string[], any]
-    ): DeepPartial<T["_source"]> {
-        return updateSourceFlag(doc, this.key, ...args);
-    }
-
-    getDataFlag<T extends foundry.abstract.DataModel, D extends Document>(
-        doc: D,
-        Model: ConstructorOf<T>,
-        ...args: DataFlagArgs<T>
-    ): FlagData<T> | undefined {
-        return getDataFlag(doc, Model, this.key, ...args);
-    }
-
-    getDataFlagArray<T extends foundry.abstract.DataModel, D extends Document>(
-        doc: D,
-        Model: ConstructorOf<T>,
-        ...path: string[]
-    ): FlagDataArray<T, D> {
-        return getDataFlagArray(doc, Model, this.key, ...path);
-    }
-
-    templatePath(...path: string[]): string {
-        return templatePath(this.key, ...path);
+    render<T extends Record<string, any>>(template: string, data: T & HandlebarsRenderData): Promise<string> {
+        return render(`${this.key}/${template}`, data);
     }
 
     _initialize(isGM: boolean) {
@@ -227,86 +153,9 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     }
 }
 
-abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.applications.api
-    .ApplicationV2 {
-    #tool: TTool;
+type ToolSetting<TSettings extends Record<string, any>> =
+    TSettings extends Record<infer K, infer V>
+        ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> | foundry.data.fields.DataField }
+        : never;
 
-    constructor(tool: TTool, options: DeepPartial<ApplicationConfiguration> = {}) {
-        super(options);
-
-        this.#tool = tool;
-    }
-
-    abstract get key(): string;
-
-    get tool(): TTool {
-        return this.#tool;
-    }
-
-    get toolKey(): string {
-        return this.tool.key;
-    }
-
-    get settings(): TTool["settings"] {
-        return this.tool.settings;
-    }
-
-    setSetting<K extends keyof TTool["settings"] & string>(
-        key: K,
-        value: TTool["settings"][K]
-    ): Promise<TTool["settings"][K]> {
-        return this.tool.setSetting(key, value);
-    }
-
-    localizePath(...path: string[]): string {
-        return this.tool.localizePath(this.key, ...path);
-    }
-
-    localizeKey(...path: string[]): string {
-        return this.tool.localizeKey(this.key, ...path);
-    }
-
-    localize(...args: LocalizeArgs): string {
-        return this.tool.localize(this.key, ...args);
-    }
-
-    localizeIfExist(...args: LocalizeArgs): string | undefined {
-        return this.tool.localizeIfExist(this.key, ...args);
-    }
-
-    info(...args: NotificationArgs): Notification {
-        return this.tool.info(this.key, ...args);
-    }
-
-    protected _renderHTML(
-        context: ApplicationRenderContext,
-        options: ApplicationRenderOptions
-    ): Promise<string> {
-        return this.tool.render(this.key, context);
-    }
-
-    protected _replaceHTML(
-        result: string,
-        content: HTMLElement,
-        options: ApplicationRenderOptions
-    ): void {
-        content.innerHTML = result;
-        content.dataset.tooltipDirection = "UP";
-        content.dataset.tooltipClass = "pf2e";
-
-        this._activateListeners(content);
-    }
-
-    protected _activateListeners(html: HTMLElement) {}
-}
-
-type ToolSetting<TSettings extends Record<string, any>> = TSettings extends Record<infer K, infer V>
-    ? RegisterSettingOptions & { key: K; type: FromPrimitive<V> | DataField }
-    : never;
-
-type ToolSettingsList<TSettings extends Record<string, any>> = ReadonlyArray<
-    ToolSetting<TSettings>
->;
-
-export { ModuleTool, ModuleToolApplication };
-export type { ToolSettingsList };
+export type ToolSettingsList<TSettings extends Record<string, any>> = ReadonlyArray<ToolSetting<TSettings>>;

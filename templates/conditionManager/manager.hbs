@@ -1,5 +1,3 @@
-
-{{log @root.systemId}}
 <div class="standard-form">
     <div class="form-group">
         <label>{{@root.i18n 'label'}}</label>
@@ -16,7 +14,7 @@
     {{/if}}
     <div class="form-group">
         <label>{{localize "PF2E.Time.Duration"}}</label>
-        {{> (@root.systemPartial 'items/partials/duration.hbs') base="system.duration"
+        {{> (resolvePath 'templates/items/partials/duration.hbs') base="system.duration"
         duration=duration units=timeUnits}}
     </div>
     {{#if hasValue}}

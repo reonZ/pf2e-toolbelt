@@ -1,42 +1,32 @@
-import {
-    addListener,
-    ApplicationConfiguration,
-    ApplicationRenderOptions,
-    CreaturePF2e,
-    FlagData,
-    MODULE,
-    R,
-} from "module-helpers";
-import { ModuleToolApplication } from "module-tool";
+import { addListener, createFormData, MODULE, R } from "foundry-helpers";
+import { CreaturePF2e } from "foundry-pf2e";
+import { ModuleToolApplication } from "module-tool-application";
 import {
     BASE_SHARE_DATA,
     CHARACTER_MASTER_SHARE_DATA,
     CHARACTER_SHARE_DATA,
-    getSlavesInMemory,
-    isValidMaster,
-    ShareDataModel,
+    ShareData,
+    ShareDataSource,
     ShareDataTool,
+    shareDataTool,
     ShareDataType,
+    zShareMaster,
 } from ".";
 
-class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
+export class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
     #actor: CreaturePF2e;
-    #data: FlagData<ShareDataModel> | null;
+    #data: ShareData | null;
 
-    static DEFAULT_OPTIONS: DeepPartial<ApplicationConfiguration> = {
+    static DEFAULT_OPTIONS: DeepPartial<fa.ApplicationConfiguration> = {
         classes: ["pf2e-toolbelt-shareData-config"],
         tag: "form",
     };
 
-    constructor(
-        actor: CreaturePF2e,
-        tool: ShareDataTool,
-        options?: DeepPartial<ApplicationConfiguration>
-    ) {
+    constructor(actor: CreaturePF2e, tool: ShareDataTool, options?: DeepPartial<fa.ApplicationConfiguration>) {
         super(tool, options);
 
-        const slaves = getSlavesInMemory(actor)?.size || 0;
-        const data = slaves ? null : tool.getDataFlag(actor, ShareDataModel, "data") ?? null;
+        const slaves = shareDataTool.getSlavesInMemory(actor)?.size || 0;
+        const data = slaves ? null : tool.getShareData(actor);
 
         if (!slaves && !data) {
             throw MODULE.Error("an error occured when trying to instantiate 'ShareDataModel'");
@@ -58,7 +48,7 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
         return this.localize("title", this.actor);
     }
 
-    async _prepareContext(_: ApplicationRenderOptions): Promise<ShareDataContext | {}> {
+    async _prepareContext(): Promise<ShareDataContext | {}> {
         if (this.#data === null) {
             return {};
         }
@@ -68,8 +58,8 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
         const master = this.#data?.master;
         const masterIsCharacter = !!master?.isOfType("character");
         const bothCharacters = masterIsCharacter && actor.isOfType("character");
-        const masters = game.actors.filter((x): x is CreaturePF2e<null> =>
-            isValidMaster(x, actorId)
+        const masters = game.actors.filter((actor): actor is CreaturePF2e<null> =>
+            this.tool.isValidMaster(actor, actorId),
         );
 
         type RawOption = {
@@ -103,7 +93,7 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
                     name,
                 };
             }),
-            R.sortBy(R.prop("disabled"), R.prop("name"))
+            R.sortBy(R.prop("disabled"), R.prop("name")),
         );
 
         return {
@@ -113,7 +103,7 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
         } satisfies ShareDataContext;
     }
 
-    protected _onClickAction(event: PointerEvent, target: HTMLElement): void {
+    protected _onClickAction(_event: PointerEvent, target: HTMLElement): void {
         const action = target.dataset.action as EventAction;
 
         if (action === "cancel") {
@@ -124,8 +114,12 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
     }
 
     protected _activateListeners(html: HTMLElement): void {
+        if (!this.#data) return;
+
         addListener(html, `[name="master"]`, "change", (el: HTMLInputElement) => {
-            this.#data?.updateSource({ master: el.value.trim() || null });
+            if (!this.#data) return;
+
+            this.#data.master = zShareMaster.decode(el.value.trim() || null);
             this.render();
         });
     }
@@ -134,17 +128,15 @@ class ShareDataConfig extends ModuleToolApplication<ShareDataTool> {
         const form = this.form;
         if (!form || !this.#data) return;
 
-        const data = new foundry.applications.ux.FormDataExtended(form, { disabled: true }).object;
-
-        this.#data.updateSource(data);
-        this.#data.setFlag();
+        const data = createFormData<ShareDataSource>(form);
+        this.tool.setFlag(this.#actor, "data", data);
         this.close();
     }
 }
 
 type EventAction = "save" | "cancel";
 
-type ShareDataContext = {
+type ShareDataContext = fa.ApplicationRenderContext & {
     masterId: string | undefined;
     masters: CreaturePF2e<null>[];
     options: ShareDataOption[];
@@ -155,5 +147,3 @@ type ShareDataOption = {
     disabled: boolean;
     name: ShareDataType;
 };
-
-export { ShareDataConfig };

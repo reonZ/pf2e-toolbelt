@@ -1,42 +1,44 @@
 import {
+    createButtonElement,
+    createHTMLElement,
+    getItemSourceId,
+    htmlClosest,
+    htmlQuery,
+    MODULE,
+    R,
+    renderActorSheets,
+    ToggleableHook,
+    ToggleableWrapper,
+    waitDialog,
+    waitTimeout,
+} from "foundry-helpers";
+import {
     ActorPF2e,
     ActorSheetPF2e,
     Bulk,
     ConsumablePF2e,
-    createButtonElement,
-    createHTMLElement,
-    createToggleableHook,
-    createToggleableWrapper,
     EquipmentPF2e,
-    getItemSourceId,
-    htmlClosest,
-    htmlQuery,
     InventoryBulk,
     ItemPF2e,
-    MODULE,
-    R,
-    renderActorSheets,
     TreasurePF2e,
-    waitDialog,
-    waitTimeout,
     WeaponSheetPF2e,
     WeaponSource,
-} from "module-helpers";
+} from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class BetterInventoryTool extends ModuleTool<ToolSettings> {
-    #actorPrepareEmbeddedDocumentsWrapper = createToggleableWrapper(
+export class BetterInventoryTool extends ModuleTool<ToolSettings> {
+    #actorPrepareEmbeddedDocumentsWrapper = new ToggleableWrapper(
         "WRAPPER",
         "CONFIG.Actor.documentClass.prototype.prepareEmbeddedDocuments",
         this.#actorPrepareEmbeddedDocuments,
-        { context: this }
+        { context: this },
     );
 
-    #treasurePreparedBaseDataWrapper = createToggleableWrapper(
+    #treasurePreparedBaseDataWrapper = new ToggleableWrapper(
         "WRAPPER",
         "CONFIG.PF2E.Item.documentClasses.treasure.prototype.prepareBaseData",
         this.#treasurePreparedBaseData,
-        { context: this }
+        { context: this },
     );
 
     #renderSheetSettingUpdate = foundry.utils.debounce(() => {
@@ -44,10 +46,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         renderActorSheets();
     }, 1);
 
-    #renderActorSheetHook = createToggleableHook(
-        "renderActorSheet",
-        this.#onRenderActorSheet.bind(this)
-    );
+    #renderActorSheetHook = new ToggleableHook("renderActorSheet", this.#onRenderActorSheet.bind(this));
 
     get key(): "betterInventory" {
         return "betterInventory";
@@ -110,12 +109,12 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         return this.settings.splitItem || this.settings.mergeItems || this.settings.improvised;
     }
 
-    init(isGM: boolean): void {
+    init(): void {
         this.#actorPrepareEmbeddedDocumentsWrapper.toggle(this.settings.dropped);
         this.#treasurePreparedBaseDataWrapper.toggle(this.settings.coins);
     }
 
-    ready(isGM: boolean): void {
+    ready(): void {
         this.#renderActorSheetHook.toggle(this.renderActorSheetEnabled);
     }
 
@@ -137,18 +136,16 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
 
                     _value = InventoryBulkClass.computeTotalBulk(
                         this.actor.inventory.filter((item) => {
-                            return (
-                                !item.isInContainer && item.system.equipped.carryType !== "dropped"
-                            );
+                            return !item.isInContainer && item.system.equipped.carryType !== "dropped";
                         }),
-                        this.actor
+                        this.actor,
                     );
 
                     return _value;
                 },
             });
         } catch (error) {
-            MODULE.Error("An error occured while trying to make dropped items weighless.");
+            MODULE.error("An error occured while trying to make dropped items weighless.");
         }
     }
 
@@ -170,7 +167,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
 
         if (this.settings.mergeItems) {
             const btn = createButtonElement({
-                dataset: { tooltip: this.localizePath("sheet.merge") },
+                dataset: { tooltip: this.localize.path("sheet.merge") },
                 icon: "fa-solid fa-merge",
             });
             const li = createHTMLElement("li", { content: btn });
@@ -181,9 +178,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         }
 
         if (this.settings.splitItem) {
-            const elements = inventory.querySelectorAll<HTMLElement>(
-                ".items [data-item-id] .quantity span"
-            );
+            const elements = inventory.querySelectorAll<HTMLElement>(".items [data-item-id] .quantity span");
 
             for (const el of elements) {
                 const quantity = Number(el.innerText);
@@ -191,7 +186,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
 
                 const btn = createHTMLElement("a", {
                     content: el.innerText,
-                    dataset: { tooltip: this.localizePath("sheet.split") },
+                    dataset: { tooltip: this.localize.path("sheet.split") },
                 });
 
                 btn.addEventListener("click", () => {
@@ -207,7 +202,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         if (actor.isOfType("character") && this.settings.improvised) {
             const btn = createHTMLElement("a", {
                 content: `<i class="fa-solid fa-hammer-war"></i>`,
-                dataset: { tooltip: this.localizePath("sheet.improvised") },
+                dataset: { tooltip: this.localize.path("sheet.improvised") },
                 style: { marginRight: "0.1em" },
             });
 
@@ -218,7 +213,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
     }
 
     async #createImprovisedWeapon(actor: ActorPF2e) {
-        const source: DeepPartial<WeaponSource> = {
+        const source: PreCreate<WeaponSource> = {
             name: this.localize("improvised.label"),
             system: {
                 category: "simple",
@@ -249,31 +244,26 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    async #mergeItems(
-        actor: ActorPF2e,
-        btn?: HTMLButtonElement | HTMLAnchorElement
-    ): Promise<void> {
+    async #mergeItems(actor: ActorPF2e, btn?: HTMLButtonElement | HTMLAnchorElement): Promise<void> {
         btn?.setAttribute("disabled", "true");
         await waitTimeout();
 
         const identicalItems = R.pipe(
             actor.inventory.filter((item): item is Mergeable => {
                 return (
-                    item.isOfType("equipment", "consumable", "treasure") &&
-                    item.isIdentified &&
-                    !!getItemSourceId(item)
+                    item.isOfType("equipment", "consumable", "treasure") && item.isIdentified && !!getItemSourceId(item)
                 );
             }),
             R.groupBy((item) => getItemSourceId(item)),
             R.values(),
             R.filter((items) => items.length > 1),
             R.flatMap((items): NonEmptyArray<Mergeable>[] => getIdenticalItems(items)),
-            R.filter((items): items is NonEmptyArray<Mergeable> => items.length > 1)
+            R.filter((items): items is NonEmptyArray<Mergeable> => items.length > 1),
         );
 
         if (!identicalItems.length) {
             btn?.removeAttribute("disabled");
-            this.warning("merge.none");
+            this.notify.warning("merge.none");
             return;
         }
 
@@ -286,13 +276,13 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                         <div class="name">${source.name}</div>
                         <input type="checkbox" name="${source.id}">
                     </label>`;
-            })
+            }),
         );
 
         const result = await waitDialog<Record<string, boolean>>({
             classes: ["toolbelt-merge-items"],
             content: content.join(""),
-            i18n: this.localizeKey("merge"),
+            i18n: this.path("merge"),
             title: this.localize("merge.title", actor),
             yes: {
                 icon: "fa-solid fa-merge",
@@ -325,7 +315,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                     const max = biggest.uses.max;
                     const uses = R.sumBy(
                         items as ConsumablePF2e[],
-                        (item) => (item.quantity - 1) * max + item.uses.value
+                        (item) => (item.quantity - 1) * max + item.uses.value,
                     );
                     const remains = uses % max;
 
@@ -338,7 +328,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                 deletes.push(...items.slice(1).map((item) => item.id));
 
                 return update;
-            })
+            }),
         );
 
         await actor.deleteEmbeddedDocuments("Item", deletes);
@@ -362,7 +352,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                     value: Math.floor(item.quantity / 2),
                 }),
             }).outerHTML,
-            i18n: this.localizeKey("split"),
+            i18n: this.localize.path("split"),
             title: item,
             yes: {
                 icon: "fa-solid fa-split",
@@ -393,9 +383,7 @@ function getIdenticalItems(items: NonEmptyArray<Mergeable>): NonEmptyArray<Merge
     const source = biggest.toObject();
 
     const [identical, others] = R.partition(sorted, (item) => {
-        const diff = foundry.utils.diffObject(source, item.toObject()) as DeepPartial<
-            Mergeable["_source"]
-        >;
+        const diff = foundry.utils.diffObject(source, item.toObject()) as DeepPartial<Mergeable["_source"]>;
 
         delete diff.sort;
         delete diff.ownership;
@@ -441,5 +429,3 @@ type ToolSettings = {
 };
 
 type Mergeable = EquipmentPF2e<ActorPF2e> | ConsumablePF2e<ActorPF2e> | TreasurePF2e<ActorPF2e>;
-
-export { BetterInventoryTool };

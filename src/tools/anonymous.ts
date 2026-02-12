@@ -1,18 +1,17 @@
 import {
-    ChatLogPF2e,
-    ChatMessagePF2e,
-    createToggleableHook,
-    CreaturePF2e,
+    ContextMenuEntry,
     htmlQuery,
     isActionMessage,
     isSpellMessage,
     R,
-    SpellcastingEntrySlots,
-    SpellPF2e,
     SYSTEM,
-} from "module-helpers";
+    ToggleableHook,
+} from "foundry-helpers";
+import { ChatLogPF2e, ChatMessagePF2e, CreaturePF2e, SpellcastingEntrySlots, SpellPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedMessageRenderHTML, TRAITS_BLACKLIST } from ".";
+import { sharedMessageRenderHTML } from ".";
+
+export const TRAITS_BLACKLIST = ["curse", "disease", "fortune", "incapacitation", "misfortune", "mythic"] as const;
 
 const TRAITS_SETTING = ["disabled", "all", "blacklist"] as const;
 
@@ -33,17 +32,15 @@ const CONTEXT_OPTIONS: {
     },
 ];
 
-class AnonymousTool extends ModuleTool<ToolSettings> {
+export class AnonymousTool extends ModuleTool<ToolSettings> {
     #traitsBlacklist?: string[];
 
-    #getChatContextOptionsHook = createToggleableHook(
+    #getChatContextOptionsHook = new ToggleableHook(
         "getChatMessageContextOptions",
         this.#onGetChatMessageContextOptions.bind(this),
     );
 
-    #messageRenderHTMLWrapper = sharedMessageRenderHTML.register(this.#messageRenderHTML, {
-        context: this,
-    });
+    #messageRenderHTMLWrapper = sharedMessageRenderHTML.register(this.#messageRenderHTML, { context: this });
 
     get key(): "anonymous" {
         return "anonymous";
@@ -95,9 +92,9 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
 
         for (const { icon, test, type } of CONTEXT_OPTIONS) {
             options.push({
-                name: this.localizePath(`${type}.context`),
+                name: this.localize.path(`${type}.context`),
                 icon,
-                condition: (el) => {
+                condition: (el: HTMLElement) => {
                     const msg = getMessage(el);
                     return this.settings[type] && test(msg) && !this.getFlag(msg, "revealed");
                 },
@@ -217,7 +214,7 @@ function isValidCoreSpellMessage(message: ChatMessagePF2e): message is ChatMessa
 function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
     return (
         !!message.item?.isOfType("spell") &&
-        R.isIncludedIn(SYSTEM.getFlag(message, "context.type"), ["spell-cast", "damage-roll"])
+        R.isIncludedIn(message.flags[SYSTEM.id].context?.type, ["spell-cast", "damage-roll"])
     );
 }
 
@@ -233,5 +230,3 @@ type ToolSettings = {
     spell: boolean;
     traits: (typeof TRAITS_SETTING)[number];
 };
-
-export { AnonymousTool };

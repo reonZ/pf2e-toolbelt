@@ -1,8 +1,9 @@
-import { createCreatureSheetWrapper, CreaturePF2e, DropCanvasItemDataPF2e, ItemPF2e } from "module-helpers";
+import { DropCanvasItemData, ToggleableCreatureSheetWrapper } from "foundry-helpers";
+import { CreaturePF2e, ItemPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class BetterTradeTool extends ModuleTool<ToolSettings> {
-    #onDropItemWrapper = createCreatureSheetWrapper("WRAPPER", "_onDropItem", this.#creatureSheetOnDropItem, {
+export class BetterTradeTool extends ModuleTool<ToolSettings> {
+    #onDropItemWrapper = new ToggleableCreatureSheetWrapper("WRAPPER", "_onDropItem", this.#creatureSheetOnDropItem, {
         context: this,
     });
 
@@ -37,7 +38,7 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         actor: CreaturePF2e,
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
-        data: DropCanvasItemDataPF2e & { fromInventory?: boolean },
+        data: DropCanvasItemData & { fromInventory?: boolean },
     ): Promise<ItemPF2e[]> {
         if (!data.fromInventory || !data.uuid || fromUuidSync<ItemPF2e>(data.uuid)?.actor === actor) {
             return wrapped(event, data);
@@ -54,5 +55,3 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
 }
 
 type ToolSettings = toolbelt.Settings["betterTrade"];
-
-export { BetterTradeTool };

@@ -1,73 +1,45 @@
-import { CreaturePF2e, R } from "module-helpers";
-import {
-    ALL_SHARE_DATA,
-    CHARACTER_MASTER_SHARE_DATA,
-    CHARACTER_SHARE_DATA,
-    isValidMaster,
-    ShareDataType,
-} from ".";
-import fields = foundry.data.fields;
-import abstract = foundry.abstract;
+import { z, zForeignDocument } from "foundry-helpers";
+import { CreaturePF2e } from "foundry-pf2e";
+import { shareDataTool } from ".";
 
-class ShareDataModel extends abstract.DataModel<null, ShareDataSchema> {
-    static defineSchema(): ShareDataSchema {
-        const CreaturePF2eCls = Reflect.getPrototypeOf(
-            CONFIG.PF2E.Actor.documentClasses.npc
-        ) as ConstructorOf<CreaturePF2e>;
+export const BASE_SHARE_DATA = ["health", "languages", "timeEvents"] as const;
+export const CHARACTER_MASTER_SHARE_DATA = ["armorRunes"] as const;
+export const CHARACTER_SHARE_DATA = ["heroPoints", "skills", "spellcasting", "weaponRunes"] as const;
+export const ALL_SHARE_DATA = [...BASE_SHARE_DATA, ...CHARACTER_MASTER_SHARE_DATA, ...CHARACTER_SHARE_DATA] as const;
 
-        return {
-            master: new fields.ForeignDocumentField(CreaturePF2eCls),
-            ...R.fromKeys(ALL_SHARE_DATA, (option) => {
-                return new fields.BooleanField<boolean, boolean, false, false, true>({
-                    required: false,
-                    nullable: false,
-                    initial: false,
-                });
-            }),
-        };
-    }
+const isValidMaster = shareDataTool.isValidMaster.bind(shareDataTool);
 
-    protected _initializeSource(
-        data: object,
-        options?: DataModelConstructionOptions<null> | undefined
-    ): this["_source"] {
-        const source = super._initializeSource(data, options);
+export const zShareMaster = zForeignDocument<"Actor", CreaturePF2e>("Actor", isValidMaster).catch(null);
 
+export const zShareData = z
+    .object({
+        armorRunes: z.boolean().catch(false),
+        health: z.boolean().catch(false),
+        heroPoints: z.boolean().catch(false),
+        languages: z.boolean().catch(false),
+        master: zShareMaster,
+        skills: z.boolean().catch(false),
+        spellcasting: z.boolean().catch(false),
+        timeEvents: z.boolean().catch(false),
+        weaponRunes: z.boolean().catch(false),
+    })
+    .transform((data) => {
         const disableOptions = (options: ReadonlyArray<ShareDataType>) => {
             for (const option of options) {
-                source[option] = false;
+                data[option] = false;
             }
-            return source;
         };
 
-        if (!source.master) {
-            return disableOptions(ALL_SHARE_DATA);
+        if (!data.master) {
+            disableOptions(ALL_SHARE_DATA);
+        } else if (data.master.isOfType("npc")) {
+            disableOptions([...CHARACTER_SHARE_DATA, ...CHARACTER_MASTER_SHARE_DATA]);
         }
 
-        const master = game.actors.get(source.master);
-        if (!isValidMaster(master)) {
-            source.master = null;
-            return disableOptions(ALL_SHARE_DATA);
-        }
+        return data;
+    });
 
-        if (master.isOfType("npc")) {
-            return disableOptions([...CHARACTER_SHARE_DATA, ...CHARACTER_MASTER_SHARE_DATA]);
-        }
+export type ShareDataType = (typeof ALL_SHARE_DATA)[number];
 
-        return source;
-    }
-}
-
-interface ShareDataModel extends ModelPropsFromSchema<ShareDataSchema> {}
-
-type ShareDataSchema = Record<
-    ShareDataType,
-    fields.BooleanField<boolean, boolean, false, false, true>
-> & {
-    master: fields.ForeignDocumentField<CreaturePF2e>;
-};
-
-type ShareDataSource = SourceFromSchema<ShareDataSchema>;
-
-export { ShareDataModel };
-export type { ShareDataSource };
+export type ShareDataSource = Partial<z.input<typeof zShareData>>;
+export type ShareData = z.output<typeof zShareData>;

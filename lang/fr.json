@@ -639,11 +639,9 @@
         "title": "Objet déposé au sol"
       },
       "error": {
-        "actor": "Impossible de créer l'acteur déposé.",
         "out-of-bounds": "Impossible de créer un jeton de dépôt au sol à l'emplacement fourni.",
         "unknown": "Une erreur s'est produite En tentant de déposer cet/ces objet(s).",
-        "no-scene": "Il n'y a aucune scène disponible pour déposer au sol.",
-        "quantity": "Vous ne pouvez déposer que les objets dont la quantité est supérieure à 0."
+        "no-scene": "Il n'y a aucune scène disponible pour déposer au sol."
       },
       "message": {
         "subtitle": "Objet déposé au sol",

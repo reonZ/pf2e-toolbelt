@@ -1,9 +1,10 @@
-import { createToggleableHook, ItemPF2e, ItemSourcePF2e } from "module-helpers";
+import { ToggleableHook } from "foundry-helpers";
+import { ItemPF2e, ItemSourcePF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class UnidedTool extends ModuleTool<ToolSettings> {
-    #preCreateItemHook = createToggleableHook("preCreateItem", this.#onPrecreateItem.bind(this));
-    #preUpdateItemHook = createToggleableHook("preUpdateItem", this.#onPreUpdateItem.bind(this));
+export class UnidedTool extends ModuleTool<ToolSettings> {
+    #preCreateItemHook = new ToggleableHook("preCreateItem", this.#onPrecreateItem.bind(this));
+    #preUpdateItemHook = new ToggleableHook("preUpdateItem", this.#onPreUpdateItem.bind(this));
 
     get key(): "unided" {
         return "unided";
@@ -54,5 +55,3 @@ type ToolSettings = {
     create: boolean;
     update: boolean;
 };
-
-export { UnidedTool };

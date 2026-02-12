@@ -1,51 +1,52 @@
-import { MAPPED_TOOLS } from "main";
 import {
-    ActorPF2e,
-    ActorSheetPF2e,
     belongToPartyAlliance,
-    CharacterPF2e,
-    CharacterSheetPF2e,
     createHTMLElement,
-    createToggleableHook,
-    createToggleableWrapper,
-    CreaturePF2e,
-    CreatureSheetData,
-    FamiliarPF2e,
-    FamiliarSheetPF2e,
     htmlQuery,
     isInstanceOf,
-    NPCSheetPF2e,
-    PhysicalItemPF2e,
-    PhysicalItemType,
     R,
     renderActorSheets,
     renderCharacterSheets,
     sortByLocaleCompare,
+    SYSTEM,
+    ToggleableHook,
+    ToggleableWrapper,
+    toggleHooksAndWrappers,
+} from "foundry-helpers";
+import {
+    ActorPF2e,
+    ActorSheetPF2e,
+    CharacterPF2e,
+    CharacterSheetPF2e,
+    CreaturePF2e,
+    CreatureSheetData,
+    FamiliarPF2e,
+    FamiliarSheetPF2e,
+    NPCSheetPF2e,
+    PhysicalItemPF2e,
+    PhysicalItemType,
     SpellcastingEntryPF2e,
     SpellCollection,
     SpellPreparationSheet,
-    splitStr,
-    SYSTEM,
-    toggleHooksAndWrappers,
-} from "module-helpers";
+} from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { BetterMerchantTool } from "./better-merchant";
+import { BetterMerchantTool } from ".";
+import { ActorSheetOptions } from "foundry-helpers/src";
 
-class BetterSheetTool extends ModuleTool<ToolSettings> {
+export class BetterSheetTool extends ModuleTool<ToolSettings> {
     #partyAsObservedHooks = [
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "OVERRIDE",
             "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.template",
             this.#characterSheetPF2eTemplate,
             { context: this },
         ),
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "OVERRIDE",
             "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.template",
             this.#npcSheetPF2eTemplate,
             { context: this },
         ),
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "WRAPPER",
             "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype.getData",
             this.#familiarSheetPF2eGetData,
@@ -53,11 +54,11 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
-    #showPlayersHook = createToggleableHook("renderActorSheetPF2e", this.#showPlayersOnRender.bind(this));
+    #showPlayersHook = new ToggleableHook("renderActorSheetPF2e", this.#showPlayersOnRender.bind(this));
 
     #sortListHooks = [
-        createToggleableHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this)),
-        createToggleableHook("renderSpellPreparationSheet", this.#addSpellbookSortList.bind(this)),
+        new ToggleableHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this)),
+        new ToggleableHook("renderSpellPreparationSheet", this.#addSpellbookSortList.bind(this)),
     ];
 
     get key(): "betterSheet" {
@@ -126,18 +127,18 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
     #npcSheetPF2eTemplate(sheet: NPCSheetPF2e): string {
         if (sheet.isLootSheet) {
-            return SYSTEM.getPath("templates/actors/npc/loot-sheet.hbs");
+            return SYSTEM.relativePath("templates/actors/npc/loot-sheet.hbs");
         } else if (sheet.actor.limited && !belongToPartyAlliance(sheet.actor)) {
-            return SYSTEM.getPath("templates/actors/limited/npc-sheet.hbs");
+            return SYSTEM.relativePath("templates/actors/limited/npc-sheet.hbs");
         }
-        return SYSTEM.getPath("templates/actors/npc/sheet.hbs");
+        return SYSTEM.relativePath("templates/actors/npc/sheet.hbs");
     }
 
     #characterSheetPF2eTemplate(sheet: CharacterSheetPF2e<CharacterPF2e>): string {
         const actor = sheet.actor;
         const template = actor.limited && !belongToPartyAlliance(actor) ? "limited" : "sheet";
 
-        return SYSTEM.getPath(`templates/actors/character/${template}.hbs`);
+        return SYSTEM.relativePath(`templates/actors/character/${template}.hbs`);
     }
 
     async #familiarSheetPF2eGetData(
@@ -213,7 +214,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             classes,
             content: `<i class="fa-solid fa-arrow-up-a-z"></i>`,
             dataset: {
-                tooltip: this.localizePath(`sortList.sheet.${label}`),
+                tooltip: this.localize.path(`sortList.sheet.${label}`),
             },
         });
     }
@@ -414,7 +415,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             const itemsList = header.nextElementSibling as HTMLElement | undefined;
             if (!itemsList || !itemsList.classList.contains("items")) continue;
 
-            const types = splitStr<PhysicalItemType>(itemsList.dataset.itemTypes ?? "");
+            const types = R.split(itemsList.dataset.itemTypes ?? "", ",") as PhysicalItemType[];
             const hasContainer = !!types.findSplice((type) => type === "backpack");
             const name = htmlQuery(header, ".item-name");
             const disabled = hasContainer
@@ -482,5 +483,3 @@ type ToolSettings = {
     sortList: boolean;
     partyAsObserved: boolean;
 };
-
-export { BetterSheetTool };

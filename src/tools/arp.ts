@@ -1,39 +1,27 @@
-import {
-    activateHooksAndWrappers,
-    ActorPF2e,
-    ArmorPF2e,
-    Coins,
-    createToggleableWrapper,
-    isSF2eItem,
-    R,
-    ShieldPF2e,
-    SYSTEM,
-    WeaponPF2e,
-    ZeroToFour,
-    ZeroToSix,
-} from "module-helpers";
+import { activateHooksAndWrappers, isSF2eItem, R, SYSTEM, ToggleableWrapper } from "foundry-helpers";
+import { ActorPF2e, ArmorPF2e, RawCoins, ShieldPF2e, WeaponPF2e, ZeroToFour, ZeroToSix } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from "tools";
+import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from ".";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
 const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
 
 const GRADES = ["commercial", "tactical", "advanced", "superior", "elite", "ultimate", "paragon"] as const;
 
-class ArpTool extends ModuleTool<ToolSettings> {
+export class ArpTool extends ModuleTool<ToolSettings> {
     #baseWrappers = [
         sharedWeaponPrepareBaseData.register(this.#weaponPrepareBaseData, { context: this }),
         sharedArmorPrepareBaseData.register(this.#armorPrepareBaseData, { context: this }),
     ];
 
     #basePriceWrappers = [
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareDerivedData",
             this.#weaponPrepareDerivedData,
             { context: this },
         ),
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "WRAPPER",
             "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareDerivedData",
             this.#armorPrepareDerivedData,
@@ -41,13 +29,13 @@ class ArpTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
-    #shieldPrepareBaseDataWrapper = createToggleableWrapper(
+    #shieldPrepareBaseDataWrapper = new ToggleableWrapper(
         "WRAPPER",
         "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareBaseData",
         this.#shieldPrepareBaseData,
         { context: this },
     );
-    #shieldPrepareDeriveDataWrapper = createToggleableWrapper(
+    #shieldPrepareDeriveDataWrapper = new ToggleableWrapper(
         "WRAPPER",
         "CONFIG.PF2E.Item.documentClasses.shield.prototype.prepareDerivedData",
         this.#shieldPrepareDerivedData,
@@ -322,52 +310,8 @@ class ArpTool extends ModuleTool<ToolSettings> {
     }
 }
 
-function getExpectedGrade(level: number, type: ItemCategory): number {
-    const improvements = CONFIG.PF2E[`${type}Improvements`];
-
-    for (let i = 0; i < 6; i++) {
-        const nextGrade = GRADES[i + 1];
-        const nextLevel = improvements[nextGrade].level;
-
-        if (level < nextLevel) {
-            return i;
-        }
-    }
-
-    return 6;
-}
-
-function updateItemGrade(level: number, force: boolean, item: ItemType) {
-    const type = item.type as ItemCategory;
-    const expected = getExpectedGrade(level, type);
-
-    if (force || GRADES.indexOf(item.system.grade ?? "commercial") < expected) {
-        item.system.grade = GRADES[expected];
-    }
-
-    return;
-}
-
-function updateItemPriceByGrade(coins: Coins, item: ItemType) {
-    const grade = item.system.grade;
-
-    if (R.isIncludedIn(grade, GRADES)) {
-        const type = item.type as ItemCategory;
-        (coins as { gp: number }).gp -= CONFIG.PF2E[`${type}Improvements`][grade].credits / 10;
-        item.system.price.value = new game.pf2e.Coins(coins);
-    }
-}
-
-function isValidActor(actor: Maybe<ActorPF2e>, isCharacter = false): actor is ActorPF2e {
-    return !!actor && !SYSTEM.getFlag(actor, "disableABP") && (!isCharacter || actor.isOfType("character"));
-}
-
-function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
-    return !armor._source.system.specific;
-}
-
-function isValidShield(shield: ShieldPF2e<ActorPF2e>): boolean {
-    return !shield._source.system.specific;
+function isValidActor(actor: Maybe<ActorPF2e>, characterOnly = false): actor is ActorPF2e {
+    return !!actor && !actor.getFlag(SYSTEM.id, "disableABP") && (!characterOnly || actor.isOfType("character"));
 }
 
 function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
@@ -386,6 +330,50 @@ function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
     }
 
     return !traits.value.includes("alchemical") && !traits.value.includes("bomb");
+}
+
+function isValidArmor(armor: ArmorPF2e<ActorPF2e>): boolean {
+    return !armor._source.system.specific;
+}
+
+function isValidShield(shield: ShieldPF2e<ActorPF2e>): boolean {
+    return !shield._source.system.specific;
+}
+
+function updateItemGrade(level: number, force: boolean, item: HandledItem) {
+    const type = item.type as ItemCategory;
+    const expected = getExpectedGrade(level, type);
+
+    if (force || GRADES.indexOf(item.system.grade ?? "commercial") < expected) {
+        item.system.grade = GRADES[expected];
+    }
+
+    return;
+}
+
+function updateItemPriceByGrade(coins: RawCoins, item: HandledItem) {
+    const grade = item.system.grade;
+
+    if (R.isIncludedIn(grade, GRADES)) {
+        const type = item.type as ItemCategory;
+        (coins as { gp: number }).gp -= CONFIG.PF2E[`${type}Improvements`][grade].credits / 10;
+        item.system.price.value = new game.pf2e.Coins(coins);
+    }
+}
+
+function getExpectedGrade(level: number, type: ItemCategory): number {
+    const improvements = CONFIG.PF2E[`${type}Improvements`];
+
+    for (let i = 0; i < 6; i++) {
+        const nextGrade = GRADES[i + 1];
+        const nextLevel = improvements[nextGrade].level;
+
+        if (level < nextLevel) {
+            return i;
+        }
+    }
+
+    return 6;
 }
 
 function isHandwrap(weapon: WeaponPF2e<ActorPF2e>): boolean {
@@ -409,7 +397,7 @@ function hasHandwrap(actor: ActorPF2e): boolean {
     });
 }
 
-type ItemType = WeaponPF2e | ArmorPF2e | ShieldPF2e;
+type HandledItem = WeaponPF2e | ArmorPF2e | ShieldPF2e;
 
 type ItemCategory = "weapon" | "armor" | "shield";
 
@@ -419,5 +407,3 @@ type ToolSettings = {
     price: boolean;
     shield: boolean;
 };
-
-export { ArpTool };

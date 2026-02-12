@@ -1,15 +1,7 @@
-import {
-    ActorPF2e,
-    ArmorPF2e,
-    ChatMessagePF2e,
-    createSharedWrapper,
-    PhysicalItemPF2e,
-    WeaponPF2e,
-} from "module-helpers";
+import { SharedWrappersContainer } from "foundry-helpers";
+import { ActorPF2e, ArmorPF2e, ChatMessagePF2e, WeaponPF2e } from "foundry-pf2e";
 
-const TRAITS_BLACKLIST = ["curse", "disease", "fortune", "incapacitation", "misfortune", "mythic"] as const;
-
-const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, () => void, () => void>(
+export const sharedWeaponPrepareBaseData = new SharedWrappersContainer<WeaponPF2e<ActorPF2e>, () => void, () => void>(
     "WRAPPER",
     "CONFIG.PF2E.Item.documentClasses.weapon.prototype.prepareBaseData",
     function (registered, wrapped) {
@@ -21,7 +13,7 @@ const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, (
     },
 );
 
-const sharedArmorPrepareBaseData = createSharedWrapper<ArmorPF2e<ActorPF2e>, () => void, () => void>(
+export const sharedArmorPrepareBaseData = new SharedWrappersContainer<ArmorPF2e<ActorPF2e>, () => void, () => void>(
     "WRAPPER",
     "CONFIG.PF2E.Item.documentClasses.armor.prototype.prepareBaseData",
     function (registered, wrapped) {
@@ -33,44 +25,12 @@ const sharedArmorPrepareBaseData = createSharedWrapper<ArmorPF2e<ActorPF2e>, () 
     },
 );
 
-const sharedActorTransferItemToActor = createSharedWrapper<
-    ActorPF2e,
-    (...args: ActorTransferItemArgs) => boolean,
-    (...args: ActorTransferItemArgs) => boolean
->("MIXED", "CONFIG.Actor.documentClass.prototype.transferItemToActor", function (registered, wrapped, args) {
-    for (const listener of registered) {
-        const cancel = listener(...args);
-        // we processed the item and should stop there
-        if (cancel) return;
-    }
-
-    return wrapped();
-});
-
-const sharedMessageRenderHTML = createSharedWrapper<
+export const sharedMessageRenderHTML = new SharedWrappersContainer<
     ChatMessagePF2e,
     (...args: any[]) => Promise<HTMLElement>,
     (html: HTMLElement) => Promise<void>
->("WRAPPER", "ChatMessage.prototype.renderHTML", async function (registered, wrapped, args) {
+>("WRAPPER", "ChatMessage.prototype.renderHTML", async function (registered, wrapped, _args) {
     const html = await wrapped();
     await Promise.all(registered.map((listener) => listener(html)));
     return html;
 });
-
-type ActorTransferItemArgs = [
-    targetActor: ActorPF2e,
-    item: PhysicalItemPF2e<ActorPF2e>,
-    quantity: number,
-    containerId?: string,
-    newStack?: boolean,
-    isPurchase?: boolean | null,
-];
-
-export {
-    sharedActorTransferItemToActor,
-    sharedArmorPrepareBaseData,
-    sharedMessageRenderHTML,
-    sharedWeaponPrepareBaseData,
-    TRAITS_BLACKLIST,
-};
-export type { ActorTransferItemArgs };

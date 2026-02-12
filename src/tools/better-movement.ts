@@ -1,27 +1,28 @@
 import {
-    createToggleableWrapper,
-    createToggleKeybind,
+    KeybindingActionConfig,
     MODULE,
     positionTokenFromCoords,
     R,
     selectTokens,
-    TokenPF2e,
-} from "module-helpers";
+    ToggleableKeybind,
+    ToggleableWrapper,
+} from "foundry-helpers";
+import { TokenPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 const TELEPORT_SETTING = ["disabled", "enabled", "select"] as const;
 
-class BetterMovementyTool extends ModuleTool<ToolSettings> {
+export class BetterMovementTool extends ModuleTool<ToolSettings> {
     #cancelTeleport: (() => void) | null = null;
 
-    #shouldRecordMovementHistoryWrapper = createToggleableWrapper(
+    #shouldRecordMovementHistoryWrapper = new ToggleableWrapper(
         "OVERRIDE",
         "CONFIG.Token.documentClass.prototype._shouldRecordMovementHistory",
         this.#shouldRecordMovementHistory,
-        { context: this }
+        { context: this },
     );
 
-    #teleportKeybind = createToggleKeybind({
+    #teleportKeybind = new ToggleableKeybind({
         name: "teleport",
         restricted: true,
         onDown: () => {
@@ -32,7 +33,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
         },
     });
 
-    #unselectKeybind = createToggleKeybind({
+    #unselectKeybind = new ToggleableKeybind({
         name: "unselect",
         restricted: true,
         onDown: () => {
@@ -134,7 +135,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #shouldRecordMovementHistory(token: TokenPF2e) {
+    #shouldRecordMovementHistory(_token: TokenPF2e) {
         return false;
     }
 
@@ -172,10 +173,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
             movement: {},
         };
 
-        const updates =
-            event.button !== 2
-                ? this.#spreadTokens(event, tokens)
-                : this.#groupTokens(event, tokens);
+        const updates = event.button !== 2 ? this.#spreadTokens(event, tokens) : this.#groupTokens(event, tokens);
 
         for (const { _id } of updates) {
             operation.movement[_id] = {
@@ -201,7 +199,6 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
         const [largeTokens, otherTokens] = R.partition(tokens, (token) => token.document.width > 1);
         const hasLargeToken = largeTokens.length > 0;
 
-        const isDebug = MODULE.isDebug;
         const gridSize = canvas.grid.size;
         const localPosition = event.getLocalPosition(canvas.app.stage);
         const clickPosition = canvas.grid.getSnappedPoint(localPosition, {
@@ -209,10 +206,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
         });
 
         if (hasLargeToken) {
-            const sortedLargeTokens = R.sortBy(largeTokens, [
-                (token) => token.document.width,
-                "desc",
-            ]);
+            const sortedLargeTokens = R.sortBy(largeTokens, [(token) => token.document.width, "desc"]);
 
             for (let i = 0; i < sortedLargeTokens.length; i++) {
                 const token = sortedLargeTokens[i];
@@ -229,10 +223,7 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
             };
         };
 
-        const testCollision = (
-            targetSpread: SpreadPoint,
-            originSpread: SpreadPoint = [0, 0]
-        ): boolean => {
+        const testCollision = (targetSpread: SpreadPoint, originSpread: SpreadPoint = [0, 0]): boolean => {
             const origin = getOffsetPosition(originSpread);
             const target = getOffsetPosition(targetSpread);
 
@@ -241,11 +232,8 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
                 mode: "any",
             });
 
-            if (!intersects && isDebug) {
-                canvas.controls.debug
-                    .lineStyle(4, 0x16a103)
-                    .moveTo(origin.x, origin.y)
-                    .lineTo(target.x, target.y);
+            if (!intersects && MODULE.isDebug) {
+                canvas.controls.debug.lineStyle(4, 0x16a103).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
             }
 
             return intersects;
@@ -258,14 +246,14 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
         const origins: SpreadPoint[] = [[0, 0]];
         const originKeys: SpreadKey[] = ["0x0"];
 
-        if (isDebug) {
+        if (MODULE.isDebug) {
             canvas.controls.debug.clear();
         }
 
         // we test for collision against ortho squares to later use them as origin too
-        for (let i = 0; i < BetterMovementyTool.OUTER_ORTHOS.length; i++) {
-            const outerSpread = BetterMovementyTool.OUTER_ORTHOS[i];
-            const innerSpread = BetterMovementyTool.INNER_ORTHOS[i];
+        for (let i = 0; i < BetterMovementTool.OUTER_ORTHOS.length; i++) {
+            const outerSpread = BetterMovementTool.OUTER_ORTHOS[i];
+            const innerSpread = BetterMovementTool.INNER_ORTHOS[i];
 
             if (!testCollision(outerSpread)) {
                 origins.push(outerSpread);
@@ -283,10 +271,9 @@ class BetterMovementyTool extends ModuleTool<ToolSettings> {
         const spreadMap: Record<SpreadKey, Point | false> = {};
 
         const addUpdate = (token: TokenPF2e): boolean => {
-            spreadIndex =
-                spreadIndex + 1 >= BetterMovementyTool.SPREADS.length ? 0 : spreadIndex + 1;
+            spreadIndex = spreadIndex + 1 >= BetterMovementTool.SPREADS.length ? 0 : spreadIndex + 1;
 
-            const spread = BetterMovementyTool.SPREADS[spreadIndex];
+            const spread = BetterMovementTool.SPREADS[spreadIndex];
             const spreadKey = getSpreadKey(spread);
 
             test: if (spreadMap[spreadKey] === undefined) {
@@ -370,5 +357,3 @@ type TokenOperation = {
         }
     >;
 };
-
-export { BetterMovementyTool };

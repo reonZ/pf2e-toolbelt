@@ -1,16 +1,18 @@
 import {
-    createToggleableHook,
     getTemplateTokens,
     isHoldingModifierKey,
-    MeasuredTemplateDocumentPF2e,
     oppositeAlliance,
     SYSTEM,
+    ToggleableHook,
+    Token,
     waitDialog,
-} from "module-helpers";
+} from "foundry-helpers";
+import { MeasuredTemplateDocumentPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { TargetHelperTool } from "./target-helper";
 
-class BetterTemplateTool extends ModuleTool<ToolSettings> {
-    #createMeasuredTemplateHook = createToggleableHook(
+export class BetterTemplateTool extends ModuleTool<ToolSettings> {
+    #createMeasuredTemplateHook = new ToggleableHook(
         "createMeasuredTemplate",
         this.#onCreateMeasuredTemplate.bind(this),
     );
@@ -59,15 +61,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         const actor = template.actor;
         const self: Token | null | undefined = !actor ? undefined : (actor.token?.object ?? actor.getActiveTokens()[0]);
 
-        const result = await waitDialog<
-            {
-                dismiss: boolean;
-                neutral: boolean;
-                self: boolean;
-                targets: "enemies" | "allies" | "all";
-            },
-            "dismiss"
-        >({
+        const result = await waitDialog({
             content: `${this.key}/target`,
             i18n: `${this.key}.target`,
             title: template.item?.name,
@@ -76,12 +70,6 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
                 noSelf: !self,
                 dismiss,
             },
-            minWidth: "",
-            position: {
-                left: 200,
-            },
-            returnOnFalse: ["dismiss"],
-            skipAnimate: true,
         });
 
         if (!result) return;
@@ -132,14 +120,15 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
             );
         });
 
-        const messageId = SYSTEM.getFlag<string | undefined>(template, "messageId");
+        const messageId = template.flags[SYSTEM.id].messageId;
         const targetsIds = targets.map((token) => token.id);
         const message = messageId && game.messages.get(messageId);
 
         canvas.tokens.setTargets(targetsIds);
 
-        if (message && game.toolbelt?.getToolSetting("targetHelper", "enabled")) {
-            const updates = game.toolbelt.api.targetHelper.setMessageFlagTargets(
+        const targetHelper = MAPPED_TOOLS.targetHelper as TargetHelperTool;
+        if (message && targetHelper.settings.enabled) {
+            const updates = targetHelper.setMessageFlagTargets(
                 {},
                 targets.map((token) => token.document.uuid),
             );
@@ -157,5 +146,3 @@ type ToolSettings = {
     target: boolean;
     targetDismiss: boolean;
 };
-
-export { BetterTemplateTool };

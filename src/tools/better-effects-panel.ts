@@ -1,17 +1,9 @@
-import {
-    AbstractEffectPF2e,
-    addListener,
-    createToggleableHook,
-    EffectsPanel,
-    EffectsPanelViewData,
-} from "module-helpers";
+import { addListener, EffectsPanelViewData, ToggleableHook } from "foundry-helpers";
+import { AbstractEffectPF2e, EffectsPanel } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
-    #renderEffectsPanelHook = createToggleableHook(
-        "renderEffectsPanel",
-        this.#onRenderEffectsPanel.bind(this)
-    );
+export class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
+    #renderEffectsPanelHook = new ToggleableHook("renderEffectsPanel", this.#onRenderEffectsPanel.bind(this));
 
     get key(): "betterEffectsPanel" {
         return "betterEffectsPanel";
@@ -31,17 +23,15 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    init(isGM: boolean): void {
+    init(): void {
         this.#renderEffectsPanelHook.toggle(this.settings.remove);
     }
 
-    #onRenderEffectsPanel(panel: EffectsPanel, html: HTMLElement, data: EffectsPanelViewData) {
+    #onRenderEffectsPanel(_panel: EffectsPanel, html: HTMLElement, data: EffectsPanelViewData) {
         const actor = data.actor;
         if (!actor) return;
 
-        const effects = [...data.afflictions, ...data.conditions, ...data.effects].map(
-            (effect) => effect.effect
-        );
+        const effects = [...data.afflictions, ...data.conditions, ...data.effects].map((effect) => effect.effect);
 
         for (const effect of effects) {
             if (effect.isLocked || !effect.badge || effect.badge.type !== "counter") continue;
@@ -50,8 +40,8 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
                 html,
                 `.effect-item[data-item-id="${effect.id}"] .icon`,
                 "contextmenu",
-                (el, event) => this.#onRemoveEffect(event, effect),
-                true
+                (_el, event) => this.#onRemoveEffect(event, effect),
+                true,
             );
         }
     }
@@ -70,5 +60,3 @@ class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {
 type ToolSettings = {
     remove: boolean;
 };
-
-export { BetterEffectsPanelTool };

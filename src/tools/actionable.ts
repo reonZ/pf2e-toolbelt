@@ -1,67 +1,68 @@
 import {
+    addListenerAll,
+    createHTMLElement,
+    createHTMLElementContent,
+    ErrorPF2e,
+    getActionGlyph,
+    getItemSourceId,
+    htmlQuery,
+    ImageFilePath,
+    isCastConsumable,
+    isDefaultActionIcon,
+    isScriptMacro,
+    ItemSheetData,
+    MODULE,
+    R,
+    renderCharacterSheets,
+    renderItemSheets,
+    SYSTEM,
+    ToggleableHook,
+    ToggleableWrapper,
+    toggleHooksAndWrappers,
+    useAction,
+    usePhysicalItem,
+} from "foundry-helpers";
+import {
     AbilityItemPF2e,
     AbilitySheetPF2e,
     AbilityViewData,
     ActorPF2e,
     ActorSheetPF2e,
-    addListenerAll,
     CastOptions,
     CharacterPF2e,
     CharacterSheetData,
     ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
-    createToggleableHook,
-    createHTMLElement,
-    createHTMLElementContent,
-    createToggleableWrapper,
     CreaturePF2e,
     EffectPF2e,
     EquipmentPF2e,
     EquipmentSheetPF2e,
-    ErrorPF2e,
     FeatPF2e,
     FeatSheetPF2e,
-    getActionGlyph,
-    getItemSourceId,
-    htmlQuery,
     InventoryItem,
-    isCastConsumable,
-    isDefaultActionIcon,
-    isScriptMacro,
     ItemPF2e,
     ItemSheetPF2e,
     MacroPF2e,
-    MODULE,
     NPCPF2e,
     NPCSheetData,
     PhysicalItemPF2e,
-    R,
-    renderCharacterSheets,
-    renderItemSheets,
     SpellcastingEntryPF2e,
     SpellPF2e,
     SpellSheetPF2e,
-    toggleHooksAndWrappers,
-    useAction,
-    usePhysicalItem,
-    SYSTEM,
-} from "module-helpers";
+} from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
-class ActionableTool extends ModuleTool<ToolSettings> {
-    #renderCharacterSheetPF2eHook = createToggleableHook(
-        [
-            "renderCharacterSheetPF2e", //
-            "renderNPCSheetPF2e",
-        ],
+export class ActionableTool extends ModuleTool<ToolSettings> {
+    #renderCharacterSheetPF2eHook = new ToggleableHook(
+        ["renderCharacterSheetPF2e", "renderNPCSheetPF2e"],
         this.#onRenderSheetPF2e.bind(this),
     );
 
-    #createChatMessageHook = createToggleableHook("createChatMessage", this.#onCreateChatMessage.bind(this));
+    #createChatMessageHook = new ToggleableHook("createChatMessage", this.#onCreateChatMessage.bind(this));
 
     #actionWrappers = [
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "WRAPPER",
             [
                 "CONFIG.Item.sheetClasses.action['pf2e.AbilitySheetPF2e'].cls.prototype._renderInner",
@@ -70,7 +71,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             this.#actionSheetRenderInner,
             { context: this },
         ),
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "OVERRIDE",
             [
                 "CONFIG.Item.sheetClasses.action['pf2e.AbilitySheetPF2e'].cls.prototype._onDrop",
@@ -82,7 +83,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     ];
 
     #itemWrappers = [
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "WRAPPER",
             [
                 "CONFIG.Item.sheetClasses.consumable['pf2e.ConsumableSheetPF2e'].cls.prototype._renderInner",
@@ -94,13 +95,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     ];
 
     #spellWrappers = [
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "WRAPPER",
             "CONFIG.Item.sheetClasses.spell['pf2e.SpellSheetPF2e'].cls.prototype._renderInner",
             this.#itemSheetRenderInner,
             { context: this },
         ),
-        createToggleableWrapper(
+        new ToggleableWrapper(
             "MIXED",
             "CONFIG.PF2E.Item.documentClasses.spellcastingEntry.prototype.cast",
             this.#spellcastingEntryCast,
@@ -187,7 +188,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         if (!skipRenders) {
             renderItemSheets(["AbilitySheetPF2e", "ConsumableSheetPF2e", "EquipmentSheetPF2e", "FeatSheetPF2e"]);
-
             renderCharacterSheets();
         }
     }
@@ -212,7 +212,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #onCreateChatMessage(origin: ChatMessagePF2e) {
-        if (!origin.isAuthor || SYSTEM.getFlag(origin, "context.type") !== "self-effect") return;
+        if (!origin.isAuthor || origin.flags[SYSTEM.id].context?.type !== "self-effect") return;
 
         const hookId = Hooks.on("renderChatMessageHTML", (message: ChatMessagePF2e, html: HTMLElement) => {
             if (message !== origin) return;
@@ -557,7 +557,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                     return wrapped(spell, foundry.utils.mergeObject(options, macroOptions, { inplace: false }));
                 },
                 cancel: () => {
-                    return this.warning("spell.cancel", { name: spell.name });
+                    return this.notify.warning("spell.cancel", { name: spell.name });
                 },
             });
         }
@@ -607,5 +607,3 @@ type DropZoneData = {
 };
 
 type ToolSettings = toolbelt.Settings["actionable"];
-
-export { ActionableTool };

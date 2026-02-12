@@ -1,41 +1,47 @@
 import {
-    ActorPF2e,
-    CanvasPF2e,
-    createEmitable,
-    createToggleableHook,
-    createToggleableWrapper,
-    createToggleKeybind,
+    DropCanvasData,
+    Emitable,
+    ImageFilePath,
     isPrimaryUpdater,
     itemIsOfType,
+    ItemUUID,
+    KeybindingActionConfig,
+    positionTokenFromCoords,
+    R,
+    SYSTEM,
+    ToggleableHook,
+    ToggleableKeybind,
+    ToggleableWrapper,
+    userIsGM,
+} from "foundry-helpers";
+import {
+    ActorPF2e,
+    CanvasPF2e,
     ItemPF2e,
     LootPF2e,
     LootSource,
     PhysicalItemPF2e,
     PhysicalItemType,
-    positionTokenFromCoords,
-    R,
-    SYSTEM,
     TokenDocumentPF2e,
     TokenLightRuleElement,
-    userIsGM,
-} from "module-helpers";
+} from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData } from ".";
 
-class DroppethTool extends ModuleTool<ToolSettings> {
-    #deleteTokenHook = createToggleableHook("deleteToken", this.#onDeleteToken.bind(this));
-    #dropCanvasDataHook = createToggleableHook("dropCanvasData", this.#onDropCanvasData.bind(this));
+export class DroppethTool extends ModuleTool<ToolSettings> {
+    #deleteTokenHook = new ToggleableHook("deleteToken", this.#onDeleteToken.bind(this));
+    #dropCanvasDataHook = new ToggleableHook("dropCanvasData", this.#onDropCanvasData.bind(this));
 
-    #droppethItemEmitable = createEmitable(this.key, this.#droppethItem.bind(this));
+    #droppethItemEmitable = new Emitable(this.key, this.#droppethItem, this);
 
-    #onEmbeddedDocumentChangeWrapper = createToggleableWrapper(
+    #onEmbeddedDocumentChangeWrapper = new ToggleableWrapper(
         "WRAPPER",
         "CONFIG.Actor.documentClass.prototype._onEmbeddedDocumentChange",
         this.#actorOnEmbeddedDocumentChange,
         { context: this },
     );
 
-    #droppethKeybind = createToggleKeybind({
+    #droppethKeybind = new ToggleableKeybind({
         name: "droppeth",
         editable: [{ key: "ControlLeft", modifiers: [] }],
         onDown: () => {
@@ -48,7 +54,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     static get DEFAULT_DATA(): { img: ImageFilePath; name: string } {
         return {
-            img: SYSTEM.getPath("icons/default-icons/backpack.svg"),
+            img: SYSTEM.relativePath("icons/default-icons/backpack.svg"),
             name: game.i18n.localize("TYPES.Actor.loot"),
         };
     }
@@ -206,7 +212,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     async #droppethItem(options: DroppethOptions, userId: string) {
         const error = (err: string) => {
-            this.error(`error.${err}`);
+            this.notify.error(`error.${err}`);
         };
 
         const scene = canvas.scene;
@@ -286,7 +292,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         tokenDocument.updateSource(position);
 
         if (!canvas.dimensions.rect.contains(tokenDocument.x, tokenDocument.y)) {
-            this.error("error.out-of-bounds");
+            this.notify.error("error.out-of-bounds");
             await actor.delete();
             return;
         }
@@ -299,7 +305,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         createTradeMessage({
             item: mainItem,
-            message: this.localizePath("message.content", actor.inventory.size > 1 ? "container" : "item"),
+            message: this.localize.path("message.content", actor.inventory.size > 1 ? "container" : "item"),
             source: owner,
             subtitle: this.localize("message.subtitle"),
             quantity: mainItem.quantity,
@@ -340,5 +346,3 @@ type ToolSettings = {
     enabled: boolean;
     light: boolean;
 };
-
-export { DroppethTool };

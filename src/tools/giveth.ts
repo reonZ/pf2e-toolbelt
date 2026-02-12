@@ -1,29 +1,31 @@
 import {
+    DropCanvasItemData,
+    Emitable,
+    isAllyActor,
+    isInstanceOf,
+    ToggleableCreatureSheetWrapper,
+    userIsGM,
+} from "foundry-helpers";
+import {
     ActorPF2e,
     ChoiceSetRuleElement,
     ConditionPF2e,
     ConditionSource,
-    createCreatureSheetWrapper,
-    createEmitable,
     CreaturePF2e,
     CreatureSheetPF2e,
-    DropCanvasItemDataPF2e,
     EffectPF2e,
     EffectSource,
     EffectTrait,
-    isAllyActor,
-    isInstanceOf,
     ItemPF2e,
-    userIsGM,
-} from "module-helpers";
+} from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 const EFFECT_SETTING = ["disabled", "ally", "all"] as const;
 
-class GivethTool extends ModuleTool<ToolSettings> {
-    #givethEmitable = createEmitable(this.key, this.#givethEffect.bind(this));
+export class GivethTool extends ModuleTool<ToolSettings> {
+    #givethEmitable = new Emitable(this.key, this.#givethEffect, this);
 
-    #handleDroppedItemWrapper = createCreatureSheetWrapper(
+    #handleDroppedItemWrapper = new ToggleableCreatureSheetWrapper(
         "MIXED",
         "_handleDroppedItem",
         this.#creatureSheetHandleDroppedItem,
@@ -57,7 +59,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         };
     }
 
-    ready(isGM: boolean): void {
+    ready(): void {
         this._configurate();
     }
 
@@ -71,7 +73,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #givethEffect({ actor, data, source }: GiveEffectOptions, userId: string): any {
+    #givethEffect({ actor, data, source }: GiveEffectOptions, _userId: string): any {
         /**
          * https://github.com/foundryvtt/pf2e/blob/1465f7190b2b8454094c50fa6d06e9902e0a3c41/src/module/actor/sheet/base.ts#L1224
          */
@@ -118,7 +120,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         wrapped: libWrapper.RegisterCallback,
         event: DragEvent,
         originalItem: ItemPF2e,
-        data: DropCanvasItemDataPF2e,
+        data: DropCanvasItemData,
     ): Promise<ItemPF2e[]> {
         const actor = actorSheet.actor;
 
@@ -140,7 +142,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
         if (!RuleCls) return [originalItem];
 
         const ItemCls = getDocumentClass("Item");
-        const item = new ItemCls(originalItem.toObject(), { parent: actor });
+        const item = new ItemCls(originalItem.toObject(), { parent: actor }) as ItemPF2e<CreaturePF2e>;
         const itemSource = item._source as EffectSource | ConditionSource;
         const itemUpdates: EmbeddedDocumentUpdateData[] = [];
 
@@ -174,12 +176,10 @@ class GivethTool extends ModuleTool<ToolSettings> {
 
 type GiveEffectOptions = {
     actor: CreaturePF2e;
-    data: DropCanvasItemDataPF2e;
+    data: DropCanvasItemData;
     source: EffectSource | ConditionSource;
 };
 
 type ToolSettings = {
     effect: (typeof EFFECT_SETTING)[number];
 };
-
-export { GivethTool };

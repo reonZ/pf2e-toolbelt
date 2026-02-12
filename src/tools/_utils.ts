@@ -1,16 +1,7 @@
-import {
-    ActionCost,
-    ActorPF2e,
-    createFormData,
-    enrichHTML,
-    getActionGlyph,
-    getPreferredName,
-    PhysicalItemPF2e,
-    R,
-    SYSTEM,
-} from "module-helpers";
+import { createFormData, enrichHTML, getActionGlyph, getPreferredName, R, SYSTEM } from "foundry-helpers";
+import { ActionCost, ActorPF2e, PhysicalItemPF2e } from "foundry-pf2e";
 
-async function createTradeMessage({
+export async function createTradeMessage({
     cost,
     item,
     message,
@@ -35,7 +26,7 @@ async function createTradeMessage({
     const glyph = getActionGlyph(cost ?? (source.isOfType("loot") && target?.isOfType("loot") ? 2 : 1));
 
     const flavor = await foundry.applications.handlebars.renderTemplate(
-        SYSTEM.getPath("templates/chat/action/flavor.hbs"),
+        SYSTEM.relativePath("templates/chat/action/flavor.hbs"),
         {
             action: { title: "PF2E.Actions.Interact.Title", subtitle, glyph },
             traits: [
@@ -49,7 +40,7 @@ async function createTradeMessage({
     );
 
     const content = await foundry.applications.handlebars.renderTemplate(
-        SYSTEM.getPath("templates/chat/action/content.hbs"),
+        SYSTEM.relativePath("templates/chat/action/content.hbs"),
         {
             imgPath: item.img,
             message: game.i18n.format(message, formattedMessageData).replace(/\b1 × /, ""),
@@ -65,7 +56,9 @@ async function createTradeMessage({
     });
 }
 
-async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): Promise<TradeQuantityDialogData | null> {
+export async function createTradeQuantityDialog(
+    options: TradeQuantityDialogOptions,
+): Promise<TradeQuantityDialogData | null> {
     const data = {
         ...options,
         maxQuantity: options.maxQuantity ?? options.item.quantity,
@@ -75,7 +68,7 @@ async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): P
     };
 
     const content = await foundry.applications.handlebars.renderTemplate(
-        SYSTEM.getPath("templates/popups/item-transfer-dialog.hbs"),
+        SYSTEM.relativePath("templates/popups/item-transfer-dialog.hbs"),
         data,
     );
 
@@ -123,11 +116,6 @@ type TradeQuantityDialogOptions = {
     title: string;
 };
 
-type TradeQuantityDialogData = {
-    quantity: number;
-    newStack?: boolean;
-};
-
 type TradeMessageOptions = {
     /** localization key */
     cost?: string | number | null | ActionCost;
@@ -140,5 +128,7 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export { createTradeMessage, createTradeQuantityDialog };
-export type { TradeMessageOptions, TradeQuantityDialogData };
+export type TradeQuantityDialogData = {
+    quantity: number;
+    newStack?: boolean;
+};

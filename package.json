@@ -16,10 +16,11 @@
     },
     "devDependencies": {
         "esbuild": "^0.20.1",
-        "sass": "^1.97.2",
+        "foundry-pf2e": "github:7H3LaughingMan/foundry-pf2e",
+        "sass": "^1.97.1",
         "typescript": "^5.9.3"
     },
     "dependencies": {
-        "module-helpers": "github:reonZ/module-helpers"
+        "foundry-helpers": "file:../foundry-helpers"
     }
 }

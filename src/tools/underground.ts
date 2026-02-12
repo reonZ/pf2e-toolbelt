@@ -1,18 +1,13 @@
-import {
-    activateHooksAndWrappers,
-    createToggleableHook,
-    createToggleableWrapper,
-    TileDocumentPF2e,
-    TokenPF2e,
-} from "module-helpers";
+import { activateHooksAndWrappers, PrimaryCanvasGroup, ToggleableHook, ToggleableWrapper } from "foundry-helpers";
+import { TileDocumentPF2e, TokenPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 const MODE_SETTING = ["normal", "greyscale", "sepia"] as const;
 
-class UndergroundTool extends ModuleTool<ToolSettings> {
+export class UndergroundTool extends ModuleTool<ToolSettings> {
     #enabledHooks = [
-        createToggleableHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
-        createToggleableWrapper(
+        new ToggleableHook("drawPrimaryCanvasGroup", this.#onDrawPrimaryCanvasGroup.bind(this)),
+        new ToggleableWrapper(
             "WRAPPER",
             "CONFIG.Token.objectClass.prototype._refreshElevation",
             this.#tokenRefreshElevation,
@@ -20,7 +15,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
-    #tilesPrepareBaseDataWrapper = createToggleableWrapper(
+    #tilesPrepareBaseDataWrapper = new ToggleableWrapper(
         "WRAPPER",
         "CONFIG.Tile.documentClass.prototype.prepareBaseData",
         this.#tileDocumentPrepareBaseData,
@@ -135,9 +130,9 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
                 const colorMatrix = new PIXI.ColorMatrixFilter();
 
                 if (mode === "sepia") {
-                    colorMatrix.sepia();
+                    colorMatrix.sepia(false);
                 } else {
-                    colorMatrix.greyscale(0.5);
+                    colorMatrix.greyscale(0.5, false);
                 }
 
                 filters.push(colorMatrix);
@@ -145,7 +140,7 @@ class UndergroundTool extends ModuleTool<ToolSettings> {
 
             if (contrast > 0) {
                 const colorMatrix = new PIXI.ColorMatrixFilter();
-                colorMatrix.contrast(contrast);
+                colorMatrix.contrast(contrast, false);
                 filters.push(colorMatrix);
             }
 
@@ -167,5 +162,3 @@ type ToolSettings = {
     mode: (typeof MODE_SETTING)[number];
     tiles: boolean;
 };
-
-export { UndergroundTool };
