@@ -1,23 +1,21 @@
 import {
-    createCreatureSheetWrapper,
-    createEmitable,
-    DropCanvasItemData,
-    isAllyActor,
-    isInstanceOf,
-    userIsGM,
-} from "foundry-helpers";
-import {
     ActorPF2e,
     ChoiceSetRuleElement,
     ConditionPF2e,
     ConditionSource,
+    createCreatureSheetWrapper,
+    createEmitable,
     CreaturePF2e,
     CreatureSheetPF2e,
+    DropCanvasItemData,
     EffectPF2e,
     EffectSource,
     EffectTrait,
+    isAllyActor,
+    isInstanceOf,
     ItemPF2e,
-} from "foundry-pf2e";
+    userIsGM,
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 const EFFECT_SETTING = ["disabled", "ally", "all"] as const;

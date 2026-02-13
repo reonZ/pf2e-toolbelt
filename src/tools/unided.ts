@@ -1,5 +1,4 @@
-import { createToggleHook } from "foundry-helpers";
-import { ItemPF2e, ItemSourcePF2e } from "foundry-pf2e";
+import { createToggleHook, ItemPF2e, ItemSourcePF2e } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class UnidedTool extends ModuleTool<ToolSettings> {

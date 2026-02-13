@@ -1,33 +1,30 @@
 import {
-    createEmitable,
-    createToggleHook,
-    createToggleWrapper,
-    createToggleKeybind,
-    isPrimaryUpdater,
-    itemIsOfType,
-    ItemUUID,
-    KeybindingActionConfig,
-    positionTokenFromCoords,
-    R,
-    SYSTEM,
-    userIsGM,
-    ImageFilePath,
-    DropCanvasData,
-} from "foundry-helpers";
-import {
     ActorPF2e,
     CanvasPF2e,
+    createEmitable,
+    createToggleHook,
+    createToggleKeybind,
+    createToggleWrapper,
+    DropCanvasData,
+    ImageFilePath,
+    isPrimaryUpdater,
+    itemIsOfType,
     ItemPF2e,
+    ItemUUID,
+    KeybindingActionConfig,
     LootPF2e,
     LootSource,
     PhysicalItemPF2e,
     PhysicalItemType,
+    positionTokenFromCoords,
+    R,
+    SYSTEM,
     TokenDocumentPF2e,
     TokenLightRuleElement,
-} from "foundry-pf2e";
+    userIsGM,
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { createTradeMessage, createTradeQuantityDialog } from ".";
-import { TradeQuantityDialogData } from ".";
+import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData } from ".";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createToggleHook("deleteToken", this.#onDeleteToken.bind(this));

@@ -1,5 +1,4 @@
-import { addListener, createFormData, MODULE, R } from "foundry-helpers";
-import { CreaturePF2e } from "foundry-pf2e";
+import { addListener, createFormData, CreaturePF2e, MODULE, R } from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
 import {
     BASE_SHARE_DATA,

@@ -1,5 +1,4 @@
-import { createSharedWrapper } from "foundry-helpers";
-import { ActorPF2e, ArmorPF2e, ChatMessagePF2e, WeaponPF2e } from "foundry-pf2e";
+import { ActorPF2e, ArmorPF2e, ChatMessagePF2e, createSharedWrapper, WeaponPF2e } from "foundry-helpers";
 
 const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, () => void, () => void>(
     "WRAPPER",

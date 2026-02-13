@@ -1,5 +1,4 @@
-import { createToggleHook, createToggleKeybind, KeybindingActionConfig } from "foundry-helpers";
-import { ActorPF2e, ItemPF2e } from "foundry-pf2e";
+import { ActorPF2e, createToggleHook, createToggleKeybind, ItemPF2e, KeybindingActionConfig } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { ConditionManager } from ".";
 

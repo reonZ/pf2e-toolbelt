@@ -1,28 +1,25 @@
 import {
+    ActorPF2e,
+    ActorType,
     advanceTime,
+    CharacterPF2e,
     confirmDialog,
     DateTime,
-    getItemIdentificationDCs,
     getShortDateTime,
     htmlClosest,
     htmlQueryAll,
-    IdentifyItemPopup,
     isCastConsumable,
-    ItemUUID,
-    MapOfArrays,
-    R,
-    SYSTEM,
-} from "foundry-helpers";
-import {
-    ActorPF2e,
-    ActorType,
-    CharacterPF2e,
     ItemPF2e,
+    ItemUUID,
     MagicTradition,
+    MapOfArrays,
     PhysicalItemPF2e,
     PhysicalItemType,
+    R,
     SkillSlug,
-} from "foundry-pf2e";
+    SYSTEM,
+} from "foundry-helpers";
+import { getItemIdentificationDCs, IdentifyItemPopup } from "foundry-helpers/dist";
 import { ModuleToolApplication } from "module-tool-application";
 import { IdentifiedItemSource, IdentifyTool, zIdentifiedItem } from ".";
 
@@ -83,7 +80,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
             this.#reset();
         }
 
-        return super.render(options, _options);
+        return super.render(options);
     }
 
     isValidItem(item: Maybe<ItemPF2e>): item is PhysicalItemPF2e<ActorPF2e> {

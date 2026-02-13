@@ -1,29 +1,27 @@
 import {
-    createButtonElement,
-    createHTMLElement,
-    createToggleHook,
-    createToggleWrapper,
-    getItemSourceId,
-    htmlClosest,
-    htmlQuery,
-    MODULE,
-    R,
-    renderActorSheets,
-    waitDialog,
-    waitTimeout,
-} from "foundry-helpers";
-import {
     ActorPF2e,
     ActorSheetPF2e,
     Bulk,
     ConsumablePF2e,
+    createButtonElement,
+    createHTMLElement,
+    createToggleHook,
+    createToggleWrapper,
     EquipmentPF2e,
+    getItemSourceId,
+    htmlClosest,
+    htmlQuery,
     InventoryBulk,
     ItemPF2e,
+    MODULE,
+    R,
+    renderActorSheets,
     TreasurePF2e,
+    waitDialog,
+    waitTimeout,
     WeaponSheetPF2e,
     WeaponSource,
-} from "foundry-pf2e";
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterInventoryTool extends ModuleTool<ToolSettings> {

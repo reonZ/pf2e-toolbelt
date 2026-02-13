@@ -1,56 +1,54 @@
 import {
-    addListenerAll,
-    createHTMLElement,
-    createHTMLElementContent,
-    createToggleHook,
-    createToggleWrapper,
-    ErrorPF2e,
-    getActionGlyph,
-    getItemSourceId,
-    htmlQuery,
-    ImageFilePath,
-    isCastConsumable,
-    isDefaultActionIcon,
-    isScriptMacro,
-    ItemSheetData,
-    MODULE,
-    R,
-    renderCharacterSheets,
-    renderItemSheets,
-    SYSTEM,
-    toggleHooksAndWrappers,
-    useAction,
-    usePhysicalItem,
-} from "foundry-helpers";
-import {
     AbilityItemPF2e,
     AbilitySheetPF2e,
     AbilityViewData,
     ActorPF2e,
     ActorSheetPF2e,
+    addListenerAll,
     CastOptions,
     CharacterPF2e,
     CharacterSheetData,
     ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
+    createHTMLElement,
+    createHTMLElementContent,
+    createToggleHook,
+    createToggleWrapper,
     CreaturePF2e,
     EffectPF2e,
     EquipmentPF2e,
     EquipmentSheetPF2e,
+    ErrorPF2e,
     FeatPF2e,
     FeatSheetPF2e,
+    getActionGlyph,
+    getItemSourceId,
+    htmlQuery,
+    ImageFilePath,
     InventoryItem,
+    isCastConsumable,
+    isDefaultActionIcon,
+    isScriptMacro,
     ItemPF2e,
+    ItemSheetDataPF2e,
     ItemSheetPF2e,
     MacroPF2e,
+    MODULE,
     NPCPF2e,
     NPCSheetData,
     PhysicalItemPF2e,
+    R,
+    renderCharacterSheets,
+    renderItemSheets,
     SpellcastingEntryPF2e,
     SpellPF2e,
     SpellSheetPF2e,
-} from "foundry-pf2e";
+    SYSTEM,
+    toggleHooksAndWrappers,
+    useAction,
+    usePhysicalItem,
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
@@ -427,7 +425,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #actionSheetRenderInner(
         sheet: AbilitySheetPF2e | FeatSheetPF2e,
         wrapped: libWrapper.RegisterCallback,
-        data: ItemSheetData<AbilityItemPF2e | FeatPF2e>,
+        data: ItemSheetDataPF2e<AbilityItemPF2e | FeatPF2e>,
     ): Promise<JQuery> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
@@ -516,7 +514,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     async #itemSheetRenderInner(
         sheet: EquipmentSheetPF2e | ConsumableSheetPF2e | SpellSheetPF2e,
         wrapped: libWrapper.RegisterCallback,
-        data: ItemSheetData<EquipmentPF2e | ConsumablePF2e | SpellPF2e>,
+        data: ItemSheetDataPF2e<EquipmentPF2e | ConsumablePF2e | SpellPF2e>,
     ): Promise<JQuery> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);

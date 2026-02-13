@@ -1,5 +1,4 @@
-import { createCreatureSheetWrapper, DropCanvasItemData } from "foundry-helpers";
-import { CreaturePF2e, ItemPF2e } from "foundry-pf2e";
+import { createCreatureSheetWrapper, CreaturePF2e, DropCanvasItemData, ItemPF2e } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterTradeTool extends ModuleTool<ToolSettings> {

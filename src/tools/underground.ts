@@ -1,5 +1,11 @@
-import { activateHooksAndWrappers, createToggleHook, createToggleWrapper, PrimaryCanvasGroup } from "foundry-helpers";
-import { TileDocumentPF2e, TokenPF2e } from "foundry-pf2e";
+import {
+    activateHooksAndWrappers,
+    createToggleHook,
+    createToggleWrapper,
+    PrimaryCanvasGroup,
+    TileDocumentPF2e,
+    TokenPF2e,
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 const MODE_SETTING = ["normal", "greyscale", "sepia"] as const;

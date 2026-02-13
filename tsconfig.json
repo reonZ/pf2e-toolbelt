@@ -18,7 +18,7 @@
         "strictPropertyInitialization": true,
         "strictBindCallApply": true,
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
-        "types": ["foundry-pf2e", "foundry-helpers"],
+        "types": ["foundry-helpers"],
         "rootDir": "src",
         "outDir": "scripts",
         "baseUrl": "src",

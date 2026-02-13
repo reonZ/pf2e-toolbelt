@@ -2,12 +2,12 @@ import {
     createToggleHook,
     getTemplateTokens,
     isHoldingModifierKey,
+    MeasuredTemplateDocumentPF2e,
     oppositeAlliance,
     SYSTEM,
     Token,
     waitDialog,
 } from "foundry-helpers";
-import { MeasuredTemplateDocumentPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { targetHelperTool } from ".";
 

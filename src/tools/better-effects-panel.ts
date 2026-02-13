@@ -1,5 +1,4 @@
-import { addListener, createToggleHook, EffectsPanelViewData } from "foundry-helpers";
-import { AbstractEffectPF2e, EffectsPanel } from "foundry-pf2e";
+import { AbstractEffectPF2e, addListener, createToggleHook, EffectsPanel, EffectsPanelViewData } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class BetterEffectsPanelTool extends ModuleTool<ToolSettings> {

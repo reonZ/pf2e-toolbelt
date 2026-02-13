@@ -1,44 +1,42 @@
 import {
-    ActorUUID,
-    ApplicationV1HeaderButton,
-    createEmitable,
-    DatabaseDeleteOperation,
-    DatabaseUpdateOperation,
-    executeWhenReady,
-    getFirstActiveToken,
-    includesAny,
-    isPrimaryOwner,
-    isPrimaryUpdater,
-    isSF2eItem,
-    MODULE,
-    R,
-    registerWrapper,
-    SYSTEM,
-} from "foundry-helpers";
-import {
     ActorPF2e,
     ActorSourcePF2e,
+    ActorUUID,
+    ApplicationV1HeaderButton,
     AppliedDamageFlag,
     CharacterPF2e,
     CharacterSkill,
     CharacterSkillData,
     CharacterSource,
     CombatantPF2e,
+    createEmitable,
     CreaturePF2e,
     CreatureSheetPF2e,
+    DatabaseDeleteOperation,
+    DatabaseUpdateOperation,
     DeferredValueParams,
     EffectPF2e,
     EncounterPF2e,
     EquipmentPF2e,
+    executeWhenReady,
+    getFirstActiveToken,
+    includesAny,
+    isPrimaryOwner,
+    isPrimaryUpdater,
+    isSF2eItem,
     Modifier,
     ModifierType,
+    MODULE,
     PerceptionStatistic,
+    R,
+    registerWrapper,
     Statistic,
+    SYSTEM,
     WeaponPF2e,
-} from "foundry-pf2e";
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedWeaponPrepareBaseData } from "tools";
-import { ShareDataConfig, ShareDataSource, ShareDataType, ShareData, zShareData } from ".";
+import { ShareData, ShareDataConfig, ShareDataSource, ShareDataType, zShareData } from ".";
 
 /**
  * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/item/abstract-effect/values.ts#L2-L7

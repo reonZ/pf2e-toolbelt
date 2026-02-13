@@ -1,34 +1,32 @@
 import {
+    ActorPF2e,
     ActorSheetOptions,
+    ActorSheetPF2e,
     belongToPartyAlliance,
+    CharacterPF2e,
+    CharacterSheetPF2e,
     createHTMLElement,
     createToggleHook,
     createToggleWrapper,
-    htmlQuery,
-    isInstanceOf,
-    R,
-    renderActorSheets,
-    renderCharacterSheets,
-    sortByLocaleCompare,
-    SYSTEM,
-    toggleHooksAndWrappers,
-} from "foundry-helpers";
-import {
-    ActorPF2e,
-    ActorSheetPF2e,
-    CharacterPF2e,
-    CharacterSheetPF2e,
     CreaturePF2e,
     CreatureSheetData,
     FamiliarPF2e,
     FamiliarSheetPF2e,
+    htmlQuery,
+    isInstanceOf,
     NPCSheetPF2e,
     PhysicalItemPF2e,
     PhysicalItemType,
+    R,
+    renderActorSheets,
+    renderCharacterSheets,
+    sortByLocaleCompare,
     SpellcastingEntryPF2e,
     SpellCollection,
     SpellPreparationSheet,
-} from "foundry-pf2e";
+    SYSTEM,
+    toggleHooksAndWrappers,
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { betterMerchantTool } from ".";
 

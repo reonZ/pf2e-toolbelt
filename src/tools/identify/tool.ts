@@ -1,4 +1,6 @@
 import {
+    ActorPF2e,
+    ActorSheetPF2e,
     confirmDialog,
     createEmitable,
     createHTMLElement,
@@ -6,10 +8,11 @@ import {
     htmlClosest,
     htmlQuery,
     isMerchant,
+    ItemPF2e,
+    PhysicalItemPF2e,
     renderActorSheets,
     userIsGM,
 } from "foundry-helpers";
-import { ActorPF2e, ActorSheetPF2e, ItemPF2e, PhysicalItemPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { IdentifyTracker } from ".";
 

@@ -1,5 +1,4 @@
-import { z, zForeignDocument } from "foundry-helpers";
-import { CreaturePF2e } from "foundry-pf2e";
+import { CreaturePF2e, z, zForeignDocument } from "foundry-helpers";
 import { shareDataTool } from ".";
 
 const BASE_SHARE_DATA = ["health", "languages", "timeEvents"] as const;

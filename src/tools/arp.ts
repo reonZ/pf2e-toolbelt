@@ -1,5 +1,17 @@
-import { activateHooksAndWrappers, createToggleWrapper, isSF2eItem, R, SYSTEM } from "foundry-helpers";
-import { ActorPF2e, ArmorPF2e, RawCoins, ShieldPF2e, WeaponPF2e, ZeroToFour, ZeroToSix } from "foundry-pf2e";
+import {
+    activateHooksAndWrappers,
+    ActorPF2e,
+    ArmorPF2e,
+    createToggleWrapper,
+    isSF2eItem,
+    R,
+    RawCoins,
+    ShieldPF2e,
+    SYSTEM,
+    WeaponPF2e,
+    ZeroToFour,
+    ZeroToSix,
+} from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from ".";
 

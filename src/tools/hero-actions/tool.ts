@@ -1,5 +1,11 @@
 import {
+    ActorPF2e,
     addListenerAll,
+    CharacterPF2e,
+    CharacterSheetData,
+    CharacterSheetPF2e,
+    ChatMessageSourcePF2e,
+    ClientDocument,
     createEmitable,
     createHTMLElement,
     createToggleWrapper,
@@ -21,7 +27,6 @@ import {
     toggleSummary,
     waitDialog,
 } from "foundry-helpers";
-import { ActorPF2e, CharacterPF2e, CharacterSheetData, CharacterSheetPF2e, ChatMessageSourcePF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { HeroAction, TradeHeroAction, zHeroAction } from ".";
 
@@ -682,7 +687,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         }
 
         if (!table.formula) {
-            if (table.compendium) {
+            if (table.inCompendium) {
                 this.localize.error("table.noFormulaCompendium", true);
                 return;
             }
@@ -881,20 +886,16 @@ async function labelfromTableResult(result: TableResult<RollTable>, uuid: string
     }
 
     const label = /@UUID\[[\w\.]+\]{([\w -]+)}/.exec(result.description)?.[1];
-    return label ?? (uuid && (await fromUuid(uuid))?.name);
+    return label ?? (uuid && (await fromUuid<ClientDocument & { name: string }>(uuid))?.name);
 }
 
-function documentUuidFromTableResult(result: TableResult<RollTable>): DocumentUUID | undefined {
+function documentUuidFromTableResult(result: TableResult<RollTable>): DocumentUUID | null | undefined {
     if (result.type === CONST.TABLE_RESULT_TYPES.TEXT) {
         return /@UUID\[([\w\.-]+)\]/.exec(result.description)?.[1] as DocumentUUID;
     }
     if (result.type === CONST.TABLE_RESULT_TYPES.DOCUMENT) {
-        return `${result.documentCollection}.${result.documentId}` as DocumentUUID;
+        return result.documentUuid;
     }
-    if (result.type === CONST.TABLE_RESULT_TYPES.COMPENDIUM) {
-        return `Compendium.${result.documentCollection}.${result.documentId}` as DocumentUUID;
-    }
-    return undefined;
 }
 
 async function openDescriptionFromElement(el: HTMLElement) {

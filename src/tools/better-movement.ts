@@ -6,8 +6,8 @@ import {
     positionTokenFromCoords,
     R,
     selectTokens,
+    TokenPF2e,
 } from "foundry-helpers";
-import { TokenPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 const TELEPORT_SETTING = ["disabled", "enabled", "select"] as const;

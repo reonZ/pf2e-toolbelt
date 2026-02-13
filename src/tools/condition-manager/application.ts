@@ -1,5 +1,13 @@
-import { addListenerAll, createCustomCondition, R } from "foundry-helpers";
-import { ActorPF2e, CombatantPF2e, ConditionPF2e, DurationData, EncounterPF2e } from "foundry-pf2e";
+import {
+    ActorPF2e,
+    addListenerAll,
+    CombatantPF2e,
+    ConditionPF2e,
+    createCustomCondition,
+    DurationData,
+    EncounterPF2e,
+    R,
+} from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
 import { ConditionManagerTool } from ".";
 

@@ -1,13 +1,17 @@
 import {
+    ChatLogPF2e,
+    ChatMessagePF2e,
     ContextMenuEntry,
     createToggleHook,
+    CreaturePF2e,
     htmlQuery,
     isActionMessage,
     isSpellMessage,
     R,
+    SpellcastingEntrySlots,
+    SpellPF2e,
     SYSTEM,
 } from "foundry-helpers";
-import { ChatLogPF2e, ChatMessagePF2e, CreaturePF2e, SpellcastingEntrySlots, SpellPF2e } from "foundry-pf2e";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedMessageRenderHTML } from ".";
 
