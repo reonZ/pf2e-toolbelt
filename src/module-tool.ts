@@ -1,18 +1,13 @@
 import {
     ClientDocument,
     deleteInMemory,
-    error,
     getFlag,
     getInMemory,
     getSetting,
     HandlebarsRenderData,
-    info,
     KeybindingActionConfig,
+    Localize,
     localize,
-    LocalizeArgs,
-    localizeIfExist,
-    localizePath,
-    NotificationArgs,
     R,
     RegisterSettingOptions,
     render,
@@ -24,11 +19,11 @@ import {
     Token,
     unsetFlag,
     unsetFlagProperty,
-    warning,
 } from "foundry-helpers";
 import DataField = foundry.data.fields.DataField;
 
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
+    #localize?: Localize;
     #settings: Record<string, any> = {};
 
     declare settings: TSettings;
@@ -42,6 +37,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     get api(): Record<string, any> {
         return {};
+    }
+
+    get localize(): Localize {
+        return (this.#localize ??= localize.sub(this.key));
     }
 
     init(isGM: boolean) {}
@@ -106,30 +105,6 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     render<T extends Record<string, any>>(template: string, data: T & HandlebarsRenderData): Promise<string> {
         return render(`${this.key}/${template}`, data);
-    }
-
-    localizePath(...path: string[]): string {
-        return localizePath(this.key, ...path);
-    }
-
-    localize(...args: LocalizeArgs): string {
-        return localize(this.key, ...args);
-    }
-
-    localizeIfExist(...args: LocalizeArgs): string | undefined {
-        return localizeIfExist(this.key, ...args);
-    }
-
-    info(...args: NotificationArgs): fa.ui.Notification {
-        return info(this.key, ...args);
-    }
-
-    warning(...args: NotificationArgs): fa.ui.Notification {
-        return warning(this.key, ...args);
-    }
-
-    error(...args: NotificationArgs): fa.ui.Notification {
-        return error(this.key, ...args);
     }
 
     _initialize(isGM: boolean) {

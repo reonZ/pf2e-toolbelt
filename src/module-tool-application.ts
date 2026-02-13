@@ -1,4 +1,4 @@
-import { LocalizeArgs, NotificationArgs } from "foundry-helpers";
+import { Localize } from "foundry-helpers";
 import { ModuleTool } from "module-tool";
 
 abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.applications.api.ApplicationV2 {
@@ -24,6 +24,10 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
         return this.tool.settings;
     }
 
+    get localize(): Localize {
+        return this.tool.localize;
+    }
+
     setSetting<K extends keyof TTool["settings"] & string>(
         key: K,
         value: TTool["settings"][K],
@@ -37,22 +41,6 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
 
     templatePath(...path: string[]): string {
         return this.tool.templatePath(this.key, ...path);
-    }
-
-    localizePath(...path: string[]): string {
-        return this.tool.localizePath(this.key, ...path);
-    }
-
-    localize(...args: LocalizeArgs): string {
-        return this.tool.localize(this.key, ...args);
-    }
-
-    localizeIfExist(...args: LocalizeArgs): string | undefined {
-        return this.tool.localizeIfExist(this.key, ...args);
-    }
-
-    info(...args: NotificationArgs): fa.ui.Notification {
-        return this.tool.info(this.key, ...args);
     }
 
     protected _renderHTML(context: fa.ApplicationRenderContext, options: fa.ApplicationRenderOptions): Promise<string> {

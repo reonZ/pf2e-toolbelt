@@ -213,7 +213,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     async #droppethItem(options: DroppethOptions, userId: string) {
         const error = (err: string) => {
-            this.error(`error.${err}`);
+            this.localize.error(`error.${err}`);
         };
 
         const scene = canvas.scene;
@@ -293,7 +293,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         tokenDocument.updateSource(position);
 
         if (!canvas.dimensions.rect.contains(tokenDocument.x, tokenDocument.y)) {
-            this.error("error.out-of-bounds");
+            this.localize.error("error.out-of-bounds");
             await actor.delete();
             return;
         }
@@ -306,7 +306,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         createTradeMessage({
             item: mainItem,
-            message: this.localizePath("message.content", actor.inventory.size > 1 ? "container" : "item"),
+            message: this.localize.path("message.content", actor.inventory.size > 1 ? "container" : "item"),
             source: owner,
             subtitle: this.localize("message.subtitle"),
             quantity: mainItem.quantity,
