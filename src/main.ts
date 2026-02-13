@@ -1,7 +1,7 @@
 import { getSetting, MODULE, R, registerModuleKeybinds, registerModuleSettings, userIsGM } from "foundry-helpers";
 import {
-    // ActionableTool,
-    // AnonymousTool,
+    ActionableTool,
+    AnonymousTool,
     // ArpTool,
     // BetterEffectsPanelTool,
     // BetterInventoryTool,
@@ -26,8 +26,8 @@ import {
 } from "tools";
 
 const TOOLS = [
-    // new ActionableTool(),
-    // new AnonymousTool(),
+    new ActionableTool(),
+    new AnonymousTool(),
     // new ArpTool(),
     // new BetterSheetTool(),
     // new BetterEffectsPanelTool(),
