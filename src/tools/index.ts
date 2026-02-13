@@ -15,7 +15,7 @@ export * from "./better-trade";
 export * from "./condition-manager";
 export * from "./droppeth";
 export * from "./giveth";
-// export * from "./hero-actions";
+export * from "./hero-actions";
 export * from "./identify";
 // export * from "./merge-damage";
 // export * from "./resource-tracker";
