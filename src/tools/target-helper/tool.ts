@@ -1,3 +1,4 @@
+import { ChatMessagePF2e, TokenDocumentUUID } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
@@ -43,6 +44,10 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             },
         ];
     }
+
+    getMessageTargets(message: ChatMessagePF2e): TokenDocumentUUID[] | undefined {}
+
+    setMessageTargets(message: ChatMessagePF2e, targets: TokenDocumentUUID[]) {}
 }
 
 const targetHelperTool = new TargetHelperTool();

@@ -1,5 +1,6 @@
 import {
     ClientDocument,
+    deleteFlagProperty,
     deleteInMemory,
     getFlag,
     getInMemory,
@@ -89,6 +90,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     unsetFlagProperty<T extends object>(obj: T, ...path: [string, ...string[]]): T {
         return unsetFlagProperty(obj, this.key, ...path);
+    }
+
+    deleteFlagProperty<T extends object>(obj: T, ...path: string[]): T {
+        return deleteFlagProperty(obj, this.key, ...path);
     }
 
     getInMemory<T>(obj: ClientDocument | Token, ...path: string[]): T | undefined {
