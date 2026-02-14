@@ -18,7 +18,7 @@ export * from "./giveth";
 export * from "./hero-actions";
 export * from "./identify";
 // export * from "./merge-damage";
-// export * from "./resource-tracker";
+export * from "./resource-tracker";
 // export * from "./roll-tracker";
 export * from "./share-data";
 export * from "./target-helper";

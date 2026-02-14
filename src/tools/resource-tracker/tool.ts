@@ -1,11 +1,11 @@
 import { createToggleHook, getWorldTime, SceneControl, settingPath, userIsGM } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { TrackedResource } from ".";
+import { ResourceTracker, TrackedResource, TrackedResourceSource, zTrackedResource } from ".";
 
 class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     #updateWorldTimeHook = createToggleHook("updateWorldTime", this.#onUpdateWorldTime.bind(this));
     #application: ResourceTracker | null = null;
-    #resources: Collection<string, TrackedResource> = new Collection();
+    #resources: ResourcesCollection = new Collection();
 
     get key(): "resourceTracker" {
         return "resourceTracker";
@@ -18,6 +18,14 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
                 type: Boolean,
                 default: false,
                 scope: "world",
+                requiresReload: true,
+            },
+            {
+                key: "offline",
+                type: Boolean,
+                default: true,
+                scope: "world",
+                config: false,
                 requiresReload: true,
             },
             {
@@ -62,70 +70,75 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         ];
     }
 
-    get resources(): ResourceCollection {
+    get resources(): ResourcesCollection {
         return this.#resources;
+    }
+
+    get resourcesKey(): "worldResources" | "userResources" {
+        return userIsGM() ? "worldResources" : "userResources";
     }
 
     init(): void {
         if (!this.settings.enabled) return;
-
         Hooks.on("getSceneControlButtons", this.#onGetSceneControlButtons.bind(this));
     }
 
     setup(): void {
         if (!this.settings.enabled) return;
-
-        this.#setResources();
-        this.#onUpdateWorldTime();
+        this.#setResources(this.settings[this.resourcesKey]);
+        this.#onUpdateWorldTime(getWorldTime());
     }
 
     ready(): void {
         if (!this.settings.enabled) return;
-
         this.#showApplication();
     }
 
-    #setResources(resources?: TrackedResource[]) {
-        const settingKey = userIsGM() ? "worldResources" : "userResources";
-        const resourcesKey = this.getSettingKey(settingKey);
+    saveResources() {
+        const entries = this.resources.map((entry) => entry);
+        this.settings[this.resourcesKey] = entries;
+    }
 
-        resources ??= this.settings[settingKey];
+    #onResourceUpdate(value: TrackedResourceSource[], userId: string) {
+        if (userId === game.userId || (userId === "world" && game.user.isGM)) {
+            this.#setResources(value);
+        }
+        this.#application?.render();
+    }
 
-        this.#resources = new ResourceCollection(resourcesKey, resources);
+    #setResources(resources: TrackedResourceSource[]) {
+        this.resources.clear();
 
-        const hasTimeout = this.#resources.some((resource) => resource.isTimeout);
+        for (const data of resources) {
+            const resource = zTrackedResource.safeParse(data)?.data;
+            if (!resource) continue;
+            this.resources.set(resource.id, resource);
+        }
+
+        const hasTimeout = this.resources.some(isTimeout);
         this.#updateWorldTimeHook.toggle(hasTimeout);
     }
 
-    #onUpdateWorldTime(worldTime: number = getWorldTime()) {
+    #onUpdateWorldTime(worldTime: number) {
         if (!game.ready || (game.user.isGM && !game.user.isActiveGM)) return;
 
         let updated = false;
 
         for (const resource of this.resources) {
-            if (!resource.isTimeout) continue;
+            if (!isTimeout(resource)) continue;
 
             const decrements = Math.floor((worldTime - resource.time) / resource.timeout);
             if (decrements < 1) continue;
 
             updated = true;
-            resource.updateSource({
-                value: resource.value - decrements,
-                time: resource.time + resource.timeout * decrements,
-            });
+
+            resource.value -= decrements;
+            resource.time += resource.timeout * decrements;
         }
 
         if (updated) {
-            this.resources.save();
+            this.saveResources();
         }
-    }
-
-    #onResourceUpdate(value: TrackedResource[], userId: string) {
-        if (userId === game.userId || (userId === "world" && game.user.isGM)) {
-            this.#setResources(value);
-        }
-
-        this.#application?.render();
     }
 
     #showApplication(show = this.settings.show) {
@@ -161,13 +174,20 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
     }
 }
 
+function isTimeout(resource: TrackedResource) {
+    return resource.timeout > 0 && resource.value > resource.min;
+}
+
 type ResourceTrackerSettings = {
     enabled: boolean;
     offline: boolean;
     position: Point;
     show: boolean;
-    userResources: TrackedResource[];
-    worldResources: TrackedResource[];
+    userResources: TrackedResourceSource[];
+    worldResources: TrackedResourceSource[];
 };
 
+type ResourcesCollection = Collection<string, TrackedResource>;
+
 export { ResourceTrackerTool };
+export type { ResourcesCollection };

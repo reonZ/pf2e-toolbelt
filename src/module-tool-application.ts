@@ -28,13 +28,6 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
         return this.tool.localize;
     }
 
-    setSetting<K extends keyof TTool["settings"] & string>(
-        key: K,
-        value: TTool["settings"][K],
-    ): Promise<TTool["settings"][K]> {
-        return this.tool.setSetting(key, value);
-    }
-
     path(...path: string[]): string {
         return this.tool.path(this.key, ...path);
     }

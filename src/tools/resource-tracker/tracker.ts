@@ -1,6 +1,16 @@
+import {
+    createHTMLElement,
+    createToggleHook,
+    getUserSetting,
+    getWorldTime,
+    htmlClosest,
+    htmlQuery,
+    localize,
+    R,
+    waitDialog,
+} from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
-import { ResourceTrackerTool } from ".";
-import { createHTMLElement, createToggleHook, htmlClosest, htmlQuery, R, waitDialog } from "foundry-helpers";
+import { ResourcesCollection, ResourceTrackerTool, TrackedResource, TrackedResourceSource, zTrackedResource } from ".";
 
 class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
     #userConnectedHook = createToggleHook("userConnected", () => this.render());
@@ -8,10 +18,7 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
     #setPosition = R.funnel(
         () => {
             const { left, top } = this.position;
-            const position = this.settings.position;
-
-            position.set(left, top);
-            this.settings.position = position;
+            this.settings.position = { x: left, y: top };
         },
         { minQuietPeriodMs: 1000 },
     );
@@ -32,7 +39,7 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
         return "tracker";
     }
 
-    get resources(): ResourceCollection {
+    get resources(): ResourcesCollection {
         return this.tool.resources;
     }
 
@@ -41,24 +48,33 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
         return super.close(options);
     }
 
-    async _prepareContext(options: fa.ApplicationRenderOptions): Promise<RenderContext> {
-        const allUsersResources = getUsersSetting<Resource[]>(this.tool.getSettingKey("userResources"));
-
+    async _prepareContext(_options: fa.ApplicationRenderOptions): Promise<RenderContext> {
+        const worldResources = { user: "world", value: this.settings.worldResources };
+        const allUsersResources = getUserSetting<TrackedResourceSource[]>(this.tool.getSettingKey("userResources"));
         const usersResources = this.settings.offline
             ? allUsersResources
             : allUsersResources.filter(({ user }) => game.users.get(user)?.active);
 
         const userId = game.user.isGM ? "world" : game.userId;
         const [ownResources, otherResources] = R.pipe(
-            [{ user: "world", value: this.settings.worldResources }, ...usersResources],
+            [worldResources, ...usersResources],
             R.map(({ user, value }) => {
-                const resources = value
-                    .filter(({ shared }) => shared || user === userId)
-                    .map((entry) => {
-                        const resource = new ResourceModel(entry);
-                        return resource.invalid ? undefined : resource;
-                    })
-                    .filter(R.isTruthy);
+                const resources = R.pipe(
+                    value,
+                    R.map((data) => zTrackedResource.safeParse(data)?.data),
+                    R.filter((resource): resource is TrackedResource => {
+                        return R.isTruthy(resource) && (resource.shared || user === userId);
+                    }),
+                    R.map((resource): TemplateResource => {
+                        return {
+                            ...resource,
+                            decrease: generateTooltip(resource, "decrease"),
+                            increase: generateTooltip(resource, "increase"),
+                            label: resource.name || resource.id,
+                            ratio: (resource.value - resource.min) / (resource.max - resource.min),
+                        };
+                    }),
+                );
 
                 if (!resources.length) return;
 
@@ -135,15 +151,18 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
         const newValue = resource.value + resource[`step${step}`] * direction;
 
         if (newValue !== resource.value) {
-            resource.updateSource({ value: newValue });
-            resources.save();
+            resource.value = newValue;
+            resource.time = getWorldTime();
+            this.tool.saveResources();
         }
     }
 
+    async #resourceMenu(resource: TrackedResource, isCreate: true): Promise<TrackedResource | null>;
     async #resourceMenu(
-        resource: ResourceModel,
+        resource: TrackedResource,
         isCreate?: boolean,
-    ): Promise<(Resource & { delete?: boolean }) | false | null> {
+    ): Promise<(TrackedResource & { delete: boolean }) | null>;
+    async #resourceMenu(resource: TrackedResource, isCreate?: boolean) {
         return await waitDialog({
             content: `${this.toolKey}/menu`,
             i18n: `${this.toolKey}.resource`,
@@ -159,6 +178,27 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
         });
     }
 
+    async #updateResource(resource: TrackedResource, changes: TrackedResourceSource) {
+        const min = R.isNumber(changes.min) ? changes.min : resource.min;
+
+        if (R.isNumber(changes.max)) {
+            changes.max = Math.max(changes.max, min + 2);
+        }
+
+        if (R.isNumber(changes.value)) {
+            const max = R.isNumber(changes.max) ? changes.max : resource.max;
+            changes.value = Math.clamp(changes.value, min, max);
+        }
+
+        const diff = foundry.utils.diffObject(resource, changes);
+
+        if ("timeout" in diff || ("value" in diff && !("time" in diff))) {
+            changes.time = getWorldTime();
+        }
+
+        foundry.utils.mergeObject(resource, changes);
+    }
+
     async #editResource(resourceId: string) {
         const resources = this.resources;
         const resource = resources.get(resourceId);
@@ -170,24 +210,35 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
         if (result.delete) {
             resources.delete(resourceId);
         } else {
-            resource.updateSource(result);
+            this.#updateResource(resource, result);
         }
 
-        resources.save();
+        this.tool.saveResources();
     }
 
     async #createResource() {
-        const resource = new ResourceModel();
-        const result = await this.#resourceMenu(resource, true);
-        if (!result) return;
+        const blank = zTrackedResource.parse({});
+        const resource = await this.#resourceMenu(blank, true);
+        if (!resource) return;
 
-        resource.updateSource(result);
-
-        const resources = this.resources;
-
-        resources.add(resource);
-        resources.save();
+        this.resources.set(resource.id, resource);
+        this.tool.saveResources();
     }
+}
+
+function generateTooltip(resource: TrackedResource, direction: "increase" | "decrease"): string {
+    const steps = R.pipe(
+        ["step1", ...(["step2", "step3"] as const).filter((step) => resource[step] !== resource.step1)] as const,
+        R.map((step) => {
+            const value = resource[step];
+            const click = localize("resourceTracker.resource.steps", step);
+            return localize("resourceTracker.resource", direction, { click, value });
+        }),
+    );
+
+    steps.unshift(localize("resourceTracker.resource.edit"));
+
+    return steps.join("<br>");
 }
 
 type RenderContext = fa.ApplicationRenderContext & {
@@ -200,6 +251,11 @@ type TemplateResourcesGroup = {
     resources: TemplateResource[];
 };
 
-type TemplateResource = {};
+type TemplateResource = TrackedResource & {
+    decrease: string;
+    increase: string;
+    label: string;
+    ratio: number;
+};
 
 export { ResourceTracker };
