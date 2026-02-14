@@ -2,6 +2,7 @@ import { Localize } from "foundry-helpers";
 import { ModuleTool } from "module-tool";
 
 abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.applications.api.ApplicationV2 {
+    #localize?: Localize;
     #tool: TTool;
 
     constructor(tool: TTool, options: DeepPartial<fa.ApplicationConfiguration> = {}) {
@@ -25,7 +26,7 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
     }
 
     get localize(): Localize {
-        return this.tool.localize;
+        return (this.#localize ??= this.tool.localize.sub(this.key));
     }
 
     path(...path: string[]): string {
