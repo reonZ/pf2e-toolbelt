@@ -122,7 +122,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
     setMessageUpdateFlags(updates: Record<string, unknown>, message: ChatMessagePF2e, data: MergeData[]) {
         const targets = this.getMessageTargets(message);
-        targetHelperTool.setFlagProperty(updates, "targets", targets);
+        targetHelperTool.setMessageFlagTargets(updates, targets);
 
         this.setFlagProperties(updates, {
             type: "damage-roll",

@@ -124,14 +124,9 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         canvas.tokens.setTargets(targetsIds);
 
         if (message && targetHelperTool.settings.enabled) {
-            const updates = targetHelperTool.setMessageFlagTargets(
-                {},
-                targets.map((token) => token.document.uuid),
-            );
-
-            if (updates) {
-                message.update(updates);
-            }
+            const uuids = targets.map((token) => token.document.uuid);
+            const updates = targetHelperTool.setMessageFlagTargets({}, uuids);
+            message.update(updates);
         }
 
         returnAndDismiss();
