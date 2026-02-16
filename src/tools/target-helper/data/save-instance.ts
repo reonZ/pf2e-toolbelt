@@ -36,7 +36,7 @@ const zSignificantModifier = z.object({
 
 const zTargetSaveInstance = z.object({
     die: z.number().min(1).max(20),
-    dosAdjustments: z.partialRecord(z.enum(ADJUSTMENT_TYPES), zAdjustement).default(() => ({})),
+    dosAdjustments: z.partialRecord(z.enum(ADJUSTMENT_TYPES), zAdjustement).default({}),
     modifiers: z.array(zModifier).default([]),
     notes: z.array(zNote).default([]),
     private: z.boolean().default(false),

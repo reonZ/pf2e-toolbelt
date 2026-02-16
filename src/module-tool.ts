@@ -20,6 +20,7 @@ import {
     Token,
     unsetFlag,
     unsetFlagProperty,
+    updateSourceFlag,
 } from "foundry-helpers";
 import DataField = foundry.data.fields.DataField;
 
@@ -94,6 +95,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
 
     deleteFlagProperty<T extends object>(obj: T, ...path: string[]): T {
         return deleteFlagProperty(obj, this.key, ...path);
+    }
+
+    updateSourceFlag<T extends ClientDocument>(doc: T, ...args: [...string[], any]): DeepPartial<T["_source"]> {
+        return updateSourceFlag(doc, this.key, ...args);
     }
 
     getInMemory<T>(obj: ClientDocument | Token, ...path: string[]): T | undefined {

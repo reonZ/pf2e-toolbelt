@@ -3,13 +3,42 @@ import {
     createEmitable,
     createToggleHook,
     createToggleWrapper,
+    getCurrentTargets,
+    isActionMessage,
+    isSpellMessage,
+    MODULE,
     refreshLatestMessages,
-    SaveType,
+    TextEditorPF2e,
+    TokenDocumentPF2e,
     TokenDocumentUUID,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { RerollType, sharedMessageRenderHTML } from "tools";
-import { TargetsData } from "..";
+import { sharedMessageRenderHTML } from "tools";
+import {
+    getSaveLinkData,
+    isAreaMessage,
+    isDamageMessage,
+    prepareActionMessage,
+    prepareAreaMessage,
+    prepareCheckMessage,
+    prepareDamageMessage,
+    prepareSpellMessage,
+    renderActionMessage,
+    SaveDragData,
+} from ".";
+import {
+    AppliedDamagesSource,
+    SaveVariants,
+    TargetsAppliedDamagesSources,
+    TargetSaveInstance,
+    TargetsData,
+    TargetsDataSource,
+    zSaveVariants,
+    zTargetsData,
+    zTokenDocumentArray,
+} from "..";
+
+const INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
     #updateQueue = new foundry.utils.Semaphore(1);
@@ -34,57 +63,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     });
 
     #preCreateChatMessageHook = createToggleHook("preCreateChatMessage", this.#onPreCreateChatMessage.bind(this));
-
-    static INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
-
-    static SAVES_DETAILS: Record<SaveType, { icon: string; label: string }> = {
-        fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
-        reflex: { icon: "fa-solid fa-person-running", label: "PF2E.SavesReflex" },
-        will: { icon: "fa-solid fa-brain", label: "PF2E.SavesWill" },
-    };
-
-    static REROLL: Record<RerollType, RerollDetails> = {
-        hero: {
-            icon: "fa-solid fa-hospital-symbol",
-            reroll: "PF2E.RerollMenu.HeroPoint",
-            rerolled: "PF2E.RerollMenu.MessageHeroPoints",
-        },
-        mythic: {
-            icon: "fa-solid fa-circle-m",
-            reroll: "PF2E.RerollMenu.MythicPoint",
-            rerolled: "PF2E.RerollMenu.MessageMythicPoints",
-        },
-        new: {
-            icon: "fa-solid fa-dice",
-            reroll: "PF2E.RerollMenu.KeepNew",
-            rerolled: "PF2E.RerollMenu.MessageKeep.new",
-        },
-        lower: {
-            icon: "fa-solid fa-dice-one",
-            reroll: "PF2E.RerollMenu.KeepLower",
-            rerolled: "PF2E.RerollMenu.MessageKeep.lower",
-        },
-        higher: {
-            icon: "fa-solid fa-dice-six",
-            reroll: "PF2E.RerollMenu.KeepHigher",
-            rerolled: "PF2E.RerollMenu.MessageKeep.higher",
-        },
-    };
-
-    static THIRD_PATH_TO_PERFECTION = "Compendium.pf2e.classfeatures.Item.haoTkr2U5k7kaAKN";
-
-    static LEGENDARY_SAVES = [
-        "Compendium.pf2e.classfeatures.Item.TuL0UfqH14MtqYVh", // Greater Juggernaut
-        "Compendium.pf2e.classfeatures.Item.XFcCeBYqeXgfiA84", // Greater Dogged Will
-        "Compendium.pf2e.classfeatures.Item.rpLPCkTXCZlQ51SR", // Greater Natural Reflexes
-        "Compendium.pf2e.classfeatures.Item.BTpL6XvMk4jvVYYJ", // Greater Rogue Reflexes
-        "Compendium.pf2e.classfeatures.Item.syEkISIi0F9946zo", // Assured Evasion
-        "Compendium.pf2e.classfeatures.Item.Kj59CmXnMJDKXKWx", // Greater Mysterious Resolve
-        "Compendium.pf2e.classfeatures.Item.mRobjNNsABQdUUZq", // Greater Performer's Heart
-        "Compendium.pf2e.classfeatures.Item.Hw6Ji7Fgx0XkVkac", // Fortress of Will
-        "Compendium.pf2e.classfeatures.Item.5LOARurr4qWkfS9K", // Greater Resolve
-        "Compendium.pf2e.classfeatures.Item.i3qjbhL7uukg9I80", // Greater Kinetic Durability
-    ];
 
     get key(): "targetHelper" {
         return "targetHelper";
@@ -152,8 +130,9 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         this.#debounceRefreshMessages();
     }
 
-    getMessageTargets(message: ChatMessagePF2e): TokenDocumentUUID[] | undefined {
-        return this.getFlag(message, "targets");
+    getMessageTargets(message: ChatMessagePF2e): TokenDocumentPF2e[] | undefined {
+        const flag = this.getFlag<TokenDocumentUUID[]>(message, "targets");
+        return flag ? zTokenDocumentArray.safeDecode(flag)?.data : undefined;
     }
 
     setMessageTargets(message: ChatMessagePF2e, targets: TokenDocumentUUID[]): Promise<ChatMessagePF2e> {
@@ -164,36 +143,53 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return this.setFlagProperty(updates, "targets", targets);
     }
 
-    async #updateMessage({ message, applied, saves, variantId }: UpdateMessageOptions, _userId: string) {
-        const flag = this.getTargetsFlagData(message);
-        if (!flag) return;
+    getMessageSaveVariants(message: ChatMessagePF2e): SaveVariants | undefined {
+        const flag = this.getFlag(message, "saveVariants");
+        return flag ? zSaveVariants.safeParse(flag)?.data : undefined;
+    }
 
-        const data = new TargetsData(flag, variantId);
+    getMessageData(message: ChatMessagePF2e): TargetsData | undefined {
+        const flag = this.getFlag<TargetsDataSource>(message);
+        return flag ? zTargetsData.safeParse(flag)?.data : undefined;
+    }
+
+    setMessageData(message: ChatMessagePF2e, data: TargetsData): Promise<ChatMessagePF2e> {
+        return this.setFlag(message, data.encode());
+    }
+
+    async #updateMessage({ message, applied, saves, variantId = "null" }: UpdateMessageOptions, _userId: string) {
+        const data = this.getMessageData(message);
+        if (!data) return;
 
         if (applied) {
-            data.update({ applied: this.#applyDamageUpdates(data, applied) });
+            const udpate = { applied: this.#applyDamageUpdates(data, applied) };
+            foundry.utils.mergeObject(data, udpate, { inplace: true });
         }
 
         if (saves) {
-            data.updateSaves(saves);
+            const update = { [`saveVariants.${variantId}.saves`]: saves };
+            foundry.utils.mergeObject(data, update, { inplace: true });
         }
 
-        await data.setFlag();
+        this.setMessageData(message, data);
     }
 
-    #applyDamageUpdates(data: TargetsData, { rollIndex, targetId }: UpdateMessageApplied): MessageApplied {
+    #applyDamageUpdates(
+        data: TargetsData,
+        { rollIndex, targetId }: UpdateMessageApplied,
+    ): TargetsAppliedDamagesSources {
         const splashIndex = data.splashIndex;
 
-        const targetApplied: MessageApplied[number] = {
+        const targetApplied: AppliedDamagesSource = {
             [rollIndex]: true,
         };
 
-        const applied: MessageApplied = {
+        const applied: TargetsAppliedDamagesSources = {
             [targetId]: targetApplied,
         };
 
         if (splashIndex !== -1) {
-            const regularIndex = data.regularIndex;
+            const regularIndex = data.splashIndex === 0 ? 1 : 0;
 
             if (rollIndex === splashIndex) {
                 targetApplied[regularIndex] = true;
@@ -227,18 +223,18 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 
     async #textEditorEnrichHTML(
-        editor: TextEditorPF2e,
+        _editor: TextEditorPF2e,
         wrapped: libWrapper.RegisterCallback,
         ...args: any[]
     ): Promise<string> {
         const enriched = (await wrapped(...args)) as string;
-        return enriched.replace(TargetHelperTool.INLINE_CHECK_REGEX, "$1 draggable='true'");
+        return enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
     }
 
     #onPreCreateChatMessage(message: ChatMessagePF2e) {
         if (message.isCheckRoll) return;
 
-        const updates: DeepPartial<TargetsDataSource> = {};
+        const updates = {} as TargetsDataSource;
 
         if (isAreaMessage(message)) {
             if (!prepareAreaMessage.call(this, message, updates)) return;
@@ -253,28 +249,29 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             return;
         }
 
-        if (!this.getMessageTargets(message).length && !updates.targets?.length) {
-            updates.targets = getCurrentTargets();
+        if (!updates.targets?.length && !this.getMessageTargets(message)?.length) {
+            updates.targets = getCurrentTargets({ types: ["creature", "hazard", "vehicle"], uuid: true });
         }
 
         this.updateSourceFlag(message, updates);
     }
 
     async #messageRenderHTML(message: ChatMessagePF2e, html: HTMLElement) {
-        const flag = this.getTargetsFlagData(message);
-        if (!flag) return;
+        const data = this.getMessageData(message);
+        console.log(data);
+        if (!data) return;
 
-        // if (flag.type === "action") {
-        //     this.settings.targets && (await renderActionMessage.call(this, message, html, flag));
-        // } else if (flag.type === "area") {
-        //     this.settings.targets && (await renderAreaMessage.call(this, message, html, flag));
-        // } else if (flag.type === "check") {
-        //     this.settings.checks && (await renderCheckMessage.call(this, message, html, flag));
-        // } else if (flag.type === "damage") {
-        //     this.settings.targets && (await renderDamageMessage.call(this, message, html, flag));
-        // } else if (flag.type === "spell") {
-        //     this.settings.targets && (await renderSpellMessage.call(this, message, html, flag));
-        // }
+        if (data.type === "action") {
+            this.settings.targets && (await renderActionMessage.call(this, message, html, data));
+        } else if (data.type === "area") {
+            // this.settings.targets && (await renderAreaMessage.call(this, message, html, data));
+        } else if (data.type === "check") {
+            // this.settings.checks && (await renderCheckMessage.call(this, message, html, data));
+        } else if (data.type === "damage") {
+            // this.settings.targets && (await renderDamageMessage.call(this, message, html, data));
+        } else if (data.type === "spell") {
+            // this.settings.targets && (await renderSpellMessage.call(this, message, html, data));
+        }
     }
 }
 
@@ -286,16 +283,11 @@ type ToolSettings = {
     small: boolean;
     targets: boolean;
 };
-type RerollDetails = {
-    icon: string;
-    reroll: string;
-    rerolled: string;
-};
 
 type UpdateMessageOptions = {
     applied?: UpdateMessageApplied;
     message: ChatMessagePF2e;
-    saves?: Record<string, toolbelt.targetHelper.TargetSaveInstance>;
+    saves?: Record<string, TargetSaveInstance>;
     variantId?: string;
 };
 

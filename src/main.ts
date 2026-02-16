@@ -20,7 +20,7 @@ import {
     ResourceTrackerTool,
     RollTrackerTool,
     shareDataTool,
-    // TargetHelperTool,
+    targetHelperTool,
     UndergroundTool,
     UnidedTool,
 } from "tools";
@@ -47,7 +47,7 @@ const TOOLS = [
     new RollTrackerTool(),
     new UnidedTool(),
     shareDataTool,
-    // new TargetHelperTool(),
+    targetHelperTool,
     new UndergroundTool(),
 ] as const;
 
