@@ -11,7 +11,7 @@ import {
     splitListString,
 } from "foundry-helpers";
 import { R, SAVE_TYPES } from "foundry-helpers/dist";
-import { SaveVariantSource, TargetHelperTool } from "..";
+import { SaveVariantSource, TargetHelperTool, zSaveVariant, zSaveVariants } from "..";
 
 let BASIC_SAVE_REGEX: RegExp;
 function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null {
@@ -84,12 +84,15 @@ function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     }
 
     const updates = R.omit(eventData, ["saveVariants", "type"]);
+    const saveVariant = zSaveVariant.safeParse(eventData.saveVariants.null)?.data;
 
     for (const [key, value] of R.entries(updates)) {
         data[key] = value as any;
     }
 
-    foundry.utils.setProperty(data, "saveVariants.null", eventData.saveVariants.null);
+    if (saveVariant) {
+        foundry.utils.setProperty(data, "saveVariants.null", saveVariant);
+    }
 
     this.setMessageData(message, data);
     this.localize.info("drop.added");

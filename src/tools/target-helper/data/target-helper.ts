@@ -6,17 +6,24 @@ import {
     ItemPF2e,
     TokenDocumentPF2e,
 } from "foundry-helpers";
-import { SaveVariant, TargetSaveInstance, TargetsData, TargetsDataSource } from ".";
+import {
+    encodeTargetsData,
+    SaveVariant,
+    TargetSaveInstance,
+    TargetsData,
+    TargetsDataSource,
+    TargetsDataUpdates,
+} from ".";
 
 class TargetHelper {
     #data: TargetsData;
     #isGM: boolean;
     #variantId: string;
 
-    constructor(data: TargetsData, variantId: string = "null") {
+    constructor(data: TargetsData, variantId: string | null = null) {
         this.#data = data;
         this.#isGM = game.user.isGM;
-        this.#variantId = variantId;
+        this.#variantId = String(variantId);
     }
 
     get variantId(): string {
@@ -89,8 +96,8 @@ class TargetHelper {
         return this.saveVariant.saves[id];
     }
 
-    encode(changes?: DeepPartial<TargetsDataSource>): TargetsDataSource {
-        return this.#data.encode(changes);
+    encode(changes?: TargetsDataUpdates): TargetsDataSource {
+        return encodeTargetsData(this.#data, changes);
     }
 }
 

@@ -14,7 +14,7 @@ import {
     onChatMessageDrop,
     TargetHelperTool,
 } from ".";
-import { TargetHelper, TargetsData, TargetsDataSource } from "..";
+import { encodeTargetsData, TargetHelper, TargetsData, TargetsDataSource } from "..";
 
 const SAVE_LINK_REGEX = /<a class="inline-check.+?".+?data-pf2-check="(?:reflex|will|fortitude)".+?<\/a>/g;
 
@@ -92,9 +92,9 @@ async function renderActionMessage(
     for (const link of damageLinks) {
         link.addEventListener(
             "click",
-            (event) => {
+            (_event) => {
                 // we cache the data & change its type
-                const cached = data.encode({ type: "damage" });
+                const cached = targetHelper.encode({ type: "damage" });
 
                 registerUpstreamHook(
                     "preCreateChatMessage",
@@ -106,9 +106,7 @@ async function renderActionMessage(
                 );
 
                 // we clean the message save related data
-                data.saveVariants = {};
-
-                this.setMessageData(message, data);
+                this.setMessageData(message, data, { ["-=saveVariants"]: null });
             },
             true,
         );

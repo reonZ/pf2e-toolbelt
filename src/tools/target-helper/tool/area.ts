@@ -2,14 +2,15 @@ import {
     AreaAttack,
     ChatMessagePF2e,
     CreaturePF2e,
+    htmlQuery,
     isAreaOrAutoFireType,
     ItemPF2e,
     MeleePF2e,
     SYSTEM,
     WeaponPF2e,
 } from "foundry-helpers";
-import { TargetHelperTool } from ".";
-import { SaveVariantsSource, TargetsDataSource } from "..";
+import { renderSpellCardLikeMessage, TargetHelperTool } from ".";
+import { SaveVariantsSource, TargetHelper, TargetsData, TargetsDataSource } from "..";
 
 const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 
@@ -35,6 +36,27 @@ function prepareAreaMessage(this: TargetHelperTool, message: ChatMessagePF2e, up
     return true;
 }
 
+async function renderAreaMessage(
+    this: TargetHelperTool,
+    message: ChatMessagePF2e,
+    html: HTMLElement,
+    data: TargetsData,
+) {
+    const item = message.item;
+    const msgContent = htmlQuery(html, ".message-content");
+    if (!msgContent || !isValidItem(item)) return;
+
+    return renderSpellCardLikeMessage.call(
+        this,
+        message,
+        msgContent,
+        data,
+        item,
+        `.message-buttons [data-action="roll-area-save"]`,
+        `.message-buttons [data-action="roll-area-damage"]`,
+    );
+}
+
 function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | null {
     const item = message.item;
     if (!isValidItem(item)) return null;
@@ -58,4 +80,4 @@ function isValidItem(item: Maybe<ItemPF2e>): item is WeaponPF2e<CreaturePF2e> | 
     return !!item?.isOfType("weapon", "melee") && !!item.actor?.isOfType("creature");
 }
 
-export { isAreaMessage, prepareAreaMessage };
+export { isAreaMessage, prepareAreaMessage, renderAreaMessage };

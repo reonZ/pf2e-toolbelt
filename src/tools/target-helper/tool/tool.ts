@@ -24,15 +24,18 @@ import {
     prepareDamageMessage,
     prepareSpellMessage,
     renderActionMessage,
+    renderAreaMessage,
     SaveDragData,
 } from ".";
 import {
     AppliedDamagesSource,
+    encodeTargetsData,
     SaveVariants,
     TargetsAppliedDamagesSources,
     TargetSaveInstanceSource,
     TargetsData,
     TargetsDataSource,
+    TargetsDataUpdates,
     zSaveVariants,
     zTargetsData,
     zTokenDocumentArray,
@@ -153,8 +156,12 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return flag ? zTargetsData.safeParse(flag)?.data : undefined;
     }
 
-    setMessageData(message: ChatMessagePF2e, data: TargetsData | TargetsDataSource): Promise<ChatMessagePF2e> {
-        const encoded = "encode" in data ? data.encode() : data;
+    setMessageData(
+        message: ChatMessagePF2e,
+        data: TargetsData,
+        changes?: TargetsDataUpdates,
+    ): Promise<ChatMessagePF2e> {
+        const encoded = encodeTargetsData(data, changes);
         return this.setFlag(message, encoded);
     }
 
@@ -268,7 +275,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         if (data.type === "action") {
             this.settings.targets && (await renderActionMessage.call(this, message, html, data));
         } else if (data.type === "area") {
-            // this.settings.targets && (await renderAreaMessage.call(this, message, html, data));
+            this.settings.targets && (await renderAreaMessage.call(this, message, html, data));
         } else if (data.type === "check") {
             // this.settings.checks && (await renderCheckMessage.call(this, message, html, data));
         } else if (data.type === "damage") {

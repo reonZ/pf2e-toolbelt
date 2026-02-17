@@ -1,4 +1,4 @@
-import { ChatMessagePF2e, createHTMLElement, R } from "foundry-helpers";
+import { ChatMessagePF2e, createHTMLElement, R, selectTokens, TokenDocumentPF2e } from "foundry-helpers";
 import { rollSaves, TargetHelperTool, TargetsType } from ".";
 import { TargetHelper } from "..";
 
@@ -37,12 +37,10 @@ function addSetTargetsListener(this: TargetHelperTool, btn: HTMLElement, message
             R.difference(targets),
         );
 
-        const updated = data.encode();
-
-        updated[type] = targets;
-        updated[otherType] = otherTargets;
-
-        this.setMessageData(message, updated);
+        this.setMessageData(message, data, {
+            [type]: targets,
+            [otherType]: otherTargets,
+        });
     });
 }
 
@@ -81,4 +79,43 @@ function addRollSavesListener(
     });
 }
 
-export { createSetTargetsBtn, createRollNPCSavesBtn };
+function addSaveBtnListener(
+    this: TargetHelperTool,
+    realBtn: HTMLButtonElement | HTMLAnchorElement,
+    fakeBtn: HTMLButtonElement,
+    message: ChatMessagePF2e,
+    targetHelper: TargetHelper,
+) {
+    const allTargets = targetHelper.targets.map((target) => target.uuid);
+
+    fakeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const selected = game.user.getActiveTokens();
+        const targets: TokenDocumentPF2e[] = [];
+        const remainSelected: TokenDocumentPF2e[] = [];
+
+        for (const token of selected) {
+            if (!targetHelper.targetSave(token.id) && allTargets.includes(token.uuid)) {
+                targets.push(token);
+            } else {
+                remainSelected.push(token);
+            }
+        }
+
+        if (remainSelected.length) {
+            selectTokens(remainSelected);
+        }
+
+        if (remainSelected.length || !targets.length) {
+            const clickEvent = new MouseEvent("click", event);
+            realBtn.dispatchEvent(clickEvent);
+        }
+
+        if (targets.length) {
+            rollSaves.call(this, event, message, targetHelper, targets);
+        }
+    });
+}
+
+export { addSaveBtnListener, createRollNPCSavesBtn, createSetTargetsBtn };

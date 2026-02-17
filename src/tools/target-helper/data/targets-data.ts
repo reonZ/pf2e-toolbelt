@@ -49,20 +49,11 @@ const zEncodeTargetsData = zBaseTargetsData.extend({
     targets: z.array(zTokenDocument).default([]),
 });
 
-const zTargetsData = zDecodeTargetsData.transform((data) => {
-    Object.defineProperties(data, {
-        encode: {
-            value: (changes?: DeepPartial<TargetsDataSource>) => {
-                const encoded = zEncodeTargetsData.encode(data);
-                return changes ? foundry.utils.mergeObject(encoded, changes, { inplace: true }) : encoded;
-            },
-        },
-    });
-    return data as typeof data & ITargetsData;
-});
+const zTargetsData = zDecodeTargetsData;
 
-interface ITargetsData {
-    encode(changes?: DeepPartial<TargetsDataSource>): TargetsDataSource;
+function encodeTargetsData(data: TargetsData, changes?: TargetsDataUpdates): TargetsDataSource {
+    const encoded = zEncodeTargetsData.encode(data);
+    return changes ? foundry.utils.mergeObject(encoded, changes, { inplace: true }) : encoded;
 }
 
 type TargetsDataSource = z.input<typeof zBaseTargetsData> & z.input<typeof zDecodeTargetsData>;
@@ -80,7 +71,9 @@ type AppliedDamages = z.output<typeof zAppliedDamages>;
 type TargetsAppliedDamagesSources = z.input<typeof zTargetsAppliedDamages>;
 type TargetsAppliedDamages = z.output<typeof zTargetsAppliedDamages>;
 
-export { zSaveVariants, zTargetsData, zTokenDocumentArray };
+type TargetsDataUpdates = DeepPartial<TargetsDataSource> & Record<string, any>;
+
+export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArray };
 export type {
     AppliedDamages,
     AppliedDamagesSource,
@@ -92,4 +85,5 @@ export type {
     TargetsAppliedDamagesSources,
     TargetsData,
     TargetsDataSource,
+    TargetsDataUpdates,
 };
