@@ -9,6 +9,7 @@ import {
 import {
     encodeTargetsData,
     SaveVariant,
+    TargetAppliedDamage,
     TargetSaveInstance,
     TargetsData,
     TargetsDataSource,
@@ -46,8 +47,24 @@ class TargetHelper {
         return this.#data.splashTargets;
     }
 
+    get splashIndex(): number {
+        return this.#data.splashIndex;
+    }
+
+    get hasSave(): boolean {
+        return !!this.saveVariant;
+    }
+
     get hasTargets(): boolean {
-        return this.targets.length > 0 || this.splashTargets.length > 0;
+        return this.targets.length > 0;
+    }
+
+    get hasSplashTargets(): boolean {
+        return this.splashTargets.length > 0;
+    }
+
+    get hasSplashDamage(): boolean {
+        return this.splashIndex > -1;
     }
 
     get saveVariant(): SaveVariant {
@@ -94,6 +111,10 @@ class TargetHelper {
 
     targetSave(id: string): TargetSaveInstance | undefined {
         return this.saveVariant.saves[id];
+    }
+
+    targetApplied(id: string): TargetAppliedDamage {
+        return this.#data.applied[id] ?? {};
     }
 
     encode(changes?: TargetsDataUpdates): TargetsDataSource {

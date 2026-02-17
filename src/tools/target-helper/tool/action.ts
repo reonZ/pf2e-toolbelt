@@ -14,7 +14,7 @@ import {
     onChatMessageDrop,
     TargetHelperTool,
 } from ".";
-import { encodeTargetsData, TargetHelper, TargetsData, TargetsDataSource } from "..";
+import { TargetHelper, TargetsData, TargetsDataSource } from "..";
 
 const SAVE_LINK_REGEX = /<a class="inline-check.+?".+?data-pf2-check="(?:reflex|will|fortitude)".+?<\/a>/g;
 
@@ -49,7 +49,7 @@ async function renderActionMessage(
     if (!msgContent) return;
 
     const targetHelper = new TargetHelper(data);
-    const hasSave = !!data.saveVariants.null;
+    const hasSave = TargetHelper.hasSave;
 
     if (hasSave) {
         await addTargetsHeaders.call(this, message, targetHelper, msgContent, ["pf2e-toolbelt-target-actionRows"]);

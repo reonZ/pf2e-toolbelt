@@ -11,7 +11,7 @@ import {
     splitListString,
 } from "foundry-helpers";
 import { R, SAVE_TYPES } from "foundry-helpers/dist";
-import { SaveVariantSource, TargetHelperTool, zSaveVariant, zSaveVariants } from "..";
+import { SaveVariantSource, TargetHelperTool, zSaveVariant } from "..";
 
 let BASIC_SAVE_REGEX: RegExp;
 function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null {

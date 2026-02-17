@@ -71,6 +71,8 @@ type AppliedDamages = z.output<typeof zAppliedDamages>;
 type TargetsAppliedDamagesSources = z.input<typeof zTargetsAppliedDamages>;
 type TargetsAppliedDamages = z.output<typeof zTargetsAppliedDamages>;
 
+type TargetAppliedDamage = z.output<typeof zAppliedDamages>;
+
 type TargetsDataUpdates = DeepPartial<TargetsDataSource> & Record<string, any>;
 
 export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArray };
@@ -81,6 +83,7 @@ export type {
     SaveVariants,
     SaveVariantSource,
     SaveVariantsSource,
+    TargetAppliedDamage,
     TargetsAppliedDamages,
     TargetsAppliedDamagesSources,
     TargetsData,

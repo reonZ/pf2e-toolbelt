@@ -67,6 +67,28 @@ function getSpellSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | nu
     return null;
 }
 
+async function renderSpellMessage(
+    this: TargetHelperTool,
+    message: ChatMessagePF2e,
+    html: HTMLElement,
+    data: TargetsData,
+) {
+    const spell = getMessageSpell(message);
+    const msgContent = htmlQuery(html, ".message-content");
+    if (!msgContent || !spell) return;
+    if (spell.hasVariants && !spell.variantId) return;
+
+    return renderSpellCardLikeMessage.call(
+        this,
+        message,
+        msgContent,
+        data,
+        spell,
+        `.card-buttons [data-action="spell-save"]`,
+        `.card-buttons [data-action="spell-damage"]`,
+    );
+}
+
 async function renderSpellCardLikeMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
@@ -143,4 +165,4 @@ function getMessageSpell(message: ChatMessagePF2e): SpellPF2e<ActorPF2e> | null 
     return item.isOfType("spell") ? item : item.isOfType("consumable") ? item.embeddedSpell : null;
 }
 
-export { getSpellSaveVariants, prepareSpellMessage, renderSpellCardLikeMessage };
+export { getSpellSaveVariants, prepareSpellMessage, renderSpellCardLikeMessage, renderSpellMessage };

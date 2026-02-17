@@ -1,4 +1,6 @@
 .dialog.pf2e-toolbelt.betterTemplate-target {
+    min-width: revert;
+
     .window-header {
         flex: 1 2em;
         --button-size: 12px;

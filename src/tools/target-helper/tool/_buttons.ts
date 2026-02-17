@@ -118,4 +118,4 @@ function addSaveBtnListener(
     });
 }
 
-export { addSaveBtnListener, createRollNPCSavesBtn, createSetTargetsBtn };
+export { addRollSavesListener, addSaveBtnListener, addSetTargetsListener, createRollNPCSavesBtn, createSetTargetsBtn };

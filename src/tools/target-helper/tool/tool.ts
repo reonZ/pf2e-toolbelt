@@ -25,6 +25,9 @@ import {
     prepareSpellMessage,
     renderActionMessage,
     renderAreaMessage,
+    renderCheckMessage,
+    renderDamageMessage,
+    renderSpellMessage,
     SaveDragData,
 } from ".";
 import {
@@ -277,11 +280,11 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         } else if (data.type === "area") {
             this.settings.targets && (await renderAreaMessage.call(this, message, html, data));
         } else if (data.type === "check") {
-            // this.settings.checks && (await renderCheckMessage.call(this, message, html, data));
+            this.settings.checks && (await renderCheckMessage.call(this, message, html, data));
         } else if (data.type === "damage") {
-            // this.settings.targets && (await renderDamageMessage.call(this, message, html, data));
+            this.settings.targets && (await renderDamageMessage.call(this, message, html, data));
         } else if (data.type === "spell") {
-            // this.settings.targets && (await renderSpellMessage.call(this, message, html, data));
+            this.settings.targets && (await renderSpellMessage.call(this, message, html, data));
         }
     }
 }

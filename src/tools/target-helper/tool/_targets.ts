@@ -30,7 +30,7 @@ async function addTargetsHeaders(
     parent: HTMLElement,
     classes: string[] = [],
 ) {
-    if (!targetHelper.hasTargets) return;
+    if (!targetHelper.hasTargets && !targetHelper.hasSplashTargets) return;
 
     const rowsWrapper = createHTMLElement("div", {
         classes: ["pf2e-toolbelt-target-targetRows", ...classes],
@@ -414,5 +414,5 @@ type TooltipData = {
 
 type TargetsType = "targets" | "splashTargets";
 
-export { addTargetsHeaders };
+export { addTargetsHeaders, createTargetsRows };
 export type { TargetsType };
