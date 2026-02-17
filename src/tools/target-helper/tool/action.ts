@@ -5,9 +5,16 @@ import {
     htmlQuery,
     registerUpstreamHook,
 } from "foundry-helpers";
-import { getSaveLinkData, isMessageOwner, TargetHelperTool } from ".";
+import {
+    addTargetsHeaders,
+    createRollNPCSavesBtn,
+    createSetTargetsBtn,
+    getSaveLinkData,
+    isMessageOwner,
+    onChatMessageDrop,
+    TargetHelperTool,
+} from ".";
 import { TargetHelper, TargetsData, TargetsDataSource } from "..";
-import { addTargetsHeaders } from ".";
 
 const SAVE_LINK_REGEX = /<a class="inline-check.+?".+?data-pf2-check="(?:reflex|will|fortitude)".+?<\/a>/g;
 
@@ -69,9 +76,9 @@ async function renderActionMessage(
     })();
 
     const buttonsWrapper = createHTMLElement("div", { classes: ["pf2e-toolbelt-target-buttons"] });
-    const setTargetsBtn = createSetTargetsBtn.call(this, data);
+    const setTargetsBtn = createSetTargetsBtn.call(this, message, targetHelper);
 
-    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, data);
+    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, targetHelper);
     if (rollSavesBtn) {
         buttonsWrapper.append(rollSavesBtn);
     }

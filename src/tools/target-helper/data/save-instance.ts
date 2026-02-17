@@ -22,7 +22,7 @@ const zNote = z.object({
     title: z.string().trim().min(1).nullish(),
     text: z.string().trim().min(1),
     predicate: z.any().optional(),
-    outcome: z.array(z.enum(DEGREE_ADJUSTMENT_AMOUNTS)).default([]),
+    outcome: z.array(z.enum(DEGREE_OF_SUCCESS_STRINGS)).default([]),
     visibility: z.enum(VISIBILITY_TYPES).nullish(),
 });
 
@@ -52,7 +52,16 @@ const zTargetSaveInstance = z.object({
 type TargetSaveInstanceSource = z.input<typeof zTargetSaveInstance>;
 type TargetSaveInstance = z.output<typeof zTargetSaveInstance>;
 
+type SaveInstanceModifierSource = z.input<typeof zModifier>;
+type SaveInstanceModifier = z.output<typeof zModifier>;
+
 type RerollType = (typeof REROLL_TYPES)[number];
 
 export { zTargetSaveInstance };
-export type { RerollType, TargetSaveInstance, TargetSaveInstanceSource };
+export type {
+    RerollType,
+    SaveInstanceModifier,
+    SaveInstanceModifierSource,
+    TargetSaveInstance,
+    TargetSaveInstanceSource,
+};

@@ -1,3 +1,13 @@
+.application.dialog.pf2e-toolbelt {
+    min-width: 400px;
+
+    .window-content {
+        .form-group {
+            white-space: nowrap;
+        }
+    }
+}
+
 @import "./actionable";
 @import "./anonymous";
 @import "./better-merchant";
@@ -13,11 +23,3 @@
 @import "./scribble-sheet";
 @import "./shareData";
 @import "./target-helper";
-
-.application.dialog.pf2e-toolbelt {
-    .window-content {
-        .form-group {
-            white-space: nowrap;
-        }
-    }
-}

@@ -1,14 +1,17 @@
 import {
     ActorUUID,
     ChatMessagePF2e,
+    getDragEventData,
+    htmlClosest,
     ItemPF2e,
     ItemUUID,
+    MODULE,
     resolveActorAndItemFromHTML,
     SaveType,
     splitListString,
 } from "foundry-helpers";
-import { SAVE_TYPES } from "foundry-helpers/dist";
-import { SaveVariantSource } from "..";
+import { R, SAVE_TYPES } from "foundry-helpers/dist";
+import { SaveVariantSource, TargetHelperTool } from "..";
 
 let BASIC_SAVE_REGEX: RegExp;
 function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null {
@@ -58,6 +61,40 @@ function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null 
     return data;
 }
 
+function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
+    const target = htmlClosest<HTMLLIElement>(event.target, "li.chat-message");
+    if (!target) return;
+
+    const eventData = getDragEventData<SaveDragData>(event);
+    if (!eventData || eventData.type !== `${MODULE.id}-check-roll`) return;
+
+    const messageId = target.dataset.messageId;
+    const message = messageId ? (game.messages.get(messageId) as ChatMessagePF2e) : undefined;
+    const data = message && this.getMessageData(message);
+    if (!data) return;
+
+    if (!isMessageOwner(message)) {
+        this.localize.warning("drop.unauth");
+        return;
+    }
+
+    if (data.saveVariants["null"]) {
+        this.localize.warning("drop.already");
+        return;
+    }
+
+    const updates = R.omit(eventData, ["saveVariants", "type"]);
+
+    for (const [key, value] of R.entries(updates)) {
+        data[key] = value as any;
+    }
+
+    foundry.utils.setProperty(data, "saveVariants.null", eventData.saveVariants.null);
+
+    this.setMessageData(message, data);
+    this.localize.info("drop.added");
+}
+
 function isValidSaveLink(el: Maybe<Element | EventTarget>): el is HTMLAnchorElement & {
     dataset: CheckLinkData;
 } {
@@ -96,5 +133,5 @@ type CheckLinkData = {
     isBasic?: boolean;
 } & ({ against: string; itemUuid: string } | { pf2Dc: `${number}` });
 
-export { getSaveLinkData, isMessageOwner };
+export { getSaveLinkData, isMessageOwner, onChatMessageDrop };
 export type { SaveDragData, SaveLinkData };

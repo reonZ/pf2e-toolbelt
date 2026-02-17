@@ -30,7 +30,7 @@ import {
     AppliedDamagesSource,
     SaveVariants,
     TargetsAppliedDamagesSources,
-    TargetSaveInstance,
+    TargetSaveInstanceSource,
     TargetsData,
     TargetsDataSource,
     zSaveVariants,
@@ -153,8 +153,13 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return flag ? zTargetsData.safeParse(flag)?.data : undefined;
     }
 
-    setMessageData(message: ChatMessagePF2e, data: TargetsData): Promise<ChatMessagePF2e> {
-        return this.setFlag(message, data.encode());
+    setMessageData(message: ChatMessagePF2e, data: TargetsData | TargetsDataSource): Promise<ChatMessagePF2e> {
+        const encoded = "encode" in data ? data.encode() : data;
+        return this.setFlag(message, encoded);
+    }
+
+    getCurrentTargets(): TokenDocumentUUID[] {
+        return getCurrentTargets({ types: ["creature", "hazard", "vehicle"], uuid: true });
     }
 
     async #updateMessage({ message, applied, saves, variantId = "null" }: UpdateMessageOptions, _userId: string) {
@@ -250,7 +255,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         }
 
         if (!updates.targets?.length && !this.getMessageTargets(message)?.length) {
-            updates.targets = getCurrentTargets({ types: ["creature", "hazard", "vehicle"], uuid: true });
+            updates.targets = this.getCurrentTargets();
         }
 
         this.updateSourceFlag(message, updates);
@@ -258,7 +263,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
     async #messageRenderHTML(message: ChatMessagePF2e, html: HTMLElement) {
         const data = this.getMessageData(message);
-        console.log(data);
         if (!data) return;
 
         if (data.type === "action") {
@@ -287,7 +291,7 @@ type ToolSettings = {
 type UpdateMessageOptions = {
     applied?: UpdateMessageApplied;
     message: ChatMessagePF2e;
-    saves?: Record<string, TargetSaveInstance>;
+    saves?: Record<string, TargetSaveInstanceSource>;
     variantId?: string;
 };
 

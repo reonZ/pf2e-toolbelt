@@ -10,10 +10,11 @@ import {
     panToToken,
     pingToken,
     R,
+    RollNotePF2e,
     SaveType,
     TokenDocumentPF2e,
 } from "foundry-helpers";
-import { RerollDetails, REROLLS, TargetHelperTool } from ".";
+import { RerollDetails, REROLLS, rerollSave, rollSaves, TargetHelperTool } from ".";
 import { TargetHelper } from "..";
 
 const SAVES_DETAILS: Record<SaveType, { icon: string; label: string }> = {
@@ -414,3 +415,4 @@ type TooltipData = {
 type TargetsType = "targets" | "splashTargets";
 
 export { addTargetsHeaders };
+export type { TargetsType };
