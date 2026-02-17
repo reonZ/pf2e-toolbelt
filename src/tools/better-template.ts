@@ -1,6 +1,7 @@
 import {
     createToggleHook,
     getTemplateTokens,
+    htmlQuery,
     isHoldingModifierKey,
     MeasuredTemplateDocumentPF2e,
     oppositeAlliance,
@@ -58,7 +59,7 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
         const actor = template.actor;
         const self: Token | null | undefined = !actor ? undefined : (actor.token?.object ?? actor.getActiveTokens()[0]);
 
-        const result = await waitDialog({
+        const result = await waitDialog<TemplateDialogData | Pick<TemplateDialogData, "dismiss">>({
             content: `${this.key}/target`,
             i18n: `${this.key}.target`,
             title: template.item?.name,
@@ -66,6 +67,13 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
             data: {
                 noSelf: !self,
                 dismiss,
+            },
+            no: {
+                callback: (_event, _btn, dialog) => {
+                    return {
+                        dismiss: !!htmlQuery<HTMLInputElement>(dialog.element, `[name="dismiss"]`)?.checked,
+                    };
+                },
             },
         });
 
@@ -136,6 +144,13 @@ class BetterTemplateTool extends ModuleTool<ToolSettings> {
 type ToolSettings = {
     target: boolean;
     targetDismiss: boolean;
+};
+
+type TemplateDialogData = {
+    dismiss: boolean;
+    neutral: boolean;
+    self: boolean;
+    targets: "enemies" | "allies" | "all";
 };
 
 export { BetterTemplateTool };
