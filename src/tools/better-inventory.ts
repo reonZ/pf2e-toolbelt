@@ -350,7 +350,7 @@ class BetterInventoryTool extends ModuleTool<ToolSettings> {
                     value: Math.floor(item.quantity / 2),
                 }),
             }).outerHTML,
-            i18n: this.localize.path("split"),
+            i18n: this.path("split"),
             title: item,
             yes: {
                 icon: "fa-solid fa-split",
