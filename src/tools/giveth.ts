@@ -51,9 +51,8 @@ class GivethTool extends ModuleTool<ToolSettings> {
 
     get api(): Record<string, any> {
         return {
-            canDropEffectOnActor: (item: ItemPF2e, actor: ActorPF2e): boolean => {
-                return this.#shouldHandleEffectDrop(item, actor);
-            },
+            givethEffect: this.#handleGiveth.bind(this),
+            canDropEffectOnActor: this.#shouldHandleEffectDrop.bind(this),
         };
     }
 
@@ -113,34 +112,20 @@ class GivethTool extends ModuleTool<ToolSettings> {
         );
     }
 
-    async #creatureSheetHandleDroppedItem(
-        actorSheet: CreatureSheetPF2e<CreaturePF2e>,
-        wrapped: libWrapper.RegisterCallback,
-        event: DragEvent,
-        originalItem: ItemPF2e,
-        data: DropCanvasItemData,
-    ): Promise<ItemPF2e[]> {
-        const actor = actorSheet.actor;
-
-        if (!this.#shouldHandleEffectDrop(originalItem, actor)) {
-            return wrapped(event, originalItem, data);
-        }
-
+    async #handleGiveth(targetActor: CreaturePF2e, originalItem: EffectPF2e | ConditionPF2e, data: DropCanvasItemData) {
         if (originalItem.isOfType("condition") || !originalItem.system.rules.some((rule) => rule.key === "ChoiceSet")) {
-            this.#givethEmitable.call({
-                actor,
+            return this.#givethEmitable.call({
+                actor: targetActor,
                 data,
                 source: originalItem.toObject(),
             });
-
-            return [originalItem];
         }
 
         const RuleCls = game.pf2e.RuleElements.builtin.ChoiceSet as typeof ChoiceSetRuleElement;
-        if (!RuleCls) return [originalItem];
+        if (!RuleCls) return;
 
         const ItemCls = getDocumentClass("Item");
-        const item = new ItemCls(originalItem.toObject(), { parent: actor }) as ItemPF2e<CreaturePF2e>;
+        const item = new ItemCls(originalItem.toObject(), { parent: targetActor }) as ItemPF2e<CreaturePF2e>;
         const itemSource = item._source as EffectSource | ConditionSource;
         const itemUpdates: EmbeddedDocumentUpdateData[] = [];
 
@@ -162,11 +147,27 @@ class GivethTool extends ModuleTool<ToolSettings> {
             } catch (error) {}
         }
 
-        this.#givethEmitable.call({
-            actor,
+        return this.#givethEmitable.call({
+            actor: targetActor,
             data,
             source: itemSource,
         });
+    }
+
+    async #creatureSheetHandleDroppedItem(
+        actorSheet: CreatureSheetPF2e<CreaturePF2e>,
+        wrapped: libWrapper.RegisterCallback,
+        event: DragEvent,
+        originalItem: ItemPF2e,
+        data: DropCanvasItemData,
+    ): Promise<ItemPF2e[]> {
+        const targetActor = actorSheet.actor;
+
+        if (!this.#shouldHandleEffectDrop(originalItem, targetActor)) {
+            return wrapped(event, originalItem, data);
+        }
+
+        await this.#handleGiveth(targetActor, originalItem, data);
 
         return [originalItem];
     }
