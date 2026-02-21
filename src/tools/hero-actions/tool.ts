@@ -29,6 +29,7 @@ import {
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { HeroAction, TradeHeroAction, zHeroAction } from ".";
+import { sharedCharacterSheetActivateListeners } from "tools";
 
 class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
     static TABLE_UUID = "Compendium.pf2e.rollable-tables.RollTable.zgZoI7h0XjjJrrNK";
@@ -50,15 +51,10 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         createToggleWrapper(
             "WRAPPER",
             "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype._renderInner",
-            this.#characterSheetPF2eRenderInner,
+            this.#characterSheetRenderInner,
             { context: this },
         ),
-        createToggleWrapper(
-            "WRAPPER",
-            "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.activateListeners",
-            this.#characterSheetPF2eActivateListeners,
-            { context: this },
-        ),
+        sharedCharacterSheetActivateListeners.register(this.#characterSheetActivateListeners, { context: this }),
     ];
 
     get key(): "heroActions" {
@@ -570,7 +566,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         });
     }
 
-    async #characterSheetPF2eRenderInner(
+    async #characterSheetRenderInner(
         sheet: CharacterSheetPF2e<CharacterPF2e>,
         wrapped: libWrapper.RegisterCallback,
         data: CharacterSheetData,
@@ -594,14 +590,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
         return $html;
     }
 
-    #characterSheetPF2eActivateListeners(
-        sheet: CharacterSheetPF2e<CharacterPF2e>,
-        wrapped: libWrapper.RegisterCallback,
-        $html: JQuery,
-    ) {
-        wrapped($html);
-
-        const html = $html[0];
+    #characterSheetActivateListeners(sheet: CharacterSheetPF2e<CharacterPF2e>, html: HTMLElement) {
         const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
         const list = htmlQuery(tab, ".heroActions-list");
         if (!list || !tab) return;

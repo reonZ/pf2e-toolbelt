@@ -1,4 +1,12 @@
-import { ActorPF2e, ArmorPF2e, ChatMessagePF2e, createSharedWrapper, WeaponPF2e } from "foundry-helpers";
+import {
+    ActorPF2e,
+    ArmorPF2e,
+    CharacterPF2e,
+    CharacterSheetPF2e,
+    ChatMessagePF2e,
+    createSharedWrapper,
+    WeaponPF2e,
+} from "foundry-helpers";
 
 const sharedWeaponPrepareBaseData = createSharedWrapper<WeaponPF2e<ActorPF2e>, () => void, () => void>(
     "WRAPPER",
@@ -34,4 +42,27 @@ const sharedMessageRenderHTML = createSharedWrapper<
     return html;
 });
 
-export { sharedArmorPrepareBaseData, sharedMessageRenderHTML, sharedWeaponPrepareBaseData };
+const sharedCharacterSheetActivateListeners = createSharedWrapper<
+    CharacterSheetPF2e<CharacterPF2e>,
+    ($html: JQuery) => void,
+    (html: HTMLElement) => void
+>(
+    "WRAPPER",
+    "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.activateListeners",
+    function (registered, wrapped, [$html]) {
+        wrapped();
+
+        const html = $html[0];
+
+        for (const listener of registered) {
+            listener(html);
+        }
+    },
+);
+
+export {
+    sharedArmorPrepareBaseData,
+    sharedCharacterSheetActivateListeners,
+    sharedMessageRenderHTML,
+    sharedWeaponPrepareBaseData,
+};

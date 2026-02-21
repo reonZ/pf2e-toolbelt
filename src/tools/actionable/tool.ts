@@ -2,12 +2,15 @@ import {
     AbilityItemPF2e,
     AbilitySheetPF2e,
     AbilityViewData,
+    ActionType,
     ActorPF2e,
+    ActorSheetOptions,
     ActorSheetPF2e,
     addListenerAll,
     CastOptions,
     CharacterPF2e,
     CharacterSheetData,
+    CharacterSheetPF2e,
     ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
@@ -26,6 +29,7 @@ import {
     getItemSourceId,
     htmlQuery,
     ImageFilePath,
+    includesAny,
     InventoryItem,
     isCastConsumable,
     isDefaultActionIcon,
@@ -33,12 +37,14 @@ import {
     ItemPF2e,
     ItemSheetDataPF2e,
     ItemSheetPF2e,
+    itemWithActor,
     MacroPF2e,
     MODULE,
     NPCPF2e,
     NPCSheetData,
     PhysicalItemPF2e,
     R,
+    registerWrapper,
     renderCharacterSheets,
     renderItemSheets,
     SpellcastingEntryPF2e,
@@ -46,10 +52,13 @@ import {
     SpellSheetPF2e,
     SYSTEM,
     toggleHooksAndWrappers,
+    toggleSummary,
     useAction,
     usePhysicalItem,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { sharedCharacterSheetActivateListeners } from "tools";
+import { ActionableData, createActionableRuleElement, getActionSheetData, VirtualActionData } from ".";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
     #renderCharacterSheetPF2eHook = createToggleHook(
@@ -142,6 +151,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
+                key: "physical",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                requiresReload: true,
+            },
+            {
                 key: "use",
                 type: Boolean,
                 default: false,
@@ -166,13 +182,40 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return {
             getActionMacro: this.getActionMacro.bind(this),
             getItemMacro: this.getItemMacro.bind(this),
+            getVirtualAction: this.getVirtualAction.bind(this),
+            getVirtualActionsData: this.getVirtualActionsData.bind(this),
         };
     }
 
-    ready(): void {
+    init() {
+        if (!this.settings.physical) return;
+
+        registerWrapper(
+            "WRAPPER",
+            "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
+            this.#characterPrepareEmbeddedDocuments,
+            this,
+        );
+
+        game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
+    }
+
+    ready() {
         this._configurate(true);
         toggleHooksAndWrappers(this.#spellWrappers, this.settings.spell);
         this.#createChatMessageHook.toggle(this.settings.apply);
+
+        if (this.settings.physical) {
+            registerWrapper(
+                "WRAPPER",
+                "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.getData",
+                this.#characterSheetGetData,
+                this,
+            );
+            sharedCharacterSheetActivateListeners
+                .register(this.#characterSheetActivateListeners, { context: this })
+                .activate();
+        }
     }
 
     _configurate(skipRenders?: boolean): void {
@@ -207,6 +250,119 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     isCraftingAction(item: AbilityItemPF2e | FeatPF2e): boolean {
         return !!item.crafting;
+    }
+
+    getVirtualActionsData(actor: CharacterPF2e): Record<string, VirtualActionData> {
+        return this.getInMemory(actor) ?? {};
+    }
+
+    async getVirtualAction(data: ActionableData): Promise<AbilityItemPF2e | null> {
+        const action = await fromUuid<AbilityItemPF2e>(data.sourceId);
+        if (!action?.actionCost || includesAny(action.system.traits.value, ["exploration", "downtime"])) return null;
+
+        return action.frequency && R.isNumber(data.frequency)
+            ? action.clone({ "system.frequency.value": data.frequency })
+            : action;
+    }
+
+    #characterPrepareEmbeddedDocuments(actor: CharacterPF2e, wrapped: libWrapper.RegisterCallback) {
+        this.deleteInMemory(actor);
+        wrapped();
+    }
+
+    async #characterSheetGetData(
+        sheet: CharacterSheetPF2e<CharacterPF2e>,
+        wrapped: libWrapper.RegisterCallback,
+        options?: ActorSheetOptions,
+    ): Promise<CharacterSheetData<CharacterPF2e>> {
+        const virtuals = this.getVirtualActionsData(sheet.actor);
+        const sheetData = (await wrapped(options)) as CharacterSheetData<CharacterPF2e>;
+        const addedTypes: Record<Exclude<ActionType, "passive">, boolean> = {
+            action: false,
+            free: false,
+            reaction: false,
+        };
+
+        await Promise.all(
+            R.values(virtuals).map(async ({ data }) => {
+                const action = await this.getVirtualAction(data);
+                if (!action) return;
+
+                const type = action.actionCost?.type ?? "free";
+                const actionData = getActionSheetData(action);
+
+                actionData.id = data.id;
+
+                addedTypes[type] = true;
+                sheetData.actions.encounter[type].actions.push(actionData);
+            }),
+        );
+
+        for (const [type, added] of R.entries(addedTypes)) {
+            if (!added) continue;
+            sheetData.actions.encounter[type].actions.sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
+        }
+
+        return sheetData;
+    }
+
+    async #characterSheetActivateListeners(sheet: CharacterSheetPF2e<CharacterPF2e>, html: HTMLElement) {
+        const actor = sheet.actor;
+        const virtuals = this.getVirtualActionsData(actor);
+
+        const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
+        if (!tab) return;
+
+        for (const { data, parent } of R.values(virtuals)) {
+            const action = await this.getVirtualAction(data);
+            if (!action) return;
+
+            const li = htmlQuery(html, `.item.action[data-item-id="${data.id}"]`);
+            const controls = htmlQuery(li, ".item-controls");
+            const summaryBtn = htmlQuery(li, `[data-action="toggle-summary"]`);
+            const imageBtn = htmlQuery(li, `[data-action="item-to-chat"]`);
+
+            const lock = createHTMLElement("div", {
+                content: `<i class="fa-solid fa-lock"></i>`,
+                dataset: {
+                    tooltip: `${this.localize("virtual")}<br>${parent.name}`,
+                },
+            });
+
+            controls?.replaceChildren(lock);
+
+            summaryBtn?.addEventListener(
+                "click",
+                async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const summary = htmlQuery(li, `.item-summary`);
+                    if (!summary) return;
+
+                    if (!summary.hasChildNodes()) {
+                        const item = itemWithActor(actor, action);
+                        const chatData = await item.getChatData({ secrets: item.isOwner });
+                        await sheet.itemRenderer.renderItemSummary(summary, item, chatData);
+                    }
+
+                    toggleSummary(summary);
+                },
+                { capture: true },
+            );
+
+            imageBtn?.addEventListener(
+                "click",
+                (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const item = itemWithActor(actor, action);
+                    item.toMessage(event);
+                },
+                { capture: true },
+            );
+        }
     }
 
     #onCreateChatMessage(origin: ChatMessagePF2e) {
@@ -597,6 +753,8 @@ function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItem
     });
 }
 
+const actionable = new ActionableTool();
+
 type DropZoneData = {
     linked: Maybe<{
         img: Maybe<ImageFilePath>;
@@ -606,4 +764,5 @@ type DropZoneData = {
 
 type ToolSettings = toolbelt.Settings["actionable"];
 
-export { ActionableTool };
+export { actionable };
+export type { ActionableTool };
