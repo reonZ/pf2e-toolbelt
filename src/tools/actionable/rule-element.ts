@@ -2,18 +2,15 @@ import {
     CharacterPF2e,
     ItemPF2e,
     ItemSourcePF2e,
-    ItemUUID,
     ModelPropsFromRESchema,
     PhysicalItemPF2e,
     R,
     RuleElement,
     RuleElementOptions,
-    RuleElementSchema,
     RuleElementSource,
 } from "foundry-helpers";
 import { SourceFromSchema } from "foundry-helpers/src";
 import { actionable } from ".";
-import fields = foundry.data.fields;
 
 function createActionableRuleElement() {
     const RuleElementCls = game.pf2e.RuleElement;
@@ -66,6 +63,7 @@ function createActionableRuleElement() {
                 actionable.setInMemory<VirtualActionData>(this.actor, this.data.id, {
                     data: this.data,
                     parent: this.item,
+                    ruleIndex: this.sourceIndex as number,
                 });
             }
         }
@@ -77,6 +75,25 @@ function createActionableRuleElement() {
             const invested = item.isInvested;
 
             return invested === true || (invested === null && item.isEquipped);
+        }
+
+        updateData(changes: ActionableUpdateDataArgs) {
+            const sourceIndex = this.sourceIndex ?? -1;
+            const rules = this.item.system.rules.slice();
+            const originalRule = rules[sourceIndex ?? -1] as ActionableRuleSource | undefined;
+            if (!originalRule) return;
+
+            const rule = (rules[sourceIndex] = R.pick(originalRule, ["key", "predicate", "data", "uuid"]));
+
+            foundry.utils.mergeObject(rule.data, changes);
+
+            if (!rule.predicate?.length) {
+                // @ts-expect-error
+                delete rule.predicate;
+            }
+
+            const update = { _id: this.item.id, "system.rules": rules };
+            return this.actor.updateEmbeddedDocuments("Item", [update]);
         }
 
         async #setData() {
@@ -101,7 +118,10 @@ function createActionableRuleElement() {
             }
 
             rule.data.id ??= foundry.utils.randomID();
-            rule.data.frequency ??= action.frequency?.value;
+
+            if (action.frequency) {
+                rule.data.frequency ??= action.frequency.max;
+            }
 
             if (!rule.predicate?.length) {
                 // @ts-expect-error
@@ -109,7 +129,7 @@ function createActionableRuleElement() {
             }
 
             const update = { _id: this.item.id, "system.rules": rules };
-            await this.actor.updateEmbeddedDocuments("Item", [update], { render: false });
+            await this.actor.updateEmbeddedDocuments("Item", [update]);
         }
     }
 
@@ -127,15 +147,11 @@ interface ActionableSource extends RuleElementSource {
 }
 
 type ActionableRuleSource = SourceFromSchema<ActionableSchema>;
-
-type ActionableSchema = RuleElementSchema & {
-    data: fields.ObjectField<ActionableData>;
-    uuid: fields.StringField<ItemUUID, ItemUUID, true, false, false>;
-};
-
+type ActionableSchema = toolbelt.actionable.ActionableSchema;
 type ActionableData = toolbelt.actionable.ActionableData;
-
 type VirtualActionData = toolbelt.actionable.VirtualActionData;
+type ActionableRuleElement = toolbelt.actionable.ActionableRuleElement;
+type ActionableUpdateDataArgs = toolbelt.actionable.ActionableRuleElement;
 
 export { createActionableRuleElement };
-export type { ActionableData, VirtualActionData };
+export type { ActionableData, ActionableRuleElement, VirtualActionData };

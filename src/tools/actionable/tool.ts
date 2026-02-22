@@ -58,7 +58,13 @@ import {
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedCharacterSheetActivateListeners } from "tools";
-import { ActionableData, createActionableRuleElement, getActionSheetData, VirtualActionData } from ".";
+import {
+    ActionableData,
+    ActionableRuleElement,
+    createActionableRuleElement,
+    getActionSheetData,
+    VirtualActionData,
+} from ".";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
     #renderCharacterSheetPF2eHook = createToggleHook(
@@ -277,6 +283,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     ): Promise<CharacterSheetData<CharacterPF2e>> {
         const virtuals = this.getVirtualActionsData(sheet.actor);
         const sheetData = (await wrapped(options)) as CharacterSheetData<CharacterPF2e>;
+        const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
+
         const addedTypes: Record<Exclude<ActionType, "passive">, boolean> = {
             action: false,
             free: false,
@@ -289,7 +297,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 if (!action) return;
 
                 const type = action.actionCost?.type ?? "free";
+                const macro = await getActionMacro(action);
                 const actionData = getActionSheetData(action);
+
+                if (macro?.img && isDefaultActionIcon(actionData.img, action.actionCost)) {
+                    actionData.img = macro.img;
+                }
 
                 actionData.id = data.id;
 
@@ -313,7 +326,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const tab = htmlQuery(html, ".tab[data-tab=actions] .tab-content .tab[data-tab=encounter]");
         if (!tab) return;
 
-        for (const { data, parent } of R.values(virtuals)) {
+        for (const virtualData of R.values(virtuals)) {
+            const { data, parent, ruleIndex } = virtualData;
             const action = await this.getVirtualAction(data);
             if (!action) return;
 
@@ -321,6 +335,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const controls = htmlQuery(li, ".item-controls");
             const summaryBtn = htmlQuery(li, `[data-action="toggle-summary"]`);
             const imageBtn = htmlQuery(li, `[data-action="item-to-chat"]`);
+            const useBtn = htmlQuery(li, "button[data-action='use-action']");
 
             const lock = createHTMLElement("div", {
                 content: `<i class="fa-solid fa-lock"></i>`,
@@ -331,37 +346,58 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
             controls?.replaceChildren(lock);
 
-            summaryBtn?.addEventListener(
-                "click",
-                async (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+            const addCaptureListener = <E extends HTMLElement, T extends keyof HTMLElementEventMap>(
+                el: Maybe<E>,
+                type: T,
+                listener: (el: E, event: HTMLElementEventMap[T]) => any,
+            ) => {
+                el?.addEventListener(
+                    type,
+                    (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        listener(el, event);
+                    },
+                    { capture: true },
+                );
+            };
 
-                    const summary = htmlQuery(li, `.item-summary`);
-                    if (!summary) return;
+            addCaptureListener(summaryBtn, "click", async () => {
+                const summary = htmlQuery(li, `.item-summary`);
+                if (!summary) return;
 
-                    if (!summary.hasChildNodes()) {
-                        const item = itemWithActor(actor, action);
-                        const chatData = await item.getChatData({ secrets: item.isOwner });
-                        await sheet.itemRenderer.renderItemSummary(summary, item, chatData);
-                    }
-
-                    toggleSummary(summary);
-                },
-                { capture: true },
-            );
-
-            imageBtn?.addEventListener(
-                "click",
-                (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-
+                if (!summary.hasChildNodes()) {
                     const item = itemWithActor(actor, action);
-                    item.toMessage(event);
-                },
-                { capture: true },
-            );
+                    const chatData = await item.getChatData({ secrets: item.isOwner });
+                    await sheet.itemRenderer.renderItemSummary(summary, item, chatData);
+                }
+
+                toggleSummary(summary);
+            });
+
+            addCaptureListener(imageBtn, "click", (_el, event) => {
+                const item = itemWithActor(actor, action);
+                item.toMessage(event);
+            });
+
+            addCaptureListener(useBtn, "click", (_el, event) => {
+                const item = itemWithActor<AbilityItemPF2e<CharacterPF2e>>(actor, action);
+                useAction(event, item, virtualData);
+            });
+
+            const frequency = action.frequency;
+            if (frequency) {
+                const frequencyInput = htmlQuery<HTMLInputElement>(li, `[data-item-property="system.frequency.value"]`);
+
+                addCaptureListener(frequencyInput, "change", async (el) => {
+                    const value = Math.clamp(el.valueAsNumber, 0, frequency.max);
+
+                    if (value !== data.frequency) {
+                        const rule = parent.rules[ruleIndex] as ActionableRuleElement;
+                        await rule.updateData({ frequency: value });
+                    }
+                });
+            }
         }
     }
 
