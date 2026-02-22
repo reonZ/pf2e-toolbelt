@@ -7,6 +7,8 @@ import {
     ImageFilePath,
     CharacterSheetData,
     FeatPF2e,
+    ActorGroupUpdate,
+    ActorPF2e,
 } from "foundry-helpers";
 import { getActionIcon } from "foundry-helpers/dist";
 
@@ -50,6 +52,45 @@ function getActionSheetData(item: AbilityItemPF2e | FeatPF2e): CharacterAbilityV
     };
 }
 
+/**
+ * https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/helpers.ts#L1002
+ */
+async function applyActorGroupUpdate(
+    actor: ActorPF2e,
+    data: Partial<ActorGroupUpdate>,
+    { render = true, keepId }: { render?: boolean; keepId?: boolean } = {},
+): Promise<void> {
+    const actorUpdates = data.actorUpdates && !R.isEmpty(data.actorUpdates) ? data.actorUpdates : null;
+    const itemCreates = data.itemCreates ?? [];
+    const itemUpdates = data.itemUpdates ?? [];
+    const itemDeletes = data.itemDeletes ?? [];
+
+    // Determine which one is last so that we cause the re-render then
+    // If we manually re-render, other users will fail to re-render
+    const lastRender = !render
+        ? null
+        : itemDeletes.length
+          ? "delete"
+          : itemUpdates.length
+            ? "update"
+            : itemCreates.length
+              ? "create"
+              : "actorUpdate";
+
+    if (actorUpdates) {
+        await actor.update(actorUpdates, { render: lastRender === "actorUpdate" });
+    }
+    if (itemCreates.length > 0) {
+        await actor.createEmbeddedDocuments("Item", itemCreates, { render: lastRender === "create", keepId });
+    }
+    if (itemUpdates.length > 0) {
+        await actor.updateEmbeddedDocuments("Item", itemUpdates, { render: lastRender === "update" });
+    }
+    if (itemDeletes.length > 0) {
+        await actor.deleteEmbeddedDocuments("Item", itemDeletes, { render: lastRender === "delete" });
+    }
+}
+
 type CharacterAbilityViewData = CharacterSheetData["actions"]["encounter"]["action"]["actions"][number];
 
-export { getActionSheetData };
+export { applyActorGroupUpdate, getActionSheetData };

@@ -77,7 +77,15 @@ function createActionableRuleElement() {
             return invested === true || (invested === null && item.isEquipped);
         }
 
-        updateData(changes: ActionableUpdateDataArgs) {
+        updateData(changes: ActionableUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
+        updateData(
+            changes: ActionableUpdateDataArgs,
+            sourceOnly?: boolean,
+        ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+        updateData(
+            changes: ActionableUpdateDataArgs,
+            sourceOnly?: boolean,
+        ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
             const sourceIndex = this.sourceIndex ?? -1;
             const rules = this.item.system.rules.slice();
             const originalRule = rules[sourceIndex ?? -1] as ActionableRuleSource | undefined;
@@ -93,7 +101,12 @@ function createActionableRuleElement() {
             }
 
             const update = { _id: this.item.id, "system.rules": rules };
-            return this.actor.updateEmbeddedDocuments("Item", [update]);
+
+            if (sourceOnly) {
+                return update;
+            } else {
+                return this.actor.updateEmbeddedDocuments("Item", [update]);
+            }
         }
 
         async #setData() {
@@ -154,4 +167,4 @@ type ActionableRuleElement = toolbelt.actionable.ActionableRuleElement;
 type ActionableUpdateDataArgs = toolbelt.actionable.ActionableRuleElement;
 
 export { createActionableRuleElement };
-export type { ActionableData, ActionableRuleElement, VirtualActionData };
+export type { ActionableData, ActionableRuleElement, ActionableRuleSource, VirtualActionData };

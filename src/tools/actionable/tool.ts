@@ -4,6 +4,7 @@ import {
     AbilityViewData,
     ActionType,
     ActorPF2e,
+    ActorRechargeData,
     ActorSheetOptions,
     ActorSheetPF2e,
     addListenerAll,
@@ -19,6 +20,7 @@ import {
     createToggleHook,
     createToggleWrapper,
     CreaturePF2e,
+    Duration,
     EffectPF2e,
     EquipmentPF2e,
     EquipmentSheetPF2e,
@@ -61,6 +63,7 @@ import { sharedCharacterSheetActivateListeners } from "tools";
 import {
     ActionableData,
     ActionableRuleElement,
+    applyActorGroupUpdate,
     createActionableRuleElement,
     getActionSheetData,
     VirtualActionData,
@@ -203,6 +206,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             this,
         );
 
+        registerWrapper(
+            "WRAPPER",
+            "CONFIG.PF2E.Actor.documentClasses.character.prototype.recharge",
+            this.#characterRecharge,
+            this,
+        );
+
         game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
     }
 
@@ -274,6 +284,60 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     #characterPrepareEmbeddedDocuments(actor: CharacterPF2e, wrapped: libWrapper.RegisterCallback) {
         this.deleteInMemory(actor);
         wrapped();
+    }
+
+    /**
+     * https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/base.ts#L531
+     * modified to update the rule data
+     */
+    async #characterRecharge(
+        actor: CharacterPF2e,
+        wrapped: libWrapper.RegisterCallback,
+        options: Parameters<CharacterPF2e["recharge"]>[0],
+    ): Promise<ActorRechargeData> {
+        const virtuals = this.getVirtualActionsData(actor);
+        // we do that to we can make sure only a single update per type is ever done
+        const originalCommit = options.commit;
+        options.commit = false;
+
+        const commitData: ActorRechargeData = await wrapped(options);
+
+        const elapsed = options.duration;
+        const specificDurations = ["turn", "round", "day"];
+
+        await Promise.all(
+            R.values(virtuals).map(async ({ data, parent, ruleIndex }) => {
+                const frequency = (await this.getVirtualAction(data))?.frequency;
+                if (!frequency || frequency.value >= frequency.max) return;
+
+                const per = frequency.per;
+
+                const specificPerIdx = specificDurations.indexOf(per);
+                if (specificPerIdx >= 0 || elapsed === "day") {
+                    const performUpdate =
+                        specificPerIdx >= 0
+                            ? specificDurations.indexOf(elapsed) >= specificPerIdx
+                            : Duration.fromISO(per) <= Duration.fromISO("PT8H");
+                    console.log(performUpdate);
+                    if (performUpdate) {
+                        const rule = parent.rules[ruleIndex] as ActionableRuleElement;
+                        const update = rule.updateData({ frequency: frequency.max }, true);
+
+                        if (update) {
+                            commitData.itemUpdates.push(update);
+                            commitData.affected.frequencies = true;
+                        }
+                    }
+                }
+            }),
+        );
+
+        // the original intent was to commit the updates, so we do it
+        if (originalCommit !== false) {
+            await applyActorGroupUpdate(actor, commitData);
+        }
+
+        return commitData;
     }
 
     async #characterSheetGetData(
