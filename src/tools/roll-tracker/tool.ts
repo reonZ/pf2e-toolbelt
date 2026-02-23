@@ -118,11 +118,11 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
     }
 
     get encounters(): TimedEvents {
-        return zTimedEvents.safeParse(this.settings.encounters)?.data ?? {};
+        return zTimedEvents.safeParse(this.settings.encounters).data ?? {};
     }
 
     get sessions(): TimedEvents {
-        return zTimedEvents.safeParse(this.settings.sessions)?.data ?? {};
+        return zTimedEvents.safeParse(this.settings.sessions).data ?? {};
     }
 
     init(isGM: boolean): void {
@@ -150,7 +150,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
     getUserRolls(userid: string): UserRoll[] {
         return R.pipe(
             getUserSetting<UserRollSource[]>(this.getSettingKey("userRolls"), userid)?.value ?? [],
-            R.map((data) => zUserRoll.safeParse(data)?.data),
+            R.map((data) => zUserRoll.safeParse(data).data),
             R.filter(R.isTruthy),
         );
     }

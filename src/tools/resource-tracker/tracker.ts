@@ -61,7 +61,7 @@ class ResourceTracker extends ModuleToolApplication<ResourceTrackerTool> {
             R.map(({ user, value }) => {
                 const resources = R.pipe(
                     value,
-                    R.map((data) => zTrackedResource.safeParse(data)?.data),
+                    R.map((data) => zTrackedResource.safeParse(data).data),
                     R.filter((resource): resource is TrackedResource => {
                         return R.isTruthy(resource) && (resource.shared || user === userId);
                     }),

@@ -149,7 +149,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
     getHeroActions(actor: CharacterPF2e): HeroAction[] {
         return R.pipe(
             this.getFlag<HeroAction[]>(actor, "actions") ?? [],
-            R.map((data) => zHeroAction.safeParse(data)?.data),
+            R.map((data) => zHeroAction.safeParse(data).data),
             R.filter(R.isTruthy),
         );
     }
@@ -709,7 +709,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
             const name = (await labelfromTableResult(draw, uuid)) ?? "";
             // const action = new HeroActionModel({ uuid, name });
 
-            const action = zHeroAction.safeParse({ name, uuid })?.data;
+            const action = zHeroAction.safeParse({ name, uuid }).data;
             if (!action) continue;
 
             actions.push(action);

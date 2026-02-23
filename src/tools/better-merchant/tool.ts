@@ -164,7 +164,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return R.pipe(
             sources,
             R.map((source) => {
-                const data = schema.safeDecode(source)?.data;
+                const data = schema.safeDecode(source).data;
                 return data ? (new ModelCls(data as any) as FilterTypes[T]) : undefined;
             }),
             R.filter(R.isTruthy),
@@ -182,7 +182,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         if (!source) return;
 
         const ModelCls = FILTER_TYPES[type].default;
-        const data = ModelCls.schema.safeDecode(source)?.data;
+        const data = ModelCls.schema.safeDecode(source).data;
 
         return data ? (new ModelCls(data as any) as DefaultFilterTypes[T]) : undefined;
     }
@@ -194,7 +194,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
     getServices(actor: LootPF2e): ServiceData[] {
         return R.pipe(
             this.getFlag<ServiceSource[]>(actor, "services") ?? [],
-            R.map((source) => zService.safeDecode(source)?.data),
+            R.map((source) => zService.safeDecode(source).data),
             R.filter(R.isTruthy),
         );
     }
@@ -686,7 +686,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             const parsed = JSON.parse(result.code);
             const toAdd = R.pipe(
                 Array.isArray(parsed) ? parsed : [parsed],
-                R.map((source) => zService.safeDecode(source)?.data),
+                R.map((source) => zService.safeDecode(source).data),
                 R.filter(R.isTruthy),
             );
 

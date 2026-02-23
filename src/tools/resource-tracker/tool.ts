@@ -110,7 +110,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
         this.resources.clear();
 
         for (const data of resources) {
-            const resource = zTrackedResource.safeParse(data)?.data;
+            const resource = zTrackedResource.safeParse(data).data;
             if (!resource) continue;
             this.resources.set(resource.id, resource);
         }

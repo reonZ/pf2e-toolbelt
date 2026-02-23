@@ -8,9 +8,9 @@ const zRawCoins = z.partialRecord(z.enum(COINS), z.number().min(0).multipleOf(1)
 
 const zCoins = z.codec(
     zRawCoins,
-    z.custom((value) => {
+    z.custom<Coins>((value) => {
         return value instanceof game.pf2e.Coins;
-    }) as z.ZodCustom<Coins, Coins>,
+    }),
     {
         decode: (raw) => {
             return new game.pf2e.Coins(raw);

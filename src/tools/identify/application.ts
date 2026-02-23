@@ -220,7 +220,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
                         const flag = this.tool.getFlag<IdentifiedItemSource[]>(actor, "identified", itemType);
                         const identification = R.pipe(
                             R.isArray(flag) ? flag : [],
-                            R.map((entry) => zIdentifiedItem.safeParse(entry)?.data),
+                            R.map((entry) => zIdentifiedItem.safeParse(entry).data),
                             R.filter((entry) => R.isTruthy(entry)),
                         );
 

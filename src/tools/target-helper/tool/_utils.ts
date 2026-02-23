@@ -84,7 +84,7 @@ function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     }
 
     const updates = R.omit(eventData, ["saveVariants", "type"]);
-    const saveVariant = zSaveVariant.safeParse(eventData.saveVariants.null)?.data;
+    const saveVariant = zSaveVariant.safeParse(eventData.saveVariants.null).data;
 
     for (const [key, value] of R.entries(updates)) {
         data[key] = value as any;

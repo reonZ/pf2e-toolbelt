@@ -154,7 +154,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
         return R.pipe(
             flag,
-            R.map((data) => zMergeData.safeParse(data)?.data),
+            R.map((data) => zMergeData.safeParse(data).data),
             R.filter(R.isTruthy),
         );
     }

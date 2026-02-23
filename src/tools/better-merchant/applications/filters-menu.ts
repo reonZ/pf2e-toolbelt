@@ -230,7 +230,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         const label = this.tool.localize("browserFilter.create");
         const callback = async () => {
             const source = await this.#getEquipmentFilter();
-            const data = ItemFilter.schema.safeDecode({ filter: source })?.data;
+            const data = ItemFilter.schema.safeDecode({ filter: source }).data;
             const filter = data ? new ItemFilter(data) : undefined;
             filter && addFilter(filter);
         };

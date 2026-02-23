@@ -138,7 +138,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
     getMessageTargets(message: ChatMessagePF2e): TokenDocumentPF2e[] | undefined {
         const flag = this.getFlag<TokenDocumentUUID[]>(message, "targets");
-        return flag ? zTokenDocumentArray.safeDecode(flag)?.data : undefined;
+        return flag ? zTokenDocumentArray.safeDecode(flag).data : undefined;
     }
 
     setMessageTargets(message: ChatMessagePF2e, targets: TokenDocumentUUID[]): Promise<ChatMessagePF2e> {
@@ -151,12 +151,12 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
     getMessageSaveVariants(message: ChatMessagePF2e): SaveVariants | undefined {
         const flag = this.getFlag(message, "saveVariants");
-        return flag ? zSaveVariants.safeParse(flag)?.data : undefined;
+        return flag ? zSaveVariants.safeParse(flag).data : undefined;
     }
 
     getMessageData(message: ChatMessagePF2e): TargetsData | undefined {
         const flag = this.getFlag<TargetsDataSource>(message);
-        return flag ? zTargetsData.safeParse(flag)?.data : undefined;
+        return flag ? zTargetsData.safeParse(flag).data : undefined;
     }
 
     setMessageData(
