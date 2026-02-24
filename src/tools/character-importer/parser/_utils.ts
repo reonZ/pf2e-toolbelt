@@ -28,9 +28,8 @@ async function getUuidFromPack(value: string, packName: string): Promise<ItemUUI
     return (entry?.uuid ?? null) as ItemUUID | null;
 }
 
-async function getCoreUuidFromPack(value: string, category: CharacterCategory) {
-    const pack = CORE_PACKS[category];
-    return getUuidFromPack(value, pack);
+async function getCoreUuidFromPack(value: string, category: CharacterCategory): Promise<ItemUUID | null> {
+    return value ? getUuidFromPack(value, CORE_PACKS[category]) : null;
 }
 
 async function getFeatUuidFromPack(value: string, category: FeatOrFeatureCategory): Promise<ItemUUID | null> {

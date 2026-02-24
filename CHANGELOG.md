@@ -1,3 +1,17 @@
+#
+
+- the module received a significant amount of rework internally
+  - this doesn't impact the end user, no setting has been reset and all your data is still available
+  - due to the sheer amount of features, it is impossible to test everything so keep an eye open for bugs
+- `Actionable`:
+  - add a new `Physical Actions` setting
+    - it adds a new RuleElement that generates virtual actions whenever a physical item is equipped/invested
+    - the rule element consist of a single `uuid` property and the `Actionable` key
+    - the generated actions are completely virtual and do not exist on the actor's data, they cannot themselves have functionning rule element
+    - the module reproduces pretty much every aspect of a regular action, from the `Send to Chat` feature to the frequency updating on turn change
+    - virtual actions can on the other hand be affected by rule elements (e.g. `AdjustModifier`, `ItemAlteration`)
+    - the virtual data is kept inside the `Actionable` RE itself, it is auto generated once the item is saved, you should not touch the `data` property inside the RE. This also means that literally no data will linger in the actor or the item if you decide to remove the RE
+
 # 3.27.0
 
 - `Better Trade`:

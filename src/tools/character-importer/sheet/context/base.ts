@@ -1,4 +1,4 @@
-import { CharacterImporterTool } from "tools";
+import { CharacterImport, CharacterImporterTool } from "tools";
 import { ImportDataCoreContext, prepareCoreTab } from ".";
 import { CharacterPF2e, R } from "foundry-helpers";
 
@@ -16,7 +16,7 @@ const MENU_TYPES = R.map(MENU, ({ type }) => type);
 async function prepareContext(
     this: CharacterImporterTool,
     actor: CharacterPF2e,
-    data: ImportDataModel | undefined,
+    data: CharacterImport | undefined,
 ): Promise<ImportDataContext | Pick<ImportDataContext, "partial">> {
     if (!data) {
         return {

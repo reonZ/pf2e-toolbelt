@@ -57,7 +57,8 @@
         grid-template-rows: auto auto;
         align-items: center;
         white-space: nowrap;
-        background: url(/systems/pf2e/assets/sheet/border-pattern.webp) repeat-x top,
+        background:
+            url(/systems/pf2e/assets/sheet/border-pattern.webp) repeat-x top,
             url(/systems/pf2e/assets/sheet/border-pattern.webp) repeat-x bottom,
             var(--color-pf-secondary);
         color: var(--text-light);
@@ -162,7 +163,7 @@
                         justify-content: center;
                         border-right: var(--entry-border);
                         width: 1.7em;
-                        font-size: 1.2em;
+                        font-size: 1.05em;
                     }
                 }
             }
@@ -189,7 +190,9 @@
                         top: 0;
                         left: 0;
                         transform: translate(-30%, -30%);
-                        text-shadow: 0 0 3px black, 0 0 3px black;
+                        text-shadow:
+                            0 0 3px black,
+                            0 0 3px black;
                     }
 
                     &.Boost,

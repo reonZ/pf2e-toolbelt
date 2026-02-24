@@ -124,7 +124,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         R.fromEntries(),
     );
 
-    const source: CharacterImportSource = {
+    return {
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
             ancestry: {
@@ -144,23 +144,17 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         level: R.isNumber(data.level) ? data.level : undefined,
         name: R.isString(data.name) ? data.name : "",
     };
-
-    return source;
 }
 
 async function parseCoreEntry(
     data: Record<PropertyKey, unknown>,
     key: CharacterCategory,
-): Promise<ImportedEntrySource | undefined> {
-    const value = data[key];
-    if (!R.isString(value)) return;
-
-    const source: ImportedEntrySource = {
+): Promise<WithRequired<ImportedEntrySource, "value">> {
+    const value = R.isString(data[key]) ? data[key] : "";
+    return {
         value,
         match: await getCoreUuidFromPack(value, key),
     };
-
-    return source;
 }
 
 type RawFeatEntry = [

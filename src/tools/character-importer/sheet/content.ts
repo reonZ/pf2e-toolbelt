@@ -11,15 +11,23 @@ import {
     MODULE,
     R,
 } from "foundry-helpers";
-import { addCoreEventListeners, EntryEventAction, ImportMenuType, MENU_TYPES, onEntryAction, prepareContext } from ".";
-import { CharacterImporterTool } from "..";
+import {
+    addCoreEventListeners,
+    EntryEventAction,
+    importData,
+    ImportMenuType,
+    MENU_TYPES,
+    onEntryAction,
+    prepareContext,
+} from ".";
+import { CharacterImporterTool, updateEntryOverride } from "..";
 
 const SHEET_MENU_CLASS = "pf2e-toolbelt-character-importer";
 
 async function createSheetContent(this: CharacterImporterTool, actor: CharacterPF2e, html: HTMLElement) {
     removeSheetContent(html);
 
-    const data = this.getImportData(actor);
+    const data = await this.getImportData(actor);
     const context = await prepareContext.call(this, actor, data);
 
     const content = createHTMLElement("div", {
@@ -56,7 +64,7 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
             });
         }
 
-        if (!isTabKey) {
+        if (!isTabKey && tabKey) {
             this.setInMemory<InMemoryTab>(actor, "tab", { key: tabKey });
         }
     }
@@ -134,7 +142,7 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
                 throw MODULE.Error("invalid item type.");
             }
 
-            onEntryDrop.call(this, actor, entry.dataset, dropData.uuid as ItemUUID);
+            updateEntryOverride.call(this, actor, itemType, dropData.uuid as ItemUUID, Number(entry.dataset.index));
         } catch (error) {
             console.error(error);
         }
@@ -143,23 +151,6 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
     addListenerAll(html, ".data", "drop", onDrop, true);
 
     addCoreEventListeners.call(this, html, actor);
-}
-
-async function onEntryDrop(
-    this: CharacterImporterTool,
-    actor: CharacterPF2e,
-    { itemType, index }: DOMStringMap,
-    uuid: ItemUUID,
-) {
-    const data = this.getImportData(actor);
-
-    if (!data) {
-        throw MODULE.Error("an error occured while processing import data.");
-    }
-
-    if (data.updateEntryOverride(itemType, uuid, Number(index))) {
-        await data.setFlag();
-    }
 }
 
 type EventAction = EntryEventAction | "delete-data" | "import-code" | "import-file" | "open-sheet" | "select-tab";

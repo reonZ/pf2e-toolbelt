@@ -3,12 +3,28 @@ import {
     AttributeString,
     CharacterPF2e,
     ClassPF2e,
-    CompendiumIndexData,
+    FeatPF2e,
+    getItemSlug,
     ItemPF2e,
     ItemUUID,
     R,
+    SYSTEM,
 } from "foundry-helpers";
-import { CharacterImporterTool } from "tools";
+import {
+    ATTRIBUTE_KEYS,
+    AttributeLevel,
+    CHARACTER_CATEGORIES,
+    CharacterCategory,
+    CharacterImport,
+    CharacterImporterTool,
+    FeatEntryParent,
+    getEntrySelection,
+    ImportedEntry,
+    ImportedFeatEntry,
+    isAttributeKey,
+    isAttributeLevel,
+    itemCanBeRefreshed,
+} from "tools";
 
 const ACTION_ICONS = {
     install: "fa-solid fa-plus-large",
@@ -21,12 +37,12 @@ const ACTION_ICONS = {
 async function prepareCoreTab(
     this: CharacterImporterTool,
     actor: CharacterPF2e,
-    data: ImportDataModel,
+    data: CharacterImport,
 ): Promise<ImportDataCoreContext> {
     const actorLevel = actor.level;
     const dataLevel = data.level;
 
-    const entries: ImportDataEntry[] = ImportDataModel.coreEntries.map((itemType) => {
+    const entries: ImportDataEntry[] = CHARACTER_CATEGORIES.map((itemType) => {
         const entry = data[itemType];
         const prepared = prepareEntry.call(this, itemType, entry, actor[itemType]);
 
@@ -47,7 +63,7 @@ async function prepareCoreTab(
         R.map(({ level, boosts }): ImportDataBoostsEntry<"Boost" | "Partial"> => {
             return {
                 label: game.i18n.format("PF2E.LevelN", { level }),
-                boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Boost" | "Partial"> => {
+                boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"Boost" | "Partial"> => {
                     const selected = R.isIncludedIn(key, boosts);
                     const type = selected && boostIsPartial(actor, key, Number(level)) ? "Partial" : "Boost";
 
@@ -64,13 +80,13 @@ async function prepareCoreTab(
             : this.localize("sheet.data.core.attributes.warning", { level: levelThreshold * 5 });
 
     const attributesTotals = R.pipe(
-        ImportDataModel.attributeKeys,
+        ATTRIBUTE_KEYS,
         R.map((key) => data.attributes.values[key] ?? 0),
     );
 
     const allAncestryBoosts = [...data.attributes.ancestry.boosts, ...data.attributes.ancestry.locked];
     const ancestryBoosts: ImportDataBoostsEntry<"Boost"> = {
-        boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Boost"> => {
+        boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"Boost"> => {
             return {
                 locked: R.isIncludedIn(key, data.attributes.ancestry.locked),
                 selected: R.isIncludedIn(key, allAncestryBoosts),
@@ -83,7 +99,7 @@ async function prepareCoreTab(
     const ancestryFlaws: ImportDataBoostsEntry<"Flaw"> | null = data.attributes.ancestry.flaws.length
         ? {
               label: "",
-              boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Flaw"> | null => {
+              boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"Flaw"> | null => {
                   if (!R.isIncludedIn(key, data.attributes.ancestry.flaws)) return null;
 
                   return {
@@ -96,7 +112,7 @@ async function prepareCoreTab(
         : null;
 
     const backgroundBoosts: ImportDataBoostsEntry<"Boost"> = {
-        boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"Boost"> => {
+        boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"Boost"> => {
             return {
                 locked: false,
                 selected: R.isIncludedIn(key, data.attributes.background),
@@ -109,7 +125,7 @@ async function prepareCoreTab(
     const classItem = classUUID ? await fromUuid<ClassPF2e>(classUUID) : null;
     const classKeys = classItem?.system.keyAbility.value ?? data.attributes.class;
     const classBoosts: ImportDataBoostsEntry<"KeyIcon"> = {
-        boosts: R.map(ImportDataModel.attributeKeys, (key): ImportDataBoost<"KeyIcon"> | null => {
+        boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"KeyIcon"> | null => {
             if (!R.isIncludedIn(key, classKeys)) return null;
 
             return {
@@ -129,7 +145,7 @@ async function prepareCoreTab(
             },
             background: backgroundBoosts,
             class: classBoosts,
-            labels: ImportDataModel.attributeKeys,
+            labels: ATTRIBUTE_KEYS,
             levels: attributesLevels,
             totals: attributesTotals,
         },
@@ -156,7 +172,7 @@ function addCoreEventListeners(this: CharacterImporterTool, html: HTMLElement, a
 }
 
 async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2e) {
-    const data = this.getImportData(actor);
+    const data = await this.getImportData(actor);
     if (!data) return;
 
     const levels = R.pullObject(getLevelsAttributes(data, actor), R.prop("level"), R.prop("boosts"));
@@ -183,7 +199,7 @@ async function assignBoosts(item: ItemWithAssignableBoosts | null, data: Attribu
     const recipiants = R.pipe(
         item._source.system.boosts,
         R.entries(),
-        R.filter(([index, { value }]) => value.length > 1),
+        R.filter(([_index, { value }]) => value.length > 1),
     );
     if (!recipiants.length || !boosts.length) return;
 
@@ -192,7 +208,7 @@ async function assignBoosts(item: ItemWithAssignableBoosts | null, data: Attribu
     for (const key of boosts) {
         const assignables = R.pipe(
             recipiants,
-            R.filter(([index, { value }]) => R.isIncludedIn(key, value)),
+            R.filter(([_index, { value }]) => R.isIncludedIn(key, value)),
             R.map(([index]) => Number(index)),
         );
 
@@ -239,7 +255,7 @@ type ItemWithAssignableBoosts = {
 type AssignableBoosts = Record<number | string, { value: AttributeString[]; selected: AttributeString | null }>;
 
 function getLevelsAttributes(
-    data: ImportDataModel,
+    data: CharacterImport,
     actor: CharacterPF2e,
 ): { level: AttributeLevel; boosts: AttributeString[] }[] {
     const actorLevel = actor.level;
@@ -247,8 +263,8 @@ function getLevelsAttributes(
     return R.pipe(
         data.attributes.levels,
         R.entries(),
-        R.filter(([level]) => {
-            return R.isIncludedIn(level, ImportDataModel.attributeLevels) && Number(level) <= actorLevel;
+        R.filter((entry): entry is [AttributeLevel, AttributeString[]] => {
+            return isAttributeLevel(entry[0]) && Number(entry[0]) <= actorLevel;
         }),
         R.map(([level, boosts]): { level: AttributeLevel; boosts: AttributeString[] } => {
             return {
@@ -261,30 +277,29 @@ function getLevelsAttributes(
 
 function validateBoosts(boosts: unknown): AttributeString[] {
     if (!R.isArray(boosts)) return [];
-    return R.filter(boosts, (key): key is AttributeString => R.isIncludedIn(key, ImportDataModel.attributeKeys));
+    return R.filter(boosts, isAttributeKey);
 }
 
 function prepareEntry(
     this: CharacterImporterTool,
     itemType: ImportDataEntryKey,
-    entry: ImportEntry,
+    entry: ImportedEntry | ImportedFeatEntry,
     current: ItemPF2e | null,
 ): ImportDataEntry {
     const isFeat = itemType === "feat";
     const isOverride = !!entry.override;
-    const selection = ImportDataModel.getSelection(entry);
-    const uuid = selection?.uuid;
+    const selection = getEntrySelection(entry);
     const matchLabel = this.localize("sheet.data.entry", isOverride ? "override" : "match");
 
     const label = game.i18n.localize(
-        isFeat ? CONFIG.PF2E.featCategories[(entry as ImportFeatEntry).category] : `TYPES.Item.${itemType}`,
+        isFeat ? CONFIG.PF2E.featCategories[(entry as ImportedFeatEntry).category] : `TYPES.Item.${itemType}`,
     );
 
     const actions = R.pipe(
         [
             isOverride ? "revert" : undefined,
-            uuid && current ? (itemCanBeRefreshed(current) ? "refresh" : "locked") : undefined,
-            uuid ? (current ? "replace" : "install") : undefined,
+            selection && current ? (itemCanBeRefreshed(current) ? "refresh" : "locked") : undefined,
+            selection ? (current ? "replace" : "install") : undefined,
         ] as const,
         R.filter(R.isTruthy),
         R.map((type): ImportDataContextAction => {
@@ -300,14 +315,14 @@ function prepareEntry(
         actions,
         children: [],
         current,
-        img: selection?.img || SYSTEM.getPath(`icons/default-icons/${itemType}.svg`),
+        img: selection?.img || SYSTEM.relativePath(`icons/default-icons/${itemType}.svg`),
         isOverride,
         itemType,
         label,
         selection,
         source: {
             label: entry.value,
-            uuid: entry.match,
+            uuid: entry.match?.uuid,
         },
     };
 }
@@ -315,12 +330,12 @@ function prepareEntry(
 function prepareFeatEntry(
     this: CharacterImporterTool,
     actor: CharacterPF2e,
-    data: ImportDataModel,
-    entry: ImportFeatEntry,
+    data: CharacterImport,
+    entry: ImportedFeatEntry,
     index: number,
     matchLevel: boolean,
 ): ImportDataFeatEntry {
-    const current = data.getCurrentFeat(actor, entry, matchLevel);
+    const current = getCurrentFeat(actor, entry, matchLevel);
     const prepared = prepareEntry.call(this, "feat", entry, current);
 
     // const children: ImportDataFeatEntry[] = R.pipe(
@@ -336,6 +351,40 @@ function prepareFeatEntry(
         level: entry.level,
         parent: entry.parent,
     };
+}
+
+function getCurrentFeat(actor: CharacterPF2e, entry: ImportedFeatEntry, matchLevel: boolean): ItemPF2e | null {
+    const selection = getEntrySelection(entry);
+    if (!selection) return null;
+
+    const actorLevel = actor.level;
+    const selectionUUID = selection.uuid;
+    const selectionSlug = getItemSlug(selection);
+    const sourceUUID = (selection !== entry.match && entry.match?.uuid) || null;
+    const sourceSlug = sourceUUID ? SYSTEM.sluggify(entry.value) : null;
+
+    const item = actor.itemTypes.feat.find((feat) => {
+        const featSlug = getItemSlug(feat);
+
+        if (feat.sourceId !== selectionUUID && featSlug !== selectionSlug) {
+            if (!sourceUUID) return false;
+            if (feat.sourceId !== sourceUUID && featSlug !== sourceSlug) return false;
+        }
+
+        const level = getItemLevel(feat);
+        return matchLevel ? level === actorLevel : level <= actorLevel;
+    });
+
+    return item ?? null;
+}
+
+function getItemLevel(item: FeatPF2e): number;
+function getItemLevel(item: ItemPF2e | null): number | undefined;
+function getItemLevel(item: ItemPF2e | null) {
+    if (!item) return;
+
+    const { system } = item as { system: { level?: { taken?: number | null; value: number } } };
+    return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
 }
 
 /**
@@ -385,7 +434,7 @@ type ImportDataAttributesContext = {
     };
     background: ImportDataBoostsEntry<"Boost">;
     class: ImportDataBoostsEntry<"KeyIcon">;
-    labels: typeof ImportDataModel.attributeKeys;
+    labels: typeof ATTRIBUTE_KEYS;
     levels: ImportDataBoostsEntry<"Boost" | "Partial">[];
     totals: AttributesRow<number>;
 };
@@ -420,10 +469,10 @@ type ImportDataEntry = {
     isOverride: boolean;
     itemType: ImportDataEntryKey;
     label: string;
-    selection: CompendiumIndexData | null;
+    selection: ItemPF2e | null;
     source: {
         label: string;
-        uuid: ItemUUID | null;
+        uuid: Maybe<ItemUUID>;
     };
 };
 
@@ -436,6 +485,8 @@ type ImportDataContextAction = {
 };
 
 type AttributesRow<T> = [T, T, T, T, T, T];
+
+type ImportDataEntryKey = CharacterCategory | "feat";
 
 export { addCoreEventListeners, prepareCoreTab };
 export type { ImportDataContextActionType, ImportDataCoreContext };

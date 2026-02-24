@@ -1,10 +1,19 @@
 import { CharacterPF2e, htmlClosest, MODULE } from "foundry-helpers";
-import { CharacterImporterTool, ImportDataContextActionType } from "..";
+import {
+    CharacterImport,
+    CharacterImporterTool,
+    getEntrySelection,
+    getImportedEntry,
+    ImportDataContextActionType,
+    isCharacterCategory,
+    isValidImportEntry,
+    updateEntryOverride,
+} from "..";
 
 const ERROR_ACCESSING = "an error occured while accessing import data.";
 
-function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, el: HTMLElement) {
-    const data = this.getImportData(actor);
+async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, el: HTMLElement) {
+    const data = await this.getImportData(actor);
     const dataset = htmlClosest(el, "[data-item-type]")?.dataset ?? {};
     const itemType = dataset.itemType;
     const index = dataset.index ? Number(dataset.index) : NaN;
@@ -30,7 +39,7 @@ function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, el: HT
             }
 
             case "entry-revert": {
-                return onEntryRevert(data, itemType, index);
+                return updateEntryOverride.call(this, actor, itemType, null, index);
             }
         }
     } catch (error) {
@@ -38,13 +47,13 @@ function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, el: HT
     }
 }
 
-async function onEntryReplace(actor: CharacterPF2e, data: FlagData<ImportDataModel>, itemType: string, index: number) {
-    if (ImportDataModel.isCoreEntry(itemType)) {
+async function onEntryReplace(actor: CharacterPF2e, data: CharacterImport, itemType: string, index: number) {
+    if (isCharacterCategory(itemType)) {
         return onEntryInstall(actor, data, itemType, index);
     }
 }
 
-async function onEntryRefresh(actor: CharacterPF2e, data: FlagData<ImportDataModel>, itemType: string, index: number) {
+async function onEntryRefresh(actor: CharacterPF2e, data: CharacterImport, itemType: string, index: number) {
     // const enabled = !item.system.rules.some(
     //     (r) => typeof r.key === "string" && ["ChoiceSet", "GrantItem"].includes(r.key),
     // );
@@ -54,17 +63,17 @@ async function onEntryRefresh(actor: CharacterPF2e, data: FlagData<ImportDataMod
     // }
 }
 
-async function onEntryInstall(actor: CharacterPF2e, data: FlagData<ImportDataModel>, itemType: string, index: number) {
-    if (!ImportDataModel.isValidEntry(itemType)) {
+async function onEntryInstall(actor: CharacterPF2e, data: CharacterImport, itemType: string, index: number) {
+    if (!isValidImportEntry(itemType)) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
-    const entry = data.getEntry(itemType, index);
+    const entry = getImportedEntry(data, itemType, index);
     if (!entry) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
-    const item = await ImportDataModel.getSelection(entry, true);
+    const item = getEntrySelection(entry);
     if (!item) {
         throw MODULE.Error("couldn't retrieve matching item.");
     }
@@ -72,14 +81,6 @@ async function onEntryInstall(actor: CharacterPF2e, data: FlagData<ImportDataMod
     // TODO if this is a feat, we need to check if it is granted by anything
 
     await actor.createEmbeddedDocuments("Item", [item.toObject()]);
-}
-
-async function onEntryRevert(data: FlagData<ImportDataModel>, itemType: string, index: number) {
-    if (data.updateEntryOverride(itemType, null, index)) {
-        return await data.setFlag();
-    }
-
-    throw MODULE.Error(ERROR_ACCESSING);
 }
 
 type EntryEventAction = `entry-${ImportDataContextActionType}`;
