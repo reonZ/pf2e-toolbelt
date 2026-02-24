@@ -20,6 +20,6 @@
         "typescript": "^5.9.3"
     },
     "dependencies": {
-        "foundry-helpers": "file:../../../../dev/foundry-helpers"
+        "foundry-helpers": "github:reonZ/foundry-helpers"
     }
 }
