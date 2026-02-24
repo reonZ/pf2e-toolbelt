@@ -600,6 +600,10 @@
                         "attributes": {
                             "assign": "Assign Attributes Boosts",
                             "override": "Use Manual Input Method",
+                            "set": {
+                                "boosts": "Attribute boosts were assigned.",
+                                "manual": "Attribute values were \"manually\" assigned."
+                            },
                             "warning": "The imported data doesn't reach the last boost threshold (level {level}).<br>You may want to update it."
                         }
                     },

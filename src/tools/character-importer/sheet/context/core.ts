@@ -143,10 +143,27 @@ function addCoreEventListeners(this: CharacterImporterTool, html: HTMLElement, a
             }
 
             case "override-attributes": {
-                return;
+                return setAttributes.call(this, actor);
             }
         }
     });
+}
+
+async function setAttributes(this: CharacterImporterTool, actor: CharacterPF2e) {
+    const data = await this.getImportData(actor);
+    if (!data) return;
+
+    const values = data.attributes.values;
+    const abilities = R.fromKeys(ATTRIBUTE_KEYS, (attr) => {
+        return { value: 10, mod: values[attr] ?? 0 };
+    });
+
+    await actor.update({
+        "system.abilities": abilities,
+        "system.details.keyability.value": data.attributes.class[0],
+    });
+
+    this.localize.info("sheet.data.core.attributes.set.manual");
 }
 
 async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2e) {
@@ -167,7 +184,12 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
         }
     }
 
-    await actor.update({ "system.build.attributes.boosts": levels });
+    await actor.update({
+        "system.abilities": null,
+        "system.build.attributes.boosts": levels,
+    });
+
+    this.localize.info("sheet.data.core.attributes.set.boosts");
 }
 
 async function assignBoosts(item: ItemWithAssignableBoosts | null, data: AttributeString[]): Promise<void> {
