@@ -8,7 +8,7 @@ import {
     renderCharacterSheets,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { CharacterImport, CharacterImportSource, createSheetContent, removeSheetContent, zCharacterImport } from ".";
+import { CharacterImport, CharacterImportSource, createSheetContent, removeSheetContent } from ".";
 
 const ENABLED_SETTING = ["disabled", "gm", "all"] as const;
 
@@ -60,12 +60,12 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
     async getImportData(actor: CharacterPF2e, sourceOnly?: boolean): Promise<CharacterImport | undefined>;
     async getImportData(actor: CharacterPF2e, sourceOnly?: boolean) {
         const source = this.getFlag<CharacterImportSource>(actor, "data");
-        const data = (await zCharacterImport().safeParseAsync(source)).data;
-        return sourceOnly && data ? zCharacterImport().safeEncode(data)?.data : data;
+        const model = await CharacterImport.fromSource(source ?? {});
+        return sourceOnly ? model?.encode() : model;
     }
 
     setImportData(actor: CharacterPF2e, data: CharacterImport): Promise<CharacterPF2e> | undefined {
-        const encoded = zCharacterImport().safeEncode(data)?.data;
+        const encoded = data.encode();
         return encoded ? this.setFlag(actor, "==data", encoded) : undefined;
     }
 

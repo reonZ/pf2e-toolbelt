@@ -1,5 +1,5 @@
 import { CharacterPF2e, R, waitDialog } from "foundry-helpers";
-import { CharacterImporterTool, fromPathbuilder, ImportedFeatSource, isCharacterCategory, zCharacterImport } from "..";
+import { CharacterImport, CharacterImporterTool, fromPathbuilder, ImportedFeatSource, isCharacterCategory } from "..";
 
 async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fromFile: boolean) {
     const code = await (fromFile ? importFromFile : importFromJSON).call(this);
@@ -47,9 +47,9 @@ async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fro
         }
 
         const mergedSource = foundry.utils.mergeObject(currentSource ?? {}, importedSource);
-        const mergedData = await zCharacterImport().parseAsync(mergedSource);
+        const merged = await CharacterImport.fromSource(mergedSource, true);
 
-        await this.setImportData(actor, mergedData);
+        await this.setImportData(actor, merged);
         this.localize.info("import.success");
     } catch (error) {
         console.error(error);

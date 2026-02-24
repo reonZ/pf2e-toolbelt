@@ -3,22 +3,22 @@ import {
     CharacterImport,
     CharacterImporterTool,
     getEntrySelection,
-    getImportedEntry,
     ImportDataContextActionType,
+    ImportDataEntryKey,
     isCharacterCategory,
     isValidImportEntry,
-    updateEntryOverride,
+    itemCanBeRefreshed,
 } from "..";
 
 const ERROR_ACCESSING = "an error occured while accessing import data.";
 
 async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, el: HTMLElement) {
-    const data = await this.getImportData(actor);
-    const dataset = htmlClosest(el, "[data-item-type]")?.dataset ?? {};
-    const itemType = dataset.itemType;
-    const index = dataset.index ? Number(dataset.index) : NaN;
-
     try {
+        const data = await this.getImportData(actor);
+        const dataset = htmlClosest(el, "[data-item-type]")?.dataset ?? {};
+        const itemType = dataset.itemType as ImportDataEntryKey;
+        const index = dataset.index ? Number(dataset.index) : NaN;
+
         if (!data || !itemType || (itemType === "feat" && isNaN(index))) {
             throw MODULE.Error(ERROR_ACCESSING);
         }
@@ -31,44 +31,34 @@ async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, 
             }
 
             case "entry-refresh": {
-                return onEntryRefresh(actor, data, itemType, index);
+                const item = actor.items.get(dataset.itemId ?? "");
+                return item && itemCanBeRefreshed(item) && item.refreshFromCompendium();
             }
 
             case "entry-replace": {
-                return onEntryReplace(actor, data, itemType, index);
+                return isCharacterCategory(itemType) && onEntryInstall(actor, data, itemType, index);
             }
 
             case "entry-revert": {
-                return updateEntryOverride.call(this, actor, itemType, null, index);
+                return data.updateEntryOverride(itemType, null, index) && this.setImportData(actor, data);
             }
         }
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        MODULE.error(error);
     }
 }
 
-async function onEntryReplace(actor: CharacterPF2e, data: CharacterImport, itemType: string, index: number) {
-    if (isCharacterCategory(itemType)) {
-        return onEntryInstall(actor, data, itemType, index);
-    }
-}
-
-async function onEntryRefresh(actor: CharacterPF2e, data: CharacterImport, itemType: string, index: number) {
-    // const enabled = !item.system.rules.some(
-    //     (r) => typeof r.key === "string" && ["ChoiceSet", "GrantItem"].includes(r.key),
-    // );
-    // if (enabled) item.refreshFromCompendium();
-    // if (ImportDataModel.isCoreEntry(itemType)) {
-    //     return onEntryInstall(actor, data, itemType, index);
-    // }
-}
-
-async function onEntryInstall(actor: CharacterPF2e, data: CharacterImport, itemType: string, index: number) {
+async function onEntryInstall(
+    actor: CharacterPF2e,
+    data: CharacterImport,
+    itemType: ImportDataEntryKey,
+    index: number,
+) {
     if (!isValidImportEntry(itemType)) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
-    const entry = getImportedEntry(data, itemType, index);
+    const entry = data.getImportedEntry(itemType, index);
     if (!entry) {
         throw MODULE.Error(ERROR_ACCESSING);
     }

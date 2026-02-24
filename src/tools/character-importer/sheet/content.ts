@@ -20,7 +20,7 @@ import {
     onEntryAction,
     prepareContext,
 } from ".";
-import { CharacterImporterTool, updateEntryOverride } from "..";
+import { CharacterImporterTool } from "..";
 
 const SHEET_MENU_CLASS = "pf2e-toolbelt-character-importer";
 
@@ -119,7 +119,7 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
 
     addListenerAll(html, ".data[data-tab]", "scroll", foundry.utils.debounce(onScroll, 200));
 
-    const onDrop = (_: HTMLElement, event: DragEvent) => {
+    const onDrop = async (_: HTMLElement, event: DragEvent) => {
         event.stopPropagation();
         event.preventDefault();
 
@@ -142,7 +142,16 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
                 throw MODULE.Error("invalid item type.");
             }
 
-            updateEntryOverride.call(this, actor, itemType, dropData.uuid as ItemUUID, Number(entry.dataset.index));
+            const data = await this.getImportData(actor);
+            const item = await fromUuid<ItemPF2e>(dropData.uuid as ItemUUID);
+
+            if (!data || !item) {
+                throw MODULE.Error("an error occured while processing import data.");
+            }
+
+            if (data.updateEntryOverride(itemType, item, Number(entry.dataset.index))) {
+                await this.setImportData(actor, data);
+            }
         } catch (error) {
             console.error(error);
         }
