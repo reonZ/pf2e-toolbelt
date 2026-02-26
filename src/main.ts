@@ -1,7 +1,7 @@
 import { getSetting, MODULE, R, registerModuleKeybinds, registerModuleSettings, userIsGM } from "foundry-helpers";
 import {
     actionable,
-    AnonymousTool,
+    anonymousTool,
     ArpTool,
     BetterEffectsPanelTool,
     BetterInventoryTool,
@@ -27,7 +27,7 @@ import {
 
 const TOOLS = [
     actionable,
-    new AnonymousTool(),
+    anonymousTool,
     new ArpTool(),
     new BetterSheetTool(),
     new BetterEffectsPanelTool(),
@@ -85,7 +85,7 @@ Hooks.once("init", () => {
     const context = (game.toolbelt ??= {} as toolbelt.GamePF2e);
     Object.defineProperty(context, "getToolSetting", {
         value: function (tool: string, setting: string) {
-            return this.active ? getSetting(`${tool}.${setting}`) : undefined;
+            return getSetting(`${tool}.${setting}`);
         },
         writable: false,
         configurable: false,

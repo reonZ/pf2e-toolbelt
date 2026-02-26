@@ -229,10 +229,13 @@ function isValidMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessage
     return !!actor && !actor.hasPlayerOwner;
 }
 
+const anonymousTool = new AnonymousTool();
+
 type ToolSettings = {
     action: boolean;
     spell: boolean;
     traits: (typeof TRAITS_SETTING)[number];
 };
 
-export { AnonymousTool };
+export { anonymousTool };
+export type { AnonymousTool };

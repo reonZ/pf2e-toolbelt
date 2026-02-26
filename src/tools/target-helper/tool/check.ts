@@ -9,7 +9,7 @@ import {
     splitListString,
 } from "foundry-helpers";
 import { SAVE_TYPES } from "foundry-helpers/dist";
-import { TRAITS_BLACKLIST } from "tools";
+import { anonymousTool, TRAITS_BLACKLIST } from "tools";
 import {
     addRollSavesListener,
     addSaveBtnListener,
@@ -103,7 +103,7 @@ async function renderCheckMessage(
 
     const label = firstElementWithText(flavor) ?? firstElementWithText(msgContent.firstElementChild);
 
-    const traitsSetting = game.toolbelt?.getToolSetting("anonymous", "traits");
+    const traitsSetting = anonymousTool.settings.traits;
     const baseTraits = item?.traitChatData() ?? [];
     const traits = canObserve
         ? baseTraits
