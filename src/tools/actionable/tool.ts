@@ -55,6 +55,7 @@ import {
     SYSTEM,
     toggleHooksAndWrappers,
     toggleSummary,
+    updateActionFrequency,
     useAction,
     usePhysicalItem,
 } from "foundry-helpers";
@@ -193,6 +194,20 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             getItemMacro: this.getItemMacro.bind(this),
             getVirtualAction: this.getVirtualAction.bind(this),
             getVirtualActionsData: this.getVirtualActionsData.bind(this),
+            updateActionFrequency: (
+                event: Event,
+                item: AbilityItemPF2e<ActorPF2e> | FeatPF2e<ActorPF2e>,
+                virtualData?: VirtualActionData,
+            ) => {
+                return updateActionFrequency(event, item, virtualData);
+            },
+            useAction: (
+                event: Event,
+                item: AbilityItemPF2e<ActorPF2e> | FeatPF2e<ActorPF2e>,
+                virtualData?: VirtualActionData,
+            ) => {
+                return useAction(event, item, virtualData);
+            },
         };
     }
 
@@ -276,9 +291,19 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const action = await fromUuid<AbilityItemPF2e>(data.sourceId);
         if (!action?.actionCost || includesAny(action.system.traits.value, ["exploration", "downtime"])) return null;
 
-        return action.frequency && R.isNumber(data.frequency)
-            ? action.clone({ "system.frequency.value": data.frequency })
-            : action;
+        const cloneData: Record<string, any> = {
+            _id: data.id,
+        };
+
+        if (!action.sourceId) {
+            cloneData["_stats.duplicateSource"] = data.sourceId;
+        }
+
+        if (action.frequency && R.isNumber(data.frequency)) {
+            cloneData["system.frequency.value"] = data.frequency;
+        }
+
+        return action.clone(cloneData, { keepId: true });
     }
 
     #characterPrepareEmbeddedDocuments(actor: CharacterPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -368,8 +393,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                     actionData.img = macro.img;
                 }
 
-                actionData.id = data.id;
-
                 addedTypes[type] = true;
                 sheetData.actions.encounter[type].actions.push(actionData);
             }),
@@ -391,7 +414,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         if (!tab) return;
 
         for (const virtualData of R.values(virtuals)) {
-            const { data, parent, ruleIndex } = virtualData;
+            const { data, parent } = virtualData;
             const action = await this.getVirtualAction(data);
             if (!action) return;
 
@@ -453,13 +476,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (frequency) {
                 const frequencyInput = htmlQuery<HTMLInputElement>(li, `[data-item-property="system.frequency.value"]`);
 
-                addCaptureListener(frequencyInput, "change", async (el) => {
-                    const value = Math.clamp(el.valueAsNumber, 0, frequency.max);
-
-                    if (value !== data.frequency) {
-                        const rule = parent.rules[ruleIndex] as ActionableRuleElement;
-                        await rule.updateData({ frequency: value });
-                    }
+                addCaptureListener(frequencyInput, "change", async (el, event) => {
+                    await updateActionFrequency(event, action, virtualData);
                 });
             }
         }
