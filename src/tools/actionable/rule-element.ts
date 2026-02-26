@@ -77,6 +77,21 @@ function createActionableRuleElement() {
             return invested === true || (invested === null && item.isEquipped);
         }
 
+        cleanRuleSource(rule: RuleElementSource): RuleElementSource {
+            if (rule.key !== "Actionable") {
+                return rule;
+            }
+
+            const cleaned = R.pick(rule as ActionableRuleSource, ["key", "predicate", "data", "uuid"]);
+
+            if (!cleaned.predicate?.length) {
+                // @ts-expect-error
+                delete cleaned.predicate;
+            }
+
+            return cleaned;
+        }
+
         updateData(changes: ActionableUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
         updateData(
             changes: ActionableUpdateDataArgs,
@@ -87,20 +102,13 @@ function createActionableRuleElement() {
             sourceOnly?: boolean,
         ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
             const sourceIndex = this.sourceIndex ?? -1;
-            const rules = this.item.system.rules.slice();
-            const originalRule = rules[sourceIndex ?? -1] as ActionableRuleSource | undefined;
-            if (!originalRule) return;
-
-            const rule = (rules[sourceIndex] = R.pick(originalRule, ["key", "predicate", "data", "uuid"]));
+            const rules = this.item.system.rules;
+            const rule = rules[sourceIndex ?? -1] as ActionableRuleSource | undefined;
+            if (!rule) return;
 
             foundry.utils.mergeObject(rule.data, changes);
 
-            if (!rule.predicate?.length) {
-                // @ts-expect-error
-                delete rule.predicate;
-            }
-
-            const update = { _id: this.item.id, "system.rules": rules };
+            const update = { _id: this.item.id, "system.rules": R.map(rules, this.cleanRuleSource) };
 
             if (sourceOnly) {
                 return update;
@@ -114,13 +122,11 @@ function createActionableRuleElement() {
             if (sourceIndex < 0) return;
 
             const rules = this.item.system.rules.slice();
-            const originalRule = rules[sourceIndex] as ActionableRuleSource | undefined;
-            if (!originalRule) return;
+            const rule = rules[sourceIndex] as ActionableRuleSource | undefined;
+            if (!rule) return;
 
             const action = await fromUuid<ItemPF2e>(this.uuid);
             if (!action?.isOfType("action", "feat")) return;
-
-            const rule = (rules[sourceIndex] = R.pick(originalRule, ["key", "predicate", "data", "uuid"]));
 
             // the uuid has changed since last update so we remove specific data
             if (rule.data.sourceId !== this.uuid) {
@@ -130,18 +136,14 @@ function createActionableRuleElement() {
                 };
             }
 
+            // we add a persistent id if none already exist
             rule.data.id ??= foundry.utils.randomID();
 
             if (action.frequency) {
                 rule.data.frequency ??= action.frequency.max;
             }
 
-            if (!rule.predicate?.length) {
-                // @ts-expect-error
-                delete rule.predicate;
-            }
-
-            const update = { _id: this.item.id, "system.rules": rules };
+            const update = { _id: this.item.id, "system.rules": R.map(rules, this.cleanRuleSource) };
             await this.actor.updateEmbeddedDocuments("Item", [update]);
         }
     }
