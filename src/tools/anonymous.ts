@@ -27,12 +27,12 @@ const CONTEXT_OPTIONS: {
     {
         type: "action",
         icon: `<span class="action-glyph" style="height: 12px; width: 15px; margin-right: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px;">1</span>`,
-        test: (message) => isValideMessage(message) && isValidActionMessage(message),
+        test: (message) => isValidMessage(message) && isValidActionMessage(message),
     },
     {
         type: "spell",
         icon: `<i class="fa-solid fa-wand-magic-sparkles"></i>`,
-        test: (message) => isValideMessage(message) && isValidCoreSpellMessage(message),
+        test: (message) => isValidMessage(message) && isValidCoreSpellMessage(message),
     },
 ];
 
@@ -113,7 +113,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 
     async #messageRenderHTML(message: ChatMessagePF2e, html: HTMLElement) {
-        if (this.getFlag(message, "revealed") || !isValideMessage(message)) return;
+        if (this.getFlag(message, "revealed") || !isValidMessage(message)) return;
 
         const isSpell = this.settings.spell && isValidSpellMessage(message);
         const isAction = !isSpell && this.settings.action && isValidActionMessage(message);
@@ -222,10 +222,10 @@ function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF
     );
 }
 
-function isValideMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
+function isValidMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
     if (!message) return false;
 
-    const actor = message.item?.actor;
+    const actor = message.actor;
     return !!actor && !actor.hasPlayerOwner;
 }
 

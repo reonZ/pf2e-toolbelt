@@ -476,7 +476,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (frequency) {
                 const frequencyInput = htmlQuery<HTMLInputElement>(li, `[data-item-property="system.frequency.value"]`);
 
-                addCaptureListener(frequencyInput, "change", async (el, event) => {
+                addCaptureListener(frequencyInput, "change", async (_el, event) => {
                     await updateActionFrequency(event, action, virtualData);
                 });
             }
