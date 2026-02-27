@@ -1,7 +1,12 @@
+# 3.28.2
+
+- `Target Helper`:
+  - fix target rows not showing on action messages
+
 # 3.28.1
 
 - `Actionable`:
-  - fix non-`Actionable` rules being filled with uneeded data whenever an item containing an `Actionable` rule is being updated
+  - fix non-`Actionable` rules being filled with unneeded data whenever an item containing an `Actionable` rule is being updated
 
 # 3.28.0
 
