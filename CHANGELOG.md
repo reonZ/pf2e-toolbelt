@@ -1,3 +1,8 @@
+# 3.28.1
+
+- `Actionable`:
+  - fix non-`Actionable` rules being filled with uneeded data whenever an item containing an `Actionable` rule is being updated
+
 # 3.28.0
 
 - the module received a significant amount of rework internally
