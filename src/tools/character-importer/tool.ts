@@ -8,7 +8,7 @@ import {
     renderCharacterSheets,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { CharacterImport, CharacterImportSource, createSheetContent, removeSheetContent } from ".";
+import { CharacterImport, CharacterImportSource, createSheetContent, MENU_TYPES, removeSheetContent } from ".";
 
 const ENABLED_SETTING = ["disabled", "gm", "all"] as const;
 
@@ -78,7 +78,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
         this.#loaded = true;
 
-        const templates = ["core"].map((path) => this.fullTemplatePath(path));
+        const templates = MENU_TYPES.map((path) => this.fullTemplatePath(path));
         return foundry.applications.handlebars.loadTemplates(templates.flat());
     }
 

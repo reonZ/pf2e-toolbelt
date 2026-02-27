@@ -343,7 +343,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                         specificPerIdx >= 0
                             ? specificDurations.indexOf(elapsed) >= specificPerIdx
                             : Duration.fromISO(per) <= Duration.fromISO("PT8H");
-                    console.log(performUpdate);
+
                     if (performUpdate) {
                         const rule = parent.rules[ruleIndex] as ActionableRuleElement;
                         const update = rule.updateData({ frequency: frequency.max }, true);

@@ -25,25 +25,11 @@
         {{/each}}
     </div>
 </div>
-<div class="data" data-tab="core">
-    {{> (@root.partial 'core') core}}
+{{#each tabs as |data tab|}}
+<div class="data" data-tab="{{tab}}">
+    {{> (@root.partial tab) data}}
 </div>
-<div class="data" data-tab="feats">
-    feats
-</div>
-<div class="data" data-tab="inventory">
-    inventory
-</div>
-<div class="data" data-tab="skills">
-    skills
-</div>
-<div class="data" data-tab="spells">
-    spells
-</div>
-<div class="data" data-tab="details">
-    details
-</div>
-
+{{/each}}
 
 {{#*inline 'entry'}}
 <div class="entry{{#if parent}} child{{/if}}" data-droppable data-item-type="{{itemType}}" {{#if

@@ -231,6 +231,22 @@
             }
         }
 
+        .skills {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-inline: auto;
+
+            .header {
+                text-align: center;
+                font-weight: bold;
+
+                &.name {
+                    padding-right: 1em;
+                }
+            }
+        }
+
         .entry {
             --scale: 1;
 
@@ -341,11 +357,8 @@
             }
 
             &.child {
-                --scale: 0.95;
-
                 align-self: end;
-                width: calc(100% * var(--scale));
-                font-size: calc(1em * var(--scale));
+                width: calc(100% - 10px);
                 border-top-left-radius: 0;
                 border-top-right-radius: 0;
                 border-top: 0;

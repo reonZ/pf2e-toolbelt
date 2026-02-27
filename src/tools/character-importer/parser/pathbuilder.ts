@@ -1,4 +1,4 @@
-import { AttributeString, FeatOrFeatureCategory, OneToTen, R, SYSTEM } from "foundry-helpers";
+import { AttributeString, FeatOrFeatureCategory, OneToTen, R, SYSTEM, ZeroToFour } from "foundry-helpers";
 import {
     ATTRIBUTE_KEYS,
     AttributeLevel,
@@ -124,6 +124,22 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         R.fromEntries(),
     );
 
+    const skills = R.mapValues(CONFIG.PF2E.skills, (_, slug) => {
+        const rank = foundry.utils.getProperty(data, `proficiencies.${slug}`);
+        return parseSkillRank(rank);
+    });
+
+    const lores = R.pipe(
+        R.isArray(data.lores) ? data.lores : [],
+        R.map((entry) => {
+            if (!R.isArray(entry)) return;
+
+            const [label, rank] = entry;
+            return R.isString(label) ? { label, rank: parseSkillRank(rank) } : undefined;
+        }),
+        R.filter(R.isTruthy),
+    );
+
     return {
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
@@ -142,8 +158,15 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         feats: feats,
         heritage: await parseCoreEntry(data, "heritage"),
         level: R.isNumber(data.level) ? data.level : undefined,
+        lores,
         name: R.isString(data.name) ? data.name : "",
+        skills,
     };
+}
+
+function parseSkillRank(value: unknown): ZeroToFour {
+    const rank = R.isNumber(value) ? value / 2 : 0;
+    return (Number.between(rank, 0, 4, true) ? rank : 0) as ZeroToFour;
 }
 
 async function parseCoreEntry(

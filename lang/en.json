@@ -601,8 +601,8 @@
                             "assign": "Assign Attributes Boosts",
                             "override": "Use Manual Input Method",
                             "set": {
-                                "boosts": "Attribute boosts were assigned.",
-                                "manual": "Attribute values were \"manually\" assigned."
+                                "boosts": "Attribute boosts have been assigned.",
+                                "manual": "Attribute values have been \"manually\" assigned."
                             },
                             "warning": "The imported data doesn't reach the last boost threshold (level {level}).<br>You may want to update it."
                         }
@@ -619,6 +619,12 @@
                         "drop": "Drop {key}",
                         "match": "Match",
                         "override": "Override"
+                    },
+                    "skills": {
+                        "assign": "Assign Skills",
+                        "current": "Current",
+                        "expected": "Expected",
+                        "set": "Skills proficiencies have been assigned."
                     }
                 },
                 "menu": {

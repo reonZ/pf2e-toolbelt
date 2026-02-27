@@ -1,4 +1,4 @@
-import { AttributeString, ItemType, R, z, zForeignItem } from "foundry-helpers";
+import { AttributeString, ItemType, R, z, ZeroToFour, zForeignItem } from "foundry-helpers";
 
 const ANCESTRY_KEYS = ["boosts", "flaws", "locked"] as const;
 const ATTRIBUTE_KEYS = ["str", "dex", "con", "int", "wis", "cha"] as const;
@@ -54,12 +54,29 @@ function zFeat() {
     });
 }
 
+const zProficiencyRank = z
+    .custom((value) => R.isNumber(value) && Number.between(value, 0, 4, true))
+    .default(0) as z.ZodDefault<z.ZodCustom<ZeroToFour, ZeroToFour>>;
+
+function zSkills() {
+    return z
+        .record(z.enum(R.keys(CONFIG.PF2E.skills)), zProficiencyRank)
+        .default(R.mapValues(CONFIG.PF2E.skills, () => 0 as ZeroToFour));
+}
+
+const zLore = z.object({
+    label: z.string().nonempty(),
+    rank: zProficiencyRank,
+});
+
 function zCharacterImport() {
     return z.object({
         name: z.string().default(""),
         attributes: zAttributes(),
         feats: z.array(zFeat()).prefault([]),
         level: z.number().min(1).multipleOf(1).default(1),
+        lores: z.array(zLore).prefault([]),
+        skills: zSkills(),
         ...R.fromKeys(CHARACTER_CATEGORIES, (category) => zImportedEntry(category).prefault({} as any)),
     });
 }

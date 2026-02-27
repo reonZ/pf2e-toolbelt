@@ -13,6 +13,7 @@ import {
 } from "foundry-helpers";
 import {
     addCoreEventListeners,
+    addSkillsEventListeners,
     EntryEventAction,
     importData,
     ImportMenuType,
@@ -160,6 +161,7 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
     addListenerAll(html, ".data", "drop", onDrop, true);
 
     addCoreEventListeners.call(this, html, actor);
+    addSkillsEventListeners.call(this, html, actor);
 }
 
 type EventAction = EntryEventAction | "delete-data" | "import-code" | "import-file" | "open-sheet" | "select-tab";

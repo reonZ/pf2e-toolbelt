@@ -1,0 +1,32 @@
+<div class="skills">
+    <div class="name header">
+        <a data-action="assign-skills" {{{@root.i18n.tooltip 'data.skills.assign' }}}>
+            <i class="fa-sharp-duotone fa-solid fa-calculator"></i>
+            {{localize 'PF2E.ProficiencyLabel'}}
+        </a>
+    </div>
+    <div class="expected header">
+        {{@root.i18n 'data.skills.expected'}}
+    </div>
+    <div class="current header">
+        {{@root.i18n 'data.skills.current'}}
+    </div>
+    {{#each skills as |skill|}}
+    <div class="name">
+        {{skill.label}}
+    </div>
+    <div class="expected">
+        {{> 'proficiency' skill.expected}}
+    </div>
+    <div class="current">
+        {{> 'proficiency' skill.current}}
+    </div>
+    {{/each}}
+</div>
+
+
+{{#*inline 'proficiency'}}
+    <div class="proficiency pf-rank" data-rank="{{rank}}">
+        {{localize label}}
+    </div>
+{{/inline}}
