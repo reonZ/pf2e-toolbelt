@@ -77,21 +77,6 @@ function createActionableRuleElement() {
             return invested === true || (invested === null && item.isEquipped);
         }
 
-        cleanRuleSource(rule: RuleElementSource): RuleElementSource {
-            if (rule.key !== "Actionable") {
-                return rule;
-            }
-
-            const cleaned = R.pick(rule as ActionableRuleSource, ["key", "predicate", "data", "uuid"]);
-
-            if (!cleaned.predicate?.length) {
-                // @ts-expect-error
-                delete cleaned.predicate;
-            }
-
-            return cleaned;
-        }
-
         updateData(changes: ActionableUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
         updateData(
             changes: ActionableUpdateDataArgs,
@@ -102,13 +87,13 @@ function createActionableRuleElement() {
             sourceOnly?: boolean,
         ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
             const sourceIndex = this.sourceIndex ?? -1;
-            const rules = this.item.system.rules;
-            const rule = rules[sourceIndex ?? -1] as ActionableRuleSource | undefined;
-            if (!rule) return;
+            const rules = this.item._source.system.rules.slice();
+            const rule = rules[sourceIndex] as DeepPartial<ActionableRuleSource> | undefined;
+            if (!rule?.data) return;
 
             foundry.utils.mergeObject(rule.data, changes);
 
-            const update = { _id: this.item.id, "system.rules": R.map(rules, this.cleanRuleSource) };
+            const update = { _id: this.item.id, "system.rules": rules };
 
             if (sourceOnly) {
                 return update;
@@ -121,12 +106,14 @@ function createActionableRuleElement() {
             const sourceIndex = this.sourceIndex ?? -1;
             if (sourceIndex < 0) return;
 
-            const rules = this.item.system.rules.slice();
-            const rule = rules[sourceIndex] as ActionableRuleSource | undefined;
+            const rules = this.item._source.system.rules.slice();
+            const rule = rules[sourceIndex] as DeepPartial<ActionableRuleSource> | undefined;
             if (!rule) return;
 
             const action = await fromUuid<ItemPF2e>(this.uuid);
             if (!action?.isOfType("action", "feat")) return;
+
+            rule.data ??= {};
 
             // the uuid has changed since last update so we remove specific data
             if (rule.data.sourceId !== this.uuid) {
@@ -143,7 +130,7 @@ function createActionableRuleElement() {
                 rule.data.frequency ??= action.frequency.max;
             }
 
-            const update = { _id: this.item.id, "system.rules": R.map(rules, this.cleanRuleSource) };
+            const update = { _id: this.item.id, "system.rules": rules };
             await this.actor.updateEmbeddedDocuments("Item", [update]);
         }
     }
