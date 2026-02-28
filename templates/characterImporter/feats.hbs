@@ -1,1 +1,6 @@
-feats
+{{#each sections as |section|}}
+<h3>{{section.label}}</h3>
+{{#each feats as |feat|}}
+{{> 'entry' feat}}
+{{/each}}
+{{/each}}

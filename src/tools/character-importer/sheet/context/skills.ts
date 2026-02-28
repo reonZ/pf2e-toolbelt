@@ -108,4 +108,3 @@ type ImportSkillEntry = {
 };
 
 export { addSkillsEventListeners, prepareSkillsTab };
-export type { ImportDataSkillsContext };

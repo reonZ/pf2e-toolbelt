@@ -3,7 +3,6 @@ import {
     CharacterCategory,
     CharacterImportData,
     CharacterImportSource,
-    ImportDataEntryKey,
     ImportedEntry,
     ImportedFeatEntry,
     isCharacterCategory,
@@ -20,9 +19,8 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         return data ? new CharacterImport(data) : undefined;
     }
 
-    getImportedEntry(itemType: "feat", index?: number | string): ImportedFeatEntry | undefined;
-    getImportedEntry<T extends ImportDataEntryKey>(itemType: T): ImportedEntry | undefined;
-    getImportedEntry(itemType: string, index?: number | string): ImportedEntry | undefined;
+    getImportedEntry(itemType: "feat", index: number | string): ImportedFeatEntry | undefined;
+    getImportedEntry(itemType: string, index?: number | string): ImportedFeatEntry | ImportedEntry | undefined;
     getImportedEntry(itemType: string, index?: number | string) {
         if (itemType === "feat") {
             const num = R.isString(index) ? Number(index.trim() || -1) : index;

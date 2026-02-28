@@ -1,11 +1,11 @@
-import { CharacterPF2e, htmlClosest, MODULE } from "foundry-helpers";
+import { CharacterPF2e, FeatSlot, getItemSlug, htmlClosest, ItemPF2e, MODULE, SYSTEM } from "foundry-helpers";
 import {
     CharacterImport,
     CharacterImporterTool,
     getEntrySelection,
     ImportDataContextActionType,
     ImportDataEntryKey,
-    isCharacterCategory,
+    ImportedFeatEntry,
     isValidImportEntry,
     itemCanBeRefreshed,
 } from "..";
@@ -36,7 +36,7 @@ async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, 
             }
 
             case "entry-replace": {
-                return isCharacterCategory(itemType) && onEntryInstall(actor, data, itemType, index);
+                return onEntryInstall(actor, data, itemType, index);
             }
 
             case "entry-revert": {
@@ -54,26 +54,82 @@ async function onEntryInstall(
     itemType: ImportDataEntryKey,
     index: number,
 ) {
+    console.log(data, itemType, index);
     if (!isValidImportEntry(itemType)) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
     const entry = data.getImportedEntry(itemType, index);
+
     if (!entry) {
         throw MODULE.Error(ERROR_ACCESSING);
     }
+
+    if ((entry as ImportedFeatEntry).parent) return;
 
     const item = getEntrySelection(entry);
     if (!item) {
         throw MODULE.Error("couldn't retrieve matching item.");
     }
 
-    // TODO if this is a feat, we need to check if it is granted by anything
+    const source = item.toObject();
 
-    await actor.createEmbeddedDocuments("Item", [item.toObject()]);
+    // this is a feat
+    if ("category" in entry) {
+        const featSlot = getFeatSlot(actor, entry);
+
+        if (featSlot) {
+            if (featSlot.feat) {
+                await actor.deleteEmbeddedDocuments("Item", [featSlot.feat.id]);
+            }
+
+            foundry.utils.setProperty(source, "system.location", featSlot.id);
+        }
+
+        foundry.utils.setProperty(source, "system.level.taken", entry.level);
+    }
+
+    await actor.createEmbeddedDocuments("Item", [source]);
+}
+
+function getCurrentFeat(actor: CharacterPF2e, entry: ImportedFeatEntry): ItemPF2e | null {
+    const selection = getEntrySelection(entry);
+    if (!selection) return null;
+
+    const featSlot = getFeatSlot(actor, entry);
+    if (featSlot) {
+        return featSlot.feat ?? null;
+    }
+
+    const selectionUUID = selection.uuid;
+    const selectionSlug = getItemSlug(selection);
+    const sourceUUID = (selection !== entry.match && entry.match?.uuid) || null;
+    const sourceSlug = sourceUUID ? SYSTEM.sluggify(entry.value) : null;
+
+    const item = actor.itemTypes.feat.find((feat) => {
+        const featSlug = getItemSlug(feat);
+
+        if (feat.sourceId !== selectionUUID && featSlug !== selectionSlug) {
+            if (!sourceUUID) return false;
+            if (feat.sourceId !== sourceUUID && featSlug !== sourceSlug) return false;
+        }
+
+        return true;
+    });
+
+    return item ?? null;
+}
+
+function getFeatSlot(actor: CharacterPF2e, entry: ImportedFeatEntry): FeatSlot | undefined {
+    if (entry.parent) return;
+
+    const slotId = `${entry.category}-${entry.level}`;
+    const category = actor.feats.get(entry.category);
+
+    return category?.feats.find((slot) => "id" in slot && slot.id === slotId) as FeatSlot | undefined;
 }
 
 type EntryEventAction = `entry-${ImportDataContextActionType}`;
 
-export { onEntryAction };
+export { getCurrentFeat, getFeatSlot, onEntryAction };
 export type { EntryEventAction };

@@ -1,4 +1,4 @@
-import { AttributeString, ItemType, R, z, ZeroToFour, zForeignItem } from "foundry-helpers";
+import { AttributeString, FeatOrFeatureCategory, ItemType, R, z, ZeroToFour, zForeignItem } from "foundry-helpers";
 
 const ANCESTRY_KEYS = ["boosts", "flaws", "locked"] as const;
 const ATTRIBUTE_KEYS = ["str", "dex", "con", "int", "wis", "cha"] as const;
@@ -43,6 +43,7 @@ function zAttributes() {
 
 function zFeat() {
     return zImportedEntry("feat").extend({
+        awarded: z.boolean().default(false),
         level: z.number().min(1).multipleOf(1).default(1),
         category: z.enum(R.keys(CONFIG.PF2E.featCategories)),
         parent: z
@@ -85,8 +86,8 @@ function getEntrySelection<T extends ImportedEntry>(entry: T): Exclude<T["overri
     return (entry.override ?? entry.match ?? null) as Exclude<T["override"] | T["match"], undefined> | null;
 }
 
-function isValidImportEntry(value: unknown): value is CharacterCategory | "feats" {
-    return R.isIncludedIn(value, [...CHARACTER_CATEGORIES, "feats"]);
+function isValidImportEntry(value: unknown): value is CharacterCategory | "feat" {
+    return R.isIncludedIn(value, [...CHARACTER_CATEGORIES, "feat"]);
 }
 
 function isCharacterCategory(value: unknown): value is CharacterCategory {

@@ -343,4 +343,3 @@ type ImportDataBoosts<T extends ImportDataBoostType> = AttributesRow<ImportDataB
 type AttributesRow<T> = [T, T, T, T, T, T];
 
 export { addCoreEventListeners, prepareCoreTab };
-export type { ImportDataCoreContext };

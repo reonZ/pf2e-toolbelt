@@ -56,6 +56,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         const parentIsCore = isCharacterCategory(parentCategory);
 
         return {
+            awarded: categoryK === "awarded-feat",
             level: Math.clamp(level, 1, 10) as OneToTen,
             match: await getFeatUuidFromPack(value, category),
             category,

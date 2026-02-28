@@ -117,7 +117,7 @@
         --row-spacing: 0.5rem;
 
         overflow-y: auto;
-        padding: 0.3rem var(--outer-padding);
+        padding: 0.5rem var(--outer-padding) 2rem;
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -247,6 +247,16 @@
             }
         }
 
+        &[data-tab="feats"] {
+            h3 {
+                margin-block: 0.5rem;
+
+                &:first-child {
+                    margin-top: 0;
+                }
+            }
+        }
+
         .entry {
             position: relative;
             display: grid;
@@ -330,19 +340,18 @@
 
             .level {
                 position: absolute;
-                font-size: 1.5em;
+                font-size: 1.1em;
+                font-weight: bold;
                 bottom: 0;
                 left: 0;
                 color: var(--text-light);
-                background: rgb(0 0 0 / 74%);
-                height: 2ch;
-                width: 2ch;
+                background: rgba(0, 0, 0, 0.74);
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                border-radius: 50%;
-                transform: translate(-25%, 25%);
-                box-shadow: inset 0 0 4px 0px #ffffffc4;
+                border-radius: 0 4px 0 4px;
+                outline: 1px solid #ffffff4a;
+                padding: 0 0.3rem;
             }
 
             &:has(+ .entry.child) {

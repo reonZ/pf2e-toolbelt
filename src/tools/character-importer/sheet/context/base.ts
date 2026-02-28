@@ -1,6 +1,6 @@
 import { CharacterPF2e, R } from "foundry-helpers";
 import { CharacterImport, CharacterImporterTool } from "tools";
-import { prepareCoreTab, prepareSkillsTab } from ".";
+import { prepareCoreTab, prepareFeatsTab, prepareSkillsTab } from ".";
 
 const MENU = [
     { type: "core", icon: "fa-solid fa-address-card" },
@@ -27,7 +27,7 @@ async function prepareContext(
     const tabs: ImportDataContext["tabs"] = {
         core: await prepareCoreTab.call(this, actor, data),
         details: {},
-        feats: {},
+        feats: await prepareFeatsTab.call(this, actor, data),
         inventory: {},
         skills: await prepareSkillsTab.call(this, actor, data),
         spells: {},

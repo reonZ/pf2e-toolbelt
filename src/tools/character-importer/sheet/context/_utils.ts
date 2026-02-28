@@ -1,9 +1,10 @@
-import { CharacterPF2e, FeatPF2e, getItemSlug, ItemPF2e, ItemUUID, R, stringNumber, SYSTEM } from "foundry-helpers";
+import { CharacterPF2e, FeatOrFeatureCategory, ItemPF2e, ItemUUID, R, stringNumber, SYSTEM } from "foundry-helpers";
 import {
     CharacterCategory,
     CharacterImport,
     CharacterImporterTool,
     FeatEntryParent,
+    getCurrentFeat,
     getEntrySelection,
     ImportedEntry,
     ImportedFeatEntry,
@@ -29,16 +30,14 @@ function prepareEntry(
     const isOverride = !!entry.override;
     const selection = getEntrySelection(entry);
     const matchLabel = this.localize("sheet.data.entry", isOverride ? "override" : "match");
-
-    const label = game.i18n.localize(
-        isFeat ? CONFIG.PF2E.featCategories[(entry as ImportedFeatEntry).category] : `TYPES.Item.${itemType}`,
-    );
+    const category = isFeat ? (entry as ImportedFeatEntry).category : undefined;
+    const label = game.i18n.localize(category ? CONFIG.PF2E.featCategories[category] : `TYPES.Item.${itemType}`);
 
     const actions = R.pipe(
         [
             isOverride ? "revert" : undefined,
             selection && current ? (itemCanBeRefreshed(current) ? "refresh" : "locked") : undefined,
-            selection ? (current ? "replace" : "install") : undefined,
+            selection && !(entry as ImportedFeatEntry).parent ? (current ? "replace" : "install") : undefined,
         ] as const,
         R.filter(R.isTruthy),
         R.map((type): ImportDataContextAction => {
@@ -52,6 +51,7 @@ function prepareEntry(
 
     return {
         actions,
+        category,
         children: [],
         current,
         depth,
@@ -74,13 +74,12 @@ function prepareFeatEntry(
     entry: ImportedFeatEntry,
     index: number,
     depth: number,
-    options?: FeatOptions,
 ): ImportDataFeatEntry {
-    const current = getCurrentFeat(actor, entry, options);
+    const current = getCurrentFeat(actor, entry);
 
     return {
         ...prepareEntry.call(this, "feat", entry, current, depth),
-        children: prepareFeatEntries.call(this, actor, data, stringNumber(index), depth + 1),
+        children: prepareFeatEntries.call(this, actor, data, index, depth + 1),
         index,
         itemType: "feat",
         level: entry.level,
@@ -92,58 +91,34 @@ function prepareFeatEntries(
     this: CharacterImporterTool,
     actor: CharacterPF2e,
     data: CharacterImport,
-    parent: FeatEntryParent | undefined,
+    parent: CharacterCategory | number | undefined,
     depth: number,
-) {
+    options: FeatOptions = {},
+): ImportDataFeatEntry[] {
+    const level = actor.level;
+    const matchParent = R.isNumber(parent) ? stringNumber(parent) : parent;
+
     return R.pipe(
         data.feats,
         R.map((feat, index) => {
-            if (feat.parent !== parent) return;
+            if (feat.level > level || feat.parent !== matchParent || (!options.includeAwarded && feat.awarded)) return;
             return prepareFeatEntry.call(this, actor, data, feat, index, depth);
         }),
         R.filter(R.isTruthy),
     );
 }
 
-function getCurrentFeat(
-    actor: CharacterPF2e,
-    entry: ImportedFeatEntry,
-    { matchLevel }: FeatOptions = {},
-): ItemPF2e | null {
-    const selection = getEntrySelection(entry);
-    if (!selection) return null;
+// function getItemLevel(item: FeatPF2e): number;
+// function getItemLevel(item: ItemPF2e | null): number | undefined;
+// function getItemLevel(item: ItemPF2e | null) {
+//     if (!item) return;
 
-    const actorLevel = actor.level;
-    const selectionUUID = selection.uuid;
-    const selectionSlug = getItemSlug(selection);
-    const sourceUUID = (selection !== entry.match && entry.match?.uuid) || null;
-    const sourceSlug = sourceUUID ? SYSTEM.sluggify(entry.value) : null;
-
-    const item = actor.itemTypes.feat.find((feat) => {
-        const featSlug = getItemSlug(feat);
-
-        if (feat.sourceId !== selectionUUID && featSlug !== selectionSlug) {
-            if (!sourceUUID) return false;
-            if (feat.sourceId !== sourceUUID && featSlug !== sourceSlug) return false;
-        }
-
-        const level = getItemLevel(feat);
-        return matchLevel ? level === actorLevel : level <= actorLevel;
-    });
-
-    return item ?? null;
-}
-
-function getItemLevel(item: FeatPF2e): number;
-function getItemLevel(item: ItemPF2e | null): number | undefined;
-function getItemLevel(item: ItemPF2e | null) {
-    if (!item) return;
-
-    const { system } = item as { system: { level?: { taken?: number | null; value: number } } };
-    return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
-}
+//     const { system } = item as { system: { level?: { taken?: number | null; value: number } } };
+//     return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
+// }
 
 type FeatOptions = {
+    includeAwarded?: boolean;
     matchLevel?: boolean;
 };
 
@@ -151,6 +126,7 @@ type ImportDataEntryKey = CharacterCategory | "feat";
 
 type ImportDataEntry = {
     actions: ImportDataContextAction[];
+    category: FeatOrFeatureCategory | undefined;
     children: ImportDataFeatEntry[];
     current: ItemPF2e | null | undefined;
     depth: number;
@@ -181,4 +157,4 @@ type ImportDataContextAction = {
 type ImportDataContextActionType = keyof typeof ACTION_ICONS;
 
 export { prepareEntry, prepareFeatEntries };
-export type { ImportDataContextActionType, ImportDataEntry, ImportDataEntryKey };
+export type { ImportDataContextActionType, ImportDataEntry, ImportDataEntryKey, ImportDataFeatEntry };
