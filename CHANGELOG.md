@@ -1,3 +1,8 @@
+# 3.30.1
+
+- `Target Helper`:
+  - fix a very fringe error when rolling a save
+
 # 3.30.0
 
 - `Character Importer`:
