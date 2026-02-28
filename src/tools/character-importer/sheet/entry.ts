@@ -54,7 +54,6 @@ async function onEntryInstall(
     itemType: ImportDataEntryKey,
     index: number,
 ) {
-    console.log(data, itemType, index);
     if (!isValidImportEntry(itemType)) {
         throw MODULE.Error(ERROR_ACCESSING);
     }

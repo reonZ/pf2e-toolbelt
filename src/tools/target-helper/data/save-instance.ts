@@ -30,7 +30,7 @@ const zSignificantModifier = z.object({
     appliedTo: z.enum(["roll", "dc"]),
     name: z.string(),
     significance: z.enum(["ESSENTIAL", "HELPFUL", "NONE", "HARMFUL", "DETRIMENTAL"]),
-    sourceUuid: z.string(),
+    sourceUuid: z.string().nullish(),
     value: z.number(),
 });
 
