@@ -34,7 +34,7 @@
 {{#*inline 'entry'}}
 <div class="entry{{#if parent}} child{{/if}}" data-droppable data-item-type="{{itemType}}" {{#if
     index includeZero=true}} data-index="{{index}}" {{/if}} {{#if parent}} data-parent="{{parent}}"
-    {{/if}} {{#if current}}data-item-id="{{current.id}}"{{/if}}>
+    {{/if}} {{#if current}}data-item-id="{{current.id}}"{{/if}} style="--depth: {{depth}}">
     <img src="{{img}}">
     <div class="header">
         <div class="section">

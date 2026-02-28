@@ -248,11 +248,9 @@
         }
 
         .entry {
-            --scale: 1;
-
             position: relative;
             display: grid;
-            grid-template-columns: calc(50px * var(--scale)) 1fr;
+            grid-template-columns: 50px 1fr;
             grid-template-rows: 1fr 1fr;
             align-items: center;
 
@@ -358,8 +356,7 @@
 
             &.child {
                 align-self: end;
-                width: calc(100% - 10px);
-                border-top-left-radius: 0;
+                width: calc(100% - var(--depth) * 10px);
                 border-top-right-radius: 0;
                 border-top: 0;
 

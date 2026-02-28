@@ -9,7 +9,7 @@ import {
     isAttributeKey,
     isAttributeLevel,
     prepareEntry,
-    prepareFeatEntry,
+    prepareFeatEntries,
 } from "tools";
 
 async function prepareCoreTab(
@@ -22,18 +22,11 @@ async function prepareCoreTab(
 
     const entries: ImportDataEntry[] = CHARACTER_CATEGORIES.map((itemType) => {
         const entry = data[itemType];
-        const prepared = prepareEntry.call(this, itemType, entry, actor[itemType]);
 
-        prepared.children = R.pipe(
-            data.feats,
-            R.map((feat, index) => {
-                if (feat.parent !== itemType) return;
-                return prepareFeatEntry.call(this, actor, data, feat, index, false);
-            }),
-            R.filter(R.isTruthy),
-        );
-
-        return prepared;
+        return {
+            ...prepareEntry.call(this, itemType, entry, actor[itemType], 0),
+            children: prepareFeatEntries.call(this, actor, data, itemType, 1),
+        };
     });
 
     const attributesLevels = R.pipe(
