@@ -177,14 +177,12 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         return this.setFlag(actor, "filters", type, encoded);
     }
 
-    getDefaultFilter<T extends FilterType>(actor: LootPF2e, type: T): DefaultFilterTypes[T] | undefined {
+    getDefaultFilter<T extends FilterType>(actor: LootPF2e, type: T): DefaultFilterTypes[T] {
         const source = this.getFlag<DefaultFilterSource>(actor, "default", type);
-        if (!source) return;
-
         const ModelCls = FILTER_TYPES[type].default;
-        const data = ModelCls.schema.safeDecode(source).data;
+        const data = ModelCls.schema.safeDecode(source ?? {}).data ?? ModelCls.schema.parse({});
 
-        return data ? (new ModelCls(data as any) as DefaultFilterTypes[T]) : undefined;
+        return new ModelCls(data as any) as DefaultFilterTypes[T];
     }
 
     getAllFilters<T extends FilterType>(actor: LootPF2e, type: T): MerchantFilters<T> {
