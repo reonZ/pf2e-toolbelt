@@ -1,3 +1,13 @@
+# 3.30.0
+
+- `Character Importer`:
+  - implement the `Feats` tab:
+    - the module will look for the `current` feats in feat slots instead of matching feats when appropriate
+  - you need to re-import the data to take advantage of the changes made in this version
+  - reminder that we are still in the testing stage of the tool
+- `Merge Damage`:
+  - fix newly created message losing the targets from the merged ones and instead using the current targets
+
 # 3.29.0
 
 - `Better Merchant`:
