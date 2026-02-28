@@ -1,3 +1,12 @@
+# 3.29.0
+
+- `Better Merchant`:
+  - fix error when generating default filters without any data on the actor
+- add new `Character Importer` tool:
+  - this is a tool that parse data imported from the `Pathbuilder` website
+  - it shows what the character should have and what is currently on the sheet, the user can then proceed step by step clicking on the different buttons that will add the expected data to the character
+  - this is just a preliminary version of the tool, it isn't complete, it is exposed to the public in case you want to test it and give feedbacks
+
 # 3.28.2
 
 - `Target Helper`:
