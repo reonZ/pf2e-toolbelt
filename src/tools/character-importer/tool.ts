@@ -28,8 +28,6 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
                 default: "disabled",
                 choices: ENABLED_SETTING,
                 scope: "world",
-                // TODO remove when/if released
-                config: false,
                 onChange: async (value: ToolSettings["enabled"]) => {
                     const activate = value === "all" || (value === "gm" && game.user.isGM);
 
