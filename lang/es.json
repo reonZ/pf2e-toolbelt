@@ -159,10 +159,6 @@
           "name": "Grupo de alianza como observado",
           "hint": "Permite a los jugadores observar las hojas de actor con el permiso \"Limitado\" siempre que pertenezcan a la alianza del grupo. No confundir con el actor del grupo."
         },
-        "scribble": {
-          "name": "Hoja de personaje escrita a mano",
-          "hint": "Un rediseño de la hoja del personaje para que parezca como si hubiera sido escrita a mano."
-        },
         "showPlayers": {
           "name": "Mostrar avatar a los jugadores",
           "hint": "Agrega un botón 'Mostrar a jugadores' en el panel de avatar de las hojas de actores."

@@ -146,10 +146,6 @@
       "betterSheet": {
         "title": "Ficha de Ator Melhorada",
         "partyAsObserved": {
-        },
-        "scribble": {
-          "name": "Ficha de Personagem Manuscrita",
-          "hint": "Uma reformulação da ficha de personagem para que pareça como se tivesse sido escrita à mão."
         }
       },
       "betterTemplate": {

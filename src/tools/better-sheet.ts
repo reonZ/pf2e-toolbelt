@@ -75,18 +75,6 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
-                key: "scribble",
-                type: Boolean,
-                default: false,
-                scope: "user",
-                // TODO this goes away once the feature is released
-                config: false,
-                onChange: (value: boolean) => {
-                    document.body.classList.toggle("pf2e-toolbelt-scribble", value);
-                    renderCharacterSheets();
-                },
-            },
-            {
                 key: "showPlayers",
                 type: Boolean,
                 default: false,
@@ -113,8 +101,6 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
     }
 
     init(isGM: boolean): void {
-        document.body.classList.toggle("pf2e-toolbelt-scribble", this.settings.scribble);
-
         this.#showPlayersHook.toggle(isGM && this.settings.showPlayers);
         toggleHooksAndWrappers(this.#sortListHooks, this.settings.sortList);
     }

@@ -164,10 +164,6 @@
           "name": "Drużyna sojuszników jako Obserwowani",
           "hint": "Zezwól graczom na przeglądanie kart postaci, posiadającym uprawnienia „Ograniczone”, o ile należą oni do grupy „sojuszników”. Nie należy mylić z postacią „Grupa”."
         },
-        "scribble": {
-          "name": "Ręcznie wypełniona karta postaci",
-          "hint": "Zmiana wyglądu karty postaci, aby wyglądała jakby została napisana ręcznie."
-        },
         "showPlayers": {
           "name": "Pokaż awatar graczom",
           "hint": "Dodaje przycisk 'Pokaż graczy' w panelu awatarów kart aktorów."
