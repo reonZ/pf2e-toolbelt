@@ -114,7 +114,10 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
     getMessageTargets(message: ChatMessagePF2e): TokenDocumentUUID[] {
         const targets = targetHelperTool.getMessageTargets(message);
-        if (targets) return targets;
+
+        if (targets) {
+            return targets.map((target) => target.uuid);
+        }
 
         const target = (message.flags[SYSTEM.id].context as DamageDamageContextFlag | undefined)?.target?.token;
         return target ? [target] : [];
