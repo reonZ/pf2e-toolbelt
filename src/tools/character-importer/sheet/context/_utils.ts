@@ -82,7 +82,7 @@ function prepareFeatEntry(
         children: prepareFeatEntries.call(this, actor, data, index, depth + 1),
         index,
         itemType: "feat",
-        level: entry.level,
+        level: !entry.parent || !R.isNumber(Number(entry.parent)) ? entry.level : 0,
         parent: entry.parent,
     };
 }
