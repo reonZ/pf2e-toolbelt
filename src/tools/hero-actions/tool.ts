@@ -272,7 +272,7 @@ class HeroActionsTool extends ModuleTool<HeroActionsSettings> {
 
         const result = await waitDialog<{ actor: (string | null)[] }>({
             classes: ["pf2e-toolbelt-heroActions-remove"],
-            content: this.path("removeActions"),
+            content: this.templatePath("removeActions"),
             data: {
                 actors: game.actors.filter((actor) => actor.isOfType("character")),
             },
