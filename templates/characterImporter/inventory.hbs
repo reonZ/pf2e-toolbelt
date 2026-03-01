@@ -1,1 +1,27 @@
-inventory
+<div class="coinage">
+    <div class="currency">
+        <li class="label">
+            <a data-action="assign-currencies" {{{@root.i18n.tooltip 'data.inventory.currency.assign' }}}>
+                <i class="fa-sharp-duotone fa-solid fa-calculator"></i>
+                {{@root.i18n 'data.inventory.currency.expected'}}
+            </a>
+        </li>
+        {{#each currencies as |currency|}}
+            <li class="denomination {{currency.unit}}">
+                <div class="currency-image" data-tooltip="{{localize currency.label}}"></div>
+                <span>{{currency.expected}}</span>
+            </li>
+        {{/each}}
+    </div>
+    <div class="currency">
+        <li class="label">
+            {{@root.i18n 'data.inventory.currency.current'}}
+        </li>
+        {{#each currencies as |currency|}}
+            <li class="denomination {{currency.unit}}">
+                <div class="currency-image" data-tooltip="{{localize currency.label}}"></div>
+                <span>{{currency.current}}</span>
+            </li>
+        {{/each}}
+    </div>
+</div>

@@ -13,15 +13,29 @@ import {
 } from "foundry-helpers";
 import {
     addCoreEventListeners,
+    addFeatsEventListeners,
+    addInventoryEventListeners,
     addSkillsEventListeners,
     EntryEventAction,
     importData,
-    ImportMenuType,
-    MENU_TYPES,
     onEntryAction,
-    prepareContext,
+    prepareCoreTab,
+    prepareFeatsTab,
+    prepareInventoryTab,
+    prepareSkillsTab,
 } from ".";
-import { CharacterImporterTool } from "..";
+import { CharacterImport, CharacterImporterTool } from "..";
+
+const MENU = [
+    { type: "core", icon: "fa-solid fa-address-card" },
+    { type: "skills", icon: "fa-solid fa-hand" },
+    { type: "feats", icon: "fa-solid fa-medal" },
+    { type: "spells", icon: "fa-solid fa-wand-magic-sparkles" },
+    { type: "inventory", icon: "fa-solid fa-box-open" },
+    { type: "details", icon: "fa-solid fa-book-reader" },
+] as const;
+
+const MENU_TYPES = R.map(MENU, ({ type }) => type);
 
 const SHEET_MENU_CLASS = "pf2e-toolbelt-character-importer";
 
@@ -41,6 +55,34 @@ async function createSheetContent(this: CharacterImporterTool, actor: CharacterP
 
     addEventListeners.call(this, content, actor);
     htmlQuery(html, ".sheet-body")?.appendChild(content);
+}
+
+async function prepareContext(
+    this: CharacterImporterTool,
+    actor: CharacterPF2e,
+    data: CharacterImport | undefined,
+): Promise<ImportDataContext | Pick<ImportDataContext, "partial">> {
+    if (!data) {
+        return {
+            partial: (key: string) => this.fullTemplatePath(key),
+        };
+    }
+
+    const tabs: ImportDataContext["tabs"] = {
+        core: await prepareCoreTab.call(this, actor, data),
+        details: {},
+        feats: await prepareFeatsTab.call(this, actor, data),
+        inventory: await prepareInventoryTab.call(this, actor, data),
+        skills: await prepareSkillsTab.call(this, actor, data),
+        spells: {},
+    };
+
+    return {
+        hasData: true,
+        menu: MENU,
+        partial: (key: string) => this.fullTemplatePath(key),
+        tabs,
+    };
 }
 
 function removeSheetContent(html: HTMLElement) {
@@ -161,6 +203,8 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
     addListenerAll(html, ".data", "drop", onDrop, true);
 
     addCoreEventListeners.call(this, html, actor);
+    addFeatsEventListeners.call(this, html, actor);
+    addInventoryEventListeners.call(this, html, actor);
     addSkillsEventListeners.call(this, html, actor);
 }
 
@@ -171,4 +215,13 @@ type InMemoryTab = {
     scroll?: number;
 };
 
-export { createSheetContent, removeSheetContent };
+type ImportDataContext = {
+    hasData: true;
+    menu: typeof MENU;
+    partial: (key: string) => string;
+    tabs: Record<ImportMenuType, Record<string, any>>;
+};
+
+type ImportMenuType = (typeof MENU)[number]["type"];
+
+export { createSheetContent, MENU_TYPES, removeSheetContent };

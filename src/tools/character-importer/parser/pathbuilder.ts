@@ -1,4 +1,4 @@
-import { AttributeString, FeatOrFeatureCategory, OneToTen, R, SYSTEM, ZeroToFour } from "foundry-helpers";
+import { AttributeString, FeatOrFeatureCategory, OneToTen, R, SYSTEM, valueBetween, ZeroToFour } from "foundry-helpers";
 import {
     ATTRIBUTE_KEYS,
     AttributeLevel,
@@ -145,6 +145,11 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         R.filter(R.isTruthy),
     );
 
+    const currencies = R.mapValues(CONFIG.PF2E.currencies, (_, slug) => {
+        const value = foundry.utils.getProperty(data, `money.${slug}`);
+        return R.isNumber(value) ? value : 0;
+    });
+
     return {
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
@@ -160,6 +165,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         },
         background: await parseCoreEntry(data, "background"),
         class: classe,
+        currencies,
         feats: feats,
         heritage: await parseCoreEntry(data, "heritage"),
         level: R.isNumber(data.level) ? data.level : undefined,
@@ -171,7 +177,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
 
 function parseSkillRank(value: unknown): ZeroToFour {
     const rank = R.isNumber(value) ? value / 2 : 0;
-    return (Number.between(rank, 0, 4, true) ? rank : 0) as ZeroToFour;
+    return (valueBetween(rank, 0, 4) ? rank : 0) as ZeroToFour;
 }
 
 async function parseCoreEntry(

@@ -616,6 +616,14 @@
                         "match": "Match",
                         "override": "Override"
                     },
+                    "inventory": {
+                        "currency": {
+                            "assign": "Override Currencies",
+                            "current": "Current",
+                            "expected": "Expected"
+                        },
+                        "set": "Skills currencies have been overriden."
+                    },
                     "skills": {
                         "assign": "Assign Skills",
                         "current": "Current",

@@ -1,16 +1,14 @@
-import { AttributeString, FeatOrFeatureCategory, ItemType, R, z, ZeroToFour, zForeignItem } from "foundry-helpers";
+import { AttributeString, ItemType, R, valueBetween, z, ZeroToFour, zForeignItem } from "foundry-helpers";
 
 const ANCESTRY_KEYS = ["boosts", "flaws", "locked"] as const;
 const ATTRIBUTE_KEYS = ["str", "dex", "con", "int", "wis", "cha"] as const;
 const ATTRIBUTE_LEVELS = ["1", "5", "10", "15", "20"] as const;
 const CHARACTER_CATEGORIES = ["ancestry", "heritage", "background", "class"] as const;
 
-function zBoosts() {
-    return z.array(z.enum(ATTRIBUTE_KEYS)).default([]);
-}
+const zBoosts = z.array(z.enum(ATTRIBUTE_KEYS)).default([]);
 
 function zBoostsRecord(keys: ReadonlyArray<string>) {
-    return z.record(z.enum(keys), zBoosts()).default(R.fromKeys(keys, () => []));
+    return z.record(z.enum(keys), zBoosts).default(R.fromKeys(keys, () => []));
 }
 
 function zImportedEntry<T extends ItemType>(type: T) {
@@ -21,25 +19,21 @@ function zImportedEntry<T extends ItemType>(type: T) {
     });
 }
 
-function zAttributes() {
-    return z
-        .object({
-            ancestry: zBoostsRecord(ANCESTRY_KEYS),
-            background: zBoosts(),
-            class: zBoosts(),
-            levels: zBoostsRecord(ATTRIBUTE_LEVELS),
-            values: z
-                .record(z.enum(ATTRIBUTE_KEYS), z.number().multipleOf(1))
-                .default(R.fromKeys(ATTRIBUTE_KEYS, () => 0)),
-        })
-        .default({
-            ancestry: R.fromKeys(ANCESTRY_KEYS, () => []),
-            background: [],
-            class: [],
-            levels: R.fromKeys(ATTRIBUTE_LEVELS, () => []),
-            values: R.fromKeys(ATTRIBUTE_KEYS, () => 0),
-        });
-}
+const zAttributes = z
+    .object({
+        ancestry: zBoostsRecord(ANCESTRY_KEYS),
+        background: zBoosts,
+        class: zBoosts,
+        levels: zBoostsRecord(ATTRIBUTE_LEVELS),
+        values: z.record(z.enum(ATTRIBUTE_KEYS), z.number().multipleOf(1)).default(R.fromKeys(ATTRIBUTE_KEYS, () => 0)),
+    })
+    .default({
+        ancestry: R.fromKeys(ANCESTRY_KEYS, () => []),
+        background: [],
+        class: [],
+        levels: R.fromKeys(ATTRIBUTE_LEVELS, () => []),
+        values: R.fromKeys(ATTRIBUTE_KEYS, () => 0),
+    });
 
 function zFeat() {
     return zImportedEntry("feat").extend({
@@ -55,9 +49,9 @@ function zFeat() {
     });
 }
 
-const zProficiencyRank = z
-    .custom((value) => R.isNumber(value) && Number.between(value, 0, 4, true))
-    .default(0) as z.ZodDefault<z.ZodCustom<ZeroToFour, ZeroToFour>>;
+const zProficiencyRank = z.custom((value) => R.isNumber(value) && valueBetween(value, 0, 4)).default(0) as z.ZodDefault<
+    z.ZodCustom<ZeroToFour, ZeroToFour>
+>;
 
 function zSkills() {
     return z
@@ -70,13 +64,20 @@ const zLore = z.object({
     rank: zProficiencyRank,
 });
 
+function zCurrencies() {
+    return z
+        .record(z.enum(R.keys(CONFIG.PF2E.currencies)), z.number().min(0).multipleOf(1))
+        .default(R.mapValues(CONFIG.PF2E.currencies, () => 0));
+}
+
 function zCharacterImport() {
     return z.object({
-        name: z.string().default(""),
-        attributes: zAttributes(),
+        attributes: zAttributes,
+        currencies: zCurrencies(),
         feats: z.array(zFeat()).prefault([]),
         level: z.number().min(1).multipleOf(1).default(1),
         lores: z.array(zLore).prefault([]),
+        name: z.string().default(""),
         skills: zSkills(),
         ...R.fromKeys(CHARACTER_CATEGORIES, (category) => zImportedEntry(category).prefault({} as any)),
     });

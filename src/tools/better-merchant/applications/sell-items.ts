@@ -9,6 +9,7 @@ import {
     R,
     simulateDropItem,
 } from "foundry-helpers";
+import { COIN_DENOMINATIONS } from "foundry-helpers/dist";
 import { ModuleToolApplication } from "module-tool-application";
 import { BetterMerchantTool } from "..";
 
@@ -143,8 +144,6 @@ class SellItemsMenu extends ModuleToolApplication<BetterMerchantTool> {
         }
     }
 }
-
-const COIN_DENOMINATIONS = ["pp", "gp", "sp", "cp"] as const;
 
 /**
  * truncated version of
