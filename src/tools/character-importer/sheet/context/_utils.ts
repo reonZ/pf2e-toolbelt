@@ -37,7 +37,7 @@ function prepareEntry(
         [
             isOverride ? "revert" : undefined,
             selection && current ? (itemCanBeRefreshed(current) ? "refresh" : "locked") : undefined,
-            selection && !(entry as ImportedFeatEntry).parent ? (current ? "replace" : "install") : undefined,
+            selection && !depth ? (current ? "replace" : "install") : undefined,
         ] as const,
         R.filter(R.isTruthy),
         R.map((type): ImportDataContextAction => {
@@ -93,7 +93,6 @@ function prepareFeatEntries(
     data: CharacterImport,
     parent: CharacterCategory | number | undefined,
     depth: number,
-    options: FeatOptions = {},
 ): ImportDataFeatEntry[] {
     const level = actor.level;
     const matchParent = R.isNumber(parent) ? stringNumber(parent) : parent;
@@ -101,7 +100,7 @@ function prepareFeatEntries(
     return R.pipe(
         data.feats,
         R.map((feat, index) => {
-            if (feat.level > level || feat.parent !== matchParent || (!options.includeAwarded && feat.awarded)) return;
+            if (feat.level > level || feat.parent !== matchParent || feat.awarded) return;
             return prepareFeatEntry.call(this, actor, data, feat, index, depth);
         }),
         R.filter(R.isTruthy),
@@ -116,11 +115,6 @@ function prepareFeatEntries(
 //     const { system } = item as { system: { level?: { taken?: number | null; value: number } } };
 //     return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
 // }
-
-type FeatOptions = {
-    includeAwarded?: boolean;
-    matchLevel?: boolean;
-};
 
 type ImportDataEntryKey = CharacterCategory | "feat";
 
@@ -156,5 +150,5 @@ type ImportDataContextAction = {
 
 type ImportDataContextActionType = keyof typeof ACTION_ICONS;
 
-export { prepareEntry, prepareFeatEntries };
+export { prepareEntry, prepareFeatEntries, prepareFeatEntry };
 export type { ImportDataContextActionType, ImportDataEntry, ImportDataEntryKey, ImportDataFeatEntry };

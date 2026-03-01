@@ -6,10 +6,12 @@ import {
     CharacterImport,
     CharacterImporterTool,
     ImportDataEntry,
+    ImportedFeatEntry,
     isAttributeKey,
     isAttributeLevel,
     prepareEntry,
     prepareFeatEntries,
+    prepareFeatEntry,
 } from "tools";
 
 async function prepareCoreTab(
@@ -20,12 +22,42 @@ async function prepareCoreTab(
     const actorLevel = actor.level;
     const dataLevel = data.level;
 
+    const awardedFeats: [number, ImportedFeatEntry][] = R.pipe(
+        data.feats,
+        R.map((feat, index): [number, ImportedFeatEntry] | undefined => {
+            return feat.level <= actorLevel && feat.awarded ? [index, feat] : undefined;
+        }),
+        R.filter(R.isTruthy),
+    );
+
     const entries: ImportDataEntry[] = CHARACTER_CATEGORIES.map((itemType) => {
         const entry = data[itemType];
+        const preparedEntry = prepareEntry.call(this, itemType, entry, actor[itemType], 0);
+
+        const parent = preparedEntry.current ?? preparedEntry.selection;
+        const expected = R.pipe(
+            R.values((parent as ClassPF2e | undefined)?.system.items ?? {}),
+            R.filter((entry) => entry.level <= actorLevel),
+            R.map((entry) => entry.uuid),
+        );
+
+        const awarded = R.pipe(
+            expected,
+            R.map((uuid) => {
+                const match = awardedFeats.find(([_, featData]) => {
+                    return featData.override?.uuid === uuid || featData.match?.uuid === uuid;
+                });
+                if (!match) return;
+
+                const [index, featData] = match;
+                return prepareFeatEntry.call(this, actor, data, featData, index, 1);
+            }),
+            R.filter(R.isTruthy),
+        );
 
         return {
-            ...prepareEntry.call(this, itemType, entry, actor[itemType], 0),
-            children: prepareFeatEntries.call(this, actor, data, itemType, 1),
+            ...preparedEntry,
+            children: [...awarded, ...prepareFeatEntries.call(this, actor, data, itemType, 1)],
         };
     });
 

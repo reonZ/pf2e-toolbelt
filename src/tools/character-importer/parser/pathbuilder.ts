@@ -45,6 +45,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         const category = FEAT_CATEGORIES[categoryK];
         if (!category) return;
 
+        const awarded = categoryK === "awarded-feat";
         const hasParent = choice === "childChoice" && R.isString(parent);
         const foundParent = hasParent
             ? R.findLast(feats.slice(0, i), (feat): feat is RawFeatEntry => {
@@ -55,11 +56,14 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         const parentCategory = foundParent ? SYSTEM.sluggify(foundParent[2]) : "";
         const parentIsCore = isCharacterCategory(parentCategory);
 
+        const featureMatch = awarded ? await getFeatUuidFromPack(value, "classfeature") : null;
+        const match = featureMatch ?? (await getFeatUuidFromPack(value, category));
+
         return {
-            awarded: categoryK === "awarded-feat",
+            awarded,
             level: Math.clamp(level, 1, 10) as OneToTen,
-            match: await getFeatUuidFromPack(value, category),
-            category,
+            match,
+            category: featureMatch ? "classfeature" : category,
             value,
             parent: parentIsCore ? parentCategory : undefined,
             childEntry: choice === "parentChoice" && R.isString(child) ? child : undefined,
