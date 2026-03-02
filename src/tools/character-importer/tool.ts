@@ -110,7 +110,6 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
                 createSheetContent.call(this, actor, html);
             } else {
                 this.deleteInMemory(actor, "importing");
-                this.deleteInMemory(actor, "tab");
                 removeSheetContent(html);
             }
         });

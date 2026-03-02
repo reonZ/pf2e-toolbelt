@@ -4,7 +4,7 @@ import {
     CharacterImportData,
     CharacterImportSource,
     ImportedEntry,
-    ImportedFeatEntry,
+    ImportItemType,
     isCharacterCategory,
     zCharacterImport,
 } from ".";
@@ -19,13 +19,20 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         return data ? new CharacterImport(data) : undefined;
     }
 
-    getImportedEntry(itemType: "feat", index: number | string): ImportedFeatEntry | undefined;
-    getImportedEntry(itemType: string, index?: number | string): ImportedFeatEntry | ImportedEntry | undefined;
-    getImportedEntry(itemType: string, index?: number | string) {
+    getImportedEntry(itemType: ImportItemType, index: number): ImportedEntry | undefined {
         if (itemType === "feat") {
-            const num = R.isString(index) ? Number(index.trim() || -1) : index;
-            return R.isNumber(num) ? this.feats.at(num) : undefined;
+            return R.isNumber(index) ? this.feats.at(index) : undefined;
         }
+
+        if (itemType === "container") {
+            return R.isNumber(index) ? this.containers.at(index) : undefined;
+        }
+
+        // this is an equipment
+        if (R.isNonNull(index)) {
+            return R.isNumber(index) ? this.equipments.at(index) : undefined;
+        }
+
         return isCharacterCategory(itemType) ? this[itemType] : undefined;
     }
 

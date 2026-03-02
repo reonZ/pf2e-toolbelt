@@ -25,3 +25,9 @@
         {{/each}}
     </div>
 </div>
+{{#each sections as |section|}}
+<h3>{{section.label}}</h3>
+{{#each items as |item|}}
+{{> 'entry' item}}
+{{/each}}
+{{/each}}

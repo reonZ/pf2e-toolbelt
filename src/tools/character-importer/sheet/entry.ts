@@ -1,12 +1,14 @@
-import { CharacterPF2e, FeatSlot, getItemSlug, htmlClosest, ItemPF2e, MODULE, SYSTEM } from "foundry-helpers";
+import { CharacterPF2e, FeatSlot, htmlClosest, MODULE } from "foundry-helpers";
 import {
     CharacterImport,
     CharacterImporterTool,
     getEntrySelection,
     ImportDataContextActionType,
-    ImportDataEntryKey,
+    ImportedContainerEntry,
+    ImportedEntry,
+    ImportedEquipmentEntry,
     ImportedFeatEntry,
-    isValidImportEntry,
+    ImportItemType,
     itemCanBeRefreshed,
 } from "..";
 
@@ -16,10 +18,10 @@ async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, 
     try {
         const data = await this.getImportData(actor);
         const dataset = htmlClosest(el, "[data-item-type]")?.dataset ?? {};
-        const itemType = dataset.itemType as ImportDataEntryKey;
+        const itemType = dataset.itemType as ImportItemType;
         const index = dataset.index ? Number(dataset.index) : NaN;
 
-        if (!data || !itemType || (itemType === "feat" && isNaN(index))) {
+        if (!data || !itemType) {
             throw MODULE.Error(ERROR_ACCESSING);
         }
 
@@ -27,7 +29,7 @@ async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, 
 
         switch (action) {
             case "entry-install": {
-                return onEntryInstall(actor, data, itemType, index);
+                return onEntryInstall(actor, data, itemType, index, dataset);
             }
 
             case "entry-refresh": {
@@ -36,7 +38,7 @@ async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, 
             }
 
             case "entry-replace": {
-                return onEntryInstall(actor, data, itemType, index);
+                return onEntryInstall(actor, data, itemType, index, dataset);
             }
 
             case "entry-revert": {
@@ -51,13 +53,10 @@ async function onEntryAction(this: CharacterImporterTool, actor: CharacterPF2e, 
 async function onEntryInstall(
     actor: CharacterPF2e,
     data: CharacterImport,
-    itemType: ImportDataEntryKey,
+    itemType: ImportItemType,
     index: number,
+    dataset: { itemId?: string; parent?: string },
 ) {
-    if (!isValidImportEntry(itemType)) {
-        throw MODULE.Error(ERROR_ACCESSING);
-    }
-
     const entry = data.getImportedEntry(itemType, index);
 
     if (!entry) {
@@ -72,9 +71,9 @@ async function onEntryInstall(
     }
 
     const source = item.toObject();
+    source._id = foundry.utils.randomID();
 
-    // this is a feat
-    if ("category" in entry) {
+    if (isFeatEntry(entry)) {
         const featSlot = getFeatSlot(actor, entry);
 
         if (featSlot) {
@@ -86,37 +85,55 @@ async function onEntryInstall(
         }
 
         foundry.utils.setProperty(source, "system.level.taken", entry.level);
-    }
+    } else if (isPhysicalEntry(entry)) {
+        const current = dataset.itemId ? actor.items.get(dataset.itemId) : undefined;
+        const currentContainerId = current?.isOfType("physical") ? current.system.containerId : null;
+        const currentContents = (current?.isOfType("backpack") ? current.contents : []).map((item) => {
+            return { _id: item.id, "system.containerId": source._id };
+        });
 
-    await actor.createEmbeddedDocuments("Item", [source]);
-}
+        foundry.utils.setProperty(source, "system.quantity", entry.quantity);
 
-function getCurrentFeat(actor: CharacterPF2e, entry: ImportedFeatEntry): ItemPF2e | null {
-    const selection = getEntrySelection(entry);
-    if (!selection) return null;
-
-    const featSlot = getFeatSlot(actor, entry);
-    if (featSlot) {
-        return featSlot.feat ?? null;
-    }
-
-    const selectionUUID = selection.uuid;
-    const selectionSlug = getItemSlug(selection);
-    const sourceUUID = (selection !== entry.match && entry.match?.uuid) || null;
-    const sourceSlug = sourceUUID ? SYSTEM.sluggify(entry.value) : null;
-
-    const item = actor.itemTypes.feat.find((feat) => {
-        const featSlug = getItemSlug(feat);
-
-        if (feat.sourceId !== selectionUUID && featSlug !== selectionSlug) {
-            if (!sourceUUID) return false;
-            if (feat.sourceId !== sourceUUID && featSlug !== sourceSlug) return false;
+        if (isContainerEntry(entry)) {
+            source.name = entry.value;
         }
 
-        return true;
-    });
+        if (currentContainerId) {
+            foundry.utils.setProperty(source, "system.containerId", currentContainerId);
+        }
 
-    return item ?? null;
+        if (current) {
+            await actor.deleteEmbeddedDocuments("Item", [current.id]);
+        } else if (isEquipmentEntry(entry) && entry.container) {
+            const parent = dataset.parent ? actor.items.get(dataset.parent) : undefined;
+
+            if (parent) {
+                foundry.utils.setProperty(source, "system.containerId", parent.id);
+            }
+        }
+
+        if (currentContents.length) {
+            await actor.updateEmbeddedDocuments("Item", currentContents);
+        }
+    }
+
+    await actor.createEmbeddedDocuments("Item", [source], { keepId: true });
+}
+
+function isFeatEntry(entry: ImportedEntry): entry is ImportedFeatEntry {
+    return "category" in entry;
+}
+
+function isEquipmentEntry(entry: ImportedEntry): entry is ImportedEquipmentEntry {
+    return "type" in entry;
+}
+
+function isContainerEntry(entry: ImportedEntry): entry is ImportedContainerEntry {
+    return "identifier" in entry;
+}
+
+function isPhysicalEntry(entry: ImportedEntry): entry is ImportedEquipmentEntry | ImportedContainerEntry {
+    return isEquipmentEntry(entry) || isContainerEntry(entry);
 }
 
 function getFeatSlot(actor: CharacterPF2e, entry: ImportedFeatEntry): FeatSlot | undefined {
@@ -130,5 +147,5 @@ function getFeatSlot(actor: CharacterPF2e, entry: ImportedFeatEntry): FeatSlot |
 
 type EntryEventAction = `entry-${ImportDataContextActionType}`;
 
-export { getCurrentFeat, getFeatSlot, onEntryAction };
+export { getFeatSlot, isFeatEntry, onEntryAction };
 export type { EntryEventAction };

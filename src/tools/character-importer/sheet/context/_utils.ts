@@ -1,13 +1,29 @@
-import { CharacterPF2e, FeatOrFeatureCategory, ItemPF2e, ItemUUID, R, stringNumber, SYSTEM } from "foundry-helpers";
+import {
+    CharacterPF2e,
+    FeatOrFeatureCategory,
+    FeatPF2e,
+    getItemSlug,
+    ItemPF2e,
+    ItemType,
+    ItemUUID,
+    PhysicalItemPF2e,
+    PhysicalItemType,
+    R,
+    stringNumber,
+    SYSTEM,
+} from "foundry-helpers";
 import {
     CharacterCategory,
     CharacterImport,
     CharacterImporterTool,
     FeatEntryParent,
-    getCurrentFeat,
     getEntrySelection,
+    getFeatSlot,
+    ImportedContainerEntry,
     ImportedEntry,
+    ImportedEquipmentEntry,
     ImportedFeatEntry,
+    isFeatEntry,
     itemCanBeRefreshed,
 } from "tools";
 
@@ -21,17 +37,15 @@ const ACTION_ICONS = {
 
 function prepareEntry(
     this: CharacterImporterTool,
-    itemType: ImportDataEntryKey,
-    entry: ImportedEntry | ImportedFeatEntry,
+    itemType: ImportItemType,
+    entry: ImportedEntry,
     current: ItemPF2e | null,
     depth: number,
 ): ImportDataEntry {
-    const isFeat = itemType === "feat";
     const isOverride = !!entry.override;
     const selection = getEntrySelection(entry);
     const matchLabel = this.localize("sheet.data.entry", isOverride ? "override" : "match");
-    const category = isFeat ? (entry as ImportedFeatEntry).category : undefined;
-    const label = game.i18n.localize(category ? CONFIG.PF2E.featCategories[category] : `TYPES.Item.${itemType}`);
+    const label = game.i18n.localize(`TYPES.Item.${itemType}`);
 
     const actions = R.pipe(
         [
@@ -51,7 +65,6 @@ function prepareEntry(
 
     return {
         actions,
-        category,
         children: [],
         current,
         depth,
@@ -75,13 +88,15 @@ function prepareFeatEntry(
     index: number,
     depth: number,
 ): ImportDataFeatEntry {
-    const current = getCurrentFeat(actor, entry);
+    const current = getCurrentItem(actor, "feat", entry);
 
     return {
         ...prepareEntry.call(this, "feat", entry, current, depth),
+        category: entry.category,
         children: prepareFeatEntries.call(this, actor, data, index, depth + 1),
         index,
         itemType: "feat",
+        label: game.i18n.localize(CONFIG.PF2E.featCategories[entry.category]),
         level: !entry.parent || !R.isNumber(Number(entry.parent)) ? entry.level : 0,
         parent: entry.parent,
     };
@@ -107,6 +122,46 @@ function prepareFeatEntries(
     );
 }
 
+function getCurrentItem(
+    actor: CharacterPF2e,
+    itemType: PhysicalItemType,
+    entry: ImportedContainerEntry | ImportedEquipmentEntry,
+): PhysicalItemPF2e | null;
+function getCurrentItem(actor: CharacterPF2e, itemType: "feat", entry: ImportedFeatEntry): FeatPF2e | null;
+function getCurrentItem(
+    actor: CharacterPF2e,
+    itemType: ItemType,
+    entry: ImportedContainerEntry | ImportedEquipmentEntry | ImportedFeatEntry,
+): ItemPF2e | null {
+    const selection = getEntrySelection(entry);
+    if (!selection) return null;
+
+    if (isFeatEntry(entry)) {
+        const featSlot = getFeatSlot(actor, entry);
+        if (featSlot) {
+            return featSlot.feat ?? null;
+        }
+    }
+
+    const selectionUUID = selection.uuid;
+    const selectionSlug = getItemSlug(selection);
+    const sourceUUID = (selection !== entry.match && entry.match?.uuid) || null;
+    const sourceSlug = sourceUUID ? SYSTEM.sluggify(entry.value) : null;
+
+    const item = actor.itemTypes[itemType].find((item) => {
+        const featSlug = getItemSlug(item);
+
+        if (item.sourceId !== selectionUUID && featSlug !== selectionSlug) {
+            if (!sourceUUID) return false;
+            if (item.sourceId !== sourceUUID && featSlug !== sourceSlug) return false;
+        }
+
+        return true;
+    });
+
+    return item ?? null;
+}
+
 // function getItemLevel(item: FeatPF2e): number;
 // function getItemLevel(item: ItemPF2e | null): number | undefined;
 // function getItemLevel(item: ItemPF2e | null) {
@@ -116,17 +171,16 @@ function prepareFeatEntries(
 //     return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
 // }
 
-type ImportDataEntryKey = CharacterCategory | "feat";
+type ImportItemType = CharacterCategory | PhysicalItemType | "container" | "feat";
 
 type ImportDataEntry = {
     actions: ImportDataContextAction[];
-    category: FeatOrFeatureCategory | undefined;
-    children: ImportDataFeatEntry[];
+    children: ImportDataEntry[];
     current: ItemPF2e | null | undefined;
     depth: number;
     img: string;
     isOverride: boolean;
-    itemType: ImportDataEntryKey;
+    itemType: ImportItemType;
     label: string;
     selection: ItemPF2e | null;
     source: {
@@ -136,6 +190,7 @@ type ImportDataEntry = {
 };
 
 type ImportDataFeatEntry = Omit<ImportDataEntry, "itemType"> & {
+    category: FeatOrFeatureCategory;
     index: number;
     itemType: "feat";
     level: number;
@@ -150,5 +205,5 @@ type ImportDataContextAction = {
 
 type ImportDataContextActionType = keyof typeof ACTION_ICONS;
 
-export { prepareEntry, prepareFeatEntries, prepareFeatEntry };
-export type { ImportDataContextActionType, ImportDataEntry, ImportDataEntryKey, ImportDataFeatEntry };
+export { getCurrentItem, prepareEntry, prepareFeatEntries, prepareFeatEntry };
+export type { ImportDataContextActionType, ImportDataEntry, ImportDataFeatEntry, ImportItemType };

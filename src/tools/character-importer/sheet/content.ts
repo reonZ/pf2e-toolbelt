@@ -44,6 +44,7 @@ async function createSheetContent(this: CharacterImporterTool, actor: CharacterP
 
     const data = await this.getImportData(actor);
     const context = await prepareContext.call(this, actor, data);
+    if (!this.getInMemory(actor, "importing")) return;
 
     const content = createHTMLElement("div", {
         classes: [SHEET_MENU_CLASS],

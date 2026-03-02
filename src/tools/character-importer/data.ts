@@ -1,4 +1,13 @@
-import { AttributeString, ItemType, R, valueBetween, z, ZeroToFour, zForeignItem } from "foundry-helpers";
+import {
+    AttributeString,
+    getPhysicalItemTypes,
+    ItemType,
+    R,
+    valueBetween,
+    z,
+    ZeroToFour,
+    zForeignItem,
+} from "foundry-helpers";
 
 const ANCESTRY_KEYS = ["boosts", "flaws", "locked"] as const;
 const ATTRIBUTE_KEYS = ["str", "dex", "con", "int", "wis", "cha"] as const;
@@ -54,10 +63,15 @@ const zContainer = zImportedEntry("backpack").extend({
     quantity: z.number().min(1).multipleOf(1).default(1),
 });
 
-const zEquipment = zImportedEntry("physical").extend({
-    container: z.string().nonempty().optional(),
-    quantity: z.number().min(1).multipleOf(1).default(1),
-});
+function zEquipment() {
+    const types = getPhysicalItemTypes();
+
+    return zImportedEntry("physical").extend({
+        container: z.string().nonempty().optional(),
+        quantity: z.number().min(1).multipleOf(1).default(1),
+        type: z.enum(types).default("equipment"),
+    });
+}
 
 const zProficiencyRank = z.custom((value) => R.isNumber(value) && valueBetween(value, 0, 4)).default(0) as z.ZodDefault<
     z.ZodCustom<ZeroToFour, ZeroToFour>
@@ -85,7 +99,7 @@ function zCharacterImport() {
         attributes: zAttributes,
         containers: z.array(zContainer).prefault([]),
         currencies: zCurrencies(),
-        equipments: z.array(zEquipment).prefault([]),
+        equipments: z.array(zEquipment()).prefault([]),
         feats: z.array(zFeat()).prefault([]),
         level: z.number().min(1).multipleOf(1).default(1),
         lores: z.array(zLore).prefault([]),
@@ -97,10 +111,6 @@ function zCharacterImport() {
 
 function getEntrySelection<T extends ImportedEntry>(entry: T): Exclude<T["override"] | T["match"], undefined> | null {
     return (entry.override ?? entry.match ?? null) as Exclude<T["override"] | T["match"], undefined> | null;
-}
-
-function isValidImportEntry(value: unknown): value is CharacterCategory | "feat" {
-    return R.isIncludedIn(value, [...CHARACTER_CATEGORIES, "feat"]);
 }
 
 function isCharacterCategory(value: unknown): value is CharacterCategory {
@@ -133,8 +143,8 @@ type ImportedFeatEntry = z.output<ReturnType<typeof zFeat>>;
 type ImportedContainerSource = z.input<typeof zContainer>;
 type ImportedContainerEntry = z.output<typeof zContainer>;
 
-type ImportedEquipmentSource = z.input<typeof zEquipment>;
-type ImportedEquipmentEntry = z.output<typeof zEquipment>;
+type ImportedEquipmentSource = z.input<ReturnType<typeof zEquipment>>;
+type ImportedEquipmentEntry = z.output<ReturnType<typeof zEquipment>>;
 
 export {
     ATTRIBUTE_KEYS,
@@ -143,7 +153,6 @@ export {
     isAttributeKey,
     isAttributeLevel,
     isCharacterCategory,
-    isValidImportEntry,
     zCharacterImport,
 };
 export type {
