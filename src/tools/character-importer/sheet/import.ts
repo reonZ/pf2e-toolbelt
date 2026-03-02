@@ -1,9 +1,14 @@
 import { CharacterPF2e, R, waitDialog } from "foundry-helpers";
 import { CharacterImport, CharacterImporterTool, fromPathbuilder, ImportedFeatSource, isCharacterCategory } from "..";
 
-async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fromFile: boolean) {
-    const code = await (fromFile ? importFromFile : importFromJSON).call(this);
-    if (!R.isString(code)) return;
+async function importData(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e, fromFile: boolean) {
+    const codeOrFile = fromFile ? await importFromFile.call(this) : await importFromJSON.call(this);
+    if (!codeOrFile) return;
+
+    this.removeSheetContent(html);
+    this.addLoader(html);
+
+    const code = R.isString(codeOrFile) ? codeOrFile : await foundry.utils.readTextFromFile(codeOrFile);
 
     try {
         const parsed = JSON.parse(code) as unknown;
@@ -53,6 +58,9 @@ async function importData(this: CharacterImporterTool, actor: CharacterPF2e, fro
         this.localize.info("import.success");
     } catch (error) {
         console.error(error);
+    } finally {
+        this.removeLoader(html);
+        this.addSheetContent(html, actor);
     }
 }
 
@@ -65,13 +73,13 @@ async function importFromJSON(this: CharacterImporterTool): Promise<string | nul
     return result ? result.code : null;
 }
 
-async function importFromFile(this: CharacterImporterTool): Promise<string | null> {
+async function importFromFile(this: CharacterImporterTool): Promise<File | null> {
     const result = await waitDialog<{ file: File }>({
         i18n: this.path("import.file"),
         content: `<input type="file" name="file" accept=".json">`,
     });
 
-    return result && result.file ? foundry.utils.readTextFromFile(result.file) : null;
+    return result ? result.file : null;
 }
 
 export { importData };

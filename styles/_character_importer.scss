@@ -12,6 +12,14 @@
         }
     }
 
+    .pf2e-toolbelt-character-importer-loader {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10em;
+    }
+
     form.importing-character {
         .char-header .char-level .character-importer {
             .import {
