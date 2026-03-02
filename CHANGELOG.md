@@ -1,8 +1,22 @@
-#
+# 3.31.0
 
 - `Character Importer`:
-  - now display feats that are automatically awarded by the `class`
+  - you need to re-import the data to take advantage of the changes made in this version
+  - implement the `Items` tab:
+    - currency overriding completely reset the character's currencies to the pathbuilder values
+    - containers have their name changed to the pathbuilder value if different from the regular name
+    - `Spacious Pouch` containers will be `Type I` by default
+    - any container that isn't a `Spacious Pouch` will be a `Backpack`
+    - replacing a current item will leave it in its current container instead of the pathbuilder container
+    - replacing a container will have all of its content be transfered to the new item
+    - just like for feats and others, you can drag & drop another item to override the matching ones
+  - now retain tab & position of the importer when toggled off
+  - now display feats that are automatically awarded by the `Class` and `Background`
+  - now diplay a spinner whenever the importer is doing intensive processing to notify the user
   - no longer display the level of attached feats
+  - fix importer still being injected in the sheet when closing it fast after opening it (due to async processing)
+- `Hero Actions`:
+  - fix not being able to use the `removeHeroActions` api function
 
 # 3.30.1
 
@@ -12,9 +26,9 @@
 # 3.30.0
 
 - `Character Importer`:
+  - you need to re-import the data to take advantage of the changes made in this version
   - implement the `Feats` tab:
     - the module will look for the `current` feats in feat slots instead of matching feats when appropriate
-  - you need to re-import the data to take advantage of the changes made in this version
   - reminder that we are still in the testing stage of the tool
 - `Merge Damage`:
   - fix newly created message losing the targets from the merged ones and instead using the current targets
