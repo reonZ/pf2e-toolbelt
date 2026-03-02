@@ -1,3 +1,9 @@
+# 3.31.1
+
+- `Identify`:
+  - fix localization of tooltips
+  - fix confirm dialogs error preventing the use of the `Auto` and `Update` features
+
 # 3.31.0
 
 - `Character Importer`:
@@ -8,7 +14,7 @@
     - `Spacious Pouch` containers will be `Type I` by default
     - any container that isn't a `Spacious Pouch` will be a `Backpack`
     - replacing a current item will leave it in its current container instead of the pathbuilder container
-    - replacing a container will have all of its content be transfered to the new item
+    - replacing a container will have all of its content be transferred to the new item
     - just like for feats and others, you can drag & drop another item to override the matching ones
   - now retain tab & position of the importer when toggled off
   - now display feats that are automatically awarded by the `Class` and `Background`
