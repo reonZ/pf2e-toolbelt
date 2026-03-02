@@ -509,7 +509,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
             });
         }
 
-        const confirm = await confirmDialog(this.templatePath("auto"), {
+        const confirm = await confirmDialog(this.path("auto"), {
             data: { items: createDialogItemList(items) },
         });
 
@@ -577,7 +577,7 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         await Promise.all(elementsUpdatesPromises);
 
         if (toIdentify.length) {
-            const confirm = await confirmDialog(this.templatePath("save"), {
+            const confirm = await confirmDialog(this.path("save"), {
                 data: { items: createDialogItemList(toIdentify) },
             });
             if (!confirm) return;
