@@ -178,9 +178,13 @@ function addEventListeners(this: CharacterImporterTool, html: HTMLElement, actor
                 throw MODULE.Error("invalid data type.");
             }
 
-            const itemType = R.isString(dropData.itemType)
-                ? (dropData.itemType as string)
-                : (fromUuidSync(dropData.uuid) as CompendiumIndexData | null)?.type;
+            let itemType = R.isString(dropData.itemType)
+                ? dropData.itemType
+                : fromUuidSync<CompendiumIndexData>(dropData.uuid)?.type;
+
+            if (entry.dataset.itemType === "container" && itemType === "backpack") {
+                itemType = "container";
+            }
 
             if (!itemType || itemType !== entry.dataset.itemType) {
                 throw MODULE.Error("invalid item type.");

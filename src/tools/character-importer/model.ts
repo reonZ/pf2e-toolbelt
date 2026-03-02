@@ -1,10 +1,9 @@
-import { ItemPF2e, R, ZodDocument } from "foundry-helpers";
+import { getPhysicalItemTypes, ItemPF2e, PhysicalItemType, R, ZodDocument } from "foundry-helpers";
 import {
     CharacterCategory,
     CharacterImportData,
     CharacterImportSource,
     ImportedEntry,
-    ImportItemType,
     isCharacterCategory,
     zCharacterImport,
 } from ".";
@@ -36,11 +35,11 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         return isCharacterCategory(itemType) ? this[itemType] : undefined;
     }
 
-    updateEntryOverride(itemType: string | undefined, value: ItemPF2e | null, index: number): boolean {
-        if (itemType === "feat" && R.isNumber(index)) {
-            return this.updateFeatOverride(index, value);
-        } else if (isCharacterCategory(itemType)) {
+    updateEntryOverride(itemType: string, value: ItemPF2e | null, index: number): boolean {
+        if (isCharacterCategory(itemType)) {
             return this.updateCoreOverride(itemType, value);
+        } else if (itemType === "feat" || isPhysicalCategory(itemType)) {
+            return this.updateIndexedEntryOverride(itemType, index, value);
         }
         return false;
     }
@@ -54,9 +53,13 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         return true;
     }
 
-    updateFeatOverride(index: number, value: ItemPF2e | null): boolean {
-        const feats = this.feats.slice();
-        const entry = feats.at(Number(index));
+    updateIndexedEntryOverride(
+        itemType: PhysicalItemType | "container" | "feat",
+        index: number,
+        value: ItemPF2e | null,
+    ): boolean {
+        const entries = itemType === "feat" ? this.feats : itemType === "container" ? this.containers : this.equipments;
+        const entry = entries.at(index);
         if (!entry) return false;
 
         if (value === null || entry.match?.uuid === value.uuid) {
@@ -75,4 +78,12 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
 
 interface CharacterImport extends CharacterImportData {}
 
+function isPhysicalCategory(value: unknown): value is PhysicalItemType | "container" {
+    const physicalTypes = getPhysicalItemTypes();
+    return R.isIncludedIn(value, ["container", ...physicalTypes]);
+}
+
+type ImportItemType = CharacterCategory | PhysicalItemType | "container" | "feat";
+
 export { CharacterImport };
+export type { ImportItemType };

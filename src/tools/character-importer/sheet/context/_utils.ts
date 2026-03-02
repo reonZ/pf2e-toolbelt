@@ -23,6 +23,7 @@ import {
     ImportedEntry,
     ImportedEquipmentEntry,
     ImportedFeatEntry,
+    ImportItemType,
     isFeatEntry,
     itemCanBeRefreshed,
 } from "tools";
@@ -171,8 +172,6 @@ function getCurrentItem(
 //     return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
 // }
 
-type ImportItemType = CharacterCategory | PhysicalItemType | "container" | "feat";
-
 type ImportDataEntry = {
     actions: ImportDataContextAction[];
     children: ImportDataEntry[];
@@ -206,4 +205,4 @@ type ImportDataContextAction = {
 type ImportDataContextActionType = keyof typeof ACTION_ICONS;
 
 export { getCurrentItem, prepareEntry, prepareFeatEntries, prepareFeatEntry };
-export type { ImportDataContextActionType, ImportDataEntry, ImportDataFeatEntry, ImportItemType };
+export type { ImportDataContextActionType, ImportDataEntry, ImportDataFeatEntry };
