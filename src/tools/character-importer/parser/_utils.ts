@@ -13,6 +13,7 @@ const FEAT_PACKS: PartialRecord<FeatOrFeatureCategory, string> = {
     classfeature: "classfeatures",
 };
 
+const EQUIPMENT_PACK = "equipment-srd";
 const FEATS_PACK = "feats-srd";
 
 async function getUuidFromPack(value: string, packName: string): Promise<ItemUUID | null> {
@@ -37,4 +38,8 @@ async function getFeatUuidFromPack(value: string, category: FeatOrFeatureCategor
     return getUuidFromPack(value, pack);
 }
 
-export { CORE_PACKS, getCoreUuidFromPack, getFeatUuidFromPack };
+async function getEquipmentUuidFromPack(value: string): Promise<ItemUUID | null> {
+    return value ? getUuidFromPack(value, EQUIPMENT_PACK) : null;
+}
+
+export { CORE_PACKS, getCoreUuidFromPack, getEquipmentUuidFromPack, getFeatUuidFromPack };

@@ -11,11 +11,11 @@ function zBoostsRecord(keys: ReadonlyArray<string>) {
     return z.record(z.enum(keys), zBoosts).default(R.fromKeys(keys, () => []));
 }
 
-function zImportedEntry<T extends ItemType>(type: T) {
+function zImportedEntry<T extends ItemType | "physical">(type: T) {
     return z.object({
         match: zForeignItem(type, false),
         override: zForeignItem(type, false).optional(),
-        value: z.string().trim().default(""),
+        value: z.string().trim(),
     });
 }
 
@@ -49,6 +49,16 @@ function zFeat() {
     });
 }
 
+const zContainer = zImportedEntry("backpack").extend({
+    identifier: z.string(),
+    quantity: z.number().min(1).multipleOf(1).default(1),
+});
+
+const zEquipment = zImportedEntry("physical").extend({
+    container: z.string().nonempty().optional(),
+    quantity: z.number().min(1).multipleOf(1).default(1),
+});
+
 const zProficiencyRank = z.custom((value) => R.isNumber(value) && valueBetween(value, 0, 4)).default(0) as z.ZodDefault<
     z.ZodCustom<ZeroToFour, ZeroToFour>
 >;
@@ -73,7 +83,9 @@ function zCurrencies() {
 function zCharacterImport() {
     return z.object({
         attributes: zAttributes,
+        containers: z.array(zContainer).prefault([]),
         currencies: zCurrencies(),
+        equipments: z.array(zEquipment).prefault([]),
         feats: z.array(zFeat()).prefault([]),
         level: z.number().min(1).multipleOf(1).default(1),
         lores: z.array(zLore).prefault([]),
@@ -118,6 +130,12 @@ type ImportedEntry = z.output<ReturnType<typeof zImportedEntry>>;
 type ImportedFeatSource = z.input<ReturnType<typeof zFeat>>;
 type ImportedFeatEntry = z.output<ReturnType<typeof zFeat>>;
 
+type ImportedContainerSource = z.input<typeof zContainer>;
+type ImportedContainerEntry = z.output<typeof zContainer>;
+
+type ImportedEquipmentSource = z.input<typeof zEquipment>;
+type ImportedEquipmentEntry = z.output<typeof zEquipment>;
+
 export {
     ATTRIBUTE_KEYS,
     CHARACTER_CATEGORIES,
@@ -134,8 +152,12 @@ export type {
     CharacterImportData,
     CharacterImportSource,
     FeatEntryParent,
+    ImportedContainerEntry,
+    ImportedContainerSource,
     ImportedEntry,
     ImportedEntrySource,
+    ImportedEquipmentEntry,
+    ImportedEquipmentSource,
     ImportedFeatEntry,
     ImportedFeatSource,
 };

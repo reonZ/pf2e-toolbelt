@@ -1,3 +1,9 @@
+#
+
+- `Character Importer`:
+  - now display feats that are automatically awarded by the `class`
+  - no longer display the level of attached feats
+
 # 3.30.1
 
 - `Target Helper`:

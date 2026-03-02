@@ -5,8 +5,11 @@ import {
     CharacterCategory,
     CharacterImportSource,
     getCoreUuidFromPack,
+    getEquipmentUuidFromPack,
     getFeatUuidFromPack,
+    ImportedContainerSource,
     ImportedEntrySource,
+    ImportedEquipmentSource,
     ImportedFeatSource,
     isAttributeKey,
     isAttributeLevel,
@@ -34,7 +37,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
 
     type FeatSourcePromise = Promise<(ImportedFeatSource & { childEntry?: string; parentEntry?: string }) | undefined>;
 
-    const featsPromises = (R.isArray(data.feats) ? data.feats : []).map(async (entry, i, feats): FeatSourcePromise => {
+    const featsPromises = R.map(R.isArray(data.feats) ? data.feats : [], async (entry, i, feats): FeatSourcePromise => {
         if (!R.isArray(entry)) return;
 
         const [value, _, categoryValue, level, child, choice, parent] = entry;
@@ -150,6 +153,46 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         return R.isNumber(value) ? value : 0;
     });
 
+    const containersPromises = R.map(
+        R.entries(R.isPlainObject(data.equipmentContainers) ? data.equipmentContainers : {}),
+        async ([identifier, entry]): Promise<ImportedContainerSource | undefined> => {
+            if (!R.isPlainObject(entry) || !("containerName" in entry) || !R.isString(entry.containerName)) return;
+
+            return {
+                identifier,
+                match: await getEquipmentUuidFromPack(entry.containerName),
+                value: entry.containerName,
+            };
+        },
+    );
+
+    const containers = R.filter(await Promise.all(containersPromises), R.isTruthy);
+    const containersIdentifiers = R.map(containers, R.prop("identifier"));
+    const containersByName = R.indexBy(containers, R.prop("value"));
+
+    const equipmentsPromises = R.map(
+        R.isArray(data.equipment) ? data.equipment : [],
+        async (entry): Promise<ImportedEquipmentSource | undefined> => {
+            if (!R.isArray(entry)) return;
+
+            const [name, quantity, identifier] = entry;
+            if (!R.isString(name) || !R.isNumber(quantity) || !R.isString(identifier)) return;
+
+            const container = containersByName[name];
+            if (container) {
+                container.quantity = quantity;
+                return;
+            }
+
+            return {
+                container: R.isIncludedIn(identifier, containersIdentifiers) ? identifier : undefined,
+                match: await getEquipmentUuidFromPack(name),
+                quantity: Math.max(quantity, 1),
+                value: name,
+            };
+        },
+    );
+
     return {
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
@@ -165,7 +208,9 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         },
         background: await parseCoreEntry(data, "background"),
         class: classe,
+        containers,
         currencies,
+        equipments: R.filter(await Promise.all(equipmentsPromises), R.isTruthy),
         feats: feats,
         heritage: await parseCoreEntry(data, "heritage"),
         level: R.isNumber(data.level) ? data.level : undefined,
