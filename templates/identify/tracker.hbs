@@ -2,27 +2,27 @@
     data-tooltip-class="pf2e">
     <div class="buttons">
         <div class="top">
-            <button type="button" data-action="auto" {{@root.i18n.tooltip 'auto.tooltip' }}>
+            <button type="button" data-action="auto" {{{@root.i18n.tooltip 'auto.tooltip' }}}>
                 {{@root.i18n 'auto.label'}}
             </button>
-            <button type="button" data-action="save" {{@root.i18n.tooltip 'save.tooltip' }}>
+            <button type="button" data-action="save" {{{@root.i18n.tooltip 'save.tooltip' }}}>
                 {{@root.i18n 'save.label'}}
             </button>
-            <button type="button" data-action="reset" {{@root.i18n.tooltip 'reset.tooltip' }}>
+            <button type="button" data-action="reset" {{{@root.i18n.tooltip 'reset.tooltip' }}}>
                 {{@root.i18n 'reset.label'}}
             </button>
         </div>
         <div class="bottom">
             <button type="button" data-action="change-time" data-direction="-"
-                {{@root.i18n.tooltip 'clock.backward' }}>
+                {{{@root.i18n.tooltip 'clock.backward' }}}>
                 -10
             </button>
             <button type="button" class="clock" data-action="open-clock"
-                {{@root.i18n.tooltip 'clock.open' }}>
+                {{{@root.i18n.tooltip 'clock.open' }}}>
                 {{date}} {{time}}
             </button>
             <button type="button" data-action="change-time" data-direction="+"
-                {{@root.i18n.tooltip 'clock.forward' }}>
+                {{{@root.i18n.tooltip 'clock.forward' }}}>
                 +10
             </button>
         </div>
@@ -63,7 +63,7 @@
                 <a data-action="mystify-item" data-tooltip="PF2E.identification.Mystify">
                     <i class="fa-solid fa-rotate-left"></i>
                 </a>
-                <a data-action="send-to-chat" {{@root.i18n.tooltip 'send-to-chat' }}>
+                <a data-action="send-to-chat" {{{@root.i18n.tooltip 'send-to-chat' }}}>
                     <i class="fa-solid fa-message"></i>
                 </a>
                 {{else}}
