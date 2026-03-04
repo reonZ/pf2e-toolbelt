@@ -29,7 +29,7 @@ async function prepareInventoryTab(
     });
 
     const items = R.map(data.equipments, (entry, index): ImportDataEquipmentEntry => {
-        const current = getCurrentItem(actor, entry.type, entry);
+        const current = getCurrentItem(actor, actor.itemTypes[entry.type], entry);
 
         return {
             ...prepareEntry.call(this, entry.type as PhysicalItemType, entry, current, 0),
@@ -43,7 +43,7 @@ async function prepareInventoryTab(
     });
 
     const containers = R.map(data.containers, (entry, index): ImportDataEquipmentEntry => {
-        const current = getCurrentItem(actor, "backpack", entry);
+        const current = getCurrentItem(actor, actor.itemTypes.backpack, entry);
 
         const children = R.pipe(
             items,

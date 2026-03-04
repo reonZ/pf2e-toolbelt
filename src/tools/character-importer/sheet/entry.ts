@@ -1,13 +1,15 @@
-import { CharacterPF2e, FeatSlot, htmlClosest, MODULE } from "foundry-helpers";
+import { CharacterPF2e, FeatSlot, htmlClosest, MODULE, SpellPF2e } from "foundry-helpers";
 import {
     CharacterImport,
     CharacterImporterTool,
+    getCurrentItem,
     getEntrySelection,
     ImportDataContextActionType,
     ImportedContainerEntry,
     ImportedEntry,
     ImportedEquipmentEntry,
     ImportedFeatEntry,
+    ImportedSpellEntry,
     ImportItemType,
     itemCanBeRefreshed,
 } from "..";
@@ -63,8 +65,6 @@ async function onEntryInstall(
         throw MODULE.Error(ERROR_ACCESSING);
     }
 
-    if ((entry as ImportedFeatEntry).parent) return;
-
     const item = getEntrySelection(entry);
     if (!item) {
         throw MODULE.Error("couldn't retrieve matching item.");
@@ -73,12 +73,29 @@ async function onEntryInstall(
     const source = item.toObject();
     source._id = foundry.utils.randomID();
 
-    if (isFeatEntry(entry)) {
+    if (isSpellEntry(entry)) {
+        const spellcasting = dataset.parent && actor.spellcasting.get(dataset.parent);
+        if (!spellcasting) return;
+
+        const current = getCurrentItem(actor, spellcasting?.spells, entry);
+
+        if (current) {
+            await actor.deleteEmbeddedDocuments("Item", [current.id], { render: false });
+        }
+
+        foundry.utils.setProperty(source, "system.location.value", spellcasting.id);
+
+        if (entry.rank > (item as SpellPF2e).rank) {
+            foundry.utils.setProperty(source, "system.location.heightenedLevel", entry.rank);
+        }
+    } else if (isFeatEntry(entry)) {
+        if (entry.parent) return;
+
         const featSlot = getFeatSlot(actor, entry);
 
         if (featSlot) {
             if (featSlot.feat) {
-                await actor.deleteEmbeddedDocuments("Item", [featSlot.feat.id]);
+                await actor.deleteEmbeddedDocuments("Item", [featSlot.feat.id], { render: false });
             }
 
             foundry.utils.setProperty(source, "system.location", featSlot.id);
@@ -103,7 +120,7 @@ async function onEntryInstall(
         }
 
         if (current) {
-            await actor.deleteEmbeddedDocuments("Item", [current.id]);
+            await actor.deleteEmbeddedDocuments("Item", [current.id], { render: false });
         } else if (isEquipmentEntry(entry) && entry.container) {
             const parent = dataset.parent ? actor.items.get(dataset.parent) : undefined;
 
@@ -113,11 +130,15 @@ async function onEntryInstall(
         }
 
         if (currentContents.length) {
-            await actor.updateEmbeddedDocuments("Item", currentContents);
+            await actor.updateEmbeddedDocuments("Item", currentContents, { render: false });
         }
     }
 
     await actor.createEmbeddedDocuments("Item", [source], { keepId: true });
+}
+
+function isSpellEntry(entry: ImportedEntry): entry is ImportedSpellEntry {
+    return "rank" in entry || ("parent" in entry && entry.parent === "rituals");
 }
 
 function isFeatEntry(entry: ImportedEntry): entry is ImportedFeatEntry {

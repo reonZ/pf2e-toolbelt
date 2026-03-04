@@ -631,8 +631,21 @@
                         "set": "Skills proficiencies have been assigned."
                     },
                     "spellcasting": {
-                        "add": "Create new Spellcasting entry",
-                        "fill": "Add all missing spells"
+                        "add": {
+                            "content": "Do you want to create a new Spellcasting entry with the matching data?",
+                            "title": "Create new Spellcasting entry",
+                            "yes": "Create"
+                        },
+                        "fill": {
+                            "content": "Do you want to add all the spells that couldn't be found in the Spellcasting entry?",
+                            "label": "Add all missing spells",
+                            "title": "Fill Spellcasting with missing spells",
+                            "yes": "Fill"
+                        },
+                        "refresh": {
+                            "label": "Refresh slots values",
+                            "set": "Spellcasting slots have been refreshed"
+                        }
                     }
                 },
                 "menu": {

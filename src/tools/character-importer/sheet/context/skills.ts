@@ -71,11 +71,13 @@ async function assignSkills(this: CharacterImporterTool, actor: CharacterPF2e) {
         }
     }
 
+    const hasLores = lores.length > 0;
+
     if (!foundry.utils.isEmpty(skills)) {
-        await actor.update({ "system.skills": skills });
+        await actor.update({ "system.skills": skills }, { render: !hasLores });
     }
 
-    if (lores.length) {
+    if (hasLores) {
         await actor.createEmbeddedDocuments("Item", lores);
     }
 

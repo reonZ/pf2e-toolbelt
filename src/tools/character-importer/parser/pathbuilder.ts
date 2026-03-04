@@ -264,10 +264,17 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
                 return;
             }
 
+            const perDay = R.isArray(entry.perDay) ? entry.perDay : [];
+            const slots = R.times(11, (slot) => {
+                const value = perDay.at(slot);
+                return R.isNumber(value) && value >= 0 ? value : 0;
+            });
+
             return {
                 attribute: entry.ability as AttributeString,
                 identifier,
                 name: entry.name,
+                slots,
                 tradition: entry.magicTradition,
                 type: entry.innate === true ? "innate" : entry.spellcastingType,
             };
@@ -301,6 +308,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
                         attribute,
                         identifier,
                         name: game.i18n.localize("PF2E.Focus.Spells"),
+                        slots: [],
                         tradition,
                         type: "focus",
                     };
@@ -310,6 +318,22 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
             return R.filter(await Promise.all(entries), R.isTruthy);
         }),
     );
+
+    const ritualsPromises = R.pipe(
+        R.isArray(data.rituals) ? data.rituals : [],
+        R.map(async (entry): Promise<ImportedSpellSource | undefined> => {
+            if (!R.isString(entry)) return;
+
+            return {
+                match: await getSpellUuidFromPack(entry),
+                parent: "rituals",
+                value: entry,
+            };
+        }),
+    );
+
+    const rituals = R.filter(await Promise.all(ritualsPromises), R.isTruthy);
+    allSpells.push(...rituals);
 
     return {
         ancestry: await parseCoreEntry(data, "ancestry"),

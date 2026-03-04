@@ -279,7 +279,7 @@
 
         .spellcasting {
             display: grid;
-            grid-template-columns: 1fr 1fr auto;
+            grid-template-columns: 1.2fr 1fr auto;
             align-items: center;
             gap: 0.5em;
             white-space: nowrap;
@@ -300,10 +300,17 @@
                 text-overflow: ellipsis;
             }
 
+            select {
+                line-height: 1.2;
+                background-color: #00000029;
+                border-color: #ffffff61;
+            }
+
             .controls {
                 display: flex;
                 align-items: center;
                 gap: 0.5em;
+                grid-column: -2;
 
                 a[disabled] {
                     opacity: 0.4;

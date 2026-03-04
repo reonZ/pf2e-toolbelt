@@ -107,6 +107,7 @@ function zSpellcastingEntry() {
         identifier: z.string(),
         name: z.string().nonempty(),
         selected: zDocumentId().nullable().default(null),
+        slots: z.tuple(R.times(11, () => z.number().min(0).multipleOf(1).default(0))),
         tradition: z.enum(R.keys(CONFIG.PF2E.magicTraditions)),
         type: z.enum(SPELLCASTING_CATEGORIES),
     });
@@ -170,6 +171,7 @@ type ImportedSpellcastingSource = z.input<ReturnType<typeof zSpellcastingEntry>>
 type ImportedSpellcastingEntry = z.output<ReturnType<typeof zSpellcastingEntry>>;
 
 type ImportedSpellSource = z.input<typeof zSpell>;
+type ImportedSpellEntry = z.output<typeof zSpell>;
 
 export {
     ATTRIBUTE_KEYS,
@@ -196,5 +198,6 @@ export type {
     ImportedFeatSource,
     ImportedSpellcastingEntry,
     ImportedSpellcastingSource,
+    ImportedSpellEntry,
     ImportedSpellSource,
 };

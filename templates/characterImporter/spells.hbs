@@ -3,19 +3,43 @@
     <div class="name">
         {{entry.label}}
     </div>
-    <select name="spellcating-selection" {{disabled (lt entry.selections.length 2)}}>
+    <select name="spellcasting-selection" {{disabled (lt entry.selections.length 2)}}>
         {{selectOptions entry.selections selected=entry.selected}}
     </select>
     <div class="controls">
-        <a data-action="add-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.add'}}}>
+        <a data-action="add-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.add.title'}}}>
             <i class="fa-solid fa-plus-large" ></i>
         </a>
-        <a data-action="fill-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.fill'}}} {{disabled (not entry.selections.length)}}>
+        {{#if entry.hasSlotsToRefresh}}
+        <a data-action="refresh-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.refresh.label'}}}>
+            <i class="fa-solid fa-arrows-rotate"></i>
+        </a>
+        {{/if}}
+        {{#if entry.hasMissingSpells}}
+        <a data-action="fill-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.fill.label'}}}>
             <i class="fa-solid fa-book-sparkles"></i>
         </a>
+        {{/if}}
     </div>
 </div>
 {{#each entry.spells as |spell|}}
 {{> 'entry' spell}}
 {{/each}}
 {{/each}}
+{{#if rituals}}
+<div class="spellcasting">
+    <div class="name">
+        {{localize 'PF2E.Actor.Creature.Spellcasting.Rituals'}}
+    </div>
+    <div class="controls">
+        {{#if rituals.hasMissingSpells}}
+        <a data-action="fill-rituals" {{{@root.i18n.tooltip 'data.spellcasting.fill.label'}}}>
+            <i class="fa-solid fa-book-sparkles"></i>
+        </a>
+        {{/if}}
+    </div>
+</div>
+{{#each rituals.spells as |spell|}}
+{{> 'entry' spell}}
+{{/each}}
+{{/if}}

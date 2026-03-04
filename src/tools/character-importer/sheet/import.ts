@@ -132,8 +132,6 @@ async function importData(this: CharacterImporterTool, html: HTMLElement, actor:
         this.localize.info("import.success");
     } catch (error) {
         console.error(error);
-    } finally {
-        this.addSheetContent(html, actor);
     }
 }
 

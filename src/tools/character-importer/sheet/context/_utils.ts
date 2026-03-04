@@ -3,11 +3,10 @@ import {
     FeatOrFeatureCategory,
     FeatPF2e,
     getItemSlug,
+    getItemSourceId,
     ItemPF2e,
-    ItemType,
     ItemUUID,
     PhysicalItemPF2e,
-    PhysicalItemType,
     R,
     SpellPF2e,
     stringNumber,
@@ -24,6 +23,7 @@ import {
     ImportedEntry,
     ImportedEquipmentEntry,
     ImportedFeatEntry,
+    ImportedSpellEntry,
     ImportItemType,
     isFeatEntry,
     itemCanBeRefreshed,
@@ -91,7 +91,7 @@ function prepareFeatEntry(
     index: number,
     depth: number,
 ): ImportDataFeatEntry {
-    const current = getCurrentItem(actor, "feat", entry);
+    const current = getCurrentItem(actor, actor.itemTypes.feat, entry);
 
     return {
         ...prepareEntry.call(this, "feat", entry, current, depth),
@@ -127,15 +127,18 @@ function prepareFeatEntries(
 
 function getCurrentItem(
     actor: CharacterPF2e,
-    itemType: PhysicalItemType,
+    itemsList: Maybe<ItemList>,
     entry: ImportedContainerEntry | ImportedEquipmentEntry,
 ): PhysicalItemPF2e | null;
-function getCurrentItem(actor: CharacterPF2e, itemType: "feat", entry: ImportedFeatEntry): FeatPF2e | null;
+function getCurrentItem(actor: CharacterPF2e, itemsList: Maybe<ItemList>, entry: ImportedSpellEntry): SpellPF2e | null;
+function getCurrentItem(actor: CharacterPF2e, itemsList: Maybe<ItemList>, entry: ImportedFeatEntry): FeatPF2e | null;
 function getCurrentItem(
     actor: CharacterPF2e,
-    itemType: ItemType,
-    entry: ImportedContainerEntry | ImportedEquipmentEntry | ImportedFeatEntry,
+    itemsList: Maybe<ItemList>,
+    entry: ImportedContainerEntry | ImportedEquipmentEntry | ImportedFeatEntry | ImportedSpellEntry,
 ): ItemPF2e | null {
+    if (!itemsList) return null;
+
     const selection = getEntrySelection(entry);
     if (!selection) return null;
 
@@ -151,18 +154,20 @@ function getCurrentItem(
     const sourceUUID = (selection !== entry.match && entry.match?.uuid) || null;
     const sourceSlug = sourceUUID ? SYSTEM.sluggify(entry.value) : null;
 
-    const item = actor.itemTypes[itemType].find((item) => {
-        const featSlug = getItemSlug(item);
+    const current = itemsList.find((item) => {
+        // const current = actor.itemTypes[itemType].find((item) => {
+        const itemSlug = getItemSlug(item);
+        const itemSourceId = getItemSourceId(item);
 
-        if (item.sourceId !== selectionUUID && featSlug !== selectionSlug) {
+        if (itemSourceId !== selectionUUID && itemSlug !== selectionSlug) {
             if (!sourceUUID) return false;
-            if (item.sourceId !== sourceUUID && featSlug !== sourceSlug) return false;
+            if (itemSourceId !== sourceUUID && itemSlug !== sourceSlug) return false;
         }
 
         return true;
     });
 
-    return item ?? null;
+    return current ?? null;
 }
 
 // function getItemLevel(item: FeatPF2e): number;
@@ -173,6 +178,10 @@ function getCurrentItem(
 //     const { system } = item as { system: { level?: { taken?: number | null; value: number } } };
 //     return getItemLevel(item.grantedBy) ?? system.level?.taken ?? system.level?.value;
 // }
+
+type ItemList = {
+    find: (predicate: (value: ItemPF2e) => boolean) => ItemPF2e | undefined;
+};
 
 type ImportDataEntry = {
     actions: ImportDataContextAction[];
