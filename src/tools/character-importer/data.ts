@@ -115,11 +115,14 @@ function zSpellcastingEntry() {
 
 function zCharacterImport() {
     return z.object({
+        age: z.string().default(""),
         attributes: zAttributes,
         containers: z.array(zContainer).prefault([]),
         currencies: zCurrencies(),
         equipments: z.array(zEquipment()).prefault([]),
         feats: z.array(zFeat()).prefault([]),
+        gender: z.string().default(""),
+        languages: z.array(z.enum(R.keys(CONFIG.PF2E.languages))).prefault([]),
         level: z.number().min(1).multipleOf(1).default(1),
         lores: z.array(zLore).prefault([]),
         name: z.string().default(""),

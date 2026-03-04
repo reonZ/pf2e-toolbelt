@@ -80,8 +80,6 @@ async function assignSkills(this: CharacterImporterTool, actor: CharacterPF2e) {
     if (hasLores) {
         await actor.createEmbeddedDocuments("Item", lores);
     }
-
-    this.localize.info("sheet.data.skills.set");
 }
 
 function getSkillEntry(rank: ZeroToFour): ImportSkillEntry {

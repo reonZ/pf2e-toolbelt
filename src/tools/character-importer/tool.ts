@@ -17,6 +17,7 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import {
     addCoreEventListeners,
+    addDetailsEventListeners,
     addFeatsEventListeners,
     addInventoryEventListeners,
     addSkillsEventListeners,
@@ -27,6 +28,7 @@ import {
     importData,
     onEntryAction,
     prepareCoreTab,
+    prepareDetailsTab,
     prepareFeatsTab,
     prepareInventoryTab,
     prepareSkillsTab,
@@ -163,7 +165,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
         const tabs: ImportDataContext["tabs"] = {
             core: await prepareCoreTab.call(this, actor, data),
-            details: {},
+            details: await prepareDetailsTab.call(this, actor, data),
             feats: await prepareFeatsTab.call(this, actor, data),
             inventory: await prepareInventoryTab.call(this, actor, data),
             skills: await prepareSkillsTab.call(this, actor, data),
@@ -341,6 +343,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
         addListenerAll(content, ".data", "drop", onDrop, true);
 
         addCoreEventListeners.call(this, content, actor);
+        addDetailsEventListeners.call(this, content, actor);
         addFeatsEventListeners.call(this, content, actor);
         addInventoryEventListeners.call(this, content, actor);
         addSkillsEventListeners.call(this, content, actor);

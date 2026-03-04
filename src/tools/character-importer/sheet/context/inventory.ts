@@ -170,8 +170,6 @@ async function assignCurrencies(this: CharacterImporterTool, actor: CharacterPF2
     if (toAdd.length) {
         await actor.createEmbeddedDocuments("Item", toAdd);
     }
-
-    this.localize.info("sheet.data.inventory.set");
 }
 
 type EventAction = "assign-currencies";

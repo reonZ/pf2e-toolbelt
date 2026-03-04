@@ -332,10 +332,17 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         }),
     );
 
-    const rituals = R.filter(await Promise.all(ritualsPromises), R.isTruthy);
-    allSpells.push(...rituals);
+    allSpells.push(...R.filter(await Promise.all(ritualsPromises), R.isTruthy));
+
+    const languageKeys = R.keys(CONFIG.PF2E.languages);
+    const languages = R.pipe(
+        R.isArray(data.languages) ? data.languages : [],
+        R.map((entry) => R.isString(entry) && SYSTEM.sluggify(entry)),
+        R.filter((entry): entry is string => R.isIncludedIn(entry, languageKeys)),
+    );
 
     return {
+        age: R.isString(data.age) ? data.age : undefined,
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
             ancestry: {
@@ -354,7 +361,9 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         currencies,
         equipments: R.filter(await Promise.all([...weaponsAndArmorsPromises, ...equipmentsPromises]), R.isTruthy),
         feats: feats,
+        gender: R.isString(data.gender) ? data.gender : undefined,
         heritage: await parseCoreEntry(data, "heritage"),
+        languages,
         level: R.isNumber(data.level) ? data.level : undefined,
         lores,
         name: R.isString(data.name) ? data.name : "",

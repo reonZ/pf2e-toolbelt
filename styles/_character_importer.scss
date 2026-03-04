@@ -318,6 +318,42 @@
             }
         }
 
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr;
+            gap: 0.2rem 0.5rem;
+
+            .name,
+            .header {
+                font-weight: bold;
+            }
+
+            .header {
+                text-align: center;
+            }
+
+            > *:not(.header) {
+                height: 1.715em;
+                display: flex;
+                align-items: center;
+
+                &:not(.name) {
+                    background: rgba(28, 28, 28, 0.1);
+                    padding-inline: 0.3rem;
+                }
+            }
+        }
+
+        .languages {
+            .header {
+                font-weight: bold;
+            }
+
+            ul {
+                margin-top: 0.3rem;
+            }
+        }
+
         .entry {
             position: relative;
             display: grid;

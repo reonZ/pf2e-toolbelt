@@ -1,1 +1,54 @@
-details
+<div class="details">
+    <div class="name header"></div>
+    <div class="expected header">
+        <a data-action="assign-details" {{{@root.i18n.tooltip 'data.details.assign' }}}>
+            <i class="fa-sharp-duotone fa-solid fa-calculator"></i>
+            {{@root.i18n 'data.details.expected'}}
+        </a>
+    </div>
+    <div class="current header">
+        {{@root.i18n 'data.details.current'}}
+    </div>
+    {{#each details as |entry|}}
+    <div class="name">
+        {{@root.i18n 'data.details' entry.label}}
+    </div>
+    <div class="expected">
+        {{entry.expected}}
+    </div>
+    <div class="current">
+        {{entry.current}}
+    </div>
+    {{/each}}
+</div>
+<hr>
+<div class="languages">
+    <div class="header">
+        <a data-action="assign-languages" {{{@root.i18n.tooltip 'data.details.language.assign' }}}>
+            <i class="fa-sharp-duotone fa-solid fa-calculator"></i>
+            {{@root.i18n 'data.details.language.expected'}}
+        </a>
+    </div>
+    <ul class="tags light">
+        {{#each languages.expected as |language|}}
+        <li class="tag">
+            {{localize language}}
+        </li>
+        {{/each}}
+    </ul>
+</div>
+<hr>
+<div class="languages">
+    <div class="header">
+        <span>
+            {{@root.i18n 'data.details.language.current'}}
+        </span>
+    </div>
+    <ul class="tags light">
+        {{#each languages.current as |language|}}
+        <li class="tag">
+            {{localize language}}
+        </li>
+        {{/each}}
+    </ul>
+</div>

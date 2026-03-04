@@ -603,6 +603,19 @@
                             "warning": "The imported data doesn't reach the last boost threshold (level {level}).<br>You may want to update it."
                         }
                     },
+                    "details": {
+                        "age": "Age",
+                        "assign": "Assign Details Entries",
+                        "current": "Current",
+                        "expected": "Expected",
+                        "gender": "Gender",
+                        "language": {
+                            "assign": "Assign Languages",
+                            "current": "Current Languages",
+                            "expected": "Expected Languages"
+                        },
+                        "name": "Name"
+                    },
                     "entry": {
                         "action": {
                             "install": "Add {match} to Character",
@@ -621,14 +634,12 @@
                             "assign": "Override Currencies",
                             "current": "Current",
                             "expected": "Expected"
-                        },
-                        "set": "Skills currencies have been overriden."
+                        }
                     },
                     "skills": {
                         "assign": "Assign Skills",
                         "current": "Current",
-                        "expected": "Expected",
-                        "set": "Skills proficiencies have been assigned."
+                        "expected": "Expected"
                     },
                     "spellcasting": {
                         "add": {
