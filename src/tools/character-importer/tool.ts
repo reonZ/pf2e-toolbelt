@@ -20,6 +20,7 @@ import {
     addFeatsEventListeners,
     addInventoryEventListeners,
     addSkillsEventListeners,
+    addSpellsEventListeners,
     CharacterImport,
     CharacterImportSource,
     EntryEventAction,
@@ -29,6 +30,7 @@ import {
     prepareFeatsTab,
     prepareInventoryTab,
     prepareSkillsTab,
+    prepareSpellsTab,
 } from ".";
 
 const MENU = [
@@ -107,10 +109,15 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
     }
 
     addLoader(html: HTMLElement) {
+        this.removeSheetContent(html);
+
+        if (htmlQuery(html, `.${SHEET_MENU_LOADER_CLASS}`)) return;
+
         const loader = createHTMLElement("div", {
             classes: [SHEET_MENU_LOADER_CLASS],
             content: `<div class="loader"><i class="fa-solid fa-spinner fa-spin-pulse"></i></div>`,
         });
+
         htmlQuery(html, ".sheet-body")?.appendChild(loader);
     }
 
@@ -119,7 +126,6 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
     }
 
     async addSheetContent(html: HTMLElement, actor: CharacterPF2e) {
-        this.removeSheetContent(html);
         this.addLoader(html);
 
         const data = await this.getImportData(actor);
@@ -141,7 +147,6 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
     }
 
     removeSheetContent(html: HTMLElement) {
-        this.removeLoader(html);
         htmlQuery(html, `.${SHEET_MENU_CLASS}`)?.remove();
     }
 
@@ -162,7 +167,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
             feats: await prepareFeatsTab.call(this, actor, data),
             inventory: await prepareInventoryTab.call(this, actor, data),
             skills: await prepareSkillsTab.call(this, actor, data),
-            spells: {},
+            spells: await prepareSpellsTab.call(this, actor, data),
         };
 
         return {
@@ -212,6 +217,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
                 this.addSheetContent(html, actor);
             } else {
                 this.deleteInMemory(actor, "importing");
+                this.removeLoader(html);
                 this.removeSheetContent(html);
             }
         });
@@ -338,6 +344,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
         addFeatsEventListeners.call(this, content, actor);
         addInventoryEventListeners.call(this, content, actor);
         addSkillsEventListeners.call(this, content, actor);
+        addSpellsEventListeners.call(this, content, actor);
     }
 }
 

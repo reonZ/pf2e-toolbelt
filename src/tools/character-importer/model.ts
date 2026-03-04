@@ -19,32 +19,23 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
     }
 
     getImportedEntry(itemType: ImportItemType, index: number): ImportedEntry | undefined {
-        if (itemType === "feat") {
-            return R.isNumber(index) ? this.feats.at(index) : undefined;
-        }
-
-        if (itemType === "container") {
-            return R.isNumber(index) ? this.containers.at(index) : undefined;
-        }
-
-        // this is an equipment
-        if (R.isNonNull(index)) {
-            return R.isNumber(index) ? this.equipments.at(index) : undefined;
-        }
-
-        return isCharacterCategory(itemType) ? this[itemType] : undefined;
+        return isCharacterCategory(itemType) ? this[itemType] : this.#getEntries(itemType).at(index);
     }
 
     updateEntryOverride(itemType: string, value: ItemPF2e | null, index: number): boolean {
         if (isCharacterCategory(itemType)) {
-            return this.updateCoreOverride(itemType, value);
-        } else if (itemType === "feat" || isPhysicalCategory(itemType)) {
-            return this.updateIndexedEntryOverride(itemType, index, value);
+            return this.#updateCoreOverride(itemType, value);
+        } else if (R.isIncludedIn(itemType, ["feat", "spell"] as const) || isPhysicalCategory(itemType)) {
+            return this.#updateIndexedEntryOverride(itemType, index, value);
         }
         return false;
     }
 
-    updateCoreOverride(key: CharacterCategory, value: ItemPF2e | null): boolean {
+    encode() {
+        return super.encode(zCharacterImport());
+    }
+
+    #updateCoreOverride(key: CharacterCategory, value: ItemPF2e | null): boolean {
         if (value === null || this[key].match === value) {
             delete this[key].override;
         } else {
@@ -53,12 +44,12 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         return true;
     }
 
-    updateIndexedEntryOverride(
-        itemType: PhysicalItemType | "container" | "feat",
+    #updateIndexedEntryOverride(
+        itemType: Exclude<ImportItemType, CharacterCategory>,
         index: number,
         value: ItemPF2e | null,
     ): boolean {
-        const entries = itemType === "feat" ? this.feats : itemType === "container" ? this.containers : this.equipments;
+        const entries = this.#getEntries(itemType);
         const entry = entries.at(index);
         if (!entry) return false;
 
@@ -71,8 +62,17 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         return true;
     }
 
-    encode() {
-        return super.encode(zCharacterImport());
+    #getEntries(itemType: Exclude<ImportItemType, CharacterCategory>): ImportedEntry[] {
+        switch (itemType) {
+            case "container":
+                return this.containers;
+            case "feat":
+                return this.feats;
+            case "spell":
+                return this.spells;
+            default:
+                return isPhysicalCategory(itemType) ? this.equipments : [];
+        }
     }
 }
 
@@ -83,7 +83,7 @@ function isPhysicalCategory(value: unknown): value is PhysicalItemType | "contai
     return R.isIncludedIn(value, ["container", ...physicalTypes]);
 }
 
-type ImportItemType = CharacterCategory | PhysicalItemType | "container" | "feat";
+type ImportItemType = CharacterCategory | PhysicalItemType | "container" | "feat" | "spell";
 
 export { CharacterImport };
 export type { ImportItemType };

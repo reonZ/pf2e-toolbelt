@@ -1,11 +1,17 @@
 import { CharacterPF2e, R, waitDialog } from "foundry-helpers";
-import { CharacterImport, CharacterImporterTool, fromPathbuilder, ImportedFeatSource, isCharacterCategory } from "..";
+import {
+    CharacterImport,
+    CharacterImporterTool,
+    fromPathbuilder,
+    ImportedFeatSource,
+    ImportedSpellcastingSource,
+    isCharacterCategory,
+} from "..";
 
 async function importData(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e, fromFile: boolean) {
     const codeOrFile = fromFile ? await importFromFile.call(this) : await importFromJSON.call(this);
     if (!codeOrFile) return;
 
-    this.removeSheetContent(html);
     this.addLoader(html);
 
     const code = R.isString(codeOrFile) ? codeOrFile : await foundry.utils.readTextFromFile(codeOrFile);
@@ -15,8 +21,8 @@ async function importData(this: CharacterImporterTool, html: HTMLElement, actor:
         const currentSource = await this.getImportData(actor, true);
         const importedSource = await fromPathbuilder(parsed);
 
-        if (importedSource.feats) {
-            const currentFeats = currentSource?.feats ?? [];
+        if (importedSource.feats?.length && currentSource?.feats?.length) {
+            const currentFeats = currentSource.feats;
 
             const featEntriesEqual = (a: ImportedFeatSource, b: ImportedFeatSource): boolean => {
                 return (
@@ -51,6 +57,74 @@ async function importData(this: CharacterImporterTool, html: HTMLElement, actor:
             }
         }
 
+        if (importedSource.containers?.length && currentSource?.containers?.length) {
+            for (const container of importedSource.containers) {
+                const current = currentSource.containers.find((current) => {
+                    return current.identifier === container.identifier;
+                });
+
+                if (current?.override) {
+                    container.override = current.override;
+                }
+            }
+        }
+
+        if (importedSource.equipments?.length && currentSource?.equipments?.length) {
+            for (const equipment of importedSource.equipments) {
+                const current = currentSource.equipments.find((current) => {
+                    return (
+                        current.container === equipment.container &&
+                        current.match === equipment.match &&
+                        current.type === equipment.type &&
+                        current.value === equipment.value
+                    );
+                });
+
+                if (current?.override) {
+                    equipment.override = current.override;
+                }
+            }
+        }
+
+        const spellcastingEntriesEqual = (a: ImportedSpellcastingSource, b: ImportedSpellcastingSource): boolean => {
+            return a.attribute === b.attribute && a.name === b.name && a.tradition === b.tradition && a.type === b.type;
+        };
+
+        if (importedSource.spellcasting?.length && currentSource?.spellcasting?.length) {
+            for (const entry of importedSource.spellcasting) {
+                const current = currentSource.spellcasting.find((current) => {
+                    return spellcastingEntriesEqual(current, entry);
+                });
+
+                if (current?.selected) {
+                    entry.selected = current.selected;
+                }
+            }
+        }
+
+        if (importedSource.spells?.length && currentSource?.spells?.length) {
+            for (const spell of importedSource.spells) {
+                const current = currentSource.spells.find((current) => {
+                    if (current.match !== spell.match || current.rank !== spell.rank || current.value !== spell.value)
+                        return false;
+
+                    const currentParent = currentSource.spellcasting?.find((entry) => {
+                        return entry.identifier === current.parent;
+                    });
+
+                    const parent = importedSource.spellcasting?.find((entry) => {
+                        return entry.identifier === spell.parent;
+                    });
+
+                    return currentParent && parent && spellcastingEntriesEqual(currentParent, parent);
+                });
+
+                if (current?.override) {
+                    spell.override = current.override;
+                }
+            }
+        }
+
         const mergedSource = foundry.utils.mergeObject(currentSource ?? {}, importedSource);
         const merged = await CharacterImport.fromSource(mergedSource, true);
 
@@ -59,7 +133,6 @@ async function importData(this: CharacterImporterTool, html: HTMLElement, actor:
     } catch (error) {
         console.error(error);
     } finally {
-        this.removeLoader(html);
         this.addSheetContent(html, actor);
     }
 }

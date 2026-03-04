@@ -1,1 +1,21 @@
-spells
+{{#each spellcasting as |entry|}}
+<div class="spellcasting" data-index="{{entry.index}}">
+    <div class="name">
+        {{entry.label}}
+    </div>
+    <select name="spellcating-selection" {{disabled (lt entry.selections.length 2)}}>
+        {{selectOptions entry.selections selected=entry.selected}}
+    </select>
+    <div class="controls">
+        <a data-action="add-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.add'}}}>
+            <i class="fa-solid fa-plus-large" ></i>
+        </a>
+        <a data-action="fill-spellcasting" {{{@root.i18n.tooltip 'data.spellcasting.fill'}}} {{disabled (not entry.selections.length)}}>
+            <i class="fa-solid fa-book-sparkles"></i>
+        </a>
+    </div>
+</div>
+{{#each entry.spells as |spell|}}
+{{> 'entry' spell}}
+{{/each}}
+{{/each}}

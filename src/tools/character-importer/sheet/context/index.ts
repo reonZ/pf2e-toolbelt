@@ -3,3 +3,4 @@ export * from "./core";
 export * from "./feats";
 export * from "./inventory";
 export * from "./skills";
+export * from "./spells";

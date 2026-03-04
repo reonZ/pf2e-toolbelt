@@ -3,10 +3,13 @@ import {
     getPhysicalItemTypes,
     ItemType,
     R,
-    valueBetween,
+    SPELLCASTING_CATEGORIES,
     z,
+    zDocumentId,
     ZeroToFour,
+    ZeroToTen,
     zForeignItem,
+    zRange,
 } from "foundry-helpers";
 
 const ANCESTRY_KEYS = ["boosts", "flaws", "locked"] as const;
@@ -73,9 +76,8 @@ function zEquipment() {
     });
 }
 
-const zProficiencyRank = z.custom((value) => R.isNumber(value) && valueBetween(value, 0, 4)).default(0) as z.ZodDefault<
-    z.ZodCustom<ZeroToFour, ZeroToFour>
->;
+const zProficiencyRank = zRange<ZeroToFour>(0, 4);
+const zSpellRank = zRange<ZeroToTen>(0, 10);
 
 function zSkills() {
     return z
@@ -94,6 +96,22 @@ function zCurrencies() {
         .default(R.mapValues(CONFIG.PF2E.currencies, () => 0));
 }
 
+const zSpell = zImportedEntry("spell").extend({
+    parent: z.string(),
+    rank: zSpellRank,
+});
+
+function zSpellcastingEntry() {
+    return z.object({
+        attribute: z.enum(R.keys(CONFIG.PF2E.abilities)),
+        identifier: z.string(),
+        name: z.string().nonempty(),
+        selected: zDocumentId().nullable().default(null),
+        tradition: z.enum(R.keys(CONFIG.PF2E.magicTraditions)),
+        type: z.enum(SPELLCASTING_CATEGORIES),
+    });
+}
+
 function zCharacterImport() {
     return z.object({
         attributes: zAttributes,
@@ -105,6 +123,8 @@ function zCharacterImport() {
         lores: z.array(zLore).prefault([]),
         name: z.string().default(""),
         skills: zSkills(),
+        spellcasting: z.array(zSpellcastingEntry()).prefault([]),
+        spells: z.array(zSpell).prefault([]),
         ...R.fromKeys(CHARACTER_CATEGORIES, (category) => zImportedEntry(category).prefault({} as any)),
     });
 }
@@ -146,6 +166,11 @@ type ImportedContainerEntry = z.output<typeof zContainer>;
 type ImportedEquipmentSource = z.input<ReturnType<typeof zEquipment>>;
 type ImportedEquipmentEntry = z.output<ReturnType<typeof zEquipment>>;
 
+type ImportedSpellcastingSource = z.input<ReturnType<typeof zSpellcastingEntry>>;
+type ImportedSpellcastingEntry = z.output<ReturnType<typeof zSpellcastingEntry>>;
+
+type ImportedSpellSource = z.input<typeof zSpell>;
+
 export {
     ATTRIBUTE_KEYS,
     CHARACTER_CATEGORIES,
@@ -169,4 +194,7 @@ export type {
     ImportedEquipmentSource,
     ImportedFeatEntry,
     ImportedFeatSource,
+    ImportedSpellcastingEntry,
+    ImportedSpellcastingSource,
+    ImportedSpellSource,
 };

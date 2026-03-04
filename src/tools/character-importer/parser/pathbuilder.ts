@@ -1,20 +1,39 @@
-import { AttributeString, FeatOrFeatureCategory, OneToTen, R, SYSTEM, valueBetween, ZeroToFour } from "foundry-helpers";
+import {
+    AttributeString,
+    FeatOrFeatureCategory,
+    OneToTen,
+    R,
+    SYSTEM,
+    valueBetween,
+    ZeroToFour,
+    ZeroToTen,
+} from "foundry-helpers";
 import {
     ATTRIBUTE_KEYS,
     AttributeLevel,
     CharacterCategory,
     CharacterImportSource,
-    getCoreUuidFromPack,
-    getEquipmentUuidFromPack,
-    getFeatUuidFromPack,
     ImportedContainerSource,
     ImportedEntrySource,
     ImportedEquipmentSource,
     ImportedFeatSource,
+    ImportedSpellcastingSource,
+    ImportedSpellSource,
     isAttributeKey,
     isAttributeLevel,
     isCharacterCategory,
 } from "..";
+
+import {
+    getCoreUuidFromPack,
+    getEquipmentUuidFromPack,
+    getFeatUuidFromPack,
+    getSpellUuidFromPack,
+    isAttribute,
+    isMagicTradition,
+    isSpellcastingCategory,
+    isSpellRank,
+} from ".";
 
 const BACKPACK_UUID = "Compendium.pf2e.equipment-srd.Item.3lgwjrFEsQVKzhh7";
 const SPACIOUS_POUCH_UUID = "Compendium.pf2e.equipment-srd.Item.jaEEvuQ32GjAa8jy";
@@ -213,6 +232,85 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         },
     );
 
+    const allSpells: ImportedSpellSource[] = [];
+
+    const spellcastingPromises = R.map(
+        R.isArray(data.spellCasters) ? data.spellCasters : [],
+        async (entry): Promise<ImportedSpellcastingSource | undefined> => {
+            if (
+                !R.isPlainObject(entry) ||
+                !R.isString(entry.name) ||
+                !isAttribute(entry.ability) ||
+                !isMagicTradition(entry.magicTradition) ||
+                !isSpellcastingCategory(entry.spellcastingType)
+            )
+                return;
+
+            const identifier = foundry.utils.randomID();
+
+            const spellsSlotsPromises = R.map(
+                R.isArray(entry.spells) ? entry.spells : [],
+                async (spellsEntry): Promise<ImportedSpellSource[] | undefined> => {
+                    if (!R.isPlainObject(spellsEntry) || !isSpellRank(spellsEntry.spellLevel)) return;
+                    return parseSpells(spellsEntry.list, identifier, spellsEntry.spellLevel);
+                },
+            );
+
+            const spells = R.filter(await Promise.all(spellsSlotsPromises), R.isTruthy).flat();
+
+            if (spells.length) {
+                allSpells.push(...spells);
+            } else {
+                return;
+            }
+
+            return {
+                attribute: entry.ability as AttributeString,
+                identifier,
+                name: entry.name,
+                tradition: entry.magicTradition,
+                type: entry.innate === true ? "innate" : entry.spellcastingType,
+            };
+        },
+    );
+
+    const focusPromises = R.pipe(
+        R.isPlainObject(data.focus) ? data.focus : {},
+        R.entries(),
+        R.map(async ([tradition, entry]) => {
+            if (!isMagicTradition(tradition) || !R.isPlainObject(entry)) return;
+
+            const entries = R.pipe(
+                R.entries(entry),
+                R.map(async ([attribute, spellcastingEntry]): Promise<ImportedSpellcastingSource | undefined> => {
+                    if (!isAttribute(attribute) || !R.isPlainObject(spellcastingEntry)) return;
+
+                    const identifier = foundry.utils.randomID();
+                    const spells = [
+                        ...(await parseSpells(spellcastingEntry.focusCantrips, identifier, 1)),
+                        ...(await parseSpells(spellcastingEntry.focusSpells, identifier, 1)),
+                    ];
+
+                    if (spells.length) {
+                        allSpells.push(...spells);
+                    } else {
+                        return;
+                    }
+
+                    return {
+                        attribute,
+                        identifier,
+                        name: game.i18n.localize("PF2E.Focus.Spells"),
+                        tradition,
+                        type: "focus",
+                    };
+                }),
+            );
+
+            return R.filter(await Promise.all(entries), R.isTruthy);
+        }),
+    );
+
     return {
         ancestry: await parseCoreEntry(data, "ancestry"),
         attributes: {
@@ -237,7 +335,28 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         lores,
         name: R.isString(data.name) ? data.name : "",
         skills,
+        spellcasting: [
+            ...R.filter(await Promise.all(spellcastingPromises), R.isTruthy),
+            ...R.filter(await Promise.all(focusPromises), R.isTruthy).flat(),
+        ],
+        spells: allSpells,
     };
+}
+
+async function parseSpells(list: unknown, parent: string, rank: ZeroToTen): Promise<ImportedSpellSource[]> {
+    const spellsPromises = R.map(
+        R.isArray(list) ? list : [],
+        async (spellName): Promise<ImportedSpellSource | undefined> => {
+            if (!R.isString(spellName)) return;
+            return {
+                match: await getSpellUuidFromPack(spellName),
+                parent,
+                rank,
+                value: spellName,
+            };
+        },
+    );
+    return R.filter(await Promise.all(spellsPromises), R.isTruthy);
 }
 
 function parseSkillRank(value: unknown): ZeroToFour {

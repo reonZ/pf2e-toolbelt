@@ -26,7 +26,11 @@ async function prepareFeatsTab(
 
 function addFeatsEventListeners(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e) {}
 
-type FeatSection = { category: FeatOrFeatureCategory; feats: ImportDataFeatEntry[]; label: string };
+type FeatSection = {
+    category: FeatOrFeatureCategory;
+    feats: ImportDataFeatEntry[];
+    label: string;
+};
 
 type ImportDataFeatsContext = {
     sections: FeatSection[];

@@ -9,6 +9,7 @@ import {
     PhysicalItemPF2e,
     PhysicalItemType,
     R,
+    SpellPF2e,
     stringNumber,
     SYSTEM,
 } from "foundry-helpers";
@@ -42,6 +43,7 @@ function prepareEntry(
     entry: ImportedEntry,
     current: ItemPF2e | null,
     depth: number,
+    disabled?: boolean,
 ): ImportDataEntry {
     const isOverride = !!entry.override;
     const selection = getEntrySelection(entry);
@@ -51,8 +53,8 @@ function prepareEntry(
     const actions = R.pipe(
         [
             isOverride ? "revert" : undefined,
-            selection && current ? (itemCanBeRefreshed(current) ? "refresh" : "locked") : undefined,
-            selection && !depth ? (current ? "replace" : "install") : undefined,
+            selection && current && !disabled ? (itemCanBeRefreshed(current) ? "refresh" : "locked") : undefined,
+            selection && !depth && !disabled ? (current ? "replace" : "install") : undefined,
         ] as const,
         R.filter(R.isTruthy),
         R.map((type): ImportDataContextAction => {

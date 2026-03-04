@@ -629,6 +629,10 @@
                         "current": "Current",
                         "expected": "Expected",
                         "set": "Skills proficiencies have been assigned."
+                    },
+                    "spellcasting": {
+                        "add": "Create new Spellcasting entry",
+                        "fill": "Add all missing spells"
                     }
                 },
                 "menu": {

@@ -277,6 +277,40 @@
             }
         }
 
+        .spellcasting {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            align-items: center;
+            gap: 0.5em;
+            white-space: nowrap;
+            margin-block: 0.5rem;
+            padding: 0.2em 0.5em;
+            background: var(--color-pf-primary);
+            border-radius: 0.25em;
+            color: var(--text-light);
+
+            &:first-child {
+                margin-top: 0;
+            }
+
+            .name {
+                font-size: 1.2em;
+                font-weight: bold;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .controls {
+                display: flex;
+                align-items: center;
+                gap: 0.5em;
+
+                a[disabled] {
+                    opacity: 0.4;
+                }
+            }
+        }
+
         .entry {
             position: relative;
             display: grid;

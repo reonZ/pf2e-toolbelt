@@ -11,8 +11,7 @@
             <i class="fa-solid fa-file-import"></i>
             {{@root.i18n 'import.file'}}
         </a>
-        <a {{#if hasData}} data-action="delete-data" {{else}} class="disabled" {{/if}}
-            {{{@root.i18n.tooltip 'import.delete' }}}>
+        <a {{#if hasData}} data-action="delete-data" {{else}} class="disabled" {{/if}} {{{@root.i18n.tooltip 'import.delete' }}}>
             <i class="fa-solid fa-trash"></i>
         </a>
     </div>
@@ -47,8 +46,8 @@
         </div>
         <div class="controls">
             {{#each actions as |action|}}
-            <a class="action" data-action="entry-{{action.type}}">
-                <i class="{{action.icon}}" data-tooltip="{{action.label}}"></i>
+            <a class="action" data-action="entry-{{action.type}}" data-tooltip="{{action.label}}">
+                <i class="{{action.icon}}"></i>
             </a>
             {{/each}}
         </div>
@@ -63,7 +62,7 @@
                 {{#if (gt quantity.selection 1)}}
                 {{quantity.selection}}x
                 {{/if}}
-                <a data-action="open-sheet" data-item-uuid="{{selection.uuid}}" data-tooltip="{{localize 'CONTROLS.CommonOpenSheet'}}">
+                <a data-action="open-sheet" data-item-uuid="{{selection.uuid}}" data-tooltip="CONTROLS.CommonOpenSheet">
                     {{selection.name}}
                 </a>
                 {{else}}
@@ -80,7 +79,7 @@
                 {{#if (gt quantity.current 1)}}
                 {{quantity.current}}x
                 {{/if}}
-                <a data-action="open-sheet" data-item-uuid="{{current.uuid}}" data-tooltip="{{localize 'CONTROLS.CommonOpenSheet'}}">
+                <a data-action="open-sheet" data-item-uuid="{{current.uuid}}" data-tooltip="CONTROLS.CommonOpenSheet">
                     {{current.name}}
                 </a>
                 {{else}}

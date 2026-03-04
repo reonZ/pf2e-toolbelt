@@ -1,4 +1,17 @@
-import { CompendiumIndexData, FeatOrFeatureCategory, ItemUUID, PhysicalItemType, R, SYSTEM } from "foundry-helpers";
+import {
+    AttributeString,
+    CompendiumIndexData,
+    FeatOrFeatureCategory,
+    ItemUUID,
+    MagicTradition,
+    PhysicalItemType,
+    R,
+    SPELLCASTING_CATEGORIES,
+    SpellcastingCategory,
+    SYSTEM,
+    valueBetween,
+    ZeroToTen,
+} from "foundry-helpers";
 import { CharacterCategory } from "..";
 
 const CORE_PACKS: Record<CharacterCategory, string> = {
@@ -15,6 +28,7 @@ const FEAT_PACKS: PartialRecord<FeatOrFeatureCategory, string> = {
 
 const EQUIPMENT_PACK = "equipment-srd";
 const FEATS_PACK = "feats-srd";
+const SPELLS_PACK = "spells-srd";
 
 async function getUuidFromPack(value: string, packName: string): Promise<CompendiumIndexData | null> {
     if (!R.isTruthy(value)) return null;
@@ -48,4 +62,35 @@ async function getEquipmentUuidFromPack(value: string): Promise<{ type: Physical
     };
 }
 
-export { CORE_PACKS, getCoreUuidFromPack, getEquipmentUuidFromPack, getFeatUuidFromPack };
+async function getSpellUuidFromPack(value: string): Promise<ItemUUID | null> {
+    const entry = await getUuidFromPack(value, SPELLS_PACK);
+    return (entry?.uuid ?? null) as ItemUUID | null;
+}
+
+function isAttribute(value: unknown): value is AttributeString {
+    return R.isString(value) && value in CONFIG.PF2E.abilities;
+}
+
+function isMagicTradition(value: unknown): value is MagicTradition {
+    return R.isString(value) && value in CONFIG.PF2E.magicTraditions;
+}
+
+function isSpellcastingCategory(value: unknown): value is SpellcastingCategory {
+    return R.isString(value) && R.isIncludedIn(value, SPELLCASTING_CATEGORIES);
+}
+
+function isSpellRank(value: unknown): value is ZeroToTen {
+    return R.isNumber(value) && valueBetween(value, 0, 10);
+}
+
+export {
+    CORE_PACKS,
+    getCoreUuidFromPack,
+    getEquipmentUuidFromPack,
+    getFeatUuidFromPack,
+    getSpellUuidFromPack,
+    isAttribute,
+    isMagicTradition,
+    isSpellcastingCategory,
+    isSpellRank,
+};
