@@ -1,3 +1,16 @@
+# 3.32.0
+
+- `Character Importer`:
+  - you need to re-import the data to take advantage of the changes made in this version
+  - the tool is now fully implemented feature-wise, the export format of pathbuilder makes it quite difficult to provide more than what has been done so far
+  - implement the `Details` tab:
+    - languages are fully replaced when assigned, though the module only adds languages that aren't already "free"
+  - implement the `Spells` tab:
+    - for each expected spellcasting entry, the module will list all the existing ones that exactly match
+    - when a new spellcasting entry is created, the slots for up to the character current level will be set
+    - you can update/refresh the spellcasting slots at any time
+  - fix override for physical items not being retained when re-importing data
+
 # 3.31.1
 
 - `Identify`:
