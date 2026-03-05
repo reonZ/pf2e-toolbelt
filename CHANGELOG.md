@@ -1,3 +1,12 @@
+# 3.33.0
+
+- add new `Auto Cover` tool:
+  - automatically adds cover to targets when path intersects with a wall or creature
+  - add a bunch of options to fine tune the way the calulations are done
+  - the module takes into account the extra large rule for creture cover
+- `Better Merchant`:
+  - fix `filterTraits` error preventing opening merchant actor sheets due to latest changes in the system
+
 # 3.32.0
 
 - `Character Importer`:

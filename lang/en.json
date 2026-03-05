@@ -105,7 +105,7 @@
                 "title": "Auto Cover",
                 "creatures": {
                     "name": "Creatures Cover",
-                    "hint": "Should creature provide cover to others.",
+                    "hint": "Should creatures provide lesser or standard cover when an attack is rolled.",
                     "choices": {
                         "disabled": "Disabled",
                         "cross": "Intersect 2 opposite sides",
@@ -124,7 +124,7 @@
                 },
                 "walls": {
                     "name": "Walls Cover",
-                    "hint": "Points used to test wall intersections. The center of the creatures will always be tested.",
+                    "hint": "Should target creatures receive standard cover when the path between them and their attacker is intersected by a wall. The center of each creatures will always be tested.",
                     "choices": {
                         "center-center": "Center to Center",
                         "center-spread": "Center to Spread",
