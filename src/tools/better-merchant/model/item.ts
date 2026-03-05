@@ -1,4 +1,4 @@
-import { ActorPF2e, PhysicalItemPF2e, R, SYSTEM } from "foundry-helpers";
+import { ActorPF2e, filterTraits, PhysicalItemPF2e, R, SYSTEM } from "foundry-helpers";
 import { BaseFilter, CalulatedFilterPrice, DefaultFilter } from ".";
 import { ItemFilterData, zBuyDefaultFilter, zItemFilter, zSellDefaultFilter } from "..";
 
@@ -100,7 +100,7 @@ class ItemFilter extends BaseFilter<typeof zItemFilter> {
         // Traits
         if (
             R.isPlainObject(traits) &&
-            !tab["filterTraits"]([...item.traits], traits.selected ?? [], traits.conjunction ?? "and")
+            filterTraits([...item.traits], traits.selected ?? [], traits.conjunction ?? "and")
         )
             return false;
 
