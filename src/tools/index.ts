@@ -3,6 +3,7 @@ export * from "./_utils";
 export * from "./actionable";
 export * from "./anonymous";
 export * from "./arp";
+export * from "./auto-cover";
 export * from "./better-effects-panel";
 export * from "./better-inventory";
 export * from "./better-merchant";

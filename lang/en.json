@@ -101,6 +101,41 @@
                     "hint": "Should shields also be updated."
                 }
             },
+            "autoCover": {
+                "title": "Auto Cover",
+                "creatures": {
+                    "name": "Creatures Cover",
+                    "hint": "Should creature provide cover to others.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "cross": "Intersect 2 opposite sides",
+                        "zero": "Intersect any side",
+                        "ten": "Any side with 10% margin",
+                        "twenty": "Any side with 20% margin"
+                    }
+                },
+                "dead": {
+                    "name": "Skip Dead Creatures",
+                    "hint": "Should dead creatures not provide cover."
+                },
+                "prone": {
+                    "name": "Skip Prone Creatures",
+                    "hint": "Should prone creatures not provide cover."
+                },
+                "walls": {
+                    "name": "Walls Cover",
+                    "hint": "Points used to test wall intersections. The center of the creatures will always be tested.",
+                    "choices": {
+                        "center-center": "Center to Center",
+                        "center-spread": "Center to Spread",
+                        "center-corner": "Center to Corners",
+                        "corner-center": "Corners to Center",
+                        "corner-spread": "Corners to Spread",
+                        "corner-corner": "Corners to Corners",
+                        "disabled": "Disabled"
+                    }
+                }
+            },
             "betterEffectsPanel": {
                 "title": "Better Effects Panel",
                 "remove": {
@@ -398,6 +433,10 @@
                 "context": "Reveal Spell to Players",
                 "header": "Is casting a spell.."
             }
+        },
+        "autoCover": {
+            "creature": "Cover from Creature",
+            "wall": "Cover from Wall"
         },
         "betterInventory": {
             "improvised": {
