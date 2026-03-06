@@ -1,3 +1,13 @@
+# 3.34.0
+
+- `Auto Cover`:
+  - the settings have been reset to avoid some unexpected outcomes
+  - no longer convert wall intersect logic for tiny creatures
+  - change the wall `Corner to Center` logic to not provide cover if at least one line doesn't intersect
+  - remove the `Corner to Spread` and `Corner to Corner` wall setting options
+  - add live auto-cover highlights when holding the `Alt` key
+  - add cover override that can be found in the `Check Modifiers` dialog
+
 # 3.33.0
 
 - add new `Auto Cover` tool:
