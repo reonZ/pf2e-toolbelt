@@ -101,6 +101,41 @@
           "hint": "Les boucliers seront aussi mis à jour."
         }
       },
+      "autoCover": {
+        "title": "Abri automatique",
+        "creatures": {
+          "name": "Abri des créatures",
+          "hint": "Les créatures doivent-elles offrir une abri inférieur ou standard lors d'un jet d'attaque ?",
+          "choices": {
+            "disabled": "Désactivé",
+            "cross": "Intersection de 2 côtés opposés",
+            "zero": "Intersection de n'importe quel côté",
+            "ten": "N'importe quel côté avec une marge de 10 %",
+            "twenty": "N'importe quel côté avec une marge de 20 %"
+          }
+        },
+        "dead": {
+          "name": "Éviter les créatures mortes",
+          "hint": "Les créatures mortes ne devraient pas fournir d'abri."
+        },
+        "prone": {
+          "name": "Éviter les créatures À terre",
+          "hint": "Les créatures À terre ne devraient pas fournir d'abri."
+        },
+        "walls": {
+          "name": "Abri des murs",
+          "hint": "Les créatures ciblées doivent-elles bénéficier d'un abri standard lorsqu'un mur barre le chemin qui les sépare de leur attaquant ? Le centre de chaque créature sera toujours testé.",
+          "choices": {
+            "center-center": "Centre à centre",
+            "center-spread": "Centre vers l'étalement",
+            "center-corner": "Centre vers les coins",
+            "corner-center": "Coins vers le centre",
+            "corner-spread": "Coins vers l'étalement",
+            "corner-corner": "coins vers les coins",
+            "disabled": "Désactivé"
+          }
+        }
+      },
       "betterEffectsPanel": {
         "title": "Panneau d'effets amélioré",
         "remove": {
@@ -399,6 +434,10 @@
         "header": "Is casting a spell.."
       }
     },
+    "autoCover": {
+      "creature": "Abri par la créature",
+      "wall": "Abri par le mur"
+    },
     "betterInventory": {
       "improvised": {
         "label": "Arme improvisée"
@@ -603,6 +642,19 @@
               "warning": "Les données importées n'atteignent pas le dernier seuil de prime (niveau {level}).<br>Vous pourriez vouloir les mettre à jour."
             }
           },
+          "details": {
+            "age": "Âge",
+            "assign": "Attribuer les détails des entrées",
+            "current": "Actuel",
+            "expected": "Attendu",
+            "gender": "Genre",
+            "language": {
+              "assign": "Attribuer les langues",
+              "current": "Langues actuelles",
+              "expected": "Langues attendues"
+            },
+            "name": "Nom"
+          },
           "entry": {
             "action": {
               "install": "Ajouter {match} au personnage",
@@ -615,6 +667,35 @@
             "drop": "Déposer {clé}",
             "match": "Correspondance",
             "override": "Remplacer"
+          },
+          "inventory": {
+            "currency": {
+              "assign": "Remplacer les devises",
+              "current": "Actuel",
+              "expected": "Attendu"
+            }
+          },
+          "skills": {
+            "assign": "Attribuer les compétences",
+            "current": "Actuel",
+            "expected": "Attendu"
+          },
+          "spellcasting": {
+            "add": {
+              "content": "Souhaitez-vous créer une nouvelle entrée d'incantation avec les données correspondantes ?",
+              "title": "Créer une nouvelle entrée d'incantation",
+              "yes": "Créer"
+            },
+            "fill": {
+              "content": "Souhaitez-vous ajouter tous les sorts qui n'ont pas pu être trouvés dans l'entrée « Incantation » ?",
+              "label": "Ajouter tous les sorts manquants",
+              "title": "Complétez l'incantation avec les sorts manquants.",
+              "yes": "Remplir"
+            },
+            "refresh": {
+              "label": "Actualiser les valeurs des emplacements",
+              "set": "Les emplacements d'incantation ont été actualisés."
+            }
           }
         },
         "menu": {
