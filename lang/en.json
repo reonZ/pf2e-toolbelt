@@ -436,6 +436,9 @@
         },
         "autoCover": {
             "creature": "Cover from Creature",
+            "lesser": "Lesser Cover",
+            "none": "No Cover",
+            "standard": "Standard Cover",
             "wall": "Cover from Wall"
         },
         "betterInventory": {

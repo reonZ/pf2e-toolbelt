@@ -14,10 +14,23 @@ import {
     R,
     Rolled,
     SYSTEM,
+    toggleHooksAndWrappers,
     TokenPF2e,
     ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import {
+    COVER_VALUES,
+    CoverHighlightRenderer,
+    CoverValue,
+    drawDebugLine,
+    getRectEdges,
+    lineIntersect,
+    RectEdge,
+    SIZES,
+    spreadToToken,
+    tokenToSpread,
+} from ".";
 
 const CREATURE_SETTINGS = ["disabled", "cross", "zero", "ten", "twenty"] as const;
 
@@ -34,39 +47,19 @@ const COVER_UUID = SYSTEM.uuid(
     "Compendium.sf2e.other-effects.Item.I9lfZUiCwMiGogVi",
 );
 
-const RECT_CORNERS = [
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 0, y: 1 },
-    { x: 1, y: 1 },
-];
-
-const RECT_SPREAD = [
-    { x: 0.25, y: 0.25 },
-    { x: 0.75, y: 0.25 },
-    { x: 0.25, y: 0.75 },
-    { x: 0.75, y: 0.75 },
-];
-
-const SIZES = {
-    tiny: 0,
-    sm: 1,
-    med: 2,
-    lg: 3,
-    huge: 4,
-    grg: 5,
-};
-
-const COVER_VALUES = {
-    none: 0,
-    lesser: 1,
-    standard: 2,
-    greater: 3,
-    "greater-prone": 4,
-} as const;
-
 class AutoCoverTool extends ModuleTool<ToolSettings> {
-    #checkRollWrapper = createToggleWrapper("WRAPPER", "game.pf2e.Check.roll", this.#checkRoll, { context: this });
+    #wrappers = [
+        createToggleWrapper("WRAPPER", "game.pf2e.Check.roll", this.#checkRoll, { context: this }),
+        createToggleWrapper(
+            "WRAPPER",
+            "CONFIG.Token.objectClass.prototype._refreshVisibility",
+            this.#tokenRefreshVisibility,
+            { context: this },
+        ),
+        createToggleWrapper("WRAPPER", "CONFIG.Token.objectClass.prototype._destroy", this.#tokenDestroy, {
+            context: this,
+        }),
+    ];
 
     get key(): "autoCover" {
         return "autoCover";
@@ -110,11 +103,34 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     _configurate(): void {
-        this.#checkRollWrapper.toggle(this.settings.creature !== "disabled" || this.settings.wall !== "disabled");
+        const enabled = this.settings.creature !== "disabled" || this.settings.wall !== "disabled";
+        toggleHooksAndWrappers(this.#wrappers, enabled);
     }
 
     init(): void {
         this._configurate();
+    }
+
+    getCoverHighlight(token: TokenPF2e, fallback: true): CoverHighlightRenderer;
+    getCoverHighlight(token: TokenPF2e, fallback: boolean): CoverHighlightRenderer | undefined;
+    getCoverHighlight(token: TokenPF2e, fallback: boolean) {
+        const current = this.getInMemory<CoverHighlightRenderer>(token, "coverHighlight");
+        return fallback ? (current ?? new CoverHighlightRenderer(token, this)) : current;
+    }
+
+    #tokenRefreshVisibility(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        const coverHighlight = this.getCoverHighlight(token, true);
+        coverHighlight.draw();
+        this.setInMemory(token, "coverHighlight", coverHighlight);
+    }
+
+    #tokenDestroy(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        const coverHighlight = this.getCoverHighlight(token, false);
+        coverHighlight?.destroy();
     }
 
     async #checkRoll(
@@ -164,7 +180,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             return wrapped(...args);
         }
 
-        const cover = this.calculateCover(originToken as TokenWithActor, targetToken as TokenWithActor);
+        const cover = this.calculateCover(originToken, targetToken);
 
         if (COVER_VALUES[cover.value] > existing) {
             const items = foundry.utils.deepClone(targetActor._source.items);
@@ -194,7 +210,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return wrapped(...args);
     }
 
-    calculateCover(origin: TokenWithActor, target: TokenWithActor): { type: "wall" | "creature"; value: CoverValue } {
+    calculateCover(origin: TokenPF2e, target: TokenPF2e): { type: "wall" | "creature"; value: CoverValue } {
         const debug = MODULE.isDebug;
 
         if (debug) {
@@ -209,43 +225,41 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return { type: "creature", value: cover };
     }
 
-    intersectsWithWall(origin: TokenWithActor, target: TokenWithActor, debug: boolean = false): boolean {
+    intersectsWithWall(origin: TokenPF2e, target: TokenPF2e, debug: boolean = false): boolean {
         const setting = this.settings.wall;
 
         switch (setting) {
             case "center-center":
                 return lineIntersect(origin.center, target.center, debug);
             case "center-spread":
-                return tokenToSpread(origin, target, RECT_SPREAD, debug);
+                return tokenToSpread(origin, target, "spread", debug);
             case "center-corner":
-                return tokenToSpread(origin, target, RECT_CORNERS, debug);
+                return tokenToSpread(origin, target, "corner", debug);
             case "corner-center":
-                return spreadToToken(origin, RECT_CORNERS, target, debug);
+                return spreadToToken(origin, "corner", target, debug);
             // case "corner-spread":
-            //     return spreadToSpread(origin, RECT_CORNERS, target, RECT_SPREAD, debug);
+            //     return spreadToSpread(origin, "corner", target, "spread", debug);
             // case "corner-corner":
-            //     return spreadToSpread(origin, RECT_CORNERS, target, RECT_CORNERS, debug);
+            //     return spreadToSpread(origin, "corner", target, "corner", debug);
             default:
                 return false;
         }
     }
 
-    calculateCreaturesCover(
-        originToken: TokenWithActor,
-        targetToken: TokenWithActor,
-        debug: boolean = false,
-    ): CoverValue {
+    calculateCreaturesCover(originToken: TokenPF2e, targetToken: TokenPF2e, debug: boolean = false): CoverValue {
         const scene = originToken.scene;
         const setting = this.settings.creature;
+        const originActor = originToken.actor;
+        const targetActor = targetToken.actor;
 
-        if (!scene || setting === "disabled") {
+        if (!scene || setting === "disabled" || !originActor || !targetActor) {
             return "none";
         }
 
         const origin = originToken.center;
         const target = targetToken.center;
-        const originSize = SIZES[originToken.actor.size];
-        const targetSize = SIZES[originToken.actor.size];
+        const originSize = SIZES[originActor.size];
+        const targetSize = SIZES[targetActor.size];
         const canHaveExtraLarges = originSize < SIZES.huge && targetSize < SIZES.huge;
         const skipDead = this.settings.dead;
         const skipProne = this.settings.prone;
@@ -376,105 +390,11 @@ function coverSourceRules(level: CoverValue) {
     ];
 }
 
-function getRectPoint(point: Point, rect: Rectangle): Point {
-    return { x: rect.x + rect.width * point.x, y: rect.y + rect.height * point.y };
-}
-
-function getRectEdges(rect: Rectangle, margin: number): RectEdges {
-    const opposite = 1 - margin;
-    return {
-        top: {
-            A: getRectPoint({ x: margin, y: margin }, rect),
-            B: getRectPoint({ x: opposite, y: margin }, rect),
-        },
-        right: {
-            A: getRectPoint({ x: opposite, y: margin }, rect),
-            B: getRectPoint({ x: opposite, y: opposite }, rect),
-        },
-        bottom: {
-            A: getRectPoint({ x: opposite, y: opposite }, rect),
-            B: getRectPoint({ x: margin, y: opposite }, rect),
-        },
-        left: {
-            A: getRectPoint({ x: margin, y: opposite }, rect),
-            B: getRectPoint({ x: margin, y: margin }, rect),
-        },
-    };
-}
-
-function* tokenSpread(token: TokenPF2e, spread: Point[]): Generator<Point, void, unknown> {
-    const rect = token.bounds;
-
-    for (const point of spread) {
-        yield getRectPoint(point, rect);
-    }
-}
-
-function tokenToSpread(origin: TokenPF2e, target: TokenPF2e, spread: Point[], debug: boolean): boolean {
-    const originCenter = origin.center;
-
-    for (const point of tokenSpread(target, spread)) {
-        if (lineIntersect(originCenter, point, debug)) return true;
-    }
-
-    return false;
-}
-
-function spreadToToken(origin: TokenPF2e, spread: Point[], target: TokenPF2e, debug: boolean): boolean {
-    const targetCenter = target.center;
-
-    for (const point of tokenSpread(origin, spread)) {
-        if (!lineIntersect(point, targetCenter, debug)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// function spreadToSpread(
-//     origin: TokenPF2e,
-//     originSpread: Point[],
-//     target: TokenPF2e,
-//     targetSpread: Point[],
-//     debug: boolean,
-// ): boolean {
-//     for (const originPoint of tokenSpread(origin, originSpread)) {
-//         for (const targetPoint of tokenSpread(target, targetSpread)) {
-//             if (lineIntersect(originPoint, targetPoint, debug)) return true;
-//         }
-//     }
-
-//     return false;
-// }
-
-function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
-    const intersects = CONFIG.Canvas.polygonBackends.move.testCollision(origin, target, { type: "move", mode: "any" });
-
-    if (debug) {
-        drawDebugLine(origin, target, intersects ? "red" : "green");
-    }
-
-    return intersects;
-}
-
-function drawDebugLine(origin: Point, target: Point, color: "blue" | "green" | "red") {
-    const hex = color === "blue" ? 0x0066cc : color === "red" ? 0xff0000 : 0x16a103;
-    canvas.controls.debug.lineStyle(4, hex).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
-}
-
 type ToolSettings = {
     creature: (typeof CREATURE_SETTINGS)[number];
     dead: boolean;
     prone: boolean;
     wall: (typeof WALL_INTERSECTIONS_SETTING)[number];
 };
-
-type RectEdge = { A: Point; B: Point };
-type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
-
-type CoverValue = keyof typeof COVER_VALUES;
-
-type TokenWithActor = TokenPF2e & { actor: ActorPF2e };
 
 export { AutoCoverTool };
