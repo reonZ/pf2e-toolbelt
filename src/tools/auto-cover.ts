@@ -413,10 +413,6 @@ function* tokenSpread(token: TokenPF2e, spread: Point[]): Generator<Point, void,
 function tokenToSpread(origin: TokenPF2e, target: TokenPF2e, spread: Point[], debug: boolean): boolean {
     const originCenter = origin.center;
 
-    if (target.actor?.size === "tiny") {
-        return lineIntersect(originCenter, target.center, debug);
-    }
-
     for (const point of tokenSpread(target, spread)) {
         if (lineIntersect(originCenter, point, debug)) return true;
     }
@@ -426,10 +422,6 @@ function tokenToSpread(origin: TokenPF2e, target: TokenPF2e, spread: Point[], de
 
 function spreadToToken(origin: TokenPF2e, spread: Point[], target: TokenPF2e, debug: boolean): boolean {
     const targetCenter = target.center;
-
-    if (origin.actor?.size === "tiny") {
-        return lineIntersect(origin.center, targetCenter, debug);
-    }
 
     for (const point of tokenSpread(origin, spread)) {
         if (lineIntersect(point, targetCenter, debug)) return true;
@@ -445,14 +437,6 @@ function spreadToSpread(
     targetSpread: Point[],
     debug: boolean,
 ): boolean {
-    if (origin.actor?.size === "tiny") {
-        return tokenToSpread(origin, target, targetSpread, debug);
-    }
-
-    if (target.actor?.size === "tiny") {
-        return spreadToToken(origin, originSpread, target, debug);
-    }
-
     for (const originPoint of tokenSpread(origin, originSpread)) {
         for (const targetPoint of tokenSpread(target, targetSpread)) {
             if (lineIntersect(originPoint, targetPoint, debug)) return true;
