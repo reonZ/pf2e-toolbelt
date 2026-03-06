@@ -103,7 +103,11 @@
       },
       "autoCover": {
         "title": "Abri automatique",
+<<<<<<< HEAD
         "creature": {
+=======
+        "creature": {
+>>>>>>> 5358edf8ae5196353862ba2acd08ba8ac0dc9c1a
           "name": "Abri des créatures",
           "hint": "Les créatures doivent-elles offrir une abri inférieur ou standard lors d'un jet d'attaque ?",
           "choices": {
@@ -122,7 +126,11 @@
           "name": "Éviter les créatures À terre",
           "hint": "Les créatures À terre ne devraient pas fournir d'abri."
         },
+<<<<<<< HEAD
         "wall": {
+=======
+        "wall": {
+>>>>>>> 5358edf8ae5196353862ba2acd08ba8ac0dc9c1a
           "name": "Abri des murs",
           "hint": "Les créatures ciblées doivent-elles bénéficier d'un abri standard lorsqu'un mur barre le chemin qui les sépare de leur attaquant ? Le centre de chaque créature sera toujours testé.",
           "choices": {
