@@ -15,7 +15,7 @@ const SIZES = {
     grg: 5,
 };
 
-type CoverValue = keyof typeof COVER_VALUES;
+type CoverLevel = keyof typeof COVER_VALUES;
 
 export { COVER_VALUES, SIZES };
-export type { CoverValue };
+export type { CoverLevel };

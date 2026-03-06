@@ -3,16 +3,22 @@ import {
     Check,
     CheckCheckContext,
     CheckModifier,
+    CheckModifiersDialog,
     CheckRoll,
     CheckRollCallback,
+    createHTMLElement,
+    createToggleHook,
     createToggleWrapper,
     EffectPF2e,
     getChoiceSetSelection,
     getFirstActiveToken,
     getItemSourceId,
+    htmlQuery,
+    ItemSourcePF2e,
     MODULE,
     R,
     Rolled,
+    signedInteger,
     SYSTEM,
     toggleHooksAndWrappers,
     TokenPF2e,
@@ -22,7 +28,7 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import {
     COVER_VALUES,
     CoverHighlightRenderer,
-    CoverValue,
+    CoverLevel,
     drawDebugLine,
     getRectEdges,
     lineIntersect,
@@ -59,6 +65,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         createToggleWrapper("WRAPPER", "CONFIG.Token.objectClass.prototype._destroy", this.#tokenDestroy, {
             context: this,
         }),
+        createToggleHook("renderCheckModifiersDialog", this.#onRenderCheckModifiersDialog.bind(this)),
     ];
 
     get key(): "autoCover" {
@@ -118,99 +125,23 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return fallback ? (current ?? new CoverHighlightRenderer(token, this)) : current;
     }
 
-    #tokenRefreshVisibility(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
-        wrapped();
-
-        const coverHighlight = this.getCoverHighlight(token, true);
-        coverHighlight.draw();
-        this.setInMemory(token, "coverHighlight", coverHighlight);
-    }
-
-    #tokenDestroy(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
-        wrapped();
-
-        const coverHighlight = this.getCoverHighlight(token, false);
-        coverHighlight?.destroy();
-    }
-
-    async #checkRoll(
-        _check: Check,
-        wrapped: libWrapper.RegisterCallback,
-        ...args: [check: CheckModifier, context?: CheckCheckContext, event?: Event | null, callback?: CheckRollCallback]
-    ): Promise<Rolled<CheckRoll> | null> {
-        const context = args[1];
-
-        if (
-            !context?.target ||
-            context.isReroll ||
-            !context.createMessage ||
-            context.type !== "attack-roll" ||
-            (R.isNumber(context.target.distance) && context.target.distance <= 5)
-        ) {
-            return wrapped(...args);
-        }
-
-        const originActor = context.origin?.actor ?? context.actor;
-        const targetActor = context.target.actor;
-
-        if (!originActor || !targetActor || originActor.isOfType("hazard")) {
-            return wrapped(...args);
-        }
-
-        const originToken = (context.origin?.token ?? context.token ?? getFirstActiveToken(originActor))?.object;
-        const targetToken = (context.target.token ?? getFirstActiveToken(targetActor))?.object;
-
-        if (!originToken || !targetToken) {
-            return wrapped(...args);
-        }
-
-        if (!R.isNumber(context.target.distance) && originToken.distanceTo(targetToken) <= 5) {
-            return wrapped(...args);
-        }
-
+    getExistingCovers(actor: ActorPF2e): EffectPF2e[] {
         const coverUUID = COVER_UUID();
-        const allExisting = R.map(targetActor.itemTypes.effect, (effect): ZeroToFour => {
-            if (getItemSourceId(effect) !== coverUUID) return 0;
-            const level = getChoiceSetSelection<{ level: CoverValue }>(effect)?.level;
-            return COVER_VALUES[level ?? "none"] as ZeroToFour;
-        });
-        const existing = R.firstBy(allExisting, [R.identity(), "desc"]) ?? 0;
-
-        if (existing >= COVER_VALUES.standard) {
-            return wrapped(...args);
-        }
-
-        const cover = this.calculateCover(originToken, targetToken);
-
-        if (COVER_VALUES[cover.value] > existing) {
-            const items = foundry.utils.deepClone(targetActor._source.items);
-            const source = (await fromUuid<EffectPF2e>(coverUUID))?.toObject();
-
-            if (!source) {
-                return wrapped(...args);
-            }
-
-            source.name = this.localize(cover.type);
-            source.system.rules = coverSourceRules(cover.value);
-
-            items.push(source);
-
-            context.target.actor = targetActor.clone({ items }, { keepId: true });
-
-            if (context.dc?.slug) {
-                const statistic = context.target.actor.getStatistic(context.dc.slug)?.dc;
-
-                if (statistic) {
-                    context.dc.value = statistic.value;
-                    context.dc.statistic = statistic;
-                }
-            }
-        }
-
-        return wrapped(...args);
+        return actor.itemTypes.effect.filter((effect) => getItemSourceId(effect) === coverUUID);
     }
 
-    calculateCover(origin: TokenPF2e, target: TokenPF2e): { type: "wall" | "creature"; value: CoverValue } {
+    getCoverEffectsSelections(effects: EffectPF2e[]): CoverSelection[] {
+        return R.map(effects, (effect): CoverSelection => {
+            const level = getChoiceSetSelection<{ level: CoverLevel }>(effect)?.level ?? "none";
+            return { level, value: COVER_VALUES[level] };
+        });
+    }
+
+    getHighestCoverSelection(selections: CoverSelection[]): CoverSelection {
+        return R.firstBy(selections, [R.prop("value"), "desc"]) ?? { level: "none", value: 0 };
+    }
+
+    calculateCover(origin: TokenPF2e, target: TokenPF2e): { type: "wall" | "creature"; level: CoverLevel } {
         const debug = MODULE.isDebug;
 
         if (debug) {
@@ -218,11 +149,11 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
 
         if (this.intersectsWithWall(origin, target, debug)) {
-            return { type: "wall", value: "standard" };
+            return { type: "wall", level: "standard" };
         }
 
         const cover = this.calculateCreaturesCover(origin, target, debug);
-        return { type: "creature", value: cover };
+        return { type: "creature", level: cover };
     }
 
     intersectsWithWall(origin: TokenPF2e, target: TokenPF2e, debug: boolean = false): boolean {
@@ -246,7 +177,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    calculateCreaturesCover(originToken: TokenPF2e, targetToken: TokenPF2e, debug: boolean = false): CoverValue {
+    calculateCreaturesCover(originToken: TokenPF2e, targetToken: TokenPF2e, debug: boolean = false): CoverLevel {
         const scene = originToken.scene;
         const setting = this.settings.creature;
         const originActor = originToken.actor;
@@ -297,7 +228,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             return size - originSize >= 2 && size - targetSize >= 2;
         };
 
-        let cover: CoverValue = "none";
+        let cover: CoverLevel = "none";
         let extraLargeCount = 0;
 
         const sceneTokens = R.pipe(
@@ -346,12 +277,184 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     clearDebug() {
         canvas.controls.debug.clear();
     }
+
+    #tokenRefreshVisibility(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        const coverHighlight = this.getCoverHighlight(token, true);
+        coverHighlight.draw();
+        this.setInMemory(token, "coverHighlight", coverHighlight);
+    }
+
+    #tokenDestroy(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
+        wrapped();
+
+        const coverHighlight = this.getCoverHighlight(token, false);
+        coverHighlight?.destroy();
+    }
+
+    #onRenderCheckModifiersDialog(dialog: CheckModifiersDialog, $html: JQuery) {
+        const context = dialog.context;
+        if (!context?.target || context.isReroll || !context.createMessage || context.type !== "attack-roll") return;
+
+        const originActor = context.origin?.actor ?? context.actor;
+        const targetActor = context.target.actor;
+        if (!originActor || !targetActor || originActor.isOfType("hazard")) return;
+
+        const coverEffects = this.getExistingCovers(targetActor);
+        const current = this.getHighestCoverSelection(this.getCoverEffectsSelections(coverEffects));
+
+        const html = $html[0];
+        const separator = document.createElement("hr");
+
+        const select = foundry.applications.fields.createSelectInput({
+            name: "override-cover",
+            options: R.map(R.keys(COVER_VALUES), (slug) => {
+                return {
+                    label: this.localize(slug),
+                    value: slug,
+                };
+            }),
+            value: current.level,
+        });
+
+        const bonusSpan = createHTMLElement("span", {
+            content: signedInteger(current.value),
+        });
+
+        const row = createHTMLElement("div", {
+            classes: ["override-cover"],
+            content: `<label>${this.localize("override")}</label>`,
+        });
+
+        row.append(bonusSpan, select);
+
+        htmlQuery(html, ".add-modifier-panel")?.after(separator, row);
+
+        let cover = current.level;
+
+        select.addEventListener("change", () => {
+            cover = select.value as CoverLevel;
+            bonusSpan.innerText = signedInteger(COVER_VALUES[cover]);
+        });
+
+        htmlQuery(html, "button.roll")?.addEventListener(
+            "click",
+            async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                if (cover !== current.level) {
+                    const ids = coverEffects.map((effect) => effect.id);
+                    const allItems = foundry.utils.deepClone(targetActor._source.items);
+                    const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
+
+                    await this.#addCoverSourceToContext(context, items, cover, this.localize("overriden"));
+                }
+
+                dialog.resolve(true);
+                dialog.isResolved = true;
+                dialog.close();
+            },
+            { capture: true },
+        );
+
+        dialog.setPosition();
+    }
+
+    async #checkRoll(
+        _check: Check,
+        wrapped: libWrapper.RegisterCallback,
+        ...args: [check: CheckModifier, context?: CheckCheckContext, event?: Event | null, callback?: CheckRollCallback]
+    ): Promise<Rolled<CheckRoll> | null> {
+        const context = args[1];
+
+        if (
+            !context?.target ||
+            context.isReroll ||
+            !context.createMessage ||
+            context.type !== "attack-roll" ||
+            (R.isNumber(context.target.distance) && context.target.distance <= 5)
+        ) {
+            return wrapped(...args);
+        }
+
+        const originActor = context.origin?.actor ?? context.actor;
+        const targetActor = context.target.actor;
+
+        if (!originActor || !targetActor || originActor.isOfType("hazard")) {
+            return wrapped(...args);
+        }
+
+        const originToken = (context.origin?.token ?? context.token ?? getFirstActiveToken(originActor))?.object;
+        const targetToken = (context.target.token ?? getFirstActiveToken(targetActor))?.object;
+
+        if (!originToken || !targetToken) {
+            return wrapped(...args);
+        }
+
+        if (!R.isNumber(context.target.distance) && originToken.distanceTo(targetToken) <= 5) {
+            return wrapped(...args);
+        }
+
+        const existing = this.getHighestCoverSelection(
+            this.getCoverEffectsSelections(this.getExistingCovers(targetActor)),
+        );
+        if (existing.value >= COVER_VALUES.standard) {
+            return wrapped(...args);
+        }
+
+        const cover = this.calculateCover(originToken, targetToken);
+
+        if (COVER_VALUES[cover.level] > existing.value) {
+            const items = foundry.utils.deepClone(targetActor._source.items);
+            await this.#addCoverSourceToContext(context, items, cover.level, this.localize(cover.type));
+        }
+
+        return wrapped(...args);
+    }
+
+    async #addCoverSourceToContext(
+        context: CheckCheckContext,
+        items: ItemSourcePF2e[],
+        level: CoverLevel,
+        sourceName: string,
+    ) {
+        const coverUUID = COVER_UUID();
+        const source = (await fromUuid<EffectPF2e>(coverUUID))?.toObject();
+        if (!source) return;
+
+        source.name = sourceName;
+        source.system.rules = coverSourceRules(level);
+
+        items.push(source);
+
+        context.target!.actor = context.target!.actor!.clone({ items }, { keepId: true });
+
+        if (context.dc?.slug) {
+            const statistic = context.target!.actor.getStatistic(context.dc.slug)?.dc;
+
+            if (statistic) {
+                context.dc.value = statistic.value;
+                context.dc.statistic = statistic;
+            }
+        }
+    }
 }
 
-function coverSourceRules(level: CoverValue) {
-    const bonus = COVER_VALUES[level];
+function coverSourceRules(level: CoverLevel) {
+    const rawBonus = COVER_VALUES[level];
+    const bonus = rawBonus === 3 ? 4 : rawBonus;
 
     return [
+        {
+            choices: [],
+            flag: "cover",
+            key: "ChoiceSet",
+            prompt: "PF2E.SpecificRule.Cover.Prompt",
+            selection: { bonus, level },
+        },
         { key: "RollOption", option: `self:cover-bonus:${bonus}` },
         { key: "RollOption", option: `self:cover-level:${level}` },
         {
@@ -396,5 +499,7 @@ type ToolSettings = {
     prone: boolean;
     wall: (typeof WALL_INTERSECTIONS_SETTING)[number];
 };
+
+type CoverSelection = { level: CoverLevel; value: ZeroToFour };
 
 export { AutoCoverTool };

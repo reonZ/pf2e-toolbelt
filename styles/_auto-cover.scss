@@ -1,0 +1,12 @@
+.app.dialog.roll-modifiers-dialog {
+    .override-cover {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    select {
+        flex: 1;
+    }
+}

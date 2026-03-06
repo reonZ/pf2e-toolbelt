@@ -436,8 +436,12 @@
         },
         "autoCover": {
             "creature": "Cover from Creature",
+            "greater": "Greater Cover",
+            "greater-prone": "Greater-Prone Cover",
             "lesser": "Lesser Cover",
             "none": "No Cover",
+            "override": "Override Cover",
+            "overriden": "Cover from Override",
             "standard": "Standard Cover",
             "wall": "Cover from Wall"
         },

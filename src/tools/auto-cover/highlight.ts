@@ -1,5 +1,5 @@
 import { TokenPF2e } from "foundry-helpers";
-import { AutoCoverTool, CoverValue } from ".";
+import { AutoCoverTool, CoverLevel } from ".";
 
 /**
  * reused version of
@@ -38,26 +38,26 @@ class CoverHighlightRenderer {
         );
     }
 
-    getLineColor(value: CoverValue): number {
-        return value !== "none" ? CONFIG.Canvas.dispositionColors.HOSTILE : CONFIG.Canvas.dispositionColors.PARTY;
+    getLineColor(level: CoverLevel): number {
+        return level !== "none" ? CONFIG.Canvas.dispositionColors.HOSTILE : CONFIG.Canvas.dispositionColors.PARTY;
     }
 
     draw(): void {
         this.clear();
         if (canvas.tokens.highlightObjects && game.user.targets.size && this.#shouldRender) {
             for (const target of game.user.targets) {
-                const { value } = this.#tool.calculateCover(this.#token, target);
-                this.drawLine(target, value);
-                this.drawLabel(target, value);
+                const { level } = this.#tool.calculateCover(this.#token, target);
+                this.drawLine(target, level);
+                this.drawLabel(target, level);
             }
         }
     }
 
-    drawLine(target: TokenPF2e, value: CoverValue): void {
+    drawLine(target: TokenPF2e, level: CoverLevel): void {
         const thickness = CONFIG.Canvas.objectBorderThickness;
         const outerThickness = Math.round(thickness * 1.5);
         const radius = Math.round(thickness * 2);
-        const lineColor = this.getLineColor(value);
+        const lineColor = this.getLineColor(level);
 
         // Draw line
         this.layer
@@ -77,7 +77,7 @@ class CoverHighlightRenderer {
         this.layer.beginFill(lineColor).lineStyle(1, 0x000000).drawCircle(target.center.x, target.center.y, radius);
     }
 
-    drawLabel(target: TokenPF2e, value: CoverValue): void {
+    drawLabel(target: TokenPF2e, level: CoverLevel): void {
         // Midpoint coordinate between tokens
         const mid_x = Math.round((this.#token.center.x + target.center.x) / 2);
         const mid_y = Math.round((this.#token.center.y + target.center.y) / 2);
@@ -100,10 +100,10 @@ class CoverHighlightRenderer {
         const style = CONFIG.canvasTextStyle.clone();
         const dimensions = canvas.dimensions;
         style.fontSize = dimensions.size >= 200 ? 28 : dimensions.size < 50 ? 20 : 24;
-        style.fill = this.getLineColor(value);
+        style.fill = this.getLineColor(level);
         style.stroke = 0x000000;
 
-        const labelText = this.#tool.localize(value);
+        const labelText = this.#tool.localize(level);
         const text = new foundry.canvas.containers.PreciseText(labelText, style);
         text.anchor.set(0.5, 0.5);
 
