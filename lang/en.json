@@ -103,7 +103,7 @@
             },
             "autoCover": {
                 "title": "Auto Cover",
-                "creatures": {
+                "creature": {
                     "name": "Creatures Cover",
                     "hint": "Should creatures provide lesser or standard cover when an attack is rolled.",
                     "choices": {
@@ -122,9 +122,9 @@
                     "name": "Skip Prone Creatures",
                     "hint": "Should prone creatures not provide cover."
                 },
-                "walls": {
+                "wall": {
                     "name": "Walls Cover",
-                    "hint": "Should target creatures receive standard cover when the path between them and their attacker is intersected by a wall. The center of each creatures will always be tested.",
+                    "hint": "Should target creatures receive standard cover when the path between them and their attacker is intersected by a wall.",
                     "choices": {
                         "center-center": "Center to Center",
                         "center-spread": "Center to Spread",

@@ -27,8 +27,6 @@ const WALL_INTERSECTIONS_SETTING = [
     "center-spread",
     "center-corner",
     "corner-center",
-    "corner-spread",
-    "corner-corner",
 ] as const;
 
 const COVER_UUID = SYSTEM.uuid(
@@ -39,7 +37,6 @@ const COVER_UUID = SYSTEM.uuid(
 const RECT_CORNERS = [
     { x: 0, y: 0 },
     { x: 1, y: 0 },
-    { x: 0.5, y: 0.5 },
     { x: 0, y: 1 },
     { x: 1, y: 1 },
 ];
@@ -47,7 +44,6 @@ const RECT_CORNERS = [
 const RECT_SPREAD = [
     { x: 0.25, y: 0.25 },
     { x: 0.75, y: 0.25 },
-    { x: 0.5, y: 0.5 },
     { x: 0.25, y: 0.75 },
     { x: 0.75, y: 0.75 },
 ];
@@ -79,7 +75,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
             {
-                key: "walls",
+                key: "wall",
                 type: String,
                 default: "disabled",
                 scope: "world",
@@ -89,7 +85,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
-                key: "creatures",
+                key: "creature",
                 type: String,
                 default: "disabled",
                 scope: "world",
@@ -114,7 +110,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     _configurate(): void {
-        this.#checkRollWrapper.toggle(this.settings.creatures !== "disabled" || this.settings.walls !== "disabled");
+        this.#checkRollWrapper.toggle(this.settings.creature !== "disabled" || this.settings.wall !== "disabled");
     }
 
     init(): void {
@@ -202,7 +198,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const debug = MODULE.isDebug;
 
         if (debug) {
-            clearDebug();
+            this.clearDebug();
         }
 
         if (this.intersectsWithWall(origin, target, debug)) {
@@ -214,7 +210,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     intersectsWithWall(origin: TokenWithActor, target: TokenWithActor, debug: boolean = false): boolean {
-        const setting = this.settings.walls;
+        const setting = this.settings.wall;
 
         switch (setting) {
             case "center-center":
@@ -225,10 +221,10 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 return tokenToSpread(origin, target, RECT_CORNERS, debug);
             case "corner-center":
                 return spreadToToken(origin, RECT_CORNERS, target, debug);
-            case "corner-spread":
-                return spreadToSpread(origin, RECT_CORNERS, target, RECT_SPREAD, debug);
-            case "corner-corner":
-                return spreadToSpread(origin, RECT_CORNERS, target, RECT_CORNERS, debug);
+            // case "corner-spread":
+            //     return spreadToSpread(origin, RECT_CORNERS, target, RECT_SPREAD, debug);
+            // case "corner-corner":
+            //     return spreadToSpread(origin, RECT_CORNERS, target, RECT_CORNERS, debug);
             default:
                 return false;
         }
@@ -240,7 +236,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         debug: boolean = false,
     ): CoverValue {
         const scene = originToken.scene;
-        const setting = this.settings.creatures;
+        const setting = this.settings.creature;
 
         if (!scene || setting === "disabled") {
             return "none";
@@ -331,6 +327,10 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
 
         return cover;
+    }
+
+    clearDebug() {
+        canvas.controls.debug.clear();
     }
 }
 
@@ -424,27 +424,29 @@ function spreadToToken(origin: TokenPF2e, spread: Point[], target: TokenPF2e, de
     const targetCenter = target.center;
 
     for (const point of tokenSpread(origin, spread)) {
-        if (lineIntersect(point, targetCenter, debug)) return true;
-    }
-
-    return false;
-}
-
-function spreadToSpread(
-    origin: TokenPF2e,
-    originSpread: Point[],
-    target: TokenPF2e,
-    targetSpread: Point[],
-    debug: boolean,
-): boolean {
-    for (const originPoint of tokenSpread(origin, originSpread)) {
-        for (const targetPoint of tokenSpread(target, targetSpread)) {
-            if (lineIntersect(originPoint, targetPoint, debug)) return true;
+        if (!lineIntersect(point, targetCenter, debug)) {
+            return false;
         }
     }
 
-    return false;
+    return true;
 }
+
+// function spreadToSpread(
+//     origin: TokenPF2e,
+//     originSpread: Point[],
+//     target: TokenPF2e,
+//     targetSpread: Point[],
+//     debug: boolean,
+// ): boolean {
+//     for (const originPoint of tokenSpread(origin, originSpread)) {
+//         for (const targetPoint of tokenSpread(target, targetSpread)) {
+//             if (lineIntersect(originPoint, targetPoint, debug)) return true;
+//         }
+//     }
+
+//     return false;
+// }
 
 function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
     const intersects = CONFIG.Canvas.polygonBackends.move.testCollision(origin, target, { type: "move", mode: "any" });
@@ -461,15 +463,11 @@ function drawDebugLine(origin: Point, target: Point, color: "blue" | "green" | "
     canvas.controls.debug.lineStyle(4, hex).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
 }
 
-function clearDebug() {
-    canvas.controls.debug.clear();
-}
-
 type ToolSettings = {
-    creatures: (typeof CREATURE_SETTINGS)[number];
+    creature: (typeof CREATURE_SETTINGS)[number];
     dead: boolean;
     prone: boolean;
-    walls: (typeof WALL_INTERSECTIONS_SETTING)[number];
+    wall: (typeof WALL_INTERSECTIONS_SETTING)[number];
 };
 
 type RectEdge = { A: Point; B: Point };
