@@ -441,7 +441,7 @@
             "lesser": "Lesser Cover",
             "none": "No Cover",
             "override": "Override Cover",
-            "overriden": "Cover from Override",
+            "overriden": "Overridden Cover",
             "standard": "Standard Cover",
             "wall": "Cover from Wall"
         },
