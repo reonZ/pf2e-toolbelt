@@ -318,8 +318,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             value: current.level,
         });
 
+        const getDisplayedBonus = (level: CoverLevel): string => {
+            const bonus = getCoverBonus(level);
+            return signedInteger(bonus);
+        };
+
         const bonusSpan = createHTMLElement("span", {
-            content: signedInteger(current.value),
+            content: getDisplayedBonus(current.level),
         });
 
         const row = createHTMLElement("div", {
@@ -335,7 +340,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         select.addEventListener("change", () => {
             cover = select.value as CoverLevel;
-            bonusSpan.innerText = signedInteger(COVER_VALUES[cover]);
+            bonusSpan.innerText = getDisplayedBonus(cover);
         });
 
         htmlQuery(html, "button.roll")?.addEventListener(
@@ -352,6 +357,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
                     await this.#addCoverSourceToContext(context, items, cover, this.localize("overriden"));
                 }
+
+                console.log(context.target?.actor);
 
                 dialog.resolve(true);
                 dialog.isResolved = true;
@@ -443,9 +450,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 }
 
-function coverSourceRules(level: CoverLevel) {
+function getCoverBonus(level: CoverLevel): ZeroToFour {
     const rawBonus = COVER_VALUES[level];
-    const bonus = rawBonus === 3 ? 4 : rawBonus;
+    return rawBonus === 3 ? 4 : rawBonus;
+}
+
+function coverSourceRules(level: CoverLevel) {
+    const bonus = getCoverBonus(level);
 
     return [
         {
