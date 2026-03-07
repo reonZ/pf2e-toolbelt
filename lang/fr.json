@@ -436,6 +436,13 @@
     },
     "autoCover": {
       "creature": "Abri par la créature",
+      "greater": "Abri supérieur",
+      "greater-prone": "Abri supérieur en étant À terre",
+      "lesser": "Abri inférieur",
+      "none": "Pas d'abri",
+      "override": "Ignorer l'abri",
+      "overriden": "Abri ignoré",
+      "standard": "Abri standard",
       "wall": "Abri par le mur"
     },
     "betterInventory": {
