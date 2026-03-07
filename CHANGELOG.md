@@ -1,3 +1,10 @@
+# 3.34.1
+
+- `Auto Cover`:
+  - make sure to only account for `Greater-Prone Cover` if the attack is ranged and the target is prone
+    - remove the option from the `Check Modifiers` dialog if not
+  - fix displayed bonus for `Greater` cover in the `Check Modifiers` dialog
+
 # 3.34.0
 
 - `Auto Cover`:
