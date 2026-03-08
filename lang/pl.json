@@ -101,6 +101,41 @@
           "hint": "Dodaje również runy wzmacniające do tarcz."
         }
       },
+      "autoCover": {
+        "title": "Automatyczna osłona",
+        "creature": {
+          "name": "Osłona zapewniana przez stworzenia",
+          "hint": "Czy stworzenia powinny zapewniać mniejszą lub standardową osłonę podczas rzutu ataku?",
+          "choices": {
+            "disabled": "Wyłączone",
+            "cross": "Przecięcie dwóch przeciwległych boków",
+            "zero": "Przecięcie dowolnego boku",
+            "ten": "Dowolny bok z 10% marginesem",
+            "twenty": "Dowolny bok z 20% marginesem"
+          }
+        },
+        "dead": {
+          "name": "Pomiń martwe stworzenia",
+          "hint": "Martwe stworzenia nie powinny zapewniać osłony."
+        },
+        "prone": {
+          "name": "Pomiń leżące stworzenia",
+          "hint": "Stworzenia leżące nie powinny zapewniać osłony."
+        },
+        "wall": {
+          "name": "Osłona zapewniana przez ściany",
+          "hint": "Czy stworzenia będące celem powinny otrzymać standardową osłonę, gdy droga między nimi a atakującym jest przecinana przez ścianę?",
+          "choices": {
+            "center-center": "Od środka do środka",
+            "center-spread": "Od środka do brzegów",
+            "center-corner": "Od środka do narożników",
+            "corner-center": "Od narożników do środka",
+            "corner-spread": "Od narożników do brzegów",
+            "corner-corner": "Od narożników do narożników",
+            "disabled": "Wyłączone"
+          }
+        }
+      },
       "betterEffectsPanel": {
         "title": "Ulepszony Panel Efektów",
         "remove": {
@@ -399,6 +434,17 @@
         "header": "Rzuca zaklęcie..."
       }
     },
+    "autoCover": {
+      "creature": "Osłona od stworzenia",
+      "greater": "Większa osłona",
+      "greater-prone": "Większa osłona od przewrócenia",
+      "lesser": "Mniejsza osłona\n",
+      "none": "Brak osłony",
+      "override": "Nadpisanie osłony",
+      "overriden": "Nadpisana osłona",
+      "standard": "Standardowa osłona",
+      "wall": "Osłona od ścian"
+    },
     "betterInventory": {
       "improvised": {
         "label": "Broń improwizowana"
@@ -603,6 +649,19 @@
               "warning": "Zaimportowane dane nie osiągają ostatniego progu wzmocnienia (poziom {level}).<br>Możesz chcieć to zaktualizować."
             }
           },
+          "details": {
+            "age": "Wiek",
+            "assign": "Przypisz szczegóły wpisów",
+            "current": "Bieżące",
+            "expected": "Oczekiwane",
+            "gender": "Płeć",
+            "language": {
+              "assign": "Przypisz języki",
+              "current": "Bieżące języki",
+              "expected": "Oczekiwane języki"
+            },
+            "name": "Nazwa"
+          },
           "entry": {
             "action": {
               "install": "Dodaj {match} do postaci",
@@ -615,6 +674,35 @@
             "drop": "Upuść {key}",
             "match": "Dopasowanie",
             "override": "Zastąpienie"
+          },
+          "inventory": {
+            "currency": {
+              "assign": "Zastąp monety",
+              "current": "Bieżące",
+              "expected": "Oczekiwane"
+            }
+          },
+          "skills": {
+            "assign": "Przypisz umiejętności",
+            "current": "Bieżące",
+            "expected": "Oczekiwane"
+          },
+          "spellcasting": {
+            "add": {
+              "content": "Czy chcesz utworzyć nowy wpis dotyczący rzucania zaklęć z pasującymi danymi?",
+              "title": "Utwórz nowy wpis dotyczący rzucania zaklęć",
+              "yes": "Utwórz"
+            },
+            "fill": {
+              "content": "Czy chcesz dodać wszystkie zaklęcia, których nie można znaleźć w wpisie „Rzucanie zaklęć”?",
+              "label": "Dodaj wszystkie brakujące zaklęcia",
+              "title": "Wypełnij wpis Rzucania zaklęć brakującymi zaklęciami",
+              "yes": "Wypełnienie"
+            },
+            "refresh": {
+              "label": "Odśwież wartości miejsc",
+              "set": "Odświeżono miejsca na zaklęcia"
+            }
           }
         },
         "menu": {
