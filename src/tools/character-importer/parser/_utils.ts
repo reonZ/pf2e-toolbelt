@@ -1,5 +1,6 @@
 import {
     AttributeString,
+    CompendiumCollection,
     CompendiumIndexData,
     FeatOrFeatureCategory,
     ItemUUID,
@@ -14,27 +15,30 @@ import {
 } from "foundry-helpers";
 import { CharacterCategory } from "..";
 
-const CORE_PACKS: Record<CharacterCategory, string> = {
-    ancestry: "ancestries",
-    background: "backgrounds",
-    class: "classes",
-    heritage: "heritages",
+type CompendiumPacksRecord<T extends string> = Record<T, () => CompendiumCollection | undefined>;
+
+const CORE_PACKS: CompendiumPacksRecord<CharacterCategory> = {
+    ancestry: SYSTEM.pack("ancestries"),
+    background: SYSTEM.pack("backgrounds"),
+    class: SYSTEM.pack("classes"),
+    heritage: SYSTEM.pack("heritages"),
 };
 
-const FEAT_PACKS: PartialRecord<FeatOrFeatureCategory, string> = {
-    ancestryfeature: "ancestryfeatures",
-    classfeature: "classfeatures",
+const FEAT_PACKS: Partial<CompendiumPacksRecord<FeatOrFeatureCategory>> = {
+    ancestryfeature: SYSTEM.pack("ancestryfeatures", "ancestry-features"),
+    classfeature: SYSTEM.pack("classfeatures", "class-features"),
 };
 
-const EQUIPMENT_PACK = "equipment-srd";
-const FEATS_PACK = "feats-srd";
-const SPELLS_PACK = "spells-srd";
+const EQUIPMENT_PACK = SYSTEM.pack("equipment-srd", "equipment");
+const FEATS_PACK = SYSTEM.pack("feats-srd", "feats");
+const SPELLS_PACK = SYSTEM.pack("spells-srd", "spells");
 
-async function getUuidFromPack(value: string, packName: string): Promise<CompendiumIndexData | null> {
-    if (!R.isTruthy(value)) return null;
-
-    const pack = SYSTEM.getPack(packName);
-    if (!pack) return null;
+async function getUuidFromPack(
+    value: string,
+    packFn: () => CompendiumCollection | undefined,
+): Promise<CompendiumIndexData | null> {
+    const pack = packFn();
+    if (!R.isTruthy(value) || !pack) return null;
 
     const slug = SYSTEM.sluggify(value);
     const collection = await pack.getIndex({ fields: ["system.slug"] });

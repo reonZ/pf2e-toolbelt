@@ -8,6 +8,7 @@ import {
     R,
     TreasurePF2e,
     TreasureSource,
+    SYSTEM,
 } from "foundry-helpers";
 import { COIN_COMPENDIUM_UUIDS, COIN_DENOMINATIONS } from "foundry-helpers/dist";
 import { CharacterImport, CharacterImporterTool, getCurrentItem, ImportDataEntry, prepareEntry } from "tools";
@@ -19,14 +20,17 @@ async function prepareInventoryTab(
 ): Promise<ImportDataInventoryContext> {
     const currency = actor.inventory.currency;
 
-    const currencies = R.map(COIN_DENOMINATIONS, (unit): ImportDataCurrency => {
-        return {
-            current: currency[unit],
-            expected: data.currencies[unit],
-            label: CONFIG.PF2E.currencies[unit],
-            unit,
-        };
-    });
+    const currencies = R.map(
+        SYSTEM.isSF2e ? (["credits"] as const) : COIN_DENOMINATIONS,
+        (unit): ImportDataCurrency => {
+            return {
+                current: unit === "credits" ? currency.copperValue / 10 : currency[unit],
+                expected: (unit === "credits" && data.currencies.sp) || data.currencies[unit],
+                label: CONFIG.PF2E.currencies[unit],
+                unit,
+            };
+        },
+    );
 
     const items = R.map(data.equipments, (entry, index): ImportDataEquipmentEntry => {
         const current = getCurrentItem(actor, actor.itemTypes[entry.type], entry);
@@ -107,11 +111,37 @@ function addInventoryEventListeners(this: CharacterImporterTool, html: HTMLEleme
         const action = el.dataset.action as EventAction;
 
         switch (action) {
-            case "assign-currencies": {
+            case "assign-credits":
+                return assignCredits.call(this, actor);
+            case "assign-currencies":
                 return assignCurrencies.call(this, actor);
-            }
         }
     });
+}
+
+async function assignCredits(this: CharacterImporterTool, actor: CharacterPF2e) {
+    const data = await this.getImportData(actor);
+    if (!data) return;
+
+    const currency = actor.inventory.currency;
+    const currentValue = currency.credits;
+    const diff = data.currencies.sp - currentValue;
+
+    if (currency.upb > 0) {
+        const updates: Partial<Record<Currency, number>> = { upb: currency.upb };
+
+        if (diff < 0) {
+            updates["credits"] = Math.abs(diff);
+        }
+
+        await actor.inventory.removeCurrency(updates);
+    } else if (diff < 0) {
+        await actor.inventory.removeCurrency({ credits: Math.abs(diff) });
+    }
+
+    if (diff > 0) {
+        await actor.inventory.addCurrency({ credits: diff });
+    }
 }
 
 async function assignCurrencies(this: CharacterImporterTool, actor: CharacterPF2e) {
@@ -150,7 +180,7 @@ async function assignCurrencies(this: CharacterImporterTool, actor: CharacterPF2
             const expected = data.currencies[unit];
             if (expected <= 0) return;
 
-            const uuid = COIN_COMPENDIUM_UUIDS[unit];
+            const uuid = COIN_COMPENDIUM_UUIDS[unit]();
             const source = (await fromUuid<TreasurePF2e>(uuid))?.toObject(true);
             if (source?.type !== "treasure") return;
 
@@ -172,7 +202,7 @@ async function assignCurrencies(this: CharacterImporterTool, actor: CharacterPF2
     }
 }
 
-type EventAction = "assign-currencies";
+type EventAction = "assign-credits" | "assign-currencies";
 
 type ImportDataEquipmentEntry = ImportDataEntry & {
     container?: string;
