@@ -1,3 +1,9 @@
+# 3.35.0
+
+- `Character Importer`:
+  - add support for `Starfinder Second Edition` system
+  - you need to re-import the data on any starfinder character if you already had imported before this update
+
 # 3.34.1
 
 - `Auto Cover`:
