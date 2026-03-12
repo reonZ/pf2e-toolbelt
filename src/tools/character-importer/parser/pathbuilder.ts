@@ -86,7 +86,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
 
         return {
             awarded,
-            level: Math.clamp(level, 1, 10) as OneToTen,
+            level: Math.clamp(level, 1, 20) as OneToTen,
             match,
             category: featureMatch ? "classfeature" : category,
             value,
