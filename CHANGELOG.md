@@ -1,3 +1,9 @@
+# 3.35.1
+
+- `Character Importer`:
+  - fix feats levels being limited to level 10
+    - you need to re-import any character that imported pathbuilder data above level 10
+
 # 3.35.0
 
 - `Character Importer`:
