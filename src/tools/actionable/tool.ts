@@ -793,7 +793,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const item = sheet.item;
         const $html: JQuery = await wrapped(data);
 
-        if (item.isOfType("consumable") && ["wand", "scroll"].includes(item.category)) {
+        if ((item.isOfType("spell") && item.original) || (item.isOfType("consumable") && isCastConsumable(item))) {
             return $html;
         }
 
