@@ -20,7 +20,6 @@ import {
     ImportedSpellcastingSource,
     ImportedSpellSource,
     isAttributeKey,
-    isAttributeLevel,
     isCharacterCategory,
 } from "..";
 
@@ -128,13 +127,24 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
     const levelsBoosts = R.pipe(
         R.isPlainObject(rawBoosts) ? rawBoosts : {},
         R.entries(),
-        R.filter((entry): entry is [AttributeLevel, unknown] => {
-            return isAttributeLevel(entry[0]);
+        R.map(([key, boosts]): [AttributeLevel, AttributeString[]] | undefined => {
+            const actualLevel = Number(key);
+            if (!R.isNumber(actualLevel) || !valueBetween(actualLevel, 1, 20)) return;
+
+            const level = actualLevel === 1 ? 1 : Math.ceil(actualLevel / 5) * 5;
+            const attributeLevel = String(level) as AttributeLevel;
+
+            return [attributeLevel, getBoosts(boosts)];
         }),
-        R.map(([key, boosts]) => {
-            return [key, getBoosts(boosts)] as const;
-        }),
-        R.fromEntries(),
+        R.filter(R.isTruthy),
+        R.reduce(
+            (acc, [level, boosts]) => {
+                acc[level] ??= [];
+                acc[level].push(...boosts);
+                return acc;
+            },
+            {} as Record<AttributeLevel, AttributeString[]>,
+        ),
     );
 
     const getBoostsAtPath = (path: BoostsPath): AttributeString[] => {
