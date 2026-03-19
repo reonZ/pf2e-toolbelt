@@ -1,3 +1,10 @@
+# 3.36.0
+
+- `Character Importer`:
+  - you need to re-import the data to take advantage of the changes made in this version
+  - add support to the `Gradual Ability Boost` variant
+  - add support to the `Free Archetype` variant
+
 # 3.35.1
 
 - `Character Importer`:
