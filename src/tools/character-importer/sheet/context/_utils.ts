@@ -92,6 +92,10 @@ function prepareFeatEntry(
     depth: number,
 ): ImportDataFeatEntry {
     const current = getCurrentItem(actor, actor.itemTypes.feat, entry);
+    const label =
+        entry.category === "archetype"
+            ? "PF2E.Actor.Character.FeatSlot.ArchetypeHeader"
+            : CONFIG.PF2E.featCategories[entry.category];
 
     return {
         ...prepareEntry.call(this, "feat", entry, current, depth),
@@ -99,7 +103,7 @@ function prepareFeatEntry(
         children: prepareFeatEntries.call(this, actor, data, index, depth + 1),
         index,
         itemType: "feat",
-        label: game.i18n.localize(CONFIG.PF2E.featCategories[entry.category]),
+        label: game.i18n.localize(label),
         level: !entry.parent || !R.isNumber(Number(entry.parent)) ? entry.level : 0,
         parent: entry.parent,
     };
@@ -116,7 +120,7 @@ function prepareFeatEntries(
     const matchParent = R.isNumber(parent) ? stringNumber(parent) : parent;
 
     return R.pipe(
-        data.feats,
+        game.pf2e.settings.variants.fa ? data.feats : data.feats.filter(({ category }) => category !== "archetype"),
         R.map((feat, index) => {
             if (feat.level > level || feat.parent !== matchParent || feat.awarded) return;
             return prepareFeatEntry.call(this, actor, data, feat, index, depth);
@@ -200,7 +204,7 @@ type ImportDataEntry = {
 };
 
 type ImportDataFeatEntry = Omit<ImportDataEntry, "itemType"> & {
-    category: FeatOrFeatureCategory;
+    category: FeatOrFeatureCategory | "archetype";
     index: number;
     itemType: "feat";
     level: number;

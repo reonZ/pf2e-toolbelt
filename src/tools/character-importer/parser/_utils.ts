@@ -24,7 +24,7 @@ const CORE_PACKS: CompendiumPacksRecord<CharacterCategory> = {
     heritage: SYSTEM.pack("heritages"),
 };
 
-const FEAT_PACKS: Partial<CompendiumPacksRecord<FeatOrFeatureCategory>> = {
+const FEAT_PACKS: Partial<CompendiumPacksRecord<FeatOrFeatureCategory | "archetype">> = {
     ancestryfeature: SYSTEM.pack("ancestryfeatures", "ancestry-features"),
     classfeature: SYSTEM.pack("classfeatures", "class-features"),
 };
@@ -52,7 +52,10 @@ async function getCoreUuidFromPack(value: string, category: CharacterCategory): 
     return (entry?.uuid ?? null) as ItemUUID | null;
 }
 
-async function getFeatUuidFromPack(value: string, category: FeatOrFeatureCategory): Promise<ItemUUID | null> {
+async function getFeatUuidFromPack(
+    value: string,
+    category: FeatOrFeatureCategory | "archetype",
+): Promise<ItemUUID | null> {
     const pack = FEAT_PACKS[category] ?? FEATS_PACK;
     const entry = await getUuidFromPack(value, pack);
     return (entry?.uuid ?? null) as ItemUUID | null;

@@ -37,10 +37,11 @@ import {
 const BACKPACK_UUID = "Compendium.pf2e.equipment-srd.Item.3lgwjrFEsQVKzhh7";
 const SPACIOUS_POUCH_UUID = "Compendium.pf2e.equipment-srd.Item.jaEEvuQ32GjAa8jy";
 
-const FEAT_CATEGORIES: Record<string, FeatOrFeatureCategory> = {
+const FEAT_CATEGORIES: Record<string, FeatOrFeatureCategory | "archetype"> = {
     "ancestry-feat": "ancestry",
     ancestry: "ancestryfeature",
     "awarded-feat": "bonus",
+    "archetype-feat": "archetype",
     // "": "calling",
     "class-feat": "class",
     class: "classfeature",

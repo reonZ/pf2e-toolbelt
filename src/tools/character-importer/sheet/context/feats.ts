@@ -27,7 +27,7 @@ async function prepareFeatsTab(
 function addFeatsEventListeners(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e) {}
 
 type FeatSection = {
-    category: FeatOrFeatureCategory;
+    category: FeatOrFeatureCategory | "archetype";
     feats: ImportDataFeatEntry[];
     label: string;
 };

@@ -48,10 +48,12 @@ const zAttributes = z
     });
 
 function zFeat() {
+    const categories = [...R.keys(CONFIG.PF2E.featCategories), "archetype"] as const;
+
     return zImportedEntry("feat").extend({
         awarded: z.boolean().default(false),
         level: z.number().min(1).multipleOf(1).default(1),
-        category: z.enum(R.keys(CONFIG.PF2E.featCategories)),
+        category: z.enum(categories),
         parent: z
             .custom<FeatEntryParent>((value) => {
                 if (!R.isString(value) || !value.trim()) return false;
