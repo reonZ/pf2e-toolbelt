@@ -1,3 +1,12 @@
+# 3.37.0
+
+- `Actionable`:
+  - no longer display macro drop zone to variant spells
+- `Merge Damage`:
+  - you can now `Shift` click on the `merge` and `inject` buttons to open a customization menu
+    - the menu allows you to select how much of each message is merged (`full`, `half` or `double`)
+    - for `inject`, you can only customize the injected damage as the original message is meant to be kept as is
+
 # 3.36.0
 
 - `Character Importer`:
