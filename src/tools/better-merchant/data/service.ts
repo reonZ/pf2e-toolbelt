@@ -31,7 +31,7 @@ const zService = z.object({
     name: z.string().trim().default(""),
     price: zCoins.prefault({}),
     quantity: z.number().min(-1).multipleOf(1).default(-1),
-    tags: z.array(z.string().trim().min(1)).default([]),
+    tags: z.array(z.string().nonempty()).default([]),
 });
 
 function exportService(service: ServiceData): Omit<ServiceSource, "id" | "enabled"> {

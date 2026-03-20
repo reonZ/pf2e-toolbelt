@@ -12,15 +12,15 @@ const zAdjustement = z.object({
 
 const zModifier = z.object({
     excluded: z.boolean().default(false),
-    label: z.string().trim().min(1),
+    label: z.string().nonempty(),
     modifier: z.number(),
-    slug: z.string().trim().min(1),
+    slug: z.string().nonempty(),
 });
 
 const zNote = z.object({
     selector: z.string(),
-    title: z.string().trim().min(1).nullish(),
-    text: z.string().trim().min(1),
+    title: z.string().nonempty().nullish(),
+    text: z.string().nonempty(),
     predicate: z.any().optional(),
     outcome: z.array(z.enum(DEGREE_OF_SUCCESS_STRINGS)).default([]),
     visibility: z.enum(VISIBILITY_TYPES).nullish(),
@@ -41,7 +41,7 @@ const zTargetSaveInstance = z.object({
     notes: z.array(zNote).default([]),
     private: z.boolean().default(false),
     rerolled: z.enum(REROLL_TYPES).optional(),
-    roll: z.string().trim().min(1),
+    roll: z.string().nonempty(),
     significantModifiers: z.array(zSignificantModifier).default([]),
     statistic: z.enum(SAVE_TYPES),
     success: z.enum(DEGREE_OF_SUCCESS_STRINGS),

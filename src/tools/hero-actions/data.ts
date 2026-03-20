@@ -1,7 +1,7 @@
 import { z, zDocumentUUID } from "foundry-helpers";
 
 const zHeroAction = z.object({
-    name: z.string().trim().min(1),
+    name: z.string().nonempty(),
     uuid: zDocumentUUID(),
 });
 
