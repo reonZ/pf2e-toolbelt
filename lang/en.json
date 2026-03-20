@@ -867,11 +867,33 @@
         },
         "mergeDamage": {
             "buttons": {
-                "split": "Split back to original messages",
+                "inject": "Inject damage to previous message",
+                "menu": {
+                    "inject": "[Shift] Open inject menu",
+                    "merge": "[Shift] Open merge menu"
+                },
                 "merge": "Merge with previous damage message",
-                "inject": "Inject damage to previous message"
+                "split": "Split back to original messages"
             },
             "injected": "Damage was injected into this message",
+            "menu": {
+                "inject-damage": {
+                    "double": "Inject double damage",
+                    "full": "Inject full damage",
+                    "half": "Inect half damage",
+                    "title": "Inject Menu",
+                    "yes": "Inject"
+                },
+                "merge-damage": {
+                    "double": "Merge double damage",
+                    "full": "Merge full damage",
+                    "half": "Merge half damage",
+                    "title": "Merge Menu",
+                    "yes": "Merge"
+                },
+                "originMerge": "Current Message",
+                "targetMerge": "Previous Message"
+            },
             "noMatch": "Couldn't find another matching damage message."
         },
         "resourceTracker": {

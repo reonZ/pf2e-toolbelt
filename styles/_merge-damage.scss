@@ -37,3 +37,33 @@
         }
     }
 }
+
+.application.dialog.pf2e-toolbelt-merge-damage-menu {
+    .dialog-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2em;
+
+            h3 {
+                font-size: 1.5em;
+                margin-bottom: 0.5rem;
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+            }
+
+            &:only-child {
+                h3 {
+                    display: none;
+                }
+            }
+        }
+    }
+}

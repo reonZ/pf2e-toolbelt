@@ -27,12 +27,19 @@ import {
     SYSTEM,
     toggleHooksAndWrappers,
     TokenDocumentUUID,
+    waitDialog,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { targetHelperTool } from "tools";
 import { MergeData, MergeDataSource, zMergeData } from ".";
 
-const _cached: { injected?: string; icons: PartialRecord<ButtonType, string> } = {
+const MERGE_MESSAGES = ["originMerge", "targetMerge"] as const;
+const MERGE_TYPES = ["full", "half", "double"] as const;
+
+const _cached: {
+    injected?: string;
+    icons: PartialRecord<ButtonType, string>;
+} = {
     icons: {},
 };
 
@@ -80,7 +87,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             injectDamageMessage: async (
                 targetMessage: ChatMessagePF2e,
                 originMessage: ChatMessagePF2e,
-                options?: { updateMessages?: boolean },
+                options: MergeOptions = {},
             ): Promise<{ rolls: RollJSON[] } | undefined> => {
                 if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
                 return this.#injectDamage(targetMessage, originMessage, options);
@@ -88,7 +95,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             mergeDamageMessages: async (
                 targetMessage: ChatMessagePF2e,
                 originMessage: ChatMessagePF2e,
-                options?: { updateMessages?: boolean },
+                options: MergeOptions = {},
             ): Promise<ChatMessagePF2e | undefined> => {
                 if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
                 return this.#mergeDamages(targetMessage, originMessage, options);
@@ -137,7 +144,9 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     getButton(type: ButtonType) {
         return (_cached.icons[type] ??= (() => {
             const icon = MergeDamageTool.ICONS[type];
-            const tooltip = this.localize("buttons", type);
+            const main = this.localize("buttons", type);
+            const tooltip = type === "split" ? main : main + "&#013;" + this.localize("buttons.menu", type);
+
             return `<button data-action="${type}-damage" title="${tooltip}">
                 <i class="${icon}"></i>
             </button>`;
@@ -248,7 +257,6 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         addListenerAll(buttonsElement, "[data-action]", async (el, event) => {
             event.stopPropagation();
 
-            type EventAction = "merge-damage" | "split-damage" | "inject-damage";
             const action = el.dataset.action as EventAction;
 
             if (R.isIncludedIn(action, ["merge-damage", "inject-damage"] as const)) {
@@ -257,10 +265,13 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
                     const otherTargets = this.getMessageTargets(otherMessage);
                     if (arraysEqual(targets, otherTargets)) {
+                        const mergeOptions = event.shiftKey ? await this.#mergeMenu(action) : {};
+                        if (!mergeOptions) return;
+
                         if (action === "merge-damage") {
-                            return this.#mergeDamages(message, otherMessage);
+                            return this.#mergeDamages(message, otherMessage, mergeOptions);
                         } else {
-                            return this.#injectDamage(message, otherMessage);
+                            return this.#injectDamage(message, otherMessage, mergeOptions);
                         }
                     }
                 }
@@ -287,10 +298,30 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         });
     }
 
+    async #mergeMenu(action: "merge-damage" | "inject-damage"): Promise<MergeOptions | false | null> {
+        const split = R.map(action === "inject-damage" ? MERGE_MESSAGES.slice(0, 1) : MERGE_MESSAGES, (message) => {
+            const header = `<h3>${this.localize("menu", message)}</h3>`;
+
+            const radios = R.map(MERGE_TYPES, (type) => {
+                const label = this.localize("menu", action, type);
+                const checked = type === "full" ? "checked" : "";
+                return `<label><input type="radio" name="${message}" value="${type}" ${checked} /> ${label}</label>`;
+            });
+
+            return `<div class="message">${header}${radios.join("")}</div>`;
+        });
+
+        return waitDialog<MergeOptions>({
+            classes: ["pf2e-toolbelt-merge-damage-menu"],
+            content: split.join(""),
+            i18n: this.path("menu", action),
+        });
+    }
+
     async #mergeDamages(
         targetMessage: ChatMessagePF2e,
         originMessage: ChatMessagePF2e,
-        { updateMessages = true }: { updateMessages?: boolean } = {},
+        options: MergeOptions,
     ): Promise<ChatMessagePF2e | undefined> {
         const groups: Record<string, MessageGroup> = {};
         const damageLabel = game.i18n.localize("PF2E.DamageRoll");
@@ -327,7 +358,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             }
         }
 
-        const { rolls, showBreakdown } = groupRolls(targetMessage, originMessage);
+        const { rolls, showBreakdown } = groupRolls(targetMessage, originMessage, options);
 
         const messageData: ChatMessageData = {
             flavor: await this.render("merged", {
@@ -350,7 +381,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
         const ChatMessagePF2e = getDocumentClass("ChatMessage");
 
-        if (updateMessages) {
+        if (options.updateMessages !== false) {
             await ChatMessage.deleteDocuments([targetMessage.id, originMessage.id]);
             return ChatMessagePF2e.create(messageData as any);
         } else {
@@ -361,9 +392,9 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     async #injectDamage(
         targetMessage: ChatMessagePF2e,
         originMessage: ChatMessagePF2e,
-        { updateMessages = true }: { updateMessages?: boolean } = {},
+        options: MergeOptions,
     ): Promise<{ rolls: RollJSON[] }> {
-        const { rolls } = groupRolls(originMessage, targetMessage);
+        const { rolls } = groupRolls(originMessage, targetMessage, options);
         const data = [
             ...this.getMessageData(originMessage), //
             ...this.getMessageData(targetMessage),
@@ -374,7 +405,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         this.setMessageUpdateFlags(updates, originMessage, data);
         this.setFlagProperty(updates, "injected", true);
 
-        if (updateMessages) {
+        if (options.updateMessages !== false) {
             await targetMessage.delete();
             originMessage.update(updates);
         }
@@ -383,10 +414,18 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     }
 }
 
-function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF2e) {
+function getRoll(roll: Rolled<foundry.dice.Roll>, mergeType: MergeType = "full"): Rolled<DamageRoll> {
+    return (mergeType === "full" ? roll : roll.alter(mergeType === "double" ? 2 : 0.5, 0)) as Rolled<DamageRoll>;
+}
+
+function groupRolls(
+    targetMessage: ChatMessagePF2e,
+    originMessage: ChatMessagePF2e,
+    { originMerge, targetMerge }: MergeOptions,
+) {
     const groupedInstances: GroupedInstance[] = [];
-    const messageRoll = targetMessage.rolls[0] as Rolled<DamageRoll>;
-    const otherRoll = originMessage.rolls[0] as Rolled<DamageRoll>;
+    const messageRoll = getRoll(targetMessage.rolls[0], targetMerge);
+    const otherRoll = getRoll(originMessage.rolls[0], originMerge);
 
     for (const roll of [otherRoll, messageRoll]) {
         const instances = roll.instances as Rolled<DamageInstance>[];
@@ -470,8 +509,10 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
                 rolls: groupedInstances.map(({ formula, total, term, type, materials, persistent }) => ({
                     class: "DamageInstance",
                     options: {
-                        flavor: R.filter([type, persistent ? "persistent" : undefined, ...materials], R.isTruthy).join(
-                            ",",
+                        flavor: R.pipe(
+                            [type, persistent ? "persistent" : undefined, ...materials],
+                            R.filter(R.isTruthy),
+                            R.join(","),
                         ),
                     },
                     dice: [],
@@ -490,9 +531,12 @@ function groupRolls(targetMessage: ChatMessagePF2e, originMessage: ChatMessagePF
 
     const rolls: RollJSON[] = [roll];
 
-    for (const msg of [originMessage, targetMessage]) {
+    for (const [msg, mergeType] of [
+        [originMessage, originMerge],
+        [targetMessage, targetMerge],
+    ] as const) {
         if (msg.rolls.length > 1) {
-            rolls.push(...msg.rolls.slice(1).map((roll) => roll.toJSON()));
+            rolls.push(...msg.rolls.slice(1).map((roll) => getRoll(roll, mergeType).toJSON()));
         }
     }
 
@@ -519,6 +563,8 @@ function createTermGroup(
 function isMessageOwner(message: ChatMessagePF2e) {
     return game.user.isGM || message.isAuthor;
 }
+
+type EventAction = "merge-damage" | "split-damage" | "inject-damage";
 
 type GroupedInstance = {
     type: DamageType;
@@ -554,9 +600,16 @@ interface SpellCastContextFlag {
 
 type ButtonType = "merge" | "inject" | "split";
 
+type MergeMessage = (typeof MERGE_MESSAGES)[number];
+type MergeType = (typeof MERGE_TYPES)[number];
+
 type ToolSettings = {
     merge: boolean;
     inject: boolean;
+};
+
+type MergeOptions = Partial<Record<MergeMessage, MergeType>> & {
+    updateMessages?: boolean;
 };
 
 export { MergeDamageTool };
