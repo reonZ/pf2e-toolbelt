@@ -85,20 +85,20 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     get api(): toolbelt.Api["mergeDamage"] {
         return {
             injectDamageMessage: async (
-                targetMessage: ChatMessagePF2e,
-                originMessage: ChatMessagePF2e,
-                options: MergeOptions = {},
+                previousMessage: ChatMessagePF2e,
+                currentMessage: ChatMessagePF2e,
+                options: Omit<MergeOptions, "targetMerge"> = {},
             ): Promise<{ rolls: RollJSON[] } | undefined> => {
-                if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
-                return this.#injectDamage(targetMessage, originMessage, options);
+                if (!this.isDamageRoll(previousMessage) || !this.isDamageRoll(currentMessage)) return;
+                return this.#injectDamage(previousMessage, currentMessage, options);
             },
             mergeDamageMessages: async (
-                targetMessage: ChatMessagePF2e,
-                originMessage: ChatMessagePF2e,
+                previousMessage: ChatMessagePF2e,
+                currentMessage: ChatMessagePF2e,
                 options: MergeOptions = {},
             ): Promise<ChatMessagePF2e | undefined> => {
-                if (!this.isDamageRoll(targetMessage) || !this.isDamageRoll(originMessage)) return;
-                return this.#mergeDamages(targetMessage, originMessage, options);
+                if (!this.isDamageRoll(previousMessage) || !this.isDamageRoll(currentMessage)) return;
+                return this.#mergeDamages(previousMessage, currentMessage, options);
             },
         };
     }
@@ -394,6 +394,9 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
         originMessage: ChatMessagePF2e,
         options: MergeOptions,
     ): Promise<{ rolls: RollJSON[] }> {
+        // since the previous message shouldn't be modified, we don't want to update its rolls
+        delete options.targetMerge;
+
         const { rolls } = groupRolls(originMessage, targetMessage, options);
         const data = [
             ...this.getMessageData(originMessage), //
@@ -600,16 +603,12 @@ interface SpellCastContextFlag {
 
 type ButtonType = "merge" | "inject" | "split";
 
-type MergeMessage = (typeof MERGE_MESSAGES)[number];
-type MergeType = (typeof MERGE_TYPES)[number];
+type MergeType = toolbelt.mergeDamage.MergeType;
+type MergeOptions = toolbelt.mergeDamage.MergeOptions;
 
 type ToolSettings = {
     merge: boolean;
     inject: boolean;
-};
-
-type MergeOptions = Partial<Record<MergeMessage, MergeType>> & {
-    updateMessages?: boolean;
 };
 
 export { MergeDamageTool };
