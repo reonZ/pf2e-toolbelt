@@ -880,7 +880,7 @@
                 "inject-damage": {
                     "double": "Inject double damage",
                     "full": "Inject full damage",
-                    "half": "Inect half damage",
+                    "half": "Inject half damage",
                     "title": "Inject Menu",
                     "yes": "Inject"
                 },
