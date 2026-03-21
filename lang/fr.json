@@ -867,11 +867,33 @@
     },
     "mergeDamage": {
       "buttons": {
-        "split": "Revenir aux messages d'origine",
+        "inject": "Injecter les dégâts au message précédent",
+        "menu": {
+          "inject": "[Maj] Ouvrir le menu injecter",
+          "merge": "[Maj] Ouvrir le menu fusionner"
+        },
         "merge": "Fusionner avec le message de dégâts précédent",
-        "inject": "Injecter les dégâts au message précédent"
+        "split": "Revenir aux messages d'origine"
       },
       "injected": "Des dégâts ont été injectés dans ce message",
+      "menu": {
+        "inject-damage": {
+          "double": "Injecter le double des dégâts",
+          "full": "Injecter la totalité des dégâts",
+          "half": "Injecter la  moitié des dégâts",
+          "title": "Menu injecter",
+          "yes": "Injecter"
+        },
+        "merge-damage": {
+          "double": "Fusionner le double des dégâts",
+          "full": "Fusionner la totalité des dégâts",
+          "half": "Fusionner la moitié des dégâts",
+          "title": "Menu fusionner",
+          "yes": "Fusionner"
+        },
+        "originMerge": "Message actuel",
+        "targetMerge": "Message précédent"
+      },
       "noMatch": "Impossible de trouver un autre message de dégât correspondant."
     },
     "resourceTracker": {
