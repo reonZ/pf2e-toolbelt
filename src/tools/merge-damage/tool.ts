@@ -299,13 +299,19 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
     }
 
     async #mergeMenu(action: "merge-damage" | "inject-damage"): Promise<MergeOptions | false | null> {
-        const split = R.map(action === "inject-damage" ? MERGE_MESSAGES.slice(0, 1) : MERGE_MESSAGES, (message) => {
+        const isInject = action === "inject-damage";
+        const split = R.map(MERGE_MESSAGES, (message) => {
             const header = `<h3>${this.localize("menu", message)}</h3>`;
 
             const radios = R.map(MERGE_TYPES, (type) => {
                 const label = this.localize("menu", action, type);
                 const checked = type === "full" ? "checked" : "";
-                return `<label><input type="radio" name="${message}" value="${type}" ${checked} /> ${label}</label>`;
+                const disabled = isInject && message === "targetMerge" ? "disabled" : "";
+
+                return `<label>
+                    <input type="radio" name="${message}" value="${type}" ${checked} ${disabled} />
+                    ${label}
+                </label>`;
             });
 
             return `<div class="message">${header}${radios.join("")}</div>`;
@@ -315,6 +321,9 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             classes: ["pf2e-toolbelt-merge-damage-menu"],
             content: split.join(""),
             i18n: this.path("menu", action),
+            yes: {
+                icon: isInject ? "fa-solid fa-syringe" : "fa-duotone fa-merge",
+            },
         });
     }
 

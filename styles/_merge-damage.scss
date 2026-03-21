@@ -58,12 +58,6 @@
                 align-items: center;
                 gap: 0.3em;
             }
-
-            &:only-child {
-                h3 {
-                    display: none;
-                }
-            }
         }
     }
 }
