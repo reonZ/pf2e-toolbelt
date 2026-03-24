@@ -1,3 +1,12 @@
+# 3.38.0
+
+- `Better Merchant`:
+  - fix infinite services not showing for players
+- `Better Actor Sheet`:
+  - add new `Retrain Feats Button` setting which adds a button to feats to replace them with another one
+    - by default, the module tries to infer browser filters to make things easier but the user can ultimately pick any feat
+  - fix not being able to sort merchant services
+
 # 3.37.0
 
 - `Actionable`:
