@@ -14,13 +14,12 @@ import {
     FamiliarSheetPF2e,
     htmlQuery,
     isInstanceOf,
+    localeCompare,
     NPCSheetPF2e,
     PhysicalItemPF2e,
     PhysicalItemType,
     R,
     renderActorSheets,
-    renderCharacterSheets,
-    sortByLocaleCompare,
     SpellcastingEntryPF2e,
     SpellCollection,
     SpellPreparationSheet,
@@ -414,10 +413,8 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             btn.addEventListener("click", async () => {
                 if (isLoot && header.classList.contains("services")) {
                     const services = betterMerchantTool.getServices(actor);
-
-                    sortByLocaleCompare(services, "label");
-                    await services.setFlag();
-                    return;
+                    services.sort((a, b) => localeCompare(a.name || a.id, b.name || a.id));
+                    return await betterMerchantTool.setServives(actor, services);
                 }
 
                 const sortItems = (a: PhysicalItemPF2e, b: PhysicalItemPF2e): number => {
