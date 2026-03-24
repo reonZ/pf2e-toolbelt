@@ -525,7 +525,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         const inventoryList = htmlQuery(html, ".sheet-body .inventory-list");
         const services = isGM
             ? this.getServices(actor)
-            : this.getServices(actor).filter((service) => service.enabled && service.quantity > 0);
+            : this.getServices(actor).filter((service) => service.enabled && service.quantity !== 0);
 
         html.classList.add("better-merchant");
         inventoryList?.classList.toggle("is-player", !isGM);
