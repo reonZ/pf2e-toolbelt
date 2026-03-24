@@ -48,10 +48,6 @@ class TradeHeroAction extends ModuleToolApplication<HeroActionsTool> {
         return "trade";
     }
 
-    get title(): string {
-        return this.localize("title");
-    }
-
     _onClose(_options: fa.ApplicationClosingOptions): void {
         this.#resolve(null);
     }

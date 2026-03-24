@@ -66,10 +66,6 @@ class IdentifyTracker extends ModuleToolApplication<IdentifyTool> {
         return "tracker";
     }
 
-    get title(): string {
-        return this.localize("title");
-    }
-
     async render(options?: boolean | IdentifyRenderOptions, _options?: IdentifyRenderOptions) {
         if (this.#loading) return this;
 

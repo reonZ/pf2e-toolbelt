@@ -17,6 +17,10 @@ abstract class ModuleToolApplication<TTool extends ModuleTool> extends foundry.a
         return this.#tool;
     }
 
+    get title(): string {
+        return this.localize("title");
+    }
+
     get toolKey(): string {
         return this.tool.key;
     }

@@ -3,7 +3,6 @@ import {
     ActorSheetPF2e,
     addListener,
     addListenerAll,
-    BrowserFilter,
     BrowserTabs,
     CharacterPF2e,
     Coins,
@@ -24,6 +23,7 @@ import {
     LootSheetPF2e,
     MODULE,
     NPCPF2e,
+    openBrowserTab,
     PhysicalItemPF2e,
     R,
     renderActorSheets,
@@ -241,24 +241,20 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
                   )
                 : undefined;
 
-        return this.openBrowserTab(tab, { actor, label, callback }, filters);
-    }
+        const onRender =
+            tab === "spell"
+                ? (html: HTMLElement) => {
+                      const invalids = html.querySelectorAll<HTMLInputElement>(
+                          `input[name="cantrip"], input[name="focus"], input[name="ritual"]`,
+                      );
 
-    async openBrowserTab(tab: TabName, data: BrowserData, filters?: BrowserFilter) {
-        const browser = this.browser;
+                      for (const el of invalids) {
+                          el.disabled = true;
+                      }
+                  }
+                : undefined;
 
-        if (browser.rendered) {
-            await browser.close();
-        }
-
-        Hooks.once("renderCompendiumBrowser", (_tab: TabName, html: HTMLElement) => {
-            this.#onBrowserRender(html, data);
-        });
-
-        browser.openTab(tab, {
-            filter: filters ?? (await this.browserTab(tab).getFilterData()),
-            hideNavigation: true,
-        });
+        return openBrowserTab(tab, { label, callback, onRender }, filters);
     }
 
     testItemsForMerchant(merchant: ActorPF2e, items: ItemPF2e[]): TestItemData[] {
@@ -963,36 +959,6 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         });
     }
 
-    async #onBrowserRender(html: HTMLElement, data: BrowserData) {
-        const controls = htmlQuery(html, ".window-header [data-action='toggleControls']");
-
-        const btn = createHTMLElement("button", {
-            classes: ["better-merchant"],
-            content: data.label,
-        });
-
-        btn.addEventListener(
-            "click",
-            async (event) => {
-                data.callback(event);
-                this.browser.close();
-            },
-            { once: true },
-        );
-
-        requestAnimationFrame(() => {
-            const invalids = html.querySelectorAll<HTMLInputElement>(
-                `input[name="cantrip"], input[name="focus"], input[name="ritual"]`,
-            );
-
-            for (const el of invalids) {
-                el.disabled = true;
-            }
-        });
-
-        controls?.replaceWith(btn);
-    }
-
     #getServiceDataFromElement(
         actor: LootPF2e,
         target: HTMLElement,
@@ -1063,12 +1029,6 @@ type TradeItemOptions = {
     target: ActorPF2e;
 };
 
-type BrowserData = {
-    actor: LootPF2e;
-    label: string;
-    callback: (event: MouseEvent) => Promise<void>;
-};
-
 type BetterMerchantSettings = {
     enabled: boolean;
 };
@@ -1118,4 +1078,4 @@ type MerchantFilters<T extends FilterType> = [...FilterTypes[T][], DefaultFilter
 type TestItemData = toolbelt.betterMerchant.TestItemData;
 
 export { betterMerchantTool, FILTER_TYPES };
-export type { BetterMerchantTool, FilterType, FilterTypes, MerchantFilters, DefaultFilterTypes };
+export type { BetterMerchantTool, DefaultFilterTypes, FilterType, FilterTypes, MerchantFilters };

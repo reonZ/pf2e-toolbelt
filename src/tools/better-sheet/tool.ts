@@ -12,6 +12,7 @@ import {
     CreatureSheetData,
     FamiliarPF2e,
     FamiliarSheetPF2e,
+    FeatPF2e,
     htmlQuery,
     isInstanceOf,
     localeCompare,
@@ -20,6 +21,7 @@ import {
     PhysicalItemType,
     R,
     renderActorSheets,
+    renderCharacterSheets,
     SpellcastingEntryPF2e,
     SpellCollection,
     SpellPreparationSheet,
@@ -27,7 +29,8 @@ import {
     toggleHooksAndWrappers,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { betterMerchantTool } from ".";
+import { betterMerchantTool } from "tools";
+import { FeatRetrainPopup } from ".";
 
 class BetterSheetTool extends ModuleTool<ToolSettings> {
     #partyAsObservedHooks = [
@@ -51,6 +54,8 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         ),
     ];
 
+    #retrainFeatsHook = createToggleHook("renderCharacterSheetPF2e", this.#onRenderCharacterSheetPF2e.bind(this));
+
     #showPlayersHook = createToggleHook("renderActorSheetPF2e", this.#showPlayersOnRender.bind(this));
 
     #sortListHooks = [
@@ -71,6 +76,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 scope: "world",
                 onChange: (value: boolean) => {
                     toggleHooksAndWrappers(this.#partyAsObservedHooks, !game.user.isGM && value);
+                    renderActorSheets();
                 },
             },
             {
@@ -96,16 +102,70 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                     renderActorSheets();
                 },
             },
+            {
+                key: "retrainFeats",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: (value: boolean) => {
+                    this.#retrainFeatsHook.toggle(value);
+                    renderCharacterSheets();
+                },
+            },
         ];
     }
 
     init(isGM: boolean): void {
+        this.#retrainFeatsHook.toggle(this.settings.retrainFeats);
         this.#showPlayersHook.toggle(isGM && this.settings.showPlayers);
         toggleHooksAndWrappers(this.#sortListHooks, this.settings.sortList);
     }
 
     ready(isGM: boolean): void {
         toggleHooksAndWrappers(this.#partyAsObservedHooks, !isGM && this.settings.partyAsObserved);
+    }
+
+    #onRenderCharacterSheetPF2e(sheet: CharacterSheetPF2e<CharacterPF2e>, $html: JQuery) {
+        if (!sheet.isEditable) return;
+
+        const html = $html[0];
+        const tab = htmlQuery(html, `.tab[data-tab="feats"]`);
+        if (!tab) return;
+
+        const actor = sheet.actor;
+        const sections = tab.querySelectorAll<HTMLElement>(`.feat-section`);
+
+        for (const section of sections) {
+            const category = section.dataset.groupId as string;
+            const selector = R.isIncludedIn(category, ["ancestryfeature", "classfeature"])
+                ? ".nested-items [data-item-id]"
+                : "[data-item-id]";
+
+            const featRows = section.querySelectorAll<HTMLElement>(selector);
+
+            for (const featRow of featRows) {
+                const controls = htmlQuery(featRow, ".item-controls");
+                const btn = createHTMLElement("a", {
+                    classes: ["pf2e-toobelt-retrain-feat"],
+                    content: `<i class="fa-solid fa-fw fa-arrows-repeat"></i>`,
+                    dataset: {
+                        tooltip: this.localize.path("retrain.title"),
+                    },
+                });
+
+                btn.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const currentFeat = actor.items.get<FeatPF2e<CharacterPF2e>>(featRow.dataset.itemId ?? "");
+                    if (!currentFeat) return;
+
+                    new FeatRetrainPopup(this, currentFeat, category).render(true);
+                });
+
+                controls?.prepend(btn);
+            }
+        }
     }
 
     #npcSheetPF2eTemplate(sheet: NPCSheetPF2e): string {
@@ -458,10 +518,11 @@ function collectionIsDisabled(collection: SpellCollection<CreaturePF2e>): boolea
 }
 
 type ToolSettings = {
+    partyAsObserved: boolean;
+    retrainFeats: boolean;
     scribble: boolean;
     showPlayers: boolean;
     sortList: boolean;
-    partyAsObserved: boolean;
 };
 
 export { BetterSheetTool };

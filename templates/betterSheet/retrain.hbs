@@ -1,0 +1,22 @@
+{{#if retrain}}
+<div class="item">
+    <img src="{{retrain.img}}">
+    <span>{{retrain.name}}</span>
+</div>
+{{else}}
+<div class="empty">{{@root.i18n 'empty'}}</div>
+{{/if}}
+<footer class="form-footer">
+    <button type="button" data-action="retrain" {{disabled (not retrain)}}>
+        <i class="fa-solid fa-arrows-repeat"></i>
+        {{@root.i18n 'retrain'}}
+    </button>
+    <button type="button" data-action="cancel">
+        <i class="fa-solid fa-x"></i>
+        {{localize 'Cancel'}}
+    </button>
+    <button type="button" data-action="browse">
+        <i class="fa-solid fa-search"></i>
+        {{localize 'PF2E.BrowseLabel'}}
+    </button>
+</footer>

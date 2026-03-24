@@ -6,6 +6,7 @@ import {
     getInputValue,
     htmlClosest,
     LootPF2e,
+    openBrowserTab,
     R,
 } from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
@@ -170,9 +171,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
         const filter = filters.find((x) => x.id === filterId);
         if (!filter) return;
 
-        const actor = this.actor;
         const label = this.tool.localize("browserFilter.edit");
-
         const merchantFilter = filter.filter;
         const filterData = foundry.utils.mergeObject(
             await this.tool.browserTab("equipment").getFilterData(),
@@ -206,12 +205,10 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
             this.render();
         };
 
-        this.tool.openBrowserTab("equipment", { actor, label, callback }, filterData);
+        openBrowserTab("equipment", { label, callback }, filterData);
     }
 
     #addFilter(type: FilterType) {
-        const actor = this.actor;
-
         const addFilter = async (filter: FilterTypes[keyof FilterTypes]) => {
             const filters = this.getFilters(type);
 
@@ -235,7 +232,7 @@ class FiltersMenu extends ModuleToolApplication<BetterMerchantTool> {
             filter && addFilter(filter);
         };
 
-        this.tool.openBrowserTab("equipment", { actor, label, callback });
+        openBrowserTab("equipment", { label, callback });
     }
 
     async #getEquipmentFilter(): Promise<Partial<EquipmentFilters>> {
