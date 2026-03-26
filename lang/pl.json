@@ -199,6 +199,10 @@
           "name": "Drużyna sojuszników jako Obserwowani",
           "hint": "Zezwól graczom na przeglądanie kart postaci, posiadającym uprawnienia „Ograniczone”, o ile należą oni do grupy „sojuszników”. Nie należy mylić z postacią „Grupa”."
         },
+        "retrainFeats": {
+          "name": "Przycisk „Przekwalifikuj Atuty”",
+          "hint": "Dodaje przycisk przekwalifikowania dla atutów w karcie postaci."
+        },
         "showPlayers": {
           "name": "Pokaż awatar graczom",
           "hint": "Dodaje przycisk 'Pokaż graczy' w panelu awatarów kart aktorów."
@@ -591,6 +595,17 @@
       }
     },
     "betterSheet": {
+      "retrain": {
+        "browser": "Otwórz przeglądarkę kompendium",
+        "empty": "Wstaw tutaj atut",
+        "error": {
+          "wrongDataType": "Nieprawidłowy typ danych",
+          "wrongItemType": "Akceptuje wyłącznie atuty"
+        },
+        "replace": "Zastąp przez",
+        "retrain": "Przetrenowanie",
+        "title": "Przetrenuj atut"
+      },
       "sortList": {
         "sheet": {
           "tooltip": "Sortuj zawartość",
@@ -867,11 +882,33 @@
     },
     "mergeDamage": {
       "buttons": {
-        "split": "Powrót do oryginalnych wiadomości",
+        "inject": "Wstaw obrażenia do poprzedniej wiadomości",
+        "menu": {
+          "inject": "[Shift] Otwórz menu wstrzykiwania",
+          "merge": "[Shift] Otwórz menu scalania"
+        },
         "merge": "Scal z poprzednią wiadomością o obrażeniach",
-        "inject": "Wstaw obrażenia do poprzedniej wiadomości"
+        "split": "Powrót do oryginalnych wiadomości"
       },
       "injected": "Obrażenia zostały wstawione do tej wiadomości",
+      "menu": {
+        "inject-damage": {
+          "double": "Wstrzyknięcie podwójnych obrażeń",
+          "full": "Wstrzyknięcie pełnych obrażeń",
+          "half": "Wstrzyknięcie połowy obrażeń",
+          "title": "Menu wstrzyknięcia",
+          "yes": "Wstrzykiwanie"
+        },
+        "merge-damage": {
+          "double": "Połącz podwójne obrażenia",
+          "full": "Połącz pełne obrażenia",
+          "half": "Połącz połowę obrażenia",
+          "title": "Menu scalania",
+          "yes": "Połącz"
+        },
+        "originMerge": "Aktualna wiadomość",
+        "targetMerge": "Poprzednia wiadomość"
+      },
       "noMatch": "Nie znaleziono innego pasującego komunikatu o obrażeniach."
     },
     "resourceTracker": {
