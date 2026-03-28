@@ -199,6 +199,10 @@
           "name": "Observer le groupe allié",
           "hint": "Autorise les joueurs à consulter les fiches d'acteur en ayant les droits 'Limité' tant qu'ils appartiennent à l'alliance 'Groupe'. À ne pas confondre avec l'acteur 'Groupe'."
         },
+        "retrainFeats": {
+          "name": "Bouton de réapprentissage des dons",
+          "hint": "Ajoute un bouton de réapprentissage pour les dons sur la fiche de personnage."
+        },
         "showPlayers": {
           "name": "Montrer l'avatar aux joueurs",
           "hint": "Ajoute un bouton 'Montrer aux joueurs' sur le panneau avatar des feuilles d'acteurs."
@@ -591,6 +595,17 @@
       }
     },
     "betterSheet": {
+      "retrain": {
+        "browser": "Ouvrir le navigateur de compendium",
+        "empty": "Glisser un don ici",
+        "error": {
+          "wrongDataType": "Type de données incorrect",
+          "wrongItemType": "N'accepte que les dons"
+        },
+        "replace": "Remplacer par",
+        "retrain": "Réapprentissage",
+        "title": "Réapprentissage de don"
+      },
       "sortList": {
         "sheet": {
           "tooltip": "Trier le contenu",
@@ -880,7 +895,7 @@
         "inject-damage": {
           "double": "Injecter le double des dégâts",
           "full": "Injecter la totalité des dégâts",
-          "half": "Injecter la  moitié des dégâts",
+          "half": "Injecter la moitié des dégâts",
           "title": "Menu injecter",
           "yes": "Injecter"
         },
