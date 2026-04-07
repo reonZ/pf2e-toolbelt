@@ -199,6 +199,7 @@ function partyKnowsSpell(spell: SpellPF2e): CreaturePF2e[] {
 
             return (
                 entry.category !== "prepared" ||
+                (entry.system?.prepared?.flexible && item.system?.location?.signature) ||
                 R.values(entry.system?.slots ?? ({} as SpellcastingEntrySlots)).some((slot) => {
                     slot.prepared.some((prepared) => prepared.id === spellId);
                 })
