@@ -218,7 +218,8 @@ function isValidCoreSpellMessage(message: ChatMessagePF2e): message is ChatMessa
 function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
     return (
         !!message.item?.isOfType("spell") &&
-        R.isIncludedIn(message.flags[SYSTEM.id].context?.type, ["spell-cast", "damage-roll"])
+        (message.flags[SYSTEM.id].origin?.type === "spell" ||
+        R.isIncludedIn(message.flags[SYSTEM.id].context?.type, ["spell-cast", "damage-roll"]))
     );
 }
 
