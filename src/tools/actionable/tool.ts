@@ -66,7 +66,7 @@ import {
     usePhysicalItem,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedCharacterPrepareData, sharedCharacterSheetActivateListeners, sharedNpcPrepareData } from "tools";
+import { sharedCharacterPrepareData, sharedCharacterSheetActivateListeners } from "tools";
 import {
     ActionableData,
     ActionableRuleElement,
@@ -245,8 +245,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         if (this.settings.cast) {
-            sharedCharacterPrepareData.register(this.#actorPrepareData, { context: this, priority: 100 }).activate();
-            sharedNpcPrepareData.register(this.#actorPrepareData, { context: this, priority: 100 }).activate();
+            sharedCharacterPrepareData
+                .register(this.#characterPrepareData, { context: this, priority: 100 })
+                .activate();
             game.pf2e.RuleElements.custom.ItemCast = createItemCastRuleElement();
         }
     }
@@ -326,7 +327,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return action.clone(cloneData, { keepId: true });
     }
 
-    #actorPrepareData(actor: CreaturePF2e) {
+    #characterPrepareData(actor: CharacterPF2e) {
         const virtualSpellData = this.getInMemory<Record<string, VirtualSpellData>>(actor, "spells");
         if (!virtualSpellData) return;
 
@@ -924,7 +925,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #createSpellcastingStatistic(
-        actor: CreaturePF2e,
+        actor: CharacterPF2e,
         attribute: AttributeString,
         tradition: MagicTradition | undefined = "arcane",
         dc: number,
@@ -976,16 +977,16 @@ function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItem
 }
 
 function getBestMatchingSpellcastingEntry(
-    actor: CreaturePF2e,
-    spell: SpellPF2e<CreaturePF2e>,
-    parent: PhysicalItemPF2e<CreaturePF2e>,
-): SpellcastingEntry<CreaturePF2e> | null {
+    actor: CharacterPF2e,
+    spell: SpellPF2e<CharacterPF2e>,
+    parent: PhysicalItemPF2e<CharacterPF2e>,
+): SpellcastingEntry<CharacterPF2e> | null {
     return R.pipe(
         actor.spellcasting.contents,
-        R.filter((entry): entry is SpellcastingEntry<CreaturePF2e> => {
+        R.filter((entry): entry is SpellcastingEntry<CharacterPF2e> => {
             return !!entry.statistic && entry.canCast(spell, { origin: parent });
         }),
-        R.reduce((best: SpellcastingEntry<CreaturePF2e> | null, entry) => {
+        R.reduce((best: SpellcastingEntry<CharacterPF2e> | null, entry) => {
             return best === null ? entry : entry.statistic.dc.value > best.statistic.dc.value ? entry : best;
         }, null),
     );

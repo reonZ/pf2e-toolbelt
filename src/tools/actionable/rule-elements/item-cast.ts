@@ -3,7 +3,7 @@ import {
     ConsumablePF2e,
     ConsumableSource,
     ConsumableTrait,
-    CreaturePF2e,
+    CharacterPF2e,
     ItemPF2e,
     ItemSourcePF2e,
     ItemUUID,
@@ -109,7 +109,7 @@ function createItemCastRuleElement() {
         }
 
         override onApplyActiveEffects() {
-            if (this.invalid || !this.actor.isOfType("character", "npc")) return;
+            if (this.invalid || !this.actor.isOfType("character")) return;
 
             if (this.data.sourceId !== this.uuid || this.missingSpellData()) {
                 return this.#setData();
@@ -147,7 +147,7 @@ function createItemCastRuleElement() {
             );
         }
 
-        createConsumable(): ConsumablePF2e<CreaturePF2e> {
+        createConsumable(): ConsumablePF2e<CharacterPF2e> {
             const actor = this.actor;
             const spellSource = this.data.spell as SpellSource & { _id: string };
 
@@ -179,7 +179,7 @@ function createItemCastRuleElement() {
                 type: "consumable",
             };
 
-            const item = new Item.implementation(source, { parent: actor }) as ConsumablePF2e<CreaturePF2e>;
+            const item = new Item.implementation(source, { parent: actor }) as ConsumablePF2e<CharacterPF2e>;
 
             item.consume = async (thisMany = 1) => {
                 if (actor.spellcasting.canCastConsumable(item)) {
@@ -205,11 +205,11 @@ function createItemCastRuleElement() {
         updateData(
             changes: ItemCastUpdateDataArgs,
             sourceOnly?: boolean,
-        ): Promise<ItemPF2e<CreaturePF2e>[]> | undefined;
+        ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
         updateData(
             changes: ItemCastUpdateDataArgs,
             sourceOnly?: boolean,
-        ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CreaturePF2e>[]> | undefined {
+        ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
             const sourceIndex = this.sourceIndex ?? -1;
             const rules = this.item._source.system.rules.slice();
             const rule = rules[sourceIndex] as DeepPartial<ItemCastRuleSource> | undefined;
@@ -239,7 +239,6 @@ function createItemCastRuleElement() {
             if (rule.data.sourceId !== this.uuid) {
                 rule.data = {
                     sourceId: this.uuid,
-                    // spellId: foundry.utils.randomID()
                 };
             }
 
@@ -269,8 +268,8 @@ function createItemCastRuleElement() {
     }
 
     interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFromRESchema<ItemCastSchema> {
-        get actor(): CreaturePF2e;
-        get item(): PhysicalItemPF2e<CreaturePF2e>;
+        get actor(): CharacterPF2e;
+        get item(): PhysicalItemPF2e<CharacterPF2e>;
     }
 
     return ItemCastRuleElement;
@@ -309,7 +308,7 @@ type ItemCastUpdateDataArgs = {
 
 type VirtualSpellData = Prettify<
     Pick<BaseItemCastRule, "attribute" | "dc" | "max" | "tradition"> & {
-        item: ConsumablePF2e<CreaturePF2e>;
+        item: ConsumablePF2e<CharacterPF2e>;
         parentId: string;
         ruleIndex: number;
         value: number | undefined;

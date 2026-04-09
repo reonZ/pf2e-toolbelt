@@ -972,10 +972,6 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
 const shareDataTool = new ShareDataTool();
 
-// function getStatisticCls(actor: CharacterPF2e) {
-//     return actor.skills.acrobatics.constructor as ConstructorOf<CharacterSkill<CharacterPF2e>>;
-// }
-
 type ShareDataSettings = {
     enabled: boolean;
 };

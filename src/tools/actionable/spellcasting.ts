@@ -1,7 +1,7 @@
 import {
     AttributeString,
     CastOptions,
-    CreaturePF2e,
+    CharacterPF2e,
     MagicTradition,
     PhysicalItemPF2e,
     Predicate,
@@ -17,18 +17,18 @@ import { createCounteractStatistic, R } from "foundry-helpers/dist";
 /**
  * https://github.com/foundryvtt/pf2e/blob/522dec9d289c7da8b69ac0167b11ccd639871fef/src/module/item/spellcasting-entry/item-spellcasting.ts#L13
  */
-class ItemCastSpellcasting implements SpellcastingEntry<CreaturePF2e> {
+class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
     id: string;
 
     name: string;
 
-    actor: CreaturePF2e;
+    actor: CharacterPF2e;
 
     statistic: Statistic;
 
     tradition: MagicTradition | null;
 
-    original: SpellcastingEntry<CreaturePF2e> | null;
+    original: SpellcastingEntry<CharacterPF2e> | null;
 
     castPredicate: Predicate;
 
@@ -43,10 +43,10 @@ class ItemCastSpellcasting implements SpellcastingEntry<CreaturePF2e> {
     }: {
         id: string;
         name: string;
-        actor: CreaturePF2e;
+        actor: CharacterPF2e;
         statistic: Statistic;
         tradition: Maybe<MagicTradition>;
-        original: Maybe<SpellcastingEntry<CreaturePF2e>>;
+        original: Maybe<SpellcastingEntry<CharacterPF2e>>;
         castPredicate: Predicate;
     }) {
         this.id = id;
@@ -91,7 +91,7 @@ class ItemCastSpellcasting implements SpellcastingEntry<CreaturePF2e> {
     }
 
     canCast(spell: SpellPF2e, { origin }: { origin?: Maybe<PhysicalItemPF2e> } = {}): boolean {
-        if (!origin || !spell.actor?.isOfType("character", "npc")) return false;
+        if (!origin || !spell.actor?.isOfType("character")) return false;
         const rollOptions = new Set([
             ...this.actor.getRollOptions(),
             ...origin.getRollOptions("item"),
@@ -108,7 +108,7 @@ class ItemCastSpellcasting implements SpellcastingEntry<CreaturePF2e> {
         }
     }
 
-    async getSheetData({ spells }: { spells?: SpellCollection<CreaturePF2e> } = {}): Promise<SpellcastingSheetData> {
+    async getSheetData({ spells }: { spells?: SpellCollection<CharacterPF2e> } = {}): Promise<SpellcastingSheetData> {
         const collectionData: SpellCollectionData = (await spells?.getSpellData()) ?? { groups: [], prepList: null };
 
         return {
