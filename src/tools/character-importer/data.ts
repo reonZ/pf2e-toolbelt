@@ -5,6 +5,7 @@ import {
     R,
     SPELLCASTING_CATEGORIES,
     z,
+    zAttribute,
     zDocumentId,
     ZeroToFour,
     ZeroToTen,
@@ -105,7 +106,7 @@ const zSpell = zImportedEntry("spell").extend({
 
 function zSpellcastingEntry() {
     return z.object({
-        attribute: z.enum(R.keys(CONFIG.PF2E.abilities)),
+        attribute: zAttribute(),
         identifier: z.string(),
         name: z.string().nonempty(),
         selected: zDocumentId().nullable().default(null),

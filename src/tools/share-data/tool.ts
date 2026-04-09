@@ -20,6 +20,7 @@ import {
     EquipmentPF2e,
     executeWhenReady,
     getFirstActiveToken,
+    getStatisticClass,
     includesAny,
     isPrimaryOwner,
     isPrimaryUpdater,
@@ -33,9 +34,10 @@ import {
     Statistic,
     SYSTEM,
     WeaponPF2e,
+    ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedWeaponPrepareBaseData } from "tools";
+import { sharedCharacterPrepareData, sharedNpcPrepareData, sharedWeaponPrepareBaseData } from "tools";
 import { ShareData, ShareDataConfig, ShareDataSource, ShareDataType, zShareData } from ".";
 
 /**
@@ -109,11 +111,12 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
             );
         };
 
+        sharedCharacterPrepareData.register(this.#actorPrepareData, { context: this }).activate();
+        sharedNpcPrepareData.register(this.#actorPrepareData, { context: this }).activate();
+
         registerCreatureWrapper("undoDamage", this.#actorUndoDamage);
 
         registerCreatureWrapper("prepareBaseData", this.#actorPrepareBaseData);
-
-        registerCreatureWrapper("prepareData", this.#actorPrepareData);
 
         registerCreatureWrapper("prepareDerivedData", this.#actorPrepareDerivedData);
 
@@ -653,9 +656,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         return wrapped(changes, operation, userId);
     }
 
-    #actorPrepareData(actor: CreaturePF2e, wrapped: libWrapper.RegisterCallback) {
-        wrapped();
-
+    #actorPrepareData(actor: CreaturePF2e) {
         // this one is to avoid race condition with masters created later in the world
         executeWhenReady(() => {
             // a master forces all slaves to refresh
@@ -739,13 +740,13 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                     });
                 }
 
-                const Statistic = getStatisticCls(actor);
+                const StatisticCls = getStatisticClass(actor);
 
                 for (const [slug, skill] of R.entries(CONFIG.PF2E.skills)) {
                     const { check, domains, rank } = master.skills[slug];
                     const currentRank = actor.skills[slug].rank;
                     const attribute = skill.attribute;
-                    const actualRank = Math.max(rank, currentRank);
+                    const actualRank = Math.max(rank, currentRank) as ZeroToFour;
 
                     // we add item modifiers from master
                     const modifiers = R.pipe(
@@ -754,7 +755,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         R.map((modifier) => modifier.clone()),
                     );
 
-                    const statistic = new Statistic(actor, {
+                    const statistic = new StatisticCls(actor, {
                         slug,
                         label: skill.label,
                         attribute,
@@ -765,7 +766,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
                         check: { type: check.type, modifiers },
                     });
 
-                    actor.skills[slug] = statistic;
+                    actor.skills[slug] = statistic as CharacterSkill<CharacterPF2e>;
                     actor.system.skills[slug] = foundry.utils.mergeObject(
                         statistic.getTraceData() as CharacterSkillData,
                         { attribute, rank: actualRank },
@@ -971,9 +972,9 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
 const shareDataTool = new ShareDataTool();
 
-function getStatisticCls(actor: CreaturePF2e) {
-    return actor.skills.acrobatics.constructor as ConstructorOf<CharacterSkill<CharacterPF2e>>;
-}
+// function getStatisticCls(actor: CharacterPF2e) {
+//     return actor.skills.acrobatics.constructor as ConstructorOf<CharacterSkill<CharacterPF2e>>;
+// }
 
 type ShareDataSettings = {
     enabled: boolean;

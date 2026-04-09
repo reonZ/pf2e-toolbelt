@@ -10,7 +10,7 @@ import {
     RuleElementSource,
 } from "foundry-helpers";
 import { SourceFromSchema } from "foundry-helpers/src";
-import { actionable } from ".";
+import { actionable } from "..";
 
 function createActionableRuleElement() {
     const RuleElementCls = game.pf2e.RuleElement;
@@ -60,7 +60,7 @@ function createActionableRuleElement() {
             }
 
             if (this.test()) {
-                actionable.setInMemory<VirtualActionData>(this.actor, this.data.id, {
+                actionable.setInMemory<VirtualActionData>(this.actor, "virtual", this.data.id, {
                     data: this.data,
                     parent: this.item,
                     ruleIndex: this.sourceIndex as number,

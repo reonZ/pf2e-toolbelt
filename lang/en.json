@@ -1,5 +1,6 @@
 {
     "PF2E.RuleElement.Actionable": "Actionable",
+    "PF2E.RuleElement.ItemCast": "Item Cast",
     "LEVIKTIMES": {
         "playerOnly": "Player Only",
         "gmOnly": "GM Only",
@@ -44,6 +45,10 @@
                 "apply": {
                     "name": "Auto Self-Applied",
                     "hint": "The use button for self-applied effect will automatically apply the effect."
+                },
+                "cast": {
+                    "name": "Item Spell Casting",
+                    "hint": "Adds a new RuleElement that generates virtual spellcasting entries whenever a physical item is equipped/invested."
                 },
                 "item": {
                     "name": "Item Macro",
@@ -413,6 +418,9 @@
                 "label": "Self-Applied Effect / Macro",
                 "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used",
                 "cancel": "<strong>{name}</strong> action was cancelled by its macro."
+            },
+            "cast": {
+                "label": "Item Spell Casting"
             },
             "item": {
                 "label": "Macro",

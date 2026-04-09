@@ -8,6 +8,7 @@ import {
     ActorSheetOptions,
     ActorSheetPF2e,
     addListenerAll,
+    AttributeString,
     CastOptions,
     CharacterPF2e,
     CharacterSheetData,
@@ -29,6 +30,8 @@ import {
     FeatSheetPF2e,
     getActionGlyph,
     getItemSourceId,
+    getSpellCollectionCls,
+    getStatisticClass,
     htmlQuery,
     ImageFilePath,
     includesAny,
@@ -41,6 +44,7 @@ import {
     ItemSheetPF2e,
     itemWithActor,
     MacroPF2e,
+    MagicTradition,
     MODULE,
     NPCPF2e,
     NPCSheetData,
@@ -49,9 +53,11 @@ import {
     registerWrapper,
     renderCharacterSheets,
     renderItemSheets,
+    SpellcastingEntry,
     SpellcastingEntryPF2e,
     SpellPF2e,
     SpellSheetPF2e,
+    Statistic,
     SYSTEM,
     toggleHooksAndWrappers,
     toggleSummary,
@@ -60,14 +66,17 @@ import {
     usePhysicalItem,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedCharacterSheetActivateListeners } from "tools";
+import { sharedCharacterPrepareData, sharedCharacterSheetActivateListeners, sharedNpcPrepareData } from "tools";
 import {
     ActionableData,
     ActionableRuleElement,
     applyActorGroupUpdate,
     createActionableRuleElement,
+    createItemCastRuleElement,
     getActionSheetData,
+    ItemCastSpellcasting,
     VirtualActionData,
+    VirtualSpellData,
 } from ".";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
@@ -168,6 +177,13 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 requiresReload: true,
             },
             {
+                key: "cast",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                requiresReload: true,
+            },
+            {
                 key: "use",
                 type: Boolean,
                 default: false,
@@ -212,23 +228,27 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     init() {
-        if (!this.settings.physical) return;
+        if (this.settings.physical) {
+            registerWrapper(
+                "WRAPPER",
+                "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
+                this.#characterPrepareEmbeddedDocuments,
+                this,
+            );
+            registerWrapper(
+                "WRAPPER",
+                "CONFIG.PF2E.Actor.documentClasses.character.prototype.recharge",
+                this.#characterRecharge,
+                this,
+            );
+            game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
+        }
 
-        registerWrapper(
-            "WRAPPER",
-            "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
-            this.#characterPrepareEmbeddedDocuments,
-            this,
-        );
-
-        registerWrapper(
-            "WRAPPER",
-            "CONFIG.PF2E.Actor.documentClasses.character.prototype.recharge",
-            this.#characterRecharge,
-            this,
-        );
-
-        game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
+        if (this.settings.cast) {
+            sharedCharacterPrepareData.register(this.#actorPrepareData, { context: this, priority: 100 }).activate();
+            sharedNpcPrepareData.register(this.#actorPrepareData, { context: this, priority: 100 }).activate();
+            game.pf2e.RuleElements.custom.ItemCast = createItemCastRuleElement();
+        }
     }
 
     ready() {
@@ -284,7 +304,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     getVirtualActionsData(actor: CharacterPF2e): Record<string, VirtualActionData> {
-        return this.getInMemory(actor) ?? {};
+        return this.getInMemory(actor, "virtual") ?? {};
     }
 
     async getVirtualAction(data: ActionableData): Promise<AbilityItemPF2e | null> {
@@ -304,6 +324,45 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         return action.clone(cloneData, { keepId: true });
+    }
+
+    #actorPrepareData(actor: CreaturePF2e) {
+        const virtualSpellData = this.getInMemory<Record<string, VirtualSpellData>>(actor, "spells");
+        if (!virtualSpellData) return;
+
+        const SpellCollectionCls = getSpellCollectionCls(actor);
+
+        for (const [spellId, data] of R.entries(virtualSpellData)) {
+            const parent = data.item;
+            const spell = parent.embeddedSpell;
+            if (!spell) continue;
+
+            const dc = data.dc;
+            const bestEntry = !dc ? getBestMatchingSpellcastingEntry(actor, spell, parent) : null;
+            if (!dc && !bestEntry) return;
+
+            const attribute = data.attribute ?? bestEntry?.attribute ?? "cha";
+            const tradition = data.tradition ?? bestEntry?.tradition ?? spell.traditions.first();
+            const statistic =
+                bestEntry?.statistic ?? this.#createSpellcastingStatistic(actor, attribute, tradition, dc as number);
+
+            const itemCasting = new ItemCastSpellcasting({
+                id: parent.id,
+                name: parent.name,
+                actor,
+                statistic,
+                tradition,
+                original: bestEntry,
+                castPredicate: new game.pf2e.Predicate([`item:id:${parent.id}`, `spell:id:${spellId}`]),
+            });
+
+            spell.system.location.value = itemCasting.id;
+
+            const collection = new SpellCollectionCls(itemCasting);
+            collection.set(spellId, spell);
+            actor.spellcasting.set(itemCasting.id, itemCasting);
+            actor.spellcasting.collections.set(itemCasting.id, collection);
+        }
     }
 
     #characterPrepareEmbeddedDocuments(actor: CharacterPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -863,12 +922,73 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             throw MODULE.error("an error occured while trying to resolve data drop", err);
         }
     }
+
+    #createSpellcastingStatistic(
+        actor: CreaturePF2e,
+        attribute: AttributeString,
+        tradition: MagicTradition | undefined = "arcane",
+        dc: number,
+    ): Statistic {
+        const domains = [`${attribute}-based`, "all", "spell-attack-dc"];
+        const saveSelectors = [`${tradition}-spell-dc`, "spell-dc"];
+        const attackSelectors = [
+            `${tradition}-spell-attack`,
+            "spell-attack",
+            "spell-attack-roll",
+            "attack",
+            "attack-roll",
+        ];
+
+        const Statistic = getStatisticClass(actor);
+        const modifiers = [
+            new game.pf2e.Modifier({
+                label: this.localize("cast.label"),
+                modifier: dc - 10,
+                domains,
+                slug: "item-cast",
+            }),
+        ];
+
+        return new Statistic(actor, {
+            attribute: null,
+            check: {
+                type: "attack-roll",
+                modifiers: [],
+                domains: attackSelectors,
+            },
+            dc: {
+                modifiers: [],
+                domains: saveSelectors,
+            },
+            domains,
+            label: CONFIG.PF2E.magicTraditions[tradition],
+            modifiers,
+            rank: undefined,
+            slug: `temporary-${tradition}`,
+        });
+    }
 }
 
 function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItemPF2e[] {
     return items.flatMap(({ item, heldItems }) => {
         return heldItems?.length ? [item, ...getSectionItems(heldItems)] : [item];
     });
+}
+
+function getBestMatchingSpellcastingEntry(
+    actor: CreaturePF2e,
+    spell: SpellPF2e<CreaturePF2e>,
+    parent: PhysicalItemPF2e<CreaturePF2e>,
+): SpellcastingEntry<CreaturePF2e> | null {
+    return R.pipe(
+        actor.spellcasting.contents,
+        R.filter((entry): entry is SpellcastingEntry<CreaturePF2e> => {
+            return !!entry.statistic && entry.canCast(spell, { origin: parent });
+        }),
+        R.reduce((best: SpellcastingEntry<CreaturePF2e> | null, entry) => {
+            return best === null ? entry : entry.statistic.dc.value > best.statistic.dc.value ? entry : best;
+        }, null),
+    );
 }
 
 const actionable = new ActionableTool();
@@ -880,7 +1000,9 @@ type DropZoneData = {
     }>;
 };
 
-type ToolSettings = toolbelt.Settings["actionable"];
+type ToolSettings = toolbelt.Settings["actionable"] & {
+    cast: boolean;
+};
 
 export { actionable };
 export type { ActionableTool };

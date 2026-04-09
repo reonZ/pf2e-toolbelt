@@ -5,6 +5,7 @@ import {
     CharacterSheetPF2e,
     ChatMessagePF2e,
     createSharedWrapper,
+    NPCPF2e,
     WeaponPF2e,
 } from "foundry-helpers";
 
@@ -29,6 +30,30 @@ const sharedArmorPrepareBaseData = createSharedWrapper<ArmorPF2e<ActorPF2e>, () 
         }
 
         wrapped();
+    },
+);
+
+const sharedCharacterPrepareData = createSharedWrapper<CharacterPF2e, () => void, () => void>(
+    "WRAPPER",
+    "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareData",
+    function (registered, wrapped) {
+        wrapped();
+
+        for (const listener of registered) {
+            listener();
+        }
+    },
+);
+
+const sharedNpcPrepareData = createSharedWrapper<NPCPF2e, () => void, () => void>(
+    "WRAPPER",
+    "CONFIG.PF2E.Actor.documentClasses.npc.prototype.prepareData",
+    function (registered, wrapped) {
+        wrapped();
+
+        for (const listener of registered) {
+            listener();
+        }
     },
 );
 
@@ -62,7 +87,9 @@ const sharedCharacterSheetActivateListeners = createSharedWrapper<
 
 export {
     sharedArmorPrepareBaseData,
+    sharedCharacterPrepareData,
     sharedCharacterSheetActivateListeners,
     sharedMessageRenderHTML,
+    sharedNpcPrepareData,
     sharedWeaponPrepareBaseData,
 };
