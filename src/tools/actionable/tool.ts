@@ -40,6 +40,7 @@ import {
     isCastConsumable,
     isDefaultActionIcon,
     isScriptMacro,
+    itemIsEquipped,
     ItemPF2e,
     ItemSheetDataPF2e,
     ItemSheetPF2e,
@@ -251,6 +252,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 .activate();
             game.pf2e.RuleElements.custom.ItemCast = createItemCastRuleElement();
             Hooks.on("renderCharacterSheetPF2e", this.#onRenderCharacterSheetPF2e.bind(this));
+            Hooks.on("renderPhysicalItemSheetPF2e", this.#onRenderPhysicalItemSheetPF2e.bind(this));
         }
 
         if (castEnabled || physicalEnabled) {
@@ -260,7 +262,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 this.#characterRecharge,
                 this,
             );
-            Hooks.on("renderPhysicalItemSheetPF2e", this.#onRenderPhysicalItemSheetPF2e.bind(this));
         }
     }
 
@@ -357,25 +358,15 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const lastGroup = nerdDetails.lastElementChild as HTMLElement | null;
         const group = htmlQuery(lastGroup, "input") ? createHTMLElement("div", { classes: ["form-group"] }) : lastGroup;
 
-        if (this.settings.cast) {
-            const label = this.localize("generate-cast.label");
-            const tooltip = this.localize("generate-cast.title");
-            const btn = createHTMLElement("button", {
-                classes: ["pf2e-toolbelt-actionable-generate-cast"],
-                content: `<i class="fa-solid fa-wand-magic-sparkles"></i> ${label}`,
-                dataset: { tooltip: tooltip },
-            });
-            btn.addEventListener("click", () => new GenerateItemCast(sheet.item, this).render(true));
-            group?.prepend(btn);
-        }
-
-        if (this.settings.physical) {
-            const btn = createHTMLElement("button", {
-                classes: ["pf2e-toolbelt-actionable-generate-physical"],
-                content: `<span class="action-glyph">1</span>  ${this.localize("physical.generate.label")}`,
-                dataset: { tooltip: this.localize.path("physical.generate.tooltip") },
-            });
-        }
+        const label = this.localize("generate-cast.label");
+        const tooltip = this.localize("generate-cast.title");
+        const btn = createHTMLElement("button", {
+            classes: ["pf2e-toolbelt-actionable-generate-cast"],
+            content: `<i class="fa-solid fa-wand-magic-sparkles"></i> ${label}`,
+            dataset: { tooltip: tooltip },
+        });
+        btn.addEventListener("click", () => new GenerateItemCast(sheet.item, this).render(true));
+        group?.prepend(btn);
     }
 
     #characterPrepareData(actor: CharacterPF2e) {
@@ -478,7 +469,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
                 if (update) {
                     commitData.itemUpdates.push(update);
-                    commitData.affected.frequencies = true;
+                    commitData.affected.spellSlots = true;
                 }
             }),
         );
@@ -632,10 +623,25 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const html = $html[0];
         const tab = htmlQuery(html, `.tab[data-tab="spellcasting"] .tab[data-tab="activations"]`);
 
-        for (const [spellId, { ruleIndex, max, parent, value }] of R.entries(virtualSpells)) {
-            if (!max) continue;
+        for (const [spellId, { max, parent, ruleIndex, value }] of R.entries(virtualSpells)) {
+            const equipped = itemIsEquipped(parent);
+            if (!max && !equipped) continue;
 
             const spellSection = htmlQuery(tab, `.spell[data-item-id="${spellId}"]`);
+
+            if (!equipped) {
+                const castBtn = htmlQuery(spellSection, "button.cast-spell");
+
+                if (castBtn) {
+                    castBtn.classList.add("unequipped");
+                    castBtn.innerHTML = `<i class="fa-solid fa-shirt"></i>`;
+                    castBtn.dataset.tooltip = this.localize("cast.equipped");
+                    delete castBtn.dataset.action;
+                }
+            }
+
+            if (!max) continue;
+
             const headerRow = spellSection?.previousElementSibling;
             const nameDiv = htmlQuery(headerRow, ".item-name");
             if (!nameDiv) continue;

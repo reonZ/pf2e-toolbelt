@@ -117,7 +117,6 @@
 }
 
 .sheet.item.physical {
-    .pf2e-toolbelt-actionable-generate-physical,
     .pf2e-toolbelt-actionable-generate-cast {
         line-height: 0;
         height: 1.75em;
@@ -126,6 +125,14 @@
 }
 
 .sheet.actor {
+    button.cast-spell.unequipped {
+        background: var(--color-disabled);
+        border-color: transparent;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        cursor: not-allowed;
+        height: 2em;
+    }
+
     a.actionable-use {
         &.disabled {
             pointer-events: none;

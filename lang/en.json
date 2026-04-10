@@ -419,6 +419,9 @@
                 "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used",
                 "cancel": "<strong>{name}</strong> action was cancelled by its macro."
             },
+            "cast": {
+                "equipped": "Not Equipped"
+            },
             "generate-cast": {
                 "add": "Add rule",
                 "dc": "DC",
