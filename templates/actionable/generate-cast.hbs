@@ -1,0 +1,42 @@
+{{#each spells as |spell|}}
+    <div class="spell" data-uuid="{{spell.uuid}}">
+        <div class="header">
+            <img src="{{spell.img}}">
+            <span>{{spell.name}}</span>
+            <label class="uses">
+                {{@root.i18n 'max'}}
+                <input type="number" name="max" min="1" step="1">
+            </label>
+            <button type="button" data-action="add-rule" {{{@root.i18n.tooltip 'add'}}}>
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+        <div class="options">
+            <div></div>
+            <label class="dc">
+                {{@root.i18n 'dc'}}
+                <input type="number" name="dc" min="1" step="1" value="{{spell.dc}}">
+            </label>
+            <label class="rank">
+                {{@root.i18n 'rank'}}
+                <select name="rank">
+                    {{selectOptions @root.ranks selected=spell.rank}}
+                </select>
+            </label>
+            <label class="attributes">
+                <select name="attribute">
+                    <option value=""></option>
+                    {{selectOptions @root.attributes localize=true}}
+                </select>
+            </label>
+            <label class="traditions">
+                <select name="tradition">
+                    <option value=""></option>
+                    {{selectOptions @root.traditions localize=true}}
+                </select>
+            </label>
+        </div>
+    </div>
+{{else}}
+    <div class="empty">{{@root.i18n 'empty'}}</div>
+{{/each}}

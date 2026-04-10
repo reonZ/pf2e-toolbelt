@@ -52,6 +52,79 @@
     }
 }
 
+.application.pf2e-toolbelt-actionable-generate-cast {
+    min-width: 500px;
+
+    .spell {
+        white-space: nowrap;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 0.3em;
+        }
+
+        img {
+            height: 2rem;
+            border-radius: 3px;
+            border: 1px solid #c1ae48;
+        }
+
+        input {
+            text-align: center;
+            padding-inline: 0.3rem;
+            width: 2.1rem;
+            height: 2em;
+        }
+
+        select {
+            padding-inline: 0.3rem;
+            width: fit-content;
+            height: 2em;
+        }
+
+        span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .uses {
+            display: flex;
+            align-items: center;
+            gap: 0.3em;
+        }
+
+        .options {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            justify-content: flex-end;
+        }
+    }
+
+    .empty {
+        text-align: center;
+        font-size: 1.1em;
+        opacity: 0.6;
+        border: 2px dotted var(--color-border);
+        padding: 0.5em 1em;
+    }
+}
+
+.sheet.item.physical {
+    .pf2e-toolbelt-actionable-generate-physical,
+    .pf2e-toolbelt-actionable-generate-cast {
+        line-height: 0;
+        height: 1.75em;
+        flex: 0 0 fit-content;
+    }
+}
+
 .sheet.actor {
     a.actionable-use {
         &.disabled {

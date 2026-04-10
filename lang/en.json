@@ -419,8 +419,14 @@
                 "hint": "A single effect item to be applied to the actor that uses this action or a macro that will be executed when this action is used",
                 "cancel": "<strong>{name}</strong> action was cancelled by its macro."
             },
-            "cast": {
-                "label": "Item Spell Casting"
+            "generate-cast": {
+                "add": "Add rule",
+                "dc": "DC",
+                "empty": "No additional spells were found in the item's description.",
+                "label": "Item Cast",
+                "max": "Max Uses",
+                "rank": "Rank",
+                "title": "Generate 'Item Cast' rules from description."
             },
             "item": {
                 "label": "Macro",

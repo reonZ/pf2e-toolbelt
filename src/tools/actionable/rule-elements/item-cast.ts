@@ -1,9 +1,9 @@
 import {
     AttributeString,
+    CharacterPF2e,
     ConsumablePF2e,
     ConsumableSource,
     ConsumableTrait,
-    CharacterPF2e,
     ItemPF2e,
     ItemSourcePF2e,
     ItemUUID,
@@ -29,6 +29,8 @@ function createItemCastRuleElement() {
     const RuleElementCls = game.pf2e.RuleElement;
 
     class ItemCastRuleElement extends RuleElementCls<ItemCastSchema> {
+        // static autogenForms = true;
+
         constructor(data: ItemCastSource, options: RuleElementOptions) {
             data.priority ??= 99;
             data.requiresEquipped = false;
@@ -275,6 +277,11 @@ function createItemCastRuleElement() {
     return ItemCastRuleElement;
 }
 
+interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFromRESchema<ItemCastSchema> {
+    get actor(): CharacterPF2e;
+    get item(): PhysicalItemPF2e<CharacterPF2e>;
+}
+
 interface ItemCastSource extends RuleElementSource, Record<keyof Exclude<ItemCastSchema, RuleElementSchema>, unknown> {}
 
 type BaseItemCastSchema = {
@@ -316,4 +323,4 @@ type VirtualSpellData = Prettify<
 >;
 
 export { createItemCastRuleElement };
-export type { VirtualSpellData };
+export type { BaseItemCastRule, ItemCastRuleElement, ItemCastRuleSource, VirtualSpellData };

@@ -49,6 +49,7 @@ import {
     NPCPF2e,
     NPCSheetData,
     PhysicalItemPF2e,
+    PhysicalItemSheetPF2e,
     R,
     registerWrapper,
     renderCharacterSheets,
@@ -73,6 +74,7 @@ import {
     applyActorGroupUpdate,
     createActionableRuleElement,
     createItemCastRuleElement,
+    GenerateItemCast,
     getActionSheetData,
     ItemCastSpellcasting,
     VirtualActionData,
@@ -228,7 +230,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     init() {
-        if (this.settings.physical) {
+        const castEnabled = this.settings.cast;
+        const physicalEnabled = this.settings.physical;
+
+        if (physicalEnabled) {
             registerWrapper(
                 "WRAPPER",
                 "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
@@ -244,11 +249,15 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
         }
 
-        if (this.settings.cast) {
+        if (castEnabled) {
             sharedCharacterPrepareData
                 .register(this.#characterPrepareData, { context: this, priority: 100 })
                 .activate();
             game.pf2e.RuleElements.custom.ItemCast = createItemCastRuleElement();
+        }
+
+        if (castEnabled || physicalEnabled) {
+            Hooks.on("renderPhysicalItemSheetPF2e", this.#onRenderPhysicalItemSheetPF2e.bind(this));
         }
     }
 
@@ -325,6 +334,41 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         return action.clone(cloneData, { keepId: true });
+    }
+
+    #onRenderPhysicalItemSheetPF2e(sheet: PhysicalItemSheetPF2e<PhysicalItemPF2e<CharacterPF2e>>, $html: JQuery) {
+        if (!sheet.isEditable) return;
+
+        const actor = sheet.actor;
+        if (!actor?.isOfType("character")) return;
+
+        const html = $html[0];
+        const tab = htmlQuery(html, `.tab[data-tab="rules"]`);
+        const nerdDetails = htmlQuery(tab, ".nerd-details");
+        if (!nerdDetails) return;
+
+        const lastGroup = nerdDetails.lastElementChild as HTMLElement | null;
+        const group = htmlQuery(lastGroup, "input") ? createHTMLElement("div", { classes: ["form-group"] }) : lastGroup;
+
+        if (this.settings.cast) {
+            const label = this.localize("generate-cast.label");
+            const tooltip = this.localize("generate-cast.title");
+            const btn = createHTMLElement("button", {
+                classes: ["pf2e-toolbelt-actionable-generate-cast"],
+                content: `<i class="fa-solid fa-wand-magic-sparkles"></i> ${label}`,
+                dataset: { tooltip: tooltip },
+            });
+            btn.addEventListener("click", () => new GenerateItemCast(sheet.item, this).render(true));
+            group?.prepend(btn);
+        }
+
+        if (this.settings.physical) {
+            const btn = createHTMLElement("button", {
+                classes: ["pf2e-toolbelt-actionable-generate-physical"],
+                content: `<span class="action-glyph">1</span>  ${this.localize("physical.generate.label")}`,
+                dataset: { tooltip: this.localize.path("physical.generate.tooltip") },
+            });
+        }
     }
 
     #characterPrepareData(actor: CharacterPF2e) {
