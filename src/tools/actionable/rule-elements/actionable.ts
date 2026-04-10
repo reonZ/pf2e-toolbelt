@@ -77,24 +77,35 @@ function createActionableRuleElement() {
         updateData(
             changes: ActionableUpdateDataArgs,
             sourceOnly?: boolean,
-        ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+        ): Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined;
         updateData(
             changes: ActionableUpdateDataArgs,
             sourceOnly?: boolean,
-        ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
+        ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined {
+            const item = this.item;
             const sourceIndex = this.sourceIndex ?? -1;
-            const rules = foundry.utils.deepClone(this.item._source.system.rules);
+            const rules = foundry.utils.deepClone(item._source.system.rules);
             const rule = rules[sourceIndex] as DeepPartial<ActionableRuleSource> | undefined;
             if (!rule?.data) return;
 
             foundry.utils.mergeObject(rule.data, changes);
 
-            const update = { _id: this.item.id, "system.rules": rules };
-
             if (sourceOnly) {
-                return update;
+                const parentItem = item.parentItem;
+                if (parentItem) {
+                    const subitems = foundry.utils.deepClone(parentItem._source.system.subitems);
+                    const subitem = subitems?.find((i) => i._id === item.id);
+
+                    if (subitem) {
+                        subitem.system.rules = rules;
+                    }
+
+                    return { _id: parentItem.id, "system.subitems": subitems };
+                } else {
+                    return { _id: item.id, "system.rules": rules };
+                }
             } else {
-                return this.actor.updateEmbeddedDocuments("Item", [update]);
+                return item.update({ "system.rules": rules });
             }
         }
 
@@ -126,8 +137,7 @@ function createActionableRuleElement() {
                 rule.data.frequency ??= action.frequency.max;
             }
 
-            const update = { _id: this.item.id, "system.rules": rules };
-            await this.actor.updateEmbeddedDocuments("Item", [update]);
+            await this.item.update({ "system.rules": rules });
         }
     }
 
