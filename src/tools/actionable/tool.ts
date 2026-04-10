@@ -329,8 +329,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             cloneData["_stats.duplicateSource"] = data.sourceId;
         }
 
-        if (action.frequency && R.isNumber(data.frequency)) {
-            cloneData["system.frequency.value"] = data.frequency;
+        if (action.frequency) {
+            cloneData["system.frequency.value"] = R.isNumber(data.frequency) ? data.frequency : action.frequency.max;
         }
 
         return action.clone(cloneData, { keepId: true });

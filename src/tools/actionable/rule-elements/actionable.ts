@@ -87,7 +87,7 @@ function createActionableRuleElement() {
             sourceOnly?: boolean,
         ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
             const sourceIndex = this.sourceIndex ?? -1;
-            const rules = this.item._source.system.rules.slice();
+            const rules = foundry.utils.deepClone(this.item._source.system.rules);
             const rule = rules[sourceIndex] as DeepPartial<ActionableRuleSource> | undefined;
             if (!rule?.data) return;
 
@@ -106,7 +106,7 @@ function createActionableRuleElement() {
             const sourceIndex = this.sourceIndex ?? -1;
             if (sourceIndex < 0) return;
 
-            const rules = this.item._source.system.rules.slice();
+            const rules = foundry.utils.deepClone(this.item._source.system.rules);
             const rule = rules[sourceIndex] as DeepPartial<ActionableRuleSource> | undefined;
             if (!rule) return;
 

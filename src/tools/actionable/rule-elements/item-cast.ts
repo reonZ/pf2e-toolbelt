@@ -103,7 +103,8 @@ function createItemCastRuleElement() {
         }
 
         get usableValue(): number {
-            return this.data.value ?? this.usableMax;
+            const max = this.usableMax;
+            return Math.clamp(this.data.value ?? max, 0, max);
         }
 
         override async preUpdateActor(): Promise<{ create: ItemSourcePF2e[]; delete: string[] }> {
@@ -131,13 +132,15 @@ function createItemCastRuleElement() {
             }
         }
 
+        // 1tfHmDmhj786VFyn QS4Rihax9do4VZPg
         test(rollOptions?: string[] | Set<string> | undefined): boolean {
-            if (!super.test(rollOptions) || this.missingSpellData()) return false;
+            return super.test(rollOptions) && !this.missingSpellData();
+            // if (!super.test(rollOptions) || this.missingSpellData()) return false;
 
-            const item = this.item;
-            const invested = item.isInvested;
+            // const item = this.item;
+            // const invested = item.isInvested;
 
-            return invested === true || (invested === null && item.isEquipped);
+            // return invested === true || (invested === null && item.isEquipped);
         }
 
         missingSpellData() {
@@ -196,6 +199,7 @@ function createItemCastRuleElement() {
                 // infinite cast
                 if (!this.max) return;
 
+                console.log(this.usableValue, thisMany);
                 const newValue = Math.max(this.usableValue - thisMany, 0);
                 await this.updateData({ value: newValue });
             };
@@ -213,7 +217,7 @@ function createItemCastRuleElement() {
             sourceOnly?: boolean,
         ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
             const sourceIndex = this.sourceIndex ?? -1;
-            const rules = this.item._source.system.rules.slice();
+            const rules = foundry.utils.deepClone(this.item._source.system.rules);
             const rule = rules[sourceIndex] as DeepPartial<ItemCastRuleSource> | undefined;
             if (!rule?.data) return;
 
@@ -232,7 +236,7 @@ function createItemCastRuleElement() {
             const sourceIndex = this.sourceIndex ?? -1;
             if (sourceIndex < 0) return;
 
-            const rules = this.item._source.system.rules.slice();
+            const rules = foundry.utils.deepClone(this.item._source.system.rules);
             const rule = rules[sourceIndex] as DeepPartial<ItemCastRule> | undefined;
             if (!rule) return;
 
@@ -258,11 +262,11 @@ function createItemCastRuleElement() {
 
             rule.data.spell = source as SpellSource & { _id: string };
 
-            if (this.max && (!R.isNumber(rule.data.value) || rule.data.value > this.max)) {
-                rule.data.value = this.max;
-            } else if (!this.max && R.isNumber(rule.data.value)) {
-                delete rule.data.value;
-            }
+            // if (this.max && (!R.isNumber(rule.data.value) || rule.data.value > this.max)) {
+            //     rule.data.value = this.max;
+            // } else if (!this.max && R.isNumber(rule.data.value)) {
+            //     delete rule.data.value;
+            // }
 
             const update = { _id: this.item.id, "system.rules": rules };
             await this.actor.updateEmbeddedDocuments("Item", [update]);
