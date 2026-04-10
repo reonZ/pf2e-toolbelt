@@ -1,5 +1,6 @@
 import {
     CharacterPF2e,
+    itemIsEquipped,
     ItemPF2e,
     ItemSourcePF2e,
     ModelPropsFromRESchema,
@@ -69,12 +70,7 @@ function createActionableRuleElement() {
         }
 
         test(rollOptions?: string[] | Set<string> | undefined): boolean {
-            if (!super.test(rollOptions)) return false;
-
-            const item = this.item;
-            const invested = item.isInvested;
-
-            return invested === true || (invested === null && item.isEquipped);
+            return super.test(rollOptions) && itemIsEquipped(this.item);
         }
 
         updateData(changes: ActionableUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;

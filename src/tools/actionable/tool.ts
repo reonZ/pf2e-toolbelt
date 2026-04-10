@@ -7,6 +7,7 @@ import {
     ActorRechargeData,
     ActorSheetOptions,
     ActorSheetPF2e,
+    addListener,
     addListenerAll,
     AttributeString,
     CastOptions,
@@ -76,15 +77,16 @@ import {
     createItemCastRuleElement,
     GenerateItemCast,
     getActionSheetData,
+    ItemCastRuleElement,
     ItemCastSpellcasting,
     VirtualActionData,
     VirtualSpellData,
 } from ".";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
-    #renderCharacterSheetPF2eHook = createToggleHook(
+    #renderCreatureSheetPF2eHook = createToggleHook(
         ["renderCharacterSheetPF2e", "renderNPCSheetPF2e"],
-        this.#onRenderSheetPF2e.bind(this),
+        this.#onRenderCreatureSheetPF2e.bind(this),
     );
 
     #createChatMessageHook = createToggleHook("createChatMessage", this.#onCreateChatMessage.bind(this));
@@ -254,6 +256,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 .register(this.#characterPrepareData, { context: this, priority: 100 })
                 .activate();
             game.pf2e.RuleElements.custom.ItemCast = createItemCastRuleElement();
+            Hooks.on("renderCharacterSheetPF2e", this.#onRenderCharacterSheetPF2e.bind(this));
         }
 
         if (castEnabled || physicalEnabled) {
@@ -286,7 +289,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         toggleHooksAndWrappers(this.#actionWrappers, actionEnabled);
         toggleHooksAndWrappers(this.#itemWrappers, itemEnabled);
 
-        this.#renderCharacterSheetPF2eHook.toggle(actionEnabled || itemEnabled || this.settings.use);
+        this.#renderCreatureSheetPF2eHook.toggle(actionEnabled || itemEnabled || this.settings.use);
 
         if (!skipRenders) {
             renderItemSheets(["AbilitySheetPF2e", "ConsumableSheetPF2e", "EquipmentSheetPF2e", "FeatSheetPF2e"]);
@@ -315,6 +318,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     getVirtualActionsData(actor: CharacterPF2e): Record<string, VirtualActionData> {
         return this.getInMemory(actor, "virtual") ?? {};
+    }
+
+    getVirtualSpellsData(actor: CharacterPF2e): Record<string, VirtualSpellData> | undefined {
+        return this.getInMemory(actor, "spells");
     }
 
     async getVirtualAction(data: ActionableData): Promise<AbilityItemPF2e | null> {
@@ -372,7 +379,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #characterPrepareData(actor: CharacterPF2e) {
-        const virtualSpellData = this.getInMemory<Record<string, VirtualSpellData>>(actor, "spells");
+        const virtualSpellData = this.getVirtualSpellsData(actor);
         if (!virtualSpellData) return;
 
         const SpellCollectionCls = getSpellCollectionCls(actor);
@@ -603,7 +610,46 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         });
     }
 
-    #onRenderSheetPF2e(
+    #onRenderCharacterSheetPF2e(sheet: CharacterSheetPF2e<CharacterPF2e>, $html: JQuery) {
+        const virtualSpells = this.getVirtualSpellsData(sheet.actor);
+        if (!virtualSpells) return;
+
+        const html = $html[0];
+        const tab = htmlQuery(html, `.tab[data-tab="spellcasting"] .tab[data-tab="activations"]`);
+
+        for (const [spellId, { ruleIndex, max, parent, value }] of R.entries(virtualSpells)) {
+            if (!max) continue;
+
+            const spellSection = htmlQuery(tab, `.spell[data-item-id="${spellId}"]`);
+            const headerRow = spellSection?.previousElementSibling;
+            const nameDiv = htmlQuery(headerRow, ".item-name");
+            if (!nameDiv) continue;
+
+            const template = `<span class="spell-slots-input">
+                <input type="number" value="${value}" placeholder="0" />
+            </span>
+            <span class="slash">/</span>
+            <span class="spell-max-input">
+                <input type="number" value="${max}" disabled />
+            </span>
+            <a><i class="fa-solid fa-arrow-rotate-right"></i></a>`;
+
+            const outer = createHTMLElement("div", { content: template });
+            nameDiv.append(...outer.children);
+
+            addListener(nameDiv, "input", "change", async (el) => {
+                const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
+                await rule.updateData({ value: Math.clamp(el.valueAsNumber, 0, max) });
+            });
+
+            addListener(nameDiv, "a", async (el) => {
+                const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
+                await rule.updateData({ value: max });
+            });
+        }
+    }
+
+    #onRenderCreatureSheetPF2e(
         sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         $html: JQuery,
         data: CharacterSheetData | NPCSheetData,

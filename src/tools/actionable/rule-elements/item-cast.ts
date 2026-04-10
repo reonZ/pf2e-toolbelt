@@ -125,7 +125,7 @@ function createItemCastRuleElement() {
                 actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, {
                     ...R.pick(this, ["attribute", "dc", "max", "tradition"]),
                     item,
-                    parentId: this.item.id,
+                    parent: this.item,
                     ruleIndex: this.sourceIndex as number,
                     value: this.data.value,
                 });
@@ -135,12 +135,6 @@ function createItemCastRuleElement() {
         // 1tfHmDmhj786VFyn QS4Rihax9do4VZPg
         test(rollOptions?: string[] | Set<string> | undefined): boolean {
             return super.test(rollOptions) && !this.missingSpellData();
-            // if (!super.test(rollOptions) || this.missingSpellData()) return false;
-
-            // const item = this.item;
-            // const invested = item.isInvested;
-
-            // return invested === true || (invested === null && item.isEquipped);
         }
 
         missingSpellData() {
@@ -199,7 +193,6 @@ function createItemCastRuleElement() {
                 // infinite cast
                 if (!this.max) return;
 
-                console.log(this.usableValue, thisMany);
                 const newValue = Math.max(this.usableValue - thisMany, 0);
                 await this.updateData({ value: newValue });
             };
@@ -262,11 +255,11 @@ function createItemCastRuleElement() {
 
             rule.data.spell = source as SpellSource & { _id: string };
 
-            // if (this.max && (!R.isNumber(rule.data.value) || rule.data.value > this.max)) {
-            //     rule.data.value = this.max;
-            // } else if (!this.max && R.isNumber(rule.data.value)) {
-            //     delete rule.data.value;
-            // }
+            if (this.max && (!R.isNumber(rule.data.value) || rule.data.value > this.max)) {
+                rule.data.value = this.max;
+            } else if (!this.max && R.isNumber(rule.data.value)) {
+                delete rule.data.value;
+            }
 
             const update = { _id: this.item.id, "system.rules": rules };
             await this.actor.updateEmbeddedDocuments("Item", [update]);
@@ -284,6 +277,12 @@ function createItemCastRuleElement() {
 interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFromRESchema<ItemCastSchema> {
     get actor(): CharacterPF2e;
     get item(): PhysicalItemPF2e<CharacterPF2e>;
+    updateData(changes: ItemCastUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
+    updateData(changes: ItemCastUpdateDataArgs, sourceOnly?: boolean): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+    updateData(
+        changes: ItemCastUpdateDataArgs,
+        sourceOnly?: boolean,
+    ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
 }
 
 interface ItemCastSource extends RuleElementSource, Record<keyof Exclude<ItemCastSchema, RuleElementSchema>, unknown> {}
@@ -320,7 +319,7 @@ type ItemCastUpdateDataArgs = {
 type VirtualSpellData = Prettify<
     Pick<BaseItemCastRule, "attribute" | "dc" | "max" | "tradition"> & {
         item: ConsumablePF2e<CharacterPF2e>;
-        parentId: string;
+        parent: PhysicalItemPF2e<CharacterPF2e>;
         ruleIndex: number;
         value: number | undefined;
     }
