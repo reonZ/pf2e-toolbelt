@@ -242,12 +242,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 this.#characterPrepareEmbeddedDocuments,
                 this,
             );
-            registerWrapper(
-                "WRAPPER",
-                "CONFIG.PF2E.Actor.documentClasses.character.prototype.recharge",
-                this.#characterRecharge,
-                this,
-            );
             game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
         }
 
@@ -260,6 +254,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         if (castEnabled || physicalEnabled) {
+            registerWrapper(
+                "WRAPPER",
+                "CONFIG.PF2E.Actor.documentClasses.character.prototype.recharge",
+                this.#characterRecharge,
+                this,
+            );
             Hooks.on("renderPhysicalItemSheetPF2e", this.#onRenderPhysicalItemSheetPF2e.bind(this));
         }
     }
@@ -431,18 +431,19 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         wrapped: libWrapper.RegisterCallback,
         options: Parameters<CharacterPF2e["recharge"]>[0],
     ): Promise<ActorRechargeData> {
-        const virtuals = this.getVirtualActionsData(actor);
+        const elapsed = options.duration;
+        const specificDurations = ["turn", "round", "day"];
+
+        const virtualActions = this.settings.physical ? this.getVirtualActionsData(actor) : {};
+        const virtualSpells = (this.settings.cast && elapsed === "day" && this.getVirtualSpellsData(actor)) || {};
         // we do that to we can make sure only a single update per type is ever done
         const originalCommit = options.commit;
         options.commit = false;
 
         const commitData: ActorRechargeData = await wrapped(options);
 
-        const elapsed = options.duration;
-        const specificDurations = ["turn", "round", "day"];
-
         await Promise.all(
-            R.values(virtuals).map(async ({ data, parent, ruleIndex }) => {
+            R.values(virtualActions).map(async ({ data, parent, ruleIndex }) => {
                 const frequency = (await this.getVirtualAction(data))?.frequency;
                 if (!frequency || frequency.value >= frequency.max) return;
 
@@ -464,6 +465,20 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                             commitData.affected.frequencies = true;
                         }
                     }
+                }
+            }),
+        );
+
+        await Promise.all(
+            R.values(virtualSpells).map(async ({ max, parent, ruleIndex }) => {
+                if (!max) return;
+
+                const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
+                const update = rule.updateData({ value: max }, true);
+
+                if (update) {
+                    commitData.itemUpdates.push(update);
+                    commitData.affected.frequencies = true;
                 }
             }),
         );
