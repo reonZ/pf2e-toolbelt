@@ -1,5 +1,6 @@
 {
   "PF2E.RuleElement.Actionable": "Wykonalny",
+  "PF2E.RuleElement.ItemCast": "Przedmiot rzucania zaklęcia",
   "LEVIKTIMES": {
     "playerOnly": "Tylko gracz",
     "gmOnly": "Tylko MG",
@@ -44,6 +45,10 @@
         "apply": {
           "name": "Automatyczna aplikacja efektu",
           "hint": "Przycisk użycia dla efektu nakładanego na siebie spowoduje automatyczne nałożenie efektu."
+        },
+        "cast": {
+          "name": "Przedmiot umożliwiający rzucanie zaklęć",
+          "hint": "Dodaje nowy element reguły, który generuje wirtualne wpisy dotyczące rzucania zaklęć za każdym razem, gdy wyposażony zostanie przedmiot fizyczny lub zostanie dostrojony."
         },
         "item": {
           "name": "Makro przedmiotu",
@@ -413,6 +418,18 @@
         "label": "Samodzielnie nakładany Efekt / Makro",
         "hint": "Pojedynczy efekt, który zostanie zastosowany do aktora używającego tej akcji lub makra, które zostanie wykonane po użyciu tej akcji.",
         "cancel": "Akcja <strong>{name}</strong> została anulowana przez makro."
+      },
+      "cast": {
+        "equipped": "Nie wyposażony"
+      },
+      "generate-cast": {
+        "add": "Dodaj regułę",
+        "dc": "ST",
+        "empty": "W opisie przedmiotu nie znaleziono żadnych dodatkowych zaklęć.",
+        "label": "Przedmiot rzucania zaklęcia",
+        "max": "Maksymalne użycia",
+        "rank": "Ranga",
+        "title": "Wygeneruj reguły „Przedmiot rzucania zaklęcia” na podstawie opisu."
       },
       "item": {
         "label": "Makro",
