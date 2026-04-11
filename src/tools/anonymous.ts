@@ -199,8 +199,9 @@ function partyKnowsSpell(spell: SpellPF2e): CreaturePF2e[] {
 
             return (
                 entry.category !== "prepared" ||
+                (entry.system?.prepared?.flexible && item.system?.location?.signature) ||
                 R.values(entry.system?.slots ?? ({} as SpellcastingEntrySlots)).some((slot) => {
-                    slot.prepared.some((prepared) => prepared.id === spellId);
+                    return slot.prepared.some((prepared) => prepared.id === spellId);
                 })
             );
         });
@@ -218,7 +219,8 @@ function isValidCoreSpellMessage(message: ChatMessagePF2e): message is ChatMessa
 function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
     return (
         !!message.item?.isOfType("spell") &&
-        R.isIncludedIn(message.flags[SYSTEM.id].context?.type, ["spell-cast", "damage-roll"])
+        (message.flags[SYSTEM.id].origin?.type === "spell" ||
+        R.isIncludedIn(message.flags[SYSTEM.id].context?.type, ["spell-cast", "damage-roll"]))
     );
 }
 
