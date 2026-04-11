@@ -256,13 +256,18 @@ async function assignBoosts(item: ItemWithAssignableBoosts | null, data: Attribu
         }
     }
 
-    const match = assigned.find((list) => list.length === recipiants.length && list.every(R.isTruthy));
+    const recipiantsSize = recipiants.length;
+    const match = assigned.find((list) => {
+        return list.filter(R.isTruthy).length === recipiantsSize;
+    });
+
     if (!match) return;
 
     const update = R.pipe(
         match,
         R.map((key, index) => [index, { selected: key }] as const),
         R.fromEntries(),
+        R.pickBy(({ selected }) => selected != null),
     );
 
     return item.update({ "system.boosts": update });
