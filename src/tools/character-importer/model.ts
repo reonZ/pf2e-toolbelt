@@ -59,8 +59,8 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
         } else {
             entry.override = value as any;
 
-            // we do this because 'equipment' is the default type for unmatched entries
-            if (isEquipmentEntry(entry) && entry.type === "equipment") {
+            // we want to allow swapping types if necessary, mostly because "equipment" is used as default for unmatched
+            if (isEquipmentEntry(entry)) {
                 entry.type = value.type as PhysicalItemType;
             }
         }

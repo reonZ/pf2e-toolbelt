@@ -322,8 +322,12 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
                     itemType = "container";
                 }
 
-                if (entry.dataset.itemType === "equipment" && isPhysicalCategory(itemType)) {
-                    itemType = "equipment";
+                if (
+                    isPhysicalCategory(entry.dataset.itemType) &&
+                    isPhysicalCategory(itemType) &&
+                    itemType !== "backpack"
+                ) {
+                    itemType = entry.dataset.itemType;
                 }
 
                 if (!itemType || itemType !== entry.dataset.itemType) {
