@@ -6,7 +6,6 @@ import {
     CreaturePF2e,
     htmlQuery,
     isActionMessage,
-    isSpellMessage,
     R,
     SpellcastingEntrySlots,
     SpellPF2e,
@@ -32,7 +31,7 @@ const CONTEXT_OPTIONS: {
     {
         type: "spell",
         icon: `<i class="fa-solid fa-wand-magic-sparkles"></i>`,
-        test: (message) => isValidMessage(message) && isValidCoreSpellMessage(message),
+        test: (message) => isValidMessage(message) && isValidSpellMessage(message),
     },
 ];
 
@@ -119,9 +118,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         const isAction = !isSpell && this.settings.action && isValidActionMessage(message);
         if (!isSpell && !isAction) return;
 
-        const isCoreSpell = isSpell && isSpellMessage(message);
-
-        if (isCoreSpell) {
+        if (isSpell) {
             const members = partyKnowsSpell(message.item).map((actor) => actor.name);
 
             if (members.length) {
@@ -142,7 +139,7 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
         html.classList.add("pf2e-toolbelt-anonymous-player");
 
         const traits = this.settings.traits;
-        const isSpellDamage = isSpell && !isCoreSpell;
+        const isSpellDamage = isSpell && message.flags[SYSTEM.id].context?.type === "damage-roll";
         const tagsSelector = isSpellDamage ? ".flavor-text > .tags:not(.modifiers)" : ".card-header > .tags";
         const tags = htmlQuery(html, tagsSelector);
 
@@ -184,7 +181,9 @@ class AnonymousTool extends ModuleTool<ToolSettings> {
     }
 }
 
-function partyKnowsSpell(spell: SpellPF2e): CreaturePF2e[] {
+function partyKnowsSpell(spell: SpellPF2e | null): CreaturePF2e[] {
+    if (!spell) return [];
+
     const sourceId = spell.sourceId;
     const members = game.actors.party?.members ?? [];
 
@@ -211,15 +210,8 @@ function isValidActionMessage(message: ChatMessagePF2e): message is ChatMessageP
     return isActionMessage(message);
 }
 
-function isValidCoreSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
-    return isSpellMessage(message);
-}
-
-function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e } {
-    return (
-        !!message.item?.isOfType("spell") &&
-        R.isIncludedIn(message.flags[SYSTEM.id].context?.type, ["spell-cast", "damage-roll"])
-    );
+function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e | null } {
+    return message.flags[SYSTEM.id].origin?.type === "spell";
 }
 
 function isValidMessage(message: Maybe<ChatMessagePF2e>): message is ChatMessagePF2e {
