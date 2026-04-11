@@ -188,20 +188,22 @@ function partyKnowsSpell(spell: SpellPF2e | null): CreaturePF2e[] {
     const members = game.actors.party?.members ?? [];
 
     return members.filter((actor) => {
-        return actor.itemTypes.spell.some((item) => {
-            if (item.sourceId !== sourceId) return false;
+        return actor.itemTypes.spell.some((spell) => {
+            if (spell.sourceId !== sourceId) return false;
 
-            const entry = item.spellcasting;
+            const entry = spell.spellcasting;
             if (!entry) return false;
 
-            const spellId = item.id;
-
-            return (
-                entry.category !== "prepared" ||
-                R.values(entry.system?.slots ?? ({} as SpellcastingEntrySlots)).some((slot) => {
-                    slot.prepared.some((prepared) => prepared.id === spellId);
-                })
-            );
+            if (entry.category !== "prepared") {
+                return true;
+            } else if (entry.isFlexible) {
+                return !!spell.system.location.signature;
+            } else {
+                const spellId = spell.id;
+                return R.values(entry.system?.slots ?? ({} as SpellcastingEntrySlots)).some((slot) => {
+                    return slot.prepared.some((prepared) => prepared.id === spellId);
+                });
+            }
         });
     });
 }
