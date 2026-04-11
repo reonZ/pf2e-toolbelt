@@ -168,5 +168,5 @@ function getFeatSlot(actor: CharacterPF2e, entry: ImportedFeatEntry): FeatSlot |
 
 type EntryEventAction = `entry-${ImportDataContextActionType}`;
 
-export { getFeatSlot, isFeatEntry, onEntryAction };
+export { getFeatSlot, isEquipmentEntry, isFeatEntry, onEntryAction };
 export type { EntryEventAction };

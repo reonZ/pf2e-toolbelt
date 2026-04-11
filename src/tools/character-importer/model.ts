@@ -5,6 +5,7 @@ import {
     CharacterImportSource,
     ImportedEntry,
     isCharacterCategory,
+    isEquipmentEntry,
     zCharacterImport,
 } from ".";
 
@@ -57,6 +58,11 @@ class CharacterImport extends ZodDocument<ReturnType<typeof zCharacterImport>> {
             delete entry.override;
         } else {
             entry.override = value as any;
+
+            // we do this because 'equipment' is the default type for unmatched entries
+            if (isEquipmentEntry(entry) && entry.type === "equipment") {
+                entry.type = value.type as PhysicalItemType;
+            }
         }
 
         return true;
@@ -85,5 +91,5 @@ function isPhysicalCategory(value: unknown): value is PhysicalItemType | "contai
 
 type ImportItemType = CharacterCategory | PhysicalItemType | "container" | "feat" | "spell";
 
-export { CharacterImport };
+export { CharacterImport, isPhysicalCategory };
 export type { ImportItemType };

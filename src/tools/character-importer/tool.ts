@@ -26,6 +26,7 @@ import {
     CharacterImportSource,
     EntryEventAction,
     importData,
+    isPhysicalCategory,
     onEntryAction,
     prepareCoreTab,
     prepareDetailsTab,
@@ -319,6 +320,10 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
                 if (entry.dataset.itemType === "container" && itemType === "backpack") {
                     itemType = "container";
+                }
+
+                if (entry.dataset.itemType === "equipment" && isPhysicalCategory(itemType)) {
+                    itemType = "equipment";
                 }
 
                 if (!itemType || itemType !== entry.dataset.itemType) {
