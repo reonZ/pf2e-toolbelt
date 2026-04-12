@@ -663,7 +663,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 await rule.updateData({ value: Math.clamp(el.valueAsNumber, 0, max) });
             });
 
-            addListener(nameDiv, "a", async (el) => {
+            addListener(nameDiv, "a", async () => {
                 const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
                 await rule.updateData({ value: max });
             });

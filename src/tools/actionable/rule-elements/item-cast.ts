@@ -132,7 +132,6 @@ function createItemCastRuleElement() {
             }
         }
 
-        // 1tfHmDmhj786VFyn QS4Rihax9do4VZPg
         test(rollOptions?: string[] | Set<string> | undefined): boolean {
             return super.test(rollOptions) && !this.missingSpellData();
         }
