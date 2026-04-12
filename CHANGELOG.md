@@ -1,3 +1,34 @@
+# 3.39.0
+
+- `Actionable`:
+  - `Physical Actions` now works when added to attachables
+    - it will look at the parent item to see if it is equipped or not
+    - fix virtual action frequency updates not always being persistent
+  - add new `Item Spell Casting` setting
+    - it adds a new RuleElement that generates virtual spellcasting entries
+    - the rules tab of items also contains a button to automatically generate the REs for virtual spells by parsing the item's description
+    - the rule element must contain at a minimum the `ItemCast` key and the `uuid` property pointing to the spell
+    - if a `dc` property is provided, the spellcasting entry will use its own statistic,
+    - if no `dc` is provided, the module will look for other spellcasting entries avaiable on the character
+    - you can also provide the `tradition` and `attribute` properties that will override the generated statistic
+    - if a `max` property is provided, the module will use it to limit the amount of times per day the spell can be cast
+      - it is recharged on rest
+      - the current value can be manipulated by using the input and button added to the spellcasting entry
+    - the module prevents the cast of the spell if the parent item isn't equipped
+- `Anonymous`:
+  - now hide the name of unretrievable spells in spell damage messages (i.e. spells from scrolls)
+  - fix spells without damage/save not being anonymized
+  - fix prepared spells not revealing spell messages
+- `Auto Cover`:
+  - now handles the `Aim-Aiding` armor rune to skip some creatures
+  - small creature cover computation improvements
+- `Character Importer`:
+  - fix issue with assigned boosts when a boost selection exist after one or more forced boosts
+  - fix not being able to override unmatched equipment entries that are not actually "equipment"
+    - this is due to the module using "equipment" as the default type when not being able to find a match
+    - the type will be overriden to whatever type the item you drop on the entry
+    - the override actually works for any item type, so you don't get stuck with a new type after making a mistake
+
 # 3.38.0
 
 - `Better Merchant`:
