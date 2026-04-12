@@ -7,7 +7,7 @@
                     "name": "物品宏"
                 },
                 "use": {
-                    "hint": "给消耗品添加一个额外的“使用”键，并在使用后生成对应信息。",
+                    "hint": "给消耗品添加一个额外的“使用”键，并在使用后生成对应消息。",
                     "name": "使用消耗品"
                 },
                 "action": {
@@ -22,6 +22,10 @@
                 "spell": {
                     "name": "法术宏",
                     "hint": "为法术新增添加宏的设置栏。"
+                },
+                "physical": {
+                    "hint": "添加一个新的规则元素，该元素能够在玩家装备/绑定一件实体物品时生成虚拟动作。",
+                    "name": "实体动作"
                 }
             },
             "arp": {
@@ -103,7 +107,7 @@
                         "disabled": "禁用"
                     },
                     "name": "特征显示",
-                    "hint": "当模组对聊天信息进行匿名化时，是否显示信息中所包含的特征。"
+                    "hint": "当模组对聊天消息进行匿名化时，是否显示消息中所包含的特征。"
                 }
             },
             "conditionManager": {
@@ -128,6 +132,10 @@
                 }
             },
             "betterTrade": {
+                "withContent": {
+                    "name": "同步容器内容物",
+                    "hint": "当容器从一名角色转移至另一名角色身上时，是否同步转移其内容物。注意，该功能在使用系统交易功能时不生效。"
+                },
                 "title": "更便利的交换",
                 "invertTrade": {
                     "hint": "玩家在进行交换时无需再长按shift键选择物品。（此时长按shift键会直接触发交换请求）",
@@ -149,11 +157,11 @@
                 "title": "合并伤害",
                 "merge": {
                     "name": "合并按钮",
-                    "hint": "为伤害信息添加一个按钮，允许它们与其他伤害信息合并数值。"
+                    "hint": "为伤害信息添加一个按钮，允许它们与其他伤害消息合并数值。"
                 },
                 "inject": {
                     "name": "注入按钮",
-                    "hint": "在伤害信息中添加一个按钮，允许它们被注入到上一个伤害信息中。"
+                    "hint": "在伤害消息中添加一个按钮，允许它们被注入到上一个伤害消息中。"
                 }
             },
             "giveth": {
@@ -190,16 +198,16 @@
             "targetHelper": {
                 "title": "目标助手",
                 "targets": {
-                    "name": "为信息添加目标",
-                    "hint": "允许在聊天信息中添加能够应用伤害与骰掷豁免的额外目标。"
+                    "name": "为消息添加目标",
+                    "hint": "允许在聊天消息中添加能够应用伤害与骰掷豁免的额外目标。"
                 },
                 "small": {
                     "name": "缩小伤害按钮",
                     "hint": "缩小额外目标的伤害按钮。"
                 },
                 "checks": {
-                    "name": "更新检查信息",
-                    "hint": "将简单的内联保存信息升级为该功能可以使用的格式，同时添加更多详细信息。"
+                    "name": "更新检查消息",
+                    "hint": "将简单的内联保存消息升级为该功能可以使用的格式，同时添加更多详细信息。"
                 },
                 "enabled": {
                     "name": "启用",
@@ -278,7 +286,7 @@
                 },
                 "private": {
                     "name": "私密抽取",
-                    "hint": "私密化生成的英雄动作抽取消息。若启用该功能，动作交换信息将不对所有参与者公开。"
+                    "hint": "私密化生成的英雄动作抽取消息。若启用该功能，动作交换消息将不对所有参与者公开。"
                 },
                 "table": {
                     "name": "随机表 UUID",
@@ -310,6 +318,10 @@
             },
             "betterSheet": {
                 "title": "更好的角色卡",
+                "scribble": {
+                    "name": "手写角色卡",
+                    "hint": "重设角色卡显示风格，使其看起来像是手绘制成的。"
+                },
                 "partyAsObserved": {
                     "name": "查看队伍盟友许可",
                     "hint": "允许玩家查看“受限”权限的角色卡，只要该角色属于队伍的盟友即可。注意不要与“团队”角色混淆。"
@@ -321,6 +333,10 @@
                 "sortList": {
                     "hint": "在角色卡的各个列表中添加整理按钮。",
                     "name": "整理列表按钮"
+                },
+                "retrainFeats": {
+                    "name": "重训专长按钮",
+                    "hint": "为角色卡的专长添加重训按钮。"
                 }
             },
             "betterUI": {
@@ -341,6 +357,41 @@
                     }
                 },
                 "title": "角色导入"
+            },
+            "autoCover": {
+                "title": "自动掩蔽",
+                "creature": {
+                    "name": "生物掩蔽",
+                    "choices": {
+                        "disabled": "禁用",
+                        "zero": "任意边缘延伸线相交",
+                        "cross": "两条对边延伸线相交",
+                        "ten": "任意边缘延伸线有10%被阻挡",
+                        "twenty": "任意边缘延伸线有20%被阻挡"
+                    },
+                    "hint": "在攻击检定掷骰时，生物会在什么情形下提供次等或标准掩蔽。"
+                },
+                "prone": {
+                    "name": "跳过倒地生物",
+                    "hint": "是否不让倒地生物提供掩蔽。"
+                },
+                "wall": {
+                    "name": "墙体掩蔽",
+                    "choices": {
+                        "disabled": "禁用",
+                        "center-center": "中心到中心的连线",
+                        "center-spread": "中心到四周的连线",
+                        "center-corner": "中心到边缘的连线",
+                        "corner-center": "边缘到中心的连线",
+                        "corner-spread": "边缘到四周的连线",
+                        "corner-corner": "边缘到边缘的连线"
+                    },
+                    "hint": "当目标生物与攻击者之间的路径被墙体阻挡时，以什么方式判断该生物是否获得标准掩蔽。"
+                },
+                "dead": {
+                    "name": "跳过死亡生物",
+                    "hint": "是否不让死亡生物提供掩蔽。"
+                }
             }
         },
         "actionable": {
@@ -358,7 +409,8 @@
                 "hint": "该法术释放时执行的宏",
                 "cancel": "<strong>{name}</strong> 的施放被其宏取消。",
                 "label": "宏"
-            }
+            },
+            "virtual": "该虚拟动作被添加自："
         },
         "keybindings": {
             "betterMovement": {
@@ -387,7 +439,8 @@
         "anonymous": {
             "spell": {
                 "header": "正在施放法术..",
-                "context": "对玩家揭示法术"
+                "context": "对玩家揭示法术",
+                "damage": "法术伤害"
             },
             "action": {
                 "header": "正在使用能力…",
@@ -426,7 +479,9 @@
             "error": {
                 "out-of-bounds": "无法在指定位置创建丢弃指示物。",
                 "no-scene": "没有可以丢弃物品的场景。",
-                "unknown": "在尝试丢弃选中物品时出现错误。"
+                "unknown": "在尝试丢弃选中物品时出现错误。",
+                "actor": "无法创建丢弃物角色。",
+                "quantity": "你只能丢弃数量大于0的物品。"
             },
             "message": {
                 "subtitle": "丢弃物品",
@@ -452,12 +507,34 @@
         },
         "mergeDamage": {
             "buttons": {
-                "merge": "与上一条伤害信息合并",
-                "inject": "注入上一条伤害信息中",
-                "split": "拆分为原信息"
+                "merge": "与上一条伤害消息合并",
+                "inject": "注入伤害至上一条伤害消息",
+                "split": "拆分为原消息",
+                "menu": {
+                    "inject": "[Shift] 打开伤害注入菜单",
+                    "merge": "[Shift] 打开伤害合并菜单"
+                }
             },
-            "noMatch": "无法找到另一条符合条件的伤害信息。",
-            "injected": "伤害已被注入该条信息"
+            "noMatch": "无法找到另一条符合条件的伤害消息。",
+            "injected": "伤害已被注入该条消息",
+            "menu": {
+                "inject-damage": {
+                    "double": "注入双倍伤害",
+                    "yes": "注入",
+                    "title": "伤害注入菜单",
+                    "full": "注入全部伤害",
+                    "half": "注入一半伤害"
+                },
+                "merge-damage": {
+                    "double": "合并双倍伤害",
+                    "full": "合并全部伤害",
+                    "half": "合并一半伤害",
+                    "title": "伤害合并菜单",
+                    "yes": "合并"
+                },
+                "originMerge": "当前消息",
+                "targetMerge": "上一条消息"
+            }
         },
         "resourceTracker": {
             "header": {
@@ -502,15 +579,15 @@
         },
         "targetHelper": {
             "check-card": {
-                "merge": "与后一条伤害信息合并"
+                "merge": "与后一条伤害消息合并"
             },
             "damage": {
                 "toggle": "切换为原始伤害按钮"
             },
             "drop": {
-                "added": "你已成功在该信息中添加一项豁免。",
-                "unauth": "你只能够对由你发出的信息这样做。",
-                "already": "该信息已有与之链接的豁免检定。"
+                "added": "你已成功在该消息中添加一项豁免。",
+                "unauth": "你只能够对由你发出的消息这样做。",
+                "already": "该消息已有与之链接的豁免检定。"
             },
             "rollSaves": "骰掷 NPC 豁免",
             "header": {
@@ -530,7 +607,7 @@
                 "targets": "设置目标"
             },
             "merge": {
-                "none": "无法找到适合的伤害信息进行合并。"
+                "none": "无法找到适合的伤害消息进行合并。"
             },
             "tooltip": {
                 "dcWithValue": "DC {dc}",
@@ -776,7 +853,7 @@
             "giveActions": {
                 "no": "取消",
                 "title": "授予英雄动作",
-                "withMessage": "生成聊天信息",
+                "withMessage": "生成聊天消息",
                 "yes": "授予动作",
                 "asDrawn": "授予时设置为抽取",
                 "drawn": "已抽取"
@@ -954,13 +1031,24 @@
                     "tooltip": "整理内容",
                     "container": "整理容器内容物"
                 }
+            },
+            "retrain": {
+                "browser": "打开合集包浏览器",
+                "empty": "专长拖入至此",
+                "retrain": "重训",
+                "title": "重训专长",
+                "error": {
+                    "wrongDataType": "错误的数据类型",
+                    "wrongItemType": "仅可拖入专长"
+                },
+                "replace": "替换为"
             }
         },
         "characterImporter": {
             "import": {
                 "code": {
                     "title": "粘贴JSON代码",
-                    "yes": "解析JSON代码"
+                    "yes": "解析JSON"
                 },
                 "fail": "角色导入失败。",
                 "file": {
@@ -972,8 +1060,8 @@
             "sheet": {
                 "import": {
                     "delete": "删除导入数据",
-                    "code": "来自代码",
-                    "file": "来自文件"
+                    "code": "代码导入",
+                    "file": "文件导入"
                 },
                 "level": {
                     "import": "打开角色导入菜单",
@@ -990,14 +1078,61 @@
                         },
                         "current": "当前",
                         "drop": "删除{key}",
-                        "match": "替换",
+                        "match": "匹配",
                         "override": "覆盖"
                     },
                     "core": {
                         "attributes": {
                             "warning": "导入数据未达到最新的提升阈值（{level}级）。<br>您可能需要更新它。",
-                            "assign": "分配属性提升",
-                            "override": "使用手动方式导入"
+                            "assign": "赋予属性提升",
+                            "override": "使用手动方式导入",
+                            "set": {
+                                "boosts": "属性提升已被赋予。",
+                                "manual": "属性值已被“手动”赋予。"
+                            }
+                        }
+                    },
+                    "skills": {
+                        "assign": "赋予技能熟练度",
+                        "current": "当前",
+                        "set": "技能熟练度已被分配。",
+                        "expected": "导入后"
+                    },
+                    "details": {
+                        "current": "当前",
+                        "expected": "导入后",
+                        "language": {
+                            "assign": "赋予语言",
+                            "current": "当前语言",
+                            "expected": "导入后语言"
+                        },
+                        "name": "姓名",
+                        "gender": "性别",
+                        "age": "年龄",
+                        "assign": "赋予详情条目信息"
+                    },
+                    "inventory": {
+                        "currency": {
+                            "current": "当前",
+                            "expected": "导入后",
+                            "assign": "覆盖货币数量"
+                        }
+                    },
+                    "spellcasting": {
+                        "add": {
+                            "yes": "创建",
+                            "content": "你是否要创建一个带有匹配数据的新法术列表？",
+                            "title": "创建新的法术列表"
+                        },
+                        "fill": {
+                            "content": "你是否要添加未在法术列表中列出的所有法术？",
+                            "label": "添加所有缺失的法术",
+                            "title": "用缺失的法术填充法术列表",
+                            "yes": "填充"
+                        },
+                        "refresh": {
+                            "label": "重置法术位",
+                            "set": "法术位已重置"
                         }
                     }
                 },
@@ -1015,6 +1150,17 @@
                 "title": "删除导入数据",
                 "content": "你确定要从这个角色中删除导入数据吗？<br><br>注意：该操作不会更新角色本身。"
             }
+        },
+        "autoCover": {
+            "none": "无掩蔽",
+            "greater": "高等掩蔽",
+            "greater-prone": "高等掩蔽（倒地）",
+            "lesser": "次等掩蔽",
+            "standard": "标准掩蔽",
+            "creature": "来自生物的掩蔽",
+            "wall": "来自墙体的掩蔽",
+            "override": "掩蔽覆盖",
+            "overriden": "被覆盖掩蔽"
         }
     },
     "LEVIKTIMES": {
@@ -1025,5 +1171,6 @@
         },
         "gmOnly": "仅限GM",
         "playerOnly": "仅限玩家"
-    }
+    },
+    "PF2E.RuleElement.Actionable": "动作项"
 }
