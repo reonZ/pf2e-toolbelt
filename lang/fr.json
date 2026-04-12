@@ -1,5 +1,6 @@
 {
   "PF2E.RuleElement.Actionable": "Actionnable",
+  "PF2E.RuleElement.ItemCast": "Lancé par un objet",
   "LEVIKTIMES": {
     "playerOnly": "Joueur uniquement",
     "gmOnly": "MJ uniquement",
@@ -44,6 +45,10 @@
         "apply": {
           "name": "Auto-appliqué",
           "hint": "Pour utiliser le bouton pour l'effet auto-appliqué appliquera automatiquement l'effet."
+        },
+        "cast": {
+          "name": "Incantation de sorts par un objet",
+          "hint": "Chaque fois que vous équipez ou investissez un objet, cela ajoute un nouvel élément de règle qui génère des entrées d'incantation virtuelles."
         },
         "item": {
           "name": "Macro d'objet",
@@ -413,6 +418,18 @@
         "label": "Effet auto-appliqué / Macro",
         "hint": "Un unique effet d'objet à appliquer à l'acteur qui utilise cette action ou une macro qui sera exécutée lorsque cette action sera utilisée",
         "cancel": "action <strong>{name}</strong> a été effacée par sa macro."
+      },
+      "cast": {
+        "equipped": "Pas équipé"
+      },
+      "generate-cast": {
+        "add": "Ajouter une règle",
+        "dc": "DD",
+        "empty": "Aucun sort supplémentaire n'a été trouvé dans la description de l'objet.",
+        "label": "Lancé par un objet",
+        "max": "# max d'utilisations",
+        "rank": "Rang",
+        "title": "Générer des règles « Lancé par un objet » à partir de la description."
       },
       "item": {
         "label": "Macro",
