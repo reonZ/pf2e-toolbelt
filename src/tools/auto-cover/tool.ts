@@ -200,16 +200,23 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const origin = originToken.center;
         const target = targetToken.center;
-        const originSize = SIZES[originActor.size];
-        const targetSize = SIZES[targetActor.size];
-        const canHaveExtraLarges = originSize < SIZES.huge && targetSize < SIZES.huge;
-        const skipDead = this.settings.dead;
-        const skipProne = this.settings.prone;
-        const margin = setting === "ten" ? 0.1 : setting === "twenty" ? 0.2 : 0;
 
         if (debug) {
             drawDebugLine(origin, target, "blue");
         }
+
+        let cover: CoverLevel = "none";
+        const skipDead = this.settings.dead;
+        const skipProne = this.settings.prone;
+        const originSize = SIZES[originActor.size];
+        const targetSize = SIZES[targetActor.size];
+        const margin = setting === "ten" ? 0.1 : setting === "twenty" ? 0.2 : 0;
+        const canHaveExtraLarges = originSize < SIZES.huge && targetSize < SIZES.huge;
+
+        const isExtraLarge = (actor: ActorPF2e) => {
+            const size = SIZES[actor.size];
+            return size - originSize >= 2 && size - targetSize >= 2;
+        };
 
         const intersectsEdge = (edge: RectEdge): boolean => {
             const intersects = foundry.utils.lineSegmentIntersects(origin, target, edge.A, edge.B);
@@ -234,60 +241,41 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             }
         };
 
-        const isExtraLarge = (actor: ActorPF2e) => {
-            const size = SIZES[actor.size];
-            return size - originSize >= 2 && size - targetSize >= 2;
-        };
+        for (const tokenDocument of scene.tokens) {
+            const token = tokenDocument.object;
+            const actor = token?.actor;
 
-        let cover: CoverLevel = "none";
-        let extraLargeCount = 0;
+            if (!token || !actor || tokenDocument.hidden) continue;
+            if (token === originToken || token === targetToken) continue;
+            if (skipDead && !actor.hitPoints?.value) continue;
+            if (skipProne && actor.getCondition("prone")) continue;
 
-        const sceneTokens = R.pipe(
-            scene.tokens.contents,
-            R.map((tokenDocument): { extraLarge: boolean; token: TokenPF2e } | undefined => {
-                const token = tokenDocument.object;
-                const actor = token?.actor;
+            // we handle the 'Aim-Aiding' armor rune
+            if (
+                actor.type === "character" &&
+                actor.isAllyOf(originActor) &&
+                (actor as CharacterPF2e).armorClass.options.has("armor:rune:property:aim-aiding")
+            )
+                continue;
 
-                if (!token || !actor || tokenDocument.hidden) return;
-                if (token === originToken || token === targetToken) return;
-                if (skipDead && !actor.hitPoints?.value) return;
-                if (skipProne && actor.getCondition("prone")) return;
+            const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
 
-                // we handle the 'Aim-Aiding' armor rune
-                if (
-                    actor.type === "character" &&
-                    actor.isAllyOf(originActor) &&
-                    (actor as CharacterPF2e).armorClass.options.has("armor:rune:property:aim-aiding")
-                ) {
-                    return;
-                }
-
-                const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
-
-                if (extraLarge) {
-                    extraLargeCount++;
-                }
-
-                return { extraLarge, token };
-            }),
-            R.filter(R.isTruthy),
-        );
-
-        for (const { extraLarge, token } of sceneTokens) {
-            if (extraLarge) {
-                extraLargeCount--;
-            }
-
+            // we don't need to check intersection on that token as it won't give more than what we already have
+            if (canHaveExtraLarges && !extraLarge && cover === "lesser") continue;
+            // no intersection
             if (!intersectsWith(token)) continue;
 
-            if (extraLarge) {
-                return "standard";
-            }
-
-            if (extraLargeCount < 1) {
+            // we can't have extra large check so this is a much as we will ever get
+            if (!canHaveExtraLarges) {
                 return "lesser";
             }
 
+            // we can never get anything beyond 'standard' so we check out now
+            if (isExtraLarge(actor)) {
+                return "standard";
+            }
+
+            // we can still have an extra large check later on so we have to keep going
             cover = "lesser";
         }
 
