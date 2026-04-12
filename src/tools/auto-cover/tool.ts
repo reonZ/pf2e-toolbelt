@@ -1,5 +1,6 @@
 import {
     ActorPF2e,
+    CharacterPF2e,
     Check,
     CheckCheckContext,
     CheckModifier,
@@ -251,6 +252,15 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 if (token === originToken || token === targetToken) return;
                 if (skipDead && !actor.hitPoints?.value) return;
                 if (skipProne && actor.getCondition("prone")) return;
+
+                // we handle the 'Aim-Aiding' armor rune
+                if (
+                    actor.type === "character" &&
+                    actor.isAllyOf(originActor) &&
+                    (actor as CharacterPF2e).armorClass.options.has("armor:rune:property:aim-aiding")
+                ) {
+                    return;
+                }
 
                 const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
 
