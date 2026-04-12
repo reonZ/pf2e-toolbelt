@@ -16,7 +16,7 @@
       - the current value can be manipulated by using the input and button added to the spellcasting entry
     - the module prevents the cast of the spell if the parent item isn't equipped
 - `Anonymous`:
-  - now hide the name of unretrievable spells in spell damage messages (i.e. spells from scrolls)
+  - now hide the name of irretrievable spells in spell damage messages (i.e. spells from scrolls)
   - fix spells without damage/save not being anonymized
   - fix prepared spells not revealing spell messages
 - `Auto Cover`:
@@ -26,7 +26,7 @@
   - fix issue with assigned boosts when a boost selection exist after one or more forced boosts
   - fix not being able to override unmatched equipment entries that are not actually "equipment"
     - this is due to the module using "equipment" as the default type when not being able to find a match
-    - the type will be overriden to whatever type the item you drop on the entry
+    - the type will be overridden to whatever type the item you drop on the entry
     - the override actually works for any item type, so you don't get stuck with a new type after making a mistake
 
 # 3.38.0
