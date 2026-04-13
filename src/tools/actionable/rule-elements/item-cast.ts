@@ -78,7 +78,7 @@ function createItemCastRuleElement() {
                     required: false,
                     nullable: true,
                     integer: true,
-                    min: 1,
+                    min: 0,
                     max: 10,
                     initial: undefined,
                 }),
@@ -154,6 +154,13 @@ function createItemCastRuleElement() {
         createConsumable(): ConsumablePF2e<CharacterPF2e> {
             const actor = this.actor;
             const spellSource = this.data.spell as SpellSource & { _id: string };
+            const isCantrip = spellSource.system.traits.value.includes("cantrip");
+
+            spellSource.system.location = {
+                autoHeightenLevel: (isCantrip && this.rank) || undefined,
+                heightenedLevel: (!isCantrip && this.rank) || undefined,
+                value: this.data.entryId!,
+            };
 
             const traits = {
                 rarity: spellSource.system.traits.rarity,
@@ -264,10 +271,6 @@ function createItemCastRuleElement() {
 
             const source = spell.toObject();
             source._id = foundry.utils.randomID();
-            source.system.location = {
-                heightenedLevel: this.rank ?? undefined,
-                value: rule.data.entryId,
-            };
 
             rule.data.spell = source as SpellSource & { _id: string };
 

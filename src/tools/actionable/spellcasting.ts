@@ -135,14 +135,14 @@ class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
         const groups = R.entries(groupedByRank)
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([rankStr, [spell]]): SpellcastingSlotGroup => {
-                const rank = spell.isCantrip ? 0 : (Number(rankStr) as OneToTen);
+                const rank = spell.isCantrip && !spell.system.location.autoHeightenLevel ? 0 : Number(rankStr);
                 const label =
                     rank === 0
                         ? "PF2E.Actor.Creature.Spellcasting.Cantrips"
                         : game.i18n.format("PF2E.Item.Spell.Rank.Ordinal", { rank: ordinalString(rank) });
 
                 return {
-                    id: rank === 0 ? "cantrips" : rank,
+                    id: rank === 0 ? "cantrips" : (rank as OneToTen),
                     label,
                     maxRank: 10,
                     active: [{ spell, expended: spell.parentItem?.uses.value === 0 }],
