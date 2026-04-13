@@ -18,7 +18,7 @@ import { ModuleToolApplication } from "module-tool-application";
 import { ActionableTool, BaseItemCastRule, ItemCastRuleElement } from "..";
 
 const ITEM_CAST_REGEX =
-    /<a class="content-link"(?=.*data-type="Item")(?=.*data-uuid="([a-z0-9\.-]+)").+?>.+?<\/a>(?:<\/em>)?/gim;
+    /<a class="content-link"(?=[^>]+data-type="Item")(?=[^>]+data-uuid="([a-z0-9\.-]+)").+?>.+?<\/a>(?:<\/em>)?/gim;
 const ITEM_CAST_DC_REGEX = /^[^<]+dc (\d+)/im;
 const ITEM_CAST_RANK_REGEX = /^[^<]+heightened to (\d+)/im;
 
