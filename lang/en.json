@@ -420,7 +420,8 @@
                 "cancel": "<strong>{name}</strong> action was cancelled by its macro."
             },
             "cast": {
-                "equipped": "Not Equipped"
+                "equipped": "Not Equipped",
+                "label": "Item Spell Cast"
             },
             "generate-cast": {
                 "add": "Add rule",
