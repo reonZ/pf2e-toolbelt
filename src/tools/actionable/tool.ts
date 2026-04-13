@@ -381,13 +381,14 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (!spell) continue;
 
             const dc = data.dc;
-            const bestEntry = !dc ? getBestMatchingSpellcastingEntry(actor, spell, parent) : null;
-            if (!dc && !bestEntry) return;
+            const existingEntry = !dc ? getExistingMatchingSpellcastingEntry(actor, spell, parent) : null;
+            if (!dc && !existingEntry) return;
 
-            const attribute = data.attribute ?? bestEntry?.attribute ?? "cha";
-            const tradition = data.tradition ?? bestEntry?.tradition ?? spell.traditions.first();
+            const attribute = data.attribute ?? existingEntry?.attribute ?? "cha";
+            const tradition = data.tradition ?? existingEntry?.tradition ?? spell.traditions.first();
             const statistic =
-                bestEntry?.statistic ?? this.#createSpellcastingStatistic(actor, attribute, tradition, dc as number);
+                existingEntry?.statistic ??
+                this.#createSpellcastingStatistic(actor, attribute, tradition, dc as number);
 
             const itemCasting = new ItemCastSpellcasting({
                 id: parent.id,
@@ -395,7 +396,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 actor,
                 statistic,
                 tradition,
-                original: bestEntry,
+                original: existingEntry,
                 castPredicate: new game.pf2e.Predicate([`item:id:${parent.id}`, `spell:id:${spellId}`]),
             });
 
@@ -652,7 +653,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 }
             }
 
-            console.log(max);
             const template = max
                 ? `<span class="spell-slots-input">
                 <input type="number" value="${item.uses.value}" placeholder="0" />
@@ -1100,20 +1100,18 @@ function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItem
     });
 }
 
-function getBestMatchingSpellcastingEntry(
+function getExistingMatchingSpellcastingEntry(
     actor: CharacterPF2e,
     spell: SpellPF2e<CharacterPF2e>,
     parent: PhysicalItemPF2e<CharacterPF2e>,
 ): SpellcastingEntry<CharacterPF2e> | null {
-    return R.pipe(
-        actor.spellcasting.contents,
-        R.filter((entry): entry is SpellcastingEntry<CharacterPF2e> => {
-            return !!entry.statistic && entry.canCast(spell, { origin: parent });
-        }),
-        R.reduce((best: SpellcastingEntry<CharacterPF2e> | null, entry) => {
-            return best === null ? entry : entry.statistic.dc.value > best.statistic.dc.value ? entry : best;
-        }, null),
-    );
+    const regularEntries = actor.spellcasting.regular;
+    const matching = regularEntries.filter((entry) => entry.canCast(spell, { origin: parent }));
+    const entries = matching.length ? matching : regularEntries;
+
+    return entries.reduce((best: SpellcastingEntry<CharacterPF2e> | null, entry) => {
+        return best === null ? entry : entry.statistic.dc.value > best.statistic.dc.value ? entry : best;
+    }, null);
 }
 
 const actionable = new ActionableTool();
