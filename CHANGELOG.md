@@ -1,3 +1,8 @@
+# 3.40.1
+
+- `Item Spell Casting`:
+  - add a `statistic` input field to the `Generate 'Item Cast' rules from description.` application as well as improve its styling a bit
+
 # 3.40.0
 
 - `Item Spell Casting`:
