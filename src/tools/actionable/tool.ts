@@ -237,12 +237,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const physicalEnabled = this.settings.physical;
 
         if (physicalEnabled) {
-            registerWrapper(
-                "WRAPPER",
-                "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
-                this.#characterPrepareEmbeddedDocuments,
-                this,
-            );
             game.pf2e.RuleElements.custom.Actionable = createActionableRuleElement();
         }
 
@@ -256,6 +250,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
 
         if (castEnabled || physicalEnabled) {
+            registerWrapper(
+                "WRAPPER",
+                "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
+                this.#characterPrepareEmbeddedDocuments,
+                this,
+            );
             registerWrapper(
                 "WRAPPER",
                 "CONFIG.PF2E.Actor.documentClasses.character.prototype.recharge",
@@ -623,10 +623,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         const html = $html[0];
         const tab = htmlQuery(html, `.tab[data-tab="spellcasting"] .tab[data-tab="activations"]`);
 
-        for (const [spellId, { max, parent, ruleIndex, value }] of R.entries(virtualSpells)) {
+        for (const [spellId, { item, max, parent, ruleIndex }] of R.entries(virtualSpells)) {
             const equipped = itemIsEquipped(parent);
-            if (!max && !equipped) continue;
-
             const spellSection = htmlQuery(tab, `.spell[data-item-id="${spellId}"]`);
 
             if (!equipped) {
@@ -640,23 +638,38 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 }
             }
 
-            if (!max) continue;
-
-            const headerRow = spellSection?.previousElementSibling;
+            const headerRow = spellSection?.previousElementSibling as Maybe<HTMLHtmlElement>;
             const nameDiv = htmlQuery(headerRow, ".item-name");
             if (!nameDiv) continue;
 
-            const template = `<span class="spell-slots-input">
-                <input type="number" value="${value}" placeholder="0" />
+            if (headerRow?.dataset.groupId === "cantrips") {
+                if (max) {
+                    while (nameDiv.childElementCount > 1) {
+                        nameDiv.removeChild(nameDiv.lastElementChild!);
+                    }
+                } else {
+                    continue;
+                }
+            }
+
+            console.log(max);
+            const template = max
+                ? `<span class="spell-slots-input">
+                <input type="number" value="${item.uses.value}" placeholder="0" />
             </span>
             <span class="slash">/</span>
             <span class="spell-max-input">
                 <input type="number" value="${max}" disabled />
             </span>
-            <a><i class="fa-solid fa-arrow-rotate-right"></i></a>`;
+            <a><i class="fa-solid fa-arrow-rotate-right"></i></a>`
+                : `<span class="spell-slots infinity">∞</span>
+            <span class="flex0"> / </span>
+            <span class="spell-max infinity">∞</span>`;
 
             const outer = createHTMLElement("div", { content: template });
             nameDiv.append(...outer.children);
+
+            if (!max) continue;
 
             addListener(nameDiv, "input", "change", async (el) => {
                 const rule = parent.rules[ruleIndex] as ItemCastRuleElement;

@@ -71,7 +71,7 @@ function createItemCastRuleElement() {
                     required: false,
                     nullable: true,
                     integer: true,
-                    min: 1,
+                    min: 0,
                     initial: undefined,
                 }),
                 rank: new fields.NumberField<OneToTen, OneToTen, false, false, false>({
@@ -99,7 +99,7 @@ function createItemCastRuleElement() {
         }
 
         get usableMax(): number {
-            return this.max ?? 1;
+            return this.max || 1;
         }
 
         get usableValue(): number {

@@ -3,16 +3,18 @@ import {
     CastOptions,
     CharacterPF2e,
     MagicTradition,
+    OneToTen,
     PhysicalItemPF2e,
     Predicate,
     SpellcastingEntry,
     SpellcastingSheetData,
+    SpellcastingSlotGroup,
     SpellCollection,
     SpellCollectionData,
     SpellPF2e,
     Statistic,
 } from "foundry-helpers";
-import { createCounteractStatistic, R } from "foundry-helpers/dist";
+import { createCounteractStatistic, ordinalString, R } from "foundry-helpers/dist";
 
 /**
  * https://github.com/foundryvtt/pf2e/blob/522dec9d289c7da8b69ac0167b11ccd639871fef/src/module/item/spellcasting-entry/item-spellcasting.ts#L13
@@ -109,7 +111,7 @@ class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
     }
 
     async getSheetData({ spells }: { spells?: SpellCollection<CharacterPF2e> } = {}): Promise<SpellcastingSheetData> {
-        const collectionData: SpellCollectionData = (await spells?.getSpellData()) ?? { groups: [], prepList: null };
+        const collectionData = spells ? this.#getEphemeralData(spells) : { groups: [], prepList: null };
 
         return {
             ...R.pick(this, ["category", "tradition", "sort", "isFlexible", "isFocusPool", "isEphemeral"]),
@@ -121,6 +123,33 @@ class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
             hasCollection: !!spells?.size,
             usesSpellProficiency: false,
         };
+    }
+
+    /**
+     * modified version of
+     * https://github.com/foundryvtt/pf2e/blob/a83c14115be999c773bee2c05c59348adf631650/src/module/item/spellcasting-entry/collection.ts#L310
+     * to handle cantrips
+     */
+    #getEphemeralData(collection: SpellCollection<CharacterPF2e>): SpellCollectionData {
+        const groupedByRank = R.groupBy(Array.from(collection.values()), (s) => s.rank);
+        const groups = R.entries(groupedByRank)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .map(([rankStr, [spell]]): SpellcastingSlotGroup => {
+                const rank = spell.isCantrip ? 0 : (Number(rankStr) as OneToTen);
+                const label =
+                    rank === 0
+                        ? "PF2E.Actor.Creature.Spellcasting.Cantrips"
+                        : game.i18n.format("PF2E.Item.Spell.Rank.Ordinal", { rank: ordinalString(rank) });
+
+                return {
+                    id: rank === 0 ? "cantrips" : rank,
+                    label,
+                    maxRank: 10,
+                    active: [{ spell, expended: spell.parentItem?.uses.value === 0 }],
+                };
+            });
+
+        return { groups, prepList: null };
     }
 }
 
