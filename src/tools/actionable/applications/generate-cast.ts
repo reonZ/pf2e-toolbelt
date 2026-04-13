@@ -12,7 +12,6 @@ import {
     R,
     ROMAN_RANKS,
     RuleElementSource,
-    waitTimeout,
 } from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
 import { ActionableTool, BaseItemCastRule, ItemCastRuleElement } from "..";
@@ -119,13 +118,6 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
 
         await this.#item.update({ "system.rules": rules });
         this.render();
-
-        /**
-         * not sure why, but the item update doesn't always show the full modified version
-         * of the rule after render if already opened, so we re-render it to avoid user confusion/mistake
-         */
-        await waitTimeout(200);
-        this.#item.sheet.render();
     }
 }
 

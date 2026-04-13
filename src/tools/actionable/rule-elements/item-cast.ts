@@ -299,6 +299,34 @@ function createItemCastRuleElement() {
     return ItemCastRuleElement;
 }
 
+function generateItemCastRuleSource(
+    spell: SpellPF2e,
+    { attribute, dc, max, rank, statistic, tradition }: ItemCastRuleSourceData,
+): ItemCastRuleSource {
+    const uuid = spell.uuid;
+    const spellSource = spell.toObject() as SpellSource & { _id: string };
+    spellSource._id = foundry.utils.randomID();
+
+    const data: WithPartial<Required<ItemCastRuleData>, "value"> = {
+        entryId: foundry.utils.randomID(),
+        sourceId: uuid,
+        spell: spellSource,
+        value: max || undefined,
+    };
+
+    return {
+        attribute,
+        data,
+        dc,
+        key: "ItemCast",
+        max,
+        rank,
+        statistic,
+        tradition,
+        uuid,
+    };
+}
+
 interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFromRESchema<ItemCastSchema> {
     get actor(): CharacterPF2e;
     get item(): PhysicalItemPF2e<CharacterPF2e>;
@@ -326,9 +354,11 @@ type BaseItemCastSchema = {
 
 type ItemCastSchema = RuleElementSchema & BaseItemCastSchema;
 
-type ItemCastRuleSource = SourceFromSchema<ItemCastSchema>;
 type BaseItemCastRule = ModelPropsFromSchema<BaseItemCastSchema>;
 type ItemCastRule = ModelPropsFromSchema<ItemCastSchema>;
+
+type ItemCastRuleSourceData = toolbelt.actionable.ItemCastRuleSourceData;
+type ItemCastRuleSource = Omit<SourceFromSchema<ItemCastSchema>, keyof RuleElementSchema> & { key: "ItemCast" };
 
 type ItemCastRuleData = {
     entryId?: string;
@@ -343,5 +373,5 @@ type ItemCastUpdateDataArgs = {
 
 type VirtualSpellData = toolbelt.actionable.VirtualSpellData;
 
-export { createItemCastRuleElement };
+export { createItemCastRuleElement, generateItemCastRuleSource };
 export type { BaseItemCastRule, ItemCastRuleElement, ItemCastRuleSource, VirtualSpellData };

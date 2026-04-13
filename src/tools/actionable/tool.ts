@@ -77,6 +77,7 @@ import {
     createActionableRuleElement,
     createItemCastRuleElement,
     GenerateItemCast,
+    generateItemCastRuleSource,
     getActionSheetData,
     ItemCastRuleElement,
     ItemCastSpellcasting,
@@ -211,6 +212,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     get api(): toolbelt.Api["actionable"] {
         return {
+            generateItemCastRuleSource,
             getActionMacro: this.getActionMacro.bind(this),
             getItemMacro: this.getItemMacro.bind(this),
             getVirtualAction: this.getVirtualAction.bind(this),
