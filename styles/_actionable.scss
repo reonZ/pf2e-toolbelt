@@ -55,6 +55,16 @@
 .application.pf2e-toolbelt-actionable-generate-cast {
     min-width: 500px;
 
+    hr {
+        background: none;
+        border-bottom: 1px solid var(--color-border);
+        margin: 0.5em 0;
+
+        &:first-child {
+            display: none;
+        }
+    }
+
     .spell {
         white-space: nowrap;
         display: flex;
@@ -74,10 +84,13 @@
         }
 
         input {
-            text-align: center;
             padding-inline: 0.3rem;
-            width: 2.1rem;
             height: 2em;
+
+            &[type="number"] {
+                text-align: center;
+                width: 2.1rem;
+            }
         }
 
         select {

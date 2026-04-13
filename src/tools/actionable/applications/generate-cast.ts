@@ -112,6 +112,7 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
             dc: getValueFromInput(target, "dc"),
             max: getValueFromInput(target, "max"),
             rank: (Number(getValueFromSelect(target, "rank")) || undefined) as OneToTen | undefined,
+            statistic: htmlQuery<HTMLInputElement>(target, `[name="statistic"]`)?.value.trim() || "",
             tradition: getValueFromSelect<MagicTradition>(target, "tradition"),
         });
 
@@ -134,7 +135,7 @@ function getValueFromInput(target: HTMLElement, name: "dc" | "max"): number | un
 
 function getValueFromSelect<T extends string>(
     target: HTMLElement,
-    name: "attribute" | "rank" | "tradition",
+    name: "attribute" | "rank" | "statistic" | "tradition",
 ): Exclude<T, ""> | undefined {
     const select = htmlQuery<HTMLSelectElement>(target, `[name="${name}"]`);
     return (select?.value.trim() || undefined) as Exclude<T, ""> | undefined;

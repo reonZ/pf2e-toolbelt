@@ -425,12 +425,15 @@
             },
             "generate-cast": {
                 "add": "Add rule",
+                "attribute": "Attribute",
                 "dc": "DC",
                 "empty": "No additional spells were found in the item's description.",
                 "label": "Item Cast",
                 "max": "Max Uses",
                 "rank": "Rank",
-                "title": "Generate 'Item Cast' rules from description."
+                "statistic": "Statistic",
+                "title": "Generate 'Item Cast' rules from description.",
+                "tradition": "Tradition"
             },
             "item": {
                 "label": "Macro",
