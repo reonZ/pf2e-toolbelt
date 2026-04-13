@@ -1,3 +1,8 @@
+# 3.40.3
+
+- `Item Spell Casting`:
+  - fix issue when parsing an item description that has been reformatted by foundry (after being edited/saved by user)
+
 # 3.40.2
 
 - `Item Spell Casting`:
