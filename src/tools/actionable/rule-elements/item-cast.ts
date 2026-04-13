@@ -74,12 +74,18 @@ function createItemCastRuleElement() {
                     min: 0,
                     initial: undefined,
                 }),
-                rank: new fields.NumberField<OneToTen, OneToTen, false, false, false>({
+                rank: new fields.NumberField<OneToTen, OneToTen, false, true, false>({
                     required: false,
-                    nullable: false,
+                    nullable: true,
                     integer: true,
                     min: 1,
                     max: 10,
+                    initial: undefined,
+                }),
+                statistic: new fields.StringField({
+                    required: false,
+                    nullable: true,
+                    blank: false,
                     initial: undefined,
                 }),
                 tradition: new fields.StringField({
@@ -123,7 +129,7 @@ function createItemCastRuleElement() {
                 const item = this.createConsumable();
 
                 actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, {
-                    ...R.pick(this, ["attribute", "dc", "max", "tradition"]),
+                    ...R.pick(this, ["attribute", "dc", "max", "statistic", "tradition"]),
                     item,
                     parent: this.item,
                     ruleIndex: this.sourceIndex as number,
@@ -259,7 +265,7 @@ function createItemCastRuleElement() {
             const source = spell.toObject();
             source._id = foundry.utils.randomID();
             source.system.location = {
-                heightenedLevel: this.rank,
+                heightenedLevel: this.rank ?? undefined,
                 value: rule.data.entryId,
             };
 
@@ -303,7 +309,8 @@ type BaseItemCastSchema = {
     /** if no static dc, we use existing entries */
     dc: fields.NumberField<number, number, false, true, false>;
     max: fields.NumberField<number, number, false, true, false>;
-    rank: fields.NumberField<OneToTen, OneToTen, false, false, false>;
+    rank: fields.NumberField<OneToTen, OneToTen, false, true, false>;
+    statistic: fields.StringField<string, string, false, true, false>;
     tradition: fields.StringField<MagicTradition, MagicTradition, false, true, false>;
     uuid: fields.StringField<ItemUUID, ItemUUID, true, false, false>;
 };
@@ -327,7 +334,7 @@ type ItemCastUpdateDataArgs = {
 };
 
 type VirtualSpellData = Prettify<
-    Pick<BaseItemCastRule, "attribute" | "dc" | "max" | "tradition"> & {
+    Pick<BaseItemCastRule, "attribute" | "dc" | "max" | "statistic" | "tradition"> & {
         item: ConsumablePF2e<CharacterPF2e>;
         parent: PhysicalItemPF2e<CharacterPF2e>;
         ruleIndex: number;

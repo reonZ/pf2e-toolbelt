@@ -380,13 +380,16 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const spell = parent.embeddedSpell;
             if (!spell) continue;
 
-            const dc = data.dc;
-            const existingEntry = !dc ? getExistingMatchingSpellcastingEntry(actor, spell, parent) : null;
-            if (!dc && !existingEntry) return;
+            const actorStatistic = data.statistic ? actor.getStatistic(data.statistic) : null;
+            const dc = !actorStatistic && data.dc;
+            const existingEntry = !actorStatistic && !dc ? getExistingSpellcastingEntry(actor, spell, parent) : null;
+            if (!actorStatistic && !dc && !existingEntry) return;
 
-            const attribute = data.attribute ?? existingEntry?.attribute ?? "cha";
+            const attribute = actorStatistic?.attribute ?? data.attribute ?? existingEntry?.attribute ?? "cha";
             const tradition = data.tradition ?? existingEntry?.tradition ?? spell.traditions.first();
+
             const statistic =
+                actorStatistic ??
                 existingEntry?.statistic ??
                 this.#createSpellcastingStatistic(actor, attribute, tradition, dc as number);
 
@@ -1053,7 +1056,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         attribute: AttributeString,
         tradition: MagicTradition | undefined = "arcane",
         dc: number,
-    ): Statistic {
+    ): Statistic<CharacterPF2e> {
         const domains = [`${attribute}-based`, "all", "spell-attack-dc"];
         const saveSelectors = [`${tradition}-spell-dc`, "spell-dc"];
         const attackSelectors = [
@@ -1100,7 +1103,7 @@ function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItem
     });
 }
 
-function getExistingMatchingSpellcastingEntry(
+function getExistingSpellcastingEntry(
     actor: CharacterPF2e,
     spell: SpellPF2e<CharacterPF2e>,
     parent: PhysicalItemPF2e<CharacterPF2e>,
