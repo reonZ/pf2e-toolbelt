@@ -1,3 +1,9 @@
+# 3.40.2
+
+- `Item Spell Casting`:
+  - add a `predicate` input field to the `Generate 'Item Cast' rules from description.` application
+  - fix empty `statistic` property when using the `Generate 'Item Cast' rules from description.`
+
 # 3.40.1
 
 - `Item Spell Casting`:
