@@ -125,16 +125,22 @@ function createItemCastRuleElement() {
             }
 
             if (this.test()) {
+                const entryId = this.data.entryId as string;
                 const spellId = this.data.spell?._id as string;
                 const item = this.createConsumable();
 
-                actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, {
+                const data: VirtualSpellData = {
                     ...R.pick(this, ["attribute", "dc", "max", "statistic", "tradition"]),
+                    entryId,
                     item,
                     parent: this.item,
                     ruleIndex: this.sourceIndex as number,
+                    spellId,
                     value: this.data.value,
-                });
+                };
+
+                actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, data);
+                actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, data);
             }
         }
 
@@ -159,7 +165,7 @@ function createItemCastRuleElement() {
             spellSource.system.location = {
                 autoHeightenLevel: (isCantrip && this.rank) || undefined,
                 heightenedLevel: (!isCantrip && this.rank) || undefined,
-                value: this.data.entryId!,
+                value: this.data.entryId as string,
             };
 
             const traits = {
@@ -327,7 +333,6 @@ type ItemCastRule = ModelPropsFromSchema<ItemCastSchema>;
 type ItemCastRuleData = {
     entryId?: string;
     sourceId?: ItemUUID;
-    spellId?: string;
     spell?: SpellSource & { _id: string };
     value?: number;
 };
@@ -336,14 +341,7 @@ type ItemCastUpdateDataArgs = {
     value?: number;
 };
 
-type VirtualSpellData = Prettify<
-    Pick<BaseItemCastRule, "attribute" | "dc" | "max" | "statistic" | "tradition"> & {
-        item: ConsumablePF2e<CharacterPF2e>;
-        parent: PhysicalItemPF2e<CharacterPF2e>;
-        ruleIndex: number;
-        value: number | undefined;
-    }
->;
+type VirtualSpellData = toolbelt.actionable.VirtualSpellData;
 
 export { createItemCastRuleElement };
 export type { BaseItemCastRule, ItemCastRuleElement, ItemCastRuleSource, VirtualSpellData };

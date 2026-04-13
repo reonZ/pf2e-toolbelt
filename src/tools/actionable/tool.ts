@@ -215,6 +215,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             getItemMacro: this.getItemMacro.bind(this),
             getVirtualAction: this.getVirtualAction.bind(this),
             getVirtualActionsData: this.getVirtualActionsData.bind(this),
+            getVirtualSpellcastingData: this.getVirtualSpellcastingData.bind(this),
+            rechargeVirtualSpell: this.#rechargeVirtualSpell.bind(this),
+            updateVirtualSpellValue: this.#updateVirtualSpellValue.bind(this),
             updateActionFrequency: (
                 event: Event,
                 item: AbilityItemPF2e<ActorPF2e> | FeatPF2e<ActorPF2e>,
@@ -323,6 +326,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     getVirtualSpellsData(actor: CharacterPF2e): Record<string, VirtualSpellData> | undefined {
         return this.getInMemory(actor, "spells");
+    }
+
+    getVirtualSpellcastingData(actor: CharacterPF2e, id: string): VirtualSpellData | undefined {
+        return this.getInMemory(actor, "spellcasting", id);
     }
 
     async getVirtualAction(data: ActionableData): Promise<AbilityItemPF2e | null> {
@@ -637,7 +644,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 if (castBtn) {
                     castBtn.classList.add("unequipped");
                     castBtn.innerHTML = `<i class="fa-solid fa-shirt"></i>`;
-                    castBtn.dataset.tooltip = this.localize("cast.equipped");
+                    castBtn.dataset.tooltip = this.localize.path("cast.equipped");
                     delete castBtn.dataset.action;
                 }
             }
@@ -675,15 +682,32 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (!max) continue;
 
             addListener(nameDiv, "input", "change", async (el) => {
-                const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-                await rule.updateData({ value: Math.clamp(el.valueAsNumber, 0, max) });
+                await this.#updateVirtualSpellValue(parent, ruleIndex, el.valueAsNumber);
             });
 
             addListener(nameDiv, "a", async () => {
-                const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-                await rule.updateData({ value: max });
+                await this.#rechargeVirtualSpell(parent, ruleIndex);
             });
         }
+    }
+
+    #updateVirtualSpellValue(
+        parent: PhysicalItemPF2e<CharacterPF2e>,
+        ruleIndex: number,
+        value: number,
+    ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
+        const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
+        if (rule.key !== "ItemCast" || !rule.max) return;
+        return rule.updateData({ value: Math.clamp(value, 0, rule.max) });
+    }
+
+    #rechargeVirtualSpell(
+        parent: PhysicalItemPF2e<CharacterPF2e>,
+        ruleIndex: number,
+    ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
+        const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
+        if (rule.key !== "ItemCast" || !rule.max) return;
+        return rule.updateData({ value: rule.max });
     }
 
     #onRenderCreatureSheetPF2e(

@@ -92,6 +92,10 @@ class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
         return true;
     }
 
+    get isVirtual(): true {
+        return true;
+    }
+
     canCast(spell: SpellPF2e, { origin }: { origin?: Maybe<PhysicalItemPF2e> } = {}): boolean {
         if (!origin || !spell.actor?.isOfType("character")) return false;
         const rollOptions = new Set([
@@ -114,7 +118,7 @@ class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
         const collectionData = spells ? this.#getEphemeralData(spells) : { groups: [], prepList: null };
 
         return {
-            ...R.pick(this, ["category", "tradition", "sort", "isFlexible", "isFocusPool", "isEphemeral"]),
+            ...R.pick(this, ["category", "tradition", "sort", "isFlexible", "isFocusPool", "isEphemeral", "isVirtual"]),
             ...collectionData,
             id: spells?.id ?? this.id,
             name: spells?.name ?? this.name,
