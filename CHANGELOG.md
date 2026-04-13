@@ -1,3 +1,18 @@
+# 3.40.0
+
+- `Item Spell Casting`:
+  - now properly handle `cantrips`
+    - if you provide a `rank` to a cantrip spell, the module will override the default autoscale behavior
+  - now display infinite symbols where the uses inputs would be if no `max` property is provided
+  - now use any valid spellcasting entry when no `dc` property is provided even if none could cast the spell
+    - the module will still prioritize finding a spellcasting entry that could normally cast the spell
+  - add new `statistic` property to the rule element:
+    - this property takes priority and will look for the statistic of the same slug on the character
+    - if the statistic isn't found, the process will continue like before (using the `dc` property or looking for an existing entry)
+  - fix uses `value` display showing `0` when the `max` property was added after the `data` was auto-generated in the RE
+  - fix cached data not being cleaned if the `Physical Actions` setting isn't enabled
+  - fix missing localization for the custom statistic modifier label
+
 # 3.39.0
 
 - `Actionable`:
