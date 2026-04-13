@@ -430,6 +430,7 @@
                 "empty": "No additional spells were found in the item's description.",
                 "label": "Item Cast",
                 "max": "Max Uses",
+                "predicate": "Predicate",
                 "rank": "Rank",
                 "statistic": "Statistic",
                 "title": "Generate 'Item Cast' rules from description.",

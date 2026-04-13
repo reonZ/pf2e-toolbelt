@@ -118,6 +118,12 @@
             gap: 0.5em;
             justify-content: flex-end;
         }
+
+        .predicate {
+            display: flex;
+            align-items: center;
+            gap: 0.3em;
+        }
     }
 
     .empty {

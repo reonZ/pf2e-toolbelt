@@ -109,10 +109,11 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
             key: "ItemCast",
             uuid: target.dataset.uuid as ItemUUID,
             attribute: getValueFromSelect<AttributeString>(target, "attribute"),
-            dc: getValueFromInput(target, "dc"),
-            max: getValueFromInput(target, "max"),
+            dc: getValueFromInputNumber(target, "dc"),
+            max: getValueFromInputNumber(target, "max"),
+            predicate: getPredicateFromInput(target),
             rank: (Number(getValueFromSelect(target, "rank")) || undefined) as OneToTen | undefined,
-            statistic: htmlQuery<HTMLInputElement>(target, `[name="statistic"]`)?.value.trim() || "",
+            statistic: getValueFromInputText(target, "statistic"),
             tradition: getValueFromSelect<MagicTradition>(target, "tradition"),
         });
 
@@ -128,7 +129,24 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
     }
 }
 
-function getValueFromInput(target: HTMLElement, name: "dc" | "max"): number | undefined {
+function getPredicateFromInput(target: HTMLElement): readonly unknown[] {
+    try {
+        const rawPredicate = getValueFromInputText(target, "predicate");
+        if (!rawPredicate) return [];
+
+        const parsed = JSON.parse(rawPredicate);
+        return R.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function getValueFromInputText(target: HTMLElement, name: "predicate" | "statistic"): string | undefined {
+    const input = htmlQuery<HTMLInputElement>(target, `[name="${name}"]`);
+    return input?.value.trim() || undefined;
+}
+
+function getValueFromInputNumber(target: HTMLElement, name: "dc" | "max"): number | undefined {
     const input = htmlQuery<HTMLInputElement>(target, `[name="${name}"]`);
     return input?.valueAsNumber || undefined;
 }
