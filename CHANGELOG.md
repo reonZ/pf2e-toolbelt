@@ -1,3 +1,11 @@
+# 3.41.1
+
+- `Actionable`:
+  - `Item Spell Casting`:
+    - improve rule generation when using the `Generate 'Item Cast' rules from description`
+- `Better Merchant`:
+  - fix not being able to purchase infinite services
+
 # 3.41.0
 
 - `Item Spell Casting`:
