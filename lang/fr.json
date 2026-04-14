@@ -429,7 +429,7 @@
         "label": "Lancé par un objet",
         "max": "# max d'utilisations",
         "rank": "Rang",
-        "title": "Générer des règles « Lancé par un objet » à partir de la description."
+        "title": "Générer des règles « Lancé par un objet » à partir de la description"
       },
       "item": {
         "label": "Macro",
