@@ -5,16 +5,16 @@ import {
     htmlClosest,
     htmlQuery,
     ImageFilePath,
+    ItemPF2e,
     ItemUUID,
     MagicTradition,
     OneToTen,
     PhysicalItemPF2e,
     R,
     ROMAN_RANKS,
-    RuleElementSource,
 } from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
-import { ActionableTool, BaseItemCastRule, ItemCastRuleElement } from "..";
+import { ActionableTool, generateItemCastRuleSource, ItemCastRuleElement, ItemCastRuleSource } from "..";
 
 const ITEM_CAST_REGEX =
     /<a class="content-link"(?=[^>]+data-type="Item")(?=[^>]+data-uuid="([a-z0-9\.-]+)").+?>.+?<\/a>(?:<\/em>)?/gim;
@@ -102,11 +102,12 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
     }
 
     async #addRule(target: HTMLElement) {
-        const rules = this.#item._source.system.rules.slice() as (RuleElementSource & Omit<BaseItemCastRule, "data">)[];
+        const uuid = target.dataset.uuid as ItemUUID;
+        const item = await fromUuid<ItemPF2e>(uuid);
+        if (!item?.isOfType("spell")) return;
 
-        rules.push({
-            key: "ItemCast",
-            uuid: target.dataset.uuid as ItemUUID,
+        const rules = this.#item._source.system.rules.slice() as ItemCastRuleSource[];
+        const rule = generateItemCastRuleSource(item, {
             attribute: getValueFromSelect<AttributeString>(target, "attribute"),
             dc: getValueFromInputNumber(target, "dc"),
             max: getValueFromInputNumber(target, "max"),
@@ -115,6 +116,8 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
             statistic: getValueFromInputText(target, "statistic"),
             tradition: getValueFromSelect<MagicTradition>(target, "tradition"),
         });
+
+        rules.push(rule);
 
         await this.#item.update({ "system.rules": rules });
         this.render();

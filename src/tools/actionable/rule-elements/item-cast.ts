@@ -338,7 +338,7 @@ interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFro
     ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
 }
 
-interface ItemCastSource extends RuleElementSource, Record<keyof Exclude<ItemCastSchema, RuleElementSchema>, unknown> {}
+type ItemCastSource = Prettify<RuleElementSource & SourceFromSchema<BaseItemCastSchema>>;
 
 type BaseItemCastSchema = {
     attribute: fields.StringField<AttributeString, AttributeString, false, true, false>;
@@ -358,7 +358,8 @@ type BaseItemCastRule = ModelPropsFromSchema<BaseItemCastSchema>;
 type ItemCastRule = ModelPropsFromSchema<ItemCastSchema>;
 
 type ItemCastRuleSourceData = toolbelt.actionable.ItemCastRuleSourceData;
-type ItemCastRuleSource = Omit<SourceFromSchema<ItemCastSchema>, keyof RuleElementSchema> & { key: "ItemCast" };
+type ItemCastRuleSource = RuleElementSource &
+    Omit<SourceFromSchema<ItemCastSchema>, keyof RuleElementSchema> & { key: "ItemCast" };
 
 type ItemCastRuleData = {
     entryId?: string;
@@ -374,4 +375,4 @@ type ItemCastUpdateDataArgs = {
 type VirtualSpellData = toolbelt.actionable.VirtualSpellData;
 
 export { createItemCastRuleElement, generateItemCastRuleSource };
-export type { BaseItemCastRule, ItemCastRuleElement, ItemCastRuleSource, VirtualSpellData };
+export type { BaseItemCastRule, ItemCastRuleElement, ItemCastRuleSource, ItemCastSource, VirtualSpellData };
