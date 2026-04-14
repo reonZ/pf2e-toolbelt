@@ -704,7 +704,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
 
         const service = this.getServices(actor).find((x) => x.id === serviceId);
 
-        if (!service || service.quantity < 1) {
+        if (!service || service.quantity === 0) {
             return this.localize.warning("service.noStock", { seller: actor.name });
         }
 
