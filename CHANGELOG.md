@@ -1,3 +1,8 @@
+# 3.41.0
+
+- `Item Spell Casting`:
+  - make necessary changes for third party to support this feature including some new api functions exposed
+
 # 3.40.3
 
 - `Item Spell Casting`:
