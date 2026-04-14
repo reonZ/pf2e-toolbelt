@@ -330,7 +330,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return this.getInMemory(actor, "spells");
     }
 
-    getVirtualSpellcastingData(actor: CharacterPF2e, id: string): VirtualSpellData | undefined {
+    getVirtualSpellcastingData(actor: ActorPF2e, id: string): VirtualSpellData | undefined {
         return this.getInMemory(actor, "spellcasting", id);
     }
 
