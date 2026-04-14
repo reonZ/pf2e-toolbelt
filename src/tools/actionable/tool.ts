@@ -217,23 +217,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             getItemMacro: this.getItemMacro.bind(this),
             getVirtualAction: this.getVirtualAction.bind(this),
             getVirtualActionsData: this.getVirtualActionsData.bind(this),
+            getVirtualSpellData: (actor, id) => this.getVirtualSpellsData(actor)?.[id],
             getVirtualSpellcastingData: this.getVirtualSpellcastingData.bind(this),
             rechargeVirtualSpell: this.#rechargeVirtualSpell.bind(this),
             updateVirtualSpellValue: this.#updateVirtualSpellValue.bind(this),
-            updateActionFrequency: (
-                event: Event,
-                item: AbilityItemPF2e<ActorPF2e> | FeatPF2e<ActorPF2e>,
-                virtualData?: VirtualActionData,
-            ) => {
-                return updateActionFrequency(event, item, virtualData);
-            },
-            useAction: (
-                event: Event,
-                item: AbilityItemPF2e<ActorPF2e> | FeatPF2e<ActorPF2e>,
-                virtualData?: VirtualActionData,
-            ) => {
-                return useAction(event, item, virtualData);
-            },
+            updateActionFrequency: (event, item, virtualData) => updateActionFrequency(event, item, virtualData),
+            useAction: (event, item, virtualData) => useAction(event, item, virtualData),
         };
     }
 
@@ -326,7 +315,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return this.getInMemory(actor, "virtual") ?? {};
     }
 
-    getVirtualSpellsData(actor: CharacterPF2e): Record<string, VirtualSpellData> | undefined {
+    getVirtualSpellsData(actor: ActorPF2e): Record<string, VirtualSpellData> | undefined {
         return this.getInMemory(actor, "spells");
     }
 
