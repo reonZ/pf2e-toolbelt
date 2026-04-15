@@ -316,7 +316,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
                 let itemType = R.isString(dropData.itemType)
                     ? dropData.itemType
-                    : fromUuidSync<CompendiumIndexData>(dropData.uuid)?.type;
+                    : fromUuidSync<CompendiumIndexData>(dropData.uuid, { strict: false })?.type;
 
                 if (entry.dataset.itemType === "container" && itemType === "backpack") {
                     itemType = "container";

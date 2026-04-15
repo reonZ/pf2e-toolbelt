@@ -17,7 +17,7 @@ const zAppliedDamages = z.record(z.union([z.string(), z.number()]), z.boolean())
 const zTargetsAppliedDamages = z.record(z.string(), zAppliedDamages).default({});
 
 const zTokenDocument = z.codec(zDocumentUUID("Token"), zClientDocument("Token").nullable(), {
-    decode: (uuid) => fromUuidSync(uuid) as TokenDocumentPF2e,
+    decode: (uuid) => fromUuidSync(uuid, { strict: false }) as TokenDocumentPF2e,
     encode: (token) => (token as TokenDocumentPF2e).uuid,
 });
 

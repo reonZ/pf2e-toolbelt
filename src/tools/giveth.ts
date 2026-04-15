@@ -94,7 +94,7 @@ class GivethTool extends ModuleTool<ToolSettings> {
             source.system.badge.value = value;
         }
         source.system.context = context ?? null;
-        const originItem = fromUuidSync(context?.origin.item ?? "");
+        const originItem = fromUuidSync(context?.origin.item ?? "", { strict: false });
         if (source.system.traits?.value.length === 0 && isInstanceOf(originItem, "SpellPF2e")) {
             const spellTraits: string[] = originItem.system.traits.value;
             const effectTraits = spellTraits.filter((t): t is EffectTrait => t in CONFIG.PF2E.effectTraits);

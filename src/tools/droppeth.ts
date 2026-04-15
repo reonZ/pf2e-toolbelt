@@ -120,7 +120,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     getDroppethToken(actor: LootPF2e): TokenDocumentPF2e | null {
         const uuid = this.getFlag<string>(actor, "tokenUuid");
-        return uuid ? (fromUuidSync(uuid) as TokenDocumentPF2e) : null;
+        return uuid ? (fromUuidSync(uuid, { strict: false }) as TokenDocumentPF2e) : null;
     }
 
     getDroppethFolder() {
@@ -180,7 +180,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             return true;
         }
 
-        const item = fromUuidSync<ItemPF2e>(data.uuid);
+        const item = fromUuidSync<ItemPF2e>(data.uuid, { strict: false });
         if (!item || !itemIsOfType(item, "physical")) {
             return true;
         }

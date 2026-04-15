@@ -39,7 +39,11 @@ class BetterTradeTool extends ModuleTool<ToolSettings> {
         event: DragEvent,
         data: DropCanvasItemData & { fromInventory?: boolean },
     ): Promise<ItemPF2e[]> {
-        if (!data.fromInventory || !data.uuid || fromUuidSync<ItemPF2e>(data.uuid)?.actor === actor) {
+        if (
+            !data.fromInventory ||
+            !data.uuid ||
+            fromUuidSync<ItemPF2e>(data.uuid, { strict: false })?.actor === actor
+        ) {
             return wrapped(event, data);
         }
 

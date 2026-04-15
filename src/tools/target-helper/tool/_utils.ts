@@ -26,7 +26,7 @@ function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null 
             return Number(dataset.pf2Dc) + adjustment;
         }
 
-        const actor = fromUuidSync<ItemPF2e>(dataset.itemUuid)?.actor;
+        const actor = fromUuidSync<ItemPF2e>(dataset.itemUuid, { strict: false })?.actor;
         const statisticDc = actor?.getStatistic(dataset.against)?.dc.value;
         if (!statisticDc) return;
 

@@ -43,7 +43,7 @@ function createItemCastRuleElement() {
             }
 
             const uuid = this.resolveInjectedProperties(this.uuid);
-            const type = fromUuidSync<ItemPF2e>(uuid)?.type;
+            const type = fromUuidSync<ItemPF2e>(uuid, { strict: false })?.type;
             if (type !== "spell") {
                 this.failValidation("uuid must be a valid spell uuid");
             }

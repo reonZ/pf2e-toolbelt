@@ -205,7 +205,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
         const slaves: CreaturePF2e[] = [];
 
         for (const uuid of uuids ?? []) {
-            const slave = fromUuidSync<CreaturePF2e>(uuid);
+            const slave = fromUuidSync<CreaturePF2e>(uuid, { strict: false });
 
             if (this.isValidSlave(slave)) {
                 slaves.push(slave);

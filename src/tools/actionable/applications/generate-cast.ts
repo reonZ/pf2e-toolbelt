@@ -62,7 +62,7 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
             const uuid = match[1] as ItemUUID;
             if (existingUUIDs.includes(uuid)) continue;
 
-            const item = fromUuidSync<CompendiumIndexData>(uuid);
+            const item = fromUuidSync<CompendiumIndexData>(uuid, { strict: false });
             if (item?.type !== "spell") continue;
 
             const index = match.index + match[0].length;
