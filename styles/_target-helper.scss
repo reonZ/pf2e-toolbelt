@@ -134,6 +134,13 @@
                     margin: -1px 0.3em 0 0.4em;
                 }
 
+                .observe,
+                .roll,
+                .reroll {
+                    display: flex;
+                    align-items: center;
+                }
+
                 .degree,
                 i.die,
                 i.ban,
@@ -170,6 +177,7 @@
                 i {
                     &.die {
                         font-size: 0.95em;
+                        margin-top: 0.5px;
                     }
 
                     &.rotate {
@@ -180,11 +188,7 @@
                     &.reroll {
                         font-size: 0.9em;
                         opacity: 0.8;
-                        margin-right: 2px;
-
-                        &.fa-dice {
-                            margin-right: 1px;
-                        }
+                        margin-top: 2px;
                     }
 
                     &.list {
