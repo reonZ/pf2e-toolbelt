@@ -1,3 +1,16 @@
+# 3.42.0
+
+- this is a foundry `14.360` and system `8.0.3` release
+- update to be compatible with the various v14 changes
+- remove `Better Template` tool
+- `Better Inventory`:
+  - add missing `ammo` to the list of mergeable items in the `Merge Items` feature
+- `Target Helper`:
+  - add new `Template Helper` setting which replace the former `Better Template` tool
+    - the feature no longer triggers for custom "templates" placed on the board due to templates no longer existing in foundry and now being done using `Scene Region` (only way to differentiate them is if they have a system context)
+  - make the necessary changes to match the new system reroll hook workflow
+  - minor row headers styling update
+
 # 3.41.1
 
 - `Actionable`:
