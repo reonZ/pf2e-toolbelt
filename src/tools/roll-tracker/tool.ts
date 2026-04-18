@@ -262,7 +262,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
 
         tokenTools.rollTracker = {
             button: true,
-            icon: "fa-sharp-duotone fa-solid fa-dice-d20",
+            icon: "fa-sharp fa-solid fa-dice-d20",
             name: "rollTracker",
             order: Object.keys(tokenTools).length,
             title: settingPath("rollTracker.title"),
