@@ -217,13 +217,6 @@
                     "hint": "Adds sorting buttons to different lists on the actor sheet."
                 }
             },
-            "betterTemplate": {
-                "title": "Better Templates",
-                "target": {
-                    "name": "Auto Target",
-                    "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside it."
-                }
-            },
             "betterTrade": {
                 "title": "Better Trade",
                 "invertTrade": {
@@ -356,6 +349,10 @@
             },
             "targetHelper": {
                 "title": "Target Helper",
+                "checks": {
+                    "name": "Upgrade Checks Messages",
+                    "hint": "Upgrades the simple inline save messages into something that can be used by the feature. Also adds more details to it."
+                },
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Enable the 'Target Helper' feature in your world."
@@ -368,9 +365,9 @@
                     "name": "Add Targets to Messages",
                     "hint": "Will add extra targets to chat messages where damage can be applied and saves can be rolled."
                 },
-                "checks": {
-                    "name": "Upgrade Checks Messages",
-                    "hint": "Upgrades the simple inline save messages into something that can be used by the feature. Also adds more details to it."
+                "template": {
+                    "name": "Template Helper",
+                    "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside it."
                 }
             },
             "underground": {
@@ -633,18 +630,6 @@
                     "tooltip": "Sort Content",
                     "container": "Sort Containers' Content"
                 }
-            }
-        },
-        "betterTemplate": {
-            "target": {
-                "all": "Both",
-                "allies": "Allies",
-                "dismiss": "Remove Template",
-                "enemies": "Enemies",
-                "neutral": "Include Neutral",
-                "self": "Include Self",
-                "title": "Template Helper",
-                "yes": "Target"
             }
         },
         "characterImporter": {
@@ -1145,6 +1130,16 @@
             "setTargets": {
                 "splashTargets": "Set Splash targets",
                 "targets": "Set targets"
+            },
+            "template": {
+                "all": "Both",
+                "allies": "Allies",
+                "dismiss": "Remove Template",
+                "enemies": "Enemies",
+                "neutral": "Include Neutral",
+                "self": "Include Self",
+                "title": "Template Helper",
+                "yes": "Target"
             },
             "tooltip": {
                 "adjustment": "Adjustment: {value}",

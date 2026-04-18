@@ -124,13 +124,6 @@
                 },
                 "title": "更高效的效果面板"
             },
-            "betterTemplate": {
-                "title": "更方便的测量板",
-                "target": {
-                    "name": "自动选择目标",
-                    "hint": "放置测量板后，将显示是否选择测量板内指示物为目标的对话框。"
-                }
-            },
             "betterTrade": {
                 "withContent": {
                     "name": "同步容器内容物",
@@ -212,6 +205,9 @@
                 "enabled": {
                     "name": "启用",
                     "hint": "在你的世界启用“目标助手” 特性。"
+                },
+                "template": {
+                    "hint": "放置测量板后，将显示是否选择测量板内指示物为目标的对话框。"
                 }
             },
             "underground": {
@@ -448,18 +444,6 @@
             },
             "revealed": "揭示者"
         },
-        "betterTemplate": {
-            "target": {
-                "allies": "盟友",
-                "all": "全部",
-                "enemies": "敌人",
-                "neutral": "包括中立角色",
-                "self": "包括自身",
-                "yes": "确认目标",
-                "title": "测量板助手",
-                "dismiss": "移除测量板"
-            }
-        },
         "conditionManager": {
             "manager": {
                 "title": "状态管理器 - {name}",
@@ -608,6 +592,16 @@
             },
             "merge": {
                 "none": "无法找到适合的伤害消息进行合并。"
+            },
+            "template": {
+                "allies": "盟友",
+                "all": "全部",
+                "enemies": "敌人",
+                "neutral": "包括中立角色",
+                "self": "包括自身",
+                "yes": "确认目标",
+                "title": "测量板助手",
+                "dismiss": "移除测量板"
             },
             "tooltip": {
                 "dcWithValue": "DC {dc}",

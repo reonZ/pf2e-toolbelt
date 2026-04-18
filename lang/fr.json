@@ -217,13 +217,6 @@
           "hint": "Ajoute des boutons de tri à différentes listes de la fiche d'acteur."
         }
       },
-      "betterTemplate": {
-        "title": "Meilleurs gabarits",
-        "target": {
-          "name": "Cible automatique",
-          "hint": "Lorsque vous placez un gabarit sur la scène, une nouvelle boîte de dialogue apparaîtra vous permettant de cibler tous les jetons qu'il contient."
-        }
-      },
       "betterTrade": {
         "title": "Meilleur commerce",
         "invertTrade": {
@@ -356,6 +349,10 @@
       },
       "targetHelper": {
         "title": "Assistant de ciblage",
+        "checks": {
+          "name": "Amélioration des messages des tests",
+          "hint": "Améliore les messages des jets de sauvegarde en ligne simples pour les rendre exploitables par la fonctionnalité. Leur ajoute également des détails."
+        },
         "enabled": {
           "name": "Activé",
           "hint": "Activez l'«Assistant de ciblage» dans votre monde."
@@ -368,9 +365,8 @@
           "name": "Ajouter les cibles aux messages",
           "hint": "Cela ajoutera des cibles supplémentaires aux messages de discussion lorsque des dégâts peuvent être appliqués et des jets de sauvegarde peuvent être effectuées."
         },
-        "checks": {
-          "name": "Amélioration des messages des tests",
-          "hint": "Améliore les messages des jets de sauvegarde en ligne simples pour les rendre exploitables par la fonctionnalité. Leur ajoute également des détails."
+        "template": {
+          "hint": "Lorsque vous placez un gabarit sur la scène, une nouvelle boîte de dialogue apparaîtra vous permettant de cibler tous les jetons qu'il contient."
         }
       },
       "underground": {
@@ -628,18 +624,6 @@
           "tooltip": "Trier le contenu",
           "container": "Trier le contenu des contenants"
         }
-      }
-    },
-    "betterTemplate": {
-      "target": {
-        "all": "Aux deux",
-        "allies": "Aux alliés",
-        "dismiss": "Retirer le gabarit",
-        "enemies": "Aux ennemis",
-        "neutral": "Inclure les neutres",
-        "self": "S'inclure",
-        "title": "Assistant de gabarit",
-        "yes": "Cible"
       }
     },
     "characterImporter": {
@@ -1140,6 +1124,16 @@
       "setTargets": {
         "splashTargets": "Définir les cibles des éclaboussures",
         "targets": "Définir les cibles"
+      },
+      "template": {
+        "all": "Aux deux",
+        "allies": "Aux alliés",
+        "dismiss": "Retirer le gabarit",
+        "enemies": "Aux ennemis",
+        "neutral": "Inclure les neutres",
+        "self": "S'inclure",
+        "title": "Assistant de gabarit",
+        "yes": "Cible"
       },
       "tooltip": {
         "adjustment": "Ajustment : {value}",

@@ -168,13 +168,6 @@
           "hint": "Agrega botones de ordenación a diferentes listas en la hoja del actor."
         }
       },
-      "betterTemplate": {
-        "title": "Mejores plantillas",
-        "target": {
-          "name": "Objetivo automático",
-          "hint": "Al colocar una plantilla en el tablero, aparecerá un nuevo cuadro de diálogo que te permitirá apuntar a todas las fichas que se encuentran dentro de ella."
-        }
-      },
       "betterTrade": {
         "title": "Mejor comercio",
         "invertTrade": {
@@ -307,6 +300,10 @@
       },
       "targetHelper": {
         "title": "Asistente de objetivo",
+        "checks": {
+          "name": "Actualizar mensajes de comprobaciones",
+          "hint": "Se actualizan los mensajes salvaciones para que la función pueda usarlos. También se añaden más detalles."
+        },
         "enabled": {
           "name": "Activado",
           "hint": "Habilite la función 'Ayudante de objetivo' en su mundo."
@@ -319,9 +316,8 @@
           "name": "Agregar objetivos a los mensajes",
           "hint": "Agregará objetivos adicionales a los mensajes de chat donde se puede aplicar daño y se pueden realizar salvaciones."
         },
-        "checks": {
-          "name": "Actualizar mensajes de comprobaciones",
-          "hint": "Se actualizan los mensajes salvaciones para que la función pueda usarlos. También se añaden más detalles."
+        "template": {
+          "hint": "Al colocar una plantilla en el tablero, aparecerá un nuevo cuadro de diálogo que te permitirá apuntar a todas las fichas que se encuentran dentro de ella."
         }
       },
       "underground": {
@@ -542,18 +538,6 @@
           "tooltip": "Ordenar contenido",
           "container": "Ordenar el contenido de los contenedores"
         }
-      }
-    },
-    "betterTemplate": {
-      "target": {
-        "all": "Ambos",
-        "allies": "Aliados",
-        "dismiss": "Eliminar plantilla",
-        "enemies": "Enemigos",
-        "neutral": "Incluir neutrales",
-        "self": "Incluirse a sí mismo",
-        "title": "Asistente de plantillas",
-        "yes": "Objetivo"
       }
     },
     "characterImporter": {
@@ -984,6 +968,16 @@
       "setTargets": {
         "splashTargets": "Establecer objetivos de salpicadura",
         "targets": "Establecer objetivos"
+      },
+      "template": {
+        "all": "Ambos",
+        "allies": "Aliados",
+        "dismiss": "Eliminar plantilla",
+        "enemies": "Enemigos",
+        "neutral": "Incluir neutrales",
+        "self": "Incluirse a sí mismo",
+        "title": "Asistente de plantillas",
+        "yes": "Objetivo"
       },
       "tooltip": {
         "adjustment": "Ajuste: {value}",

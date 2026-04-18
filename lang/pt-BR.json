@@ -148,13 +148,6 @@
         "partyAsObserved": {
         }
       },
-      "betterTemplate": {
-        "title": "Modelos Melhores",
-        "target": {
-          "name": "Marcar Alvos Automaticamente",
-          "hint": "Ao colocar um modelo no mapa, uma nova caixa de diálogo será exibida permitindo que você selecione todos os tokens dentro dele."
-        }
-      },
       "betterTrade": {
         "title": "Comércio Melhorado"
       },
@@ -264,6 +257,10 @@
       },
       "targetHelper": {
         "title": "Assistente de Alvo",
+        "checks": {
+          "name": "Atualizar mensagens de testes",
+          "hint": "Atualiza as mensagens simples de salvamento em linha para algo que pode ser usado pelo recurso. Também adiciona mais detalhes."
+        },
         "enabled": {
           "name": "Habilitado",
           "hint": "Habilita o recurso 'Assistente de Alvo' no seu mundo."
@@ -276,9 +273,8 @@
           "name": "Adicionar alvos às mensagens",
           "hint": "Adicionará alvos extras às mensagens de bate-papo, onde o dano pode ser aplicado e defesas podem ser realizadas."
         },
-        "checks": {
-          "name": "Atualizar mensagens de testes",
-          "hint": "Atualiza as mensagens simples de salvamento em linha para algo que pode ser usado pelo recurso. Também adiciona mais detalhes."
+        "template": {
+          "hint": "Ao colocar um modelo no mapa, uma nova caixa de diálogo será exibida permitindo que você selecione todos os tokens dentro dele."
         }
       },
       "underground": {
@@ -478,18 +474,6 @@
         "quantity": "Número negativo para estoque infinito",
         "tags": "Etiquetas de serviço",
         "title": "Serviço - {label}"
-      }
-    },
-    "betterTemplate": {
-      "target": {
-        "all": "Ambos",
-        "allies": "Aliados",
-        "dismiss": "Remover modelo",
-        "enemies": "Inimigos",
-        "neutral": "Incluir Neutro",
-        "self": "Incluir a si mesmo",
-        "title": "Assistente de modelo",
-        "yes": "Alvo"
       }
     },
     "conditionManager": {
@@ -853,6 +837,16 @@
       "setTargets": {
         "splashTargets": "Definir alvos de respingo",
         "targets": "Definir alvos"
+      },
+      "template": {
+        "all": "Ambos",
+        "allies": "Aliados",
+        "dismiss": "Remover modelo",
+        "enemies": "Inimigos",
+        "neutral": "Incluir Neutro",
+        "self": "Incluir a si mesmo",
+        "title": "Assistente de modelo",
+        "yes": "Alvo"
       },
       "tooltip": {
         "adjustment": "Ajuste: {value}",

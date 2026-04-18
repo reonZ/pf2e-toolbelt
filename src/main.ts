@@ -9,7 +9,6 @@ import {
     betterMerchantTool,
     BetterMovementTool,
     BetterSheetTool,
-    BetterTemplateTool,
     BetterTradeTool,
     CharacterImporterTool,
     ConditionManagerTool,
@@ -27,7 +26,7 @@ import {
 } from "tools";
 
 const TOOLS = [
-    // actionable,
+    actionable,
     anonymousTool,
     new ArpTool(),
     new AutoCoverTool(),
@@ -36,7 +35,6 @@ const TOOLS = [
     new BetterInventoryTool(),
     betterMerchantTool,
     new BetterMovementTool(),
-    // new BetterTemplateTool(),
     new BetterTradeTool(),
     new CharacterImporterTool(),
     new ConditionManagerTool(),
@@ -47,10 +45,10 @@ const TOOLS = [
     new MergeDamageTool(),
     new ResourceTrackerTool(),
     new RollTrackerTool(),
-    // new UnidedTool(),
-    // shareDataTool,
-    // targetHelperTool,
-    // new UndergroundTool(),
+    new UnidedTool(),
+    shareDataTool,
+    targetHelperTool,
+    new UndergroundTool(),
 ] as const;
 
 MODULE.register("pf2e-toolbelt");

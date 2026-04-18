@@ -1,19 +1,28 @@
 import {
+    ActorPF2e,
     ChatMessagePF2e,
     createEmitable,
     createToggleHook,
     createToggleWrapper,
     getCurrentTargets,
+    getFirstActiveToken,
+    htmlQuery,
     isActionMessage,
+    isHoldingModifierKey,
     isSpellMessage,
+    ItemOriginFlag,
     MODULE,
+    oppositeAlliance,
     refreshLatestMessages,
+    RegionDocumentPF2e,
+    SYSTEM,
     TextEditorPF2e,
     TokenDocumentPF2e,
     TokenDocumentUUID,
+    waitDialog,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedMessageRenderHTML } from "tools";
+import { lineIntersect, sharedMessageRenderHTML } from "tools";
 import {
     getSaveLinkData,
     isAreaMessage,
@@ -70,6 +79,8 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
     #preCreateChatMessageHook = createToggleHook("preCreateChatMessage", this.#onPreCreateChatMessage.bind(this));
 
+    #createRegionTemplateHook = createToggleHook("createRegion", this.#onCreateRegion.bind(this));
+
     get key(): "targetHelper" {
         return "targetHelper";
     }
@@ -110,6 +121,22 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                     this.#debounceRefreshMessages();
                 },
             },
+            {
+                key: "template",
+                type: Boolean,
+                default: true,
+                scope: "user",
+                onChange: (value: boolean) => {
+                    this.#createRegionTemplateHook.toggle(value);
+                },
+            },
+            {
+                key: "dismissTemplate",
+                type: Boolean,
+                default: true,
+                scope: "user",
+                config: false,
+            },
         ];
     }
 
@@ -125,6 +152,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
         this.updateMessageEmitable.activate();
         this.#preCreateChatMessageHook.activate();
+        this.#createRegionTemplateHook.toggle(this.settings.template);
         this.#textEditorEnrichHTMLWrapper.activate();
         this.#messageRenderHTMLWrapper.toggle(this.settings.targets || this.settings.checks);
 
@@ -246,6 +274,101 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return enriched.replace(INLINE_CHECK_REGEX, "$1 draggable='true'");
     }
 
+    async #onCreateRegion(region: RegionDocumentPF2e, _context: any, userId: string) {
+        const user = game.user;
+
+        if (
+            user.id !== userId ||
+            !canvas.scene ||
+            !region.isEffectArea ||
+            isHoldingModifierKey("Control") ||
+            this.getFlag(region, "skip")
+        )
+            return;
+
+        const shape = region.shapes.at(0);
+        const flagOrigin = region.flags[SYSTEM.id].origin as (ItemOriginFlag & { name: string }) | undefined;
+        if (!flagOrigin || !shape) return;
+
+        const dismiss = this.settings.dismissTemplate;
+        const actor = flagOrigin?.actor ? await fromUuid<ActorPF2e>(flagOrigin.actor) : null;
+        const self = actor ? getFirstActiveToken(actor)?.object : undefined;
+
+        const result = await waitDialog<TemplateDialogData | Pick<TemplateDialogData, "dismiss">>({
+            content: this.templatePath("template"),
+            i18n: this.path("template"),
+            title: flagOrigin?.name,
+            classes: ["pf2e-toolbelt-template-helper"],
+            data: {
+                noSelf: !self,
+                dismiss,
+            },
+            no: {
+                callback: (_event, _btn, dialog) => {
+                    return {
+                        dismiss: !!htmlQuery<HTMLInputElement>(dialog.element, `[name="dismiss"]`)?.checked,
+                    };
+                },
+            },
+        });
+
+        if (!result) return;
+
+        const returnAndDismiss = () => {
+            if (dismiss !== result.dismiss) {
+                this.settings.dismissTemplate = result.dismiss;
+            }
+            if (result.dismiss && region.rendered) {
+                region.delete();
+            }
+            return;
+        };
+
+        if (!("targets" in result)) {
+            return returnAndDismiss();
+        }
+
+        const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
+        const opposition = oppositeAlliance(alliance);
+        const origin = shape instanceof foundry.data.PolygonShapeData ? shape.origin : { x: shape.x, y: shape.y };
+        const debug = MODULE.isDebug;
+
+        if (debug) {
+            canvas.controls.debug.clear();
+        }
+
+        const targets = [...region.tokens].filter((tokenDoc) => {
+            if (self && !result.self && tokenDoc.object === self) return false;
+
+            const token = tokenDoc.object;
+            if (!token || tokenDoc.hidden) return false;
+
+            const targetActor = tokenDoc.actor;
+            if (!targetActor?.isOfType("creature", "hazard", "vehicle") || targetActor.isDead) return false;
+
+            const targetAlliance = targetActor.alliance;
+            if (targetAlliance === null && !result.neutral) return false;
+            if (result.targets === "allies" && targetAlliance !== alliance) return false;
+            if (result.targets === "enemies" && targetAlliance !== opposition) return false;
+
+            return !lineIntersect(origin, token.center, debug);
+        });
+
+        const messageId = region.flags[SYSTEM.id].messageId;
+        const targetsIds = targets.map((token) => token.id);
+        const message = messageId && game.messages.get(messageId);
+
+        canvas.tokens.setTargets(targetsIds);
+
+        if (message) {
+            const uuids = targets.map((token) => token.uuid);
+            const updates = this.setMessageFlagTargets({}, uuids);
+            message.update(updates);
+        }
+
+        returnAndDismiss();
+    }
+
     #onPreCreateChatMessage(message: ChatMessagePF2e) {
         if (message.isCheckRoll) return;
 
@@ -293,9 +416,11 @@ const targetHelperTool = new TargetHelperTool();
 
 type ToolSettings = {
     checks: boolean;
+    dismissTemplate: boolean;
     enabled: boolean;
     small: boolean;
     targets: boolean;
+    template: boolean;
 };
 
 type UpdateMessageOptions = {
@@ -308,6 +433,13 @@ type UpdateMessageOptions = {
 type UpdateMessageApplied = {
     targetId: string;
     rollIndex: number;
+};
+
+type TemplateDialogData = {
+    dismiss: boolean;
+    neutral: boolean;
+    self: boolean;
+    targets: "enemies" | "allies" | "all";
 };
 
 export { targetHelperTool };

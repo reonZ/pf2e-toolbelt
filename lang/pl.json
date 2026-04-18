@@ -217,13 +217,6 @@
           "hint": "Dodaje przyciski sortowania do różnych list w karcie aktora."
         }
       },
-      "betterTemplate": {
-        "title": "Ulepszone Szablony",
-        "target": {
-          "name": "Auto celowanie",
-          "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
-        }
-      },
       "betterTrade": {
         "title": "Ulepszona Wymiana",
         "invertTrade": {
@@ -356,6 +349,10 @@
       },
       "targetHelper": {
         "title": "Pomocnik Celowania",
+        "checks": {
+          "name": "Wiadomości dotyczące testów",
+          "hint": "Ulepsza proste wiadomości zapisu liniowego do czegoś, co może być używane przez funkcję. Dodaje również więcej szczegółów."
+        },
         "enabled": {
           "name": "Włączone",
           "hint": "Włącz funkcję \"Pomocnik celowania\" na twoim świecie."
@@ -368,9 +365,8 @@
           "name": "Dodawanie celów do wiadomości",
           "hint": "Doda dodatkowe cele do wiadomości na czacie, w których można zadawać obrażenia i rzucać rzuty obronne."
         },
-        "checks": {
-          "name": "Wiadomości dotyczące testów",
-          "hint": "Ulepsza proste wiadomości zapisu liniowego do czegoś, co może być używane przez funkcję. Dodaje również więcej szczegółów."
+        "template": {
+          "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
         }
       },
       "underground": {
@@ -628,18 +624,6 @@
           "tooltip": "Sortuj zawartość",
           "container": "Sortuj zawartość pojemników"
         }
-      }
-    },
-    "betterTemplate": {
-      "target": {
-        "all": "Oba",
-        "allies": "Sojusznicy",
-        "dismiss": "Usuń szablon",
-        "enemies": "Wrogowie",
-        "neutral": "Uwzględnij neutralne",
-        "self": "Uwzględnij siebie",
-        "title": "Pomocnik Szablonów",
-        "yes": "Cel"
       }
     },
     "characterImporter": {
@@ -1140,6 +1124,16 @@
       "setTargets": {
         "splashTargets": "Wyznacz cele Rozprysku",
         "targets": "Wyznacz cele"
+      },
+      "template": {
+        "all": "Oba",
+        "allies": "Sojusznicy",
+        "dismiss": "Usuń szablon",
+        "enemies": "Wrogowie",
+        "neutral": "Uwzględnij neutralne",
+        "self": "Uwzględnij siebie",
+        "title": "Pomocnik Szablonów",
+        "yes": "Cel"
       },
       "tooltip": {
         "adjustment": "Dostosowanie: {value}",
