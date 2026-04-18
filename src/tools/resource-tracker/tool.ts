@@ -163,7 +163,7 @@ class ResourceTrackerTool extends ModuleTool<ResourceTrackerSettings> {
             active: this.settings.show,
             name: "resourceTracker",
             title: settingPath("resourceTracker.title"),
-            icon: "fa-regular fa-bars-progress",
+            icon: "fa-sharp fa-solid fa-bars-progress",
             order: Object.keys(tokenTools).length,
             toggle: true,
             visible: true,
