@@ -220,9 +220,11 @@ async function rerollSave(
 
     if (!result) return;
 
-    const keep = R.isIncludedIn(result.reroll, ["hero", "mythic"]) ? "new" : result.reroll;
-    const resourceKey = result.reroll === "hero" ? "hero-points" : result.reroll === "mythic" ? "mythic-points" : "";
+    const hookOptions = {
+        keep: R.isIncludedIn(result.reroll, ["hero", "mythic"]) ? "new" : result.reroll,
+    };
 
+    const resourceKey = result.reroll === "hero" ? "hero-points" : result.reroll === "mythic" ? "mythic-points" : "";
     const resource = actor.getResource(resourceKey);
 
     if (resource && isCharacter && resource.value < 1) {
@@ -268,15 +270,16 @@ async function rerollSave(
     })();
     unevaluatedNewRoll.options.isReroll = true;
 
-    Hooks.callAll("pf2e.preReroll", Roll.fromJSON(targetSave.roll), unevaluatedNewRoll, resource, keep);
+    Hooks.callAll("pf2e.preReroll", Roll.fromJSON(targetSave.roll), unevaluatedNewRoll, resource, hookOptions);
 
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
-    Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, keep);
+    Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, hookOptions);
 
     await roll3dDice(newRoll, target, targetSave.private);
 
     const keptRoll =
-        (keep === "higher" && oldRoll.total > newRoll.total) || (keep === "lower" && oldRoll.total < newRoll.total)
+        (hookOptions.keep === "higher" && oldRoll.total > newRoll.total) ||
+        (hookOptions.keep === "lower" && oldRoll.total < newRoll.total)
             ? oldRoll
             : newRoll;
 
