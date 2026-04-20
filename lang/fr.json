@@ -366,6 +366,7 @@
           "hint": "Cela ajoutera des cibles supplémentaires aux messages de discussion lorsque des dégâts peuvent être appliqués et des jets de sauvegarde peuvent être effectuées."
         },
         "template": {
+          "name": "Assistant de gabarit",
           "hint": "Lorsque vous placez un gabarit sur la scène, une nouvelle boîte de dialogue apparaîtra vous permettant de cibler tous les jetons qu'il contient."
         }
       },
@@ -416,16 +417,21 @@
         "cancel": "action <strong>{name}</strong> a été effacée par sa macro."
       },
       "cast": {
-        "equipped": "Pas équipé"
+        "equipped": "Pas équipé",
+        "label": "Incantation de sort d'objet"
       },
       "generate-cast": {
         "add": "Ajouter une règle",
+        "attribute": "Attribut",
         "dc": "DD",
         "empty": "Aucun sort supplémentaire n'a été trouvé dans la description de l'objet.",
         "label": "Lancé par un objet",
         "max": "# max d'utilisations",
+        "predicate": "Prédicat",
         "rank": "Rang",
-        "title": "Générer des règles « Lancé par un objet » à partir de la description"
+        "statistic": "Statistique",
+        "title": "Générer des règles « Lancé par un objet » à partir de la description",
+        "tradition": "Tradition"
       },
       "item": {
         "label": "Macro",
