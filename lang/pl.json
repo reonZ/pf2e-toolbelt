@@ -366,6 +366,7 @@
           "hint": "Doda dodatkowe cele do wiadomości na czacie, w których można zadawać obrażenia i rzucać rzuty obronne."
         },
         "template": {
+          "name": "Pomocnik Szablonów",
           "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
         }
       },
@@ -416,16 +417,21 @@
         "cancel": "Akcja <strong>{name}</strong> została anulowana przez makro."
       },
       "cast": {
-        "equipped": "Nie wyposażony"
+        "equipped": "Nie wyposażony",
+        "label": "Przedmiot rzucenia zaklęcia"
       },
       "generate-cast": {
         "add": "Dodaj regułę",
+        "attribute": "Atrybut",
         "dc": "ST",
         "empty": "W opisie przedmiotu nie znaleziono żadnych dodatkowych zaklęć.",
         "label": "Przedmiot rzucania zaklęcia",
         "max": "Maksymalne użycia",
+        "predicate": "Predykat",
         "rank": "Ranga",
-        "title": "Wygeneruj reguły „Przedmiot rzucania zaklęcia” na podstawie opisu."
+        "statistic": "Statystyka",
+        "title": "Wygeneruj reguły „Przedmiot rzucania zaklęcia” na podstawie opisu.",
+        "tradition": "Tradycja"
       },
       "item": {
         "label": "Makro",
