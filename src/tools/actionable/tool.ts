@@ -1141,9 +1141,7 @@ type DropZoneData = {
     }>;
 };
 
-type ToolSettings = toolbelt.Settings["actionable"] & {
-    cast: boolean;
-};
+type ToolSettings = toolbelt.Settings["actionable"];
 
 export { actionable };
 export type { ActionableTool };
