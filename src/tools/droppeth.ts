@@ -277,6 +277,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             sort: Math.max(canvas.tokens.getMaxSort() + 1, 0),
             width: 0.5,
             height: 0.5,
+            level: canvas.level?.id,
             texture: { src: img },
             ring: { enabled: false },
             light: this.getLightSource(item),
