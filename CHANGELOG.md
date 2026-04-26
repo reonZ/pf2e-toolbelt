@@ -1,3 +1,12 @@
+# 3.43.0
+
+- make the necessary changes to support the `PF2e Anachronism` and `SF2e Anachronism` modules
+- `Character Importer`:
+  - now also look into the anachronism modules compendium packs, which means that you can import a `pf2e` character into a world that runs on the `sf2e` system and vice versa
+  - fix calculator icon
+- `Droppeth`:
+  - fix droppeth token always being created on the base level
+
 # 3.42.0
 
 - this is a foundry `14.360` and system `8.0.3` release
