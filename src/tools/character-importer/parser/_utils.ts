@@ -1,6 +1,5 @@
 import {
     AttributeString,
-    CompendiumCollection,
     CompendiumIndexData,
     FeatOrFeatureCategory,
     ItemUUID,
@@ -15,36 +14,43 @@ import {
 } from "foundry-helpers";
 import { CharacterCategory } from "..";
 
-type CompendiumPacksRecord<T extends string> = Record<T, () => CompendiumCollection | undefined>;
-
-const CORE_PACKS: CompendiumPacksRecord<CharacterCategory> = {
-    ancestry: SYSTEM.pack("ancestries"),
-    background: SYSTEM.pack("backgrounds"),
-    class: SYSTEM.pack("classes"),
-    heritage: SYSTEM.pack("heritages"),
+const CORE_PACKS: Record<CharacterCategory, [string, string]> = {
+    ancestry: ["ancestries", "ancestries"],
+    background: ["backgrounds", "backgrounds"],
+    class: ["classes", "classes"],
+    heritage: ["heritages", "heritages"],
 };
 
-const FEAT_PACKS: Partial<CompendiumPacksRecord<FeatOrFeatureCategory | "archetype">> = {
-    ancestryfeature: SYSTEM.pack("ancestryfeatures", "ancestry-features"),
-    classfeature: SYSTEM.pack("classfeatures", "class-features"),
-};
+const FEAT_PACKS: PartialRecord<FeatOrFeatureCategory | "archetype", [string, string]> = {
+    ancestryfeature: ["ancestryfeatures", "ancestry-features"],
+    classfeature: ["classfeatures", "class-features"],
+} as const;
 
-const EQUIPMENT_PACK = SYSTEM.pack("equipment-srd", "equipment");
-const FEATS_PACK = SYSTEM.pack("feats-srd", "feats");
-const SPELLS_PACK = SYSTEM.pack("spells-srd", "spells");
+const EQUIPMENT_PACK = ["equipment-srd", "equipment"] as const;
+const FEATS_PACK = ["feats-srd", "feats"] as const;
+const SPELLS_PACK = ["spells-srd", "spells"] as const;
 
 async function getUuidFromPack(
     value: string,
-    packFn: () => CompendiumCollection | undefined,
+    packNames: readonly [string, string],
 ): Promise<CompendiumIndexData | null> {
-    const pack = packFn();
-    if (!R.isTruthy(value) || !pack) return null;
+    if (!R.isTruthy(value)) return null;
 
-    const slug = SYSTEM.sluggify(value);
-    const collection = await pack.getIndex({ fields: ["system.slug"] });
-    const entry = collection.find((entry) => entry.system?.slug === slug);
+    // both anachronism modules use the sf2e naming for packs
+    const [systemName, moduleName] = SYSTEM.id === "pf2e" ? packNames : [packNames[1], packNames[1]];
+    const packs = R.filter([SYSTEM.getSystemPack(systemName), SYSTEM.getAnachronismPack(moduleName)], R.isTruthy);
 
-    return entry ?? null;
+    for (const pack of packs) {
+        const slug = SYSTEM.sluggify(value);
+        const collection = await pack.getIndex({ fields: ["system.slug"] });
+        const entry = collection.find((entry) => entry.system?.slug === slug);
+
+        if (entry) {
+            return entry;
+        }
+    }
+
+    return null;
 }
 
 async function getCoreUuidFromPack(value: string, category: CharacterCategory): Promise<ItemUUID | null> {
@@ -91,7 +97,6 @@ function isSpellRank(value: unknown): value is ZeroToTen {
 }
 
 export {
-    CORE_PACKS,
     getCoreUuidFromPack,
     getEquipmentUuidFromPack,
     getFeatUuidFromPack,
