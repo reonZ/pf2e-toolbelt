@@ -1,3 +1,8 @@
+# 3.43.2
+
+- `Hero Action`:
+  - add fix for foundry misinterpreting the `Hero Deck` table results type preventing drawing new hero actions
+
 # 3.43.1
 
 - `Roll Tracker`:
