@@ -1,3 +1,9 @@
+# 3.43.1
+
+- `Roll Tracker`:
+  - fix multi rolls (e.g. `2d20`) being recorded as a single one which results in outrageous (and non displayable) numbers being saved
+    - such rolls will now be recorded as individual instances by the module with the same metadata
+
 # 3.43.0
 
 - make the necessary changes to support the `PF2e Anachronism` and `SF2e Anachronism` modules
