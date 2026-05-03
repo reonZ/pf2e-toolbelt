@@ -21,7 +21,6 @@ import {
     RollTrackerTool,
     shareDataTool,
     targetHelperTool,
-    UndergroundTool,
     UnidedTool,
 } from "tools";
 
@@ -48,7 +47,7 @@ const TOOLS = [
     new UnidedTool(),
     shareDataTool,
     targetHelperTool,
-    new UndergroundTool(),
+    // new UndergroundTool(),
 ] as const;
 
 MODULE.register("pf2e-toolbelt");
