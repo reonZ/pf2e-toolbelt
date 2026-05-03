@@ -174,9 +174,9 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         );
     }
 
-    async togglePause(paused?: boolean) {
+    async togglePause(paused: boolean = !this.settings.paused) {
         if (!game.user.isGM) return;
-        await this.setSetting("paused", paused ?? !this.settings.paused);
+        await this.setSetting("paused", paused);
         this.localize.info("confirm", paused ? "pause" : "play");
     }
 
