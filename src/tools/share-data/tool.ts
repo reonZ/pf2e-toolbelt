@@ -126,9 +126,9 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
         registerCreatureWrapper("_onDelete", this.#actorOnDelete);
 
-        registerToolWrapper("CONFIG.Combatant.documentClass.prototype.startTurn", this.#combatantStartTurn);
+        registerToolWrapper("CONFIG.Combatant.documentClass.prototype.onStartTurn", this.#combatantStartTurn);
 
-        registerToolWrapper("CONFIG.Combatant.documentClass.prototype.endTurn", this.#combatantEndTurn);
+        registerToolWrapper("CONFIG.Combatant.documentClass.prototype.onEndTurn", this.#combatantEndTurn);
 
         registerToolWrapper("CONFIG.Combatant.documentClass.prototype._onUpdate", this.#combatantOnUpdate);
 
