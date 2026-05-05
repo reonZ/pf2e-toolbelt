@@ -13,12 +13,15 @@ import {
     OneToTen,
     PhysicalItemPF2e,
     R,
+    ResolvableValueField,
     RuleElement,
     RuleElementOptions,
     RuleElementSchema,
     RuleElementSource,
     SpellPF2e,
     SpellSource,
+    getRuleElementCls,
+    ruleElementResolveField,
     setHasElement,
 } from "foundry-helpers";
 import { MAGIC_TRADITIONS, SourceFromSchema } from "foundry-helpers/dist";
@@ -26,9 +29,7 @@ import { actionable } from "..";
 import fields = foundry.data.fields;
 
 function createItemCastRuleElement() {
-    const RuleElementCls = game.pf2e.RuleElement;
-
-    class ItemCastRuleElement extends RuleElementCls<ItemCastSchema> {
+    class ItemCastRuleElement extends getRuleElementCls()<ItemCastSchema> {
         // static autogenForms = true;
 
         constructor(data: RuleElementSource, options: RuleElementOptions) {
@@ -47,6 +48,10 @@ function createItemCastRuleElement() {
             if (type !== "spell") {
                 this.failValidation("uuid must be a valid spell uuid");
             }
+
+            if (!R.isIncludedIn(this.dc, [null, undefined]) && !R.isIncludedIn(typeof this.dc, ["string", "number"])) {
+                this.failValidation("dc must be a number, string, null or undefined");
+            }
         }
 
         static override defineSchema(): ItemCastSchema {
@@ -60,18 +65,14 @@ function createItemCastRuleElement() {
                     initial: undefined,
                 }),
                 data: new fields.ObjectField(),
-                dc: new fields.NumberField({
+                dc: ruleElementResolveField({
                     required: false,
                     nullable: true,
-                    integer: true,
-                    min: 1,
                     initial: undefined,
                 }),
-                max: new fields.NumberField({
+                max: ruleElementResolveField({
                     required: false,
                     nullable: true,
-                    integer: true,
-                    min: 0,
                     initial: undefined,
                 }),
                 rank: new fields.NumberField<OneToTen, OneToTen, false, true, false>({
@@ -104,8 +105,32 @@ function createItemCastRuleElement() {
             };
         }
 
+        get resolvedMax(): number | undefined {
+            switch (typeof this.max) {
+                case "number":
+                    return Math.max(this.max, 0);
+                case "string":
+                    const resolved = Number(this.resolveValue(this.max));
+                    return Math.max(Math.trunc(resolved), 0);
+                default:
+                    return undefined;
+            }
+        }
+
+        get resolvedDc(): number | undefined {
+            switch (typeof this.dc) {
+                case "number":
+                    return Math.max(this.dc, 1);
+                case "string":
+                    const resolved = Number(this.resolveValue(this.dc));
+                    return Math.max(Math.trunc(resolved), 1);
+                default:
+                    return undefined;
+            }
+        }
+
         get usableMax(): number {
-            return this.max || 1;
+            return this.resolvedMax || 1;
         }
 
         get usableValue(): number {
@@ -130,9 +155,11 @@ function createItemCastRuleElement() {
                 const item = this.createConsumable();
 
                 const data: VirtualSpellData = {
-                    ...R.pick(this, ["attribute", "dc", "max", "statistic", "tradition"]),
+                    ...R.pick(this, ["attribute", "statistic", "tradition"]),
+                    dc: this.resolvedDc,
                     entryId,
                     item,
+                    max: this.resolvedMax,
                     parent: this.item,
                     ruleIndex: this.sourceIndex as number,
                     spellId,
@@ -209,7 +236,7 @@ function createItemCastRuleElement() {
                 }
 
                 // infinite cast
-                if (!this.max) return;
+                if (!this.resolvedMax) return;
 
                 const newValue = Math.max(this.usableValue - thisMany, 0);
                 await this.updateData({ value: newValue });
@@ -280,9 +307,10 @@ function createItemCastRuleElement() {
 
             rule.data.spell = source as SpellSource & { _id: string };
 
-            if (this.max && (!R.isNumber(rule.data.value) || rule.data.value > this.max)) {
-                rule.data.value = this.max;
-            } else if (!this.max && R.isNumber(rule.data.value)) {
+            const max = this.resolvedMax;
+            if (max && (!R.isNumber(rule.data.value) || rule.data.value > max)) {
+                rule.data.value = max;
+            } else if (!max && R.isNumber(rule.data.value)) {
                 delete rule.data.value;
             }
 
@@ -330,6 +358,10 @@ function generateItemCastRuleSource(
 interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFromRESchema<ItemCastSchema> {
     get actor(): CharacterPF2e;
     get item(): PhysicalItemPF2e<CharacterPF2e>;
+    get resolvedDc(): number | undefined;
+    get resolvedMax(): number | undefined;
+    get usableMax(): number;
+    get usableValue(): number;
     updateData(changes: ItemCastUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
     updateData(changes: ItemCastUpdateDataArgs, sourceOnly?: boolean): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
     updateData(
@@ -344,8 +376,8 @@ type BaseItemCastSchema = {
     attribute: fields.StringField<AttributeString, AttributeString, false, true, false>;
     data: fields.ObjectField<ItemCastRuleData>;
     /** if no static dc, we use existing entries */
-    dc: fields.NumberField<number, number, false, true, false>;
-    max: fields.NumberField<number, number, false, true, false>;
+    dc: ResolvableValueField<false, true, false>;
+    max: ResolvableValueField<false, true, false>;
     rank: fields.NumberField<OneToTen, OneToTen, false, true, false>;
     statistic: fields.StringField<string, string, false, true, false>;
     tradition: fields.StringField<MagicTradition, MagicTradition, false, true, false>;

@@ -1,5 +1,6 @@
 import {
     CharacterPF2e,
+    getRuleElementCls,
     itemIsEquipped,
     ItemPF2e,
     ItemSourcePF2e,
@@ -14,9 +15,7 @@ import { SourceFromSchema } from "foundry-helpers/src";
 import { actionable } from "..";
 
 function createActionableRuleElement() {
-    const RuleElementCls = game.pf2e.RuleElement;
-
-    class ActionableRuleElement extends RuleElementCls<ActionableSchema> {
+    class ActionableRuleElement extends getRuleElementCls()<ActionableSchema> {
         constructor(data: ActionableSource, options: RuleElementOptions) {
             data.priority ??= 99;
             data.requiresEquipped = false;

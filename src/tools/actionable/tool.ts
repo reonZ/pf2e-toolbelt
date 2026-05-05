@@ -688,8 +688,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         value: number,
     ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
         const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-        if (rule.key !== "ItemCast" || !rule.max) return;
-        return rule.updateData({ value: Math.clamp(value, 0, rule.max) });
+        if (rule.key !== "ItemCast") return;
+
+        const max = rule.resolvedMax;
+        return max ? rule.updateData({ value: Math.clamp(value, 0, max) }) : undefined;
     }
 
     #rechargeVirtualSpell(
@@ -697,8 +699,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         ruleIndex: number,
     ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
         const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-        if (rule.key !== "ItemCast" || !rule.max) return;
-        return rule.updateData({ value: rule.max });
+        if (rule.key !== "ItemCast") return;
+
+        const max = rule.resolvedMax;
+        return max ? rule.updateData({ value: max }) : undefined;
     }
 
     #onRenderCreatureSheetPF2e(
