@@ -38,8 +38,8 @@ function createItemCastRuleElement() {
 
             super(data, options);
 
-            if (!this.item.isOfType("physical")) {
-                this.failValidation("parent item must be physical");
+            if (!this.item.isOfType("physical") || this.item.isOfType("consumable")) {
+                this.failValidation("parent must be a non-consumable physical item");
             }
 
             const uuid = this.resolveInjectedProperties(this.uuid);

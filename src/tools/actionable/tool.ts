@@ -343,7 +343,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #onRenderPhysicalItemSheetPF2e(sheet: PhysicalItemSheetPF2e<PhysicalItemPF2e<CharacterPF2e>>, $html: JQuery) {
-        if (!sheet.isEditable) return;
+        if (!sheet.isEditable || sheet.item.isOfType("consumable")) return;
 
         const actor = sheet.actor;
         if (!actor?.isOfType("character")) return;
