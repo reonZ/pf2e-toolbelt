@@ -58,12 +58,31 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
             R.map(({ uuid }) => uuid),
         );
 
+        // Consumables generated from a spell carry the source spell on
+        // `system.spell` (see PF2e `createConsumableFromSpell`). Reading it
+        // directly is locale-agnostic; the description regex below is not.
+        if (item.isOfType("consumable")) {
+            const embedded = item.system.spell;
+            const sourceId = (embedded?._stats?.compendiumSource ??
+                embedded?.flags?.core?.sourceId) as ItemUUID | undefined;
+            if (sourceId && !existingUUIDs.includes(sourceId)) {
+                const spell = fromUuidSync<CompendiumIndexData>(sourceId, { strict: false });
+                if (spell?.type === "spell") {
+                    spells.push({
+                        img: spell.img,
+                        dc: undefined,
+                        name: spell.name,
+                        rank: (embedded?.system?.location?.heightenedLevel ??
+                            embedded?.system?.level?.value) as OneToTen | undefined,
+                        uuid: sourceId,
+                    });
+                }
+            }
+        }
+
         while ((match = ITEM_CAST_REGEX.exec(description))) {
             const uuid = match[1] as ItemUUID;
             if (existingUUIDs.includes(uuid)) continue;
-
-            const item = fromUuidSync<CompendiumIndexData>(uuid, { strict: false });
-            if (item?.type !== "spell") continue;
 
             const index = match.index + match[0].length;
             const segment = description.slice(index);
@@ -72,6 +91,18 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
 
             const dc = dcRaw ? Number(dcRaw) : undefined;
             const rank = rankRaw ? (Number(rankRaw) as OneToTen) : undefined;
+
+            // If the structured-data path above already pushed this spell,
+            // enrich it with description-derived dc/rank rather than skipping.
+            const existing = spells.find((s) => s.uuid === uuid);
+            if (existing) {
+                existing.dc ??= dc;
+                existing.rank ??= rank;
+                continue;
+            }
+
+            const item = fromUuidSync<CompendiumIndexData>(uuid, { strict: false });
+            if (item?.type !== "spell") continue;
 
             spells.push({
                 img: item.img,
