@@ -1,3 +1,11 @@
+# 3.45.0
+
+- `Actionable`:
+  - add resolve support for `dc` and `max` properties (e.g. `"10 + @actor.level"`) in `ItemCast` rule element
+  - `Item Spell Casting` no longer works on consumables
+- `Anonymous`:
+  - fix check messages originating from an action being partially anonymized
+
 # 3.44.0
 
 - this is a system `8.1.0` release
@@ -40,8 +48,7 @@
 # 3.41.1
 
 - `Actionable`:
-  - `Item Spell Casting`:
-    - improve rule generation when using the `Generate 'Item Cast' rules from description`
+  - improve rule generation when using the `Generate 'Item Cast' rules from description` of `Item Spell Casting`
 - `Better Merchant`:
   - fix not being able to purchase infinite services
 
