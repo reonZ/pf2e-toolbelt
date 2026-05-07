@@ -1,3 +1,19 @@
+# 3.46.0
+
+- `Item Spell Casting`:
+  - revert removal of support for `consumable` items
+    - the feature will not work with scrolls & wands (because those are fully handled by the system)
+    - the `max` property will have no impact on the feature, the module will instead use the parent item's uses
+    - casting the spell will consume one of the parent's use and delete the parent item if it has the `Destroy on Use` flag when reaching `0`
+  - add proper support for `ammo` items
+    - the ammo must be added to a weapon for the spell to be generated
+    - the spell is castable only if the weapon is equipped/invested
+    - the `max` property will have no impact on the feature
+    - casting the spell will **NOT** consume any ammo, leaving it to the system to handle it (or the user)
+    - consuming an ammo will **NOT** automatically trigger the spell leaving it to the user to decide when and if they want to
+- `Resource Tracker`:
+  - fix shared world resource icon
+
 # 3.45.0
 
 - `Actionable`:
