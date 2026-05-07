@@ -21,6 +21,7 @@ import {
     SpellPF2e,
     SpellSource,
     getRuleElementCls,
+    isCastConsumable,
     ruleElementResolveField,
     setHasElement,
 } from "foundry-helpers";
@@ -31,6 +32,8 @@ import fields = foundry.data.fields;
 function createItemCastRuleElement() {
     class ItemCastRuleElement extends getRuleElementCls()<ItemCastSchema> {
         // static autogenForms = true;
+        #isAmmo: boolean = false;
+        #isConsumable: boolean = false;
 
         constructor(data: RuleElementSource, options: RuleElementOptions) {
             data.priority ??= 99;
@@ -39,18 +42,28 @@ function createItemCastRuleElement() {
 
             super(data, options);
 
-            if (!this.item.isOfType("physical") || this.item.isOfType("consumable")) {
-                this.failValidation("parent must be a non-consumable physical item");
+            if (!this.item.isOfType("physical")) {
+                this.failValidation("parent item must be physical");
+            }
+
+            if (this.item.isOfType("consumable")) {
+                this.#isConsumable = true;
+
+                if (isCastConsumable(this.item)) {
+                    this.failValidation("parent item cannot be a scroll/wand");
+                }
+            } else {
+                this.#isAmmo = this.item.isOfType("ammo");
+            }
+
+            if (!R.isIncludedIn(this.dc, [null, undefined]) && !R.isIncludedIn(typeof this.dc, ["string", "number"])) {
+                this.failValidation("dc must be a number, string, null or undefined");
             }
 
             const uuid = this.resolveInjectedProperties(this.uuid);
             const type = fromUuidSync<ItemPF2e>(uuid, { strict: false })?.type;
             if (type !== "spell") {
                 this.failValidation("uuid must be a valid spell uuid");
-            }
-
-            if (!R.isIncludedIn(this.dc, [null, undefined]) && !R.isIncludedIn(typeof this.dc, ["string", "number"])) {
-                this.failValidation("dc must be a number, string, null or undefined");
             }
         }
 
@@ -105,7 +118,19 @@ function createItemCastRuleElement() {
             };
         }
 
+        get isConsumable(): boolean {
+            return this.#isConsumable;
+        }
+
+        get isAmmo(): boolean {
+            return this.#isAmmo;
+        }
+
         get resolvedMax(): number | undefined {
+            if (this.isConsumable) {
+                return (this.item as ConsumablePF2e<CharacterPF2e>).uses.max;
+            }
+
             switch (typeof this.max) {
                 case "number":
                     return Math.max(this.max, 0);
@@ -134,6 +159,10 @@ function createItemCastRuleElement() {
         }
 
         get usableValue(): number {
+            if (this.isConsumable) {
+                return (this.item as ConsumablePF2e<CharacterPF2e>).uses.value;
+            }
+
             const max = this.usableMax;
             return Math.clamp(this.data.value ?? max, 0, max);
         }
@@ -163,7 +192,6 @@ function createItemCastRuleElement() {
                     parent: this.item,
                     ruleIndex: this.sourceIndex as number,
                     spellId,
-                    value: this.data.value,
                 };
 
                 actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, data);
@@ -235,11 +263,21 @@ function createItemCastRuleElement() {
                     return;
                 }
 
-                // infinite cast
-                if (!this.resolvedMax) return;
+                if (this.isConsumable) {
+                    // we consume parent instead of using spell uses
+                    const parent = this.item as ConsumablePF2e<CharacterPF2e>;
+                    const newValue = Math.max(this.usableValue - thisMany, 0);
 
-                const newValue = Math.max(this.usableValue - thisMany, 0);
-                await this.updateData({ value: newValue });
+                    if (newValue < 1 && parent.system.uses.autoDestroy) {
+                        await parent.delete();
+                    } else {
+                        await parent.update({ "system.uses.value": newValue });
+                    }
+                } else if (this.resolvedMax) {
+                    // non infinite cast
+                    const newValue = Math.max(this.usableValue - thisMany, 0);
+                    await this.updateData({ value: newValue });
+                }
             };
 
             return item;
@@ -363,11 +401,11 @@ interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFro
     get usableMax(): number;
     get usableValue(): number;
     updateData(changes: ItemCastUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
-    updateData(changes: ItemCastUpdateDataArgs, sourceOnly?: boolean): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+    updateData(changes: ItemCastUpdateDataArgs, sourceOnly?: boolean): Promise<ItemPF2e<CharacterPF2e>> | undefined;
     updateData(
         changes: ItemCastUpdateDataArgs,
         sourceOnly?: boolean,
-    ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+    ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>> | undefined;
 }
 
 type ItemCastSource = Prettify<RuleElementSource & SourceFromSchema<BaseItemCastSchema>>;

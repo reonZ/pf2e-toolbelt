@@ -686,7 +686,16 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         parent: PhysicalItemPF2e<CharacterPF2e>,
         ruleIndex: number,
         value: number,
-    ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
+    ): Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined {
+        if (parent.isOfType("consumable")) {
+            if (isCastConsumable(parent)) return;
+
+            const { autoDestroy, max } = parent.system.uses;
+            const min = autoDestroy ? 1 : 0;
+
+            return parent.update({ "system.uses.value": Math.clamp(value, min, max) });
+        }
+
         const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
         if (rule.key !== "ItemCast") return;
 
@@ -697,12 +706,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     #rechargeVirtualSpell(
         parent: PhysicalItemPF2e<CharacterPF2e>,
         ruleIndex: number,
-    ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
-        const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-        if (rule.key !== "ItemCast") return;
-
-        const max = rule.resolvedMax;
-        return max ? rule.updateData({ value: max }) : undefined;
+    ): Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined {
+        return this.#updateVirtualSpellValue(parent, ruleIndex, Infinity);
     }
 
     #onRenderCreatureSheetPF2e(
