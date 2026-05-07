@@ -34,6 +34,7 @@ function createItemCastRuleElement() {
         // static autogenForms = true;
         #isAmmo: boolean = false;
         #isConsumable: boolean = false;
+        #isWeapon: boolean = false;
 
         constructor(data: RuleElementSource, options: RuleElementOptions) {
             data.priority ??= 99;
@@ -54,6 +55,7 @@ function createItemCastRuleElement() {
                 }
             } else {
                 this.#isAmmo = this.item.isOfType("ammo");
+                this.#isWeapon = this.item.isOfType("weapon");
             }
 
             if (!R.isIncludedIn(this.dc, [null, undefined]) && !R.isIncludedIn(typeof this.dc, ["string", "number"])) {
@@ -126,7 +128,15 @@ function createItemCastRuleElement() {
             return this.#isAmmo;
         }
 
+        get isWeapon(): boolean {
+            return this.#isWeapon;
+        }
+
         get resolvedMax(): number | undefined {
+            if (this.isAmmo) {
+                return undefined;
+            }
+
             if (this.isConsumable) {
                 return (this.item as ConsumablePF2e<CharacterPF2e>).uses.max;
             }
@@ -159,6 +169,10 @@ function createItemCastRuleElement() {
         }
 
         get usableValue(): number {
+            if (this.isAmmo) {
+                return 1;
+            }
+
             if (this.isConsumable) {
                 return (this.item as ConsumablePF2e<CharacterPF2e>).uses.value;
             }
@@ -178,25 +192,50 @@ function createItemCastRuleElement() {
                 return this.#setData();
             }
 
-            if (this.test()) {
-                const entryId = this.data.entryId as string;
-                const spellId = this.data.spell?._id as string;
-                const item = this.createConsumable();
+            if (!this.test()) return;
 
-                const data: VirtualSpellData = {
-                    ...R.pick(this, ["attribute", "statistic", "tradition"]),
-                    dc: this.resolvedDc,
-                    entryId,
-                    item,
-                    max: this.resolvedMax,
-                    parent: this.item,
-                    ruleIndex: this.sourceIndex as number,
-                    spellId,
-                };
+            const entryId = this.data.entryId as string;
+            const spellId = this.data.spell?._id as string;
+            const existAmmo = this.isWeapon && actionable.getInMemory<VirtualSpellData>(this.actor, "ammos", spellId);
 
-                actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, data);
-                actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, data);
+            // we are a weapon and found existing ammo, we set it up in place of the weapon
+            if (existAmmo) {
+                existAmmo.parent = this.item;
+                actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, existAmmo);
+                actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, existAmmo);
+                return;
             }
+
+            const item = this.createConsumable();
+
+            const data: VirtualSpellData = {
+                ...R.pick(this, ["attribute", "statistic", "tradition"]),
+                dc: this.resolvedDc,
+                entryId,
+                item,
+                max: this.resolvedMax,
+                parent: this.item,
+                ruleIndex: this.sourceIndex as number,
+                spellId,
+            };
+
+            if (this.isAmmo) {
+                actionable.setInMemory<VirtualSpellData>(this.actor, "ammos", spellId, data);
+
+                const existWeapon = actionable.getInMemory<VirtualSpellData>(this.actor, "spells", spellId);
+
+                if (existWeapon?.parent.isOfType("weapon")) {
+                    // we replace this parent with the found weapon parent, making it looks like the RE is on the weapon
+                    data.parent = existWeapon.parent;
+                } else {
+                    // we are an ammo and haven't found an already existing weapon, so we skip
+                    // the idea is that parentless ammo will never generate the spell
+                    return;
+                }
+            }
+
+            actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, data);
+            actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, data);
         }
 
         test(rollOptions?: string[] | Set<string> | undefined): boolean {

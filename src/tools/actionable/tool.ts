@@ -687,6 +687,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         ruleIndex: number,
         value: number,
     ): Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined {
+        if (parent.isOfType("ammo")) return;
+
         if (parent.isOfType("consumable")) {
             if (isCastConsumable(parent)) return;
 
