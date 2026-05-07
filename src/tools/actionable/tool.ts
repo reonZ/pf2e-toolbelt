@@ -656,7 +656,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
             const template = max
                 ? `<span class="spell-slots-input">
-                <input type="number" value="${item.uses.value}" placeholder="0" />
+                <input type="number" value="${item.uses.value}" min="0" max="${max}" placeholder="0" />
             </span>
             <span class="slash">/</span>
             <span class="spell-max-input">
