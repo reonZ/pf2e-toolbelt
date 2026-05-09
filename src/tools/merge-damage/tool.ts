@@ -269,7 +269,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                     if (isMerge && otherMessage.actor !== actor) continue;
 
                     const otherTargets = this.getMessageTargets(otherMessage);
-                    if (arraysEqual(targets, otherTargets)) {
+                    if ((isMerge && arraysEqual(targets, otherTargets)) || !targets.length) {
                         const mergeOptions = event.shiftKey ? await this.#mergeMenu(action) : {};
                         if (!mergeOptions) return;
 
