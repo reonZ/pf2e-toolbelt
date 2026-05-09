@@ -1,3 +1,15 @@
+# 3.47.0
+
+- convert some remaining deprecated v14 stuff
+- `Item Spell Casting`:
+  - the `statistic` property now accepts a list of slugs, the module will pick the first found on the actor
+    - you can use comma separated slugs in the `Item Cast` generator popup window
+  - fix spell attack rolls being regular checks instead when using manual statistics
+- `Merge Damage`:
+  - you can now `inject` damage from a message that has no origin actor or a different actor than the message before
+  - you can now `inject` damage from a message that has no targets into another that has some (won't allow different targets still)
+  - fix merge/inject api function merging messages backward
+
 # 3.46.0
 
 - `Item Spell Casting`:
