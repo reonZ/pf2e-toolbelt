@@ -379,7 +379,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const spell = parent.embeddedSpell;
             if (!spell) continue;
 
-            const actorStatistic = data.statistic ? actor.getStatistic(data.statistic) : null;
+            const actorStatistic = getFirstStatistic(actor, data.statistic);
             const dc = !actorStatistic && data.dc;
             const existingEntry = !actorStatistic && !dc ? getExistingSpellcastingEntry(actor, spell, parent) : null;
             if (!actorStatistic && !dc && !existingEntry) return;
@@ -1148,6 +1148,17 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             slug: `temporary-${tradition}`,
         });
     }
+}
+
+function getFirstStatistic(actor: CharacterPF2e, statistics: Maybe<string[]>): Statistic<CharacterPF2e> | null {
+    if (!statistics?.length) return null;
+
+    for (const slug of statistics) {
+        const statistic = actor.getStatistic(slug);
+        if (statistic) return statistic;
+    }
+
+    return null;
 }
 
 function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItemPF2e[] {

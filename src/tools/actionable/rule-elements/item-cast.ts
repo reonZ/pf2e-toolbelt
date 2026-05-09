@@ -26,6 +26,7 @@ import {
     setHasElement,
 } from "foundry-helpers";
 import { MAGIC_TRADITIONS, SourceFromSchema } from "foundry-helpers/dist";
+import { splitListString } from "foundry-helpers/src";
 import { actionable } from "..";
 import fields = foundry.data.fields;
 
@@ -98,12 +99,19 @@ function createItemCastRuleElement() {
                     max: 10,
                     initial: undefined,
                 }),
-                statistic: new fields.StringField({
-                    required: false,
-                    nullable: true,
-                    blank: false,
-                    initial: undefined,
-                }),
+                statistic: new fields.ArrayField(
+                    new fields.StringField({
+                        required: true,
+                        nullable: false,
+                        blank: false,
+                        initial: undefined,
+                    }),
+                    {
+                        required: false,
+                        nullable: true,
+                        initial: undefined,
+                    },
+                ),
                 tradition: new fields.StringField({
                     required: false,
                     nullable: true,
@@ -426,7 +434,7 @@ function generateItemCastRuleSource(
         key: "ItemCast",
         max,
         rank,
-        statistic,
+        statistic: splitListString(statistic ?? ""),
         tradition,
         uuid,
     };
@@ -456,7 +464,14 @@ type BaseItemCastSchema = {
     dc: ResolvableValueField<false, true, false>;
     max: ResolvableValueField<false, true, false>;
     rank: fields.NumberField<OneToTen, OneToTen, false, true, false>;
-    statistic: fields.StringField<string, string, false, true, false>;
+    statistic: fields.ArrayField<
+        fields.StringField<string, string, true, false>,
+        string[],
+        string[],
+        false,
+        true,
+        false
+    >;
     tradition: fields.StringField<MagicTradition, MagicTradition, false, true, false>;
     uuid: fields.StringField<ItemUUID, ItemUUID, true, false, false>;
 };
