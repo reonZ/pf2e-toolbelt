@@ -90,7 +90,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                 options: Omit<MergeOptions, "targetMerge"> = {},
             ): Promise<{ rolls: RollJSON[] } | undefined> => {
                 if (!this.isDamageRoll(previousMessage) || !this.isDamageRoll(currentMessage)) return;
-                return this.#injectDamage(previousMessage, currentMessage, options);
+                return this.#injectDamage(currentMessage, previousMessage, options);
             },
             mergeDamageMessages: async (
                 previousMessage: ChatMessagePF2e,
@@ -98,7 +98,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
                 options: MergeOptions = {},
             ): Promise<ChatMessagePF2e | undefined> => {
                 if (!this.isDamageRoll(previousMessage) || !this.isDamageRoll(currentMessage)) return;
-                return this.#mergeDamages(previousMessage, currentMessage, options);
+                return this.#mergeDamages(currentMessage, previousMessage, options);
             },
         };
     }
