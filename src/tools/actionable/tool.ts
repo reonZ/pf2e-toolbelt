@@ -973,7 +973,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 "system.selfEffect": { uuid: droppedItem.uuid, name: droppedItem.name },
             };
 
-            this.setFlagProperty(updates, "-=macro", null);
+            this.setFlagProperty(updates, "macro", _del);
 
             return sheetItem.update(updates);
         } else if (

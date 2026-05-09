@@ -73,7 +73,9 @@ type TargetsAppliedDamages = z.output<typeof zTargetsAppliedDamages>;
 
 type TargetAppliedDamage = z.output<typeof zAppliedDamages>;
 
-type TargetsDataUpdates = DeepPartial<TargetsDataSource> & Record<string, any>;
+type TargetsDataUpdates = {
+    [k in keyof TargetsDataSource]?: TargetsDataSource[k] | ForcedReplacement | ForcedDeletion;
+};
 
 export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArray };
 export type {

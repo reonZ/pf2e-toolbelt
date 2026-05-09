@@ -104,7 +104,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
 
     setImportData(actor: CharacterPF2e, data: CharacterImport): Promise<CharacterPF2e> | undefined {
         const encoded = data.encode();
-        return encoded ? this.setFlag(actor, "==data", encoded) : undefined;
+        return encoded ? this.setFlag(actor, "data", _replace(encoded)) : undefined;
     }
 
     fullTemplatePath(...path: string[]): string {
