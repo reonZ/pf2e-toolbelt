@@ -61,6 +61,7 @@ import {
     SpellPF2e,
     SpellSheetPF2e,
     Statistic,
+    StatisticData,
     SYSTEM,
     toggleHooksAndWrappers,
     toggleSummary,
@@ -387,7 +388,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const tradition = data.tradition ?? existingEntry?.tradition ?? spell.traditions.first();
 
             const statistic =
-                actorStatistic ??
+                this.#extendActorStatistic(actor, actorStatistic, tradition) ??
                 existingEntry?.statistic ??
                 this.#createSpellcastingStatistic(actor, attribute, tradition, dc as number);
 
@@ -1075,6 +1076,32 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         } catch (err: any) {
             throw MODULE.error("an error occured while trying to resolve data drop", err);
         }
+    }
+
+    #extendActorStatistic(
+        actor: CharacterPF2e,
+        statistic: Statistic<CharacterPF2e> | null,
+        tradition: MagicTradition | undefined,
+    ): Statistic<CharacterPF2e> | null {
+        if (!statistic) return null;
+
+        const data = foundry.utils.deepClone(statistic["data"]) as DeepRequired<StatisticData>;
+        if (!data || !data.check || !data.dc || !data.domains) return null;
+
+        data.domains.push("spell-attack-dc");
+
+        data.check.type = "attack-roll";
+        data.check.domains.push(`${statistic.slug}-attack-roll`, "spell-attack", "spell-attack-roll");
+
+        data.dc.domains.push("spell-dc");
+
+        if (tradition) {
+            data.check.domains.push(`${tradition}-spell-attack`);
+            data.dc.domains.push(`${tradition}-spell-dc`);
+        }
+
+        const Statistic = getStatisticClass(actor);
+        return new Statistic(actor, data);
     }
 
     #createSpellcastingStatistic(
