@@ -225,7 +225,7 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
     async #onRenderChatMessage(message: ChatMessagePF2e, html: HTMLElement) {
         const actor = message.actor;
-        if (!actor || !isMessageOwner(message) || !this.isDamageRoll(message)) return;
+        if (!isMessageOwner(message) || !this.isDamageRoll(message)) return;
 
         const targets = this.getMessageTargets(message);
         const injected = this.getFlag(message, "injected");
@@ -238,9 +238,11 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
             buttons.push("inject");
         }
 
-        if (this.settings.merge) {
+        if (this.settings.merge && actor) {
             buttons.push("merge");
         }
+
+        if (!buttons.length) return;
 
         const buttonsElement = createHTMLElement("div", {
             classes: ["pf2e-toolbelt-merge-buttons"],
@@ -261,14 +263,17 @@ class MergeDamageTool extends ModuleTool<ToolSettings> {
 
             if (R.isIncludedIn(action, ["merge-damage", "inject-damage"] as const)) {
                 for (const otherMessage of latestChatMessages(5, message)) {
-                    if (otherMessage.actor !== actor || !this.isDamageRoll(otherMessage)) continue;
+                    if (!this.isDamageRoll(otherMessage)) continue;
+
+                    const isMerge = action === "merge-damage";
+                    if (isMerge && otherMessage.actor !== actor) continue;
 
                     const otherTargets = this.getMessageTargets(otherMessage);
                     if (arraysEqual(targets, otherTargets)) {
                         const mergeOptions = event.shiftKey ? await this.#mergeMenu(action) : {};
                         if (!mergeOptions) return;
 
-                        if (action === "merge-damage") {
+                        if (isMerge) {
                             return this.#mergeDamages(message, otherMessage, mergeOptions);
                         } else {
                             return this.#injectDamage(message, otherMessage, mergeOptions);
