@@ -1,3 +1,8 @@
+# 3.47.1
+
+- `Better Merchant`:
+  - fix not being able to use the `Price` fields for the filters
+
 # 3.47.0
 
 - convert some remaining deprecated v14 stuff
