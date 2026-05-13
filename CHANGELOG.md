@@ -1,3 +1,8 @@
+# 3.47.2
+
+- `Target Helper`:
+  - allow third party to feed an empty array of targets to the message
+
 # 3.47.1
 
 - `Better Merchant`:
