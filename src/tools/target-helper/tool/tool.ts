@@ -387,7 +387,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             return;
         }
 
-        if (!updates.targets?.length && !this.getMessageTargets(message)?.length) {
+        if (!updates.targets?.length && !this.getMessageTargets(message)) {
             updates.targets = this.getCurrentTargets();
         }
 
