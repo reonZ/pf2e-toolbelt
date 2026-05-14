@@ -277,6 +277,10 @@
         &:last-child {
             .damage-application {
                 margin-bottom: 0;
+
+                + .damage-application {
+                    margin-top: 2px;
+                }
             }
         }
     }
