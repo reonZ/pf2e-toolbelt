@@ -9,15 +9,14 @@ import {
 } from "..";
 
 async function importData(this: CharacterImporterTool, html: HTMLElement, actor: CharacterPF2e, fromFile: boolean) {
-    const codeOrFile = fromFile ? await importFromFile.call(this) : await importFromJSON.call(this);
+    const codeOrFile = fromFile ? await importFromFilePopup.call(this) : await importFromUrlPopup.call(this, actor);
     if (!codeOrFile) return;
 
     this.addLoader(html);
 
-    const code = R.isString(codeOrFile) ? codeOrFile : await foundry.utils.readTextFromFile(codeOrFile);
-
     try {
-        const parsed = JSON.parse(code) as unknown;
+        const code = codeOrFile instanceof File ? await importFromFile(codeOrFile) : await importFromUrl(codeOrFile);
+        const parsed = R.isString(code) ? JSON.parse(code) : code;
         const currentSource = await this.getImportData(actor, true);
         const importedSource = await fromPathbuilder(parsed);
 
@@ -128,29 +127,39 @@ async function importData(this: CharacterImporterTool, html: HTMLElement, actor:
         const mergedSource = foundry.utils.mergeObject(currentSource ?? {}, importedSource);
         const merged = await CharacterImport.fromSource(mergedSource, true);
 
-        await this.setImportData(actor, merged);
+        await this.setImportDataAndCode(actor, merged, R.isNumber(codeOrFile) ? codeOrFile : undefined);
         this.localize.info("import.success");
     } catch (error) {
         console.error(error);
     }
 }
 
-async function importFromJSON(this: CharacterImporterTool): Promise<string | null> {
-    const result = await waitDialog<{ code: string }>({
-        i18n: this.path("import.code"),
-        content: `<textarea name="code"></textarea>`,
-    });
-
-    return result ? result.code : null;
+function importFromFile(file: File): Promise<string> {
+    return foundry.utils.readTextFromFile(file);
 }
 
-async function importFromFile(this: CharacterImporterTool): Promise<File | null> {
+async function importFromFilePopup(this: CharacterImporterTool): Promise<File | null> {
     const result = await waitDialog<{ file: File }>({
         i18n: this.path("import.file"),
         content: `<input type="file" name="file" accept=".json">`,
     });
 
     return result ? result.file : null;
+}
+
+function importFromUrl(code: number): Promise<JSONValue> {
+    return foundry.utils.fetchJsonWithTimeout(`https://pathbuilder2e.com/json.php?id=${code}`);
+}
+
+async function importFromUrlPopup(this: CharacterImporterTool, actor: CharacterPF2e): Promise<number | null> {
+    const code = this.getFlag<number>(actor, "code");
+
+    const result = await waitDialog<{ code: number }>({
+        i18n: this.path("import.url"),
+        content: `<input type="number" name="code" min="0" value="${code}">`,
+    });
+
+    return result ? result.code : null;
 }
 
 export { importData };

@@ -107,6 +107,15 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
         return encoded ? this.setFlag(actor, "data", _replace(encoded)) : undefined;
     }
 
+    setImportDataAndCode(
+        actor: CharacterPF2e,
+        data: CharacterImport,
+        code: number | undefined,
+    ): Promise<CharacterPF2e> | undefined {
+        const encoded = data.encode();
+        return encoded ? this.setFlag(actor, { code: code || _del, data: _replace(encoded) }) : undefined;
+    }
+
     fullTemplatePath(...path: string[]): string {
         return MODULE.templatePath(this.templatePath(...path));
     }
@@ -262,7 +271,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
                     return confirm && this.unsetFlag(actor, "data");
                 }
 
-                case "import-code": {
+                case "import-url": {
                     return importData.call(this, html, actor, false);
                 }
 
@@ -360,7 +369,7 @@ class CharacterImporterTool extends ModuleTool<ToolSettings> {
     }
 }
 
-type EventAction = EntryEventAction | "delete-data" | "import-code" | "import-file" | "open-sheet" | "select-tab";
+type EventAction = EntryEventAction | "delete-data" | "import-url" | "import-file" | "open-sheet" | "select-tab";
 
 type InMemoryTab = {
     key: ImportMenuType;

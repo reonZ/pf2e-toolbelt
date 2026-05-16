@@ -647,7 +647,11 @@
                     "title": "Select JSON File",
                     "yes": "Parse File"
                 },
-                "success": "The character import was successful."
+                "success": "The character import was successful.",
+                "url": {
+                    "title": "Enter Character JSON ID",
+                    "yes": "Parse URL Data"
+                }
             },
             "sheet": {
                 "level": {
@@ -657,7 +661,8 @@
                 "import": {
                     "code": "From Code",
                     "delete": "Delete Import Data",
-                    "file": "From File"
+                    "file": "From File",
+                    "url": "From Url"
                 },
                 "data": {
                     "core": {
