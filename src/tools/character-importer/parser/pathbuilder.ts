@@ -35,6 +35,8 @@ import {
     isSpellRank,
 } from ".";
 
+const EXTRA_FEAT_REGEX = /(?:[a-z0-9]+-){4}[a-z0-9]+/i;
+
 const BACKPACK_UUID = "Compendium.pf2e.equipment-srd.Item.3lgwjrFEsQVKzhh7";
 const SPACIOUS_POUCH_UUID = "Compendium.pf2e.equipment-srd.Item.jaEEvuQ32GjAa8jy";
 
@@ -87,6 +89,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
 
         return {
             awarded,
+            extra: !awarded && !hasParent && R.isString(child) && EXTRA_FEAT_REGEX.test(child),
             level: Math.clamp(level, 1, 20) as OneToTen,
             match,
             category: featureMatch ? "classfeature" : category,

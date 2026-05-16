@@ -53,6 +53,7 @@ function zFeat() {
 
     return zImportedEntry("feat").extend({
         awarded: z.boolean().default(false),
+        extra: z.boolean().default(false),
         level: z.number().min(1).multipleOf(1).default(1),
         category: z.enum(categories),
         parent: z

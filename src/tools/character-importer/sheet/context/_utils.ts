@@ -102,6 +102,7 @@ function prepareFeatEntry(
         category: entry.category,
         children: prepareFeatEntries.call(this, actor, data, index, depth + 1),
         index,
+        isExtra: entry.extra,
         itemType: "feat",
         label: game.i18n.localize(label),
         level: !entry.parent || !R.isNumber(Number(entry.parent)) ? entry.level : 0,
@@ -146,7 +147,7 @@ function getCurrentItem(
     const selection = getEntrySelection(entry);
     if (!selection) return null;
 
-    if (isFeatEntry(entry)) {
+    if (isFeatEntry(entry) && !entry.extra) {
         const featSlot = getFeatSlot(actor, entry);
         if (featSlot) {
             return featSlot.feat ?? null;
@@ -206,6 +207,7 @@ type ImportDataEntry = {
 type ImportDataFeatEntry = Omit<ImportDataEntry, "itemType"> & {
     category: FeatOrFeatureCategory | "archetype";
     index: number;
+    isExtra: boolean;
     itemType: "feat";
     level: number;
     parent: FeatEntryParent | undefined;

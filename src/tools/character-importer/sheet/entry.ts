@@ -91,7 +91,7 @@ async function onEntryInstall(
     } else if (isFeatEntry(entry)) {
         if (entry.parent) return;
 
-        const featSlot = getFeatSlot(actor, entry);
+        const featSlot = !entry.extra && getFeatSlot(actor, entry);
 
         if (featSlot) {
             if (featSlot.feat) {
