@@ -30,7 +30,7 @@ const EQUIPMENT_PACK = ["equipment-srd", "equipment"] as const;
 const FEATS_PACK = ["feats-srd", "feats"] as const;
 const SPELLS_PACK = ["spells-srd", "spells"] as const;
 
-async function getUuidFromPack(
+async function getIndexFromPack(
     value: string,
     packNames: readonly [string, string],
 ): Promise<CompendiumIndexData | null> {
@@ -54,7 +54,7 @@ async function getUuidFromPack(
 }
 
 async function getCoreUuidFromPack(value: string, category: CharacterCategory): Promise<ItemUUID | null> {
-    const entry = await getUuidFromPack(value, CORE_PACKS[category]);
+    const entry = await getIndexFromPack(value, CORE_PACKS[category]);
     return (entry?.uuid ?? null) as ItemUUID | null;
 }
 
@@ -63,12 +63,12 @@ async function getFeatUuidFromPack(
     category: FeatOrFeatureCategory | "archetype",
 ): Promise<ItemUUID | null> {
     const pack = FEAT_PACKS[category] ?? FEATS_PACK;
-    const entry = await getUuidFromPack(value, pack);
+    const entry = await getIndexFromPack(value, pack);
     return (entry?.uuid ?? null) as ItemUUID | null;
 }
 
-async function getEquipmentUuidFromPack(value: string): Promise<{ type: PhysicalItemType; uuid: ItemUUID | null }> {
-    const entry = await getUuidFromPack(value, EQUIPMENT_PACK);
+async function getEquipmentDataFromPack(value: string): Promise<{ type: PhysicalItemType; uuid: ItemUUID | null }> {
+    const entry = await getIndexFromPack(value, EQUIPMENT_PACK);
     return {
         type: (entry?.type ?? "equipment") as PhysicalItemType,
         uuid: (entry?.uuid ?? null) as ItemUUID | null,
@@ -76,7 +76,7 @@ async function getEquipmentUuidFromPack(value: string): Promise<{ type: Physical
 }
 
 async function getSpellUuidFromPack(value: string): Promise<ItemUUID | null> {
-    const entry = await getUuidFromPack(value, SPELLS_PACK);
+    const entry = await getIndexFromPack(value, SPELLS_PACK);
     return (entry?.uuid ?? null) as ItemUUID | null;
 }
 
@@ -98,7 +98,7 @@ function isSpellRank(value: unknown): value is ZeroToTen {
 
 export {
     getCoreUuidFromPack,
-    getEquipmentUuidFromPack,
+    getEquipmentDataFromPack,
     getFeatUuidFromPack,
     getSpellUuidFromPack,
     isAttribute,

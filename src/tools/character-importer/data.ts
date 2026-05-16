@@ -119,6 +119,7 @@ function zSpellcastingEntry() {
 function zCharacterImport() {
     return z.object({
         age: z.string().default(""),
+        alternativeBoosts: z.boolean().default(false),
         attributes: zAttributes,
         containers: z.array(zContainer).prefault([]),
         currencies: zCurrencies(),

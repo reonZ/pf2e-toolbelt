@@ -1,4 +1,4 @@
-import { addListenerAll, AttributeString, CharacterPF2e, ClassPF2e, R } from "foundry-helpers";
+import { addListenerAll, AncestryPF2e, AttributeString, CharacterPF2e, ClassPF2e, R } from "foundry-helpers";
 import {
     ATTRIBUTE_KEYS,
     AttributeLevel,
@@ -87,6 +87,9 @@ async function prepareCoreTab(
         R.map((key) => data.attributes.values[key] ?? 0),
     );
 
+    const ancestryUUID = entries.find((x) => x.itemType === "ancestry")?.selection?.uuid;
+    const ancestryItem = ancestryUUID ? await fromUuid<AncestryPF2e>(ancestryUUID) : null;
+
     const allAncestryBoosts = [...data.attributes.ancestry.boosts, ...data.attributes.ancestry.locked];
     const ancestryBoosts: ImportDataBoostsEntry<"Boost"> = {
         boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"Boost"> => {
@@ -98,6 +101,11 @@ async function prepareCoreTab(
         }),
         label: game.i18n.localize("TYPES.Item.ancestry"),
     };
+
+    if (ancestryItem && data.alternativeBoosts) {
+        const tooltip = game.i18n.localize("PF2E.Actor.Character.AttributeBuilder.AlternateBoostsLabel");
+        ancestryBoosts.label += ` <i class="fa-solid fa-alt" data-tooltip="${tooltip}"></i>`;
+    }
 
     const ancestryFlaws: ImportDataBoostsEntry<"Flaw"> | null = data.attributes.ancestry.flaws.length
         ? {
@@ -124,6 +132,7 @@ async function prepareCoreTab(
         }),
         label: game.i18n.localize("TYPES.Item.background"),
     };
+
     const classUUID = entries.find((x) => x.itemType === "class")?.selection?.uuid;
     const classItem = classUUID ? await fromUuid<ClassPF2e>(classUUID) : null;
     const classKeys = classItem?.system.keyAbility.value ?? data.attributes.class;
@@ -141,6 +150,7 @@ async function prepareCoreTab(
     };
 
     return {
+        ancestryItem,
         attributes: {
             ancestry: {
                 boosts: ancestryBoosts,
@@ -197,7 +207,12 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
 
     const levels = R.pullObject(getLevelsAttributes(data, actor), R.prop("level"), R.prop("boosts"));
 
-    await assignBoosts(actor.ancestry, data.attributes.ancestry.boosts);
+    if (data.alternativeBoosts) {
+        await actor.ancestry?.update({ "system.alternateAncestryBoosts": data.attributes.ancestry.boosts });
+    } else {
+        await assignBoosts(actor.ancestry, data.attributes.ancestry.boosts);
+    }
+
     await assignBoosts(actor.background, data.attributes.background);
 
     if (actor.class) {
@@ -344,6 +359,7 @@ function boostIsPartial(
 type EventAction = "assign-attributes" | "override-attributes";
 
 type ImportDataCoreContext = {
+    ancestryItem: AncestryPF2e | null;
     attributes: ImportDataAttributesContext;
     classItem: ClassPF2e | null;
     entries: ImportDataEntry[];

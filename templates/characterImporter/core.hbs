@@ -22,10 +22,12 @@
     </div>
     {{/each}}
     {{!-- ancestry --}}
+    {{#if ancestryItem}}
     {{#if attributes.ancestry.flaws}}
     {{> 'boosts' attributes.ancestry.flaws}}
     {{/if}}
     {{> 'boosts' attributes.ancestry.boosts}}
+    {{/if}}
     {{!-- background --}}
     {{> 'boosts' attributes.background}}
     {{!-- class --}}
@@ -53,7 +55,7 @@
 
 {{#*inline 'boosts'}}
 <div class="label">
-    {{label}}
+    {{{label}}}
 </div>
 {{#each boosts as |boost|}}
 <div class="attribute">
