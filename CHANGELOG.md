@@ -1,3 +1,16 @@
+# 3.48.0
+
+- `Character Importer`:
+  - all the following changes need a fresh import of character data
+  - add support for alternate ancestry boosts
+  - add support for `Custom Feat Choice` pathbuilder feature
+    - those feats will now be added as bonus instead of trying to replace others at the same level
+  - replace the `Import From Code` with `Import From Url`
+    - all you have to do is provide the pathbuilder json id
+    - the id is also saved on the actor for further uses
+- `Target Helper`:
+  - add spacing between regular and splash buttons
+
 # 3.47.2
 
 - `Target Helper`:
