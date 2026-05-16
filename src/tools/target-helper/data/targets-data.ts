@@ -1,4 +1,4 @@
-import { R, TokenDocumentPF2e, z, zClientDocument, zDocumentUUID } from "foundry-helpers";
+import { R, TokenDocumentPF2e, z, zClientDocument, zDocumentUUID, zSafeArray } from "foundry-helpers";
 import { SAVE_TYPES } from "foundry-helpers/dist";
 import { zTargetSaveInstance } from ".";
 
@@ -16,15 +16,17 @@ const zSaveVariants = z.record(z.string(), zSaveVariant).default({});
 const zAppliedDamages = z.record(z.union([z.string(), z.number()]), z.boolean()).default({});
 const zTargetsAppliedDamages = z.record(z.string(), zAppliedDamages).default({});
 
-const zTokenDocument = z.codec(zDocumentUUID("Token"), zClientDocument("Token").nullable(), {
-    decode: (uuid) => fromUuidSync(uuid, { strict: false }) as TokenDocumentPF2e,
-    encode: (token) => (token as TokenDocumentPF2e).uuid,
+const zTokenDocumentArrayDecode = zSafeArray(zDocumentUUID("Token"), true).transform((uuids) => {
+    return R.pipe(
+        R.isArray(uuids) ? uuids : [],
+        R.map((uuid): TokenDocumentPF2e | null => fromUuidSync(uuid, { strict: false })),
+        R.filter(R.isTruthy),
+    );
 });
 
-const zTokenDocumentArray = z
-    .array(zTokenDocument)
-    .transform((tokens) => tokens.filter(R.isTruthy))
-    .default([]);
+const zTokenDocumentArrayEncode = z
+    .array(zClientDocument("Token"))
+    .transform((tokens) => tokens.map((token) => token.uuid));
 
 const zBaseTargetsData = z.object({
     applied: zTargetsAppliedDamages,
@@ -40,19 +42,19 @@ const zBaseTargetsData = z.object({
 });
 
 const zDecodeTargetsData = zBaseTargetsData.extend({
-    splashTargets: zTokenDocumentArray,
-    targets: zTokenDocumentArray,
+    splashTargets: zTokenDocumentArrayDecode,
+    targets: zTokenDocumentArrayDecode,
 });
 
 const zEncodeTargetsData = zBaseTargetsData.extend({
-    splashTargets: z.array(zTokenDocument).default([]),
-    targets: z.array(zTokenDocument).default([]),
+    splashTargets: zTokenDocumentArrayEncode,
+    targets: zTokenDocumentArrayEncode,
 });
 
 const zTargetsData = zDecodeTargetsData;
 
 function encodeTargetsData(data: TargetsData, changes?: TargetsDataUpdates): TargetsDataSource {
-    const encoded = zEncodeTargetsData.encode(data);
+    const encoded = zEncodeTargetsData.parse(data);
     return changes ? foundry.utils.mergeObject(encoded, changes, { inplace: true }) : encoded;
 }
 
@@ -77,7 +79,7 @@ type TargetsDataUpdates = {
     [k in keyof TargetsDataSource]?: TargetsDataSource[k] | ForcedReplacement | ForcedDeletion;
 };
 
-export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArray };
+export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArrayDecode };
 export type {
     AppliedDamages,
     AppliedDamagesSource,

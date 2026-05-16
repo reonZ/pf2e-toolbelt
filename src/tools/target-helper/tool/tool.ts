@@ -50,7 +50,7 @@ import {
     TargetsDataUpdates,
     zSaveVariants,
     zTargetsData,
-    zTokenDocumentArray,
+    zTokenDocumentArrayDecode,
 } from "..";
 
 const INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
@@ -166,7 +166,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
     getMessageTargets(message: ChatMessagePF2e): TokenDocumentPF2e[] | undefined {
         const flag = this.getFlag<TokenDocumentUUID[]>(message, "targets");
-        return flag ? zTokenDocumentArray.safeDecode(flag).data : undefined;
+        return flag ? zTokenDocumentArrayDecode.safeParse(flag).data : undefined;
     }
 
     setMessageTargets(message: ChatMessagePF2e, targets: TokenDocumentUUID[]): Promise<ChatMessagePF2e> {
