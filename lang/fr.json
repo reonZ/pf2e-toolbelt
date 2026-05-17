@@ -141,6 +141,16 @@
           }
         }
       },
+      "betterChat": {
+        "merge": {
+          "name": "Bouton de fusion",
+          "hint": "Ajoute un bouton aux messages de dégâts leur permettant d'être fusionnés avec les autres messages de dégâts."
+        },
+        "inject": {
+          "name": "Bouton d'injection",
+          "hint": "Ajoute un bouton aux messages de dégâts permettant de les injecter dans un message de dégâts précédent."
+        }
+      },
       "betterEffectsPanel": {
         "title": "Panneau d'effets amélioré",
         "remove": {
@@ -315,17 +325,6 @@
           "hint": "Les joueurs devraient-ils pouvoir être capables de solliciter l'identification des objets."
         }
       },
-      "mergeDamage": {
-        "title": "Fusionner les dégâts",
-        "merge": {
-          "name": "Bouton de fusion",
-          "hint": "Ajoute un bouton aux messages de dégâts leur permettant d'être fusionnés avec les autres messages de dégâts."
-        },
-        "inject": {
-          "name": "Bouton d'injection",
-          "hint": "Ajoute un bouton aux messages de dégâts permettant de les injecter dans un message de dégâts précédent."
-        }
-      },
       "resourceTracker": {
         "title": "Suivi des ressources",
         "enabled": {
@@ -467,6 +466,39 @@
       "overriden": "Abri ignoré",
       "standard": "Abri standard",
       "wall": "Abri par le mur"
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "inject": "Injecter les dégâts au message précédent",
+          "menu": {
+            "inject": "[Maj] Ouvrir le menu injecter",
+            "merge": "[Maj] Ouvrir le menu fusionner"
+          },
+          "merge": "Fusionner avec le message de dégâts précédent",
+          "split": "Revenir aux messages d'origine"
+        },
+        "injected": "Des dégâts ont été injectés dans ce message",
+        "menu": {
+          "inject-damage": {
+            "double": "Injecter le double des dégâts",
+            "full": "Injecter la totalité des dégâts",
+            "half": "Injecter la moitié des dégâts",
+            "title": "Menu injecter",
+            "yes": "Injecter"
+          },
+          "merge-damage": {
+            "double": "Fusionner le double des dégâts",
+            "full": "Fusionner la totalité des dégâts",
+            "half": "Fusionner la moitié des dégâts",
+            "title": "Menu fusionner",
+            "yes": "Fusionner"
+          },
+          "originMerge": "Message actuel",
+          "targetMerge": "Message précédent"
+        },
+        "noMatch": "Impossible de trouver un autre message de dégât correspondant."
+      }
     },
     "betterInventory": {
       "improvised": {
@@ -891,37 +923,6 @@
         "send-to-chat": "Envoyer dans la conversation",
         "title": "Suivi d'identification des objets"
       }
-    },
-    "mergeDamage": {
-      "buttons": {
-        "inject": "Injecter les dégâts au message précédent",
-        "menu": {
-          "inject": "[Maj] Ouvrir le menu injecter",
-          "merge": "[Maj] Ouvrir le menu fusionner"
-        },
-        "merge": "Fusionner avec le message de dégâts précédent",
-        "split": "Revenir aux messages d'origine"
-      },
-      "injected": "Des dégâts ont été injectés dans ce message",
-      "menu": {
-        "inject-damage": {
-          "double": "Injecter le double des dégâts",
-          "full": "Injecter la totalité des dégâts",
-          "half": "Injecter la moitié des dégâts",
-          "title": "Menu injecter",
-          "yes": "Injecter"
-        },
-        "merge-damage": {
-          "double": "Fusionner le double des dégâts",
-          "full": "Fusionner la totalité des dégâts",
-          "half": "Fusionner la moitié des dégâts",
-          "title": "Menu fusionner",
-          "yes": "Fusionner"
-        },
-        "originMerge": "Message actuel",
-        "targetMerge": "Message précédent"
-      },
-      "noMatch": "Impossible de trouver un autre message de dégât correspondant."
     },
     "resourceTracker": {
       "header": {

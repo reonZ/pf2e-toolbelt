@@ -96,6 +96,16 @@
           "hint": "¿Deberían actualizarse también los escudos?"
         }
       },
+      "betterChat": {
+          "merge": {
+            "name": "Botón de fusión",
+            "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
+          },
+          "inject": {
+            "name": "Botón de inyección",
+            "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
+          }
+      },
       "betterEffectsPanel": {
         "title": "Panel de mejores efectos",
         "remove": {
@@ -266,17 +276,6 @@
           "hint": "¿Deberían los jugadores poder solicitar la identificación de los objetos?"
         }
       },
-      "mergeDamage": {
-        "title": "Fusionar daños",
-        "merge": {
-          "name": "Botón de fusión",
-          "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
-        },
-        "inject": {
-          "name": "Botón de inyección",
-          "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
-        }
-      },
       "resourceTracker": {
         "title": "Rastreador de recursos",
         "enabled": {
@@ -386,6 +385,17 @@
       "spell": {
         "header": "Está lanzando un conjuro...",
         "context": "Revelar conjuro a los jugadores"
+      }
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "split": "Volver a los mensajes originales",
+          "merge": "Fusionar con el mensaje de daño anterior",
+          "inject": "Inyectar daño al mensaje anterior"
+        },
+        "injected": "Se inyectó daño en este mensaje.",
+        "noMatch": "No se pudo encontrar otro mensaje de daño coincidente."
       }
     },
     "betterInventory": {
@@ -746,15 +756,6 @@
         "send-to-chat": "Enviar al chat",
         "title": "Rastreador de identificación de objetos"
       }
-    },
-    "mergeDamage": {
-      "buttons": {
-        "split": "Volver a los mensajes originales",
-        "merge": "Fusionar con el mensaje de daño anterior",
-        "inject": "Inyectar daño al mensaje anterior"
-      },
-      "injected": "Se inyectó daño en este mensaje.",
-      "noMatch": "No se pudo encontrar otro mensaje de daño coincidente."
     },
     "resourceTracker": {
       "header": {

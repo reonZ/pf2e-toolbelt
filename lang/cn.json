@@ -51,6 +51,16 @@
                     "hint": "是否自动更新盾牌。"
                 }
             },
+            "betterChat": {
+                "merge": {
+                    "name": "合并按钮",
+                    "hint": "为伤害信息添加一个按钮，允许它们与其他伤害消息合并数值。"
+                },
+                "inject": {
+                    "name": "注入按钮",
+                    "hint": "在伤害消息中添加一个按钮，允许它们被注入到上一个伤害消息中。"
+                }
+            },
             "betterInventory": {
                 "coins": {
                     "hint": "货币重量不被计入负载。",
@@ -155,17 +165,6 @@
                 "light": {
                     "name": "光源",
                     "hint": "若丢弃的物品会发光，则仅在战利品角色中存在物品时才会发光。"
-                }
-            },
-            "mergeDamage": {
-                "title": "合并伤害",
-                "merge": {
-                    "name": "合并按钮",
-                    "hint": "为伤害信息添加一个按钮，允许它们与其他伤害消息合并数值。"
-                },
-                "inject": {
-                    "name": "注入按钮",
-                    "hint": "在伤害消息中添加一个按钮，允许它们被注入到上一个伤害消息中。"
                 }
             },
             "giveth": {
@@ -473,6 +472,39 @@
             },
             "revealed": "揭示者"
         },
+        "betterChat": {
+            "mergeDamage": {
+                "buttons": {
+                    "merge": "与上一条伤害消息合并",
+                    "inject": "注入伤害至上一条伤害消息",
+                    "split": "拆分为原消息",
+                    "menu": {
+                        "inject": "[Shift] 打开伤害注入菜单",
+                        "merge": "[Shift] 打开伤害合并菜单"
+                    }
+                },
+                "noMatch": "无法找到另一条符合条件的伤害消息。",
+                "injected": "伤害已被注入该条消息",
+                "menu": {
+                    "inject-damage": {
+                        "double": "注入双倍伤害",
+                        "yes": "注入",
+                        "title": "伤害注入菜单",
+                        "full": "注入全部伤害",
+                        "half": "注入一半伤害"
+                    },
+                    "merge-damage": {
+                        "double": "合并双倍伤害",
+                        "full": "合并全部伤害",
+                        "half": "合并一半伤害",
+                        "title": "伤害合并菜单",
+                        "yes": "合并"
+                    },
+                    "originMerge": "当前消息",
+                    "targetMerge": "上一条消息"
+                }
+            }  
+        },
         "betterTemplate": {
             "target": {
                 "allies": "盟友",
@@ -528,37 +560,6 @@
                     "container": "{source} 传递了 {item} 与其中所有内容物给 {target}。",
                     "item": "{source} 传递了 {quantity} × {item} 给 {target}。"
                 }
-            }
-        },
-        "mergeDamage": {
-            "buttons": {
-                "merge": "与上一条伤害消息合并",
-                "inject": "注入伤害至上一条伤害消息",
-                "split": "拆分为原消息",
-                "menu": {
-                    "inject": "[Shift] 打开伤害注入菜单",
-                    "merge": "[Shift] 打开伤害合并菜单"
-                }
-            },
-            "noMatch": "无法找到另一条符合条件的伤害消息。",
-            "injected": "伤害已被注入该条消息",
-            "menu": {
-                "inject-damage": {
-                    "double": "注入双倍伤害",
-                    "yes": "注入",
-                    "title": "伤害注入菜单",
-                    "full": "注入全部伤害",
-                    "half": "注入一半伤害"
-                },
-                "merge-damage": {
-                    "double": "合并双倍伤害",
-                    "full": "合并全部伤害",
-                    "half": "合并一半伤害",
-                    "title": "伤害合并菜单",
-                    "yes": "合并"
-                },
-                "originMerge": "当前消息",
-                "targetMerge": "上一条消息"
             }
         },
         "resourceTracker": {

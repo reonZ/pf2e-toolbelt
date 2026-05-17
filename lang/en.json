@@ -141,6 +141,17 @@
                     }
                 }
             },
+            "betterChat": {
+                "title": "Better Chat Message",
+                "merge": {
+                    "name": "Merge Button",
+                    "hint": "Adds a button to damage messages allowing them to be merged with other damage messages."
+                },
+                "inject": {
+                    "name": "Inject Button",
+                    "hint": "Adds a button to damage messages allowing them to be injected to a previous damage message."
+                }
+            },
             "betterEffectsPanel": {
                 "title": "Better Effects Panel",
                 "remove": {
@@ -315,17 +326,6 @@
                     "hint": "Should players be able to request identification of items."
                 }
             },
-            "mergeDamage": {
-                "title": "Merge Damages",
-                "merge": {
-                    "name": "Merge Button",
-                    "hint": "Adds a button to damage messages allowing them to be merged with other damage messages."
-                },
-                "inject": {
-                    "name": "Inject Button",
-                    "hint": "Adds a button to damage messages allowing them to be injected to a previous damage message."
-                }
-            },
             "resourceTracker": {
                 "title": "Resource Tracker",
                 "enabled": {
@@ -467,6 +467,39 @@
             "overriden": "Overridden Cover",
             "standard": "Standard Cover",
             "wall": "Cover from Wall"
+        },
+        "betterChat": {
+            "mergeDamage": {
+                "buttons": {
+                    "inject": "Inject damage to previous message",
+                    "menu": {
+                        "inject": "[Shift] Open inject menu",
+                        "merge": "[Shift] Open merge menu"
+                    },
+                    "merge": "Merge with previous damage message",
+                    "split": "Split back to original messages"
+                },
+                "injected": "Damage was injected into this message",
+                "menu": {
+                    "inject-damage": {
+                        "double": "Inject double damage",
+                        "full": "Inject full damage",
+                        "half": "Inject half damage",
+                        "title": "Inject Menu",
+                        "yes": "Inject"
+                    },
+                    "merge-damage": {
+                        "double": "Merge double damage",
+                        "full": "Merge full damage",
+                        "half": "Merge half damage",
+                        "title": "Merge Menu",
+                        "yes": "Merge"
+                    },
+                    "originMerge": "Current Message",
+                    "targetMerge": "Previous Message"
+                },
+                "noMatch": "Couldn't find another matching damage message."
+            }
         },
         "betterInventory": {
             "improvised": {
@@ -891,37 +924,6 @@
                 "send-to-chat": "Send to Chat",
                 "title": "Item Identification Tracker"
             }
-        },
-        "mergeDamage": {
-            "buttons": {
-                "inject": "Inject damage to previous message",
-                "menu": {
-                    "inject": "[Shift] Open inject menu",
-                    "merge": "[Shift] Open merge menu"
-                },
-                "merge": "Merge with previous damage message",
-                "split": "Split back to original messages"
-            },
-            "injected": "Damage was injected into this message",
-            "menu": {
-                "inject-damage": {
-                    "double": "Inject double damage",
-                    "full": "Inject full damage",
-                    "half": "Inject half damage",
-                    "title": "Inject Menu",
-                    "yes": "Inject"
-                },
-                "merge-damage": {
-                    "double": "Merge double damage",
-                    "full": "Merge full damage",
-                    "half": "Merge half damage",
-                    "title": "Merge Menu",
-                    "yes": "Merge"
-                },
-                "originMerge": "Current Message",
-                "targetMerge": "Previous Message"
-            },
-            "noMatch": "Couldn't find another matching damage message."
         },
         "resourceTracker": {
             "header": {

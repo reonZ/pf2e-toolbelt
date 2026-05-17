@@ -86,6 +86,16 @@
           "hint": "Runas de reforço também devem ser adicionadas aos escudos?"
         }
       },
+      "betterChat": {
+        "merge": {
+          "name": "Botão Mesclar",
+          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam mescladas com outras mensagens de dano."
+        },
+        "inject": {
+          "name": "Injetar Botão",
+          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam injetadas em uma mensagem de dano anterior."
+        }
+      },
       "betterEffectsPanel": {
         "title": "Painel de Efeitos Melhorado",
         "remove": {
@@ -223,17 +233,6 @@
           "hint": "Os jogadores devem poder solicitar a identificação de itens."
         }
       },
-      "mergeDamage": {
-        "title": "Mesclar Danos",
-        "merge": {
-          "name": "Botão Mesclar",
-          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam mescladas com outras mensagens de dano."
-        },
-        "inject": {
-          "name": "Injetar Botão",
-          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam injetadas em uma mensagem de dano anterior."
-        }
-      },
       "resourceTracker": {
         "title": "Monitor de Recursos",
         "enabled": {
@@ -342,6 +341,17 @@
       "spell": {
         "header": "Está conjurando uma magia...",
         "context": "Revelar feitiço para jogadores"
+      }
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "split": "Dividir de volta para mensagens originais",
+          "merge": "Mesclar com mensagem de dano anterior",
+          "inject": "Injetar dano à mensagem anterior"
+        },
+        "injected": "Danos foram injetados nesta mensagem",
+        "noMatch": "Não foi possível encontrar outra mensagem de dano correspondente."
       }
     },
     "betterInventory": {
@@ -622,15 +632,6 @@
         "send-to-chat": "Enviar para o bate-papo",
         "title": "Monitor de Identificação de Itens"
       }
-    },
-    "mergeDamage": {
-      "buttons": {
-        "split": "Dividir de volta para mensagens originais",
-        "merge": "Mesclar com mensagem de dano anterior",
-        "inject": "Injetar dano à mensagem anterior"
-      },
-      "injected": "Danos foram injetados nesta mensagem",
-      "noMatch": "Não foi possível encontrar outra mensagem de dano correspondente."
     },
     "resourceTracker": {
       "header": {
