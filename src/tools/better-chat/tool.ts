@@ -62,7 +62,7 @@ class BetterChatTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    get api(): toolbelt.Api["mergeDamage"] {
+    get api(): toolbelt.Api["betterChat"] {
         return {
             injectDamageMessage: async (
                 previousMessage: ChatMessagePF2e,

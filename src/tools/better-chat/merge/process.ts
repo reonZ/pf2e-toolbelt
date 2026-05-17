@@ -286,8 +286,8 @@ type GroupedInstance = {
     term: RollTermData | GroupingData | null;
 };
 
-type MergeType = toolbelt.mergeDamage.MergeType;
-type MergeOptions = toolbelt.mergeDamage.MergeOptions;
+type MergeType = toolbelt.betterChat.mergeDamage.MergeType;
+type MergeOptions = toolbelt.betterChat.mergeDamage.MergeOptions;
 
 export { injectDamage, mergeDamages };
 export type { MergeOptions, MergeType };
