@@ -1,3 +1,10 @@
+# 3.49.0
+
+- add new `Better Chat Message` tool:
+  - convert previously `Merge Damages` tool into subsections of the new tool (associated settings have been reset)
+  - add new `Damage Indicator` user setting, which adds a colored display on damage messages showing how well you rolled compared to the min/max values
+  - fix not being able to inject damage messages with targets
+
 # 3.48.0
 
 - `Character Importer`:
