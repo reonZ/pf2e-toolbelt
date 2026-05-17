@@ -68,7 +68,7 @@ async function renderChatMessageMergeDamage(this: BetterChatTool, message: ChatM
                 if (isMerge && otherMessage.actor !== actor) continue;
 
                 const otherTargets = this.getMessageTargets(otherMessage);
-                if ((isMerge && arraysEqual(targets, otherTargets)) || !targets.length) {
+                if ((!isMerge && !targets.length) || arraysEqual(targets, otherTargets)) {
                     const mergeOptions = event.shiftKey ? await mergeMenu.call(this, action) : {};
                     if (!mergeOptions) return;
 
