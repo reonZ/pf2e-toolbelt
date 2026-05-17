@@ -143,6 +143,15 @@
             },
             "betterChat": {
                 "title": "Better Chat Message",
+                "average": {
+                    "name": "Damage Indicator",
+                    "hint": "Adds a colored display on damage messages showing how well you rolled compared to the min/max values.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "standalone": "Standalone Display",
+                        "background": "Dice Formula Background"
+                    }
+                },
                 "merge": {
                     "name": "Merge Button",
                     "hint": "Adds a button to damage messages allowing them to be merged with other damage messages."
