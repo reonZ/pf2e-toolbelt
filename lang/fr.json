@@ -647,7 +647,11 @@
           "title": "Sélectionner un fichier JSON",
           "yes": "Analyser le fichier"
         },
-        "success": "L'importation du personnage a réussi."
+        "success": "L'importation du personnage a réussi.",
+        "url": {
+          "title": "Saisissez l'ID JSON du personnage",
+          "yes": "Analyser les données URL"
+        }
       },
       "sheet": {
         "level": {
@@ -657,7 +661,8 @@
         "import": {
           "code": "À partir du code",
           "delete": "Supprimer les données d'importation",
-          "file": "À partir d'un fichier"
+          "file": "À partir d'un fichier",
+          "url": "Depuis l'URL"
         },
         "data": {
           "core": {
