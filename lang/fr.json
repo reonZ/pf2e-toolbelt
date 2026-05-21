@@ -142,6 +142,16 @@
         }
       },
       "betterChat": {
+        "title": "Message de conversation amélioré",
+        "average": {
+          "name": "Indicateur de dégâts",
+          "hint": "Colorie les messages de dégâts pour afficher la qualité de votre jet de dés comparé aux valeurs min/max.",
+          "choices": {
+            "disabled": "Désactivé",
+            "standalone": "Affichage autonome",
+            "background": "Arrière plan de la formule des dés"
+          }
+        },
         "merge": {
           "name": "Bouton de fusion",
           "hint": "Ajoute un bouton aux messages de dégâts leur permettant d'être fusionnés avec les autres messages de dégâts."
