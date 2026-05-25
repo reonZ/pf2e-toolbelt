@@ -13,7 +13,7 @@
     ],
     "compatibility": {
         "minimum": "14.360",
-        "verified": "14.361",
+        "verified": "14.363",
         "maximum": "14"
     },
     "socket": true,
