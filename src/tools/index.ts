@@ -17,6 +17,7 @@ export * from "./droppeth";
 export * from "./giveth";
 export * from "./hero-actions";
 export * from "./identify";
+export * from "./perception";
 export * from "./resource-tracker";
 export * from "./roll-tracker";
 export * from "./share-data";
