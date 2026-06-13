@@ -25,7 +25,16 @@ class BetterToolTool extends ModuleTool<ToolSettings> {
 
         const mouse = canvas.mousePosition;
         const regions = R.reverse(canvas.scene.regions.contents);
-        const region = regions.find((region) => region.isOwner && region.polygonTree.testPoint(mouse));
+
+        const region = regions.find((region) => {
+            return (
+                region.object?.isVisible &&
+                !region.object.isPreview &&
+                !region.locked &&
+                region.isOwner &&
+                region.polygonTree.testPoint(mouse)
+            );
+        });
 
         region?.delete();
     }
