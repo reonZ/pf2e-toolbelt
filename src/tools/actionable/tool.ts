@@ -464,8 +464,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         );
 
         await Promise.all(
-            R.values(virtualSpells).map(async ({ max, parent, ruleIndex }) => {
-                if (!max) return;
+            R.values(virtualSpells).map(async ({ max, parent, recharge, ruleIndex }) => {
+                if (!max || !recharge) return;
 
                 const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
                 const update = rule.updateData({ value: max }, true);

@@ -99,6 +99,11 @@ function createItemCastRuleElement() {
                     max: 10,
                     initial: undefined,
                 }),
+                recharge: new fields.BooleanField({
+                    required: false,
+                    nullable: false,
+                    initial: true,
+                }),
                 statistic: new fields.ArrayField(
                     new fields.StringField({
                         required: true,
@@ -223,6 +228,7 @@ function createItemCastRuleElement() {
                 item,
                 max: this.resolvedMax,
                 parent: this.item,
+                recharge: this.recharge,
                 ruleIndex: this.sourceIndex as number,
                 spellId,
             };
@@ -414,7 +420,7 @@ function createItemCastRuleElement() {
 
 function generateItemCastRuleSource(
     spell: SpellPF2e,
-    { attribute, dc, max, rank, statistic, tradition }: ItemCastRuleSourceData,
+    { attribute, dc, max, rank, recharge = true, statistic, tradition }: ItemCastRuleSourceData,
 ): ItemCastRuleSource {
     const uuid = spell.uuid;
     const spellSource = spell.toObject() as SpellSource & { _id: string };
@@ -434,6 +440,7 @@ function generateItemCastRuleSource(
         key: "ItemCast",
         max,
         rank,
+        recharge,
         statistic: splitListString(statistic ?? ""),
         tradition,
         uuid,
@@ -464,6 +471,7 @@ type BaseItemCastSchema = {
     dc: ResolvableValueField<false, true, false>;
     max: ResolvableValueField<false, true, false>;
     rank: fields.NumberField<OneToTen, OneToTen, false, true, false>;
+    recharge: fields.BooleanField<boolean, boolean, false, false, true>;
     statistic: fields.ArrayField<
         fields.StringField<string, string, true, false>,
         string[],

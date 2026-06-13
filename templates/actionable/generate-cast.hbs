@@ -8,6 +8,10 @@
             {{@root.i18n 'max'}}
             <input type="number" name="max" min="1" step="1">
         </label>
+        <label class="recharge" {{{@root.i18n.tooltip 'recharge'}}}>
+            <i class="fa-solid fa-bed"></i>
+            <input type="checkbox" name="recharge" checked>
+        </label>
         <button type="button" data-action="add-rule" {{{@root.i18n.tooltip 'add'}}}>
             <i class="fa-solid fa-plus"></i>
         </button>
