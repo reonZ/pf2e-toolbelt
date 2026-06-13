@@ -28,6 +28,12 @@
                     "hint": "Key held while clicking on the scene to teleport all selected tokens. Also unselect the tokens when pressing the keybind to give an unobstructed vision over the whole scene."
                 }
             },
+            "betterTool": {
+                "removeRegion": {
+                    "name": "Remove Region",
+                    "hint": "Delete the first region found under your cursor."
+                }
+            },
             "droppeth": {
                 "droppeth": {
                     "name": "Droppeth Modifier",
@@ -236,6 +242,9 @@
                     "name": "Sort List Button",
                     "hint": "Adds sorting buttons to different lists on the actor sheet."
                 }
+            },
+            "betterTool": {
+                "title": "Better Foundry Tool"
             },
             "betterTrade": {
                 "title": "Better Trade",

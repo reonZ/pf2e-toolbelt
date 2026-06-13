@@ -10,6 +10,7 @@ export * from "./better-inventory";
 export * from "./better-merchant";
 export * from "./better-movement";
 export * from "./better-sheet";
+export * from "./better-tool";
 export * from "./better-trade";
 export * from "./character-importer";
 export * from "./condition-manager";
