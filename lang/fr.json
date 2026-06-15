@@ -28,6 +28,12 @@
           "hint": "Maintenez la touche tout en cliquant sur la scène pour téléporter tous les jetons sélectionnés. Désélectionnez également les jetons en appuyant sur la touche liée pour une vision dégagée sur la totalité de la scène."
         }
       },
+      "betterTool": {
+        "removeRegion": {
+          "name": "Supprimer une région",
+          "hint": "Supprime la première région trouvée sous votre curseur."
+        }
+      },
       "droppeth": {
         "droppeth": {
           "name": "Modificateur pour le dépôt sur la scène",
@@ -236,6 +242,9 @@
           "name": "Bouton de tri de la liste",
           "hint": "Ajoute des boutons de tri à différentes listes de la fiche d'acteur."
         }
+      },
+      "betterTool": {
+        "title": "Outil Foundry amélioré"
       },
       "betterTrade": {
         "title": "Meilleur commerce",
