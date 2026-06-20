@@ -1,3 +1,15 @@
+# 3.50.0
+
+- `Item Spell Casting`:
+  - add new `recharge` property to the rule element (default `true`)
+    - if set to `false`, the charges will not be recharged during long rest
+- `Damage Indicator`:
+  - add sliver of background color when at min damage (instead of having the background be completely empty)
+- add new `Remove Region` keybind which deletes the first found region under your cursor when pressed
+  - only regions that are currently visible, not locked and owned can be removed that way
+  - if multiple regions are on top of each other, the one created last is picked first
+  - this keybind isn't gated behind any setting, it works as soon as it is set
+
 # 3.49.0
 
 - add new `Better Chat Message` tool:
