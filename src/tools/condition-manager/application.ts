@@ -151,15 +151,6 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
     }
 
     protected _activateListeners(html: HTMLElement) {
-        type EventChangeName =
-            | "label"
-            | "origin"
-            | "system.badge.value"
-            | "system.duration.unit"
-            | "system.duration.expiry"
-            | "system.duration.value"
-            | "system.unidentified";
-
         addListenerAll(html, "[name]", "change", (el: HTMLInputElement) => {
             const input = el.name as EventChangeName;
 
@@ -190,6 +181,15 @@ class ConditionManager extends ModuleToolApplication<ConditionManagerTool> {
         });
     }
 }
+
+type EventChangeName =
+    | "label"
+    | "origin"
+    | "system.badge.value"
+    | "system.duration.unit"
+    | "system.duration.expiry"
+    | "system.duration.value"
+    | "system.unidentified";
 
 type RenderContext = fa.ApplicationRenderContext & {
     isGM: boolean;

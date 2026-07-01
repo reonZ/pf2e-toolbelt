@@ -1,8 +1,124 @@
+# 3.50.0
+
+- `Item Spell Casting`:
+  - add new `recharge` property to the rule element (default `true`)
+    - if set to `false`, the charges will not be recharged during long rest
+- `Damage Indicator`:
+  - add sliver of background color when at min damage (instead of having the background be completely empty)
+- add new `Remove Region` keybind which deletes the first found region under your cursor when pressed
+  - only regions that are currently visible, not locked and owned can be removed that way
+  - if multiple regions are on top of each other, the one created last is picked first
+  - this keybind isn't gated behind any setting, it works as soon as it is set
+
+# 3.49.0
+
+- add new `Better Chat Message` tool:
+  - convert previously `Merge Damages` tool into subsections of the new tool (associated settings have been reset)
+  - add new `Damage Indicator` user setting, which adds a colored display on damage messages showing how well you rolled compared to the min/max values
+  - fix not being able to inject damage messages with targets
+
+# 3.48.0
+
+- `Character Importer`:
+  - all the following changes need a fresh import of character data
+  - add support for alternate ancestry boosts
+  - add support for `Custom Feat Choice` pathbuilder feature
+    - those feats will now be added as bonus instead of trying to replace others at the same level
+  - replace the `Import From Code` with `Import From Url`
+    - all you have to do is provide the pathbuilder json id
+    - the id is also saved on the actor for further uses
+- `Target Helper`:
+  - add spacing between regular and splash buttons
+
+# 3.47.2
+
+- `Target Helper`:
+  - allow third party to feed an empty array of targets to the message
+
+# 3.47.1
+
+- `Better Merchant`:
+  - fix not being able to use the `Price` fields for the filters
+
+# 3.47.0
+
+- convert some remaining deprecated v14 stuff
+- `Item Spell Casting`:
+  - the `statistic` property now accepts a list of slugs, the module will pick the first found on the actor
+    - you can use comma separated slugs in the `Item Cast` generator popup window
+  - fix spell attack rolls being regular checks instead when using manual statistics
+- `Merge Damage`:
+  - you can now `inject` damage from a message that has no origin actor or a different actor than the message before
+  - you can now `inject` damage from a message that has no targets into another that has some (won't allow different targets still)
+  - fix merge/inject api function merging messages backward
+
+# 3.46.0
+
+- `Item Spell Casting`:
+  - revert removal of support for `consumable` items
+    - the feature will not work with scrolls & wands (because those are fully handled by the system)
+    - the `max` property will have no impact on the feature, the module will instead use the parent item's uses
+    - casting the spell will consume one of the parent's use and delete the parent item if it has the `Destroy on Use` flag when reaching `0`
+  - add proper support for `ammo` items
+    - the ammo must be added to a weapon for the spell to be generated
+    - the spell is castable only if the weapon is equipped/invested
+    - the `max` property will have no impact on the feature
+    - casting the spell will **NOT** consume any ammo, leaving it to the system to handle it (or the user)
+    - consuming an ammo will **NOT** automatically trigger the spell leaving it to the user to decide when and if they want to
+- `Resource Tracker`:
+  - fix shared world resource icon
+
+# 3.45.0
+
+- `Actionable`:
+  - add resolve support for `dc` and `max` properties (e.g. `"10 + @actor.level"`) in `ItemCast` rule element
+  - `Item Spell Casting` no longer works on consumables
+- `Anonymous`:
+  - fix check messages originating from an action being partially anonymized
+
+# 3.44.0
+
+- this is a system `8.1.0` release
+- remove the `Underground` tool from the module as it breaks the multi levels backgrounds
+- fix wrapper issue due to system changes in the latest update
+
+# 3.43.2
+
+- `Hero Action`:
+  - add fix for foundry misinterpreting the `Hero Deck` table results type preventing drawing new hero actions
+
+# 3.43.1
+
+- `Roll Tracker`:
+  - fix multi rolls (e.g. `2d20`) being recorded as a single one which results in outrageous (and non displayable) numbers being saved
+    - such rolls will now be recorded as individual instances by the module with the same metadata
+
+# 3.43.0
+
+- make the necessary changes to support the `PF2e Anachronism` and `SF2e Anachronism` modules
+- `Character Importer`:
+  - now also look into the anachronism modules compendium packs, which means that you can import a `pf2e` character into a world that runs on the `sf2e` system and vice versa
+  - fix calculator icon
+- `Droppeth`:
+  - fix droppeth token always being created on the base level
+
+# 3.42.0
+
+- this is a foundry `14.360` and system `8.0.3` release
+- update to be compatible with the various v14 changes
+- remove `Better Template` tool
+- `Better Inventory`:
+  - add missing `ammo` to the list of mergeable items in the `Merge Items` feature
+- `Target Helper`:
+  - add new `Template Helper` setting which replace the former `Better Template` tool
+    - the feature no longer triggers for custom "templates" placed on the board due to templates no longer existing in foundry and now being done using `Scene Region` (only way to differentiate them is if they have a system context)
+  - make the necessary changes to match the new system reroll hook workflow
+  - minor row headers styling update
+
 # 3.41.1
 
 - `Actionable`:
-  - `Item Spell Casting`:
-    - improve rule generation when using the `Generate 'Item Cast' rules from description`
+  - improve rule generation when using the `Generate 'Item Cast' rules from description` of `Item Spell Casting`
 - `Better Merchant`:
   - fix not being able to purchase infinite services
 

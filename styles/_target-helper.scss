@@ -134,6 +134,13 @@
                     margin: -1px 0.3em 0 0.4em;
                 }
 
+                .observe,
+                .roll,
+                .reroll {
+                    display: flex;
+                    align-items: center;
+                }
+
                 .degree,
                 i.die,
                 i.ban,
@@ -170,6 +177,7 @@
                 i {
                     &.die {
                         font-size: 0.95em;
+                        margin-top: 0.5px;
                     }
 
                     &.rotate {
@@ -180,11 +188,7 @@
                     &.reroll {
                         font-size: 0.9em;
                         opacity: 0.8;
-                        margin-right: 2px;
-
-                        &.fa-dice {
-                            margin-right: 1px;
-                        }
+                        margin-top: 2px;
                     }
 
                     &.list {
@@ -273,6 +277,10 @@
         &:last-child {
             .damage-application {
                 margin-bottom: 0;
+
+                + .damage-application {
+                    margin-top: 2px;
+                }
             }
         }
     }
@@ -378,6 +386,58 @@
                 width: 1.6em;
                 text-align: center;
             }
+        }
+    }
+}
+
+.application.dialog.pf2e-toolbelt.pf2e-toolbelt-template-helper {
+    min-width: revert;
+
+    .window-header {
+        flex: 1 2em;
+        --button-size: 12px;
+    }
+
+    .window-content {
+        padding: 0.1em 0.6em 0.5em;
+    }
+
+    .dialog-form {
+        gap: 0.3em;
+    }
+
+    .dialog-content {
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-columns: auto auto;
+        gap: 0 1em;
+        align-items: center;
+        font-size: 0.9em;
+
+        label {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+
+            input {
+                &[type="radio"] {
+                    --checkbox-size: 13px;
+
+                    margin-inline: 0.3em;
+                }
+
+                &[type="checkbox"] {
+                    --checkbox-size: 16px;
+                }
+            }
+        }
+    }
+
+    .form-footer {
+        button {
+            --button-size: 1.5rem;
+
+            padding: 0;
         }
     }
 }

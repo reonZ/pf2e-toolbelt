@@ -125,6 +125,19 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         return zTimedEvents.safeParse(this.settings.sessions).data ?? {};
     }
 
+    get canRecord(): boolean {
+        if (MODULE.isDebug) return true;
+
+        let nbUsers = 0;
+
+        for (const user of game.users) {
+            if (user.active) nbUsers++;
+            if (nbUsers > 1) return true;
+        }
+
+        return false;
+    }
+
     init(isGM: boolean): void {
         if (!this.settings.enabled) return;
 
@@ -143,8 +156,14 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         this.settings.userRolls = rolls;
     }
 
-    canRecord(): boolean {
-        return MODULE.isDebug || game.users.filter((user) => user.active).length > 1;
+    addRollsWithValues(values: number[], roll: Omit<UserRoll, "value">) {
+        const rolls = this.settings.userRolls.slice();
+
+        for (const value of values) {
+            rolls.push({ ...roll, value });
+        }
+
+        this.settings.userRolls = rolls;
     }
 
     getUserRolls(userid: string): UserRoll[] {
@@ -155,9 +174,9 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         );
     }
 
-    async togglePause(paused?: boolean) {
+    async togglePause(paused: boolean = !this.settings.paused) {
         if (!game.user.isGM) return;
-        await this.setSetting("paused", paused ?? !this.settings.paused);
+        await this.setSetting("paused", paused);
         this.localize.info("confirm", paused ? "pause" : "play");
     }
 
@@ -262,7 +281,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
 
         tokenTools.rollTracker = {
             button: true,
-            icon: "fa-sharp-duotone fa-solid fa-dice-d20",
+            icon: "fa-sharp fa-solid fa-dice-d20",
             name: "rollTracker",
             order: Object.keys(tokenTools).length,
             title: settingPath("rollTracker.title"),
@@ -278,11 +297,11 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
     }
 
     #onCreateChatMessage(message: ChatMessagePF2e, _data: object, userId: string) {
-        if (userId !== game.userId || !this.canRecord()) return;
+        if (userId !== game.userId || !this.canRecord) return;
 
-        const die = message.rolls[0]?.dice[0];
-        const value = die?.total;
-        if (!die || die.faces !== 20 || !R.isNumber(value)) return;
+        const die = message.rolls.at(0)?.dice[0];
+        const values = die?.values.filter(R.isNumber);
+        if (!die || die.faces !== 20 || !values?.length) return;
 
         const user = game.user;
         const context = message.flags[SYSTEM.id].context;
@@ -290,8 +309,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         if (context && isCheckContextFlag(context)) {
             if (!user.isGM && context.rollMode === "selfroll") return;
 
-            this.addRoll({
-                value,
+            this.addRollsWithValues(values, {
                 time: Date.now(),
                 type: context.type,
                 isPrivate: !tupleHasValue(["publicroll", "roll"], context.rollMode),
@@ -306,8 +324,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
         } else if (message.rolls.length === 1 && message.rolls[0].dice.length === 1) {
             if (!user.isGM && !message.blind && message.whisper.length === 1 && message.whisper[0] === user.id) return;
 
-            this.addRoll({
-                value,
+            this.addRollsWithValues(values, {
                 time: Date.now(),
                 type: "roll",
                 isPrivate: message.blind || message.whisper.length > 0,
@@ -320,7 +337,7 @@ class RollTrackerTool extends ModuleTool<RollTrackerSettings> {
     }
 
     #onRerollSave({ newRoll, data, target }: toolbelt.targetHelper.RerollSaveHook) {
-        if (!this.canRecord()) return;
+        if (!this.canRecord) return;
 
         const value = newRoll.dice[0]?.total;
         if (!R.isNumber(value)) return;

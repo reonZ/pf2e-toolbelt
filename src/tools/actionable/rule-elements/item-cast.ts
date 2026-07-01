@@ -13,25 +13,31 @@ import {
     OneToTen,
     PhysicalItemPF2e,
     R,
+    ResolvableValueField,
     RuleElement,
     RuleElementOptions,
     RuleElementSchema,
     RuleElementSource,
     SpellPF2e,
     SpellSource,
+    getRuleElementCls,
+    isCastConsumable,
+    ruleElementResolveField,
     setHasElement,
 } from "foundry-helpers";
 import { MAGIC_TRADITIONS, SourceFromSchema } from "foundry-helpers/dist";
+import { splitListString } from "foundry-helpers/src";
 import { actionable } from "..";
 import fields = foundry.data.fields;
 
 function createItemCastRuleElement() {
-    const RuleElementCls = game.pf2e.RuleElement;
-
-    class ItemCastRuleElement extends RuleElementCls<ItemCastSchema> {
+    class ItemCastRuleElement extends getRuleElementCls()<ItemCastSchema> {
         // static autogenForms = true;
+        #isAmmo: boolean = false;
+        #isConsumable: boolean = false;
+        #isWeapon: boolean = false;
 
-        constructor(data: ItemCastSource, options: RuleElementOptions) {
+        constructor(data: RuleElementSource, options: RuleElementOptions) {
             data.priority ??= 99;
             data.requiresEquipped = false;
             data.requiresInvestment = false;
@@ -40,6 +46,21 @@ function createItemCastRuleElement() {
 
             if (!this.item.isOfType("physical")) {
                 this.failValidation("parent item must be physical");
+            }
+
+            if (this.item.isOfType("consumable")) {
+                this.#isConsumable = true;
+
+                if (isCastConsumable(this.item)) {
+                    this.failValidation("parent item cannot be a scroll/wand");
+                }
+            } else {
+                this.#isAmmo = this.item.isOfType("ammo");
+                this.#isWeapon = this.item.isOfType("weapon");
+            }
+
+            if (!R.isIncludedIn(this.dc, [null, undefined]) && !R.isIncludedIn(typeof this.dc, ["string", "number"])) {
+                this.failValidation("dc must be a number, string, null or undefined");
             }
 
             const uuid = this.resolveInjectedProperties(this.uuid);
@@ -60,18 +81,14 @@ function createItemCastRuleElement() {
                     initial: undefined,
                 }),
                 data: new fields.ObjectField(),
-                dc: new fields.NumberField({
+                dc: ruleElementResolveField({
                     required: false,
                     nullable: true,
-                    integer: true,
-                    min: 1,
                     initial: undefined,
                 }),
-                max: new fields.NumberField({
+                max: ruleElementResolveField({
                     required: false,
                     nullable: true,
-                    integer: true,
-                    min: 0,
                     initial: undefined,
                 }),
                 rank: new fields.NumberField<OneToTen, OneToTen, false, true, false>({
@@ -82,12 +99,24 @@ function createItemCastRuleElement() {
                     max: 10,
                     initial: undefined,
                 }),
-                statistic: new fields.StringField({
+                recharge: new fields.BooleanField({
                     required: false,
-                    nullable: true,
-                    blank: false,
-                    initial: undefined,
+                    nullable: false,
+                    initial: true,
                 }),
+                statistic: new fields.ArrayField(
+                    new fields.StringField({
+                        required: true,
+                        nullable: false,
+                        blank: false,
+                        initial: undefined,
+                    }),
+                    {
+                        required: false,
+                        nullable: true,
+                        initial: undefined,
+                    },
+                ),
                 tradition: new fields.StringField({
                     required: false,
                     nullable: true,
@@ -104,11 +133,63 @@ function createItemCastRuleElement() {
             };
         }
 
+        get isConsumable(): boolean {
+            return this.#isConsumable;
+        }
+
+        get isAmmo(): boolean {
+            return this.#isAmmo;
+        }
+
+        get isWeapon(): boolean {
+            return this.#isWeapon;
+        }
+
+        get resolvedMax(): number | undefined {
+            if (this.isAmmo) {
+                return undefined;
+            }
+
+            if (this.isConsumable) {
+                return (this.item as ConsumablePF2e<CharacterPF2e>).uses.max;
+            }
+
+            switch (typeof this.max) {
+                case "number":
+                    return Math.max(this.max, 0);
+                case "string":
+                    const resolved = Number(this.resolveValue(this.max));
+                    return Math.max(Math.trunc(resolved), 0);
+                default:
+                    return undefined;
+            }
+        }
+
+        get resolvedDc(): number | undefined {
+            switch (typeof this.dc) {
+                case "number":
+                    return Math.max(this.dc, 1);
+                case "string":
+                    const resolved = Number(this.resolveValue(this.dc));
+                    return Math.max(Math.trunc(resolved), 1);
+                default:
+                    return undefined;
+            }
+        }
+
         get usableMax(): number {
-            return this.max || 1;
+            return this.resolvedMax || 1;
         }
 
         get usableValue(): number {
+            if (this.isAmmo) {
+                return 1;
+            }
+
+            if (this.isConsumable) {
+                return (this.item as ConsumablePF2e<CharacterPF2e>).uses.value;
+            }
+
             const max = this.usableMax;
             return Math.clamp(this.data.value ?? max, 0, max);
         }
@@ -124,24 +205,51 @@ function createItemCastRuleElement() {
                 return this.#setData();
             }
 
-            if (this.test()) {
-                const entryId = this.data.entryId as string;
-                const spellId = this.data.spell?._id as string;
-                const item = this.createConsumable();
+            if (!this.test()) return;
 
-                const data: VirtualSpellData = {
-                    ...R.pick(this, ["attribute", "dc", "max", "statistic", "tradition"]),
-                    entryId,
-                    item,
-                    parent: this.item,
-                    ruleIndex: this.sourceIndex as number,
-                    spellId,
-                    value: this.data.value,
-                };
+            const entryId = this.data.entryId as string;
+            const spellId = this.data.spell?._id as string;
+            const existAmmo = this.isWeapon && actionable.getInMemory<VirtualSpellData>(this.actor, "ammos", spellId);
 
-                actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, data);
-                actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, data);
+            // we are a weapon and found existing ammo, we set it up in place of the weapon
+            if (existAmmo) {
+                existAmmo.parent = this.item;
+                actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, existAmmo);
+                actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, existAmmo);
+                return;
             }
+
+            const item = this.createConsumable();
+
+            const data: VirtualSpellData = {
+                ...R.pick(this, ["attribute", "statistic", "tradition"]),
+                dc: this.resolvedDc,
+                entryId,
+                item,
+                max: this.resolvedMax,
+                parent: this.item,
+                recharge: this.recharge,
+                ruleIndex: this.sourceIndex as number,
+                spellId,
+            };
+
+            if (this.isAmmo) {
+                actionable.setInMemory<VirtualSpellData>(this.actor, "ammos", spellId, data);
+
+                const existWeapon = actionable.getInMemory<VirtualSpellData>(this.actor, "spells", spellId);
+
+                if (existWeapon?.parent.isOfType("weapon")) {
+                    // we replace this parent with the found weapon parent, making it looks like the RE is on the weapon
+                    data.parent = existWeapon.parent;
+                } else {
+                    // we are an ammo and haven't found an already existing weapon, so we skip
+                    // the idea is that parentless ammo will never generate the spell
+                    return;
+                }
+            }
+
+            actionable.setInMemory<VirtualSpellData>(this.actor, "spells", spellId, data);
+            actionable.setInMemory<VirtualSpellData>(this.actor, "spellcasting", entryId, data);
         }
 
         test(rollOptions?: string[] | Set<string> | undefined): boolean {
@@ -208,11 +316,21 @@ function createItemCastRuleElement() {
                     return;
                 }
 
-                // infinite cast
-                if (!this.max) return;
+                if (this.isConsumable) {
+                    // we consume parent instead of using spell uses
+                    const parent = this.item as ConsumablePF2e<CharacterPF2e>;
+                    const newValue = Math.max(this.usableValue - thisMany, 0);
 
-                const newValue = Math.max(this.usableValue - thisMany, 0);
-                await this.updateData({ value: newValue });
+                    if (newValue < 1 && parent.system.uses.autoDestroy) {
+                        await parent.delete();
+                    } else {
+                        await parent.update({ "system.uses.value": newValue });
+                    }
+                } else if (this.resolvedMax) {
+                    // non infinite cast
+                    const newValue = Math.max(this.usableValue - thisMany, 0);
+                    await this.updateData({ value: newValue });
+                }
             };
 
             return item;
@@ -280,9 +398,10 @@ function createItemCastRuleElement() {
 
             rule.data.spell = source as SpellSource & { _id: string };
 
-            if (this.max && (!R.isNumber(rule.data.value) || rule.data.value > this.max)) {
-                rule.data.value = this.max;
-            } else if (!this.max && R.isNumber(rule.data.value)) {
+            const max = this.resolvedMax;
+            if (max && (!R.isNumber(rule.data.value) || rule.data.value > max)) {
+                rule.data.value = max;
+            } else if (!max && R.isNumber(rule.data.value)) {
                 delete rule.data.value;
             }
 
@@ -301,7 +420,7 @@ function createItemCastRuleElement() {
 
 function generateItemCastRuleSource(
     spell: SpellPF2e,
-    { attribute, dc, max, rank, statistic, tradition }: ItemCastRuleSourceData,
+    { attribute, dc, max, rank, recharge = true, statistic, tradition }: ItemCastRuleSourceData,
 ): ItemCastRuleSource {
     const uuid = spell.uuid;
     const spellSource = spell.toObject() as SpellSource & { _id: string };
@@ -321,7 +440,8 @@ function generateItemCastRuleSource(
         key: "ItemCast",
         max,
         rank,
-        statistic,
+        recharge,
+        statistic: splitListString(statistic ?? ""),
         tradition,
         uuid,
     };
@@ -330,12 +450,16 @@ function generateItemCastRuleSource(
 interface ItemCastRuleElement extends RuleElement<ItemCastSchema>, ModelPropsFromRESchema<ItemCastSchema> {
     get actor(): CharacterPF2e;
     get item(): PhysicalItemPF2e<CharacterPF2e>;
+    get resolvedDc(): number | undefined;
+    get resolvedMax(): number | undefined;
+    get usableMax(): number;
+    get usableValue(): number;
     updateData(changes: ItemCastUpdateDataArgs, sourceOnly: true): EmbeddedDocumentUpdateData | undefined;
-    updateData(changes: ItemCastUpdateDataArgs, sourceOnly?: boolean): Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+    updateData(changes: ItemCastUpdateDataArgs, sourceOnly?: boolean): Promise<ItemPF2e<CharacterPF2e>> | undefined;
     updateData(
         changes: ItemCastUpdateDataArgs,
         sourceOnly?: boolean,
-    ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>[]> | undefined;
+    ): EmbeddedDocumentUpdateData | Promise<ItemPF2e<CharacterPF2e>> | undefined;
 }
 
 type ItemCastSource = Prettify<RuleElementSource & SourceFromSchema<BaseItemCastSchema>>;
@@ -344,10 +468,18 @@ type BaseItemCastSchema = {
     attribute: fields.StringField<AttributeString, AttributeString, false, true, false>;
     data: fields.ObjectField<ItemCastRuleData>;
     /** if no static dc, we use existing entries */
-    dc: fields.NumberField<number, number, false, true, false>;
-    max: fields.NumberField<number, number, false, true, false>;
+    dc: ResolvableValueField<false, true, false>;
+    max: ResolvableValueField<false, true, false>;
     rank: fields.NumberField<OneToTen, OneToTen, false, true, false>;
-    statistic: fields.StringField<string, string, false, true, false>;
+    recharge: fields.BooleanField<boolean, boolean, false, false, true>;
+    statistic: fields.ArrayField<
+        fields.StringField<string, string, true, false>,
+        string[],
+        string[],
+        false,
+        true,
+        false
+    >;
     tradition: fields.StringField<MagicTradition, MagicTradition, false, true, false>;
     uuid: fields.StringField<ItemUUID, ItemUUID, true, false, false>;
 };

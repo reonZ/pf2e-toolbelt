@@ -53,6 +53,7 @@ function zFeat() {
 
     return zImportedEntry("feat").extend({
         awarded: z.boolean().default(false),
+        extra: z.boolean().default(false),
         level: z.number().min(1).multipleOf(1).default(1),
         category: z.enum(categories),
         parent: z
@@ -119,6 +120,7 @@ function zSpellcastingEntry() {
 function zCharacterImport() {
     return z.object({
         age: z.string().default(""),
+        alternativeBoosts: z.boolean().default(false),
         attributes: zAttributes,
         containers: z.array(zContainer).prefault([]),
         currencies: zCurrencies(),

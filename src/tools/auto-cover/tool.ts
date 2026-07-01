@@ -30,14 +30,13 @@ import {
     COVER_VALUES,
     CoverHighlightRenderer,
     CoverLevel,
-    drawDebugLine,
     getRectEdges,
-    lineIntersect,
     RectEdge,
     SIZES,
     spreadToToken,
     tokenToSpread,
 } from ".";
+import { drawDebugLine, lineIntersect } from "tools";
 
 const CREATURE_SETTINGS = ["disabled", "cross", "zero", "ten", "twenty"] as const;
 
@@ -49,7 +48,7 @@ const WALL_INTERSECTIONS_SETTING = [
     "corner-center",
 ] as const;
 
-const COVER_UUID = SYSTEM.uuid(
+const COVER_UUID = SYSTEM.itemUuid(
     "Compendium.pf2e.other-effects.Item.I9lfZUiCwMiGogVi",
     "Compendium.sf2e.other-effects.Item.I9lfZUiCwMiGogVi",
 );
@@ -156,7 +155,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const debug = MODULE.isDebug;
 
         if (debug) {
-            this.clearDebug();
+            canvas.controls.debug.clear();
         }
 
         if (this.intersectsWithWall(origin, target, debug)) {
@@ -280,10 +279,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
 
         return cover;
-    }
-
-    clearDebug() {
-        canvas.controls.debug.clear();
     }
 
     #tokenRefreshVisibility(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {

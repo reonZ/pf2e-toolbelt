@@ -61,6 +61,7 @@ import {
     SpellPF2e,
     SpellSheetPF2e,
     Statistic,
+    StatisticData,
     SYSTEM,
     toggleHooksAndWrappers,
     toggleSummary,
@@ -343,7 +344,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     #onRenderPhysicalItemSheetPF2e(sheet: PhysicalItemSheetPF2e<PhysicalItemPF2e<CharacterPF2e>>, $html: JQuery) {
-        if (!sheet.isEditable) return;
+        if (!sheet.isEditable || sheet.item.isOfType("consumable")) return;
 
         const actor = sheet.actor;
         if (!actor?.isOfType("character")) return;
@@ -378,7 +379,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const spell = parent.embeddedSpell;
             if (!spell) continue;
 
-            const actorStatistic = data.statistic ? actor.getStatistic(data.statistic) : null;
+            const actorStatistic = getFirstStatistic(actor, data.statistic);
             const dc = !actorStatistic && data.dc;
             const existingEntry = !actorStatistic && !dc ? getExistingSpellcastingEntry(actor, spell, parent) : null;
             if (!actorStatistic && !dc && !existingEntry) return;
@@ -387,7 +388,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             const tradition = data.tradition ?? existingEntry?.tradition ?? spell.traditions.first();
 
             const statistic =
-                actorStatistic ??
+                this.#extendActorStatistic(actor, actorStatistic, tradition) ??
                 existingEntry?.statistic ??
                 this.#createSpellcastingStatistic(actor, attribute, tradition, dc as number);
 
@@ -463,8 +464,8 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         );
 
         await Promise.all(
-            R.values(virtualSpells).map(async ({ max, parent, ruleIndex }) => {
-                if (!max) return;
+            R.values(virtualSpells).map(async ({ max, parent, recharge, ruleIndex }) => {
+                if (!max || !recharge) return;
 
                 const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
                 const update = rule.updateData({ value: max }, true);
@@ -656,7 +657,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
             const template = max
                 ? `<span class="spell-slots-input">
-                <input type="number" value="${item.uses.value}" placeholder="0" />
+                <input type="number" value="${item.uses.value}" min="0" max="${max}" placeholder="0" />
             </span>
             <span class="slash">/</span>
             <span class="spell-max-input">
@@ -686,19 +687,30 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         parent: PhysicalItemPF2e<CharacterPF2e>,
         ruleIndex: number,
         value: number,
-    ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
+    ): Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined {
+        if (parent.isOfType("ammo")) return;
+
+        if (parent.isOfType("consumable")) {
+            if (isCastConsumable(parent)) return;
+
+            const { autoDestroy, max } = parent.system.uses;
+            const min = autoDestroy ? 1 : 0;
+
+            return parent.update({ "system.uses.value": Math.clamp(value, min, max) });
+        }
+
         const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-        if (rule.key !== "ItemCast" || !rule.max) return;
-        return rule.updateData({ value: Math.clamp(value, 0, rule.max) });
+        if (rule.key !== "ItemCast") return;
+
+        const max = rule.resolvedMax;
+        return max ? rule.updateData({ value: Math.clamp(value, 0, max) }) : undefined;
     }
 
     #rechargeVirtualSpell(
         parent: PhysicalItemPF2e<CharacterPF2e>,
         ruleIndex: number,
-    ): Promise<ItemPF2e<CharacterPF2e>[]> | undefined {
-        const rule = parent.rules[ruleIndex] as ItemCastRuleElement;
-        if (rule.key !== "ItemCast" || !rule.max) return;
-        return rule.updateData({ value: rule.max });
+    ): Promise<ItemPF2e<CharacterPF2e> | undefined> | undefined {
+        return this.#updateVirtualSpellValue(parent, ruleIndex, Infinity);
     }
 
     #onRenderCreatureSheetPF2e(
@@ -961,7 +973,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 "system.selfEffect": { uuid: droppedItem.uuid, name: droppedItem.name },
             };
 
-            this.setFlagProperty(updates, "-=macro", null);
+            this.setFlagProperty(updates, "macro", _del);
 
             return sheetItem.update(updates);
         } else if (
@@ -1066,6 +1078,32 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
     }
 
+    #extendActorStatistic(
+        actor: CharacterPF2e,
+        statistic: Statistic<CharacterPF2e> | null,
+        tradition: MagicTradition | undefined,
+    ): Statistic<CharacterPF2e> | null {
+        if (!statistic) return null;
+
+        const data = foundry.utils.deepClone(statistic["data"]) as DeepRequired<StatisticData>;
+        if (!data || !data.check || !data.dc || !data.domains) return null;
+
+        data.domains.push("spell-attack-dc");
+
+        data.check.type = "attack-roll";
+        data.check.domains.push(`${statistic.slug}-attack-roll`, "spell-attack", "spell-attack-roll");
+
+        data.dc.domains.push("spell-dc");
+
+        if (tradition) {
+            data.check.domains.push(`${tradition}-spell-attack`);
+            data.dc.domains.push(`${tradition}-spell-dc`);
+        }
+
+        const Statistic = getStatisticClass(actor);
+        return new Statistic(actor, data);
+    }
+
     #createSpellcastingStatistic(
         actor: CharacterPF2e,
         attribute: AttributeString,
@@ -1112,6 +1150,17 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 }
 
+function getFirstStatistic(actor: CharacterPF2e, statistics: Maybe<string[]>): Statistic<CharacterPF2e> | null {
+    if (!statistics?.length) return null;
+
+    for (const slug of statistics) {
+        const statistic = actor.getStatistic(slug);
+        if (statistic) return statistic;
+    }
+
+    return null;
+}
+
 function getSectionItems(items: InventoryItem<PhysicalItemPF2e>[]): PhysicalItemPF2e[] {
     return items.flatMap(({ item, heldItems }) => {
         return heldItems?.length ? [item, ...getSectionItems(heldItems)] : [item];
@@ -1141,9 +1190,7 @@ type DropZoneData = {
     }>;
 };
 
-type ToolSettings = toolbelt.Settings["actionable"] & {
-    cast: boolean;
-};
+type ToolSettings = toolbelt.Settings["actionable"];
 
 export { actionable };
 export type { ActionableTool };

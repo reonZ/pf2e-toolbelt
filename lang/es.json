@@ -96,6 +96,16 @@
           "hint": "¿Deberían actualizarse también los escudos?"
         }
       },
+      "betterChat": {
+          "merge": {
+            "name": "Botón de fusión",
+            "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
+          },
+          "inject": {
+            "name": "Botón de inyección",
+            "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
+          }
+      },
       "betterEffectsPanel": {
         "title": "Panel de mejores efectos",
         "remove": {
@@ -166,13 +176,6 @@
         "sortList": {
           "name": "Botón Ordenar lista",
           "hint": "Agrega botones de ordenación a diferentes listas en la hoja del actor."
-        }
-      },
-      "betterTemplate": {
-        "title": "Mejores plantillas",
-        "target": {
-          "name": "Objetivo automático",
-          "hint": "Al colocar una plantilla en el tablero, aparecerá un nuevo cuadro de diálogo que te permitirá apuntar a todas las fichas que se encuentran dentro de ella."
         }
       },
       "betterTrade": {
@@ -273,17 +276,6 @@
           "hint": "¿Deberían los jugadores poder solicitar la identificación de los objetos?"
         }
       },
-      "mergeDamage": {
-        "title": "Fusionar daños",
-        "merge": {
-          "name": "Botón de fusión",
-          "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
-        },
-        "inject": {
-          "name": "Botón de inyección",
-          "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
-        }
-      },
       "resourceTracker": {
         "title": "Rastreador de recursos",
         "enabled": {
@@ -307,6 +299,10 @@
       },
       "targetHelper": {
         "title": "Asistente de objetivo",
+        "checks": {
+          "name": "Actualizar mensajes de comprobaciones",
+          "hint": "Se actualizan los mensajes salvaciones para que la función pueda usarlos. También se añaden más detalles."
+        },
         "enabled": {
           "name": "Activado",
           "hint": "Habilite la función 'Ayudante de objetivo' en su mundo."
@@ -319,9 +315,8 @@
           "name": "Agregar objetivos a los mensajes",
           "hint": "Agregará objetivos adicionales a los mensajes de chat donde se puede aplicar daño y se pueden realizar salvaciones."
         },
-        "checks": {
-          "name": "Actualizar mensajes de comprobaciones",
-          "hint": "Se actualizan los mensajes salvaciones para que la función pueda usarlos. También se añaden más detalles."
+        "template": {
+          "hint": "Al colocar una plantilla en el tablero, aparecerá un nuevo cuadro de diálogo que te permitirá apuntar a todas las fichas que se encuentran dentro de ella."
         }
       },
       "underground": {
@@ -390,6 +385,17 @@
       "spell": {
         "header": "Está lanzando un conjuro...",
         "context": "Revelar conjuro a los jugadores"
+      }
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "split": "Volver a los mensajes originales",
+          "merge": "Fusionar con el mensaje de daño anterior",
+          "inject": "Inyectar daño al mensaje anterior"
+        },
+        "injected": "Se inyectó daño en este mensaje.",
+        "noMatch": "No se pudo encontrar otro mensaje de daño coincidente."
       }
     },
     "betterInventory": {
@@ -542,18 +548,6 @@
           "tooltip": "Ordenar contenido",
           "container": "Ordenar el contenido de los contenedores"
         }
-      }
-    },
-    "betterTemplate": {
-      "target": {
-        "all": "Ambos",
-        "allies": "Aliados",
-        "dismiss": "Eliminar plantilla",
-        "enemies": "Enemigos",
-        "neutral": "Incluir neutrales",
-        "self": "Incluirse a sí mismo",
-        "title": "Asistente de plantillas",
-        "yes": "Objetivo"
       }
     },
     "characterImporter": {
@@ -762,15 +756,6 @@
         "send-to-chat": "Enviar al chat",
         "title": "Rastreador de identificación de objetos"
       }
-    },
-    "mergeDamage": {
-      "buttons": {
-        "split": "Volver a los mensajes originales",
-        "merge": "Fusionar con el mensaje de daño anterior",
-        "inject": "Inyectar daño al mensaje anterior"
-      },
-      "injected": "Se inyectó daño en este mensaje.",
-      "noMatch": "No se pudo encontrar otro mensaje de daño coincidente."
     },
     "resourceTracker": {
       "header": {
@@ -984,6 +969,16 @@
       "setTargets": {
         "splashTargets": "Establecer objetivos de salpicadura",
         "targets": "Establecer objetivos"
+      },
+      "template": {
+        "all": "Ambos",
+        "allies": "Aliados",
+        "dismiss": "Eliminar plantilla",
+        "enemies": "Enemigos",
+        "neutral": "Incluir neutrales",
+        "self": "Incluirse a sí mismo",
+        "title": "Asistente de plantillas",
+        "yes": "Objetivo"
       },
       "tooltip": {
         "adjustment": "Ajuste: {value}",

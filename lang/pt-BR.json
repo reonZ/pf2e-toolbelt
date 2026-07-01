@@ -86,6 +86,16 @@
           "hint": "Runas de reforço também devem ser adicionadas aos escudos?"
         }
       },
+      "betterChat": {
+        "merge": {
+          "name": "Botão Mesclar",
+          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam mescladas com outras mensagens de dano."
+        },
+        "inject": {
+          "name": "Injetar Botão",
+          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam injetadas em uma mensagem de dano anterior."
+        }
+      },
       "betterEffectsPanel": {
         "title": "Painel de Efeitos Melhorado",
         "remove": {
@@ -146,13 +156,6 @@
       "betterSheet": {
         "title": "Ficha de Ator Melhorada",
         "partyAsObserved": {
-        }
-      },
-      "betterTemplate": {
-        "title": "Modelos Melhores",
-        "target": {
-          "name": "Marcar Alvos Automaticamente",
-          "hint": "Ao colocar um modelo no mapa, uma nova caixa de diálogo será exibida permitindo que você selecione todos os tokens dentro dele."
         }
       },
       "betterTrade": {
@@ -230,17 +233,6 @@
           "hint": "Os jogadores devem poder solicitar a identificação de itens."
         }
       },
-      "mergeDamage": {
-        "title": "Mesclar Danos",
-        "merge": {
-          "name": "Botão Mesclar",
-          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam mescladas com outras mensagens de dano."
-        },
-        "inject": {
-          "name": "Injetar Botão",
-          "hint": "Adiciona um botão para mensagens de dano, permitindo que elas sejam injetadas em uma mensagem de dano anterior."
-        }
-      },
       "resourceTracker": {
         "title": "Monitor de Recursos",
         "enabled": {
@@ -264,6 +256,10 @@
       },
       "targetHelper": {
         "title": "Assistente de Alvo",
+        "checks": {
+          "name": "Atualizar mensagens de testes",
+          "hint": "Atualiza as mensagens simples de salvamento em linha para algo que pode ser usado pelo recurso. Também adiciona mais detalhes."
+        },
         "enabled": {
           "name": "Habilitado",
           "hint": "Habilita o recurso 'Assistente de Alvo' no seu mundo."
@@ -276,9 +272,8 @@
           "name": "Adicionar alvos às mensagens",
           "hint": "Adicionará alvos extras às mensagens de bate-papo, onde o dano pode ser aplicado e defesas podem ser realizadas."
         },
-        "checks": {
-          "name": "Atualizar mensagens de testes",
-          "hint": "Atualiza as mensagens simples de salvamento em linha para algo que pode ser usado pelo recurso. Também adiciona mais detalhes."
+        "template": {
+          "hint": "Ao colocar um modelo no mapa, uma nova caixa de diálogo será exibida permitindo que você selecione todos os tokens dentro dele."
         }
       },
       "underground": {
@@ -346,6 +341,17 @@
       "spell": {
         "header": "Está conjurando uma magia...",
         "context": "Revelar feitiço para jogadores"
+      }
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "split": "Dividir de volta para mensagens originais",
+          "merge": "Mesclar com mensagem de dano anterior",
+          "inject": "Injetar dano à mensagem anterior"
+        },
+        "injected": "Danos foram injetados nesta mensagem",
+        "noMatch": "Não foi possível encontrar outra mensagem de dano correspondente."
       }
     },
     "betterInventory": {
@@ -478,18 +484,6 @@
         "quantity": "Número negativo para estoque infinito",
         "tags": "Etiquetas de serviço",
         "title": "Serviço - {label}"
-      }
-    },
-    "betterTemplate": {
-      "target": {
-        "all": "Ambos",
-        "allies": "Aliados",
-        "dismiss": "Remover modelo",
-        "enemies": "Inimigos",
-        "neutral": "Incluir Neutro",
-        "self": "Incluir a si mesmo",
-        "title": "Assistente de modelo",
-        "yes": "Alvo"
       }
     },
     "conditionManager": {
@@ -638,15 +632,6 @@
         "send-to-chat": "Enviar para o bate-papo",
         "title": "Monitor de Identificação de Itens"
       }
-    },
-    "mergeDamage": {
-      "buttons": {
-        "split": "Dividir de volta para mensagens originais",
-        "merge": "Mesclar com mensagem de dano anterior",
-        "inject": "Injetar dano à mensagem anterior"
-      },
-      "injected": "Danos foram injetados nesta mensagem",
-      "noMatch": "Não foi possível encontrar outra mensagem de dano correspondente."
     },
     "resourceTracker": {
       "header": {
@@ -853,6 +838,16 @@
       "setTargets": {
         "splashTargets": "Definir alvos de respingo",
         "targets": "Definir alvos"
+      },
+      "template": {
+        "all": "Ambos",
+        "allies": "Aliados",
+        "dismiss": "Remover modelo",
+        "enemies": "Inimigos",
+        "neutral": "Incluir Neutro",
+        "self": "Incluir a si mesmo",
+        "title": "Assistente de modelo",
+        "yes": "Alvo"
       },
       "tooltip": {
         "adjustment": "Ajuste: {value}",

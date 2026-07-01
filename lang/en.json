@@ -28,6 +28,12 @@
                     "hint": "Key held while clicking on the scene to teleport all selected tokens. Also unselect the tokens when pressing the keybind to give an unobstructed vision over the whole scene."
                 }
             },
+            "betterTool": {
+                "removeRegion": {
+                    "name": "Remove Region",
+                    "hint": "Delete the first region found under your cursor."
+                }
+            },
             "droppeth": {
                 "droppeth": {
                     "name": "Droppeth Modifier",
@@ -141,6 +147,26 @@
                     }
                 }
             },
+            "betterChat": {
+                "title": "Better Chat Message",
+                "average": {
+                    "name": "Damage Indicator",
+                    "hint": "Adds a colored display on damage messages showing how well you rolled compared to the min/max values.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "standalone": "Standalone Display",
+                        "background": "Dice Formula Background"
+                    }
+                },
+                "merge": {
+                    "name": "Merge Button",
+                    "hint": "Adds a button to damage messages allowing them to be merged with other damage messages."
+                },
+                "inject": {
+                    "name": "Inject Button",
+                    "hint": "Adds a button to damage messages allowing them to be injected to a previous damage message."
+                }
+            },
             "betterEffectsPanel": {
                 "title": "Better Effects Panel",
                 "remove": {
@@ -217,12 +243,8 @@
                     "hint": "Adds sorting buttons to different lists on the actor sheet."
                 }
             },
-            "betterTemplate": {
-                "title": "Better Templates",
-                "target": {
-                    "name": "Auto Target",
-                    "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside it."
-                }
+            "betterTool": {
+                "title": "Better Tool"
             },
             "betterTrade": {
                 "title": "Better Trade",
@@ -322,17 +344,6 @@
                     "hint": "Should players be able to request identification of items."
                 }
             },
-            "mergeDamage": {
-                "title": "Merge Damages",
-                "merge": {
-                    "name": "Merge Button",
-                    "hint": "Adds a button to damage messages allowing them to be merged with other damage messages."
-                },
-                "inject": {
-                    "name": "Inject Button",
-                    "hint": "Adds a button to damage messages allowing them to be injected to a previous damage message."
-                }
-            },
             "resourceTracker": {
                 "title": "Resource Tracker",
                 "enabled": {
@@ -356,6 +367,10 @@
             },
             "targetHelper": {
                 "title": "Target Helper",
+                "checks": {
+                    "name": "Upgrade Checks Messages",
+                    "hint": "Upgrades the simple inline save messages into something that can be used by the feature. Also adds more details to it."
+                },
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Enable the 'Target Helper' feature in your world."
@@ -368,9 +383,9 @@
                     "name": "Add Targets to Messages",
                     "hint": "Will add extra targets to chat messages where damage can be applied and saves can be rolled."
                 },
-                "checks": {
-                    "name": "Upgrade Checks Messages",
-                    "hint": "Upgrades the simple inline save messages into something that can be used by the feature. Also adds more details to it."
+                "template": {
+                    "name": "Template Helper",
+                    "hint": "When placing a template on the board, a new dialog will show up allowing you to target all the tokens inside it."
                 }
             },
             "underground": {
@@ -432,6 +447,7 @@
                 "max": "Max Uses",
                 "predicate": "Predicate",
                 "rank": "Rank",
+                "recharge": "Recharge on daily rest?",
                 "statistic": "Statistic",
                 "title": "Generate 'Item Cast' Rules from Description",
                 "tradition": "Tradition"
@@ -470,6 +486,39 @@
             "overriden": "Overridden Cover",
             "standard": "Standard Cover",
             "wall": "Cover from Wall"
+        },
+        "betterChat": {
+            "mergeDamage": {
+                "buttons": {
+                    "inject": "Inject damage to previous message",
+                    "menu": {
+                        "inject": "[Shift] Open inject menu",
+                        "merge": "[Shift] Open merge menu"
+                    },
+                    "merge": "Merge with previous damage message",
+                    "split": "Split back to original messages"
+                },
+                "injected": "Damage was injected into this message",
+                "menu": {
+                    "inject-damage": {
+                        "double": "Inject double damage",
+                        "full": "Inject full damage",
+                        "half": "Inject half damage",
+                        "title": "Inject Menu",
+                        "yes": "Inject"
+                    },
+                    "merge-damage": {
+                        "double": "Merge double damage",
+                        "full": "Merge full damage",
+                        "half": "Merge half damage",
+                        "title": "Merge Menu",
+                        "yes": "Merge"
+                    },
+                    "originMerge": "Current Message",
+                    "targetMerge": "Previous Message"
+                },
+                "noMatch": "Couldn't find another matching damage message."
+            }
         },
         "betterInventory": {
             "improvised": {
@@ -635,18 +684,6 @@
                 }
             }
         },
-        "betterTemplate": {
-            "target": {
-                "all": "Both",
-                "allies": "Allies",
-                "dismiss": "Remove Template",
-                "enemies": "Enemies",
-                "neutral": "Include Neutral",
-                "self": "Include Self",
-                "title": "Template Helper",
-                "yes": "Target"
-            }
-        },
         "characterImporter": {
             "deleteData": {
                 "content": "Are you sure you want to delete the import data from this character?<br><br>NOTE: This will not update the character itself.",
@@ -662,7 +699,11 @@
                     "title": "Select JSON File",
                     "yes": "Parse File"
                 },
-                "success": "The character import was successful."
+                "success": "The character import was successful.",
+                "url": {
+                    "title": "Enter Character JSON ID",
+                    "yes": "Parse URL Data"
+                }
             },
             "sheet": {
                 "level": {
@@ -672,7 +713,8 @@
                 "import": {
                     "code": "From Code",
                     "delete": "Delete Import Data",
-                    "file": "From File"
+                    "file": "From File",
+                    "url": "From Url"
                 },
                 "data": {
                     "core": {
@@ -902,37 +944,6 @@
                 "title": "Item Identification Tracker"
             }
         },
-        "mergeDamage": {
-            "buttons": {
-                "inject": "Inject damage to previous message",
-                "menu": {
-                    "inject": "[Shift] Open inject menu",
-                    "merge": "[Shift] Open merge menu"
-                },
-                "merge": "Merge with previous damage message",
-                "split": "Split back to original messages"
-            },
-            "injected": "Damage was injected into this message",
-            "menu": {
-                "inject-damage": {
-                    "double": "Inject double damage",
-                    "full": "Inject full damage",
-                    "half": "Inject half damage",
-                    "title": "Inject Menu",
-                    "yes": "Inject"
-                },
-                "merge-damage": {
-                    "double": "Merge double damage",
-                    "full": "Merge full damage",
-                    "half": "Merge half damage",
-                    "title": "Merge Menu",
-                    "yes": "Merge"
-                },
-                "originMerge": "Current Message",
-                "targetMerge": "Previous Message"
-            },
-            "noMatch": "Couldn't find another matching damage message."
-        },
         "resourceTracker": {
             "header": {
                 "add": "Add new resource"
@@ -1145,6 +1156,16 @@
             "setTargets": {
                 "splashTargets": "Set Splash targets",
                 "targets": "Set targets"
+            },
+            "template": {
+                "all": "Both",
+                "allies": "Allies",
+                "dismiss": "Remove Template",
+                "enemies": "Enemies",
+                "neutral": "Include Neutral",
+                "self": "Include Self",
+                "title": "Template Helper",
+                "yes": "Target"
             },
             "tooltip": {
                 "adjustment": "Adjustment: {value}",

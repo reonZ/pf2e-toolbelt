@@ -10,7 +10,7 @@ import {
     WeaponPF2e,
 } from "foundry-helpers";
 import { renderSpellCardLikeMessage, TargetHelperTool } from ".";
-import { SaveVariantsSource, TargetHelper, TargetsData, TargetsDataSource } from "..";
+import { SaveVariantsSource, TargetsData, TargetsDataSource } from "..";
 
 const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 

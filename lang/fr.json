@@ -28,6 +28,12 @@
           "hint": "Maintenez la touche tout en cliquant sur la scène pour téléporter tous les jetons sélectionnés. Désélectionnez également les jetons en appuyant sur la touche liée pour une vision dégagée sur la totalité de la scène."
         }
       },
+      "betterTool": {
+        "removeRegion": {
+          "name": "Supprimer une région",
+          "hint": "Supprime la première région trouvée sous votre curseur."
+        }
+      },
       "droppeth": {
         "droppeth": {
           "name": "Modificateur pour le dépôt sur la scène",
@@ -141,6 +147,26 @@
           }
         }
       },
+      "betterChat": {
+        "title": "Message de conversation amélioré",
+        "average": {
+          "name": "Indicateur de dégâts",
+          "hint": "Colorie les messages de dégâts pour afficher la qualité de votre jet de dés comparé aux valeurs min/max.",
+          "choices": {
+            "disabled": "Désactivé",
+            "standalone": "Affichage autonome",
+            "background": "Arrière plan de la formule des dés"
+          }
+        },
+        "merge": {
+          "name": "Bouton de fusion",
+          "hint": "Ajoute un bouton aux messages de dégâts leur permettant d'être fusionnés avec les autres messages de dégâts."
+        },
+        "inject": {
+          "name": "Bouton d'injection",
+          "hint": "Ajoute un bouton aux messages de dégâts permettant de les injecter dans un message de dégâts précédent."
+        }
+      },
       "betterEffectsPanel": {
         "title": "Panneau d'effets amélioré",
         "remove": {
@@ -217,12 +243,8 @@
           "hint": "Ajoute des boutons de tri à différentes listes de la fiche d'acteur."
         }
       },
-      "betterTemplate": {
-        "title": "Meilleurs gabarits",
-        "target": {
-          "name": "Cible automatique",
-          "hint": "Lorsque vous placez un gabarit sur la scène, une nouvelle boîte de dialogue apparaîtra vous permettant de cibler tous les jetons qu'il contient."
-        }
+      "betterTool": {
+        "title": "Meilleur outil"
       },
       "betterTrade": {
         "title": "Meilleur commerce",
@@ -322,17 +344,6 @@
           "hint": "Les joueurs devraient-ils pouvoir être capables de solliciter l'identification des objets."
         }
       },
-      "mergeDamage": {
-        "title": "Fusionner les dégâts",
-        "merge": {
-          "name": "Bouton de fusion",
-          "hint": "Ajoute un bouton aux messages de dégâts leur permettant d'être fusionnés avec les autres messages de dégâts."
-        },
-        "inject": {
-          "name": "Bouton d'injection",
-          "hint": "Ajoute un bouton aux messages de dégâts permettant de les injecter dans un message de dégâts précédent."
-        }
-      },
       "resourceTracker": {
         "title": "Suivi des ressources",
         "enabled": {
@@ -356,6 +367,10 @@
       },
       "targetHelper": {
         "title": "Assistant de ciblage",
+        "checks": {
+          "name": "Amélioration des messages des tests",
+          "hint": "Améliore les messages des jets de sauvegarde en ligne simples pour les rendre exploitables par la fonctionnalité. Leur ajoute également des détails."
+        },
         "enabled": {
           "name": "Activé",
           "hint": "Activez l'«Assistant de ciblage» dans votre monde."
@@ -368,9 +383,9 @@
           "name": "Ajouter les cibles aux messages",
           "hint": "Cela ajoutera des cibles supplémentaires aux messages de discussion lorsque des dégâts peuvent être appliqués et des jets de sauvegarde peuvent être effectuées."
         },
-        "checks": {
-          "name": "Amélioration des messages des tests",
-          "hint": "Améliore les messages des jets de sauvegarde en ligne simples pour les rendre exploitables par la fonctionnalité. Leur ajoute également des détails."
+        "template": {
+          "name": "Assistant de gabarit",
+          "hint": "Lorsque vous placez un gabarit sur la scène, une nouvelle boîte de dialogue apparaîtra vous permettant de cibler tous les jetons qu'il contient."
         }
       },
       "underground": {
@@ -420,16 +435,22 @@
         "cancel": "action <strong>{name}</strong> a été effacée par sa macro."
       },
       "cast": {
-        "equipped": "Pas équipé"
+        "equipped": "Pas équipé",
+        "label": "Incantation de sort d'objet"
       },
       "generate-cast": {
         "add": "Ajouter une règle",
+        "attribute": "Attribut",
         "dc": "DD",
         "empty": "Aucun sort supplémentaire n'a été trouvé dans la description de l'objet.",
         "label": "Lancé par un objet",
         "max": "# max d'utilisations",
+        "predicate": "Prédicat",
         "rank": "Rang",
-        "title": "Générer des règles « Lancé par un objet » à partir de la description"
+        "recharge": "Recharger lors des préparatifs quotidiens ?",
+        "statistic": "Statistique",
+        "title": "Générer des règles « Lancé par un objet » à partir de la description",
+        "tradition": "Tradition"
       },
       "item": {
         "label": "Macro",
@@ -465,6 +486,39 @@
       "overriden": "Abri ignoré",
       "standard": "Abri standard",
       "wall": "Abri par le mur"
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "inject": "Injecter les dégâts au message précédent",
+          "menu": {
+            "inject": "[Maj] Ouvrir le menu injecter",
+            "merge": "[Maj] Ouvrir le menu fusionner"
+          },
+          "merge": "Fusionner avec le message de dégâts précédent",
+          "split": "Revenir aux messages d'origine"
+        },
+        "injected": "Des dégâts ont été injectés dans ce message",
+        "menu": {
+          "inject-damage": {
+            "double": "Injecter le double des dégâts",
+            "full": "Injecter la totalité des dégâts",
+            "half": "Injecter la moitié des dégâts",
+            "title": "Menu injecter",
+            "yes": "Injecter"
+          },
+          "merge-damage": {
+            "double": "Fusionner le double des dégâts",
+            "full": "Fusionner la totalité des dégâts",
+            "half": "Fusionner la moitié des dégâts",
+            "title": "Menu fusionner",
+            "yes": "Fusionner"
+          },
+          "originMerge": "Message actuel",
+          "targetMerge": "Message précédent"
+        },
+        "noMatch": "Impossible de trouver un autre message de dégât correspondant."
+      }
     },
     "betterInventory": {
       "improvised": {
@@ -630,18 +684,6 @@
         }
       }
     },
-    "betterTemplate": {
-      "target": {
-        "all": "Aux deux",
-        "allies": "Aux alliés",
-        "dismiss": "Retirer le gabarit",
-        "enemies": "Aux ennemis",
-        "neutral": "Inclure les neutres",
-        "self": "S'inclure",
-        "title": "Assistant de gabarit",
-        "yes": "Cible"
-      }
-    },
     "characterImporter": {
       "deleteData": {
         "content": "Êtes-vous sûr de vouloir supprimer les données d'importation de ce personnage ?<br><br>NOTE : Cela ne mettra pas à jour le personnage lui-même.",
@@ -657,7 +699,11 @@
           "title": "Sélectionner un fichier JSON",
           "yes": "Analyser le fichier"
         },
-        "success": "L'importation du personnage a réussi."
+        "success": "L'importation du personnage a réussi.",
+        "url": {
+          "title": "Saisissez l'ID JSON du personnage",
+          "yes": "Analyser les données URL"
+        }
       },
       "sheet": {
         "level": {
@@ -667,7 +713,8 @@
         "import": {
           "code": "À partir du code",
           "delete": "Supprimer les données d'importation",
-          "file": "À partir d'un fichier"
+          "file": "À partir d'un fichier",
+          "url": "Depuis l'URL"
         },
         "data": {
           "core": {
@@ -897,37 +944,6 @@
         "title": "Suivi d'identification des objets"
       }
     },
-    "mergeDamage": {
-      "buttons": {
-        "inject": "Injecter les dégâts au message précédent",
-        "menu": {
-          "inject": "[Maj] Ouvrir le menu injecter",
-          "merge": "[Maj] Ouvrir le menu fusionner"
-        },
-        "merge": "Fusionner avec le message de dégâts précédent",
-        "split": "Revenir aux messages d'origine"
-      },
-      "injected": "Des dégâts ont été injectés dans ce message",
-      "menu": {
-        "inject-damage": {
-          "double": "Injecter le double des dégâts",
-          "full": "Injecter la totalité des dégâts",
-          "half": "Injecter la moitié des dégâts",
-          "title": "Menu injecter",
-          "yes": "Injecter"
-        },
-        "merge-damage": {
-          "double": "Fusionner le double des dégâts",
-          "full": "Fusionner la totalité des dégâts",
-          "half": "Fusionner la moitié des dégâts",
-          "title": "Menu fusionner",
-          "yes": "Fusionner"
-        },
-        "originMerge": "Message actuel",
-        "targetMerge": "Message précédent"
-      },
-      "noMatch": "Impossible de trouver un autre message de dégât correspondant."
-    },
     "resourceTracker": {
       "header": {
         "add": "Ajouter une nouvelle ressource"
@@ -1140,6 +1156,16 @@
       "setTargets": {
         "splashTargets": "Définir les cibles des éclaboussures",
         "targets": "Définir les cibles"
+      },
+      "template": {
+        "all": "Aux deux",
+        "allies": "Aux alliés",
+        "dismiss": "Retirer le gabarit",
+        "enemies": "Aux ennemis",
+        "neutral": "Inclure les neutres",
+        "self": "S'inclure",
+        "title": "Assistant de gabarit",
+        "yes": "Cible"
       },
       "tooltip": {
         "adjustment": "Ajustment : {value}",

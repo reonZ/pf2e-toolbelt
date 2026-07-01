@@ -28,6 +28,12 @@
           "hint": "Przytrzymanie klawisza podczas klikania sceny powoduje teleportację wszystkich wybranych tokenów. Usunięcie zaznaczenia tokenów po naciśnięciu klawisza daje nieograniczony widok na całą scenę."
         }
       },
+      "betterTool": {
+        "removeRegion": {
+          "name": "Usuń region",
+          "hint": "Usuń pierwszy region znajdujący się pod kursorem."
+        }
+      },
       "droppeth": {
         "droppeth": {
           "name": "Upuszczanie modyfikatora",
@@ -141,6 +147,26 @@
           }
         }
       },
+      "betterChat": {
+        "title": "Ulepszony Czat Wiadomości",
+        "average": {
+          "name": "Wskaźnik obrażeń",
+          "hint": "Dodaje kolorowe oznaczenia do komunikatów o zadanych obrażeniach, pokazujące, jak dobrze wypadł twój rzut w porównaniu z wartościami minimalnymi i maksymalnymi.",
+          "choices": {
+            "disabled": "Wyłączone",
+            "standalone": "Niezależne wyświetlanie",
+            "background": "Kontekst formuły kości"
+          }
+        },
+        "merge": {
+          "name": "Przycisk złączania",
+          "hint": "Dodaje przycisk do komunikatów o obrażeniach, umożliwiający połączenie ich z innymi komunikatami o obrażeniach."
+        },
+        "inject": {
+          "name": "Przycisk wstrzyknięcia",
+          "hint": "Dodaje przycisk do komunikatów o obrażeniach, umożliwiający wstawienie ich do poprzedniego komunikatu o obrażeniach."
+        }
+      },
       "betterEffectsPanel": {
         "title": "Ulepszony Panel Efektów",
         "remove": {
@@ -217,12 +243,8 @@
           "hint": "Dodaje przyciski sortowania do różnych list w karcie aktora."
         }
       },
-      "betterTemplate": {
-        "title": "Ulepszone Szablony",
-        "target": {
-          "name": "Auto celowanie",
-          "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
-        }
+      "betterTool": {
+        "title": "Lepsze narzędzia"
       },
       "betterTrade": {
         "title": "Ulepszona Wymiana",
@@ -322,17 +344,6 @@
           "hint": "Czy gracze powinni mieć możliwość żądania identyfikacji przedmiotów."
         }
       },
-      "mergeDamage": {
-        "title": "Złączanie Obrażeń",
-        "merge": {
-          "name": "Przycisk złączania",
-          "hint": "Dodaje przycisk do komunikatów o obrażeniach, umożliwiający połączenie ich z innymi komunikatami o obrażeniach."
-        },
-        "inject": {
-          "name": "Przycisk wstrzyknięcia",
-          "hint": "Dodaje przycisk do komunikatów o obrażeniach, umożliwiający wstawienie ich do poprzedniego komunikatu o obrażeniach."
-        }
-      },
       "resourceTracker": {
         "title": "Śledzenie Zasobów",
         "enabled": {
@@ -356,6 +367,10 @@
       },
       "targetHelper": {
         "title": "Pomocnik Celowania",
+        "checks": {
+          "name": "Wiadomości dotyczące testów",
+          "hint": "Ulepsza proste wiadomości zapisu liniowego do czegoś, co może być używane przez funkcję. Dodaje również więcej szczegółów."
+        },
         "enabled": {
           "name": "Włączone",
           "hint": "Włącz funkcję \"Pomocnik celowania\" na twoim świecie."
@@ -368,9 +383,9 @@
           "name": "Dodawanie celów do wiadomości",
           "hint": "Doda dodatkowe cele do wiadomości na czacie, w których można zadawać obrażenia i rzucać rzuty obronne."
         },
-        "checks": {
-          "name": "Wiadomości dotyczące testów",
-          "hint": "Ulepsza proste wiadomości zapisu liniowego do czegoś, co może być używane przez funkcję. Dodaje również więcej szczegółów."
+        "template": {
+          "name": "Pomocnik Szablonów",
+          "hint": "Po umieszczeniu szablonu na planszy pojawi się nowe okno dialogowe, pozwalające na namierzenie wszystkich znajdujących się w nim tokenów."
         }
       },
       "underground": {
@@ -420,16 +435,22 @@
         "cancel": "Akcja <strong>{name}</strong> została anulowana przez makro."
       },
       "cast": {
-        "equipped": "Nie wyposażony"
+        "equipped": "Nie wyposażony",
+        "label": "Przedmiot rzucenia zaklęcia"
       },
       "generate-cast": {
         "add": "Dodaj regułę",
+        "attribute": "Atrybut",
         "dc": "ST",
         "empty": "W opisie przedmiotu nie znaleziono żadnych dodatkowych zaklęć.",
         "label": "Przedmiot rzucania zaklęcia",
         "max": "Maksymalne użycia",
+        "predicate": "Predykat",
         "rank": "Ranga",
-        "title": "Wygeneruj reguły „Przedmiot rzucania zaklęcia” na podstawie opisu."
+        "recharge": "Czy codzienny odpoczynek pozwala na Doładowanie?",
+        "statistic": "Statystyka",
+        "title": "Wygeneruj reguły „Przedmiot rzucania zaklęcia” na podstawie opisu.",
+        "tradition": "Tradycja"
       },
       "item": {
         "label": "Makro",
@@ -465,6 +486,39 @@
       "overriden": "Nadpisana osłona",
       "standard": "Standardowa osłona",
       "wall": "Osłona od ścian"
+    },
+    "betterChat": {
+      "mergeDamage": {
+        "buttons": {
+          "inject": "Wstaw obrażenia do poprzedniej wiadomości",
+          "menu": {
+            "inject": "[Shift] Otwórz menu wstrzykiwania",
+            "merge": "[Shift] Otwórz menu scalania"
+          },
+          "merge": "Scal z poprzednią wiadomością o obrażeniach",
+          "split": "Powrót do oryginalnych wiadomości"
+        },
+        "injected": "Obrażenia zostały wstawione do tej wiadomości",
+        "menu": {
+          "inject-damage": {
+            "double": "Wstrzyknięcie podwójnych obrażeń",
+            "full": "Wstrzyknięcie pełnych obrażeń",
+            "half": "Wstrzyknięcie połowy obrażeń",
+            "title": "Menu wstrzyknięcia",
+            "yes": "Wstrzykiwanie"
+          },
+          "merge-damage": {
+            "double": "Połącz podwójne obrażenia",
+            "full": "Połącz pełne obrażenia",
+            "half": "Połącz połowę obrażenia",
+            "title": "Menu scalania",
+            "yes": "Połącz"
+          },
+          "originMerge": "Aktualna wiadomość",
+          "targetMerge": "Poprzednia wiadomość"
+        },
+        "noMatch": "Nie znaleziono innego pasującego komunikatu o obrażeniach."
+      }
     },
     "betterInventory": {
       "improvised": {
@@ -630,18 +684,6 @@
         }
       }
     },
-    "betterTemplate": {
-      "target": {
-        "all": "Oba",
-        "allies": "Sojusznicy",
-        "dismiss": "Usuń szablon",
-        "enemies": "Wrogowie",
-        "neutral": "Uwzględnij neutralne",
-        "self": "Uwzględnij siebie",
-        "title": "Pomocnik Szablonów",
-        "yes": "Cel"
-      }
-    },
     "characterImporter": {
       "deleteData": {
         "content": "Czy na pewno chcesz usunąć dane importowane z tej postaci?<br><br>UWAGA: Nie spowoduje to aktualizacji samej postaci.",
@@ -657,7 +699,11 @@
           "title": "Wybierz plik JSON",
           "yes": "Parsowanie pliku"
         },
-        "success": "Import postaci zakończył się powodzeniem."
+        "success": "Import postaci zakończył się powodzeniem.",
+        "url": {
+          "title": "Wprowadź identyfikator JSON postaci",
+          "yes": "Przetwarzanie danych z adresów URL"
+        }
       },
       "sheet": {
         "level": {
@@ -667,7 +713,8 @@
         "import": {
           "code": "Z kodu\n",
           "delete": "Usuń importowane dane",
-          "file": "Z pliku\n\n"
+          "file": "Z pliku\n\n",
+          "url": "Z adresu URL"
         },
         "data": {
           "core": {
@@ -897,37 +944,6 @@
         "title": "Śledzenie identyfikacji przedmiotów"
       }
     },
-    "mergeDamage": {
-      "buttons": {
-        "inject": "Wstaw obrażenia do poprzedniej wiadomości",
-        "menu": {
-          "inject": "[Shift] Otwórz menu wstrzykiwania",
-          "merge": "[Shift] Otwórz menu scalania"
-        },
-        "merge": "Scal z poprzednią wiadomością o obrażeniach",
-        "split": "Powrót do oryginalnych wiadomości"
-      },
-      "injected": "Obrażenia zostały wstawione do tej wiadomości",
-      "menu": {
-        "inject-damage": {
-          "double": "Wstrzyknięcie podwójnych obrażeń",
-          "full": "Wstrzyknięcie pełnych obrażeń",
-          "half": "Wstrzyknięcie połowy obrażeń",
-          "title": "Menu wstrzyknięcia",
-          "yes": "Wstrzykiwanie"
-        },
-        "merge-damage": {
-          "double": "Połącz podwójne obrażenia",
-          "full": "Połącz pełne obrażenia",
-          "half": "Połącz połowę obrażenia",
-          "title": "Menu scalania",
-          "yes": "Połącz"
-        },
-        "originMerge": "Aktualna wiadomość",
-        "targetMerge": "Poprzednia wiadomość"
-      },
-      "noMatch": "Nie znaleziono innego pasującego komunikatu o obrażeniach."
-    },
     "resourceTracker": {
       "header": {
         "add": "Dodaj nowy zasób"
@@ -1140,6 +1156,16 @@
       "setTargets": {
         "splashTargets": "Wyznacz cele Rozprysku",
         "targets": "Wyznacz cele"
+      },
+      "template": {
+        "all": "Oba",
+        "allies": "Sojusznicy",
+        "dismiss": "Usuń szablon",
+        "enemies": "Wrogowie",
+        "neutral": "Uwzględnij neutralne",
+        "self": "Uwzględnij siebie",
+        "title": "Pomocnik Szablonów",
+        "yes": "Cel"
       },
       "tooltip": {
         "adjustment": "Dostosowanie: {value}",

@@ -139,7 +139,7 @@ async function renderSpellCardLikeMessage(
             const cached = targetHelper.encode({
                 type: "damage",
                 item: targetHelper.itemUUID ?? item.uuid,
-                "==saveVariants": { null: save },
+                saveVariants: _replace({ null: save }),
             });
 
             registerUpstreamHook(

@@ -441,20 +441,31 @@
                 }
             }
 
-            .level {
+            .level,
+            .extra {
                 position: absolute;
-                font-size: 1.1em;
-                font-weight: bold;
-                bottom: 0;
                 left: 0;
                 color: var(--text-light);
                 background: rgba(0, 0, 0, 0.74);
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                border-radius: 0 4px 0 4px;
                 outline: 1px solid #ffffff4a;
+            }
+
+            .level {
+                font-size: 1.1em;
+                font-weight: bold;
+                bottom: 0;
+                border-radius: 0 4px;
                 padding: 0 0.3rem;
+            }
+
+            .extra {
+                top: 0;
+                border-radius: 4px 0;
+                font-size: 0.6em;
+                padding: 0.2rem;
             }
 
             &:has(+ .entry.child) {

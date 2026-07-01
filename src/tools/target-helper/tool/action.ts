@@ -106,7 +106,7 @@ async function renderActionMessage(
                 );
 
                 // we clean the message save related data
-                this.setMessageData(message, data, { ["-=saveVariants"]: null });
+                this.setMessageData(message, data, { saveVariants: _del });
             },
             true,
         );

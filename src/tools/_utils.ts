@@ -108,6 +108,21 @@ async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): P
     });
 }
 
+function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
+    const intersects = CONFIG.Canvas.polygonBackends.move.testCollision(origin, target, { type: "move", mode: "any" });
+
+    if (debug) {
+        drawDebugLine(origin, target, intersects ? "red" : "green");
+    }
+
+    return intersects;
+}
+
+function drawDebugLine(origin: Point, target: Point, color: "blue" | "green" | "red") {
+    const hex = color === "blue" ? 0x0066cc : color === "red" ? 0xff0000 : 0x16a103;
+    canvas.controls.debug.lineStyle(4, hex).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
+}
+
 type TradeQuantityDialogOptions = {
     button: {
         action: string;
@@ -140,5 +155,5 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export { createTradeMessage, createTradeQuantityDialog };
+export { createTradeMessage, createTradeQuantityDialog, drawDebugLine, lineIntersect };
 export type { TradeMessageOptions, TradeQuantityDialogData };

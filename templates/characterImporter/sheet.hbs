@@ -3,9 +3,9 @@
         {{@root.i18n 'title'}}
     </div>
     <div class="import">
-        <a data-action="import-code">
-            <i class="fa-solid fa-laptop-code"></i>
-            {{@root.i18n 'import.code'}}
+        <a data-action="import-url">
+            <i class="fa-regular fa-globe"></i>
+            {{@root.i18n 'import.url'}}
         </a>
         <a data-action="import-file">
             <i class="fa-solid fa-file-import"></i>
@@ -88,6 +88,11 @@
             </div>
         </div>
     </div>
+    {{#if isExtra}}
+    <div class="extra">
+        <i class="fa-solid fa-star"></i>
+    </div>
+    {{/if}}
     {{#if level}}
     <div class="level">{{level}}</div>
     {{/if}}

@@ -1,4 +1,5 @@
 import {
+    AncestryPF2e,
     AttributeString,
     FeatOrFeatureCategory,
     OneToTen,
@@ -25,7 +26,7 @@ import {
 
 import {
     getCoreUuidFromPack,
-    getEquipmentUuidFromPack,
+    getEquipmentDataFromPack,
     getFeatUuidFromPack,
     getSpellUuidFromPack,
     isAttribute,
@@ -33,6 +34,8 @@ import {
     isSpellcastingCategory,
     isSpellRank,
 } from ".";
+
+const EXTRA_FEAT_REGEX = /(?:[a-z0-9]+-){4}[a-z0-9]+/i;
 
 const BACKPACK_UUID = "Compendium.pf2e.equipment-srd.Item.3lgwjrFEsQVKzhh7";
 const SPACIOUS_POUCH_UUID = "Compendium.pf2e.equipment-srd.Item.jaEEvuQ32GjAa8jy";
@@ -86,6 +89,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
 
         return {
             awarded,
+            extra: !awarded && !hasParent && R.isString(child) && EXTRA_FEAT_REGEX.test(child),
             level: Math.clamp(level, 1, 20) as OneToTen,
             match,
             category: featureMatch ? "classfeature" : category,
@@ -212,7 +216,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
             if (!R.isString(name) || !R.isNumber(quantity) || !R.isString(identifier)) return;
             if (R.isIncludedIn(name, containersNames)) return;
 
-            const match = await getEquipmentUuidFromPack(name);
+            const match = await getEquipmentDataFromPack(name);
 
             return {
                 container: R.isIncludedIn(identifier, containersIdentifiers) ? identifier : undefined,
@@ -232,7 +236,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
             const { name, qty } = entry;
             if (!R.isString(name) || !R.isNumber(qty)) return;
 
-            const match = await getEquipmentUuidFromPack(name);
+            const match = await getEquipmentDataFromPack(name);
 
             return {
                 match: match.uuid,
@@ -352,14 +356,19 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
         R.filter((entry): entry is string => R.isIncludedIn(entry, languageKeys)),
     );
 
+    const ancestry = await parseCoreEntry(data, "ancestry");
+    const ancestryFlaws = getBoostsAtPath("ancestryFlaws");
+    const ancestryLockedBoosts = getBoostsAtPath("ancestryBoosts");
+
     return {
         age: R.isString(data.age) ? data.age : undefined,
-        ancestry: await parseCoreEntry(data, "ancestry"),
+        alternativeBoosts: await alternativeBoosts(ancestry, ancestryFlaws, ancestryLockedBoosts),
+        ancestry,
         attributes: {
             ancestry: {
                 boosts: getBoostsAtPath("ancestryFree"),
-                flaws: getBoostsAtPath("ancestryFlaws"),
-                locked: getBoostsAtPath("ancestryBoosts"),
+                flaws: ancestryFlaws,
+                locked: ancestryLockedBoosts,
             },
             background: getBoostsAtPath("backgroundBoosts"),
             class: getBoostsAtPath("classBoosts"),
@@ -387,6 +396,20 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
     };
 }
 
+async function alternativeBoosts(
+    ancestry: ParsedCoreEntry,
+    ancestryFlaws: AttributeString[],
+    ancestryLockedBoosts: AttributeString[],
+): Promise<boolean> {
+    const ancestryItem = ancestry.match ? await fromUuid<AncestryPF2e>(ancestry.match) : null;
+    if (!ancestryItem) return false;
+
+    return (
+        (!!ancestryItem.lockedFlaws.length && !ancestryFlaws.length) ||
+        (!!ancestryItem.lockedBoosts.length && !ancestryLockedBoosts.length)
+    );
+}
+
 async function parseSpells(list: unknown, parent: string, rank: ZeroToTen): Promise<ImportedSpellSource[]> {
     const spellsPromises = R.map(
         R.isArray(list) ? list : [],
@@ -408,16 +431,15 @@ function parseSkillRank(value: unknown): ZeroToFour {
     return (valueBetween(rank, 0, 4) ? rank : 0) as ZeroToFour;
 }
 
-async function parseCoreEntry(
-    data: Record<PropertyKey, unknown>,
-    key: CharacterCategory,
-): Promise<WithRequired<ImportedEntrySource, "value">> {
+async function parseCoreEntry(data: Record<PropertyKey, unknown>, key: CharacterCategory): Promise<ParsedCoreEntry> {
     const value = R.isString(data[key]) ? data[key] : "";
     return {
         value,
         match: await getCoreUuidFromPack(value, key),
     };
 }
+
+type ParsedCoreEntry = WithRequired<ImportedEntrySource, "value">;
 
 type RawFeatEntry = [
     string,
