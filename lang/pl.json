@@ -28,6 +28,12 @@
           "hint": "Przytrzymanie klawisza podczas klikania sceny powoduje teleportację wszystkich wybranych tokenów. Usunięcie zaznaczenia tokenów po naciśnięciu klawisza daje nieograniczony widok na całą scenę."
         }
       },
+      "betterTool": {
+        "removeRegion": {
+          "name": "Usuń region",
+          "hint": "Usuń pierwszy region znajdujący się pod kursorem."
+        }
+      },
       "droppeth": {
         "droppeth": {
           "name": "Upuszczanie modyfikatora",
@@ -237,6 +243,9 @@
           "hint": "Dodaje przyciski sortowania do różnych list w karcie aktora."
         }
       },
+      "betterTool": {
+        "title": "Lepsze narzędzia"
+      },
       "betterTrade": {
         "title": "Ulepszona Wymiana",
         "invertTrade": {
@@ -438,6 +447,7 @@
         "max": "Maksymalne użycia",
         "predicate": "Predykat",
         "rank": "Ranga",
+        "recharge": "Czy codzienny odpoczynek pozwala na Doładowanie?",
         "statistic": "Statystyka",
         "title": "Wygeneruj reguły „Przedmiot rzucania zaklęcia” na podstawie opisu.",
         "tradition": "Tradycja"
