@@ -330,8 +330,14 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
 
         const alliance = actor ? actor.alliance : user.isGM ? "opposition" : "party";
         const opposition = oppositeAlliance(alliance);
-        const origin = shape instanceof foundry.data.PolygonShapeData ? shape.origin : { x: shape.x, y: shape.y };
         const debug = MODULE.isDebug;
+
+        const origin =
+            shape instanceof foundry.data.PolygonShapeData
+                ? shape.origin
+                : shape instanceof foundry.data.EmanationShapeData
+                  ? { x: shape.base.x, y: shape.base.y }
+                  : { x: shape.x, y: shape.y };
 
         if (debug) {
             canvas.controls.debug.clear();
