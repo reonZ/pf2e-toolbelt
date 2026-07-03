@@ -375,6 +375,10 @@
                     "name": "Enabled",
                     "hint": "Enable the 'Target Helper' feature in your world."
                 },
+                "expend": {
+                    "name": "Expend Ammo Button",
+                    "hint": "Add a button in area related messages to expend ammunitions/grenades."
+                },
                 "small": {
                     "name": "Small Damage Buttons",
                     "hint": "Reduce the size of damage buttons for the extra targets."

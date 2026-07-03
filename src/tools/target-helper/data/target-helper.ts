@@ -71,6 +71,10 @@ class TargetHelper {
         return this.#data.saveVariants[this.#variantId];
     }
 
+    get expended(): number {
+        return this.#data.expended;
+    }
+
     get itemUUID(): foundry.utils.DocumentUUID | null {
         return this.#data.item;
     }
@@ -85,6 +89,14 @@ class TargetHelper {
 
     get isAction(): boolean {
         return this.type === "action";
+    }
+
+    get isAutoFire(): boolean {
+        return this.area === "auto-fire";
+    }
+
+    get area(): "area-fire" | "auto-fire" | null {
+        return this.#data.area;
     }
 
     get extraRollOptions(): string[] {

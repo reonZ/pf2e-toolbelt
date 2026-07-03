@@ -2,6 +2,7 @@ import { R, TokenDocumentPF2e, z, zClientDocument, zDocumentUUID, zSafeArray } f
 import { SAVE_TYPES } from "foundry-helpers/dist";
 import { zTargetSaveInstance } from ".";
 
+const AREA_TYPE = ["area-fire", "auto-fire"] as const;
 const TARGET_MESSAGE_TYPE = ["area", "damage", "spell", "action", "check"] as const;
 
 const zSaveVariant = z.object({
@@ -30,6 +31,7 @@ const zTokenDocumentArrayEncode = z
 
 const zBaseTargetsData = z.object({
     applied: zTargetsAppliedDamages,
+    area: z.enum(AREA_TYPE).nullish().default(null),
     author: zDocumentUUID("Actor").nullish().default(null),
     expended: z.number().min(0).default(0),
     item: zDocumentUUID("Item").nullish().default(null),

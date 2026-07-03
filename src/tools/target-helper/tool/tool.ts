@@ -122,6 +122,15 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
+                key: "expend",
+                type: Boolean,
+                default: true,
+                scope: "user",
+                onChange: () => {
+                    this.#debounceRefreshMessages();
+                },
+            },
+            {
                 key: "template",
                 type: Boolean,
                 default: true,
@@ -431,6 +440,7 @@ type ToolSettings = {
     checks: boolean;
     dismissTemplate: boolean;
     enabled: boolean;
+    expend: boolean;
     small: boolean;
     targets: boolean;
     template: boolean;

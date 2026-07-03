@@ -2,6 +2,7 @@ import {
     addListenerAll,
     ChatMessagePF2e,
     createHTMLElement,
+    DamageDamageContextFlag,
     DamageMessage,
     DamageRoll,
     DegreeOfSuccessString,
@@ -19,6 +20,7 @@ import {
 } from "foundry-helpers";
 import { extractEphemeralEffects } from "foundry-helpers/dist";
 import {
+    createAreaExpendBtn,
     createRollNPCSavesBtn,
     createSetTargetsBtn,
     createTargetsRows,
@@ -59,6 +61,16 @@ function prepareDamageMessage(
 
     updates.type = "damage";
     updates.isRegen = isRegenMessage(message);
+
+    if (!this.getFlag(message, "area")) {
+        const context = message.flags[SYSTEM.id].context as DamageDamageContextFlag;
+
+        updates.area = R.isIncludedIn("auto-fire-damage", context.domains)
+            ? "auto-fire"
+            : R.isIncludedIn("area-fire-damage", context.domains)
+              ? "area-fire"
+              : null;
+    }
 
     if (!this.getMessageSaveVariants(message)) {
         const saveVariants = getSpellSaveVariants(message);
@@ -108,7 +120,8 @@ async function renderDamageMessage(
     const targetHelper = new TargetHelper(data);
     const hasTargets = targetHelper.hasTargets;
     const hasSplashTargets = targetHelper.hasSplashTargets;
-    if (!hasTargets && !hasSplashTargets && !isOwner) return;
+    const isArea = !!targetHelper.area;
+    if (!hasTargets && !hasSplashTargets && !isArea && !isOwner) return;
 
     const damageRows = htmlQueryAll(msgContent, ".damage-application");
     const diceTotalElements = msgContent.querySelectorAll(".dice-result .dice-total");
@@ -150,6 +163,11 @@ async function renderDamageMessage(
     const rollSavesBtn = createRollNPCSavesBtn.call(this, message, targetHelper);
     if (rollSavesBtn) {
         btnWrapper.append(rollSavesBtn);
+    }
+
+    const expendBtn = isArea && createAreaExpendBtn.call(this, message, targetHelper);
+    if (expendBtn) {
+        btnWrapper.append(expendBtn);
     }
 
     wrappersParents[0].append(btnWrapper);

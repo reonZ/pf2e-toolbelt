@@ -78,11 +78,13 @@ async function renderSpellMessage(
     if (!msgContent || !spell) return;
     if (spell.hasVariants && !spell.variantId) return;
 
+    const targetHelper = new TargetHelper(data, spell.variantId);
+
     return renderSpellCardLikeMessage.call(
         this,
         message,
         msgContent,
-        data,
+        targetHelper,
         spell,
         `.card-buttons [data-action="spell-save"]`,
         `.card-buttons [data-action="spell-damage"]`,
@@ -93,16 +95,15 @@ async function renderSpellCardLikeMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
     msgContent: HTMLElement,
-    data: TargetsData,
+    data: TargetHelper,
     item: SpellPF2e | WeaponPF2e | MeleePF2e,
     saveBtnSelector: string,
     damageBtnSelector: string,
 ): Promise<void> {
-    const targetHelper = new TargetHelper(data, item.isOfType("spell") ? item.variantId : "null");
-    const save = targetHelper.saveVariant;
+    const save = data.saveVariant;
     if (!save) return;
 
-    await addTargetsHeaders.call(this, message, targetHelper, msgContent);
+    await addTargetsHeaders.call(this, message, data, msgContent);
 
     const saveBtn = htmlQuery(msgContent, saveBtnSelector);
     if (!(saveBtn instanceof HTMLButtonElement)) return;
@@ -116,15 +117,15 @@ async function renderSpellCardLikeMessage(
     saveBtn.classList.add("hidden");
     saveBtn.after(buttonsWrapper);
 
-    addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, targetHelper);
+    addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, data);
     buttonsWrapper.append(fakeSaveBtn);
 
     if (!isMessageOwner(message)) return;
 
-    const setTargetsBtn = createSetTargetsBtn.call(this, message, targetHelper);
+    const setTargetsBtn = createSetTargetsBtn.call(this, message, data);
     buttonsWrapper.prepend(setTargetsBtn);
 
-    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, targetHelper);
+    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, data);
     if (rollSavesBtn) {
         buttonsWrapper.append(rollSavesBtn);
     }
@@ -137,11 +138,11 @@ async function renderSpellCardLikeMessage(
 
     damageBtn.addEventListener(
         "click",
-        (event) => {
+        () => {
             // we cache the data & add the spell just in case
-            const cached = targetHelper.encode({
+            const cached = data.encode({
                 type: "damage",
-                item: targetHelper.itemUUID ?? item.uuid,
+                item: data.itemUUID ?? item.uuid,
                 saveVariants: _replace({ null: save }),
             });
 

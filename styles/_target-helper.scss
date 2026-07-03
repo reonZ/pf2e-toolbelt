@@ -69,6 +69,26 @@
                     min-height: revert;
                 }
 
+                button.pf2e-toolbelt-target-expend {
+                    padding: 0;
+
+                    i {
+                        background-size: contain;
+                        height: 1em;
+                        width: 100%;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                    }
+
+                    span {
+                        display: none;
+                    }
+
+                    &:disabled {
+                        opacity: 0.5;
+                    }
+                }
+
                 .pf2e-toolbelt-target-toggleDamageRows {
                     &.expanded {
                         .expand {

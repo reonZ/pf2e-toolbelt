@@ -12,7 +12,7 @@ import {
     WeaponPF2e,
 } from "foundry-helpers";
 import { isMessageOwner, renderSpellCardLikeMessage, TargetHelperTool } from ".";
-import { SaveVariantsSource, TargetsData, TargetsDataSource } from "..";
+import { SaveVariantsSource, TargetHelper, TargetsData, TargetsDataSource } from "..";
 import { createHTMLElement } from "foundry-helpers/src";
 
 const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
@@ -26,6 +26,9 @@ function prepareAreaMessage(this: TargetHelperTool, message: ChatMessagePF2e, up
     const saveVariants = getAreaSaveVariants(message);
     if (!saveVariants) return false;
 
+    const context = message.flags[SYSTEM.id].context as AreaAttackContextFlag;
+
+    updates.area = context.type;
     updates.author = message.item?.actor.uuid;
     updates.type = "area";
 
@@ -49,9 +52,9 @@ async function renderAreaMessage(
     const msgContent = htmlQuery(html, ".message-content");
     if (!msgContent || !isValidItem(item)) return;
 
-    const context = message.flags[SYSTEM.id].context as AreaAttackContextFlag;
+    const targetHelper = new TargetHelper(data);
+    const expendBtn = createAreaExpendBtn.call(this, message, targetHelper);
 
-    const expendBtn = createAreaExpendBtn.call(this, message, data, context.type);
     if (expendBtn) {
         const buttonsWrapper = createHTMLElement("div", {
             classes: ["pf2e-toolbelt-target-buttons"],
@@ -70,7 +73,7 @@ async function renderAreaMessage(
         this,
         message,
         msgContent,
-        data,
+        targetHelper,
         item,
         `.message-buttons [data-action="roll-area-save"]`,
         `.message-buttons [data-action="roll-area-damage"]`,
@@ -80,11 +83,12 @@ async function renderAreaMessage(
 function createAreaExpendBtn(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
-    data: TargetsData,
-    type: "area-fire" | "auto-fire",
+    data: TargetHelper,
 ): HTMLButtonElement | undefined {
+    if (!this.settings.expend) return;
+
     const item = message.item;
-    if (!item?.isOfType("weapon")) return;
+    if (!data.area || !item?.isOfType("weapon")) return;
 
     const isGrenade = item.system.baseItem === "grenade";
     if (!isGrenade && !item.system.ammo) return;
@@ -97,13 +101,13 @@ function createAreaExpendBtn(
         ? MODULE.imagePath("grenade", "svg")
         : SYSTEM.relativePath("assets/icons/heavy-bullets.svg");
 
-    const totalExpend = isGrenade ? 1 : type === "auto-fire" ? nb * 2 : item.system.expend || 1;
+    const totalExpend = isGrenade ? 1 : data.isAutoFire ? nb * 2 : item.system.expend || 1;
 
     const hasExpended = expended > 0;
     const displayedExpend = isGrenade ? "" : hasExpended ? expended : totalExpend;
 
     const tooltip = this.localize("expend-ammo", hasExpended ? "expended" : "expend", isGrenade ? "grenade" : "ammo", {
-        expend: type === "auto-fire" ? `${nb}x2` : totalExpend,
+        expend: data.isAutoFire ? `${nb}x2` : totalExpend,
         nb: totalExpend,
     });
 
@@ -121,7 +125,9 @@ function createAreaExpendBtn(
         return btn;
     }
 
-    btn.addEventListener("click", async () => {
+    btn.addEventListener("click", async (event) => {
+        event.stopPropagation();
+
         if (isGrenade) {
             if (item.quantity < 1) {
                 return this.localize.warning("expend-ammo.warning.grenade");
@@ -184,4 +190,4 @@ function isValidItem(item: Maybe<ItemPF2e>): item is WeaponPF2e<CreaturePF2e> | 
     return !!item?.isOfType("weapon", "melee") && !!item.actor?.isOfType("creature");
 }
 
-export { isAreaMessage, prepareAreaMessage, renderAreaMessage };
+export { createAreaExpendBtn, isAreaMessage, prepareAreaMessage, renderAreaMessage };
