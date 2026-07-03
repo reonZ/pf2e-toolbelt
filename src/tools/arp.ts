@@ -16,7 +16,7 @@ import { ModuleTool, ToolSettingsList } from "module-tool";
 import { sharedArmorPrepareBaseData, sharedWeaponPrepareBaseData } from ".";
 
 const HANDWRAPS_SLUG = "handwraps-of-mighty-blows";
-const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"];
+const STRIKING_SHIELDS = ["shield-boss", "shield-spikes"] as const;
 
 const GRADES = ["commercial", "tactical", "advanced", "superior", "elite", "ultimate", "paragon"] as const;
 
@@ -329,16 +329,16 @@ function isValidActor(actor: Maybe<ActorPF2e>, characterOnly = false): actor is 
 function isValidWeapon(weapon: WeaponPF2e<ActorPF2e>): boolean {
     const { specific, category, group, baseItem, traits } = weapon._source.system;
 
-    if (specific) {
+    if (specific || baseItem === "grenade") {
+        return false;
+    }
+
+    if (group === "shield" && (!baseItem || !R.isIncludedIn(baseItem, STRIKING_SHIELDS))) {
         return false;
     }
 
     if (category === "unarmed" && !isHandwrap(weapon)) {
         return hasHandwrap(weapon.actor);
-    }
-
-    if (group === "shield" && (!baseItem || !STRIKING_SHIELDS.includes(baseItem))) {
-        return false;
     }
 
     return !traits.value.includes("alchemical") && !traits.value.includes("bomb");
