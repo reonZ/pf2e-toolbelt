@@ -1138,6 +1138,21 @@
                 "already": "This message already has a save check linked to it.",
                 "unauth": "You can only do that on messages you are the author of."
             },
+            "expend-ammo": {
+                "expend": {
+                    "ammo": "Expend {expend} ammo(s)",
+                    "grenade": "Expend the grenade"
+                },
+                "expended": {
+                    "ammo": "{nb} ammo(s) have been expended",
+                    "grenade": "Grenade has been expended"
+                },
+                "warning": {
+                    "ammo": "Not enough ammo loaded in your weapon",
+                    "error": "Couldn't recpover any valid ammo to expend",
+                    "grenade": "You are out of grenade to throw"
+                }
+            },
             "header": {
                 "hidden": "Hidden From Players",
                 "noSave": "This actor cannot roll {save} checks",

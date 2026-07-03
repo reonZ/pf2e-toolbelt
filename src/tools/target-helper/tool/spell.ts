@@ -129,6 +129,9 @@ async function renderSpellCardLikeMessage(
         buttonsWrapper.append(rollSavesBtn);
     }
 
+    // weapons that don't deal damage shouldn't even have a damage button, but they do so..
+    if (!item.isOfType("spell") && !item.dealsDamage) return;
+
     const damageBtn = htmlQuery(msgContent, damageBtnSelector);
     if (!damageBtn) return;
 

@@ -31,6 +31,7 @@ const zTokenDocumentArrayEncode = z
 const zBaseTargetsData = z.object({
     applied: zTargetsAppliedDamages,
     author: zDocumentUUID("Actor").nullish().default(null),
+    expended: z.number().min(0).default(0),
     item: zDocumentUUID("Item").nullish().default(null),
     isRegen: z.boolean().default(false),
     options: z.array(z.string()).default([]),

@@ -7,6 +7,7 @@
                 gap: 1px;
 
                 button[data-save],
+                button[data-action="roll-area-damage"],
                 button[data-action="roll-fake-check"] {
                     flex: 1;
                     border-radius: 0 4px 4px 0;
@@ -16,11 +17,38 @@
                     }
                 }
 
-                .pf2e-toolbelt-target-setTargets {
+                button[class^="pf2e-toolbelt-target-"] {
+                    width: 2.4em;
                     border-radius: 4px 0 0 4px;
                 }
 
-                .pf2e-toolbelt-target-rollSaves {
+                button.pf2e-toolbelt-target-expend {
+                    i {
+                        background-size: contain;
+                        height: 100%;
+                        width: 100%;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                    }
+
+                    span {
+                        position: absolute;
+                        color: white;
+                        text-shadow:
+                            0 0 2px black,
+                            0 0 2px black,
+                            0 0 2px black;
+                        font-weight: bold;
+                        padding-left: 1em;
+                        padding-top: 0.9em;
+                    }
+
+                    &:disabled {
+                        opacity: 0.5;
+                    }
+                }
+
+                button.pf2e-toolbelt-target-rollSaves {
                     border-radius: 0 4px 4px 0;
                 }
             }

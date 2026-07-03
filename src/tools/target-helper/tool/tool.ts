@@ -200,13 +200,20 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return getCurrentTargets({ types: ["creature", "hazard", "vehicle"], uuid: true });
     }
 
-    async #updateMessage({ message, applied, saves, variantId = "null" }: UpdateMessageOptions, _userId: string) {
+    async #updateMessage(
+        { message, applied, expended, saves, variantId = "null" }: UpdateMessageOptions,
+        _userId: string,
+    ) {
         const data = this.getMessageData(message);
         if (!data) return;
 
         if (applied) {
             const udpate = { applied: this.#applyDamageUpdates(data, applied) };
             foundry.utils.mergeObject(data, udpate, { inplace: true });
+        }
+
+        if (expended) {
+            data.expended = expended;
         }
 
         if (saves) {
@@ -431,6 +438,7 @@ type ToolSettings = {
 
 type UpdateMessageOptions = {
     applied?: UpdateMessageApplied;
+    expended?: number;
     message: ChatMessagePF2e;
     saves?: Record<string, TargetSaveInstanceSource>;
     variantId?: string;
