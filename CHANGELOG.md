@@ -1,3 +1,13 @@
+# 3.51.0
+
+- `Automatic Rune Progression`:
+  - no longer upgrade items with the `Grenade` base
+- `Target Helper`:
+  - add new `Expend Ammo Button` user setting (enabled)
+    - it adds a button in area related messages to expend ammunitions/grenades
+    - make sure to validate your targets before using it in the case of `Auto Fire` as the button can only be interacted with once
+  - fix origin of emanation templates for `Template Helper`
+
 # 3.50.0
 
 - `Item Spell Casting`:
