@@ -799,12 +799,15 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 : `.tab[data-tab="main"] .actions.section-container .section-body`,
         );
 
+        const autoApply = this.settings.apply;
+        const actionable = this.settings.action;
+
         const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
             const item = actor.items.get(itemId);
             if (!item?.isOfType("action", "feat") || this.isPassiveAction(item) || this.isCraftingAction(item)) return;
 
-            const selfEffect = this.settings.apply && item.system.selfEffect;
-            const macro = this.settings.action && (await getActionMacro(item));
+            const selfEffect = autoApply && item.system.selfEffect;
+            const macro = actionable && (await getActionMacro(item));
             if (!selfEffect && !macro) return;
 
             const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
