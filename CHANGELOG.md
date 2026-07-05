@@ -1,3 +1,8 @@
+# 3.51.1
+
+- `Actionable`:
+  - the message generated when using the `Auto Self-Applied` setting is now the same as when using "send to chat" on an action
+
 # 3.51.0
 
 - `Automatic Rune Progression`:
