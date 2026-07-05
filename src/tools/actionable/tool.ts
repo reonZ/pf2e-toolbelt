@@ -14,7 +14,6 @@ import {
     CharacterPF2e,
     CharacterSheetData,
     CharacterSheetPF2e,
-    ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
     createHTMLElement,
@@ -62,7 +61,6 @@ import {
     SpellSheetPF2e,
     Statistic,
     StatisticData,
-    SYSTEM,
     toggleHooksAndWrappers,
     toggleSummary,
     updateActionFrequency,
@@ -91,8 +89,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         ["renderCharacterSheetPF2e", "renderNPCSheetPF2e"],
         this.#onRenderCreatureSheetPF2e.bind(this),
     );
-
-    #createChatMessageHook = createToggleHook("createChatMessage", this.#onCreateChatMessage.bind(this));
 
     #actionWrappers = [
         createToggleWrapper(
@@ -205,7 +201,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "user",
                 onChange: (value) => {
-                    this.#createChatMessageHook.toggle(value);
+                    this.configurate();
                 },
             },
         ];
@@ -263,7 +259,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     ready() {
         this._configurate(true);
         toggleHooksAndWrappers(this.#spellWrappers, this.settings.spell);
-        this.#createChatMessageHook.toggle(this.settings.apply);
 
         if (this.settings.physical) {
             registerWrapper(
@@ -285,7 +280,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         toggleHooksAndWrappers(this.#actionWrappers, actionEnabled);
         toggleHooksAndWrappers(this.#itemWrappers, itemEnabled);
 
-        this.#renderCreatureSheetPF2eHook.toggle(actionEnabled || itemEnabled || this.settings.use);
+        this.#renderCreatureSheetPF2eHook.toggle(
+            actionEnabled || itemEnabled || this.settings.use || this.settings.apply,
+        );
 
         if (!skipRenders) {
             renderItemSheets(["AbilitySheetPF2e", "ConsumableSheetPF2e", "EquipmentSheetPF2e", "FeatSheetPF2e"]);
@@ -603,22 +600,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #onCreateChatMessage(origin: ChatMessagePF2e) {
-        if (!origin.isAuthor || origin.flags[SYSTEM.id].context?.type !== "self-effect") return;
-
-        const hookId = Hooks.on("renderChatMessageHTML", (message: ChatMessagePF2e, html: HTMLElement) => {
-            if (message !== origin) return;
-
-            Hooks.off("renderChatMessageHTML", hookId);
-
-            // we wait for the message to actually be added to the DOM
-            requestAnimationFrame(() => {
-                const btn = htmlQuery(html, `button[data-action="applyEffect"]`);
-                btn?.click();
-            });
-        });
-    }
-
     #onRenderCharacterSheetPF2e(sheet: CharacterSheetPF2e<CharacterPF2e>, $html: JQuery) {
         const virtualSpells = this.getVirtualSpellsData(sheet.actor);
         if (!virtualSpells) return;
@@ -722,7 +703,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const html = $html[0];
 
-        if (this.settings.action) {
+        if (this.settings.apply || this.settings.action) {
             this.#updateActorActions(sheet, html, data);
         }
 
@@ -820,17 +801,11 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
             const item = actor.items.get(itemId);
+            if (!item?.isOfType("action", "feat") || this.isPassiveAction(item) || this.isCraftingAction(item)) return;
 
-            if (
-                !item?.isOfType("action", "feat") ||
-                this.isPassiveAction(item) ||
-                this.isCraftingAction(item) ||
-                item.system.selfEffect
-            )
-                return;
-
-            const macro = await getActionMacro(item);
-            if (!macro) return;
+            const selfEffect = this.settings.apply && item.system.selfEffect;
+            const macro = this.settings.action && (await getActionMacro(item));
+            if (!selfEffect && !macro) return;
 
             const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
             if (!el) return;
@@ -850,9 +825,9 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
             if (existingBtn) {
                 existingBtn.replaceWith(btn);
-            } else if (macro && isCharacter) {
+            } else if (isCharacter) {
                 htmlQuery(el, ".button-group")?.append(btn);
-            } else if (macro) {
+            } else {
                 const wrapper = createHTMLElement("div", {
                     classes: ["button-group"],
                     content: btn,
