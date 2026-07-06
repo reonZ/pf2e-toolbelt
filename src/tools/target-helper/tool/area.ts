@@ -1,5 +1,4 @@
 import {
-    AreaAttack,
     AreaAttackContextFlag,
     ChatMessagePF2e,
     CreaturePF2e,
@@ -12,21 +11,18 @@ import {
     WeaponPF2e,
 } from "foundry-helpers";
 import { isMessageOwner, renderSpellCardLikeMessage, TargetHelperTool } from ".";
-import { SaveVariantsSource, TargetHelper, TargetsData, TargetsDataSource } from "..";
+import { TargetHelper, TargetsData, TargetsDataSource } from "..";
 import { createHTMLElement } from "foundry-helpers/src";
 
 const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 
 function isAreaMessage(message: ChatMessagePF2e): boolean {
     const context = message.flags[SYSTEM.id].context;
-    return isAreaOrAutoFireType(context?.type ?? "");
+    return !!context && isAreaOrAutoFireType(context.type) && !!(context as AreaAttackContextFlag).dc?.value;
 }
 
 function prepareAreaMessage(this: TargetHelperTool, message: ChatMessagePF2e, updates: TargetsDataSource): boolean {
-    const saveVariants = getAreaSaveVariants(message);
-    if (!saveVariants) return false;
-
-    const context = message.flags[SYSTEM.id].context as AreaAttackContextFlag;
+    const context = message.flags[SYSTEM.id].context as Required<AreaAttackContextFlag>;
 
     updates.area = context.type;
     updates.author = message.item?.actor.uuid;
@@ -36,7 +32,13 @@ function prepareAreaMessage(this: TargetHelperTool, message: ChatMessagePF2e, up
     updates.options.push(...EXTRA_AREA_OPTIONS);
 
     if (!this.getMessageSaveVariants(message)) {
-        updates.saveVariants = saveVariants;
+        updates.saveVariants = {
+            null: {
+                basic: true,
+                dc: context.dc.value,
+                statistic: "reflex",
+            },
+        };
     }
 
     return true;
@@ -165,25 +167,6 @@ function createAreaExpendBtn(
     });
 
     return btn;
-}
-
-function getAreaSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | null {
-    const item = message.item;
-    if (!isValidItem(item)) return null;
-
-    const strike = item.actor.system.actions?.find((strike): strike is AreaAttack => strike.item === item);
-    if (!strike) return null;
-
-    const statistic = strike.statistic ?? (strike.altUsages?.at(0) as Maybe<AreaAttack>)?.statistic;
-    if (!statistic) return null;
-
-    return {
-        null: {
-            basic: true,
-            dc: statistic.dc.value,
-            statistic: "reflex",
-        },
-    };
 }
 
 function isValidItem(item: Maybe<ItemPF2e>): item is WeaponPF2e<CreaturePF2e> | MeleePF2e<CreaturePF2e> {
