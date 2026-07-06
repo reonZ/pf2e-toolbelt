@@ -1,3 +1,9 @@
+# 3.52.0
+
+- this is a systems `8.3.0` & `1.3.0` release
+- `Target Helper`:
+  - use the new area messages dc snapshot instead of pulling it from the item and strike
+
 # 3.51.1
 
 - `Actionable`:
