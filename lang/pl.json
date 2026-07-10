@@ -375,6 +375,10 @@
           "name": "Włączone",
           "hint": "Włącz funkcję \"Pomocnik celowania\" na twoim świecie."
         },
+        "expend": {
+          "name": "Przycisk Wykorzystaj amunicję",
+          "hint": "Dodaj przycisk w sekcji powiadomień dotyczących obszaru, aby zużyć amunicję/granaty."
+        },
         "small": {
           "name": "Małe przyciski obrażeń",
           "hint": "Zmniejsz rozmiar przycisków obrażeń dla dodatkowych celów."
@@ -1137,6 +1141,21 @@
         "added": "Pomyślnie dodano rzut obronny do wiadomości.",
         "already": "Ta wiadomość ma już powiązany rzut obronny.",
         "unauth": "Możesz to zrobić tylko w wiadomościach, których jesteś autorem."
+      },
+      "expend-ammo": {
+        "expend": {
+          "ammo": "Wykorzystaj amunicję {expend}",
+          "grenade": "Rzuć granat"
+        },
+        "expended": {
+          "ammo": "{nb} nabojów zostały zużyte",
+          "grenade": "Granat został zużyty"
+        },
+        "warning": {
+          "ammo": "W broni nie ma wystarczającej ilości amunicji",
+          "error": "Nie udało się odzyskać żadnej nadającej się do użycia amunicji",
+          "grenade": "Nie masz już granatów do rzucenia"
+        }
       },
       "header": {
         "hidden": "Ukryte przed graczami",
