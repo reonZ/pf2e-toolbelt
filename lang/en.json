@@ -1153,7 +1153,7 @@
                 },
                 "warning": {
                     "ammo": "Not enough ammo loaded in your weapon",
-                    "error": "Couldn't recpover any valid ammo to expend",
+                    "error": "Couldn't recover any valid ammo to expend",
                     "grenade": "You are out of grenade to throw"
                 }
             },
