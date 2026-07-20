@@ -62,8 +62,9 @@ function prepareDamageMessage(
     updates.type = "damage";
     updates.isRegen = isRegenMessage(message);
 
-    if (!this.getFlag(message, "area")) {
-        const context = message.flags[SYSTEM.id].context as DamageDamageContextFlag;
+    area: if (!this.getFlag(message, "area")) {
+        const context = message.flags[SYSTEM.id].context as DamageDamageContextFlag | undefined;
+        if (!context) break area;
 
         updates.area = R.isIncludedIn("auto-fire-damage", context.domains)
             ? "auto-fire"
