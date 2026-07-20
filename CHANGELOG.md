@@ -1,3 +1,9 @@
+# 3.52.1
+
+- fix some localization typo
+- `Target Helper`:
+  - fix issue with damage roll messages that don't have a system context flag
+
 # 3.52.0
 
 - this is a systems `8.3.0` & `1.3.0` release
