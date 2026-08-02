@@ -518,8 +518,8 @@
             "title": "統合メニュー",
             "yes": "統合"
           },
-          "originMerge": "現在のメッセージ",
-          "targetMerge": "前のメッセージ"
+          "originMerge": "前のメッセージ",
+          "targetMerge": "現在のメッセージ"
         },
         "noMatch": "他の一致するダメージ・メッセージが見つからなかった。"
       }

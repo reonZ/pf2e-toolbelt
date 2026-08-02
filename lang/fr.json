@@ -514,8 +514,8 @@
             "title": "Menu fusionner",
             "yes": "Fusionner"
           },
-          "originMerge": "Message actuel",
-          "targetMerge": "Message précédent"
+          "originMerge": "Message précédent",
+          "targetMerge": "Message actuel"
         },
         "noMatch": "Impossible de trouver un autre message de dégât correspondant."
       }

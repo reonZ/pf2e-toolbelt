@@ -13,7 +13,7 @@ import { BetterChatTool } from "..";
 
 const _cached: { injected?: string; icons: PartialRecord<ButtonType, string> } = { icons: {} };
 
-const MERGE_MESSAGES = ["originMerge", "targetMerge"] as const;
+const MERGE_MESSAGES = ["targetMerge", "originMerge"] as const;
 const MERGE_TYPES = ["full", "half", "double"] as const;
 
 const ICONS: Record<ButtonType, string> = {
@@ -22,16 +22,16 @@ const ICONS: Record<ButtonType, string> = {
     split: "fa-duotone fa-split",
 };
 
-async function renderChatMessageMergeDamage(this: BetterChatTool, message: ChatMessagePF2e, html: HTMLElement) {
-    if (!isMessageOwner(message) || !message.isDamageRoll) return;
+async function renderChatMessageMergeDamage(this: BetterChatTool, targetMessage: ChatMessagePF2e, html: HTMLElement) {
+    if (!isMessageOwner(targetMessage) || !targetMessage.isDamageRoll) return;
 
-    const actor = message.actor;
-    const targets = this.getMessageTargets(message);
-    const injected = this.getFlag(message, "mergeDamage.injected");
+    const actor = targetMessage.actor;
+    const targets = this.getMessageTargets(targetMessage);
+    const injected = this.getFlag(targetMessage, "mergeDamage.injected");
 
     const buttons: ButtonType[] = [];
 
-    if (injected || this.getFlag(message, "mergeDamage.merged")) {
+    if (injected || this.getFlag(targetMessage, "mergeDamage.merged")) {
         buttons.push("split");
     } else if (this.settings.inject) {
         buttons.push("inject");
@@ -61,28 +61,28 @@ async function renderChatMessageMergeDamage(this: BetterChatTool, message: ChatM
         const action = el.dataset.action as EventAction;
 
         if (R.isIncludedIn(action, ["merge-damage", "inject-damage"] as const)) {
-            for (const otherMessage of latestChatMessages(5, message)) {
-                if (!otherMessage.isDamageRoll) continue;
+            for (const originMessage of latestChatMessages(5, targetMessage)) {
+                if (!originMessage.isDamageRoll) continue;
 
                 const isMerge = action === "merge-damage";
-                if (isMerge && otherMessage.actor !== actor) continue;
+                if (isMerge && originMessage.actor !== actor) continue;
 
-                const otherTargets = this.getMessageTargets(otherMessage);
+                const otherTargets = this.getMessageTargets(originMessage);
                 if ((!isMerge && !targets.length) || arraysEqual(targets, otherTargets)) {
                     const mergeOptions = event.shiftKey ? await mergeMenu.call(this, action) : {};
                     if (!mergeOptions) return;
 
                     if (isMerge) {
-                        return mergeDamages.call(this, message, otherMessage, mergeOptions);
+                        return mergeDamages.call(this, targetMessage, originMessage, mergeOptions);
                     } else {
-                        return injectDamage.call(this, message, otherMessage, mergeOptions);
+                        return injectDamage.call(this, targetMessage, originMessage, mergeOptions);
                     }
                 }
             }
 
             this.localize.warning("mergeDamage.noMatch");
         } else if (action === "split-damage") {
-            const data = getMessageMergeFlagData.call(this, message);
+            const data = getMessageMergeFlagData.call(this, targetMessage);
             if (!data) return;
 
             const sources = data.flatMap((data) => {
@@ -95,8 +95,13 @@ async function renderChatMessageMergeDamage(this: BetterChatTool, message: ChatM
             });
 
             if (sources?.length) {
-                await message.delete();
-                getDocumentClass("ChatMessage").createDocuments(sources);
+                await targetMessage.delete();
+
+                const ChatMessagePF2e = getDocumentClass("ChatMessage");
+
+                for (const source of sources) {
+                    await ChatMessagePF2e.create(source);
+                }
             }
         }
     });
@@ -113,7 +118,7 @@ async function mergeMenu(
         const radios = R.map(MERGE_TYPES, (type) => {
             const label = this.localize("mergeDamage.menu", action, type);
             const checked = type === "full" ? "checked" : "";
-            const disabled = isInject && message === "targetMerge" ? "disabled" : "";
+            const disabled = isInject && message === "originMerge" ? "disabled" : "";
 
             return `<label>
                 <input type="radio" name="${message}" value="${type}" ${checked} ${disabled} />

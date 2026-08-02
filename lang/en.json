@@ -518,8 +518,8 @@
                         "title": "Merge Menu",
                         "yes": "Merge"
                     },
-                    "originMerge": "Current Message",
-                    "targetMerge": "Previous Message"
+                    "originMerge": "Previous Message",
+                    "targetMerge": "Current Message"
                 },
                 "noMatch": "Couldn't find another matching damage message."
             }

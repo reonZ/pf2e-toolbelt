@@ -96,9 +96,9 @@ async function injectDamage(
     options: MergeOptions,
 ): Promise<{ rolls: RollJSON[] }> {
     // since the previous message shouldn't be modified, we don't want to update its rolls
-    delete options.targetMerge;
+    delete options.originMerge;
 
-    const { rolls } = groupRolls(originMessage, targetMessage, options);
+    const { rolls } = groupRolls(targetMessage, originMessage, options);
     const data = [
         ...getMessageMergeData.call(this, originMessage), //
         ...getMessageMergeData.call(this, targetMessage),

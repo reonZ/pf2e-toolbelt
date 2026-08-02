@@ -518,8 +518,8 @@
             "title": "Menu scalania",
             "yes": "Połącz"
           },
-          "originMerge": "Aktualna wiadomość",
-          "targetMerge": "Poprzednia wiadomość"
+          "originMerge": "Poprzednia wiadomość",
+          "targetMerge": "Aktualna wiadomość"
         },
         "noMatch": "Nie znaleziono innego pasującego komunikatu o obrażeniach."
       }

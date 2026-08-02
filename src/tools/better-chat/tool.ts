@@ -65,20 +65,20 @@ class BetterChatTool extends ModuleTool<ToolSettings> {
     get api(): toolbelt.Api["betterChat"] {
         return {
             injectDamageMessage: async (
-                previousMessage: ChatMessagePF2e,
-                currentMessage: ChatMessagePF2e,
+                originMessage: ChatMessagePF2e,
+                targetMessage: ChatMessagePF2e,
                 options: Omit<MergeOptions, "targetMerge"> = {},
             ): Promise<{ rolls: RollJSON[] } | undefined> => {
-                if (!previousMessage.isDamageRoll || !currentMessage.isDamageRoll) return;
-                return injectDamage.call(this, currentMessage, previousMessage, options);
+                if (!originMessage.isDamageRoll || !targetMessage.isDamageRoll) return;
+                return injectDamage.call(this, targetMessage, originMessage, options);
             },
             mergeDamageMessages: async (
-                previousMessage: ChatMessagePF2e,
-                currentMessage: ChatMessagePF2e,
+                originMessage: ChatMessagePF2e,
+                targetMessage: ChatMessagePF2e,
                 options: MergeOptions = {},
             ): Promise<ChatMessagePF2e | undefined> => {
-                if (!previousMessage.isDamageRoll || !currentMessage.isDamageRoll) return;
-                return mergeDamages.call(this, currentMessage, previousMessage, options);
+                if (!originMessage.isDamageRoll || !targetMessage.isDamageRoll) return;
+                return mergeDamages.call(this, targetMessage, originMessage, options);
             },
         };
     }
