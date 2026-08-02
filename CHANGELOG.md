@@ -1,3 +1,12 @@
+# 3.53.0
+
+- this is a systems `8.4.0` & `1.4.0` release
+- add Japanese localization (thanks to [counterpost](https://github.com/counterpost))
+- `Better Actor Sheet`:
+  - remove the now useless part that was offering sorting for the spell preparation app (it is now fully handled by the system)
+- `Better Chat Message`:
+  - fix options being inverted when using the customization menu of merge damage messages
+
 # 3.52.1
 
 - fix some localization typo
