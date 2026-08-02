@@ -24,7 +24,6 @@ import {
     renderCharacterSheets,
     SpellcastingEntryPF2e,
     SpellCollection,
-    SpellPreparationSheet,
     SYSTEM,
     toggleHooksAndWrappers,
 } from "foundry-helpers";
@@ -58,10 +57,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
 
     #showPlayersHook = createToggleHook("renderActorSheetPF2e", this.#showPlayersOnRender.bind(this));
 
-    #sortListHooks = [
-        createToggleHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this)),
-        createToggleHook("renderSpellPreparationSheet", this.#addSpellbookSortList.bind(this)),
-    ];
+    #sortListHooks = createToggleHook("renderActorSheetPF2e", this.#sortListOnRender.bind(this));
 
     get key(): "betterSheet" {
         return "betterSheet";
@@ -98,7 +94,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "user",
                 onChange: (value: boolean) => {
-                    toggleHooksAndWrappers(this.#sortListHooks, value);
+                    this.#sortListHooks.toggle(value);
                     renderActorSheets();
                 },
             },
@@ -118,7 +114,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
     init(isGM: boolean): void {
         this.#retrainFeatsHook.toggle(this.settings.retrainFeats);
         this.#showPlayersHook.toggle(isGM && this.settings.showPlayers);
-        toggleHooksAndWrappers(this.#sortListHooks, this.settings.sortList);
+        this.#sortListHooks.toggle(this.settings.sortList);
     }
 
     ready(isGM: boolean): void {
@@ -298,31 +294,6 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         });
 
         await entry.update({ "system.slots": updates });
-    }
-
-    #addSpellbookSortList(sheet: SpellPreparationSheet<CreaturePF2e>, $html: JQuery) {
-        if (!sheet.isEditable) return;
-
-        const html = $html[0];
-        const actor = sheet.actor;
-        const collectionId = htmlQuery(html, `[data-entry-id]`)?.dataset.entryId;
-        const collection = actor.spellcasting.collections.get(collectionId ?? "");
-        if (!collection) return;
-
-        const name = htmlQuery(html, ".sheet-header h1");
-        const disabled = collectionIsDisabled(collection);
-        const btn = this.#createSortBtn(disabled);
-
-        name?.classList.add("with-sort");
-        name?.prepend(btn);
-
-        if (disabled) return;
-
-        btn.addEventListener("click", async () => {
-            if (collection) {
-                await this.#sortCollectionSpells(collection);
-            }
-        });
     }
 
     #addSpellcastingSortList(html: HTMLElement, actor: ActorPF2e) {
