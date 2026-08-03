@@ -401,12 +401,14 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             bonusSpan.innerText = getDisplayedBonus(cover);
         });
 
-        htmlQuery(html, "button.roll")?.addEventListener(
+        htmlQuery(html, `button[type="submit"]`)?.addEventListener(
             "click",
             async (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 event.stopImmediatePropagation();
+
+                console.log(cover, current);
 
                 if (cover !== current.level) {
                     const ids = coverEffects.map((effect) => effect.id);
