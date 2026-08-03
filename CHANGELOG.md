@@ -1,3 +1,10 @@
+# 3.53.1
+
+- `Auto Cover`:
+  - fix cover override no longer working after some system changes (not sure when it happened)
+- `Target Helper`:
+  - fix retrieval of spell DC not taking into account roll options that specifically target the spell (and not the spellcasting entry)
+
 # 3.53.0
 
 - this is a systems `8.4.0` & `1.4.0` release
