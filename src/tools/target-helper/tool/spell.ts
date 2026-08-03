@@ -38,8 +38,10 @@ function prepareSpellMessage(
 
 function getSpellSaveVariants(message: ChatMessagePF2e): SaveVariantsSource | null {
     const spell = getMessageSpell(message);
-    const dc = spell?.spellcasting?.statistic?.dc.value;
-    if (!spell || !R.isNumber(dc)) return null;
+    if (!spell) return null;
+
+    const dc: number | undefined = spell.spellcasting?.statistic?.withRollOptions({ item: spell }).dc.value;
+    if (!R.isNumber(dc)) return null;
 
     const baseSave = spell?.system.defense?.save;
 
