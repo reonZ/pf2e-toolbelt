@@ -21,6 +21,7 @@ import {
     createToggleHook,
     createToggleWrapper,
     CreaturePF2e,
+    DatabaseCreateOperation,
     Duration,
     EffectPF2e,
     EquipmentPF2e,
@@ -43,7 +44,9 @@ import {
     ItemPF2e,
     ItemSheetDataPF2e,
     ItemSheetPF2e,
+    ItemSourcePF2e,
     itemWithActor,
+    LaxSchemaField,
     MacroPF2e,
     MagicTradition,
     MODULE,
@@ -55,6 +58,10 @@ import {
     registerWrapper,
     renderCharacterSheets,
     renderItemSheets,
+    RuleElement,
+    RuleElementOptions,
+    RuleElementSchema,
+    RuleElementSource,
     SpellcastingEntry,
     SpellcastingEntryPF2e,
     SpellPF2e,
@@ -68,7 +75,7 @@ import {
     usePhysicalItem,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { sharedCharacterPrepareData, sharedCharacterSheetActivateListeners } from "tools";
+import { isPhysicalCategory, sharedCharacterPrepareData, sharedCharacterSheetActivateListeners } from "tools";
 import {
     ActionableData,
     ActionableRuleElement,
@@ -243,6 +250,12 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         if (castEnabled || physicalEnabled) {
             registerWrapper(
                 "WRAPPER",
+                "CONFIG.PF2E.Actor.documentClasses.character.prototype.createEmbeddedDocuments",
+                this.#characterCreateEmbeddedDocuments,
+                this,
+            );
+            registerWrapper(
+                "WRAPPER",
                 "CONFIG.PF2E.Actor.documentClasses.character.prototype.prepareEmbeddedDocuments",
                 this.#characterPrepareEmbeddedDocuments,
                 this,
@@ -406,6 +419,39 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             actor.spellcasting.set(itemCasting.id, itemCasting);
             actor.spellcasting.collections.set(itemCasting.id, collection);
         }
+    }
+
+    async #characterCreateEmbeddedDocuments(
+        actor: CharacterPF2e,
+        wrapped: libWrapper.RegisterCallback,
+        embeddedName: "ActiveEffect" | "Item",
+        data: PreCreate<ItemSourcePF2e>[],
+        operation?: Partial<DatabaseCreateOperation<CharacterPF2e>>,
+    ): Promise<ItemPF2e<CharacterPF2e>[]> {
+        if (embeddedName !== "Item") {
+            return wrapped(embeddedName, data, operation);
+        }
+
+        const ItemCls = getDocumentClass("Item");
+
+        await Promise.all(
+            data.map(async (itemSource) => {
+                if (!isPhysicalCategory(itemSource.type) || !itemSource.system?.rules?.length) return;
+
+                const item = new ItemCls(itemSource, { parent: actor }) as PhysicalItemPF2e<CharacterPF2e>;
+
+                await Promise.all(
+                    itemSource.system.rules.map((ruleSource) => {
+                        if (!ruleSource.key || !R.isIncludedIn(ruleSource.key, ["Actionable", "ItemCast"])) return;
+
+                        const RuleElementCls = game.pf2e.RuleElements.custom[ruleSource.key] as RuleElementConstructor;
+                        return RuleElementCls.setData(item, ruleSource as RuleElementSource);
+                    }),
+                );
+            }),
+        );
+
+        return wrapped(embeddedName, data, operation);
     }
 
     #characterPrepareEmbeddedDocuments(actor: CharacterPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -1169,6 +1215,13 @@ type DropZoneData = {
 };
 
 type ToolSettings = toolbelt.Settings["actionable"];
+
+type RuleElementConstructor = {
+    schema: LaxSchemaField<RuleElementSchema>;
+    LOCALIZATION_PREFIXES: string[];
+} & (new (data: RuleElementSource, options: RuleElementOptions) => RuleElement) & {
+        setData(parent: PhysicalItemPF2e<CharacterPF2e>, source: RuleElementSource): Promise<void>;
+    };
 
 export { actionable };
 export type { ActionableTool };

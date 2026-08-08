@@ -108,6 +108,29 @@ function createActionableRuleElement() {
             }
         }
 
+        static async setData(parent: PhysicalItemPF2e<CharacterPF2e>, source: RuleElementSource): Promise<void> {
+            try {
+                const rule = new ActionableRuleElement(source, { parent });
+
+                const data: ActionableData = ((source as ActionableRuleSource).data = {
+                    id: foundry.utils.randomID(),
+                    sourceId: rule.uuid,
+                });
+
+                await rule.setDataFrequency(data);
+            } catch (error: any) {}
+        }
+
+        async setDataFrequency(data: DeepPartial<ActionableData>) {
+            const action = await fromUuid<ItemPF2e>(this.uuid);
+
+            if (action?.isOfType("action", "feat") && action.frequency) {
+                data.frequency = action.frequency.max;
+            } else {
+                delete data.frequency;
+            }
+        }
+
         async #setData() {
             const sourceIndex = this.sourceIndex ?? -1;
             if (sourceIndex < 0) return;
@@ -116,25 +139,10 @@ function createActionableRuleElement() {
             const rule = rules[sourceIndex] as DeepPartial<ActionableRuleSource> | undefined;
             if (!rule) return;
 
-            const action = await fromUuid<ItemPF2e>(this.uuid);
-            if (!action?.isOfType("action", "feat")) return;
-
             rule.data ??= {};
-
-            // the uuid has changed since last update so we remove specific data
-            if (rule.data.sourceId !== this.uuid) {
-                rule.data = {
-                    id: rule.data.id,
-                    sourceId: this.uuid,
-                };
-            }
-
-            // we add a persistent id if none already exist
             rule.data.id ??= foundry.utils.randomID();
-
-            if (action.frequency) {
-                rule.data.frequency ??= action.frequency.max;
-            }
+            rule.data.sourceId = this.uuid;
+            await this.setDataFrequency(rule.data);
 
             await this.item.update({ "system.rules": rules });
         }

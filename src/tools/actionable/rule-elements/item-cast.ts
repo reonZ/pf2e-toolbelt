@@ -372,6 +372,39 @@ function createItemCastRuleElement() {
             }
         }
 
+        static async setData(parent: PhysicalItemPF2e<CharacterPF2e>, source: RuleElementSource): Promise<void> {
+            try {
+                const rule = new ItemCastRuleElement(source, { parent });
+
+                const data: ItemCastRuleData = ((source as ItemCastRuleSource).data = {
+                    entryId: foundry.utils.randomID(),
+                    sourceId: rule.uuid,
+                    spell: await rule.getSpellSource(),
+                });
+
+                rule.setDataValue(data);
+            } catch (error: any) {}
+        }
+
+        setDataValue(data: DeepPartial<ItemCastRuleData>): void {
+            const max = this.resolvedMax;
+            if (max && (!R.isNumber(data.value) || data.value > max)) {
+                data.value = max;
+            } else if (!max && R.isNumber(data.value)) {
+                delete data.value;
+            }
+        }
+
+        async getSpellSource(): Promise<(SpellSource & { _id: string }) | undefined> {
+            const spell = await fromUuid<SpellPF2e>(this.uuid);
+            if (!spell) return;
+
+            const spellSource = spell.toObject();
+            spellSource._id = foundry.utils.randomID();
+
+            return spellSource as SpellSource & { _id: string };
+        }
+
         async #setData() {
             const sourceIndex = this.sourceIndex ?? -1;
             if (sourceIndex < 0) return;
@@ -381,32 +414,12 @@ function createItemCastRuleElement() {
             if (!rule) return;
 
             rule.data ??= {};
-
-            if (rule.data.sourceId !== this.uuid) {
-                rule.data = {
-                    sourceId: this.uuid,
-                };
-            }
-
             rule.data.entryId ??= foundry.utils.randomID();
+            rule.data.sourceId = this.uuid;
+            rule.data.spell = await this.getSpellSource();
+            this.setDataValue(rule.data);
 
-            const spell = await fromUuid<SpellPF2e>(this.uuid);
-            if (!spell) return;
-
-            const source = spell.toObject();
-            source._id = foundry.utils.randomID();
-
-            rule.data.spell = source as SpellSource & { _id: string };
-
-            const max = this.resolvedMax;
-            if (max && (!R.isNumber(rule.data.value) || rule.data.value > max)) {
-                rule.data.value = max;
-            } else if (!max && R.isNumber(rule.data.value)) {
-                delete rule.data.value;
-            }
-
-            const update = { _id: this.item.id, "system.rules": rules };
-            await this.actor.updateEmbeddedDocuments("Item", [update]);
+            await this.item.update({ "system.rules": rules });
         }
     }
 
