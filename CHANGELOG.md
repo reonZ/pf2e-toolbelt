@@ -1,3 +1,11 @@
+# 3.53.2
+
+- `Actionable`:
+  - fix adding an item (with multiple `ItemCast` or `Actionable` rule elements already defined) to an actor ending up with a breaking infinite loop of updates
+  - fix adding an item (with `ItemCast` or `Actionable` rule elements) to an actor not resetting the rules data
+  - fix the generate `ItemCast` menu being completely reset en render (now it retains all the data you already set for the other spells)
+  - fix the `Recharge` checkbox in the generate `ItemCast` menu not working
+
 # 3.53.1
 
 - `Auto Cover`:
