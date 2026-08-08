@@ -408,8 +408,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 event.stopPropagation();
                 event.stopImmediatePropagation();
 
-                console.log(cover, current);
-
                 if (cover !== current.level) {
                     const ids = coverEffects.map((effect) => effect.id);
                     const allItems = foundry.utils.deepClone(targetActor._source.items);
