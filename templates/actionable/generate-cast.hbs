@@ -1,4 +1,5 @@
 {{#each spells as |spell|}}
+{{log spell}}
 <hr>
 <div class="spell" data-uuid="{{spell.uuid}}">
     <div class="header">
@@ -6,25 +7,25 @@
         <span>{{spell.name}}</span>
         <label class="uses">
             {{@root.i18n 'max'}}
-            <input type="number" name="max" min="1" step="1">
+            <input type="number" name="max" min="1" step="1" value="{{spell.max}}">
         </label>
         <label class="recharge" {{{@root.i18n.tooltip 'recharge'}}}>
             <i class="fa-solid fa-bed"></i>
-            <input type="checkbox" name="recharge" checked>
+            <input type="checkbox" name="recharge" {{checked (ne spell.recharge false)}}>
         </label>
         <button type="button" data-action="add-rule" {{{@root.i18n.tooltip 'add'}}}>
             <i class="fa-solid fa-plus"></i>
         </button>
     </div>
     <div class="options">
-        <input type="text" name="statistic" placeholder="{{@root.i18n 'statistic'}}">
+        <input type="text" name="statistic" placeholder="{{@root.i18n 'statistic'}}" value={{spell.statistic}}>
         <select name="attribute">
             <option value="">{{@root.i18n 'attribute'}}</option>
-            {{selectOptions @root.attributes localize=true}}
+            {{selectOptions @root.attributes selected=spell.attribute localize=true}}
         </select>
         <select name="tradition">
             <option value="">{{@root.i18n 'tradition'}}</option>
-            {{selectOptions @root.traditions localize=true}}
+            {{selectOptions @root.traditions selected=spell.tradition localize=true}}
         </select>
         <label class="dc">
             {{@root.i18n 'dc'}}

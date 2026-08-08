@@ -520,4 +520,11 @@ type ItemCastUpdateDataArgs = {
 type VirtualSpellData = toolbelt.actionable.VirtualSpellData;
 
 export { createItemCastRuleElement, generateItemCastRuleSource };
-export type { BaseItemCastRule, ItemCastRuleElement, ItemCastRuleSource, ItemCastSource, VirtualSpellData };
+export type {
+    BaseItemCastRule,
+    ItemCastRuleElement,
+    ItemCastRuleSource,
+    ItemCastRuleSourceData,
+    ItemCastSource,
+    VirtualSpellData,
+};

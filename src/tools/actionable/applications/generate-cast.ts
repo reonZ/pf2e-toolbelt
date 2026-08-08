@@ -4,6 +4,7 @@ import {
     CompendiumIndexData,
     htmlClosest,
     htmlQuery,
+    htmlQueryAll,
     ImageFilePath,
     ItemPF2e,
     ItemUUID,
@@ -14,7 +15,13 @@ import {
     ROMAN_RANKS,
 } from "foundry-helpers";
 import { ModuleToolApplication } from "module-tool-application";
-import { ActionableTool, generateItemCastRuleSource, ItemCastRuleElement, ItemCastRuleSource } from "..";
+import {
+    ActionableTool,
+    generateItemCastRuleSource,
+    ItemCastRuleElement,
+    ItemCastRuleSource,
+    ItemCastRuleSourceData,
+} from "..";
 
 const ITEM_CAST_REGEX =
     /<a class="content-link"(?=[^>]+data-type="Item")(?=[^>]+data-uuid="([a-z0-9\.-]+)").+?>.+?<\/a>(?:<\/em>)?/gim;
@@ -22,6 +29,7 @@ const ITEM_CAST_DC_REGEX = /^[^<]+dc (\d+)/im;
 const ITEM_CAST_RANK_REGEX = /^[^<]+heightened to (\d+)/im;
 
 class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
+    #data: Record<ItemUUID, ItemCastRuleSourceData> = {};
     #item: PhysicalItemPF2e<CharacterPF2e>;
 
     static DEFAULT_OPTIONS: DeepPartial<fa.ApplicationConfiguration> = {
@@ -35,7 +43,6 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
         options?: DeepPartial<fa.ApplicationConfiguration>,
     ) {
         super(tool, options);
-
         this.#item = item;
     }
 
@@ -67,19 +74,26 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
 
             const index = match.index + match[0].length;
             const segment = description.slice(index);
-            const dcRaw = ITEM_CAST_DC_REGEX.exec(segment)?.[1];
-            const rankRaw = ITEM_CAST_RANK_REGEX.exec(segment)?.[1];
+            const savedData = this.#data[uuid];
 
-            const dc = dcRaw ? Number(dcRaw) : undefined;
-            const rank = rankRaw ? (Number(rankRaw) as OneToTen) : undefined;
-
-            spells.push({
+            const data: GenerateItemCastData = {
+                ...savedData,
                 img: item.img,
-                dc,
                 name: item.name,
-                rank,
                 uuid,
-            });
+            };
+
+            if (!data.dc) {
+                const dcRaw = ITEM_CAST_DC_REGEX.exec(segment)?.[1];
+                data.dc = dcRaw ? Number(dcRaw) : undefined;
+            }
+
+            if (!data.rank) {
+                const rankRaw = ITEM_CAST_RANK_REGEX.exec(segment)?.[1];
+                data.rank = rankRaw ? (Number(rankRaw) as OneToTen) : undefined;
+            }
+
+            spells.push(data);
         }
 
         return {
@@ -101,23 +115,36 @@ class GenerateItemCast extends ModuleToolApplication<ActionableTool> {
         }
     }
 
-    async #addRule(target: HTMLElement) {
-        const uuid = target.dataset.uuid as ItemUUID;
-        const item = await fromUuid<ItemPF2e>(uuid);
-        if (!item?.isOfType("spell")) return;
-
-        const rules = this.#item._source.system.rules.slice() as ItemCastRuleSource[];
-        const rule = generateItemCastRuleSource(item, {
+    generateRuleData(target: HTMLElement): ItemCastRuleSourceData {
+        return {
             attribute: getValueFromSelect<AttributeString>(target, "attribute"),
             dc: getValueFromInputNumber(target, "dc"),
             max: getValueFromInputNumber(target, "max"),
             predicate: getPredicateFromInput(target),
             rank: (Number(getValueFromSelect(target, "rank")) || undefined) as OneToTen | undefined,
+            recharge: htmlQuery<HTMLInputElement>(target, `[name="recharge"]`)?.checked,
             statistic: getValueFromInputText(target, "statistic"),
             tradition: getValueFromSelect<MagicTradition>(target, "tradition"),
-        });
+        };
+    }
+
+    async #addRule(target: HTMLElement) {
+        const uuid = target.dataset.uuid as ItemUUID;
+        const item = await fromUuid<ItemPF2e>(uuid);
+        if (!item?.isOfType("spell")) return;
+
+        this.#data = R.pipe(
+            htmlQueryAll(this.element, ".window-content .spell"),
+            R.map((el) => [el.dataset.uuid as ItemUUID, this.generateRuleData(el)] as const),
+            R.fromEntries(),
+        ) as Record<ItemUUID, ItemCastRuleSourceData>;
+
+        const rules = this.#item._source.system.rules.slice() as ItemCastRuleSource[];
+        const rule = generateItemCastRuleSource(item, this.#data[uuid]);
 
         rules.push(rule);
+
+        delete this.#data[uuid];
 
         await this.#item.update({ "system.rules": rules });
         this.render();
@@ -163,11 +190,9 @@ type GenerateItemCastContext = fa.ApplicationRenderContext & {
     traditions: typeof CONFIG.PF2E.magicTraditions;
 };
 
-type GenerateItemCastData = {
-    dc: number | undefined;
+type GenerateItemCastData = Prettify<ItemCastRuleSourceData> & {
     img: ImageFilePath;
     name: string;
-    rank: number | undefined;
     uuid: ItemUUID;
 };
 
