@@ -36,7 +36,7 @@ function getMessageMergeData(this: BetterChatTool, message: ChatMessagePF2e): Me
     this.deleteFlagProperty(source, "splitted");
 
     const sourceFlag = source.flags[SYSTEM.id] as ChatMessageFlagsPF2e["pf2e"] & {
-        context: DamageDamageContextFlag | SpellCastContextFlag;
+        context?: DamageDamageContextFlag | SpellCastContextFlag;
         strike?: {
             actor: string;
             index: number;
@@ -47,10 +47,6 @@ function getMessageMergeData(this: BetterChatTool, message: ChatMessagePF2e): Me
     };
 
     const flavor = createHTMLElement("div", { content: message.flavor });
-    const tags = flavor.querySelector(":scope > h4.action + .tags")?.outerHTML.trim() ?? "";
-    const modifiers = flavor.querySelector(":scope > .tags.modifiers")?.outerHTML.trim() ?? "";
-    const options = sourceFlag.context.options.filter((option) => /^(item|self):/.test(option));
-    const notes = htmlQueryAll(flavor, ":scope > .notes > .roll-note").map((x) => x.outerHTML.trim());
 
     return [
         zMergeData.parse({
@@ -60,11 +56,11 @@ function getMessageMergeData(this: BetterChatTool, message: ChatMessagePF2e): Me
                 message.item?.name ??
                 flavor.querySelector<HTMLHeadElement>(":scope > h4.action")?.innerText.trim() ??
                 "unknown",
-            outcome: sourceFlag.context.outcome ?? null,
-            options,
-            modifiers,
-            notes,
-            tags,
+            outcome: sourceFlag.context?.outcome ?? null,
+            options: sourceFlag.context?.options.filter((option) => /^(item|self):/.test(option)),
+            modifiers: flavor.querySelector(":scope > .tags.modifiers")?.outerHTML.trim() ?? "",
+            notes: htmlQueryAll(flavor, ":scope > .notes > .roll-note").map((x) => x.outerHTML.trim()),
+            tags: flavor.querySelector(":scope > h4.action + .tags")?.outerHTML.trim() ?? "",
         }),
     ];
 }
