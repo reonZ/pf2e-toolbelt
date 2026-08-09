@@ -1,3 +1,8 @@
+# 3.53.3
+
+- `Merge Damage`:
+  - fix not being able to merge/inject damage messages generated with the `/r` command
+
 # 3.53.2
 
 - `Actionable`:
