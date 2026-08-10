@@ -22,7 +22,7 @@ const zTokenDocumentArrayDecode = zSafeArray(zDocumentUUID("Token"), true).trans
         R.isArray(uuids) ? uuids : [],
         R.map((uuid): TokenDocumentPF2e | null => fromUuidSync(uuid, { strict: false })),
         R.filter(R.isTruthy),
-        R.uniqueBy((token) => token.flags[SYSTEM.id].troop?.id ?? token.uuid),
+        R.uniqueBy((token) => token.flags[SYSTEM.id].troop?.id ?? token.actor?.uuid ?? token.uuid),
     );
 });
 
