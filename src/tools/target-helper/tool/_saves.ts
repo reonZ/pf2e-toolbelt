@@ -168,6 +168,10 @@ async function rollSaves(
     const filteredTargetsRollsPromise = targetsRollsPromise.filter(R.isTruthy);
     if (!filteredTargetsRollsPromise.length) return;
 
+    if (!game.dice3d) {
+        foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
+    }
+
     await Promise.all(filteredTargetsRollsPromise);
 
     this.updateMessageEmitable.call({
