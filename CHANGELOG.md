@@ -1,3 +1,11 @@
+# 3.54.0
+
+- `Target helper`:
+  - now play dice sound when using target saves
+    - it only plays the sound if DsN isn't used
+    - it plays a single sound even if you roll for all NPCs at once to avoid the cacophony of stacking sounds
+  - fix being able to set more than one troop token of the same troop as targets of a message
+
 # 3.53.3
 
 - `Merge Damage`:
