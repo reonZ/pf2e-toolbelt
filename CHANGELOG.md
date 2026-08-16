@@ -1,3 +1,8 @@
+# 3.54.1
+
+- `Target helper`:
+  - add new `Use Color-Blind Palette` setting to use color-blind friendly colors for saves results
+
 # 3.54.0
 
 - `Target helper`:
