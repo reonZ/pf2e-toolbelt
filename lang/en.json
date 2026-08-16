@@ -371,6 +371,10 @@
                     "name": "Upgrade Checks Messages",
                     "hint": "Upgrades the simple inline save messages into something that can be used by the feature. Also adds more details to it."
                 },
+                "colorblind": {
+                    "name": "Use Color-Blind Palette",
+                    "hint": "Replaces saves results colors with color-blind friendly colors."
+                },
                 "enabled": {
                     "name": "Enabled",
                     "hint": "Enable the 'Target Helper' feature in your world."

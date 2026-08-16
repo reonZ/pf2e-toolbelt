@@ -53,6 +53,7 @@ import {
     zTokenDocumentArrayDecode,
 } from "..";
 
+const COLORBLIND_CLASS = "pf2e-toolbelt-target-helper-save-colorblind";
 const INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
 
 class TargetHelperTool extends ModuleTool<ToolSettings> {
@@ -140,6 +141,15 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                 },
             },
             {
+                key: "colorblind",
+                type: Boolean,
+                default: false,
+                scope: "user",
+                onChange: (value: boolean) => {
+                    document.body.classList.toggle(COLORBLIND_CLASS, value);
+                },
+            },
+            {
                 key: "dismissTemplate",
                 type: Boolean,
                 default: true,
@@ -165,6 +175,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         this.#textEditorEnrichHTMLWrapper.activate();
         this.#messageRenderHTMLWrapper.toggle(this.settings.targets || this.settings.checks);
 
+        document.body.classList.toggle(COLORBLIND_CLASS, this.settings.colorblind);
         document.body.addEventListener("dragstart", this.#onDragStart.bind(this), true);
     }
 
@@ -438,6 +449,7 @@ const targetHelperTool = new TargetHelperTool();
 
 type ToolSettings = {
     checks: boolean;
+    colorblind: boolean;
     dismissTemplate: boolean;
     enabled: boolean;
     expend: boolean;
