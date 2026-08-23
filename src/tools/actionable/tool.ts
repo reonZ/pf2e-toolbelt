@@ -79,7 +79,6 @@ import { isPhysicalCategory, sharedCharacterPrepareData, sharedCharacterSheetAct
 import {
     ActionableData,
     ActionableRuleElement,
-    applyActorGroupUpdate,
     createActionableRuleElement,
     createItemCastRuleElement,
     GenerateItemCast,
@@ -90,6 +89,7 @@ import {
     VirtualActionData,
     VirtualSpellData,
 } from ".";
+import { applyActorGroupUpdate } from "foundry-helpers/dist";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
     #renderCreatureSheetPF2eHook = createToggleHook(
