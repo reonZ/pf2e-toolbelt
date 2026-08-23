@@ -12,9 +12,7 @@ import {
 } from "foundry-helpers";
 import { getActionIcon } from "foundry-helpers/dist";
 
-/**
- * https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/sheet/helpers.ts#L67-L79
- */
+/** https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/sheet/helpers.ts#L67-L79 */
 function createAbilityViewData(item: AbilityItemPF2e | FeatPF2e): AbilityViewData {
     return {
         ...R.pick(item, ["id", "uuid", "img", "name", "actionCost", "frequency"]),
@@ -29,9 +27,7 @@ function createAbilityViewData(item: AbilityItemPF2e | FeatPF2e): AbilityViewDat
     };
 }
 
-/**
- * https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/character/sheet.ts#L434
- */
+/** https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/character/sheet.ts#L434 */
 function getActionSheetData(item: AbilityItemPF2e | FeatPF2e): CharacterAbilityViewData {
     const baseData = createAbilityViewData(item);
 
@@ -52,9 +48,7 @@ function getActionSheetData(item: AbilityItemPF2e | FeatPF2e): CharacterAbilityV
     };
 }
 
-/**
- * https://github.com/foundryvtt/pf2e/blob/e215ebfbb287190d313fe0441e0362439766786d/src/module/actor/helpers.ts#L1002
- */
+/** https://github.com/foundryvtt/pf2e/src/module/actor/helpers.ts#L1011 */
 async function applyActorGroupUpdate(
     actor: ActorPF2e,
     data: Partial<ActorGroupUpdate>,
@@ -77,17 +71,49 @@ async function applyActorGroupUpdate(
               ? "create"
               : "actorUpdate";
 
+    const operations: foundry.documents.DatabaseWriteOperation[] = [];
+
     if (actorUpdates) {
-        await actor.update(actorUpdates, { render: lastRender === "actorUpdate" });
+        operations.push({
+            action: "update",
+            documentName: "Actor",
+            updates: [{ ...actorUpdates, _id: actor.id }],
+            parent: actor.parent,
+            render: lastRender === "actorUpdate",
+        });
     }
     if (itemCreates.length > 0) {
-        await actor.createEmbeddedDocuments("Item", itemCreates, { render: lastRender === "create", keepId });
+        operations.push({
+            action: "create",
+            data: itemCreates,
+            documentName: "Item",
+            keepId,
+            parent: actor,
+            render: lastRender === "create",
+        });
     }
     if (itemUpdates.length > 0) {
-        await actor.updateEmbeddedDocuments("Item", itemUpdates, { render: lastRender === "update" });
+        operations.push({
+            action: "update",
+            documentName: "Item",
+            updates: itemUpdates,
+            parent: actor,
+            render: lastRender === "update",
+        });
     }
     if (itemDeletes.length > 0) {
-        await actor.deleteEmbeddedDocuments("Item", itemDeletes, { render: lastRender === "delete" });
+        operations.push({
+            action: "delete",
+            documentName: "Item",
+            ids: itemDeletes,
+            parent: actor,
+            render: lastRender === "delete",
+        });
+    }
+
+    // we bundle all the operations into a single server query
+    if (operations.length > 0) {
+        await foundry.documents.modifyBatch(operations);
     }
 }
 
