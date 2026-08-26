@@ -110,7 +110,11 @@ class ItemCastSpellcasting implements SpellcastingEntry<CharacterPF2e> {
         const message = options.message ?? true;
         if (message && this.canCast(spell, { origin: spell.parentItem })) {
             spell.system.location.value = this.id;
-            await spell.toMessage(null, { rollMode: options.rollMode, data: { castRank: spell.rank } });
+            await spell.toMessage(null, {
+                actualCast: true,
+                rollMode: options.rollMode,
+                data: { castRank: spell.rank },
+            });
         }
     }
 
