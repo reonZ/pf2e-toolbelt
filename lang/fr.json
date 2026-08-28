@@ -371,9 +371,17 @@
           "name": "Amélioration des messages des tests",
           "hint": "Améliore les messages des jets de sauvegarde en ligne simples pour les rendre exploitables par la fonctionnalité. Leur ajoute également des détails."
         },
+        "colorblind": {
+          "name": "Palette pour daltoniens",
+          "hint": "Remplace les couleurs enregistrées par des couleurs adaptées aux daltoniens."
+        },
         "enabled": {
           "name": "Activé",
           "hint": "Activez l'«Assistant de ciblage» dans votre monde."
+        },
+        "expend": {
+          "name": "Bouton Conso munitions",
+          "hint": "Ajouter un bouton dans la zone en lien avec les messages pour dépenser les munitions/grenades."
         },
         "small": {
           "name": "Petits boutons de dégâts",
@@ -1137,6 +1145,21 @@
         "added": "Vous avez ajouté avec succès un jet de sauvegarde au message.",
         "already": "Ce message possède déjà un jet de sauvegarde qui lui est associé.",
         "unauth": "Vous ne pouvez le faire que sur les messages dont vous êtes l'auteur."
+      },
+      "expend-ammo": {
+        "expend": {
+          "ammo": "Dépenser {expend} munition(s)",
+          "grenade": "Dépenser la grenade"
+        },
+        "expended": {
+          "ammo": "{nb} munition(s) ont été dépensées",
+          "grenade": "La grenade a été dépensée"
+        },
+        "warning": {
+          "ammo": "Pas assez de munitions dans votre arme",
+          "error": "Impossible de récupérer des munitions valides à dépenser",
+          "grenade": "Vous êtes à court de grenades"
+        }
       },
       "header": {
         "hidden": "Caché aux joueurs",
