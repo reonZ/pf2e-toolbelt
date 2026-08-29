@@ -1,3 +1,10 @@
+# 3.55.0
+
+- `Actionable`:
+  - add the `origin:action:slug:cast-a-spell` rollOption to the spells cast from a `ItemCast` spellcasting entry
+- `Character Importer`:
+  - add support for the `Gradual Ability Boosts` variant
+
 # 3.54.1
 
 - `Target helper`:

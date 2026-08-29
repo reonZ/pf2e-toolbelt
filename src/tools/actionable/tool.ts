@@ -207,7 +207,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 type: Boolean,
                 default: false,
                 scope: "user",
-                onChange: (value) => {
+                onChange: () => {
                     this.configurate();
                 },
             },
