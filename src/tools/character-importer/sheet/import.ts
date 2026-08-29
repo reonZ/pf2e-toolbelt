@@ -124,10 +124,8 @@ async function importData(this: CharacterImporterTool, html: HTMLElement, actor:
             }
         }
 
-        const mergedSource = foundry.utils.mergeObject(currentSource ?? {}, importedSource);
-        const merged = await CharacterImport.fromSource(mergedSource, true);
-
-        await this.setImportDataAndCode(actor, merged, R.isNumber(codeOrFile) ? codeOrFile : undefined);
+        const newSource = await CharacterImport.fromSource(importedSource, true);
+        await this.setImportDataAndCode(actor, newSource, R.isNumber(codeOrFile) ? codeOrFile : undefined);
         this.localize.info("import.success");
     } catch (error) {
         console.error(error);
