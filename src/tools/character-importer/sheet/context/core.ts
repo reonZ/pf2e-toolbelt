@@ -1,14 +1,20 @@
-import { addListenerAll, AncestryPF2e, AttributeString, CharacterPF2e, ClassPF2e, R } from "foundry-helpers";
+import {
+    addListenerAll,
+    AncestryPF2e,
+    AttributeString,
+    CharacterPF2e,
+    ClassPF2e,
+    R,
+    valueBetween,
+} from "foundry-helpers";
 import {
     ATTRIBUTE_KEYS,
-    AttributeLevel,
     CHARACTER_CATEGORIES,
     CharacterImport,
     CharacterImporterTool,
     ImportDataEntry,
     ImportedFeatEntry,
     isAttributeKey,
-    isAttributeLevel,
     prepareEntry,
     prepareFeatEntries,
     prepareFeatEntry,
@@ -63,7 +69,7 @@ async function prepareCoreTab(
 
     const attributesLevels = R.pipe(
         getLevelsAttributes(data, actor),
-        R.map(({ level, boosts }): ImportDataBoostsEntry<"Boost" | "Partial"> => {
+        R.map(([level, boosts]): ImportDataBoostsEntry<"Boost" | "Partial"> => {
             return {
                 label: game.i18n.format("PF2E.LevelN", { level }),
                 boosts: R.map(ATTRIBUTE_KEYS, (key): ImportDataBoost<"Boost" | "Partial"> => {
@@ -76,11 +82,12 @@ async function prepareCoreTab(
         }),
     );
 
-    const levelThreshold = Math.floor(actorLevel / 5);
+    const levelFactor = game.pf2e.settings.variants.gab ? 1 : 5;
+    const levelThreshold = Math.floor(actorLevel / levelFactor);
     const warning =
-        dataLevel >= actorLevel || Math.floor(dataLevel / 5) >= levelThreshold
+        dataLevel >= actorLevel || Math.floor(dataLevel / levelFactor) >= levelThreshold
             ? null
-            : this.localize("sheet.data.core.attributes.warning", { level: levelThreshold * 5 });
+            : this.localize("sheet.data.core.attributes.warning", { level: levelThreshold * levelFactor });
 
     const attributesTotals = R.pipe(
         ATTRIBUTE_KEYS,
@@ -205,8 +212,6 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
     const data = await this.getImportData(actor);
     if (!data) return;
 
-    const levels = R.pullObject(getLevelsAttributes(data, actor), R.prop("level"), R.prop("boosts"));
-
     if (data.alternativeBoosts) {
         await actor.ancestry?.update({ "system.alternateAncestryBoosts": data.attributes.ancestry.boosts });
     } else {
@@ -226,7 +231,7 @@ async function assignAttributes(this: CharacterImporterTool, actor: CharacterPF2
 
     await actor.update({
         "system.abilities": null,
-        "system.build.attributes.boosts": levels,
+        "system.build.attributes.boosts": getLevelsAttributes(data, actor, true),
     });
 
     this.localize.info("sheet.data.core.attributes.set.boosts");
@@ -302,38 +307,73 @@ type AssignableBoosts = Record<number | string, { value: AttributeString[]; sele
 function getLevelsAttributes(
     data: CharacterImport,
     actor: CharacterPF2e,
-): { level: AttributeLevel; boosts: AttributeString[] }[] {
+    convertToBuild: true,
+): Record<number, AttributeString[]>;
+function getLevelsAttributes(
+    data: CharacterImport,
+    actor: CharacterPF2e,
+    convertToBuild?: boolean,
+): [number | `${number}`, AttributeString[]][];
+function getLevelsAttributes(
+    data: CharacterImport,
+    actor: CharacterPF2e,
+    convertToBuild?: boolean,
+): Record<number, AttributeString[]> | [number | `${number}`, AttributeString[]][] {
     const actorLevel = actor.level;
+    const useGradialBoosts = game.pf2e.settings.variants.gab;
+    const convert = convertToBuild ?? !useGradialBoosts;
+    const buildLevel = convertToBuild && useGradialBoosts ? convertToSystemBuildLevel(actor.level) : actorLevel;
 
-    return R.pipe(
+    const entries = R.pipe(
         data.attributes.levels,
         R.entries(),
-        R.filter((entry): entry is [AttributeLevel, AttributeString[]] => {
-            return isAttributeLevel(entry[0]) && Number(entry[0]) <= actorLevel;
+        R.map(([key, boosts]): [number, AttributeString[]] | undefined => {
+            const rawLevel = Number(key);
+            if (!R.isNumber(rawLevel) || !valueBetween(rawLevel, 1, actorLevel)) return;
+
+            const level = convert ? convertToSystemBuildLevel(rawLevel) : rawLevel;
+            return level <= buildLevel ? [level, validateBoosts(boosts)] : undefined;
         }),
-        R.map(([level, boosts]): { level: AttributeLevel; boosts: AttributeString[] } => {
-            return {
-                level,
-                boosts: validateBoosts(boosts),
-            };
+        R.filter(R.isTruthy),
+    );
+
+    if (!convert) return entries;
+
+    const converted = R.pipe(
+        entries,
+        R.groupBy(([level]) => level),
+        R.mapValues((entries) => {
+            return R.pipe(
+                entries,
+                R.flatMap(([_level, boosts]) => boosts),
+                R.unique(),
+            );
         }),
     );
+
+    return convertToBuild ? converted : R.entries(converted);
 }
 
 function validateBoosts(boosts: unknown): AttributeString[] {
-    if (!R.isArray(boosts)) return [];
-    return R.filter(boosts, isAttributeKey);
+    return R.isArray(boosts) ? R.filter(boosts, isAttributeKey) : [];
+}
+
+function convertToSystemBuildLevel(level: number) {
+    return level === 1 ? 1 : Math.ceil(level / 5) * 5;
 }
 
 /**
+ * slight variant of
  * https://github.com/foundryvtt/pf2e/blob/a4049bd76dab59cb992e77b8c5c447d793940a85/src/module/actor/character/apps/attribute-builder.ts#L221
  */
 function boostIsPartial(
     actor: CharacterPF2e,
     attribute: AttributeString,
-    level: number,
+    rawLevel: number,
     isApex: boolean = false,
 ): boolean {
+    // MODULE: contrary to the original method, we potentialy feed it in-between levels
+    const level = convertToSystemBuildLevel(rawLevel);
     const build = actor.system.build.attributes;
 
     if (level < 5 || build.manual || isApex) {

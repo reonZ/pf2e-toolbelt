@@ -11,7 +11,6 @@ import {
 } from "foundry-helpers";
 import {
     ATTRIBUTE_KEYS,
-    AttributeLevel,
     CharacterCategory,
     CharacterImportSource,
     ImportedContainerSource,
@@ -132,14 +131,9 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
     const levelsBoosts = R.pipe(
         R.isPlainObject(rawBoosts) ? rawBoosts : {},
         R.entries(),
-        R.map(([key, boosts]): [AttributeLevel, AttributeString[]] | undefined => {
-            const actualLevel = Number(key);
-            if (!R.isNumber(actualLevel) || !valueBetween(actualLevel, 1, 20)) return;
-
-            const level = actualLevel === 1 ? 1 : Math.ceil(actualLevel / 5) * 5;
-            const attributeLevel = String(level) as AttributeLevel;
-
-            return [attributeLevel, getBoosts(boosts)];
+        R.map(([key, boosts]): [number, AttributeString[]] | undefined => {
+            const level = Number(key);
+            return R.isNumber(level) && level >= 1 ? [level, getBoosts(boosts)] : undefined;
         }),
         R.filter(R.isTruthy),
         R.reduce(
@@ -148,7 +142,7 @@ async function fromPathbuilder(raw: unknown): Promise<CharacterImportSource> {
                 acc[level].push(...boosts);
                 return acc;
             },
-            {} as Record<AttributeLevel, AttributeString[]>,
+            {} as Record<number, AttributeString[]>,
         ),
     );
 

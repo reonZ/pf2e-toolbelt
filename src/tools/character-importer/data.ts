@@ -37,7 +37,7 @@ const zAttributes = z
         ancestry: zBoostsRecord(ANCESTRY_KEYS),
         background: zBoosts,
         class: zBoosts,
-        levels: zBoostsRecord(ATTRIBUTE_LEVELS),
+        levels: z.record(z.number().min(1).multipleOf(1), zBoosts).default(R.fromKeys(ATTRIBUTE_LEVELS, () => [])),
         values: z.record(z.enum(ATTRIBUTE_KEYS), z.number().multipleOf(1)).default(R.fromKeys(ATTRIBUTE_KEYS, () => 0)),
     })
     .default({
@@ -150,12 +150,6 @@ function isAttributeKey(value: unknown): value is AttributeString {
     return R.isIncludedIn(value, ATTRIBUTE_KEYS);
 }
 
-function isAttributeLevel(value: unknown): value is AttributeLevel {
-    return R.isIncludedIn(value, ATTRIBUTE_LEVELS);
-}
-
-type AttributeLevel = (typeof ATTRIBUTE_LEVELS)[number];
-
 type FeatEntryParent = CharacterCategory | `${number}`;
 
 type CharacterCategory = (typeof CHARACTER_CATEGORIES)[number];
@@ -186,12 +180,10 @@ export {
     CHARACTER_CATEGORIES,
     getEntrySelection,
     isAttributeKey,
-    isAttributeLevel,
     isCharacterCategory,
     zCharacterImport,
 };
 export type {
-    AttributeLevel,
     CharacterCategory,
     CharacterImportData,
     CharacterImportSource,
