@@ -14,6 +14,7 @@ import {
     CharacterPF2e,
     CharacterSheetData,
     CharacterSheetPF2e,
+    ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
     createHTMLElement,
@@ -27,6 +28,9 @@ import {
     EquipmentPF2e,
     EquipmentSheetPF2e,
     ErrorPF2e,
+    FamiliarPF2e,
+    FamiliarSheetData,
+    FamiliarSheetPF2e,
     FeatPF2e,
     FeatSheetPF2e,
     getActionGlyph,
@@ -52,11 +56,12 @@ import {
     MODULE,
     NPCPF2e,
     NPCSheetData,
+    NPCSheetPF2e,
     PhysicalItemPF2e,
     PhysicalItemSheetPF2e,
     R,
     registerWrapper,
-    renderCharacterSheets,
+    renderActorSheets,
     renderItemSheets,
     RuleElement,
     RuleElementOptions,
@@ -68,14 +73,25 @@ import {
     SpellSheetPF2e,
     Statistic,
     StatisticData,
+    SYSTEM,
     toggleHooksAndWrappers,
     toggleSummary,
     updateActionFrequency,
+    USE_ACTION_OPTION,
     useAction,
     usePhysicalItem,
+    VehiclePF2e,
+    VehicleSheetData,
+    VehicleSheetPF2e,
 } from "foundry-helpers";
+import { applyActorGroupUpdate, ChatMessageMode } from "foundry-helpers/dist";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { isPhysicalCategory, sharedCharacterPrepareData, sharedCharacterSheetActivateListeners } from "tools";
+import {
+    isPhysicalCategory,
+    sharedCharacterPrepareData,
+    sharedCharacterSheetActivateListeners,
+    sharedFamiliarSheetGetData,
+} from "tools";
 import {
     ActionableData,
     ActionableRuleElement,
@@ -89,13 +105,45 @@ import {
     VirtualActionData,
     VirtualSpellData,
 } from ".";
-import { applyActorGroupUpdate } from "foundry-helpers/dist";
 
 class ActionableTool extends ModuleTool<ToolSettings> {
     #renderCreatureSheetPF2eHook = createToggleHook(
         ["renderCharacterSheetPF2e", "renderNPCSheetPF2e"],
-        this.#onRenderCreatureSheetPF2e.bind(this),
+        this.#onRenderCreatureSheet.bind(this),
     );
+
+    #characterSheetGetDataWrapper = createToggleWrapper(
+        "WRAPPER",
+        "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.getData",
+        this.#characterSheetGetData,
+        { context: this },
+    );
+
+    #actionableWrappers = [
+        createToggleHook(["renderFamiliarSheetPF2e", "renderVehicleSheetPF2e"], this.#onRenderOtherSheet.bind(this)),
+        createToggleWrapper(
+            "WRAPPER",
+            [
+                "CONFIG.PF2E.Item.documentClasses.action.prototype.toMessage",
+                "CONFIG.PF2E.Item.documentClasses.feat.prototype.toMessage",
+            ],
+            this.#actionToMessage,
+            { context: this },
+        ),
+        createToggleWrapper(
+            "WRAPPER",
+            "CONFIG.Actor.sheetClasses.npc['pf2e.NPCSheetPF2e'].cls.prototype.getData",
+            this.#npcSheetGetData,
+            { context: this },
+        ),
+        createToggleWrapper(
+            "WRAPPER",
+            "CONFIG.Actor.sheetClasses.vehicle['pf2e.VehicleSheetPF2e'].cls.prototype.getData",
+            this.#vehicleSheetGetData,
+            { context: this },
+        ),
+        sharedFamiliarSheetGetData.register(this.#familiarSheetGetData, { context: this }),
+    ];
 
     #actionWrappers = [
         createToggleWrapper(
@@ -151,6 +199,15 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
         return [
+            {
+                key: "actionable",
+                type: Boolean,
+                default: false,
+                scope: "world",
+                onChange: () => {
+                    this.configurate();
+                },
+            },
             {
                 key: "action",
                 type: Boolean,
@@ -274,12 +331,6 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         toggleHooksAndWrappers(this.#spellWrappers, this.settings.spell);
 
         if (this.settings.physical) {
-            registerWrapper(
-                "WRAPPER",
-                "CONFIG.Actor.sheetClasses.character['pf2e.CharacterSheetPF2e'].cls.prototype.getData",
-                this.#characterSheetGetData,
-                this,
-            );
             sharedCharacterSheetActivateListeners
                 .register(this.#characterSheetActivateListeners, { context: this })
                 .activate();
@@ -287,19 +338,24 @@ class ActionableTool extends ModuleTool<ToolSettings> {
     }
 
     _configurate(skipRenders?: boolean): void {
+        const actionableEnabled = this.settings.actionable;
         const actionEnabled = this.settings.action;
         const itemEnabled = this.settings.item;
+        const physicalEnabled = this.settings.physical;
 
+        toggleHooksAndWrappers(this.#actionableWrappers, actionableEnabled);
         toggleHooksAndWrappers(this.#actionWrappers, actionEnabled);
         toggleHooksAndWrappers(this.#itemWrappers, itemEnabled);
 
+        this.#characterSheetGetDataWrapper.toggle(physicalEnabled || actionableEnabled);
+
         this.#renderCreatureSheetPF2eHook.toggle(
-            actionEnabled || itemEnabled || this.settings.use || this.settings.apply,
+            actionableEnabled || actionEnabled || itemEnabled || this.settings.use || this.settings.apply,
         );
 
         if (!skipRenders) {
-            renderItemSheets(["AbilitySheetPF2e", "ConsumableSheetPF2e", "EquipmentSheetPF2e", "FeatSheetPF2e"]);
-            renderCharacterSheets();
+            renderItemSheets();
+            renderActorSheets();
         }
     }
 
@@ -528,42 +584,116 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return commitData;
     }
 
+    #setActionableData(actionsData: AbilityViewData[]) {
+        for (const entry of actionsData) {
+            entry.usable = true;
+        }
+    }
+
+    async #actionToMessage(
+        _item: AbilityItemPF2e | FeatPF2e,
+        wrapped: libWrapper.RegisterCallback,
+        event?: Maybe<Event>,
+        options: { actualUse?: boolean; create?: boolean; mode?: ChatMessageMode } = {},
+    ): Promise<ChatMessagePF2e | undefined> {
+        if (!options.actualUse) {
+            return wrapped(event, options);
+        }
+
+        const message = (await wrapped(event, { create: false, mode: options.mode })) as ChatMessagePF2e | undefined;
+        if (!message) return undefined;
+
+        const messageSource = message.toObject();
+        const flags = messageSource.flags[SYSTEM.id];
+        if (flags.origin?.rollOptions) {
+            flags.origin.rollOptions.push(USE_ACTION_OPTION);
+        }
+
+        if (options.create === false) {
+            message.updateSource(messageSource);
+            return message;
+        }
+
+        const ChatMessagePF2e = getDocumentClass("ChatMessage");
+        return ChatMessagePF2e.create(messageSource, { renderSheet: false });
+    }
+
+    async #familiarSheetGetData(_sheet: FamiliarSheetPF2e<FamiliarPF2e>, sheetData: FamiliarSheetData) {
+        this.#setActionableData(sheetData.familiarAbilities.items);
+    }
+
+    async #npcSheetGetData(
+        _sheet: NPCSheetPF2e,
+        wrapped: libWrapper.RegisterCallback,
+        options?: ActorSheetOptions,
+    ): Promise<NPCSheetData> {
+        const sheetData = (await wrapped(options)) as NPCSheetData;
+        const allActions = R.flatMap(["active", "passive"] as const, (key) => sheetData.actions[key].actions);
+        this.#setActionableData(allActions);
+        return sheetData;
+    }
+
+    async #vehicleSheetGetData(
+        _sheet: VehicleSheetPF2e,
+        wrapped: libWrapper.RegisterCallback,
+        options?: ActorSheetOptions,
+    ): Promise<VehicleSheetData> {
+        const sheetData = (await wrapped(options)) as VehicleSheetData;
+        const allActions = R.flatMap(["action", "free", "reaction"] as const, (key) => sheetData.actions[key].actions);
+        this.#setActionableData(allActions);
+        return sheetData;
+    }
+
     async #characterSheetGetData(
         sheet: CharacterSheetPF2e<CharacterPF2e>,
         wrapped: libWrapper.RegisterCallback,
         options?: ActorSheetOptions,
     ): Promise<CharacterSheetData<CharacterPF2e>> {
-        const virtuals = this.getVirtualActionsData(sheet.actor);
         const sheetData = (await wrapped(options)) as CharacterSheetData<CharacterPF2e>;
-        const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
 
-        const addedTypes: Record<Exclude<ActionType, "passive">, boolean> = {
-            action: false,
-            free: false,
-            reaction: false,
-        };
+        if (this.settings.actionable) {
+            const actionKeys = ["action", "free", "reaction"] as const;
+            const allActions = R.flatMap(actionKeys, (key) => sheetData.actions.encounter[key].actions);
+            this.#setActionableData(allActions);
+        }
 
-        await Promise.all(
-            R.values(virtuals).map(async ({ data }) => {
-                const action = await this.getVirtualAction(data);
-                if (!action) return;
+        if (this.settings.physical) {
+            const actionableEnabled = this.settings.actionable;
+            const virtuals = this.getVirtualActionsData(sheet.actor);
+            const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
 
-                const type = action.actionCost?.type ?? "free";
-                const macro = await getActionMacro(action);
-                const actionData = getActionSheetData(action);
+            const addedTypes: Record<Exclude<ActionType, "passive">, boolean> = {
+                action: false,
+                free: false,
+                reaction: false,
+            };
 
-                if (macro?.img && isDefaultActionIcon(actionData.img, action.actionCost)) {
-                    actionData.img = macro.img;
-                }
+            await Promise.all(
+                R.values(virtuals).map(async ({ data }) => {
+                    const action = await this.getVirtualAction(data);
+                    if (!action) return;
 
-                addedTypes[type] = true;
-                sheetData.actions.encounter[type].actions.push(actionData);
-            }),
-        );
+                    const type = action.actionCost?.type ?? "free";
+                    const macro = await getActionMacro(action);
+                    const actionData = getActionSheetData(action);
 
-        for (const [type, added] of R.entries(addedTypes)) {
-            if (!added) continue;
-            sheetData.actions.encounter[type].actions.sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
+                    if (actionableEnabled) {
+                        actionData.usable = true;
+                    }
+
+                    if (macro?.img && isDefaultActionIcon(actionData.img, action.actionCost)) {
+                        actionData.img = macro.img;
+                    }
+
+                    addedTypes[type] = true;
+                    sheetData.actions.encounter[type].actions.push(actionData);
+                }),
+            );
+
+            for (const [type, added] of R.entries(addedTypes)) {
+                if (!added) continue;
+                sheetData.actions.encounter[type].actions.sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
+            }
         }
 
         return sheetData;
@@ -740,7 +870,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return this.#updateVirtualSpellValue(parent, ruleIndex, Infinity);
     }
 
-    #onRenderCreatureSheetPF2e(
+    #onRenderCreatureSheet(
         sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         $html: JQuery,
         data: CharacterSheetData | NPCSheetData,
@@ -749,7 +879,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const html = $html[0];
 
-        if (this.settings.apply || this.settings.action) {
+        if (this.settings.actionable || this.settings.apply || this.settings.action) {
             this.#updateActorActions(sheet, html, data);
         }
 
@@ -820,24 +950,85 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         Promise.all(itemsPromise);
     }
 
+    #createActionUseBtn(item: AbilityItemPF2e<ActorPF2e> | FeatPF2e<ActorPF2e>): HTMLButtonElement {
+        const useLabel = game.i18n.localize("PF2E.Action.Use");
+        const actionCost = item.actionCost;
+        const glyph = getActionGlyph(actionCost);
+
+        const btn = createHTMLElement("button", {
+            classes: ["use-action"],
+            content: `<span>${useLabel}</span><span class="action-glyph">${glyph}</span>`,
+        });
+
+        btn.addEventListener("click", (event) => {
+            useAction(event, item);
+        });
+
+        return btn;
+    }
+
+    #onRenderOtherSheet(
+        sheet: ActorSheetPF2e<FamiliarPF2e | VehiclePF2e>,
+        $html: JQuery,
+        data: FamiliarSheetData | VehicleSheetData,
+    ) {
+        if (!sheet.isEditable) return;
+
+        const html = $html[0];
+        const actor = sheet.actor as ActorPF2e;
+
+        const panel = htmlQuery(
+            html,
+            actor.isOfType("familiar")
+                ? `.main-container .section-container .section-body:has(.actions-list)`
+                : `.tab[data-tab="actions"] .actions-container .actions-panels`,
+        );
+
+        const actionGroups =
+            "familiarAbilities" in data ? { action: { actions: data.familiarAbilities.items } } : data.actions;
+        const actions = R.pipe(
+            actionGroups as Record<string, { actions: AbilityViewData[] }>,
+            R.values(),
+            R.flatMap((group) => group.actions),
+        );
+
+        const actionsPromise = actions.map(async ({ id: itemId }) => {
+            const item = actor.items.get(itemId);
+            if (!item?.isOfType("action", "feat") || this.isCraftingAction(item)) return;
+
+            const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
+            if (!el) return;
+
+            const existBtn = htmlQuery(el, "button[data-action='use-action']");
+            if (!existBtn) return;
+
+            const btn = this.#createActionUseBtn(item);
+            existBtn.replaceWith(btn);
+        });
+
+        Promise.all(actionsPromise);
+    }
+
     async #updateActorActions(
         sheet: ActorSheetPF2e<CharacterPF2e | NPCPF2e>,
         html: HTMLElement,
         data: CharacterSheetData | NPCSheetData,
     ) {
+        const actionableEnabled = this.settings.actionable;
+        const actionEnabled = this.settings.action;
+        const applyEnabled = this.settings.apply;
+
         const actor = sheet.actor as CreaturePF2e;
         const isCharacter = actor.isOfType("character");
-        const getActionMacro = this.settings.action ? this.getActionMacro.bind(this) : () => null;
+        const getActionMacro = actionEnabled ? this.getActionMacro.bind(this) : () => null;
 
-        const actionGroups: Record<string, { actions: AbilityViewData[] }> =
-            "encounter" in data.actions ? data.actions.encounter : R.pick(data.actions, ["active"]);
+        const actionGroups = "encounter" in data.actions ? data.actions.encounter : data.actions;
         const actions = R.pipe(
-            actionGroups,
+            actionGroups as Record<string, { actions: AbilityViewData[] }>,
             R.values(),
             R.flatMap((group) => group.actions),
         );
 
-        const useLabel = game.i18n.localize("PF2E.Action.Use");
         const panel = htmlQuery(
             html,
             isCharacter
@@ -845,32 +1036,20 @@ class ActionableTool extends ModuleTool<ToolSettings> {
                 : `.tab[data-tab="main"] .actions.section-container .section-body`,
         );
 
-        const autoApply = this.settings.apply;
-        const actionable = this.settings.action;
-
         const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
             const item = actor.items.get(itemId);
-            if (!item?.isOfType("action", "feat") || this.isPassiveAction(item) || this.isCraftingAction(item)) return;
-
-            const selfEffect = autoApply && item.system.selfEffect;
-            const macro = actionable && (await getActionMacro(item));
-            if (!selfEffect && !macro) return;
+            if (!item?.isOfType("action", "feat") || this.isCraftingAction(item)) return;
 
             const el = htmlQuery(panel, `.actions-list .action[data-item-id="${itemId}"]`);
             if (!el) return;
 
-            const actionCost = item.actionCost;
-            const glyph = getActionGlyph(actionCost);
+            const isPassive = this.isPassiveAction(item);
+            const selfEffect = !isPassive && applyEnabled && item.system.selfEffect;
+            const macro = !isPassive && actionEnabled && (await getActionMacro(item));
             const existingBtn = htmlQuery(el, "button[data-action='use-action']");
+            if (!actionableEnabled && !selfEffect && !macro) return;
 
-            const btn = createHTMLElement("button", {
-                classes: ["use-action"],
-                content: `<span>${useLabel}</span><span class="action-glyph">${glyph}</span>`,
-            });
-
-            btn.addEventListener("click", (event) => {
-                useAction(event, item);
-            });
+            const btn = this.#createActionUseBtn(item);
 
             if (existingBtn) {
                 existingBtn.replaceWith(btn);
@@ -887,7 +1066,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             if (macro && isCharacter) {
                 // we replace the action image if it is the default
                 const imgEl = htmlQuery<HTMLImageElement>(el, ".item-image img");
-                if (imgEl && macro.img && isDefaultActionIcon(actionImg, actionCost)) {
+                if (imgEl && macro.img && isDefaultActionIcon(actionImg, item.actionCost)) {
                     imgEl.src = macro.img;
                 }
             }

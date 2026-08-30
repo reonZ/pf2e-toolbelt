@@ -5,6 +5,9 @@ import {
     CharacterSheetPF2e,
     ChatMessagePF2e,
     createSharedWrapper,
+    FamiliarPF2e,
+    FamiliarSheetData,
+    FamiliarSheetPF2e,
     NPCPF2e,
     WeaponPF2e,
 } from "foundry-helpers";
@@ -67,6 +70,20 @@ const sharedMessageRenderHTML = createSharedWrapper<
     return html;
 });
 
+const sharedFamiliarSheetGetData = createSharedWrapper<
+    FamiliarSheetPF2e<FamiliarPF2e>,
+    (...args: any[]) => Promise<FamiliarSheetData<FamiliarPF2e>>,
+    (data: FamiliarSheetData<FamiliarPF2e>) => Promise<void>
+>(
+    "WRAPPER",
+    "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype.getData",
+    async function (registered, wrapped) {
+        const data = await wrapped();
+        await Promise.all(registered.map((listener) => listener(data)));
+        return data;
+    },
+);
+
 const sharedCharacterSheetActivateListeners = createSharedWrapper<
     CharacterSheetPF2e<CharacterPF2e>,
     ($html: JQuery) => void,
@@ -89,6 +106,7 @@ export {
     sharedArmorPrepareBaseData,
     sharedCharacterPrepareData,
     sharedCharacterSheetActivateListeners,
+    sharedFamiliarSheetGetData,
     sharedMessageRenderHTML,
     sharedNpcPrepareData,
     sharedWeaponPrepareBaseData,

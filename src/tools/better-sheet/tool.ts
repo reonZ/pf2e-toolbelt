@@ -1,6 +1,5 @@
 import {
     ActorPF2e,
-    ActorSheetOptions,
     ActorSheetPF2e,
     belongToPartyAlliance,
     CharacterPF2e,
@@ -9,8 +8,8 @@ import {
     createToggleHook,
     createToggleWrapper,
     CreaturePF2e,
-    CreatureSheetData,
     FamiliarPF2e,
+    FamiliarSheetData,
     FamiliarSheetPF2e,
     FeatPF2e,
     htmlQuery,
@@ -28,7 +27,7 @@ import {
     toggleHooksAndWrappers,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { betterMerchantTool } from "tools";
+import { betterMerchantTool, sharedFamiliarSheetGetData } from "tools";
 import { FeatRetrainPopup } from ".";
 
 class BetterSheetTool extends ModuleTool<ToolSettings> {
@@ -45,12 +44,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
             this.#npcSheetPF2eTemplate,
             { context: this },
         ),
-        createToggleWrapper(
-            "WRAPPER",
-            "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype.getData",
-            this.#familiarSheetPF2eGetData,
-            { context: this },
-        ),
+        sharedFamiliarSheetGetData.register(this.#familiarSheetPF2eGetData, { context: this }),
     ];
 
     #retrainFeatsHook = createToggleHook("renderCharacterSheetPF2e", this.#onRenderCharacterSheetPF2e.bind(this));
@@ -180,25 +174,17 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         return SYSTEM.relativePath(`templates/actors/character/${template}.hbs`);
     }
 
-    async #familiarSheetPF2eGetData(
-        sheet: FamiliarSheetPF2e<FamiliarPF2e>,
-        wrapped: libWrapper.RegisterCallback,
-        options?: ActorSheetOptions,
-    ): Promise<CreatureSheetData<FamiliarPF2e>> {
-        const data = (await wrapped(options)) as CreatureSheetData<FamiliarPF2e>;
+    async #familiarSheetPF2eGetData(sheet: FamiliarSheetPF2e<FamiliarPF2e>, data: FamiliarSheetData<FamiliarPF2e>) {
+        if (!belongToPartyAlliance(sheet.actor)) return;
 
-        if (belongToPartyAlliance(sheet.actor)) {
-            data.limited = false;
-            data.document = data.document.clone();
+        data.limited = false;
+        data.document = data.document.clone();
 
-            Object.defineProperty(data.document, "limited", {
-                get() {
-                    return false;
-                },
-            });
-        }
-
-        return data;
+        Object.defineProperty(data.document, "limited", {
+            get() {
+                return false;
+            },
+        });
     }
 
     #showPlayersOnRender(sheet: ActorSheetPF2e<ActorPF2e>, $html: JQuery) {
