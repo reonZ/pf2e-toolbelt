@@ -1031,9 +1031,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
 
         const panel = htmlQuery(
             html,
-            isCharacter
-                ? `.tab[data-tab="actions"] .tab-content .tab[data-tab="encounter"]`
-                : `.tab[data-tab="main"] .actions.section-container .section-body`,
+            isCharacter ? `.tab[data-tab="actions"] .tab-content .tab[data-tab="encounter"]` : `.tab[data-tab="main"]`,
         );
 
         const actionsPromise = actions.map(async ({ id: itemId, img: actionImg }) => {
