@@ -1,7 +1,17 @@
+# 3.56.0
+
+- `Actionable`:
+  - add new `All Actionable` world setting
+    - it adds a `Use` button to all actions in the sheets instead of it being limited to those that have a self-applied effect, are related to crafting or have uses
+    - clicking on the `Use` button of any action will add an extra roll-option to the generated message so third parties (i.e. automation modules) can use it to distinguish an actual action used from a plain send-to-chat
+    - `crafting` related actions as well as actions used from a hotbar shortcut will not receive the roll-option due to system limitations
+- `Target helper`:
+  - fix target rows showing on damage-taken messages originating from spells
+
 # 3.55.0
 
 - `Actionable`:
-  - add the `origin:action:slug:cast-a-spell` rollOption to the spells cast from a `ItemCast` spellcasting entry
+  - add the `origin:action:slug:cast-a-spell` roll-option to the spells cast from a `ItemCast` spellcasting entry
 - `Character Importer`:
   - add support for the `Gradual Ability Boosts` variant
 

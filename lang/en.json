@@ -50,7 +50,7 @@
                 },
                 "actionable": {
                     "name": "All Actionable",
-                    "hint": "This feature makes all actions have the 'Use' button in sheets. It also make actions make using the 'Use' button add an extra RollOption to differentiate it from simply sending the action to chat."
+                    "hint": "This feature makes all actions have the 'Use' button in sheets. It also make actions make using the 'Use' button add an extra roll-option to differentiate it from simply sending the action to chat."
                 },
                 "apply": {
                     "name": "Auto Self-Applied",
