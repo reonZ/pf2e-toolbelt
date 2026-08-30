@@ -1,3 +1,9 @@
+# 3.56.1
+
+- `Actionable`:
+  - expose new `messageHasUseActionOption` function to the API
+  - fix NPC passive actions not receiving the extra roll-option from the `All Actionable` feature
+
 # 3.56.0
 
 - `Actionable`:
