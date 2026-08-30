@@ -14,6 +14,7 @@ import {
     CharacterPF2e,
     CharacterSheetData,
     CharacterSheetPF2e,
+    ChatMessageMode,
     ChatMessagePF2e,
     ConsumablePF2e,
     ConsumableSheetPF2e,
@@ -53,6 +54,7 @@ import {
     LaxSchemaField,
     MacroPF2e,
     MagicTradition,
+    messageHasUseActionOption,
     MODULE,
     NPCPF2e,
     NPCSheetData,
@@ -84,7 +86,7 @@ import {
     VehicleSheetData,
     VehicleSheetPF2e,
 } from "foundry-helpers";
-import { applyActorGroupUpdate, ChatMessageMode } from "foundry-helpers/dist";
+import { applyActorGroupUpdate } from "foundry-helpers/dist";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import {
     isPhysicalCategory,
@@ -280,6 +282,10 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             getVirtualActionsData: this.getVirtualActionsData.bind(this),
             getVirtualSpellData: (actor, id) => this.getVirtualSpellsData(actor)?.[id],
             getVirtualSpellcastingData: this.getVirtualSpellcastingData.bind(this),
+            messageHasUseActionOption: (message, withSettingCheck = true) => {
+                if (withSettingCheck && !this.settings.actionable) return false;
+                return messageHasUseActionOption(message);
+            },
             rechargeVirtualSpell: this.#rechargeVirtualSpell.bind(this),
             updateVirtualSpellValue: this.#updateVirtualSpellValue.bind(this),
             updateActionFrequency: (event, item, virtualData) => updateActionFrequency(event, item, virtualData),
