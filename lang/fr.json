@@ -48,6 +48,10 @@
           "name": "Macro d'action",
           "hint": "Ajoute un moyen de lier une macro à des actions/dons."
         },
+        "actionable": {
+          "name": "Toutes actionnables",
+          "hint": "Cette fonctionnalité ajoute un bouton 'Utiliser' pour toutes les actions sur le feuilles. Elle permet également d'ajouter un bouton supplémentaire aux actions  avec une option de jet supplémentaire pour les différencier d'un simple envoi dans la conversation."
+        },
         "apply": {
           "name": "Auto-appliqué",
           "hint": "Pour utiliser le bouton pour l'effet auto-appliqué appliquera automatiquement l'effet."
