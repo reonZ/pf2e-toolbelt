@@ -303,13 +303,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     ): Promise<Rolled<CheckRoll> | null> {
         const context = args[1];
 
-        if (
-            !context?.target ||
-            context.isReroll ||
-            !context.createMessage ||
-            context.type !== "attack-roll" ||
-            (R.isNumber(context.target.distance) && context.target.distance <= 5)
-        ) {
+        if (!context?.target || context.isReroll || !context.createMessage || context.type !== "attack-roll") {
             return wrapped(...args);
         }
 
@@ -327,10 +321,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             return wrapped(...args);
         }
 
-        if (!R.isNumber(context.target.distance) && originToken.distanceTo(targetToken) <= 5) {
-            return wrapped(...args);
-        }
-
         const targetIsProne = this.isTargetProne(context);
         const existing = this.getHighestCoverSelection(this.getExistingCovers(targetActor), targetIsProne);
         if (existing.value >= COVER_VALUES.standard) {
@@ -338,6 +328,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
 
         const cover = this.calculateCover(originToken, targetToken);
+        if (cover.type === "creature" && (context.target.distance ?? originToken.distanceTo(targetToken)) <= 5) {
+            return wrapped(...args);
+        }
 
         if (COVER_VALUES[cover.level] > existing.value) {
             const items = foundry.utils.deepClone(targetActor._source.items);
