@@ -1,3 +1,8 @@
+# 3.56.2
+
+- `Auto Cover`:
+  - fix wall cover not working at distance of 5ft.
+
 # 3.56.1
 
 - `Actionable`:
