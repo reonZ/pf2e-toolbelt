@@ -1,3 +1,7 @@
+# 3.56.3
+
+- localization & foundry verified version bump
+
 # 3.56.2
 
 - `Auto Cover`:
