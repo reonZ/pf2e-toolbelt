@@ -204,7 +204,9 @@ function createItemCastRuleElement() {
             if (this.data.sourceId !== this.uuid || this.missingSpellData()) {
                 return this.#setData();
             }
+        }
 
+        afterPrepareData(): void {
             if (!this.test()) return;
 
             const entryId = this.data.entryId as string;
