@@ -1,3 +1,9 @@
+# 3.56.4
+
+- `Actionable`:
+  - move the generation of the `Item Cast` rule element virtual data later during the actor's data preparation
+    - this allows you to use resolvable `dc` and `max` with actor data that weren't yet available before
+
 # 3.56.3
 
 - localization & foundry verified version bump
