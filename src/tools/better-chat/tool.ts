@@ -110,8 +110,11 @@ class BetterChatTool extends ModuleTool<ToolSettings> {
         const roll = message.rolls.find((roll): roll is Rolled<DamageRoll> => !roll.options.splashOnly);
         if (!roll || (!roll.options.showBreakdown && !game.user.isGM)) return;
 
-        const minValue = roll.minimumValue;
-        const maxValue = roll.maximumValue;
+        const instances = roll.instances.filter((instance) => !instance.persistent);
+        if (instances.length === 0) return;
+
+        const minValue = instances.reduce((value, instance) => value + instance.minimumValue, 0);
+        const maxValue = instances.reduce((value, instance) => value + instance.maximumValue, 0);
         if (minValue === maxValue) return;
 
         const total = roll.total;
