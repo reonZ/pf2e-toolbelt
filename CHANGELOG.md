@@ -1,3 +1,8 @@
+# 3.56.5
+
+- `Better Chat Message`:
+  - now exclude persistent damage instances from `Damage Indicator` calculations
+
 # 3.56.4
 
 - `Actionable`:
