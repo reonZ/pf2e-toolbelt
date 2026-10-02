@@ -1,3 +1,9 @@
+# 3.57.0
+
+- `Auto Cover`:
+  - add support for the `Phalanx Formation` feat
+  - fix creature cover skipping allies with the `Aim-Aiding` rune etched on their armor while it is worn but not investing
+
 # 3.56.5
 
 - `Better Chat Message`:
