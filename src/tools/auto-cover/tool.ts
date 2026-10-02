@@ -249,18 +249,16 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             if (skipProne && actor.getCondition("prone")) continue;
 
             const rollOptions = actor.rollOptions.all;
+            const isAllyCharacter = actor.type === "character" && actor.isAllyOf(originActor);
 
             // we handle the 'Aim-Aiding' armor rune
-            if (
-                actor.type === "character" &&
-                actor.isAllyOf(originActor) &&
-                !rollOptions["armor:uninvested"] &&
-                rollOptions["armor:rune:property:aim-aiding"]
-            )
+            if (isAllyCharacter && !rollOptions["armor:uninvested"] && rollOptions["armor:rune:property:aim-aiding"])
                 continue;
 
             const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
 
+            // we handle the 'Phalanx Formation' feat
+            if (!extraLarge && isAllyCharacter && rollOptions["feat:phalanx-formation"]) continue;
             // we don't need to check intersection on that token as it won't give more than what we already have
             if (canHaveExtraLarges && !extraLarge && cover === "lesser") continue;
             // no intersection
