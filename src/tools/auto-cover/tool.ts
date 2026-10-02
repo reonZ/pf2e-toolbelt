@@ -251,29 +251,22 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             const rollOptions = actor.rollOptions.all;
             const isAllyCharacter = actor.type === "character" && actor.isAllyOf(originActor);
 
-            // we handle the 'Aim-Aiding' armor rune
-            if (isAllyCharacter && !rollOptions["armor:uninvested"] && rollOptions["armor:rune:property:aim-aiding"])
+            // we handle the 'Aim-Aiding' armor rune (make sure the armor is not uninvested)
+            if (isAllyCharacter && rollOptions["armor:rune:property:aim-aiding"] && !rollOptions["armor:uninvested"])
                 continue;
 
             const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
 
-            // we handle the 'Phalanx Formation' feat
+            // we handle the 'Phalanx Formation' feat (it only excludes lesser-cover)
             if (!extraLarge && isAllyCharacter && rollOptions["feat:phalanx-formation"]) continue;
-            // we don't need to check intersection on that token as it won't give more than what we already have
-            if (canHaveExtraLarges && !extraLarge && cover === "lesser") continue;
+            // we don't need to check intersections on that token as it won't give more than what we already have
+            if (!extraLarge && cover === "lesser") continue;
             // no intersection
             if (!intersectsWith(token)) continue;
-
-            // we can't have extra large check so this is a much as we will ever get
-            if (!canHaveExtraLarges) {
-                return "lesser";
-            }
-
+            // we can't have extra large check so this is as much as we will ever get
+            if (!canHaveExtraLarges) return "lesser";
             // we can never get anything beyond 'standard' so we check out now
-            if (isExtraLarge(actor)) {
-                return "standard";
-            }
-
+            if (extraLarge) return "standard";
             // we can still have an extra large check later on so we have to keep going
             cover = "lesser";
         }
