@@ -147,7 +147,6 @@ async function rollSaves(
                     roll,
                     rollMessage,
                     target,
-                    user,
                 } satisfies toolbelt.targetHelper.RollSaveHook);
 
                 resolve();
@@ -169,11 +168,11 @@ async function rollSaves(
     const filteredTargetsRollsPromise = targetsRollsPromise.filter(R.isTruthy);
     if (!filteredTargetsRollsPromise.length) return;
 
+    await Promise.all(filteredTargetsRollsPromise);
+
     if (!game.dice3d) {
         foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
     }
-
-    await Promise.all(filteredTargetsRollsPromise);
 
     this.updateMessageEmitable.call({
         message,
@@ -365,7 +364,6 @@ async function rerollSave(
         newRoll,
         oldRoll,
         target,
-        user: game.user,
     } satisfies toolbelt.targetHelper.RerollSaveHook);
 
     const updates = { [target.id]: rollData };
