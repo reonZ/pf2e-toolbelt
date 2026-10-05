@@ -1,3 +1,10 @@
+# 3.57.1
+
+- `Target Helper`:
+  - remove support for the `Dice So Nice!` module
+  - fix save roll dice audio being played before the roll is actually evaluated
+  - fix save reroll not playing the dice audio
+
 # 3.57.0
 
 - `Auto Cover`:
