@@ -5,7 +5,6 @@ import {
     CheckRollCallback,
     ErrorPF2e,
     eventToRollParams,
-    getActiveModule,
     getCheckRollClass,
     R,
     Rolled,
@@ -52,31 +51,6 @@ const REROLLS: Record<RerollType, RerollDetails> = {
     },
 };
 
-function showGhostDiceOnPrivate() {
-    const dsn = getActiveModule("dice-so-nice");
-    return !!dsn && dsn.getSetting<"0" | "1" | "2">("showGhostDice") !== "0";
-}
-
-function roll3dDice(
-    roll: Rolled<CheckRoll>,
-    target: TokenDocumentPF2e,
-    isPrivate: boolean,
-): Promise<boolean> | undefined {
-    if (!game.dice3d) return;
-
-    const speaker = ChatMessage.getSpeaker({ token: target });
-
-    if (!isPrivate && (target.hasPlayerOwner || !showGhostDiceOnPrivate())) {
-        return game.dice3d.showForRoll(roll, game.user, true, null, false, null, speaker);
-    }
-
-    const cloneRoll = Roll.fromTerms(roll.terms) as Rolled<CheckRoll> & { ghost: boolean };
-    cloneRoll.ghost = true;
-
-    game.dice3d.showForRoll(cloneRoll, game.user, true, null, true, null, speaker);
-    return game.dice3d.showForRoll(roll, game.user, false, null, false, null, speaker);
-}
-
 async function rollSaves(
     this: TargetHelperTool,
     event: MouseEvent,
@@ -108,8 +82,6 @@ async function rollSaves(
                 const isPrivate =
                     targetHelper.isPrivate ||
                     rollMessage.whisper.filter((userId) => userId && game.users.get(userId)?.isGM).length > 0;
-
-                await roll3dDice(roll, target, isPrivate);
 
                 const context = rollMessage.flags[SYSTEM.id].context as CheckContextChatFlag;
                 const modifiers = R.pipe(
@@ -278,8 +250,6 @@ async function rerollSave(
 
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, hookOptions);
-
-    await roll3dDice(newRoll, target, targetSave.private);
 
     const keptRoll =
         (hookOptions.keep === "higher" && oldRoll.total > newRoll.total) ||
