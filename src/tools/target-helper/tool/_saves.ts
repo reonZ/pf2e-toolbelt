@@ -142,12 +142,13 @@ async function rollSaves(
                 updates[target.id] = rollData;
 
                 Hooks.callAll("pf2e-toolbelt.rollSave", {
-                    roll,
+                    data: rollData,
                     message,
+                    roll,
                     rollMessage,
                     target,
-                    data: rollData,
-                });
+                    user,
+                } satisfies toolbelt.targetHelper.RollSaveHook);
 
                 resolve();
             };
@@ -358,12 +359,13 @@ async function rerollSave(
     }
 
     Hooks.callAll("pf2e-toolbelt.rerollSave", {
-        oldRoll,
-        newRoll,
+        data: rollData,
         keptRoll,
         message,
+        newRoll,
+        oldRoll,
         target,
-        data: rollData,
+        user: game.user,
     } satisfies toolbelt.targetHelper.RerollSaveHook);
 
     const updates = { [target.id]: rollData };
