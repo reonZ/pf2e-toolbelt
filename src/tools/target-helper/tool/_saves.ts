@@ -142,9 +142,7 @@ async function rollSaves(
 
     await Promise.all(filteredTargetsRollsPromise);
 
-    if (!game.dice3d) {
-        foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
-    }
+    foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
 
     this.updateMessageEmitable.call({
         message,
@@ -250,6 +248,8 @@ async function rerollSave(
 
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, hookOptions);
+
+    foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
 
     const keptRoll =
         (hookOptions.keep === "higher" && oldRoll.total > newRoll.total) ||
