@@ -5,11 +5,11 @@ import {
     htmlQuery,
     MeleePF2e,
     R,
-    registerUpstreamHook,
     SpellPF2e,
     WeaponPF2e,
 } from "foundry-helpers";
 import {
+    addDamageBtnListener,
     addSaveBtnListener,
     addTargetsHeaders,
     createRollNPCSavesBtn,
@@ -97,15 +97,15 @@ async function renderSpellCardLikeMessage(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
     msgContent: HTMLElement,
-    data: TargetHelper,
+    targetHelper: TargetHelper,
     item: SpellPF2e | WeaponPF2e | MeleePF2e,
     saveBtnSelector: string,
     damageBtnSelector: string,
 ): Promise<void> {
-    const save = data.saveVariant;
+    const save = targetHelper.saveVariant;
     if (!save) return;
 
-    await addTargetsHeaders.call(this, message, data, msgContent);
+    await addTargetsHeaders.call(this, message, targetHelper, msgContent);
 
     const saveBtn = htmlQuery(msgContent, saveBtnSelector);
     if (!(saveBtn instanceof HTMLButtonElement)) return;
@@ -119,15 +119,15 @@ async function renderSpellCardLikeMessage(
     saveBtn.classList.add("hidden");
     saveBtn.after(buttonsWrapper);
 
-    addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, data);
+    addSaveBtnListener.call(this, saveBtn, fakeSaveBtn, message, targetHelper);
     buttonsWrapper.append(fakeSaveBtn);
 
     if (!isMessageOwner(message)) return;
 
-    const setTargetsBtn = createSetTargetsBtn.call(this, message, data);
+    const setTargetsBtn = createSetTargetsBtn.call(this, message, targetHelper);
     buttonsWrapper.prepend(setTargetsBtn);
 
-    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, data);
+    const rollSavesBtn = createRollNPCSavesBtn.call(this, message, targetHelper);
     if (rollSavesBtn) {
         buttonsWrapper.append(rollSavesBtn);
     }
@@ -136,32 +136,10 @@ async function renderSpellCardLikeMessage(
     if (!item.isOfType("spell") && !item.dealsDamage) return;
 
     const damageBtn = htmlQuery(msgContent, damageBtnSelector);
-    if (!damageBtn) return;
 
-    damageBtn.addEventListener(
-        "click",
-        () => {
-            // we cache the data & add the spell just in case
-            const cached = data.encode({
-                type: "damage",
-                item: data.itemUUID ?? item.uuid,
-                saveVariants: _replace({ null: save }),
-            });
-
-            registerUpstreamHook(
-                "preCreateChatMessage",
-                (damageMessage: ChatMessagePF2e) => {
-                    // we feed all the data to the damage message
-                    this.updateSourceFlag(damageMessage, cached);
-                },
-                true,
-            );
-
-            // we clean up the spell message as we are not gonna use it anymore
-            this.unsetFlag(message);
-        },
-        true,
-    );
+    if (damageBtn) {
+        addDamageBtnListener.call(this, message, damageBtn);
+    }
 }
 
 function getMessageSpell(message: ChatMessagePF2e): SpellPF2e<ActorPF2e> | null {
@@ -171,4 +149,4 @@ function getMessageSpell(message: ChatMessagePF2e): SpellPF2e<ActorPF2e> | null 
     return item.isOfType("spell") ? item : item.isOfType("consumable") ? item.embeddedSpell : null;
 }
 
-export { getSpellSaveVariants, prepareSpellMessage, renderSpellCardLikeMessage, renderSpellMessage };
+export { getMessageSpell, getSpellSaveVariants, prepareSpellMessage, renderSpellCardLikeMessage, renderSpellMessage };

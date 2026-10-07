@@ -155,11 +155,11 @@ async function renderCheckMessage(
 
     const mergeBtn = htmlQuery(msgContent, `[data-action="merge-to-damage"]`);
     mergeBtn?.addEventListener("click", () => {
-        mergeToDamage.call(this, message, targetHelper);
+        mergeToDamage.call(this, message);
     });
 }
 
-function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e, targetHelper: TargetHelper) {
+function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e) {
     const messages = game.messages.contents;
     const index = messages.findLastIndex((msg) => message === msg);
     const damageMessage = messages[index + 1];
@@ -167,17 +167,13 @@ function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e, targetH
     if (
         !damageMessage ||
         !isDamageMessage(damageMessage) ||
-        !isMessageOwner(message) ||
+        !isMessageOwner(damageMessage) ||
         this.getFlag(damageMessage, "save")
     ) {
         return this.localize.warning("merge.none");
     }
 
-    const source = R.pick(targetHelper.encode(), ["saveVariants", "targets"]);
-    this.setFlag(damageMessage, source);
-
-    // we clean up the check message as we are not gonna use it anymore
-    this.unsetFlag(message);
+    this.transferMessageEmitable.call({ origin: message, target: damageMessage });
 }
 
 export { prepareCheckMessage, renderCheckMessage };

@@ -13,6 +13,7 @@ import {
     ItemOriginFlag,
     MODULE,
     oppositeAlliance,
+    R,
     refreshLatestMessages,
     RegionDocumentPF2e,
     SYSTEM,
@@ -24,6 +25,7 @@ import {
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { lineIntersect, sharedMessageRenderHTML } from "tools";
 import {
+    getMessageSpell,
     getSaveLinkData,
     isAreaMessage,
     isDamageMessage,
@@ -42,8 +44,10 @@ import {
 import {
     AppliedDamagesSource,
     encodeTargetsData,
+    SaveVariant,
     SaveVariants,
     TargetsAppliedDamagesSources,
+    TargetSaveInstance,
     TargetSaveInstanceSource,
     TargetsData,
     TargetsDataSource,
@@ -56,6 +60,8 @@ import {
 const COLORBLIND_CLASS = "pf2e-toolbelt-target-helper-save-colorblind";
 const INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
 
+const targetDataRootUpdateMessageOptions = ["author", "expended", "item", "options", "traits"] as const;
+
 class TargetHelperTool extends ModuleTool<ToolSettings> {
     #updateQueue = new foundry.utils.Semaphore(1);
 
@@ -63,9 +69,19 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         refreshLatestMessages(20);
     }, 100);
 
-    updateMessageEmitable = createEmitable(this.key, (options: UpdateMessageOptions, userId: string) => {
-        this.#updateQueue.add(this.#updateMessage.bind(this), options, userId);
-    });
+    updateMessageEmitable = createEmitable(
+        this.path("update-message"),
+        (options: UpdateMessageOptions, userId: string) => {
+            this.#updateQueue.add(this.#updateMessage.bind(this), options, userId);
+        },
+    );
+
+    transferMessageEmitable = createEmitable(
+        this.path("transfer-message"),
+        (options: TransferMessageOptions, userId: string) => {
+            this.#updateQueue.add(this.#transferMessage.bind(this), options, userId);
+        },
+    );
 
     #textEditorEnrichHTMLWrapper = createToggleWrapper(
         "WRAPPER",
@@ -170,6 +186,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         if (!this.settings.enabled) return;
 
         this.updateMessageEmitable.activate();
+        this.transferMessageEmitable.activate();
         this.#preCreateChatMessageHook.activate();
         this.#createRegionTemplateHook.toggle(this.settings.template);
         this.#textEditorEnrichHTMLWrapper.activate();
@@ -189,10 +206,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return flag ? zTokenDocumentArrayDecode.safeParse(flag).data : undefined;
     }
 
-    setMessageTargets(message: ChatMessagePF2e, targets: TokenDocumentUUID[]): Promise<ChatMessagePF2e> {
-        return this.setFlag(message, "targets", targets);
-    }
-
     setMessageFlagTargets<T extends Record<string, unknown>>(updates: T, targets: TokenDocumentUUID[]): T {
         return this.setFlagProperty(updates, "targets", targets);
     }
@@ -207,41 +220,75 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return flag ? zTargetsData.safeParse(flag).data : undefined;
     }
 
-    setMessageData(
-        message: ChatMessagePF2e,
-        data: TargetsData,
-        changes?: TargetsDataUpdates,
-    ): Promise<ChatMessagePF2e> {
-        const encoded = encodeTargetsData(data, changes);
-        return this.setFlag(message, encoded);
-    }
-
     getCurrentTargets(): TokenDocumentUUID[] {
         return getCurrentTargets({ types: ["creature", "hazard", "vehicle"], uuid: true });
     }
 
-    async #updateMessage(
-        { message, applied, expended, saves, variantId = "null" }: UpdateMessageOptions,
-        _userId: string,
-    ) {
+    async #transferMessage({ origin, target }: TransferMessageOptions, _userId: string) {
+        const data = this.getMessageData(origin);
+        if (!data?.saveVariants) return;
+
+        if (data.type === "action") {
+            const encoded = encodeTargetsData(data, { saveVariants: _del });
+            await this.setFlag(origin, encoded);
+        } else {
+            await this.unsetFlag(origin);
+        }
+
+        const transferData: TargetsDataUpdates = { type: "damage" };
+
+        if (data.type === "spell") {
+            const spell = getMessageSpell(origin);
+
+            transferData.item = data.item ?? spell?.uuid;
+            transferData.saveVariants = _replace({ null: data.saveVariants[spell?.variantId ?? "null"] });
+        }
+
+        const encoded = encodeTargetsData(data, transferData);
+        await this.setFlag(target, encoded);
+    }
+
+    async #updateMessage(options: UpdateMessageOptions, _userId: string) {
+        const message = options.message;
         const data = this.getMessageData(message);
         if (!data) return;
 
-        if (applied) {
-            const udpate = { applied: this.#applyDamageUpdates(data, applied) };
-            foundry.utils.mergeObject(data, udpate, { inplace: true });
+        if (options.applied) {
+            const udpate = { applied: this.#applyDamageUpdates(data, options.applied) };
+            foundry.utils.mergeObject(data, udpate, { inplace: true, overwrite: false });
         }
 
-        if (expended) {
-            data.expended = expended;
+        if (options.nullVariant && !data.saveVariants.null) {
+            data.saveVariants.null = options.nullVariant;
         }
 
-        if (saves) {
-            const update = { [`saveVariants.${variantId}.saves`]: saves };
-            foundry.utils.mergeObject(data, update, { inplace: true });
+        saves: if (options.saves) {
+            const saveVariant = data.saveVariants[options.variantId ?? "null"];
+            if (!saveVariant) break saves;
+
+            const saves = (saveVariant.saves ??= {});
+
+            for (const [id, save] of R.entries(options.saves)) {
+                saves[id] ??= save as TargetSaveInstance;
+            }
         }
 
-        this.setMessageData(message, data);
+        if (options.splashTargets) {
+            data.splashTargets = zTokenDocumentArrayDecode.parse(options.splashTargets);
+        }
+
+        if (options.targets) {
+            data.targets = zTokenDocumentArrayDecode.parse(options.targets);
+        }
+
+        for (const key of targetDataRootUpdateMessageOptions) {
+            if (options[key] === undefined) continue;
+            // @ts-ignore who fucking knows
+            data[key] = options[key];
+        }
+
+        const encoded = encodeTargetsData(data);
+        await this.setFlag(message, encoded);
     }
 
     #applyDamageUpdates(
@@ -458,17 +505,26 @@ type ToolSettings = {
     template: boolean;
 };
 
-type UpdateMessageOptions = {
-    applied?: UpdateMessageApplied;
-    expended?: number;
-    message: ChatMessagePF2e;
-    saves?: Record<string, TargetSaveInstanceSource>;
-    variantId?: string;
-};
+type TargetDataRootUpdateMessageOptions = (typeof targetDataRootUpdateMessageOptions)[number];
+
+type UpdateMessageOptions = Prettify<
+    Partial<Pick<TargetsDataSource, TargetDataRootUpdateMessageOptions | "splashTargets" | "targets">> & {
+        applied?: UpdateMessageApplied;
+        message: ChatMessagePF2e;
+        nullVariant?: SaveVariant;
+        saves?: Record<string, TargetSaveInstanceSource>;
+        variantId?: string;
+    }
+>;
 
 type UpdateMessageApplied = {
     targetId: string;
     rollIndex: number;
+};
+
+type TransferMessageOptions = {
+    origin: ChatMessagePF2e;
+    target: ChatMessagePF2e;
 };
 
 type TemplateDialogData = {

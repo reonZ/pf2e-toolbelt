@@ -20,6 +20,7 @@ const zTargetsAppliedDamages = z.record(z.string(), zAppliedDamages).default({})
 const zTokenDocumentArrayDecode = zSafeArray(zDocumentUUID("Token"), true).transform((uuids) => {
     return R.pipe(
         R.isArray(uuids) ? uuids : [],
+        R.filter((uuid) => R.isString(uuid)),
         R.map((uuid): TokenDocumentPF2e | null => fromUuidSync(uuid, { strict: false })),
         R.filter(R.isTruthy),
         R.uniqueBy((token) => token.flags[SYSTEM.id].troop?.id ?? token.actor?.uuid ?? token.uuid),

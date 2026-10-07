@@ -83,18 +83,12 @@ function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
         return;
     }
 
-    const updates = R.omit(eventData, ["saveVariants", "type"]);
-    const saveVariant = zSaveVariant.safeParse(eventData.saveVariants.null).data;
+    this.updateMessageEmitable.call({
+        message,
+        nullVariant: zSaveVariant.safeParse(eventData.saveVariants.null).data,
+        ...R.omit(eventData, ["saveVariants", "type"]),
+    });
 
-    for (const [key, value] of R.entries(updates)) {
-        data[key] = value as any;
-    }
-
-    if (saveVariant) {
-        foundry.utils.setProperty(data, "saveVariants.null", saveVariant);
-    }
-
-    this.setMessageData(message, data);
     this.localize.info("drop.added");
 }
 

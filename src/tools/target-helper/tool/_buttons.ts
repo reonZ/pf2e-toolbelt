@@ -1,4 +1,11 @@
-import { ChatMessagePF2e, createHTMLElement, R, selectTokens, TokenDocumentPF2e } from "foundry-helpers";
+import {
+    ChatMessagePF2e,
+    createHTMLElement,
+    R,
+    registerUpstreamHook,
+    selectTokens,
+    TokenDocumentPF2e,
+} from "foundry-helpers";
 import { rollSaves, TargetHelperTool, TargetsType } from ".";
 import { TargetHelper } from "..";
 
@@ -37,7 +44,8 @@ function addSetTargetsListener(this: TargetHelperTool, btn: HTMLElement, message
             R.difference(targets),
         );
 
-        this.setMessageData(message, data, {
+        this.updateMessageEmitable.call({
+            message,
             [type]: targets,
             [otherType]: otherTargets,
         });
@@ -118,4 +126,34 @@ function addSaveBtnListener(
     });
 }
 
-export { addRollSavesListener, addSaveBtnListener, addSetTargetsListener, createRollNPCSavesBtn, createSetTargetsBtn };
+function addDamageBtnListener(this: TargetHelperTool, message: ChatMessagePF2e, btn: HTMLElement) {
+    btn.addEventListener(
+        "click",
+        (_event) => {
+            registerUpstreamHook(
+                "preCreateChatMessage",
+                (preMessage: ChatMessagePF2e) => {
+                    const cachedId = foundry.utils.randomID();
+                    this.updateSourceFlag(preMessage, { cachedId });
+
+                    const hookId = Hooks.on("createChatMessage", (newMessage: ChatMessagePF2e) => {
+                        if (cachedId !== this.getFlag<string>(newMessage, "cachedId")) return;
+                        Hooks.off("createChatMessage", hookId);
+                        this.transferMessageEmitable.call({ origin: message, target: newMessage });
+                    });
+                },
+                true,
+            );
+        },
+        true,
+    );
+}
+
+export {
+    addDamageBtnListener,
+    addRollSavesListener,
+    addSaveBtnListener,
+    addSetTargetsListener,
+    createRollNPCSavesBtn,
+    createSetTargetsBtn,
+};

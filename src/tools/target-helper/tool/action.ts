@@ -1,11 +1,6 @@
+import { ChatMessagePF2e, createHTMLElement, createHTMLElementContent, htmlQuery } from "foundry-helpers";
 import {
-    ChatMessagePF2e,
-    createHTMLElement,
-    createHTMLElementContent,
-    htmlQuery,
-    registerUpstreamHook,
-} from "foundry-helpers";
-import {
+    addDamageBtnListener,
     addTargetsHeaders,
     createRollNPCSavesBtn,
     createSetTargetsBtn,
@@ -90,26 +85,7 @@ async function renderActionMessage(
     const damageLinks = msgContent.querySelectorAll<HTMLElement>(".inline-roll[data-formula][data-damage-roll]");
 
     for (const link of damageLinks) {
-        link.addEventListener(
-            "click",
-            (_event) => {
-                // we cache the data & change its type
-                const cached = targetHelper.encode({ type: "damage" });
-
-                registerUpstreamHook(
-                    "preCreateChatMessage",
-                    (damageMessage: ChatMessagePF2e) => {
-                        // we feed all the data to the damage message
-                        this.updateSourceFlag(damageMessage, cached);
-                    },
-                    true,
-                );
-
-                // we clean the message save related data
-                this.setMessageData(message, data, { saveVariants: _del });
-            },
-            true,
-        );
+        addDamageBtnListener.call(this, message, link);
     }
 }
 
