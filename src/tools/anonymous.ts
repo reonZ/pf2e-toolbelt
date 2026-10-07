@@ -209,7 +209,7 @@ function partyKnowsSpell(spell: SpellPF2e | null): CreaturePF2e[] {
 }
 
 function isValidActionMessage(message: ChatMessagePF2e): message is ChatMessagePF2e {
-    return isActionMessage(message);
+    return isActionMessage(message) || message.flags[SYSTEM.id].context?.type === "self-effect";
 }
 
 function isValidSpellMessage(message: ChatMessagePF2e): message is ChatMessagePF2e & { item: SpellPF2e | null } {
