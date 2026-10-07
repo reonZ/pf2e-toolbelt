@@ -387,6 +387,10 @@
                     "name": "Expend Ammo Button",
                     "hint": "Add a button in area related messages to expend ammunitions/grenades."
                 },
+                "skipdice": {
+                    "name": "Immediate 'Dice So Nice!'",
+                    "hint": "Do not wait for 3D dice animations to finish before updating the message."
+                },
                 "small": {
                     "name": "Small Damage Buttons",
                     "hint": "Reduce the size of damage buttons for the extra targets."

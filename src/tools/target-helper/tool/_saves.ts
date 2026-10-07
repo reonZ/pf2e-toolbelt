@@ -21,6 +21,7 @@ import {
     TargetHelperTool,
     TargetSaveInstance,
     TargetSaveInstanceSource,
+    UpdateMessageDice,
 } from "..";
 
 const REROLLS: Record<RerollType, RerollDetails> = {
@@ -77,11 +78,11 @@ async function rollSaves(
         const statistic = target.actor?.getStatistic(dataSave.statistic);
         if (!statistic) return;
 
-        return new Promise<void>((resolve) => {
+        return new Promise<UpdateMessageDice>((resolve) => {
             const callback: CheckRollCallback = async (roll, success, rollMessage) => {
                 const isPrivate =
                     targetHelper.isPrivate ||
-                    rollMessage.whisper.filter((userId) => userId && game.users.get(userId)?.isGM).length > 0;
+                    rollMessage.whisper.some((userId) => userId && game.users.get(userId)?.isGM);
 
                 const context = rollMessage.flags[SYSTEM.id].context as CheckContextChatFlag;
                 const modifiers = R.pipe(
@@ -121,7 +122,11 @@ async function rollSaves(
                     target,
                 } satisfies toolbelt.targetHelper.RollSaveHook);
 
-                resolve();
+                resolve({
+                    id: target.id,
+                    data: roll.dice[0].toJSON(),
+                    target: target.uuid,
+                });
             };
 
             statistic.check.roll({
@@ -140,12 +145,11 @@ async function rollSaves(
     const filteredTargetsRollsPromise = targetsRollsPromise.filter(R.isTruthy);
     if (!filteredTargetsRollsPromise.length) return;
 
-    await Promise.all(filteredTargetsRollsPromise);
-
-    foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
+    const dice = R.indexBy(await Promise.all(filteredTargetsRollsPromise), R.prop("id"));
 
     this.updateMessageEmitable.call({
         message,
+        dice,
         saves: updates,
         variantId: targetHelper.variantId,
     });
@@ -249,8 +253,6 @@ async function rerollSave(
     const newRoll = await unevaluatedNewRoll.evaluate({ allowInteractive: !targetSave.private });
     Hooks.callAll("pf2e.reroll", Roll.fromJSON(targetSave.roll), newRoll, resource, hookOptions);
 
-    foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
-
     const keptRoll =
         (hookOptions.keep === "higher" && oldRoll.total > newRoll.total) ||
         (hookOptions.keep === "lower" && oldRoll.total < newRoll.total)
@@ -343,6 +345,13 @@ async function rerollSave(
     }
 
     this.updateMessageEmitable.call({
+        dice: {
+            [target.id]: {
+                id: target.id,
+                data: keptRoll.dice[0].toJSON(),
+                target: target.uuid,
+            },
+        },
         message,
         saves: updates,
         variantId: targetHelper.variantId,

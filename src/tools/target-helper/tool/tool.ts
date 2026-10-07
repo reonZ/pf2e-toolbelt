@@ -20,6 +20,7 @@ import {
     TextEditorPF2e,
     TokenDocumentPF2e,
     TokenDocumentUUID,
+    UserPF2e,
     waitDialog,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -110,6 +111,12 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                 default: false,
                 scope: "world",
                 requiresReload: true,
+            },
+            {
+                key: "skipdice",
+                type: Boolean,
+                default: true,
+                scope: "world",
             },
             {
                 key: "targets",
@@ -248,7 +255,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         await this.setFlag(target, encoded);
     }
 
-    async #updateMessage(options: UpdateMessageOptions, _userId: string) {
+    async #updateMessage(options: UpdateMessageOptions, userId: string) {
         const message = options.message;
         const data = this.getMessageData(message);
         if (!data) return;
@@ -266,10 +273,27 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             const saveVariant = data.saveVariants[options.variantId ?? "null"];
             if (!saveVariant) break saves;
 
+            const author = game.users.get(userId);
             const saves = (saveVariant.saves ??= {});
+            const dicePromise = [];
 
             for (const [id, save] of R.entries(options.saves)) {
-                saves[id] ??= save as TargetSaveInstance;
+                if (saves[id]) continue;
+
+                saves[id] = save as TargetSaveInstance;
+
+                const dieData = options.dice?.[id];
+                if (dieData) {
+                    dicePromise.push(rollDice3d(author, dieData, save.private));
+                }
+            }
+
+            if (!this.settings.skipdice) {
+                await Promise.all(dicePromise);
+            }
+
+            if (options.dice && !game.dice3d) {
+                foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
             }
         }
 
@@ -492,6 +516,21 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 }
 
+async function rollDice3d(
+    author: UserPF2e | undefined,
+    { data, target }: UpdateMessageDice,
+    isPrivate: boolean | undefined,
+): Promise<boolean> {
+    if (!game.dice3d) return false;
+
+    const die = new foundry.dice.terms.Die(data);
+    const token = fromUuidSync<TokenDocumentPF2e>(target);
+    const speaker = ChatMessage.getSpeaker({ token });
+    const messageMode = isPrivate || (token && !token.hasPlayerOwner) ? "blind" : "public";
+
+    return game.dice3d?.animateRoll({ dice: [die] }, { author, speaker }, { messageMode });
+}
+
 const targetHelperTool = new TargetHelperTool();
 
 type ToolSettings = {
@@ -500,6 +539,7 @@ type ToolSettings = {
     dismissTemplate: boolean;
     enabled: boolean;
     expend: boolean;
+    skipdice: boolean;
     small: boolean;
     targets: boolean;
     template: boolean;
@@ -507,15 +547,22 @@ type ToolSettings = {
 
 type TargetDataRootUpdateMessageOptions = (typeof targetDataRootUpdateMessageOptions)[number];
 
-type UpdateMessageOptions = Prettify<
-    Partial<Pick<TargetsDataSource, TargetDataRootUpdateMessageOptions | "splashTargets" | "targets">> & {
-        applied?: UpdateMessageApplied;
-        message: ChatMessagePF2e;
-        nullVariant?: SaveVariant;
-        saves?: Record<string, TargetSaveInstanceSource>;
-        variantId?: string;
-    }
->;
+type UpdateMessageOptions = Partial<
+    Pick<TargetsDataSource, TargetDataRootUpdateMessageOptions | "splashTargets" | "targets">
+> & {
+    applied?: UpdateMessageApplied;
+    dice?: Record<string, UpdateMessageDice>;
+    message: ChatMessagePF2e;
+    nullVariant?: SaveVariant;
+    saves?: Record<string, TargetSaveInstanceSource>;
+    variantId?: string;
+};
+
+type UpdateMessageDice = {
+    id: string;
+    data: Partial<DieData>;
+    target: TokenDocumentUUID;
+};
 
 type UpdateMessageApplied = {
     targetId: string;
@@ -535,4 +582,4 @@ type TemplateDialogData = {
 };
 
 export { targetHelperTool };
-export type { TargetHelperTool };
+export type { TargetHelperTool, UpdateMessageDice };
