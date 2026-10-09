@@ -1,3 +1,7 @@
+# 3.58.3
+
+- fix exposed module localize path (from `game.toolbelt.localize`)
+
 # 3.58.2
 
 - add spanish localization (thanks to [HonzoNebro](https://github.com/HonzoNebro))
