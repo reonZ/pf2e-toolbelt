@@ -95,7 +95,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
             {
                 key: "skipDice",
                 type: Boolean,
-                default: true,
+                default: false,
                 scope: "world",
             },
             {
