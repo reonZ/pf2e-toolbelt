@@ -69,21 +69,24 @@ function onChatMessageDrop(this: TargetHelperTool, event: DragEvent) {
     if (!eventData || eventData.type !== `${MODULE.id}-check-roll`) return;
 
     const messageId = target.dataset.messageId;
-    const message = messageId ? (game.messages.get(messageId) as ChatMessagePF2e) : undefined;
-    const data = message && this.getMessageData(message);
-    if (!data) return;
+    const message = messageId && game.messages.get(messageId);
+    if (!message) return;
 
     if (!isMessageOwner(message)) {
         this.localize.warning("drop.unauth");
         return;
     }
 
+    const data = this.getMessageData(message);
+    if (!data) return;
+
     if (data.saveVariants["null"]) {
         this.localize.warning("drop.already");
         return;
     }
 
-    this.updateMessageEmitable.call({
+    this.queryMessageUpdate({
+        type: "drop-save",
         message,
         nullVariant: zSaveVariant.safeParse(eventData.saveVariants.null).data,
         ...R.omit(eventData, ["saveVariants", "type"]),

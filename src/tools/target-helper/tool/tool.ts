@@ -13,20 +13,17 @@ import {
     ItemOriginFlag,
     MODULE,
     oppositeAlliance,
-    R,
     refreshLatestMessages,
     RegionDocumentPF2e,
     SYSTEM,
     TextEditorPF2e,
     TokenDocumentPF2e,
     TokenDocumentUUID,
-    UserPF2e,
     waitDialog,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { lineIntersect, sharedMessageRenderHTML } from "tools";
 import {
-    getMessageSpell,
     getSaveLinkData,
     isAreaMessage,
     isDamageMessage,
@@ -41,18 +38,13 @@ import {
     renderDamageMessage,
     renderSpellMessage,
     SaveDragData,
+    UpdateMessageQueue,
+    UpdateMessageQueueOption,
 } from ".";
 import {
-    AppliedDamagesSource,
-    encodeTargetsData,
-    SaveVariant,
     SaveVariants,
-    TargetsAppliedDamagesSources,
-    TargetSaveInstance,
-    TargetSaveInstanceSource,
     TargetsData,
     TargetsDataSource,
-    TargetsDataUpdates,
     zSaveVariants,
     zTargetsData,
     zTokenDocumentArrayDecode,
@@ -61,28 +53,16 @@ import {
 const COLORBLIND_CLASS = "pf2e-toolbelt-target-helper-save-colorblind";
 const INLINE_CHECK_REGEX = /(data-pf2-check="[\w]+")/g;
 
-const targetDataRootUpdateMessageOptions = ["author", "expended", "item", "options", "traits"] as const;
-
 class TargetHelperTool extends ModuleTool<ToolSettings> {
-    #updateQueue = new foundry.utils.Semaphore(1);
+    #updatesQueue = new UpdateMessageQueue(this);
 
     #debounceRefreshMessages = foundry.utils.debounce(() => {
         refreshLatestMessages(20);
     }, 100);
 
-    updateMessageEmitable = createEmitable(
-        this.path("update-message"),
-        (options: UpdateMessageOptions, userId: string) => {
-            this.#updateQueue.add(this.#updateMessage.bind(this), options, userId);
-        },
-    );
-
-    transferMessageEmitable = createEmitable(
-        this.path("transfer-message"),
-        (options: TransferMessageOptions, userId: string) => {
-            this.#updateQueue.add(this.#transferMessage.bind(this), options, userId);
-        },
-    );
+    #queryUpdateEmitable = createEmitable(this.key, (options: UpdateMessageQueueOption, userId: string) => {
+        this.#updatesQueue.add(options, userId);
+    });
 
     #textEditorEnrichHTMLWrapper = createToggleWrapper(
         "WRAPPER",
@@ -113,7 +93,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                 requiresReload: true,
             },
             {
-                key: "skipdice",
+                key: "skipDice",
                 type: Boolean,
                 default: true,
                 scope: "world",
@@ -192,8 +172,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     init(): void {
         if (!this.settings.enabled) return;
 
-        this.updateMessageEmitable.activate();
-        this.transferMessageEmitable.activate();
+        this.#queryUpdateEmitable.activate();
         this.#preCreateChatMessageHook.activate();
         this.#createRegionTemplateHook.toggle(this.settings.template);
         this.#textEditorEnrichHTMLWrapper.activate();
@@ -231,122 +210,8 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         return getCurrentTargets({ types: ["creature", "hazard", "vehicle"], uuid: true });
     }
 
-    async #transferMessage({ origin, target }: TransferMessageOptions, _userId: string) {
-        const data = this.getMessageData(origin);
-        if (!data?.saveVariants) return;
-
-        if (data.type === "action") {
-            const encoded = encodeTargetsData(data, { saveVariants: _del });
-            await this.setFlag(origin, encoded);
-        } else {
-            await this.unsetFlag(origin);
-        }
-
-        const transferData: TargetsDataUpdates = { type: "damage" };
-
-        if (data.type === "spell") {
-            const spell = getMessageSpell(origin);
-
-            transferData.item = data.item ?? spell?.uuid;
-            transferData.saveVariants = _replace({ null: data.saveVariants[spell?.variantId ?? "null"] });
-        }
-
-        const encoded = encodeTargetsData(data, transferData);
-        await this.setFlag(target, encoded);
-    }
-
-    async #updateMessage(options: UpdateMessageOptions, userId: string) {
-        const message = options.message;
-        const data = this.getMessageData(message);
-        if (!data) return;
-
-        if (options.applied) {
-            const udpate = { applied: this.#applyDamageUpdates(data, options.applied) };
-            foundry.utils.mergeObject(data, udpate, { inplace: true, overwrite: false });
-        }
-
-        if (options.nullVariant && !data.saveVariants.null) {
-            data.saveVariants.null = options.nullVariant;
-        }
-
-        saves: if (options.saves) {
-            const saveVariant = data.saveVariants[options.variantId ?? "null"];
-            if (!saveVariant) break saves;
-
-            const author = game.users.get(userId);
-            const saves = (saveVariant.saves ??= {});
-            const dicePromise = [];
-
-            for (const [id, save] of R.entries(options.saves)) {
-                if (saves[id]) continue;
-
-                saves[id] = save as TargetSaveInstance;
-
-                const dieData = options.dice?.[id];
-                if (dieData) {
-                    dicePromise.push(rollDice3d(author, dieData, save.private));
-                }
-            }
-
-            if (!this.settings.skipdice) {
-                await Promise.all(dicePromise);
-            }
-
-            if (options.dice && !game.dice3d) {
-                foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
-            }
-        }
-
-        if (options.splashTargets) {
-            data.splashTargets = zTokenDocumentArrayDecode.parse(options.splashTargets);
-        }
-
-        if (options.targets) {
-            data.targets = zTokenDocumentArrayDecode.parse(options.targets);
-        }
-
-        for (const key of targetDataRootUpdateMessageOptions) {
-            if (options[key] === undefined) continue;
-            // @ts-ignore who fucking knows
-            data[key] = options[key];
-        }
-
-        const encoded = encodeTargetsData(data);
-        await this.setFlag(message, encoded);
-    }
-
-    #applyDamageUpdates(
-        data: TargetsData,
-        { rollIndex, targetId }: UpdateMessageApplied,
-    ): TargetsAppliedDamagesSources {
-        const splashIndex = data.splashIndex;
-
-        const targetApplied: AppliedDamagesSource = {
-            [rollIndex]: true,
-        };
-
-        const applied: TargetsAppliedDamagesSources = {
-            [targetId]: targetApplied,
-        };
-
-        if (splashIndex !== -1) {
-            const regularIndex = data.splashIndex === 0 ? 1 : 0;
-
-            if (rollIndex === splashIndex) {
-                targetApplied[regularIndex] = true;
-            } else {
-                targetApplied[splashIndex] = true;
-
-                for (const otherTarget of data.targets) {
-                    const otherId = otherTarget.id;
-                    if (otherId === targetId) continue;
-
-                    applied[otherId] = { [regularIndex]: true };
-                }
-            }
-        }
-
-        return applied;
+    queryMessageUpdate(options: UpdateMessageQueueOption) {
+        return this.#queryUpdateEmitable.call(options);
     }
 
     #onDragStart(event: DragEvent) {
@@ -516,21 +381,6 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
     }
 }
 
-async function rollDice3d(
-    author: UserPF2e | undefined,
-    { data, target }: UpdateMessageDice,
-    isPrivate: boolean | undefined,
-): Promise<boolean> {
-    if (!game.dice3d) return false;
-
-    const die = new foundry.dice.terms.Die(data);
-    const token = fromUuidSync<TokenDocumentPF2e>(target);
-    const speaker = ChatMessage.getSpeaker({ token });
-    const messageMode = isPrivate || (token && !token.hasPlayerOwner) ? "blind" : "public";
-
-    return game.dice3d?.animateRoll({ dice: [die] }, { author, speaker }, { messageMode });
-}
-
 const targetHelperTool = new TargetHelperTool();
 
 type ToolSettings = {
@@ -539,39 +389,16 @@ type ToolSettings = {
     dismissTemplate: boolean;
     enabled: boolean;
     expend: boolean;
-    skipdice: boolean;
+    skipDice: boolean;
     small: boolean;
     targets: boolean;
     template: boolean;
-};
-
-type TargetDataRootUpdateMessageOptions = (typeof targetDataRootUpdateMessageOptions)[number];
-
-type UpdateMessageOptions = Partial<
-    Pick<TargetsDataSource, TargetDataRootUpdateMessageOptions | "splashTargets" | "targets">
-> & {
-    applied?: UpdateMessageApplied;
-    dice?: Record<string, UpdateMessageDice>;
-    message: ChatMessagePF2e;
-    nullVariant?: SaveVariant;
-    saves?: Record<string, TargetSaveInstanceSource>;
-    variantId?: string;
 };
 
 type UpdateMessageDice = {
     id: string;
     data: Partial<DieData>;
     target: TokenDocumentUUID;
-};
-
-type UpdateMessageApplied = {
-    targetId: string;
-    rollIndex: number;
-};
-
-type TransferMessageOptions = {
-    origin: ChatMessagePF2e;
-    target: ChatMessagePF2e;
 };
 
 type TemplateDialogData = {

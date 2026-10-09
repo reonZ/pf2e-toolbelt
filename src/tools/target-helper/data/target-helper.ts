@@ -6,15 +6,7 @@ import {
     ItemPF2e,
     TokenDocumentPF2e,
 } from "foundry-helpers";
-import {
-    encodeTargetsData,
-    SaveVariant,
-    TargetAppliedDamage,
-    TargetSaveInstance,
-    TargetsData,
-    TargetsDataSource,
-    TargetsDataUpdates,
-} from ".";
+import { SaveVariant, TargetAppliedDamage, TargetSaveInstance, TargetsData } from ".";
 
 class TargetHelper {
     #data: TargetsData;
@@ -127,10 +119,6 @@ class TargetHelper {
 
     targetApplied(id: string): TargetAppliedDamage {
         return this.#data.applied[id] ?? {};
-    }
-
-    encode(changes?: TargetsDataUpdates): TargetsDataSource {
-        return encodeTargetsData(this.#data, changes);
     }
 }
 

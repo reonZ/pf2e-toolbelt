@@ -21,8 +21,8 @@ import {
     TargetHelperTool,
     TargetSaveInstance,
     TargetSaveInstanceSource,
-    UpdateMessageDice,
 } from "..";
+import { UpdateMessageDice } from ".";
 
 const REROLLS: Record<RerollType, RerollDetails> = {
     hero: {
@@ -78,7 +78,7 @@ async function rollSaves(
         const statistic = target.actor?.getStatistic(dataSave.statistic);
         if (!statistic) return;
 
-        return new Promise<UpdateMessageDice>((resolve) => {
+        return new Promise<{ roll: Rolled<CheckRoll>; target: TokenDocumentPF2e }>((resolve) => {
             const callback: CheckRollCallback = async (roll, success, rollMessage) => {
                 const isPrivate =
                     targetHelper.isPrivate ||
@@ -122,11 +122,7 @@ async function rollSaves(
                     target,
                 } satisfies toolbelt.targetHelper.RollSaveHook);
 
-                resolve({
-                    id: target.id,
-                    data: roll.dice[0].toJSON(),
-                    target: target.uuid,
-                });
+                resolve({ roll, target });
             };
 
             statistic.check.roll({
@@ -145,11 +141,20 @@ async function rollSaves(
     const filteredTargetsRollsPromise = targetsRollsPromise.filter(R.isTruthy);
     if (!filteredTargetsRollsPromise.length) return;
 
-    const dice = R.indexBy(await Promise.all(filteredTargetsRollsPromise), R.prop("id"));
+    const dice = game.dice3d
+        ? R.pipe(
+              await Promise.all(filteredTargetsRollsPromise),
+              R.map(({ roll, target }): UpdateMessageDice => {
+                  return { id: target.id, source: roll.dice[0].toJSON(), target: target.uuid };
+              }),
+              R.indexBy(R.prop("id")),
+          )
+        : {};
 
-    this.updateMessageEmitable.call({
-        message,
+    this.queryMessageUpdate({
+        type: "roll-save",
         dice,
+        message,
         saves: updates,
         variantId: targetHelper.variantId,
     });
@@ -344,11 +349,12 @@ async function rerollSave(
         await actor.updateResource(resource.slug, resource.value - 1);
     }
 
-    this.updateMessageEmitable.call({
+    this.queryMessageUpdate({
+        type: "reroll-save",
         dice: {
             [target.id]: {
                 id: target.id,
-                data: keptRoll.dice[0].toJSON(),
+                source: keptRoll.dice[0].toJSON(),
                 target: target.uuid,
             },
         },

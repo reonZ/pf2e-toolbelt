@@ -37,17 +37,17 @@ function addSetTargetsListener(this: TargetHelperTool, btn: HTMLElement, message
         if (!data) return;
 
         const targets = this.getCurrentTargets();
-        const otherType: TargetsType = type === "targets" ? "splashTargets" : "targets";
         const otherTargets = R.pipe(
-            data[otherType],
+            data[type === "targets" ? "splashTargets" : "targets"],
             R.map((token) => token.uuid),
             R.difference(targets),
         );
 
-        this.updateMessageEmitable.call({
+        this.queryMessageUpdate({
+            type: "set-targets",
             message,
-            [type]: targets,
-            [otherType]: otherTargets,
+            splashTargets: type === "splashTargets" ? targets : otherTargets,
+            targets: type === "targets" ? targets : otherTargets,
         });
     });
 }
@@ -136,11 +136,20 @@ function addDamageBtnListener(this: TargetHelperTool, message: ChatMessagePF2e, 
                     const cachedId = foundry.utils.randomID();
                     this.updateSourceFlag(preMessage, { cachedId });
 
-                    const hookId = Hooks.on("createChatMessage", (newMessage: ChatMessagePF2e) => {
-                        if (cachedId !== this.getFlag<string>(newMessage, "cachedId")) return;
-                        Hooks.off("createChatMessage", hookId);
-                        this.transferMessageEmitable.call({ origin: message, target: newMessage });
-                    });
+                    if (game.dice3d) {
+                        const dsnHookId = Hooks.on("diceSoNiceRollComplete", (messageId: string) => {
+                            const newMessage = game.messages.get(messageId);
+                            if (!newMessage || cachedId !== this.getFlag<string>(newMessage, "cachedId")) return;
+                            Hooks.off("diceSoNiceRollComplete", dsnHookId);
+                            this.queryMessageUpdate({ type: "transfer-data", message, target: newMessage });
+                        });
+                    } else {
+                        const hookId = Hooks.on("createChatMessage", (newMessage: ChatMessagePF2e) => {
+                            if (cachedId !== this.getFlag<string>(newMessage, "cachedId")) return;
+                            Hooks.off("createChatMessage", hookId);
+                            this.queryMessageUpdate({ type: "transfer-data", message, target: newMessage });
+                        });
+                    }
                 },
                 true,
             );

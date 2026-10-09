@@ -58,11 +58,14 @@ const zEncodeTargetsData = zBaseTargetsData.extend({
 
 const zTargetsData = zDecodeTargetsData;
 
-function encodeTargetsData(data: TargetsData, changes?: TargetsDataUpdates): TargetsDataSource {
+function encodeTargetsData(data: TargetsData, ...updates: TargetsDataUpdates[]): TargetsDataSource {
     const encoded = zEncodeTargetsData.parse(data);
-    return changes ? foundry.utils.mergeObject(encoded, changes, { inplace: true }) : encoded;
+    return updates.length
+        ? updates.reduce<TargetsDataSource>((acc, curr) => foundry.utils.mergeObject(acc, curr), encoded)
+        : encoded;
 }
 
+type TargetsDataSourceKey = keyof TargetsDataSource;
 type TargetsDataSource = z.input<typeof zBaseTargetsData> & z.input<typeof zDecodeTargetsData>;
 type TargetsData = z.output<typeof zTargetsData>;
 
@@ -81,7 +84,7 @@ type TargetsAppliedDamages = z.output<typeof zTargetsAppliedDamages>;
 type TargetAppliedDamage = z.output<typeof zAppliedDamages>;
 
 type TargetsDataUpdates = {
-    [k in keyof TargetsDataSource]?: TargetsDataSource[k] | ForcedReplacement | ForcedDeletion;
+    [k in TargetsDataSourceKey]?: TargetsDataSource[k] | ForcedReplacement | ForcedDeletion;
 };
 
 export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArrayDecode };
@@ -97,5 +100,6 @@ export type {
     TargetsAppliedDamagesSources,
     TargetsData,
     TargetsDataSource,
+    TargetsDataSourceKey,
     TargetsDataUpdates,
 };

@@ -138,7 +138,7 @@ function createAreaExpendBtn(
                 await item.update({ "system.quantity": item.quantity - 1 });
             }
 
-            return this.updateMessageEmitable.call({ message, expended: 1 });
+            return this.queryMessageUpdate({ type: "set-expended", message, expended: 1 });
         }
 
         const ammo = item.ammo;
@@ -163,7 +163,7 @@ function createAreaExpendBtn(
             return this.localize.warning("expend-ammo.warning.error");
         }
 
-        this.updateMessageEmitable.call({ message, expended: totalExpend });
+        this.queryMessageUpdate({ type: "set-expended", message, expended: totalExpend });
     });
 
     return btn;

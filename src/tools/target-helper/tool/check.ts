@@ -173,7 +173,7 @@ function mergeToDamage(this: TargetHelperTool, message: ChatMessagePF2e) {
         return this.localize.warning("merge.none");
     }
 
-    this.transferMessageEmitable.call({ origin: message, target: damageMessage });
+    this.queryMessageUpdate({ type: "transfer-data", message, target: damageMessage });
 }
 
 export { prepareCheckMessage, renderCheckMessage };

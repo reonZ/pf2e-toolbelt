@@ -426,12 +426,11 @@ async function applyDamageFromMessage(
     toggleOffShieldBlock(message.id);
 
     // ADDED BY MODULE
-    this.updateMessageEmitable.call({
+    this.queryMessageUpdate({
+        type: "set-applied",
         message,
-        applied: {
-            rollIndex,
-            targetId: token.id,
-        },
+        rollIndex,
+        targetId: token.id,
     });
 }
 
