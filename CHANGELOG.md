@@ -1,3 +1,8 @@
+# 3.58.1
+
+- `Target Helper`:
+  - fix save check rolls not working when not using the `Dice So Nice!` module
+
 # 3.58.0
 
 - `Anonymous`:
