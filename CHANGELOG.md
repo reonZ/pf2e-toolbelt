@@ -1,3 +1,7 @@
+# 3.58.2
+
+- add spanish localization (thanks to [HonzoNebro](https://github.com/HonzoNebro))
+
 # 3.58.1
 
 - `Target Helper`:
