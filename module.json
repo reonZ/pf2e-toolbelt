@@ -56,9 +56,19 @@
     },
     "languages": [
         {
+            "lang": "cn",
+            "name": "简体中文",
+            "path": "lang/cn.json"
+        },
+        {
             "lang": "en",
             "name": "English",
             "path": "lang/en.json"
+        },
+        {
+            "lang": "es",
+            "name": "Español",
+            "path": "lang/es.json"
         },
         {
             "lang": "fr",
@@ -66,24 +76,19 @@
             "path": "lang/fr.json"
         },
         {
+            "lang": "ja",
+            "name": "日本語",
+            "path": "lang/ja.json"
+        },
+        {
             "lang": "pl",
             "name": "Polish",
             "path": "lang/pl.json"
         },
         {
-            "lang": "cn",
-            "name": "简体中文",
-            "path": "lang/cn.json"
-        },
-        {
             "lang": "pt-BR",
             "name": "Português Brasileiro",
             "path": "lang/pt-BR.json"
-        },
-        {
-            "lang": "ja",
-            "name": "日本語",
-            "path": "lang/ja.json"
         }
     ]
 }
