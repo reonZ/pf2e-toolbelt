@@ -61,7 +61,7 @@ class UpdateMessageQueue {
             });
         }
 
-        if (isRollSaveOptions(options)) {
+        if (isSaveRoll(options)) {
             const author = game.users.get(userId);
             const skipDice = !!game.dice3d && this.#tool.settings.skipDice;
 
@@ -186,6 +186,13 @@ class UpdateMessageQueue {
 
         const updates = readyUpdates.map(({ update }) => update);
 
+        if (!game.dice3d) {
+            const diceUpdates = readyUpdates.filter((update) => isSaveRoll(update));
+            for (const __ of diceUpdates) {
+                foundry.audio.AudioHelper.play({ src: CONFIG.sounds.dice }, true);
+            }
+        }
+
         if (transferTo) {
             instance.toUpdate.length = 0;
             instance.transferTo = undefined;
@@ -258,7 +265,9 @@ function applyDamageUpdates(
     return applied;
 }
 
-function isRollSaveOptions(options: UpdateMessageQueueOption): options is UpdateMessageQueueSaveOptions {
+function isSaveRoll(options: UpdateMessageQueueOption): options is UpdateMessageQueueSaveOptions;
+function isSaveRoll(options: { type: QueueOptionType }): boolean;
+function isSaveRoll(options: { type: QueueOptionType }) {
     return R.isIncludedIn(options.type, ["reroll-save", "roll-save"]);
 }
 
