@@ -1,3 +1,8 @@
+# 3.58.4
+
+- `Target Helper`:
+  - fix save check rolls not playing dice sound
+
 # 3.58.3
 
 - fix exposed module localize path (from `game.toolbelt.localize`)
