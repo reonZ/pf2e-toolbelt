@@ -1,4 +1,6 @@
 {
+  "PF2E.RuleElement.Actionable": "Accionable",
+  "PF2E.RuleElement.ItemCast": "Lanzamiento desde el objeto",
   "LEVIKTIMES": {
     "playerOnly": "Solo jugador",
     "gmOnly": "Sólo MJ",
@@ -26,6 +28,12 @@
           "hint": "Tecla que se mantiene presionada mientras hace clic en la escena para teletransportar todas las fichas seleccionadas. También puedes deseleccionar las fichas al pulsar la combinación de teclas para tener una visión despejada de toda la escena."
         }
       },
+      "betterTool": {
+        "removeRegion": {
+          "name": "Eliminar región",
+          "hint": "Elimine la primera región que encuentre bajo el cursor."
+        }
+      },
       "droppeth": {
         "droppeth": {
           "name": "Modificador de Droppeth",
@@ -40,13 +48,25 @@
           "name": "Macro de Acción",
           "hint": "Agrega una forma de vincular una macro a acciones/dotes."
         },
+        "actionable": {
+          "name": "Todo lo accionable",
+          "hint": "Esta función hace que todas las acciones tengan el botón \"Usar\" en las hojas de cálculo. Además, al usar el botón \"Usar\", se añade una opción de tirada adicional para diferenciarlas de simplemente enviar la acción al chat."
+        },
         "apply": {
           "name": "Auto autoaplicado",
           "hint": "Botón para efecto autoaplicado que aplicará automáticamente el efecto."
         },
+        "cast": {
+          "name": "Lanzamiento de conjuros desde objetos",
+          "hint": "Agrega un nuevo RuleElement que genera entradas de lanzamiento de conjuros virtuales cada vez que se equipa o invierte un objeto físico."
+        },
         "item": {
           "name": "Macro de objeto",
           "hint": "Agrega una forma de vincular una macro a equipo y artículos consumibles."
+        },
+        "physical": {
+          "name": "Acciones físicas",
+          "hint": "Agrega un nuevo RuleElement que genera acciones virtuales cada vez que se equipa o invierte en un objeto físico."
         },
         "spell": {
           "name": "Macro de conjuro",
@@ -96,15 +116,60 @@
           "hint": "¿Deberían actualizarse también los escudos?"
         }
       },
-      "betterChat": {
-          "merge": {
-            "name": "Botón de fusión",
-            "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
-          },
-          "inject": {
-            "name": "Botón de inyección",
-            "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
+      "autoCover": {
+        "title": "Cobertura automática",
+        "creature": {
+          "name": "Cobertura por criaturas",
+          "hint": "¿Deben las criaturas proporcionar cobertura menor o estándar cuando se realiza una tirada de ataque?",
+          "choices": {
+            "disabled": "Desactivado",
+            "cross": "Intersecar 2 lados opuestos",
+            "zero": "Intersecar cualquier lado",
+            "ten": "Cualquier lado con un margen del 10%.",
+            "twenty": "Cualquier lado con un margen del 20%"
           }
+        },
+        "dead": {
+          "name": "Saltar criaturas muertas",
+          "hint": "Deberían las criaturas muertas no proporcionan cobertura."
+        },
+        "prone": {
+          "name": "Ignorar a las criaturas tumbadas",
+          "hint": "Deberían las criaturas tumbadas no proporcionan cobertura."
+        },
+        "wall": {
+          "name": "Cobertura de pared",
+          "hint": "¿Deben las criaturas objetivo recibir cobertura estándar cuando el camino entre ellas y su atacante está interrumpido por una pared?",
+          "choices": {
+            "center-center": "Centro a centro",
+            "center-spread": "Centro para propagarse",
+            "center-corner": "Centro a esquinas",
+            "corner-center": "De las esquinas al centro",
+            "corner-spread": "Esquinas para propagarse",
+            "corner-corner": "De esquina a esquina",
+            "disabled": "Desactivado"
+          }
+        }
+      },
+      "betterChat": {
+        "title": "Mensaje de Better Chat",
+        "average": {
+          "name": "Indicador de daño",
+          "hint": "Agrega color a los mensajes de daño que muestra qué tan bien tiraste los dados en comparación con los valores mínimos y máximos.",
+          "choices": {
+            "disabled": "Desactivado",
+            "standalone": "Pantalla independiente",
+            "background": "Antecedentes de la fórmula de los dados"
+          }
+        },
+        "merge": {
+          "name": "Botón de fusión",
+          "hint": "Agrega un botón a los mensajes de daño que permite fusionarlos con otros mensajes de daño."
+        },
+        "inject": {
+          "name": "Botón de inyección",
+          "hint": "Agrega un botón a los mensajes de daño que permite inyectarlos en un mensaje de daño anterior."
+        }
       },
       "betterEffectsPanel": {
         "title": "Panel de mejores efectos",
@@ -169,6 +234,10 @@
           "name": "Grupo de alianza como observado",
           "hint": "Permite a los jugadores observar las hojas de actor con el permiso \"Limitado\" siempre que pertenezcan a la alianza del grupo. No confundir con el actor del grupo."
         },
+        "retrainFeats": {
+          "name": "Botón de reentrenamiento de habilidades",
+          "hint": "Agrega un botón para reentrenar las dotes en la hoja de personaje."
+        },
         "showPlayers": {
           "name": "Mostrar avatar a los jugadores",
           "hint": "Agrega un botón 'Mostrar a jugadores' en el panel de avatar de las hojas de actores."
@@ -177,6 +246,9 @@
           "name": "Botón Ordenar lista",
           "hint": "Agrega botones de ordenación a diferentes listas en la hoja del actor."
         }
+      },
+      "betterTool": {
+        "title": "Better Tool"
       },
       "betterTrade": {
         "title": "Mejor comercio",
@@ -303,9 +375,19 @@
           "name": "Actualizar mensajes de comprobaciones",
           "hint": "Se actualizan los mensajes salvaciones para que la función pueda usarlos. También se añaden más detalles."
         },
+        "colorblind": {
+          "name": "Utilice una paleta de colores para daltónicos.",
+          "hint": "Sustituye los colores de los resultados guardados por colores aptos para personas daltónicas."
+        },
         "enabled": {
           "name": "Activado",
           "hint": "Habilite la función 'Ayudante de objetivo' en su mundo."
+        },
+        "expend": {
+          "name": "Botón para gastar munición",
+          "hint": "Añade un botón en los mensajes relacionados con el área para gastar munición/granadas."
+        },
+        "skipDice": {
         },
         "small": {
           "name": "Botones de daño pequeños",
@@ -316,7 +398,12 @@
           "hint": "Agregará objetivos adicionales a los mensajes de chat donde se puede aplicar daño y se pueden realizar salvaciones."
         },
         "template": {
+          "name": "Asistente de plantillas",
           "hint": "Al colocar una plantilla en el tablero, aparecerá un nuevo cuadro de diálogo que te permitirá apuntar a todas las fichas que se encuentran dentro de ella."
+        },
+        "skipdice": {
+          "name": "\"Dice So Nice\" inmediato",
+          "hint": "No esperar a que finalicen las animaciones de los dados en 3D antes de actualizar el mensaje."
         }
       },
       "underground": {
@@ -365,6 +452,24 @@
         "hint": "Un objeto con efecto único que se aplicará al actor que usa esta acción o una macro que se ejecutará cuando se use esta acción",
         "cancel": "La acción <strong>{name}</strong> fue cancelada por su macro."
       },
+      "cast": {
+        "equipped": "No equipado",
+        "label": "Lanzamiento de conjuro desde objeto"
+      },
+      "generate-cast": {
+        "add": "Agregar regla",
+        "attribute": "Atributo",
+        "dc": "CD",
+        "empty": "No se encontraron conjuros adicionales en la descripción del objeto.",
+        "label": "Lanzamiento desde el objeto",
+        "max": "Usos máximos",
+        "predicate": "Predicado",
+        "rank": "Rango",
+        "recharge": "¿Recargar energías con el descanso diario?",
+        "statistic": "Estadística",
+        "title": "Generar reglas de 'lanzamiento desde objeto' a partir de la descripción.",
+        "tradition": "Tradición"
+      },
       "item": {
         "label": "Macro",
         "hint": "Una macro que se ejecutará cuando se utilice este objeto",
@@ -374,27 +479,62 @@
         "label": "Macro",
         "hint": "Una macro que se ejecutará cuando se lance este conjuro.",
         "cancel": "El lanzamiento de <strong>{name}</strong> fue cancelado por su macro."
-      }
+      },
+      "virtual": "Esta es una acción virtual añadida por:"
     },
     "anonymous": {
       "action": {
-        "header": "Está usando una habilidad...",
-        "context": "Revelar la acción a los jugadores"
+        "context": "Revelar la acción a los jugadores",
+        "header": "Está usando una habilidad..."
       },
       "revealed": "Revelado por",
       "spell": {
-        "header": "Está lanzando un conjuro...",
-        "context": "Revelar conjuro a los jugadores"
+        "damage": "Daño de conjuro",
+        "context": "Revelar conjuro a los jugadores",
+        "header": "Está lanzando un conjuro..."
       }
+    },
+    "autoCover": {
+      "creature": "Cobertura de la criatura",
+      "greater": "Cobertura mayor",
+      "greater-prone": "Cobertura mayor estando tumbado",
+      "lesser": "Cobertura menor",
+      "none": "Sin cobertura",
+      "override": "Anular cobertura",
+      "overriden": "Cobertura anulada",
+      "standard": "Cobertura estándar",
+      "wall": "Cobertura de la pared"
     },
     "betterChat": {
       "mergeDamage": {
         "buttons": {
-          "split": "Volver a los mensajes originales",
+          "inject": "Inyectar daño al mensaje anterior",
+          "menu": {
+            "inject": "[Mayús] Abrir menú de inyección",
+            "merge": "[Mayús] Abrir menú de fusión"
+          },
           "merge": "Fusionar con el mensaje de daño anterior",
-          "inject": "Inyectar daño al mensaje anterior"
+          "split": "Volver a los mensajes originales"
         },
         "injected": "Se inyectó daño en este mensaje.",
+        "menu": {
+          "inject-damage": {
+            "double": "Inyectar doble daño",
+            "full": "Inyectar daño total",
+            "half": "Inyectar la mitad del daño",
+            "title": "Menú de inyección",
+            "yes": "Inyectar"
+          },
+          "merge-damage": {
+            "double": "Fusionar daño doble",
+            "full": "Fusionar daño total",
+            "half": "Fusionar la mitad del daño",
+            "title": "Menú fusionar",
+            "yes": "Fusionar"
+          },
+          "originMerge": "Mensaje anterior",
+          "targetMerge": "Mensaje actual"
+        },
         "noMatch": "No se pudo encontrar otro mensaje de daño coincidente."
       }
     },
@@ -478,6 +618,7 @@
       "sheet": {
         "browser": "Desde el navegador",
         "filters": "Filtros de configuración",
+        "gems": "Crear gemas de conjuros",
         "infiniteAll": {
           "label": "Existencias infinitas",
           "tooltip": "El comerciante nunca se quedará sin artículos para vender (no afecta a los tesoros ni a los servicios)"
@@ -543,6 +684,17 @@
       }
     },
     "betterSheet": {
+      "retrain": {
+        "browser": "Abrir el navegador del compendio",
+        "empty": "Suelta la dote aquí",
+        "error": {
+          "wrongDataType": "Tipo de datos incorrecto",
+          "wrongItemType": "Solo acepta dotes"
+        },
+        "replace": "Reemplazar con",
+        "retrain": "Reentrenar",
+        "title": "Reentrenar dote"
+      },
       "sortList": {
         "sheet": {
           "tooltip": "Ordenar contenido",
@@ -565,7 +717,11 @@
           "title": "Seleccionar archivo JSON",
           "yes": "Analizar archivo"
         },
-        "success": "La importación del personaje fue exitosa."
+        "success": "La importación del personaje fue exitosa.",
+        "url": {
+          "title": "Introduzca el ID JSON del personaje",
+          "yes": "Analizar datos de URL"
+        }
       },
       "sheet": {
         "level": {
@@ -575,15 +731,33 @@
         "import": {
           "code": "Desde el código",
           "delete": "Eliminar datos de importación",
-          "file": "Desde archivo"
+          "file": "Desde archivo",
+          "url": "Desde URL"
         },
         "data": {
           "core": {
             "attributes": {
               "assign": "Asignar potenciadores de atributos",
               "override": "Utilice el método de entrada manual",
+              "set": {
+                "boosts": "Se han asignado mejoras a los atributos.",
+                "manual": "Los valores de los atributos se han asignado \"manualmente\"."
+              },
               "warning": "Los datos importados no alcanzan el último umbral de impulso (nivel {level}).<br>Es posible que desees actualizarlo."
             }
+          },
+          "details": {
+            "age": "Edad",
+            "assign": "Asignar detalles de las entradas",
+            "current": "Actual",
+            "expected": "Esperado",
+            "gender": "Género",
+            "language": {
+              "assign": "Asignar idiomas",
+              "current": "Idiomas actuales",
+              "expected": "Idiomas esperados"
+            },
+            "name": "Nombre"
           },
           "entry": {
             "action": {
@@ -597,6 +771,35 @@
             "drop": "Soltar {key}",
             "match": "Coincidencia",
             "override": "Anular"
+          },
+          "inventory": {
+            "currency": {
+              "assign": "Anular monedas",
+              "current": "Actual",
+              "expected": "Esperado"
+            }
+          },
+          "skills": {
+            "assign": "Asignar habilidades",
+            "current": "Actual",
+            "expected": "Esperado"
+          },
+          "spellcasting": {
+            "add": {
+              "content": "¿Desea crear una nueva entrada de Lanzamiento de conjuros con los datos coincidentes?",
+              "title": "Crear nueva entrada de Lanzamiento de conjuros",
+              "yes": "Crear"
+            },
+            "fill": {
+              "content": "¿Quieres añadir todos los hechizos que no se pudieron encontrar en la entrada de Lanzamiento de conjuros?",
+              "label": "Añade todos los conjuros que falten.",
+              "title": "Completa la habilidad de Lanzamiento de conjuros con los conjuros que te falten.",
+              "yes": "Llenar"
+            },
+            "refresh": {
+              "label": "Actualizar valores de los espacios de conjuro",
+              "set": "Se han actualizado los espacios para lanzar conjuros."
+            }
           }
         },
         "menu": {
@@ -627,9 +830,11 @@
         "title": "Objeto soltado"
       },
       "error": {
+        "actor": "No se pudo crear el actor droppeth.",
         "out-of-bounds": "No se pudo crear la ficha soltada en la ubicación proporcionada.",
         "unknown": "Algo salió mal al intentar soltar los objetos seleccionados.",
-        "no-scene": "No hay ninguna escena disponible para soltar."
+        "no-scene": "No hay ninguna escena disponible para soltar.",
+        "quantity": "Solo puedes soltar objetos con una cantidad mayor que 0."
       },
       "message": {
         "subtitle": "Objeto soltado",
@@ -950,6 +1155,21 @@
         "added": "Has añadido con éxito una salvación al mensaje.",
         "already": "Este mensaje ya tiene una salvación vinculada a él.",
         "unauth": "Sólo puedes hacer esto en mensajes de los que seas autor."
+      },
+      "expend-ammo": {
+        "expend": {
+          "ammo": "Gastar {expend} munición(es)",
+          "grenade": "Gastar la granada"
+        },
+        "expended": {
+          "ammo": "Se han gastado {nb} munición/es",
+          "grenade": "La granada ha sido gastada."
+        },
+        "warning": {
+          "ammo": "No hay suficiente munición cargada en tu arma.",
+          "error": "No se pudo recuperar ninguna munición válida para gastar.",
+          "grenade": "Te has quedado sin granadas para lanzar."
+        }
       },
       "header": {
         "hidden": "Oculto para los jugadores",
