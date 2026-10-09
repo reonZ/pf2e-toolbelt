@@ -389,7 +389,7 @@
                 },
                 "skipDice": {
                     "name": "Immediate 'Dice So Nice!'",
-                    "hint": "Do not wait for 3D dice animations to finish before updating the message."
+                    "hint": "Do not wait for 3D dice animations of save check rolls to finish before updating the message."
                 },
                 "small": {
                     "name": "Small Damage Buttons",
