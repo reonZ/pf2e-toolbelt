@@ -7,7 +7,6 @@ import {
     SaveVariant,
     SaveVariantSource,
     TargetsAppliedDamagesSources,
-    TargetSaveInstance,
     TargetSaveInstanceSource,
     TargetsData,
     TargetsDataSource,
@@ -41,8 +40,14 @@ class UpdateMessageQueue {
         const instance = this.getInstance(options.message);
         if (instance.deleted) return;
 
-        const data = this.#tool.getMessageData(instance.message);
+        const data = this.#tool.getMessageData(options.message);
         if (!data) return;
+
+        if (options.type === "transfer-data") {
+            if (instance.transferTo) return;
+            instance.transferTo = options.target;
+            return instance.toUpdate.length === 0 && this.#processInstance(instance);
+        }
 
         if (options.type === "drop-save") {
             if (data.saveVariants.null) return;
@@ -56,11 +61,19 @@ class UpdateMessageQueue {
             });
         }
 
-        if (options.type === "roll-save") {
+        if (isRollSaveOptions(options)) {
             const author = game.users.get(userId);
             const skipDice = this.#tool.settings.skipDice;
             const currentSaveVariant = data.saveVariants[options.variantId];
-            const currentSaves = R.keys(currentSaveVariant.saves);
+            const currentSaves = R.pipe(
+                instance.toUpdate,
+                R.map((update) => update.type === options.type && update.options?.id),
+                R.filter(R.isTruthy),
+            );
+
+            if (options.type === "roll-save") {
+                currentSaves.push(...R.keys(currentSaveVariant.saves));
+            }
 
             for (const [id, save] of R.entries(options.saves)) {
                 if (R.isIncludedIn(id, currentSaves)) continue;
@@ -75,7 +88,8 @@ class UpdateMessageQueue {
                     },
                 };
 
-                this.addUpdate(instance, options.type, update, game.dice3d && !skipDice ? id : undefined);
+                const updateOptions: ToUpdateOptions = { awaits: !!game.dice3d && !skipDice, id };
+                this.addUpdate(instance, options.type, update, updateOptions);
 
                 if (game.dice3d) {
                     const dieData = options.dice[id];
@@ -106,11 +120,6 @@ class UpdateMessageQueue {
         }
     }
 
-    transfer(origin: ChatMessagePF2e, target: ChatMessagePF2e) {
-        const instance = this.getInstance(origin);
-        this.#processInstance(instance, target);
-    }
-
     addInstance(message: ChatMessagePF2e): UpdateMessageQueueInstance {
         const instance: UpdateMessageQueueInstance = { message, toUpdate: [] };
         this.#instances.set(message.id, instance);
@@ -125,6 +134,7 @@ class UpdateMessageQueue {
     deleteInstance(instance: UpdateMessageQueueInstance) {
         instance.deleted = true;
         instance.toUpdate.length = 0;
+        instance.transferTo = undefined;
 
         this.#instances.delete(instance.message.id);
 
@@ -134,29 +144,37 @@ class UpdateMessageQueue {
     }
 
     clearAwaits(instance: UpdateMessageQueueInstance, id: string) {
-        const update = instance.toUpdate.find(({ awaits }) => awaits === id);
-        if (!update) return;
-
-        delete update.awaits;
-        this.#processInstance(instance);
+        const update = instance.toUpdate.find(
+            (update): update is Required<QueueInstanceToUpdate> => !!update.options?.awaits && update.options.id === id,
+        );
+        if (update) {
+            update.options.awaits = false;
+            this.#processInstance(instance);
+        }
     }
 
     addUpdate(
         instance: UpdateMessageQueueInstance,
         type: QueueOptionType,
         update: TargetsDataUpdates,
-        awaits?: string,
+        options: ToUpdateOptions = {},
     ) {
-        instance.toUpdate.push({ awaits, type, update });
+        instance.toUpdate.push({ options, type, update });
         this.#processInstance(instance);
     }
 
-    async #processInstance(instance: UpdateMessageQueueInstance, transferTo?: ChatMessagePF2e) {
+    #processInstance = foundry.utils.throttle(this.#_processInstance.bind(this), 200);
+
+    async #_processInstance(instance: UpdateMessageQueueInstance) {
         if (instance.processing || instance.deleted) return;
 
+        const transferTo = instance.transferTo;
         const [readyUpdates, awaitingUpdates] = transferTo
             ? [instance.toUpdate, []] // when transfering data, we process everything without waiting
-            : R.partition(instance.toUpdate, ({ awaits }) => !awaits);
+            : R.partition(instance.toUpdate, ({ options }) => !options?.awaits);
+
+        // we put awaiting updates back now because toUpdate can be filled during async
+        instance.toUpdate = awaitingUpdates;
 
         if (!readyUpdates.length && !transferTo) return;
 
@@ -169,7 +187,8 @@ class UpdateMessageQueue {
         const updates = readyUpdates.map(({ update }) => update);
 
         if (transferTo) {
-            this.deleteInstance(instance);
+            instance.toUpdate.length = 0;
+            instance.transferTo = undefined;
 
             if (data.type === "action") {
                 const encoded = encodeTargetsData(data, ...updates, { saveVariants: _del });
@@ -179,21 +198,20 @@ class UpdateMessageQueue {
                 this.deleteInstance(instance);
             }
 
-            const transferUpdates: TargetsDataUpdates = { type: "damage" };
+            const encoded = encodeTargetsData(data, ...updates, { type: "damage" });
 
             if (data.type === "spell") {
                 const spell = getMessageSpell(message);
-
-                transferUpdates.item = data.item ?? spell?.uuid;
-                transferUpdates.saveVariants = _replace({ null: data.saveVariants[spell?.variantId ?? "null"] });
+                foundry.utils.mergeObject<TargetsDataSource, TargetsDataUpdates>(encoded, {
+                    item: data.item ?? spell?.uuid,
+                    saveVariants: _replace({ null: encoded.saveVariants?.[spell?.variantId ?? "null"] }),
+                });
             }
 
-            const encoded = encodeTargetsData(data, ...updates, transferUpdates);
             await this.#tool.setFlag(transferTo, encoded);
         } else {
-            if (awaitingUpdates.length) {
-                instance.toUpdate = awaitingUpdates;
-            } else {
+            // toUpdate may still have awaiting updates or received new ones in the mean time
+            if (!instance.toUpdate.length) {
                 this.deleteInstance(instance);
             }
 
@@ -240,15 +258,22 @@ function applyDamageUpdates(
     return applied;
 }
 
+function isRollSaveOptions(options: UpdateMessageQueueOption): options is UpdateMessageQueueSaveOptions {
+    return R.isIncludedIn(options.type, ["reroll-save", "roll-save"]);
+}
+
 type UpdateMessageQueueInstance = {
     deleted?: boolean;
     message: ChatMessagePF2e;
     processing?: boolean;
     toUpdate: QueueInstanceToUpdate[];
+    transferTo?: ChatMessagePF2e;
 };
 
+type ToUpdateOptions = { id?: string; awaits?: boolean };
+
 type QueueInstanceToUpdate = {
-    awaits?: string;
+    options?: ToUpdateOptions;
     type: QueueOptionType;
     update: TargetsDataUpdates;
 };
@@ -258,7 +283,8 @@ type UpdateMessageQueueOption =
     | UpdateMessageQueueDropOptions
     | UpdateMessageQueueExpendedOptions
     | UpdateMessageQueueSaveOptions
-    | UpdateMessageQueueTargetsOptions;
+    | UpdateMessageQueueTargetsOptions
+    | UpdateMessageQueueTransferOptions;
 
 type QueueOptionType = UpdateMessageQueueOption["type"];
 
@@ -276,21 +302,25 @@ type UpdateMessageQueueAppliedOptions = BaseUpdateMessageQueueOptions<"set-appli
 };
 
 type UpdateMessageQueueDropOptions = BaseUpdateMessageQueueOptions<"drop-save"> &
-    DataDropOptions & { nullVariant: SaveVariant };
+    DataDropOptions & { nullVariant: SaveVariant | undefined };
 
 type UpdateMessageQueueExpendedOptions = BaseUpdateMessageQueueOptions<"set-expended"> & {
     expended: number;
 };
 
-type UpdateMessageQueueSaveOptions = BaseUpdateMessageQueueOptions<"roll-save"> & {
+type UpdateMessageQueueSaveOptions = BaseUpdateMessageQueueOptions<"roll-save" | "reroll-save"> & {
     dice: Record<string, UpdateMessageDice>;
-    saves: Record<string, TargetSaveInstance>;
+    saves: Record<string, TargetSaveInstanceSource>;
     variantId: string;
 };
 
 type UpdateMessageQueueTargetsOptions = BaseUpdateMessageQueueOptions<"set-targets"> & {
     splashTargets: TokenDocumentUUID[];
     targets: TokenDocumentUUID[];
+};
+
+type UpdateMessageQueueTransferOptions = BaseUpdateMessageQueueOptions<"transfer-data"> & {
+    target: ChatMessagePF2e;
 };
 
 type UpdateMessageDice = {
