@@ -12,7 +12,7 @@
     - this allow everything to be put in a queue system that a single user (the active GM) handle in order
     - this should solve issues where multiple users try to use actions --that require an update-- at the same time
     - this should also solve issues with high latency or the use of the `Dice So Nice!` module while waiting for 3D dice animations
-    - the custom queue system is somehow dynamic and will prevent the spam of the same action as much as possible
+    - the custom queue system is somewhat dynamic and will prevent the spam of the same action as much as possible
   - add support for the `Dice So Nice!` module back
     - you need to update `Dice So Nice!` to version `6.4.4` if you use it in your world
   - add new `Immediate 'Dice So Nice!'` world setting
