@@ -141,9 +141,11 @@ async function rollSaves(
     const filteredTargetsRollsPromise = targetsRollsPromise.filter(R.isTruthy);
     if (!filteredTargetsRollsPromise.length) return;
 
+    const resolvedTargetsRollsPromise = await Promise.all(filteredTargetsRollsPromise);
+
     const dice = game.dice3d
         ? R.pipe(
-              await Promise.all(filteredTargetsRollsPromise),
+              resolvedTargetsRollsPromise,
               R.map(({ roll, target }): UpdateMessageDice => {
                   return { id: target.id, source: roll.dice[0].toJSON(), target: target.uuid };
               }),
