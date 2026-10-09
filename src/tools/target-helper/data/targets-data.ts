@@ -1,4 +1,13 @@
-import { R, SYSTEM, TokenDocumentPF2e, z, zClientDocument, zDocumentUUID, zSafeArray } from "foundry-helpers";
+import {
+    R,
+    SYSTEM,
+    TokenDocumentPF2e,
+    z,
+    zClientDocument,
+    zDocumentUUID,
+    zSafeArray,
+    mergeArray,
+} from "foundry-helpers";
 import { SAVE_TYPES } from "foundry-helpers/dist";
 import { zTargetSaveInstance } from ".";
 
@@ -59,10 +68,8 @@ const zEncodeTargetsData = zBaseTargetsData.extend({
 const zTargetsData = zDecodeTargetsData;
 
 function encodeTargetsData(data: TargetsData, ...updates: TargetsDataUpdates[]): TargetsDataSource {
-    const encoded = zEncodeTargetsData.parse(data);
-    return updates.length
-        ? updates.reduce<TargetsDataSource>((acc, curr) => foundry.utils.mergeObject(acc, curr), encoded)
-        : encoded;
+    const encoded: TargetsDataSource = zEncodeTargetsData.parse(data);
+    return updates.length ? mergeArray(updates, encoded) : encoded;
 }
 
 type TargetsDataSourceKey = keyof TargetsDataSource;
@@ -83,9 +90,7 @@ type TargetsAppliedDamages = z.output<typeof zTargetsAppliedDamages>;
 
 type TargetAppliedDamage = z.output<typeof zAppliedDamages>;
 
-type TargetsDataUpdates = {
-    [k in TargetsDataSourceKey]?: TargetsDataSource[k] | ForcedReplacement | ForcedDeletion;
-};
+type TargetsDataUpdates = Mergeable<TargetsDataSource>;
 
 export { encodeTargetsData, zSaveVariant, zSaveVariants, zTargetsData, zTokenDocumentArrayDecode };
 export type {

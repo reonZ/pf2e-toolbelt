@@ -63,47 +63,47 @@ class UpdateMessageQueue {
 
         if (isRollSaveOptions(options)) {
             const author = game.users.get(userId);
-            const skipDice = this.#tool.settings.skipDice;
-            const currentSaveVariant = data.saveVariants[options.variantId];
+            const skipDice = !!game.dice3d && this.#tool.settings.skipDice;
+
             const currentSaves = R.pipe(
                 instance.toUpdate,
-                R.map((update) => update.type === options.type && update.options?.id),
-                R.filter(R.isTruthy),
+                R.filter((update): update is Required<QueueInstanceToUpdate> => {
+                    return update.type === options.type && !!update.options;
+                }),
+                R.flatMap((update) => update.options.targetIds),
             );
 
             if (options.type === "roll-save") {
+                const currentSaveVariant = data.saveVariants[options.variantId];
                 currentSaves.push(...R.keys(currentSaveVariant.saves));
             }
 
-            for (const [id, save] of R.entries(options.saves)) {
-                if (R.isIncludedIn(id, currentSaves)) continue;
+            const allowedSaves = R.omit(options.saves, currentSaves);
+            const updateOptions: ToUpdateOptions = { targetIds: R.keys(allowedSaves) };
 
-                currentSaves.push(id);
-
-                const update: TargetsDataUpdates = {
-                    saveVariants: {
-                        [options.variantId]: {
-                            saves: { [id]: save satisfies TargetSaveInstanceSource },
-                        } as SaveVariantSource,
-                    },
-                };
-
-                const updateOptions: ToUpdateOptions = { awaits: !!game.dice3d && !skipDice, id };
-                this.addUpdate(instance, options.type, update, updateOptions);
-
-                if (game.dice3d) {
+            if (game.dice3d) {
+                const [dice3d] = R.entries(allowedSaves).map(([id, save]) => {
                     const dieData = options.dice[id];
                     const die = new foundry.dice.terms.Die(dieData.source);
                     const token = fromUuidSync<TokenDocumentPF2e>(dieData.target);
                     const speaker = ChatMessage.getSpeaker({ token });
                     const messageMode = save.private || (token && !token.hasPlayerOwner) ? "blind" : "public";
-                    const dice3d = game.dice3d.animateRoll({ dice: [die] }, { author, speaker }, { messageMode });
+                    return game.dice3d!.animateRoll({ dice: [die] }, { author, speaker }, { messageMode });
+                });
 
-                    if (!skipDice) {
-                        dice3d.then(() => this.clearAwaits(instance, id));
-                    }
+                if (!skipDice && dice3d) {
+                    const diceId = foundry.utils.randomID();
+                    dice3d.then(() => this.clearAwaits(instance, diceId));
+                    updateOptions.awaits = true;
+                    updateOptions.diceId = diceId;
                 }
             }
+
+            const update: TargetsDataUpdates = {
+                saveVariants: { [options.variantId]: { saves: allowedSaves } as SaveVariantSource },
+            };
+
+            this.addUpdate(instance, options.type, update, updateOptions);
 
             return;
         }
@@ -143,10 +143,10 @@ class UpdateMessageQueue {
         }
     }
 
-    clearAwaits(instance: UpdateMessageQueueInstance, id: string) {
-        const update = instance.toUpdate.find(
-            (update): update is Required<QueueInstanceToUpdate> => !!update.options?.awaits && update.options.id === id,
-        );
+    clearAwaits(instance: UpdateMessageQueueInstance, diceId: string) {
+        const update = instance.toUpdate.find((update): update is Required<QueueInstanceToUpdate> => {
+            return !!update.options?.awaits && update.options.diceId === diceId;
+        });
         if (update) {
             update.options.awaits = false;
             this.#processInstance(instance);
@@ -157,7 +157,7 @@ class UpdateMessageQueue {
         instance: UpdateMessageQueueInstance,
         type: QueueOptionType,
         update: TargetsDataUpdates,
-        options: ToUpdateOptions = {},
+        options?: ToUpdateOptions,
     ) {
         instance.toUpdate.push({ options, type, update });
         this.#processInstance(instance);
@@ -270,7 +270,11 @@ type UpdateMessageQueueInstance = {
     transferTo?: ChatMessagePF2e;
 };
 
-type ToUpdateOptions = { id?: string; awaits?: boolean };
+type ToUpdateOptions = {
+    targetIds: string[];
+    diceId?: string;
+    awaits?: boolean;
+};
 
 type QueueInstanceToUpdate = {
     options?: ToUpdateOptions;
