@@ -1,3 +1,19 @@
+# 3.58.0
+
+- `Anonymous`:
+  - fix system's self-applied action messages not being anonymized
+- `Target Helper`:
+  - now has every message update be handled by the active GM instead of the current client even if not required due to permission
+    - this allow everything to be put in a queue system that a single user (the active GM) handle in order
+    - this should solve issues where multiple users try to use actions --that require an update-- at the same time
+    - this should also solve issues with high latency or the use of the `Dice So Nice!` module while waiting for 3D dice animations
+    - the custom queue system is somehow dynamic and will prevent the spam of the same action as much as possible
+  - add support for the `Dice So Nice!` module back
+    - you need to update `Dice So Nice!` to version `6.4.4` if you use it in your world
+  - add new `Immediate 'Dice So Nice!'` world setting
+    - when enabled, the module will not wait for 3D dice animations of save checks to finish before updating the message
+    - this allows you to override the default `Display chat message immediately` setting of `Dice So Nice!` only for this feature
+
 # 3.57.1
 
 - `Target Helper`:
