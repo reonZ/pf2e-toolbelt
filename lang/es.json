@@ -388,6 +388,8 @@
           "hint": "Añade un botón en los mensajes relacionados con el área para gastar munición/granadas."
         },
         "skipDice": {
+          "name": "'Dice So Nice!' inmediato",
+          "hint": "No espere a que finalicen las animaciones de dados en 3D de las tiradas de salvación antes de actualizar el mensaje."
         },
         "small": {
           "name": "Botones de daño pequeños",
