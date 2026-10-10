@@ -1,4 +1,5 @@
 import { getSetting, MODULE, R, registerModuleKeybinds, registerModuleSettings, userIsGM } from "foundry-helpers";
+import { PF2eToolbeltEffectRegionBehaviorType } from "regions";
 import {
     actionable,
     anonymousTool,
@@ -25,6 +26,10 @@ import {
     targetHelperTool,
     UnidedTool,
 } from "tools";
+
+const REGIONS = [
+    { class: PF2eToolbeltEffectRegionBehaviorType, icon: "fa-solid fa-person-rays", name: "effect" },
+] as const;
 
 const TOOLS = [
     actionable,
@@ -98,6 +103,13 @@ Hooks.once("init", () => {
     for (const tool of TOOLS) {
         tool._initialize(isGM);
         tool.init(isGM);
+    }
+
+    for (const region of REGIONS) {
+        const path = MODULE.path(region.name);
+        CONFIG.RegionBehavior.typeIcons[path] = region.icon;
+        CONFIG.RegionBehavior.dataModels[path] = region.class;
+        region.class.initialize();
     }
 });
 

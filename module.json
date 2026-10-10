@@ -27,6 +27,11 @@
     "styles": [
         "styles/pf2e-toolbelt.css"
     ],
+    "documentTypes": {
+        "RegionBehavior": {
+            "effect": {}
+        }
+    },
     "relationships": {
         "systems": [
             {

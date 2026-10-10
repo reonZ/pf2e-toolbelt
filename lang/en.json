@@ -1,4 +1,11 @@
 {
+    "TYPES": {
+        "RegionBehavior": {
+            "pf2e-toolbelt": {
+                "effect": "(Toolbelt) Add Effect"
+            }
+        }
+    },
     "PF2E.RuleElement.Actionable": "Actionable",
     "PF2E.RuleElement.ItemCast": "Item Cast",
     "LEVIKTIMES": {
@@ -958,6 +965,29 @@
                 },
                 "send-to-chat": "Send to Chat",
                 "title": "Item Identification Tracker"
+            }
+        },
+        "regions": {
+            "effect": {
+                "locked": {
+                    "console": "If the effect persisted despite the actor no longer being in a toolbelt region, then type the following in the console: game.actors.get(\"{actor}\").items.get(\"{item}\").delete({context})",
+                    "notify": "This effect is locked by a toolbelt region, check your console for more details (F12)"
+                },
+                "origin": {
+                    "actor": {
+                        "error": "must be a world 'Actor'",
+                        "label": "Origin Actor"
+                    },
+                    "hint": "(Optional) Automatically provided for system templates but will be overridden if set here.",
+                    "item": {
+                        "label": "Origin Item"
+                    }
+                },
+                "uuid": {
+                    "error": "must be a world/compendium 'Item' of type 'Effect'",
+                    "hint": "The world/compendium effect's source ID.",
+                    "label": "Effect UUID"
+                }
             }
         },
         "resourceTracker": {
