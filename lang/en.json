@@ -969,6 +969,17 @@
         },
         "regions": {
             "effect": {
+                "affects": {
+                    "choices": {
+                        "all": "Everyone",
+                        "party": "Party Alliance",
+                        "opposition": "Opposition Alliance",
+                        "allies": "Ally Actors",
+                        "enemies": "Enemy Actors"
+                    },
+                    "hint": "Which actors should receive the effect. 'Ally' and 'Enemy' require an 'Origin Actor', if none, they will respectively considered as 'Party' and 'Opposition' alliance.",
+                    "label": "Region Affects"
+                },
                 "level": {
                     "hint": "(Optional) Override the default level of the effect.",
                     "label": "Override Level"

@@ -1,6 +1,8 @@
 import {
     ActorPF2e,
+    actorsRespectAlliance,
     ActorUUID,
+    CompendiumIndexData,
     EffectPF2e,
     getFlag,
     ItemPF2e,
@@ -20,10 +22,11 @@ import {
 } from "foundry-helpers";
 import fields = foundry.data.fields;
 
+const AFFECTS = ["all", "party", "opposition", "allies", "enemies"] as const;
 const EVENTS = ["tokenEnter", "tokenExit"] as const satisfies RegionEventType[];
 
 class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.RegionBehaviorType {
-    static #i18n: Localize = localize.sub("regions.effect");
+    static localize: Localize = localize.sub("regions.effect");
 
     static defineSchema(): EffectRegionSchema {
         return {
@@ -35,6 +38,14 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
                 hint: this.localize.path("uuid.hint"),
                 validate: (uuid) => R.isString(uuid) && fromUuidSync<ItemPF2e>(uuid)?.type === "effect",
                 validationError: this.localize("uuid.error"),
+            }),
+            affects: new fields.StringField({
+                required: false,
+                nullable: false,
+                initial: "all",
+                choices: R.fromKeys(AFFECTS, (type) => this.localize.path("affects.choices", type)),
+                label: this.localize.path("affects.label"),
+                hint: this.localize.path("affects.hint"),
             }),
             level: new fields.NumberField({
                 required: false,
@@ -60,10 +71,6 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
                 }),
             }),
         };
-    }
-
-    static get localize(): Localize {
-        return this.#i18n;
     }
 
     static initialize() {
@@ -106,6 +113,44 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
         this.#process(event.name, actor);
     }
 
+    isAffected(actor: ActorPF2e, origin: Maybe<ActorUUID>): boolean {
+        switch (this.affects) {
+            case "all": {
+                return true;
+            }
+
+            case "party":
+            case "opposition": {
+                return actor.alliance === this.affects;
+            }
+
+            case "allies":
+            case "enemies": {
+                const originActor = origin ? fromUuidSync<ActorPF2e | CompendiumIndexData>(origin) : null;
+                return originActor instanceof Actor
+                    ? actorsRespectAlliance(originActor, actor, this.affects)
+                    : actor.alliance === (this.affects === "allies" ? "party" : "opposition");
+            }
+        }
+    }
+
+    getOrigin(): { actor: ActorUUID; item: ItemUUID | null; options: string[] } | undefined {
+        const templateOrigin = this.region.flags[SYSTEM.id].origin;
+        const originItem = this.origin.item || templateOrigin?.uuid || null;
+        const originActor =
+            this.origin.actor ||
+            templateOrigin?.actor ||
+            (originItem?.startsWith("Actor.") ? originItem.split(".").slice(0, 2).join(".") : null);
+
+        if (!originActor) return;
+
+        return {
+            actor: originActor as ActorUUID,
+            item: originItem as ItemUUID | null,
+            options: templateOrigin?.rollOptions ?? [],
+        };
+    }
+
     #process = foundry.utils.debounce(this.#_process.bind(this), 50);
 
     async #_process(event: EventName, actor: ActorPF2e): Promise<void> {
@@ -136,25 +181,21 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
     }
 
     async #addEffect(actor: ActorPF2e): Promise<void> {
+        const origin = this.getOrigin();
+        if (!this.isAffected(actor, origin?.actor)) return;
+
         const exist = this.#getExistingEffect(actor);
         if (exist) return;
 
         const source = (await fromUuid<EffectPF2e>(this.uuid ?? ""))?.toObject();
         if (!source) return;
 
-        const templateOrigin = this.region.flags[SYSTEM.id].origin;
-        const originItem = this.origin.item || templateOrigin?.uuid || null;
-        const originActor =
-            this.origin.actor ||
-            templateOrigin?.actor ||
-            (originItem?.startsWith("Actor.") ? originItem.split(".").slice(0, 2).join(".") : null);
-
-        if (originActor) {
+        if (origin) {
             source.system.context = {
                 origin: {
-                    actor: originActor as ActorUUID,
-                    item: (originItem || null) as ItemUUID | null,
-                    rollOptions: templateOrigin?.rollOptions ?? [],
+                    actor: origin.actor,
+                    item: origin.item,
+                    rollOptions: origin.options,
                     spellcasting: null,
                     token: null,
                 },
@@ -188,10 +229,13 @@ interface PF2eToolbeltEffectRegionBehaviorType extends ModelPropsFromSchema<Effe
 }
 
 type EffectRegionSchema = {
+    affects: fields.StringField<RegionAffects, RegionAffects, false, false, true>;
     level: fields.NumberField;
     origin: fields.SchemaField<EffectRegionOriginSchema>;
     uuid: fields.DocumentUUIDField<ItemUUID>;
 };
+
+type RegionAffects = (typeof AFFECTS)[number];
 
 type EffectRegionOriginSchema = {
     actor: fields.DocumentUUIDField<ActorUUID, false>;
