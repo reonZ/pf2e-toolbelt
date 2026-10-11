@@ -26,6 +26,9 @@ const AFFECTS = ["all", "party", "opposition", "allies", "enemies"] as const;
 const EVENTS = ["tokenEnter", "tokenExit"] as const satisfies RegionEventType[];
 
 class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.RegionBehaviorType {
+    static #alliances?: Record<RegionAffects, string>;
+    static #types?: Record<string, string>;
+
     static localize: Localize = localize.sub("regions.effect");
 
     static defineSchema(): EffectRegionSchema {
@@ -39,13 +42,33 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
                 validate: (uuid) => R.isString(uuid) && fromUuidSync<ItemPF2e>(uuid)?.type === "effect",
                 validationError: this.localize("uuid.error"),
             }),
-            affects: new fields.StringField({
-                required: false,
-                nullable: false,
-                initial: "all",
-                choices: R.fromKeys(AFFECTS, (type) => this.localize.path("affects.choices", type)),
-                label: this.localize.path("affects.label"),
-                hint: this.localize.path("affects.hint"),
+            affects: new fields.SchemaField({
+                types: new fields.SetField(
+                    new fields.StringField({
+                        choices: (this.#types ??= R.pipe(
+                            CONFIG.PF2E.Actor.documentClasses,
+                            R.omitBy((cls, type) => {
+                                const tmp = new cls({ name: "__", type });
+                                return !R.isIncludedIn("effect", tmp.allowedItemTypes);
+                            }),
+                            R.mapValues((__, type) => `TYPES.Actor.${type}`),
+                        )),
+                    }),
+                    {
+                        label: this.localize.path("affects.types.label"),
+                        hint: this.localize.path("affects.types.hint"),
+                    },
+                ),
+                alliance: new fields.StringField({
+                    required: false,
+                    nullable: false,
+                    initial: "all",
+                    choices: (this.#alliances ??= R.fromKeys(AFFECTS, (type) =>
+                        this.localize.path("affects.alliance.choices", type),
+                    )),
+                    label: this.localize.path("affects.alliance.label"),
+                    hint: this.localize.path("affects.alliance.hint"),
+                }),
             }),
             level: new fields.NumberField({
                 required: false,
@@ -108,30 +131,36 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
         if (!this.uuid || !game.user.isActiveGM || !this.region || !this.behavior) return;
 
         const actor = event.data.token.actor;
-        if (!actor) return;
+        if (!actor || !R.isIncludedIn("effect", actor.allowedItemTypes)) return;
 
         this.#process(event.name, actor);
     }
 
-    isAffected(actor: ActorPF2e, origin: Maybe<ActorUUID>): boolean {
-        switch (this.affects) {
+    isAffectedAlliance(actor: ActorPF2e, origin: Maybe<ActorUUID>): boolean {
+        const affects = this.affects.alliance;
+
+        switch (affects) {
             case "all": {
                 return true;
             }
 
             case "party":
             case "opposition": {
-                return actor.alliance === this.affects;
+                return actor.alliance === affects;
             }
 
             case "allies":
             case "enemies": {
                 const originActor = origin ? fromUuidSync<ActorPF2e | CompendiumIndexData>(origin) : null;
                 return originActor instanceof Actor
-                    ? actorsRespectAlliance(originActor, actor, this.affects)
-                    : actor.alliance === (this.affects === "allies" ? "party" : "opposition");
+                    ? actorsRespectAlliance(originActor, actor, affects)
+                    : actor.alliance === (affects === "allies" ? "party" : "opposition");
             }
         }
+    }
+
+    isAffectedType(actor: ActorPF2e): boolean {
+        return this.affects.types.size === 0 || this.affects.types.has(actor.type);
     }
 
     getOrigin(): { actor: ActorUUID; item: ItemUUID | null; options: string[] } | undefined {
@@ -182,7 +211,7 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
 
     async #addEffect(actor: ActorPF2e): Promise<void> {
         const origin = this.getOrigin();
-        if (!this.isAffected(actor, origin?.actor)) return;
+        if (!this.isAffectedType(actor) || !this.isAffectedAlliance(actor, origin?.actor)) return;
 
         const exist = this.#getExistingEffect(actor);
         if (exist) return;
@@ -229,18 +258,23 @@ interface PF2eToolbeltEffectRegionBehaviorType extends ModelPropsFromSchema<Effe
 }
 
 type EffectRegionSchema = {
-    affects: fields.StringField<RegionAffects, RegionAffects, false, false, true>;
+    affects: fields.SchemaField<EffectRegionAffectsSchema>;
     level: fields.NumberField;
     origin: fields.SchemaField<EffectRegionOriginSchema>;
     uuid: fields.DocumentUUIDField<ItemUUID>;
 };
 
-type RegionAffects = (typeof AFFECTS)[number];
-
 type EffectRegionOriginSchema = {
     actor: fields.DocumentUUIDField<ActorUUID, false>;
     item: fields.DocumentUUIDField<ItemUUID, false>;
 };
+
+type EffectRegionAffectsSchema = {
+    alliance: fields.StringField<RegionAffects, RegionAffects, false, false, true>;
+    types: fields.SetField<fields.StringField>;
+};
+
+type RegionAffects = (typeof AFFECTS)[number];
 
 type EffectRegionEvent = Omit<RegionEventPF2e, "data" | "name"> & {
     data: { token: TokenDocumentPF2e };
