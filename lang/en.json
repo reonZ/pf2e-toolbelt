@@ -969,6 +969,10 @@
         },
         "regions": {
             "effect": {
+                "level": {
+                    "hint": "(Optional) Override the default level of the effect.",
+                    "label": "Override Level"
+                },
                 "locked": {
                     "console": "If the effect persisted despite the actor no longer being in a toolbelt region, then type the following in the console: game.actors.get(\"{actor}\").items.get(\"{item}\").delete({context})",
                     "notify": "This effect is locked by a toolbelt region, check your console for more details (F12)"

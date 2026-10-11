@@ -10,9 +10,12 @@ import {
     ModelPropsFromSchema,
     MODULE,
     R,
+    RegionBehaviorPF2e,
+    RegionDocumentPF2e,
     RegionEventPF2e,
     RegionEventType,
     setFlagProperty,
+    SYSTEM,
     TokenDocumentPF2e,
 } from "foundry-helpers";
 import fields = foundry.data.fields;
@@ -32,6 +35,13 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
                 hint: this.localize.path("uuid.hint"),
                 validate: (uuid) => R.isString(uuid) && fromUuidSync<ItemPF2e>(uuid)?.type === "effect",
                 validationError: this.localize("uuid.error"),
+            }),
+            level: new fields.NumberField({
+                required: false,
+                integer: true,
+                positive: true,
+                label: this.localize.path("level.label"),
+                hint: this.localize.path("level.hint"),
             }),
             origin: new fields.SchemaField({
                 actor: new fields.DocumentUUIDField({
@@ -57,13 +67,14 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
     }
 
     static initialize() {
-        Hooks.on("preDeleteItem", (item: ItemPF2e, context: { forceDelete?: boolean }) => {
+        Hooks.on("preDeleteItem", (item: ItemPF2e, { forceDelete }: { forceDelete?: boolean }) => {
             if (
+                !forceDelete &&
                 item.type === "effect" &&
                 !item.pack &&
-                item.actor &&
-                !context.forceDelete &&
-                getFlag(item, "regions.effect")
+                !!item.actor &&
+                !!(item.flags[MODULE.id]?.regions as { effect?: string } | undefined)?.effect &&
+                !(item as EffectPF2e).system.expired
             ) {
                 this.localize.error("locked.notify");
                 const error = this.localize("locked.console", {
@@ -83,7 +94,7 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
     override events = new Set<RegionEventType>(EVENTS);
 
     get uniqueId() {
-        return this.behavior?.uuid;
+        return this.behavior.uuid;
     }
 
     async _handleRegionEvent(event: EffectRegionEvent): Promise<void> {
@@ -131,6 +142,31 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
         const source = (await fromUuid<EffectPF2e>(this.uuid ?? ""))?.toObject();
         if (!source) return;
 
+        const templateOrigin = this.region.flags[SYSTEM.id].origin;
+        const originItem = this.origin.item || templateOrigin?.uuid || null;
+        const originActor =
+            this.origin.actor ||
+            templateOrigin?.actor ||
+            (originItem?.startsWith("Actor.") ? originItem.split(".").slice(0, 2).join(".") : null);
+
+        if (originActor) {
+            source.system.context = {
+                origin: {
+                    actor: originActor as ActorUUID,
+                    item: (originItem || null) as ItemUUID | null,
+                    rollOptions: templateOrigin?.rollOptions ?? [],
+                    spellcasting: null,
+                    token: null,
+                },
+                roll: null,
+                target: null,
+            };
+        }
+
+        if (this.level) {
+            source.system.level.value = this.level;
+        }
+
         setFlagProperty(source, "regions.effect", this.uniqueId);
 
         await actor.createEmbeddedDocuments("Item", [source]);
@@ -146,9 +182,13 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
     }
 }
 
-interface PF2eToolbeltEffectRegionBehaviorType extends ModelPropsFromSchema<EffectRegionSchema> {}
+interface PF2eToolbeltEffectRegionBehaviorType extends ModelPropsFromSchema<EffectRegionSchema> {
+    get behavior(): RegionBehaviorPF2e;
+    get region(): RegionDocumentPF2e;
+}
 
 type EffectRegionSchema = {
+    level: fields.NumberField;
     origin: fields.SchemaField<EffectRegionOriginSchema>;
     uuid: fields.DocumentUUIDField<ItemUUID>;
 };
