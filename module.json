@@ -29,6 +29,7 @@
     ],
     "documentTypes": {
         "RegionBehavior": {
+            "difficult-terrain": {},
             "effect": {}
         }
     },

@@ -2,6 +2,7 @@
     "TYPES": {
         "RegionBehavior": {
             "pf2e-toolbelt": {
+                "difficult-terrain": "(Toolbelt) Difficult Terrain",
                 "effect": "(Toolbelt) Add Effect"
             }
         }
@@ -968,7 +969,23 @@
             }
         },
         "regions": {
+            "difficult-terrain": {},
             "effect": {
+                "level": {
+                    "hint": "(Optional) Override the default level of the effect.",
+                    "label": "Override Level"
+                },
+                "locked": {
+                    "console": "If the effect persisted despite the actor no longer being in a toolbelt region, then type the following in the console: game.actors.get(\"{actor}\").items.get(\"{item}\").delete({context})",
+                    "notify": "This effect is locked by a toolbelt region, check your console for more details (F12)"
+                },
+                "uuid": {
+                    "error": "must be a world/compendium 'Item' of type 'Effect'",
+                    "hint": "The world/compendium effect's source ID.",
+                    "label": "Effect UUID"
+                }
+            },
+            "shared": {
                 "affects": {
                     "alliance": {
                         "choices": {
@@ -978,21 +995,13 @@
                             "allies": "Ally Actors",
                             "enemies": "Enemy Actors"
                         },
-                        "hint": "Which actors should receive the effect based on their alliance/disposition. 'Ally' and 'Enemy' require an 'Origin Actor', if none, they will respectively considered as 'Party' and 'Opposition' alliance.",
+                        "hint": "Which actors should be affected based on their alliance/disposition. 'Ally' and 'Enemy' require an 'Origin Actor'.",
                         "label": "Affects Disposition"
                     },
                     "types": {
-                        "hint": "Which actors should receive the effect based on their type. Leave empty for all.",
+                        "hint": "Which actors should be affectedt based on their type. Leave empty for all.",
                         "label": "Affects Types"
                     }
-                },
-                "level": {
-                    "hint": "(Optional) Override the default level of the effect.",
-                    "label": "Override Level"
-                },
-                "locked": {
-                    "console": "If the effect persisted despite the actor no longer being in a toolbelt region, then type the following in the console: game.actors.get(\"{actor}\").items.get(\"{item}\").delete({context})",
-                    "notify": "This effect is locked by a toolbelt region, check your console for more details (F12)"
                 },
                 "origin": {
                     "actor": {
@@ -1003,11 +1012,6 @@
                     "item": {
                         "label": "Origin Item"
                     }
-                },
-                "uuid": {
-                    "error": "must be a world/compendium 'Item' of type 'Effect'",
-                    "hint": "The world/compendium effect's source ID.",
-                    "label": "Effect UUID"
                 }
             }
         },
