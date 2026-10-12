@@ -2,8 +2,8 @@
     "TYPES": {
         "RegionBehavior": {
             "pf2e-toolbelt": {
-                "difficult-terrain": "(Toolbelt) Difficult Terrain",
-                "effect": "(Toolbelt) Add Effect"
+                "difficult-terrain": "[Toolbelt] Difficult Terrain",
+                "effect": "[Toolbelt] Add Effect"
             }
         }
     },
@@ -995,11 +995,11 @@
                             "allies": "Ally Actors",
                             "enemies": "Enemy Actors"
                         },
-                        "hint": "Which actors should be affected based on their alliance/disposition. 'Ally' and 'Enemy' require an 'Origin Actor'.",
+                        "hint": "Which actors should be affected based on their alliance/disposition. 'Ally Actors' and 'Enemy Actors' require an 'Origin Actor'.",
                         "label": "Affects Disposition"
                     },
                     "types": {
-                        "hint": "Which actors should be affectedt based on their type. Leave empty for all.",
+                        "hint": "Which actors should be affected based on their type. Leave empty for all.",
                         "label": "Affects Types"
                     }
                 },
