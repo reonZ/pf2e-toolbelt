@@ -7,7 +7,7 @@
     - the module prevents deletion of any such effect that aren't `expired`
     - you can filter which actors are affected based on their alliance/disposition and/or their type
     - you can override the default `level` of the effect item directly
-    - if the region is a system templates, the `origin` data from the template will be transfered to the `effect` but you can also override the origin `Actor` and `Item` if needed or set them for region manually created
+    - if the region is a system templates, the `origin` data from the template will be transferred to the `effect` but you can also override the origin `Actor` and `Item` if needed or set them for region manually created
   - `Difficult Terrain`:
     - this is an extension of the system's behavior type
     - you can filter which actors are affected based on their alliance/disposition and/or their type
