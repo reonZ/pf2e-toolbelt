@@ -92,9 +92,7 @@ function isAffectedAlliance(
         case "allies":
         case "enemies": {
             const originActor = origin ? fromUuidSync<ActorPF2e | CompendiumIndexData>(origin) : null;
-            return originActor instanceof Actor
-                ? actorsRespectAlliance(originActor, actor, affects)
-                : actor.alliance === (affects === "allies" ? "party" : "opposition");
+            return originActor instanceof Actor && actorsRespectAlliance(originActor, actor, affects);
         }
     }
 }
