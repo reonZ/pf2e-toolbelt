@@ -1,3 +1,18 @@
+# 3.59.0
+
+- `Custom Region Behaviors`:
+  - the module now come bundled with custom region behaviors, there is no setting associated with them, they are just there for you to use whenever you want
+  - `Add Effect`:
+    - this behavior adds an `effect` to an actor on `enter` and remove it on `leave`
+    - the module prevents deletion of any such effect that aren't `expired`
+    - you can filter which actors are affected based on their alliance/disposition and/or their type
+    - you can override the default `level` of the effect item directly
+    - if the region is a system templates, the `origin` data from the template will be transfered to the `effect` but you can also override the origin `Actor` and `Item` if needed or set them for region manually created
+  - `Difficult Terrain`:
+    - this is an extension of the system's behavior type
+    - you can filter which actors are affected based on their alliance/disposition and/or their type
+    - you can set the `Origin Actor` used for disposition test or let the module automatically pull it from the region data for system template regions
+
 # 3.58.4
 
 - `Target Helper`:
