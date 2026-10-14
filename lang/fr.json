@@ -1,4 +1,12 @@
 {
+  "TYPES": {
+    "RegionBehavior": {
+      "pf2e-toolbelt": {
+        "difficult-terrain": "[Toolbelt] Terrain difficile",
+        "effect": "[Toolbelt] Ajouter un effet"
+      }
+    }
+  },
   "PF2E.RuleElement.Actionable": "Actionnable",
   "PF2E.RuleElement.ItemCast": "Lancé par un objet",
   "LEVIKTIMES": {
@@ -356,7 +364,7 @@
         }
       },
       "rollTracker": {
-        "title": "Compteur de rencontre",
+        "title": "Suivi des jets",
         "enabled": {
           "name": "Activé",
           "hint": "Suivre les jets pour voir si les joueurs sont vraiment si malchanceux."
@@ -386,6 +394,10 @@
         "expend": {
           "name": "Bouton Conso munitions",
           "hint": "Ajouter un bouton dans la zone en lien avec les messages pour dépenser les munitions/grenades."
+        },
+        "skipDice": {
+          "name": "'Dice So Nice!' immédiat",
+          "hint": "N'attend pas la fin de l'animation des dés 3D des jets de sauvegarde pour mettre à jour le message."
         },
         "small": {
           "name": "Petits boutons de dégâts",
@@ -954,6 +966,54 @@
         },
         "send-to-chat": "Envoyer dans la conversation",
         "title": "Suivi d'identification des objets"
+      }
+    },
+    "regions": {
+      "difficult-terrain": {
+      },
+      "effect": {
+        "level": {
+          "hint": "(Optionnel) Remplace le niveau par défaut de l’effet.",
+          "label": "Remplacer le niveau"
+        },
+        "locked": {
+          "console": "Si l'effet persiste même si l'acteur n'est plus dans une région créée par toolbelt, tapez ceci dans la console : game.actors.get(\"{actor}\").items.get(\"{item}\").delete({context})",
+          "notify": "Cet effet est bloqué par une région créée par toolbelt, vérifiez votre console pour plus de détails (F12)"
+        },
+        "uuid": {
+          "error": "Il faut que l''Objet' du monde/compendium soit de type 'Effet'",
+          "hint": "La source ID de l'effet du monde/compendium.",
+          "label": "L'UUID de l'effet"
+        }
+      },
+      "shared": {
+        "affects": {
+          "alliance": {
+            "choices": {
+              "all": "Tout le monde",
+              "party": "Alliés de l'équipe",
+              "opposition": "Ennemis de l'équipe",
+              "allies": "Acteurs alliés",
+              "enemies": "Acteurs ennemis"
+            },
+            "hint": "Quels acteurs doivent être affectés en fonction de leur alliance/disposition. Les 'Acteurs alliés' et les 'Acteurs ennemis' nécessitent un 'Acteur d'origine'.",
+            "label": "Affecte la disposition"
+          },
+          "types": {
+            "hint": "Quels acteurs doivent être affectés en fonction de type. Laissez vide si cela doit affecter tous les types d'acteur.",
+            "label": "Affecte les types"
+          }
+        },
+        "origin": {
+          "actor": {
+            "error": "Cela doit être un 'Acteur' du monde",
+            "label": "Acteur d'origine"
+          },
+          "hint": "(Optionnel) Fourni automatiquement pour les templates du système mais sera remplacé s'il est défini ici.",
+          "item": {
+            "label": "Objet d'origine"
+          }
+        }
       }
     },
     "resourceTracker": {
