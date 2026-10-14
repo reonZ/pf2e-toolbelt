@@ -1,3 +1,7 @@
+# 3.59.1
+
+- change the way actor types are gathered for `Custom Region Behaviors`
+
 # 3.59.0
 
 - `Custom Region Behaviors`:
