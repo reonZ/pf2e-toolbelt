@@ -43,22 +43,15 @@ function definedOriginSchema(withItem: boolean) {
     return new fields.SchemaField(schema);
 }
 
-function getAffectsTypesChoices() {
-    return (TYPES ??= R.pipe(
-        CONFIG.PF2E.Actor.documentClasses,
-        R.omitBy((cls, type) => {
-            const tmp = new cls({ name: "__", type });
-            return !R.isIncludedIn("effect", tmp.allowedItemTypes);
-        }),
-        R.mapValues((__, type) => `TYPES.Actor.${type}`),
-    ));
-}
-
 function defineAffectsSchema(): SharedRegionAffectsSchemaField {
     return new fields.SchemaField({
         types: new fields.SetField(
             new fields.StringField({
-                choices: getAffectsTypesChoices,
+                choices: (TYPES ??= R.pipe(
+                    CONFIG.PF2E.Actor.documentClasses,
+                    R.omitBy((cls) => !R.isIncludedIn("effect", cls.prototype.allowedItemTypes)),
+                    R.mapValues((__, type) => `TYPES.Actor.${type}`),
+                )),
             }),
             {
                 label: i18n.path("affects.types.label"),
