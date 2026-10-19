@@ -353,7 +353,9 @@ async function getTargetRowData(
 }
 
 function targetIsHidden(target: TokenDocumentPF2e): boolean {
-    return target.hidden || !!target.actor?.hasCondition("unnoticed", "undetected");
+    if (target.hidden) return true;
+    if (target.hasPlayerOwner) return false;
+    return !!target.scene?.tokenVision && !!target.actor?.hasCondition("unnoticed", "undetected");
 }
 
 type HeaderData = {
