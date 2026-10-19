@@ -1,3 +1,9 @@
+# 3.59.2
+
+- `Target Helper`:
+  - fix player owned targets not showing to players if the actor currently has the `unnoticed` or `undetected` condition
+  - fix testing for `unnoticed` and `undetected` conditions on scenes that don't have the `Token Vision` setting enabled
+
 # 3.59.1
 
 - change the way actor types are gathered for `Custom Region Behaviors`
