@@ -174,7 +174,7 @@ class BetterSheetTool extends ModuleTool<ToolSettings> {
         return SYSTEM.relativePath(`templates/actors/character/${template}.hbs`);
     }
 
-    async #familiarSheetPF2eGetData(sheet: FamiliarSheetPF2e<FamiliarPF2e>, data: FamiliarSheetData<FamiliarPF2e>) {
+    async #familiarSheetPF2eGetData(sheet: FamiliarSheetPF2e<FamiliarPF2e>, data: FamiliarSheetData) {
         if (!belongToPartyAlliance(sheet.actor)) return;
 
         data.limited = false;

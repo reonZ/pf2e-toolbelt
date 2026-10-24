@@ -72,8 +72,8 @@ const sharedMessageRenderHTML = createSharedWrapper<
 
 const sharedFamiliarSheetGetData = createSharedWrapper<
     FamiliarSheetPF2e<FamiliarPF2e>,
-    (...args: any[]) => Promise<FamiliarSheetData<FamiliarPF2e>>,
-    (data: FamiliarSheetData<FamiliarPF2e>) => Promise<void>
+    (...args: any[]) => Promise<FamiliarSheetData>,
+    (data: FamiliarSheetData) => Promise<void>
 >(
     "WRAPPER",
     "CONFIG.Actor.sheetClasses.familiar['pf2e.FamiliarSheetPF2e'].cls.prototype.getData",

@@ -164,5 +164,5 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export { createTradeMessage, createTradeQuantityDialog, drawDebugLine, gmMustTransfer, lineIntersect };
+export { createTradeMessage, createTradeQuantityDialog, drawDebugLine, lineIntersect };
 export type { TradeMessageOptions, TradeQuantityDialogData, TradeQuantityDialogOptions };

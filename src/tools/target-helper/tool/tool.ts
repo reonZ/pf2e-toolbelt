@@ -395,12 +395,6 @@ type ToolSettings = {
     template: boolean;
 };
 
-type UpdateMessageDice = {
-    id: string;
-    data: Partial<DieData>;
-    target: TokenDocumentUUID;
-};
-
 type TemplateDialogData = {
     dismiss: boolean;
     neutral: boolean;
@@ -409,4 +403,4 @@ type TemplateDialogData = {
 };
 
 export { targetHelperTool };
-export type { TargetHelperTool, UpdateMessageDice };
+export type { TargetHelperTool };
