@@ -1159,7 +1159,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         event: DragEvent,
     ) {
         const sheetItem = sheet.item;
-        if (!sheet.isEditable || this.isCraftingAction(sheetItem)) {
+        if (!sheet.isEditable || this.isCraftingAction(sheetItem) || this.isPassiveAction(sheetItem)) {
             return wrapped(event);
         }
 
