@@ -35,7 +35,6 @@ import {
     FeatPF2e,
     FeatSheetPF2e,
     getActionGlyph,
-    getItemSourceId,
     getSpellCollectionCls,
     getStatisticClass,
     htmlQuery,
@@ -158,7 +157,7 @@ class ActionableTool extends ModuleTool<ToolSettings> {
             { context: this },
         ),
         createToggleWrapper(
-            "OVERRIDE",
+            "MIXED",
             [
                 "CONFIG.Item.sheetClasses.action['pf2e.AbilitySheetPF2e'].cls.prototype._onDrop",
                 "CONFIG.Item.sheetClasses.feat['pf2e.FeatSheetPF2e'].cls.prototype._onDrop",
@@ -1154,56 +1153,33 @@ class ActionableTool extends ModuleTool<ToolSettings> {
         return $html;
     }
 
-    async #actionSheetPF2eOnDrop(sheet: AbilitySheetPF2e | FeatSheetPF2e, event: DragEvent) {
+    async #actionSheetPF2eOnDrop(
+        sheet: AbilitySheetPF2e | FeatSheetPF2e,
+        wrapped: libWrapper.RegisterCallback,
+        event: DragEvent,
+    ) {
         const sheetItem = sheet.item;
-        if (!sheet.isEditable || this.isPassiveAction(sheetItem)) return;
+        if (!sheet.isEditable || this.isCraftingAction(sheetItem)) {
+            return wrapped(event);
+        }
 
         const droppedItem = await this.#resolveDroppedItem(event, false);
-        if (!droppedItem) return;
 
         if (droppedItem instanceof Macro) {
-            if (this.isCraftingAction(sheetItem)) {
-                throw ErrorPF2e("Invalid item drop");
-            }
-
-            const updates = {
-                "system.selfEffect": null,
-            };
-
-            this.setFlagProperty(updates, "linked", droppedItem.uuid);
-
+            const updates = this.setFlagProperty({ "system.selfEffect": null }, "linked", droppedItem.uuid);
             return sheetItem.update(updates);
         }
 
-        if (droppedItem.isOfType("effect")) {
-            const updates = {
-                "system.selfEffect": { uuid: droppedItem.uuid, name: droppedItem.name },
-            };
-
-            this.setFlagProperty(updates, "macro", _del);
-
+        if (droppedItem?.isOfType("effect")) {
+            const updates = this.setFlagProperty(
+                { "system.selfEffect": { uuid: droppedItem.uuid, name: droppedItem.name } },
+                "macro",
+                _del,
+            );
             return sheetItem.update(updates);
-        } else if (
-            sheetItem.isOfType("feat") &&
-            droppedItem.isOfType("feat") &&
-            droppedItem.category === "classfeature"
-        ) {
-            const droppedSourceId = getItemSourceId(droppedItem);
-
-            if (!droppedSourceId || droppedSourceId === getItemSourceId(sheetItem)) {
-                throw ErrorPF2e("Invalid item drop");
-            }
-
-            const feats = sheetItem._source.system.subfeatures?.suppressedFeatures ?? [];
-            if (!feats.includes(droppedSourceId)) {
-                const newFeatures = [...feats, droppedSourceId];
-                await sheetItem.update({ "system.subfeatures.suppressedFeatures": newFeatures });
-            }
-
-            return;
         }
 
-        throw ErrorPF2e("Invalid item drop");
+        return wrapped(event);
     }
 
     async #itemSheetRenderInner(
