@@ -5,6 +5,7 @@ import {
     createToggleHook,
     createToggleWrapper,
     DropCanvasData,
+    htmlQuery,
     ImageFilePath,
     isMerchant,
     isPrimaryUpdater,
@@ -12,7 +13,6 @@ import {
     itemIsCredits,
     itemIsOfType,
     ItemPF2e,
-    ItemTransferData,
     ItemUUID,
     LootPF2e,
     LootSource,
@@ -26,14 +26,14 @@ import {
     userIsGM,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData, TradeQuantityDialogOptions } from ".";
+import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogOptions } from ".";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createToggleHook("deleteToken", this.#onDeleteToken.bind(this));
     #dropCanvasDataHook = createToggleHook("dropCanvasData", this.#onDropCanvasData.bind(this), { upstream: true });
 
     #droppethItemEmitable = createEmitable(this.path("droppeth"), this.#droppethItem.bind(this));
-    #tradeItemEmitable = createEmitable(this.path("trade"), this.#tradeItem.bind(this));
+    #tradeItemEmitable = createEmitable(this.path("trade"), transferItemToActor);
 
     #onEmbeddedDocumentChangeWrapper = createToggleWrapper(
         "WRAPPER",
@@ -196,7 +196,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             return error("quantity");
         }
 
-        const owner = item.actor;
+        const owner = getValidOwner(item);
         const folder = await this.getDroppethFolder();
         const tokenId = foundry.utils.randomID();
         const tokenUuid = `${scene.uuid}.Token.${tokenId}`;
@@ -208,7 +208,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             folder: folder?.id,
             img,
             // item has no owner or is from the compendium so we add the source directly
-            items: !owner || item.pack ? [item.toObject()] : undefined,
+            items: !owner ? [item.toObject()] : undefined,
             ownership: {
                 default: 3,
                 [userId]: 3,
@@ -225,7 +225,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         // we transfer the item from its owner to the newly created droppeth actor
         if (owner) {
-            await transferItemToActor(actor, item as PhysicalItemPF2e<ActorPF2e>, options);
+            await transferItemToActor({ ...options, item, target: actor });
         }
 
         // we recover the main item (which is added first if container and its content)
@@ -314,8 +314,10 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             y,
         };
 
+        const hasMultiple = checkedValue > 1;
+
         // we don't need to ask, straight forward droppeth it is
-        if (!targetActor && (!owner || item.pack || checkedValue === 1 || item.isOfType("backpack"))) {
+        if (!targetActor && (!owner || !hasMultiple || item.isOfType("backpack"))) {
             return this.#droppethItemEmitable.call(droppethOptions);
         }
 
@@ -332,7 +334,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             buttons.push({
                 action: "trade",
                 icon: "fa-solid fa-gift",
-                label: "PF2E.ItemTransferDialog.Button.move",
+                label: this.localize.path("dialog.mixed.button"),
             });
         }
 
@@ -340,8 +342,21 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             buttons,
             item,
             lockStack: !stackable,
-            prompt: this.localize("dialog.prompt"),
-            title: this.localize("dialog.title", { item: item.name }),
+            prompt: this.localize("dialog", !targetActor ? "prompt" : hasMultiple ? "mixed.multi" : "mixed.single"),
+            render: (html) => {
+                if (!targetActor || hasMultiple) return;
+
+                const nameEl = htmlQuery(html, ".transfer-data .name");
+                const groupEl = nameEl?.nextElementSibling;
+
+                if (nameEl && groupEl instanceof HTMLElement) {
+                    nameEl.style.gridRow = "1 / -1";
+                    nameEl.style.marginBlock = "auto";
+
+                    groupEl.style.display = "none";
+                }
+            },
+            title: this.localize(targetActor ? "dialog.mixed.title" : "dialog.title", { item: item.name }),
         });
 
         if (!result) return;
@@ -356,49 +371,43 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         if (gmMustTransfer(item, targetActor)) {
             this.#tradeItemEmitable.emit({ item, target: targetActor, ...R.pick(result, ["newStack", "quantity"]) });
         } else {
-            transferItemToActor(targetActor, item, result);
+            transferItemToActor({ ...result, item, target: targetActor });
         }
     }
+}
 
-    async #tradeItem(data: TradeOptions) {}
+function getValidOwner(item: PhysicalItemPF2e): ActorPF2e | null {
+    return item.pack ? null : item.actor;
 }
 
 function gmMustTransfer(item: PhysicalItemPF2e, target: ActorPF2e): boolean {
     const bothAreOwned = item.isOwner && target.isOwner;
     if (bothAreOwned) return false;
 
-    const source = item.actor;
+    const source = getValidOwner(item);
     const sourceIsOwnedOrLoot = !source || source.isLootableBy(game.user);
     const targetIsOwnedOrLoot = target.isLootableBy(game.user);
 
     return sourceIsOwnedOrLoot && targetIsOwnedOrLoot;
 }
 
-async function transferItemToActor(
-    targetActor: ActorPF2e,
-    item: PhysicalItemPF2e,
-    { quantity = 1, newStack }: Partial<TradeQuantityDialogData>,
-): Promise<PhysicalItemPF2e<ActorPF2e> | io.Socket | null | undefined> {
-    const owner = item.actor;
+async function transferItemToActor({ item, quantity = 1, newStack, target }: TradeOptions): Promise<void> {
+    const owner = getValidOwner(item);
 
     if (!itemIsCredits(item) || (item.system.slug !== "credstick" && quantity >= item.system.price.value.credits)) {
-        if (owner && !item.pack) {
-            return owner.transferItemToActor(
-                targetActor,
-                item as PhysicalItemPF2e<ActorPF2e>,
-                quantity,
-                undefined,
-                newStack,
-            );
+        if (owner) {
+            await owner.transferItemToActor(target, item as PhysicalItemPF2e<ActorPF2e>, quantity, undefined, newStack);
         } else {
-            return; // we add the item to targetActor
+            const source = item.toObject();
+            await target.createEmbeddedDocuments("Item", [source]);
         }
+        return;
     }
 
     const credits = Math.min(quantity, item.system.price.value.credits);
-    await targetActor.inventory.addCurrency({ credits });
+    await target.inventory.addCurrency({ credits });
 
-    if (owner && !item.pack) {
+    if (owner) {
         const newPrice = new game.pf2e.Coins({ credits: item.system.price.value.credits - credits }).toObject();
         await item.update({ "system.price.value": _replace(newPrice) });
     }
@@ -406,7 +415,8 @@ async function transferItemToActor(
 
 type TradeOptions = {
     item: PhysicalItemPF2e;
-    quantity: number;
+    newStack?: boolean;
+    quantity?: number;
     target: ActorPF2e;
 };
 
@@ -421,10 +431,5 @@ type ToolSettings = {
     enabled: boolean;
     light: boolean;
 };
-
-interface TransferCallbackMessage {
-    request: "itemTransfer";
-    data: ItemTransferData;
-}
 
 export { DroppethTool };

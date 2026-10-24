@@ -826,8 +826,14 @@
         "droppeth": {
             "dialog": {
                 "button": "Droppeth",
+                "mixed": {
+                    "button": "Giveth",
+                    "multi": "How many items do you wish to droppeth/giveth?",
+                    "single": "Do you wish to droppeth or giveth the item?",
+                    "title": "Droppeth/Giveth: {item}"
+                },
                 "prompt": "How many items do you wish to droppeth?",
-                "title": "Droppeth {item}"
+                "title": "Droppeth: {item}"
             },
             "error": {
                 "actor": "Couldn't create droppeth actor.",

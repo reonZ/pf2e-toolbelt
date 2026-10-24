@@ -102,6 +102,9 @@ async function createTradeQuantityDialog<A extends string>(
             position: {
                 width: 450,
             },
+            render: (_event, dialog) => {
+                options.render?.(dialog.element);
+            },
             window: {
                 icon: options.buttons[0].icon,
                 contentClasses: ["standard-form"],
@@ -141,6 +144,7 @@ type TradeQuantityDialogOptions<A extends string = string> = {
     maxQuantity?: number;
     prompt: string;
     quantity?: number;
+    render?: (html: HTMLElement) => void;
     targetActor?: ActorPF2e;
     title: string;
 };
