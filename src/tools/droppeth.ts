@@ -37,7 +37,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     #onEmbeddedDocumentChangeWrapper = createToggleWrapper(
         "WRAPPER",
-        "CONFIG.Actor.documentClass.prototype._onEmbeddedDocumentChange",
+        "CONFIG.PF2E.Actor.documentClasses.loot.prototype._onEmbeddedDocumentChange",
         this.#actorOnEmbeddedDocumentChange,
         { context: this },
     );
@@ -125,21 +125,23 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         return new foundry.data.LightData(lightRule?.value as foundry.data.LightSource).toObject();
     }
 
-    #actorOnEmbeddedDocumentChange(actor: ActorPF2e, wrapped: libWrapper.RegisterCallback) {
+    #actorOnEmbeddedDocumentChange(actor: LootPF2e, wrapped: libWrapper.RegisterCallback) {
         wrapped();
 
-        if (!this.isDroppethActor(actor) || !isPrimaryUpdater(actor)) return;
+        if (!isPrimaryUpdater(actor)) return;
 
         (async () => {
             const token = this.getDroppethToken(actor);
+            const inventory = actor.inventory.contents;
 
-            if (actor.inventory.size === 0) {
+            // we didn't allow droppeth of items with 0 qty, so we shouldn't allow them to remain
+            if (inventory.length === 0 || (inventory.length === 1 && itemCheckedValue(inventory[0]) <= 0)) {
                 token?.delete();
                 return;
             }
 
             const onlyItem = R.pipe(
-                actor.inventory.contents,
+                inventory,
                 R.filter((item) => !item.isInContainer),
                 R.only(),
             );
