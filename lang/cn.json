@@ -490,12 +490,6 @@
                     "hint": "绑定键：长按并点击状态调出效果编辑界面，以调整其持续时间。"
                 }
             },
-            "droppeth": {
-                "droppeth": {
-                    "hint": "绑定键：将一件物品丢弃在地上。",
-                    "name": "丢弃调整"
-                }
-            },
             "betterTool": {
                 "removeRegion": {
                     "name": "移除区域",

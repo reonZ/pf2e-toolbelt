@@ -323,7 +323,7 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
         targetActor: ActorPF2e,
         item: PhysicalItemPF2e,
         isPurchase: boolean,
-    ): Promise<TradeQuantityDialogData | null> {
+    ): Promise<Omit<TradeQuantityDialogData, "action"> | null> {
         const stackable = !!targetActor.inventory.findStackableItem(item);
         const infinite = isPurchase && this.getFlag(sourceActor, "infiniteAll");
 
@@ -349,11 +349,13 @@ class BetterMerchantTool extends ModuleTool<BetterMerchantSettings> {
             : this.localize("item.sell.button");
 
         return createTradeQuantityDialog({
-            button: {
-                action: isPurchase ? "buy" : "sell",
-                icon: "fa-solid fa-coins",
-                label,
-            },
+            buttons: [
+                {
+                    action: isPurchase ? "buy" : "sell",
+                    icon: "fa-solid fa-coins",
+                    label,
+                },
+            ],
             item,
             lockStack: !stackable,
             maxQuantity: infinite ? 9999 : item.quantity,
@@ -995,12 +997,7 @@ const betterMerchantTool = new BetterMerchantTool();
 type EventItemAction = "buy-item";
 
 type EventSheetAction =
-    | "create-scrolls"
-    | "create-service"
-    | "export-services"
-    | "from-browser"
-    | "import-services"
-    | "setup-filters";
+    "create-scrolls" | "create-service" | "export-services" | "from-browser" | "import-services" | "setup-filters";
 
 type EventSheetServiceAction =
     | "buy-service"

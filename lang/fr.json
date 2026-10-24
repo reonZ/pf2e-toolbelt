@@ -41,12 +41,6 @@
           "name": "Supprimer une région",
           "hint": "Supprime la première région trouvée sous votre curseur."
         }
-      },
-      "droppeth": {
-        "droppeth": {
-          "name": "Modificateur pour le dépôt sur la scène",
-          "hint": "Touche maintenue lorsque vous déposez un objet sur le sol."
-        }
       }
     },
     "settings": {

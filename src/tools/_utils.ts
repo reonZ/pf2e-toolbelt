@@ -5,6 +5,8 @@ import {
     enrichHTML,
     getActionGlyph,
     getPreferredName,
+    itemCheckedValue,
+    itemIsCredits,
     PhysicalItemPF2e,
     R,
     SYSTEM,
@@ -65,12 +67,16 @@ async function createTradeMessage({
     });
 }
 
-async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): Promise<TradeQuantityDialogData | null> {
+async function createTradeQuantityDialog<A extends string>(
+    options: TradeQuantityDialogOptions<A>,
+): Promise<TradeQuantityDialogData<A> | null> {
+    const item = options.item;
+    const checkValue = itemCheckedValue(item);
     const data = {
         ...options,
-        maxQuantity: options.maxQuantity ?? options.item.quantity,
-        mode: R.isBoolean(options.lockStack) ? "" : "gift",
-        quantity: options.quantity ?? options.item.quantity,
+        maxQuantity: options.maxQuantity ?? checkValue,
+        mode: itemIsCredits(item) ? "credits" : R.isBoolean(options.lockStack) ? "move" : "gift",
+        quantity: options.quantity ?? checkValue,
         rootId: "item-transfer-dialog",
     };
 
@@ -81,23 +87,23 @@ async function createTradeQuantityDialog(options: TradeQuantityDialogOptions): P
 
     return new Promise((resolve) => {
         foundry.applications.api.DialogV2.wait({
-            buttons: [
-                {
-                    ...options.button,
+            buttons: options.buttons.map((btnOptions) => {
+                return {
+                    ...btnOptions,
                     type: "submit",
                     callback: (_event, _button, dialog) => {
-                        const data = createFormData(dialog.element) as TradeQuantityDialogData;
-                        resolve(data);
+                        const data = createFormData(dialog.element) as Omit<TradeQuantityDialogData, "action">;
+                        resolve({ ...data, action: btnOptions.action });
                     },
-                },
-            ],
+                };
+            }),
             content,
             id: "item-transfer-dialog",
             position: {
                 width: 450,
             },
             window: {
-                icon: options.button.icon,
+                icon: options.buttons[0].icon,
                 contentClasses: ["standard-form"],
                 title: options.title,
             },
@@ -123,12 +129,13 @@ function drawDebugLine(origin: Point, target: Point, color: "blue" | "green" | "
     canvas.controls.debug.lineStyle(4, hex).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
 }
 
-type TradeQuantityDialogOptions = {
-    button: {
-        action: string;
+type TradeQuantityDialogOptions<A extends string = string> = {
+    buttons: {
+        action: A;
         icon: string;
         label: string;
-    };
+    }[];
+    icon?: string;
     item: PhysicalItemPF2e;
     lockStack?: boolean;
     maxQuantity?: number;
@@ -138,9 +145,11 @@ type TradeQuantityDialogOptions = {
     title: string;
 };
 
-type TradeQuantityDialogData = {
+type TradeQuantityDialogData<A extends string = string> = {
+    action: A;
     quantity: number;
-    newStack?: boolean;
+    newStack: boolean;
+    mode?: "move" | "purchase" | "gift" | "credits";
 };
 
 type TradeMessageOptions = {
@@ -155,5 +164,5 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export { createTradeMessage, createTradeQuantityDialog, drawDebugLine, lineIntersect };
-export type { TradeMessageOptions, TradeQuantityDialogData };
+export { createTradeMessage, createTradeQuantityDialog, drawDebugLine, gmMustTransfer, lineIntersect };
+export type { TradeMessageOptions, TradeQuantityDialogData, TradeQuantityDialogOptions };

@@ -41,12 +41,6 @@
                     "name": "Remove Region",
                     "hint": "Delete the first region found under your cursor."
                 }
-            },
-            "droppeth": {
-                "droppeth": {
-                    "name": "Droppeth Modifier",
-                    "hint": "Key held when dropping an item on the ground."
-                }
             }
         },
         "settings": {

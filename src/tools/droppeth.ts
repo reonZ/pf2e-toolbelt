@@ -3,15 +3,17 @@ import {
     CanvasPF2e,
     createEmitable,
     createToggleHook,
-    createToggleKeybind,
     createToggleWrapper,
     DropCanvasData,
     ImageFilePath,
+    isMerchant,
     isPrimaryUpdater,
+    itemCheckedValue,
+    itemIsCredits,
     itemIsOfType,
     ItemPF2e,
+    ItemTransferData,
     ItemUUID,
-    KeybindingActionConfig,
     LootPF2e,
     LootSource,
     PhysicalItemPF2e,
@@ -24,13 +26,14 @@ import {
     userIsGM,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData } from ".";
+import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogData, TradeQuantityDialogOptions } from ".";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createToggleHook("deleteToken", this.#onDeleteToken.bind(this));
-    #dropCanvasDataHook = createToggleHook("dropCanvasData", this.#onDropCanvasData.bind(this));
+    #dropCanvasDataHook = createToggleHook("dropCanvasData", this.#onDropCanvasData.bind(this), { upstream: true });
 
-    #droppethItemEmitable = createEmitable(this.key, this.#droppethItem.bind(this));
+    #droppethItemEmitable = createEmitable(this.path("droppeth"), this.#droppethItem.bind(this));
+    #tradeItemEmitable = createEmitable(this.path("trade"), this.#tradeItem.bind(this));
 
     #onEmbeddedDocumentChangeWrapper = createToggleWrapper(
         "WRAPPER",
@@ -38,17 +41,6 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         this.#actorOnEmbeddedDocumentChange,
         { context: this },
     );
-
-    #droppethKeybind = createToggleKeybind({
-        name: "droppeth",
-        editable: [{ key: "ControlLeft", modifiers: [] }],
-        onDown: () => {
-            this.#dropCanvasDataHook.activate();
-        },
-        onUp: () => {
-            this.#dropCanvasDataHook.disable();
-        },
-    });
 
     static get DEFAULT_DATA(): { img: ImageFilePath; name: string } {
         return {
@@ -81,10 +73,6 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    get keybindsSchema(): KeybindingActionConfig[] {
-        return [this.#droppethKeybind.configs];
-    }
-
     get api(): Record<string, any> {
         return {
             droppethRequest: (options: DroppethOptions) => {
@@ -96,12 +84,13 @@ class DroppethTool extends ModuleTool<ToolSettings> {
     _configurate(): void {
         const enabled = this.settings.enabled;
 
-        this.#droppethKeybind.toggle(enabled);
+        this.#dropCanvasDataHook.toggle(enabled);
 
         if (userIsGM()) {
             this.#deleteTokenHook.toggle(enabled);
             this.#droppethItemEmitable.toggle(enabled);
             this.#onEmbeddedDocumentChangeWrapper.toggle(enabled);
+            this.#tradeItemEmitable.toggle(enabled);
         }
     }
 
@@ -175,42 +164,19 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         actor?.delete();
     }
 
-    #onDropCanvasData(_canvas: CanvasPF2e, data: DropCanvasData): boolean {
-        if (data.type !== "Item" || !R.isString(data.uuid)) {
-            return true;
-        }
+    #onDropCanvasData(_canvas: CanvasPF2e, data: DropCanvasData, event: DragEvent): boolean {
+        if (data.type !== "Item" && data.type !== "PersistentDamage") return true;
 
-        const item = fromUuidSync<ItemPF2e>(data.uuid, { strict: false });
-        if (!item || !itemIsOfType(item, "physical")) {
-            return true;
-        }
+        const item = R.isString(data.uuid) && fromUuidSync<ItemPF2e>(data.uuid, { strict: false });
+        if (!item || !itemIsOfType(item, "physical")) return true;
 
-        (async () => {
-            const options: DroppethOptions = {
-                item,
-                x: data.x,
-                y: data.y,
-            };
-
-            if (!(item instanceof Item) || item.pack) {
-                this.#droppethItemEmitable.call(options);
-                return;
-            }
-
-            const tradeData = await this.#initiateTrade(item);
-
-            if (tradeData) {
-                options.quantity = tradeData.quantity;
-                this.#droppethItemEmitable.call(options);
-            }
-        })();
-
+        this.#initiateDroppeth(item, event, data);
         return false;
     }
 
     async #droppethItem(options: DroppethOptions, userId: string) {
         const error = (err: string) => {
-            this.localize.error(`error.${err}`);
+            this.localize.error("error", err);
         };
 
         const scene = canvas.scene;
@@ -225,9 +191,8 @@ class DroppethTool extends ModuleTool<ToolSettings> {
             return error("unknown");
         }
 
-        const allowedQuantity = item.quantity;
-
-        if (allowedQuantity < 1) {
+        const checkedValue = itemCheckedValue(item);
+        if (checkedValue < 1) {
             return error("quantity");
         }
 
@@ -260,7 +225,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
         // we transfer the item from its owner to the newly created droppeth actor
         if (owner) {
-            await item.actor?.transferItemToActor(actor, item as PhysicalItemPF2e<ActorPF2e>, options.quantity ?? 1);
+            await transferItemToActor(actor, item as PhysicalItemPF2e<ActorPF2e>, options);
         }
 
         // we recover the main item (which is added first if container and its content)
@@ -312,38 +277,154 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         });
     }
 
-    async #initiateTrade(item: PhysicalItemPF2e): Promise<TradeQuantityDialogData | null> {
-        if (item.quantity <= 0) {
-            return null;
+    async #initiateDroppeth(item: PhysicalItemPF2e, event: DragEvent, data: DropCanvasData) {
+        const { x, y } = data;
+        const owner = item.actor;
+        const checkedValue = itemCheckedValue(item);
+        const targetActor = canvas.tokens.quadtree
+            .getObjects(new PIXI.Rectangle(x, y))
+            .values()
+            .toArray()
+            .sort((a, b) => b.document.elevation - a.document.elevation || b.document.sort - a.document.sort)
+            .find((t) => t.visible)?.actor;
+
+        // we don't want to droppeth an item with 0 qty
+        if (!targetActor && checkedValue <= 0) {
+            return this.localize.warning("error.quantity");
         }
 
-        if (item.isOfType("backpack") || item.quantity === 1) {
-            return { quantity: 1, newStack: false };
+        // merchants & droppeth actors do not droppeth if there is a target
+        if (targetActor && (checkedValue <= 0 || isMerchant(owner) || this.isDroppethActor(owner))) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.setData("text/plain", JSON.stringify(data));
+
+            const newEvent = new DragEvent("drop", {
+                altKey: event.altKey,
+                shiftKey: event.shiftKey,
+                dataTransfer,
+            });
+
+            return targetActor.sheet._onDrop(newEvent);
         }
 
-        return createTradeQuantityDialog({
-            button: {
+        const droppethOptions: DroppethOptions = {
+            item,
+            quantity: 1,
+            x,
+            y,
+        };
+
+        // we don't need to ask, straight forward droppeth it is
+        if (!targetActor && (!owner || item.pack || checkedValue === 1 || item.isOfType("backpack"))) {
+            return this.#droppethItemEmitable.call(droppethOptions);
+        }
+
+        const stackable = !!targetActor?.inventory.findStackableItem(item._source);
+        const buttons: TradeQuantityDialogOptions<"droppeth" | "trade">["buttons"] = [
+            {
                 action: "droppeth",
                 icon: "fa-solid fa-arrow-down-to-bracket",
-                label: this.localize("dialog.button"),
+                label: this.localize.path("dialog.button"),
             },
+        ];
+
+        if (targetActor) {
+            buttons.push({
+                action: "trade",
+                icon: "fa-solid fa-gift",
+                label: "PF2E.ItemTransferDialog.Button.move",
+            });
+        }
+
+        const result = await createTradeQuantityDialog({
+            buttons,
             item,
+            lockStack: !stackable,
             prompt: this.localize("dialog.prompt"),
             title: this.localize("dialog.title", { item: item.name }),
         });
+
+        if (!result) return;
+
+        if (result.action === "droppeth") {
+            droppethOptions.quantity = result.quantity;
+            return this.#droppethItemEmitable.call(droppethOptions);
+        }
+
+        if (!targetActor) return;
+
+        if (gmMustTransfer(item, targetActor)) {
+            this.#tradeItemEmitable.emit({ item, target: targetActor, ...R.pick(result, ["newStack", "quantity"]) });
+        } else {
+            transferItemToActor(targetActor, item, result);
+        }
+    }
+
+    async #tradeItem(data: TradeOptions) {}
+}
+
+function gmMustTransfer(item: PhysicalItemPF2e, target: ActorPF2e): boolean {
+    const bothAreOwned = item.isOwner && target.isOwner;
+    if (bothAreOwned) return false;
+
+    const source = item.actor;
+    const sourceIsOwnedOrLoot = !source || source.isLootableBy(game.user);
+    const targetIsOwnedOrLoot = target.isLootableBy(game.user);
+
+    return sourceIsOwnedOrLoot && targetIsOwnedOrLoot;
+}
+
+async function transferItemToActor(
+    targetActor: ActorPF2e,
+    item: PhysicalItemPF2e,
+    { quantity = 1, newStack }: Partial<TradeQuantityDialogData>,
+): Promise<PhysicalItemPF2e<ActorPF2e> | io.Socket | null | undefined> {
+    const owner = item.actor;
+
+    if (!itemIsCredits(item) || (item.system.slug !== "credstick" && quantity >= item.system.price.value.credits)) {
+        if (owner && !item.pack) {
+            return owner.transferItemToActor(
+                targetActor,
+                item as PhysicalItemPF2e<ActorPF2e>,
+                quantity,
+                undefined,
+                newStack,
+            );
+        } else {
+            return; // we add the item to targetActor
+        }
+    }
+
+    const credits = Math.min(quantity, item.system.price.value.credits);
+    await targetActor.inventory.addCurrency({ credits });
+
+    if (owner && !item.pack) {
+        const newPrice = new game.pf2e.Coins({ credits: item.system.price.value.credits - credits }).toObject();
+        await item.update({ "system.price.value": _replace(newPrice) });
     }
 }
 
+type TradeOptions = {
+    item: PhysicalItemPF2e;
+    quantity: number;
+    target: ActorPF2e;
+};
+
 type DroppethOptions = {
     item: PhysicalItemPF2e | { type: PhysicalItemType; uuid: ItemUUID };
+    quantity: number;
     x: number;
     y: number;
-    quantity?: number;
 };
 
 type ToolSettings = {
     enabled: boolean;
     light: boolean;
 };
+
+interface TransferCallbackMessage {
+    request: "itemTransfer";
+    data: ItemTransferData;
+}
 
 export { DroppethTool };

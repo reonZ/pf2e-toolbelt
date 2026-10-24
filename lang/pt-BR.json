@@ -24,12 +24,6 @@
           "name": "Teleportar Token (Desselecionar)",
           "hint": "Mantenha a tecla pressionada enquanto clica na cena para teletransportar todos os tokens selecionados. Também desmarca os tokens ao pressionar a tecla de atalho para ter uma visão desobstruída de toda a cena."
         }
-      },
-      "droppeth": {
-        "droppeth": {
-          "name": "Modificador do \"Droppeth\"",
-          "hint": "Tecla pressionada ao soltar um item no chão."
-        }
       }
     },
     "settings": {

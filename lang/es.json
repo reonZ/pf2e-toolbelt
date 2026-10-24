@@ -33,12 +33,6 @@
           "name": "Eliminar región",
           "hint": "Elimine la primera región que encuentre bajo el cursor."
         }
-      },
-      "droppeth": {
-        "droppeth": {
-          "name": "Modificador de Droppeth",
-          "hint": "Tecla a mantener al soltar un objeto en el suelo."
-        }
       }
     },
     "settings": {

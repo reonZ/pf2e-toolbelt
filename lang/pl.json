@@ -33,12 +33,6 @@
           "name": "Usuń region",
           "hint": "Usuń pierwszy region znajdujący się pod kursorem."
         }
-      },
-      "droppeth": {
-        "droppeth": {
-          "name": "Upuszczanie modyfikatora",
-          "hint": "Przytrzymywany klawisz podczas upuszczania przedmiotu na ziemię."
-        }
       }
     },
     "settings": {
