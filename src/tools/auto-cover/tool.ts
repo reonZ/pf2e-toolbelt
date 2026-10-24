@@ -310,7 +310,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const originToken = (context.origin?.token ?? context.token ?? getFirstActiveToken(originActor))?.object;
         const targetToken = (context.target.token ?? getFirstActiveToken(targetActor))?.object;
 
-        if (!originToken || !targetToken) {
+        if (!originToken || !targetToken || originToken.scene !== targetToken.scene) {
             return wrapped(...args);
         }
 
