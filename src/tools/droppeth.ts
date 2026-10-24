@@ -213,6 +213,11 @@ class DroppethTool extends ModuleTool<ToolSettings> {
                 default: 3,
                 [userId]: 3,
             },
+            system: {
+                _migration: {
+                    version: game.settings.get(SYSTEM.id, "worldSchemaVersion"),
+                },
+            },
         };
 
         this.setFlagProperties(actorSource, { temporary: true, tokenUuid });
