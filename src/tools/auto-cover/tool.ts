@@ -25,10 +25,10 @@ import {
     toggleHooksAndWrappers,
     TokenDocumentPF2e,
     TokenPF2e,
-    valueBetween,
     ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { drawDebugLine, lineIntersect } from "tools";
 import {
     COVER_VALUES,
     CoverHighlightRenderer,
@@ -36,15 +36,14 @@ import {
     getRectEdges,
     getSideOfPointFromLine,
     lineIntersectTriangle,
+    project90,
     RectEdge,
     SIZES,
     spreadToToken,
     tokenCenter3d,
     tokenToSpread,
     Vector,
-    Vector2d,
 } from ".";
-import { drawDebugLine, lineIntersect } from "tools";
 
 const CREATURE_SETTINGS = ["disabled", "cross", "zero", "ten", "twenty"] as const;
 
@@ -522,13 +521,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const scene = originToken.scene;
         const origin = tokenCenter3d(originToken);
         const target = tokenCenter3d(targetToken);
-        const boudaryWidth = target.x - origin.x;
-        const boudaryHeight = target.y - origin.y;
+        const boundaryWidth = target.x - origin.x;
+        const boundaryHeight = target.y - origin.y;
 
         // we have nothing to test, they are null
-        if (boudaryWidth === 0 && boudaryHeight === 0) return;
+        if (boundaryWidth === 0 && boundaryHeight === 0) return;
 
-        const boundaryShape = new PIXI.Rectangle(origin.x, origin.y, boudaryWidth, boudaryHeight);
+        const boundaryShape = new PIXI.Rectangle(origin.x, origin.y, boundaryWidth, boundaryHeight);
         const config: ClockwiseSweepPolygonConfig = {
             type: "move",
             boundaryShapes: [boundaryShape.normalize()],
@@ -546,9 +545,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             console.log(intersection);
 
             const { edge, point } = intersection;
-            const v0 = Vector2d.fromData(edge.a);
-            const v1 = Vector2d.fromData(edge.b);
+            const v0 = Vector.fromData(edge.a);
+            const v1 = Vector.fromData(edge.b);
             const side = getSideOfPointFromLine(v0, v1, origin);
+
+            const projected = project90(point, v0, v1);
+            console.log(projected);
         }
     }
 
@@ -557,6 +559,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         lines: readonly [readonly [Vector, Vector]],
         edges: Set<foundry.canvas.geometry.edges.Edge>,
     ): { point: Vector; edge: foundry.canvas.geometry.edges.Edge } | undefined {
+        const { distance, size } = scene.grid;
+
         for (const edge of edges) {
             const wall = edge.object;
             if (!(wall instanceof CONFIG.Wall.documentClass)) continue;
@@ -573,8 +577,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 R.uniqueWith((a, b) => a[0] === b[0] && a[1] === b[1]),
                 R.map(([bottom, top]): [number, number] => {
                     return [
-                        bottom === -Infinity ? Number.MIN_SAFE_INTEGER : bottom,
-                        top === Infinity ? Number.MAX_SAFE_INTEGER : top,
+                        bottom === -Infinity ? Number.MIN_SAFE_INTEGER : (bottom / distance) * size,
+                        top === Infinity ? Number.MAX_SAFE_INTEGER : (top / distance) * size,
                     ]; // we can't do intersection with Infinity
                 }),
             );
@@ -599,11 +603,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                         } // we got it
                     }
                 }
-
-                // // we know we don't have to test elevation so we use the regular foundry logic
-                // if (valueBetween(origin.z, bottom, top) && valueBetween(target.z, bottom, top)) {
-                //     const x = foundry.utils.lineSegmentIntersection(origin, target, edge.a, edge.b);
-                // }
             }
         }
     }

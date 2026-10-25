@@ -95,13 +95,13 @@ class Vector {
     #y: number;
     #z: number;
 
-    constructor(x: number, y: number, z: number) {
+    constructor(x: number, y: number, z: number = 0) {
         this.#x = x;
         this.#y = y;
         this.#z = z;
     }
 
-    static fromData(position: Point, elevation: number): Vector {
+    static fromData(position: Point, elevation: number = 0): Vector {
         return new Vector(position.x, position.y, elevation);
     }
 
@@ -117,6 +117,18 @@ class Vector {
         return this.#z;
     }
 
+    get magnitude(): number {
+        return Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
+    }
+
+    get normalize(): Vector {
+        return this.divide(this.magnitude);
+    }
+
+    get position(): Point {
+        return { x: this.x, y: this.y };
+    }
+
     add(other: Vector): Vector {
         return new Vector(this.x + other.x, this.y + other.y, this.z + other.z);
     }
@@ -127,6 +139,10 @@ class Vector {
             this.z * other.x - this.x * other.z,
             this.x * other.y - this.y * other.x,
         );
+    }
+
+    divide(value: number): Vector {
+        return new Vector(this.x / value, this.y / value, this.z / value);
     }
 
     dot(other: Vector): number {
@@ -142,18 +158,10 @@ class Vector {
     }
 }
 
-class Vector2d extends Vector {
-    constructor(x: number, y: number) {
-        super(x, y, 0);
-    }
-
-    static fromData(position: Point): Vector {
-        return new Vector2d(position.x, position.y);
-    }
-
-    get z(): number {
-        return 0;
-    }
+function project90(p: Vector, v0: Vector, v1: Vector, inverted: boolean = false) {
+    const v = v1.subtract(v0);
+    const u = inverted ? new Vector(v.y, -v.x) : new Vector(-v.y, v.x);
+    return u.normalize.multiply(p.z).add(p);
 }
 
 function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
@@ -161,32 +169,30 @@ function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
     return d > 0 ? 1 : d < 0 ? -1 : 0;
 }
 
-function project90(v0: Vector, v1: Vector) {
-    const v = v1.subtract(v0);
-}
-
 function getTokenDepth(token: TokenPF2e): number {
-    const gridSize = token.scene?.grid.size ?? 100;
     const actor = token.actor;
 
     if (actor?.isOfType("vehicle")) {
-        return actor.system.details.space.high * gridSize;
+        return actor.system.details.space.high;
     }
 
     if (actor?.isOfType("creature") && token.document.width === token.document.height) {
-        return token.document.width * gridSize;
+        return token.document.width;
     }
 
     // not really sure what to do here in case of non squared bounds
-    return Math.min(token.document.width, token.document.height) * gridSize;
+    return Math.min(token.document.width, token.document.height);
 }
 
 function tokenCenter3d(token: TokenPF2e): Vector {
-    return Vector.fromData(token.center, token.document.elevation + getTokenDepth(token) / 2);
+    const { size, distance } = token.scene?.grid ?? { distance: 5, size: 100 };
+    const elevation = token.document.elevation / distance;
+    const depth = getTokenDepth(token);
+    return Vector.fromData(token.center, (elevation + depth / 2) * size);
 }
 
 // Möller–Trumbore implementation
-function lineIntersectTriangle(O: Vector, D: Vector, v0: Vector, v1: Vector, v2: Vector): Vector | undefined {
+function lineIntersectTriangle(P: Vector, D: Vector, v0: Vector, v1: Vector, v2: Vector): Vector | undefined {
     const e1 = v1.subtract(v0);
     const e2 = v2.subtract(v0);
     const N = D.cross(e2);
@@ -196,7 +202,7 @@ function lineIntersectTriangle(O: Vector, D: Vector, v0: Vector, v1: Vector, v2:
     if (Math.abs(denom) < EPSILON) return;
 
     const invDenom = 1 / denom;
-    const w0 = O.subtract(v0);
+    const w0 = P.subtract(v0);
     const u = w0.dot(N) * invDenom;
 
     // line passes outside of e2 bounds
@@ -213,7 +219,7 @@ function lineIntersectTriangle(O: Vector, D: Vector, v0: Vector, v1: Vector, v2:
 
     // our finite line intersects the triangle
     if (t > EPSILON) {
-        return D.multiply(t).add(O);
+        return D.multiply(t).add(P);
     }
 }
 
@@ -259,10 +265,10 @@ export {
     getRectEdges,
     getSideOfPointFromLine,
     lineIntersectTriangle,
+    project90,
     spreadToToken,
     tokenCenter3d,
     tokenToSpread,
     Vector,
-    Vector2d,
 };
 export type { RectEdge, RectEdges };
