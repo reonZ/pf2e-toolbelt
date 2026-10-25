@@ -1,4 +1,4 @@
-import { ClockwiseSweepPolygonConfig, R, ScenePF2e, TokenDocumentPF2e, TokenPF2e, valueBetween } from "foundry-helpers";
+import { TokenPF2e } from "foundry-helpers";
 import { lineIntersect } from "tools";
 
 const RECT_CORNERS = [
@@ -101,9 +101,8 @@ class Vector {
         this.#z = z;
     }
 
-    static fromToken(token: TokenPF2e) {
-        const center = token.document.center;
-        return new Vector(Math.round(center.x), Math.round(center.y), Math.round(token.document.elevation));
+    static fromData(position: Point, elevation: number): Vector {
+        return new Vector(position.x, position.y, elevation);
     }
 
     get x(): number {
@@ -143,73 +142,96 @@ class Vector {
     }
 }
 
-function belongInTool(originToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>, targetToken: TokenPF2e) {
-    const scene = originToken.scene;
-    const origin = Vector.fromToken(originToken);
-    const target = Vector.fromToken(targetToken);
-    const width = target.x - origin.x;
-    const height = target.y - origin.y;
+class Vector2d extends Vector {
+    constructor(x: number, y: number) {
+        super(x, y, 0);
+    }
 
-    // we have nothing to test, they are null
-    if (width === 0 && height === 0) return;
+    static fromData(position: Point): Vector {
+        return new Vector2d(position.x, position.y);
+    }
 
-    const boundaryShape = new PIXI.Rectangle(origin.x, origin.y, width, height);
-    const config: ClockwiseSweepPolygonConfig = {
-        type: "move",
-        boundaryShapes: [boundaryShape.normalize()],
-    };
-
-    const poly = new CONFIG.Canvas.polygonBackends.move();
-    poly.initialize(origin, config);
-    poly["_identifyEdges"]();
-
-    for (const edge of poly.edges) {
-        const wall = edge.object;
-        if (!(wall instanceof CONFIG.Wall.documentClass)) continue;
-        // TODO use custom check to see if that wall can block cover or not (probably a flag in the document)
-
-        const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
-        // we retrieve the unique ranges for this edge
-        const ranges = R.pipe(
-            [...(levels.size ? levels : scene.levels)],
-            R.map((level) => [level.elevation.bottom, level.elevation.top] as const),
-            R.uniqueWith((a, b) => a[0] === b[0] && a[1] === b[1]),
-        );
-
-        for (const [bottom, top] of ranges) {
-            // we know we don't have to test elevation so we use the regular foundry logic
-            if (valueBetween(origin.z, bottom, top) && valueBetween(target.z, bottom, top)) {
-                const x = foundry.utils.lineSegmentIntersection(origin, target, edge.a, edge.b);
-            }
-        }
+    get z(): number {
+        return 0;
     }
 }
 
-function lineIntersectPlane(origin: ElevationPoint, target: ElevationPoint, levels: Level[]) {
-    const p0 = new Vector(origin.x, origin.y, origin.elevation);
-    const p1 = new Vector(target.x, target.y, target.elevation);
-    const U = p1.subtract(p0);
+function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
+    const d = (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
+    return d > 0 ? 1 : d < 0 ? -1 : 0;
 }
 
-/** @returns 0 if no intersection, 1 if intersection or 2 if coplanar */
-function rayIntersectTriangle(O: Vector, U: Vector, v0: Vector, v1: Vector, v2: Vector) {
+function project90(v0: Vector, v1: Vector) {
+    const v = v1.subtract(v0);
+}
+
+function getTokenDepth(token: TokenPF2e): number {
+    const gridSize = token.scene?.grid.size ?? 100;
+    const actor = token.actor;
+
+    if (actor?.isOfType("vehicle")) {
+        return actor.system.details.space.high * gridSize;
+    }
+
+    if (actor?.isOfType("creature") && token.document.width === token.document.height) {
+        return token.document.width * gridSize;
+    }
+
+    // not really sure what to do here in case of non squared bounds
+    return Math.min(token.document.width, token.document.height) * gridSize;
+}
+
+function tokenCenter3d(token: TokenPF2e): Vector {
+    return Vector.fromData(token.center, token.document.elevation + getTokenDepth(token) / 2);
+}
+
+// Möller–Trumbore implementation
+function lineIntersectTriangle(O: Vector, D: Vector, v0: Vector, v1: Vector, v2: Vector): Vector | undefined {
     const e1 = v1.subtract(v0);
     const e2 = v2.subtract(v0);
-    const n = e1.cross(e2);
+    const N = D.cross(e2);
+    const denom = e1.dot(N);
+
+    // line is parallel to plane
+    if (Math.abs(denom) < EPSILON) return;
+
+    const invDenom = 1 / denom;
     const w0 = O.subtract(v0);
-    const a = -n.dot(w0);
-    const b = n.dot(U);
+    const u = w0.dot(N) * invDenom;
 
-    // ray is parallel to plane
-    if (Math.abs(b) < EPSILON) {
-        return Math.abs(a) < EPSILON ? 2 : 0;
+    // line passes outside of e2 bounds
+    if (u < 0 || u > 1) return;
+
+    const q = w0.cross(e1);
+    const v = D.dot(q) * invDenom;
+
+    // line passes outside of e1 bounds
+    if (v < 0 || u + v > 1.0) return;
+
+    // line intersection
+    const t = e2.dot(q) * invDenom;
+
+    // our finite line intersects the triangle
+    if (t > EPSILON) {
+        return D.multiply(t).add(O);
     }
+}
 
-    // get intersect point of ray and plane
-    const P = a / b;
-    if (P < 0 || P > 1) return 0; // no intersect
+function _lineIntersectTriangle(O: Vector, U: Vector, v0: Vector, v1: Vector, v2: Vector) {
+    const e1 = v1.subtract(v0);
+    const e2 = v2.subtract(v0);
+    const N = e1.cross(e2);
+    const w0 = O.subtract(v0);
+    const denom = N.dot(U);
 
-    // intersect point of ray and plane
+    // line is parallel to plane
+    if (Math.abs(denom) < EPSILON) return;
+
+    const P = -N.dot(w0) / denom;
+    // no intersection
+    if (P < 0 || P > 1) return;
+
+    // intersect point of line and plane
     const I = U.multiply(P).add(O);
 
     // we test if I is inside the triangle
@@ -222,22 +244,25 @@ function rayIntersectTriangle(O: Vector, U: Vector, v0: Vector, v1: Vector, v2: 
     const D = uv * uv - uu * vv;
 
     // get and test parametric coords
-    const s = (uv * wv - vv * wu) / D;
-    if (s < 0.0 || s > 1.0) return 0;
-    const t = (uv * wu - uu * wv) / D;
-    if (t < 0.0 || s + t > 1.0) return 0;
+    const c1 = (uv * wv - vv * wu) / D;
+    if (c1 < 0 || c1 > 1) return;
+    const c2 = (uv * wu - uu * wv) / D;
+    if (c2 < 0 || c1 + c2 > 1) return;
 
     return 1;
 }
 
-type ElevationPoint = {
-    x: number;
-    y: number;
-    elevation: number;
-};
-
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 
-export { getRectEdges, spreadToToken, tokenToSpread };
+export {
+    getRectEdges,
+    getSideOfPointFromLine,
+    lineIntersectTriangle,
+    spreadToToken,
+    tokenCenter3d,
+    tokenToSpread,
+    Vector,
+    Vector2d,
+};
 export type { RectEdge, RectEdges };

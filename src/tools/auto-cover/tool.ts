@@ -6,6 +6,7 @@ import {
     CheckModifiersDialog,
     CheckRoll,
     CheckRollCallback,
+    ClockwiseSweepPolygonConfig,
     createHTMLElement,
     createToggleHook,
     createToggleWrapper,
@@ -18,10 +19,13 @@ import {
     MODULE,
     R,
     Rolled,
+    ScenePF2e,
     signedInteger,
     SYSTEM,
     toggleHooksAndWrappers,
+    TokenDocumentPF2e,
     TokenPF2e,
+    valueBetween,
     ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -30,14 +34,22 @@ import {
     CoverHighlightRenderer,
     CoverLevel,
     getRectEdges,
+    getSideOfPointFromLine,
+    lineIntersectTriangle,
     RectEdge,
     SIZES,
     spreadToToken,
+    tokenCenter3d,
     tokenToSpread,
+    Vector,
+    Vector2d,
 } from ".";
 import { drawDebugLine, lineIntersect } from "tools";
 
 const CREATURE_SETTINGS = ["disabled", "cross", "zero", "ten", "twenty"] as const;
+
+const WALL_COVER_DEFAULT = ["move", "none", "normal"] as const;
+const WALL_COVER_OPTIONS = ["default", "none", "normal"] as const;
 
 const WALL_INTERSECTIONS_SETTING = [
     "disabled",
@@ -82,6 +94,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 onChange: () => {
                     this.configurate();
                 },
+            },
+            {
+                key: "wallDefault",
+                type: String,
+                default: "move",
+                scope: "world",
+                choices: WALL_COVER_DEFAULT,
             },
             {
                 key: "creature",
@@ -492,13 +511,112 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             },
         ];
     }
+
+    getWallCover(wall: WallDocument): WallCoverDefault {
+        const flag = this.getFlag<string>(wall, "option");
+        const option = R.isIncludedIn(flag, WALL_COVER_OPTIONS) ? flag : "default";
+        return option === "default" ? this.settings.wallDefault : option;
+    }
+
+    test(originToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>, targetToken: TokenPF2e) {
+        const scene = originToken.scene;
+        const origin = tokenCenter3d(originToken);
+        const target = tokenCenter3d(targetToken);
+        const boudaryWidth = target.x - origin.x;
+        const boudaryHeight = target.y - origin.y;
+
+        // we have nothing to test, they are null
+        if (boudaryWidth === 0 && boudaryHeight === 0) return;
+
+        const boundaryShape = new PIXI.Rectangle(origin.x, origin.y, boudaryWidth, boudaryHeight);
+        const config: ClockwiseSweepPolygonConfig = {
+            type: "move",
+            boundaryShapes: [boundaryShape.normalize()],
+        };
+
+        const poly = new CONFIG.Canvas.polygonBackends.move();
+        poly.initialize(origin, config);
+        poly["_identifyEdges"]();
+
+        // this needs to be dynamic using settings
+        const lines = [[origin, target.subtract(origin)]] as const;
+        const intersection = this.testEdgesCollisions(scene, lines, poly.edges);
+
+        if (intersection) {
+            console.log(intersection);
+
+            const { edge, point } = intersection;
+            const v0 = Vector2d.fromData(edge.a);
+            const v1 = Vector2d.fromData(edge.b);
+            const side = getSideOfPointFromLine(v0, v1, origin);
+        }
+    }
+
+    testEdgesCollisions(
+        scene: ScenePF2e,
+        lines: readonly [readonly [Vector, Vector]],
+        edges: Set<foundry.canvas.geometry.edges.Edge>,
+    ): { point: Vector; edge: foundry.canvas.geometry.edges.Edge } | undefined {
+        for (const edge of edges) {
+            const wall = edge.object;
+            if (!(wall instanceof CONFIG.Wall.documentClass)) continue;
+
+            const option = this.getWallCover(wall);
+            // this edge doesn't block cover so we skip
+            if (option === "none" || (option === "move" && edge.isLimited("move"))) continue;
+
+            const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
+            // we retrieve the unique ranges for this edge
+            const ranges = R.pipe(
+                [...(levels.size ? levels : scene.levels)],
+                R.map((level) => [level.elevation.bottom, level.elevation.top] as const),
+                R.uniqueWith((a, b) => a[0] === b[0] && a[1] === b[1]),
+                R.map(([bottom, top]): [number, number] => {
+                    return [
+                        bottom === -Infinity ? Number.MIN_SAFE_INTEGER : bottom,
+                        top === Infinity ? Number.MAX_SAFE_INTEGER : top,
+                    ]; // we can't do intersection with Infinity
+                }),
+            );
+
+            for (const [bottom, top] of ranges) {
+                const origin = Vector.fromData(edge.a, bottom);
+                const r0 = origin;
+                const r1 = Vector.fromData(edge.b, bottom);
+                const r2 = Vector.fromData(edge.b, top);
+                const r3 = Vector.fromData(edge.a, top);
+
+                const triangles = [
+                    [r0, r1, r3],
+                    [r3, r2, r1],
+                ] as const;
+
+                for (const [v0, v1, v2] of triangles) {
+                    for (const [O, D] of lines) {
+                        const point = lineIntersectTriangle(O, D, v0, v1, v2);
+                        if (point) {
+                            return { point, edge };
+                        } // we got it
+                    }
+                }
+
+                // // we know we don't have to test elevation so we use the regular foundry logic
+                // if (valueBetween(origin.z, bottom, top) && valueBetween(target.z, bottom, top)) {
+                //     const x = foundry.utils.lineSegmentIntersection(origin, target, edge.a, edge.b);
+                // }
+            }
+        }
+    }
 }
+
+type WallCoverDefault = (typeof WALL_COVER_DEFAULT)[number];
 
 type ToolSettings = {
     creature: (typeof CREATURE_SETTINGS)[number];
     dead: boolean;
     prone: boolean;
     wall: (typeof WALL_INTERSECTIONS_SETTING)[number];
+    wallDefault: WallCoverDefault;
 };
 
 type CoverSelection = { level: CoverLevel; value: ZeroToFour };
