@@ -121,15 +121,28 @@ function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
     const intersects = CONFIG.Canvas.polygonBackends.move.testCollision(origin, target, { type: "move", mode: "any" });
 
     if (debug) {
-        drawDebugLine(origin, target, intersects ? "red" : "green");
+        drawDebug(intersects ? "red" : "green", origin, target);
     }
 
     return intersects;
 }
 
-function drawDebugLine(origin: Point, target: Point, color: "blue" | "green" | "red") {
-    const hex = color === "blue" ? 0x0066cc : color === "red" ? 0xff0000 : 0x16a103;
-    canvas.controls.debug.lineStyle(4, hex).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
+function drawDebug(color: PIXI.ColorSource, ...points: [...Point[], Point | boolean]) {
+    const [closed, path] = (
+        typeof points.at(-1) === "boolean" ? [points.at(-1), points.slice(0, -1)] : [false, points]
+    ) as [boolean, Point[]];
+
+    if (path.length < 2) return;
+
+    const debug = canvas.controls.debug;
+
+    debug.lineStyle(4, color);
+
+    return path.length === 2
+        ? debug.moveTo(path[0].x, path[0].y).lineTo(path[1].x, path[1].y)
+        : closed
+          ? debug.drawPolygon(...path).finishPoly()
+          : debug.drawPath(...path).closePath();
 }
 
 type TradeQuantityDialogOptions<A extends string = string> = {
@@ -168,5 +181,5 @@ type TradeMessageOptions = {
     userId?: string;
 };
 
-export { createTradeMessage, createTradeQuantityDialog, drawDebugLine, lineIntersect };
+export { createTradeMessage, createTradeQuantityDialog, drawDebug, lineIntersect };
 export type { TradeMessageOptions, TradeQuantityDialogData, TradeQuantityDialogOptions };

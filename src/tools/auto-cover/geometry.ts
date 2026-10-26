@@ -1,4 +1,4 @@
-import { TokenPF2e } from "foundry-helpers";
+import { ScenePF2e, TokenDocumentPF2e, TokenPF2e } from "foundry-helpers";
 import { lineIntersect } from "tools";
 
 const RECT_CORNERS = [
@@ -158,35 +158,30 @@ class Vector {
     }
 }
 
-function project90(p: Vector, v0: Vector, v1: Vector, inverted: boolean = false) {
-    const v = v1.subtract(v0);
-    const u = inverted ? new Vector(v.y, -v.x) : new Vector(-v.y, v.x);
-    return u.normalize.multiply(p.z).add(p);
-}
-
 function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
     const d = (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
     return d > 0 ? 1 : d < 0 ? -1 : 0;
 }
 
-function getTokenDepth(token: TokenPF2e): number {
+function getTokenDepth(token: TokenDocumentPF2e): number {
     const actor = token.actor;
 
     if (actor?.isOfType("vehicle")) {
         return actor.system.details.space.high;
     }
 
-    if (actor?.isOfType("creature") && token.document.width === token.document.height) {
-        return token.document.width;
+    if (actor?.isOfType("creature") && token.width === token.height) {
+        return token.width;
     }
 
     // not really sure what to do here in case of non squared bounds
-    return Math.min(token.document.width, token.document.height);
+    return Math.min(token.width, token.height);
 }
 
-function tokenCenter3d(token: TokenPF2e): Vector {
-    const { size, distance } = token.scene?.grid ?? { distance: 5, size: 100 };
-    const elevation = token.document.elevation / distance;
+function tokenCenter3d(token: TokenDocumentPF2e<ScenePF2e>): Vector {
+    const offset = token.scene.levels.get(token.level)?.elevation.bottom ?? 0;
+    const { size, distance } = token.scene.grid;
+    const elevation = (token.elevation - offset) / distance;
     const depth = getTokenDepth(token);
     return Vector.fromData(token.center, (elevation + depth / 2) * size);
 }
@@ -265,7 +260,6 @@ export {
     getRectEdges,
     getSideOfPointFromLine,
     lineIntersectTriangle,
-    project90,
     spreadToToken,
     tokenCenter3d,
     tokenToSpread,

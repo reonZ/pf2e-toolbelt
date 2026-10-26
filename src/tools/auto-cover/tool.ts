@@ -28,7 +28,7 @@ import {
     ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { drawDebugLine, lineIntersect } from "tools";
+import { drawDebug, lineIntersect } from "tools";
 import {
     COVER_VALUES,
     CoverHighlightRenderer,
@@ -36,7 +36,6 @@ import {
     getRectEdges,
     getSideOfPointFromLine,
     lineIntersectTriangle,
-    project90,
     RectEdge,
     SIZES,
     spreadToToken,
@@ -218,7 +217,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const target = targetToken.center;
 
         if (debug) {
-            drawDebugLine(origin, target, "blue");
+            drawDebug("blue", origin, target);
         }
 
         let cover: CoverLevel = "none";
@@ -238,7 +237,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             const intersects = foundry.utils.lineSegmentIntersects(origin, target, edge.A, edge.B);
 
             if (debug) {
-                drawDebugLine(edge.A, edge.B, intersects ? "red" : "green");
+                drawDebug(intersects ? "red" : "green", edge.A, edge.B);
             }
 
             return intersects;
@@ -511,21 +510,25 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         ];
     }
 
-    getWallCover(wall: WallDocument): WallCoverDefault {
+    getWallCoverOption(wall: WallDocument): WallCoverDefault {
         const flag = this.getFlag<string>(wall, "option");
         const option = R.isIncludedIn(flag, WALL_COVER_OPTIONS) ? flag : "default";
         return option === "default" ? this.settings.wallDefault : option;
     }
 
-    test(originToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>, targetToken: TokenPF2e) {
+    test(
+        originToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>,
+        targetToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>,
+        debug?: boolean,
+    ): boolean {
         const scene = originToken.scene;
-        const origin = tokenCenter3d(originToken);
-        const target = tokenCenter3d(targetToken);
+        const origin = originToken.document;
+        const target = targetToken.document;
         const boundaryWidth = target.x - origin.x;
         const boundaryHeight = target.y - origin.y;
 
-        // we have nothing to test, they are null
-        if (boundaryWidth === 0 && boundaryHeight === 0) return;
+        // we have nothing to test, the points are on top of each other
+        if (boundaryWidth === 0 && boundaryHeight === 0) return false;
 
         const boundaryShape = new PIXI.Rectangle(origin.x, origin.y, boundaryWidth, boundaryHeight);
         const config: ClockwiseSweepPolygonConfig = {
@@ -537,40 +540,55 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         poly.initialize(origin, config);
         poly["_identifyEdges"]();
 
-        // this needs to be dynamic using settings
-        const lines = [[origin, target.subtract(origin)]] as const;
-        const intersection = this.testEdgesCollisions(scene, lines, poly.edges);
+        // TODO this needs to be dynamic using settings
+        const lines: [origin: Vector, target: Vector][] = [[tokenCenter3d(origin), tokenCenter3d(target)]];
+        const intersection = this.testWallEdgesCollisions(scene, lines, poly.edges);
+        if (!intersection) return false;
 
-        if (intersection) {
-            console.log(intersection);
+        if (debug) {
+            const { bottom, origin: O, target: T, point: p0, triangle } = intersection;
+            const [v0, v1, v2] = triangle;
+            const u = Vector.fromData(v1).subtract(v0);
 
-            const { edge, point } = intersection;
-            const v0 = Vector.fromData(edge.a);
-            const v1 = Vector.fromData(edge.b);
-            const side = getSideOfPointFromLine(v0, v1, origin);
+            // we project the points onto our triangle section
+            const side = getSideOfPointFromLine(v0, v1, origin.center);
+            const proj = (side === 1 ? new Vector(u.y, -u.x) : new Vector(-u.y, u.x)).normalize;
+            const [t0, t1, t2, p1] = R.map([v0, v1, v2, p0], (p) => {
+                // TODO convert it into clamped Vector first if edge is too short/long
+                return p.z === bottom ? p : proj.multiply(p.z - bottom).add(p);
+            });
 
-            const projected = project90(point, v0, v1);
-            console.log(projected);
+            drawDebug("blue", t0, t1, t2, true); // projected triangle section
+            drawDebug("red", v0, v1); // edge that was intersected with
+            drawDebug("red", O, T); // line between tokens
+            drawDebug("blue", p0, p1); // projected line between token
+            canvas.controls.debug.beginFill("blue").drawCircle(p1.x, p1.y, 4).endFill();
         }
+
+        return true;
     }
 
-    testEdgesCollisions(
+    testWallEdgesCollisions(
         scene: ScenePF2e,
-        lines: readonly [readonly [Vector, Vector]],
+        lines: [Vector, Vector][],
         edges: Set<foundry.canvas.geometry.edges.Edge>,
-    ): { point: Vector; edge: foundry.canvas.geometry.edges.Edge } | undefined {
+    ): WallEdgeIntersection | undefined {
         const { distance, size } = scene.grid;
+
+        // we process the lines direction outside the loops to come
+        const rays = R.map(lines, ([origin, target]) => [origin, target, target.subtract(origin)] as const);
 
         for (const edge of edges) {
             const wall = edge.object;
             if (!(wall instanceof CONFIG.Wall.documentClass)) continue;
 
-            const option = this.getWallCover(wall);
+            const option = this.getWallCoverOption(wall);
             // this edge doesn't block cover so we skip
             if (option === "none" || (option === "move" && edge.isLimited("move"))) continue;
 
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
             // we retrieve the unique ranges for this edge
+            // TODO cache the levels range
             const ranges = R.pipe(
                 [...(levels.size ? levels : scene.levels)],
                 R.map((level) => [level.elevation.bottom, level.elevation.top] as const),
@@ -596,10 +614,10 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 ] as const;
 
                 for (const [v0, v1, v2] of triangles) {
-                    for (const [O, D] of lines) {
+                    for (const [O, T, D] of rays) {
                         const point = lineIntersectTriangle(O, D, v0, v1, v2);
                         if (point) {
-                            return { point, edge };
+                            return { bottom, top, origin: O, target: T, point, triangle: [v0, v1, v2] };
                         } // we got it
                     }
                 }
@@ -616,6 +634,15 @@ type ToolSettings = {
     prone: boolean;
     wall: (typeof WALL_INTERSECTIONS_SETTING)[number];
     wallDefault: WallCoverDefault;
+};
+
+type WallEdgeIntersection = {
+    bottom: number;
+    top: number;
+    origin: Vector;
+    target: Vector;
+    point: Vector;
+    triangle: [Vector, Vector, Vector];
 };
 
 type CoverSelection = { level: CoverLevel; value: ZeroToFour };
