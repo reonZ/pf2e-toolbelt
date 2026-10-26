@@ -122,11 +122,15 @@ class Vector {
     }
 
     get normalize(): Vector {
-        return this.divide(this.magnitude);
+        return this.divideBy(this.magnitude);
     }
 
     get position(): Point {
         return { x: this.x, y: this.y };
+    }
+
+    get vector2d(): Vector {
+        return new Vector(this.x, this.y);
     }
 
     add(other: Vector): Vector {
@@ -141,7 +145,7 @@ class Vector {
         );
     }
 
-    divide(value: number): Vector {
+    divideBy(value: number): Vector {
         return new Vector(this.x / value, this.y / value, this.z / value);
     }
 
@@ -149,7 +153,15 @@ class Vector {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
-    multiply(value: number): Vector {
+    equals(other: Vector): boolean {
+        return this.equals2d(other) && this.z === other.z;
+    }
+
+    equals2d(other: Vector): boolean {
+        return this.x === other.x && this.y === other.y;
+    }
+
+    multiplyBy(value: number): Vector {
         return new Vector(this.x * value, this.y * value, this.z * value);
     }
 
@@ -214,43 +226,8 @@ function lineIntersectTriangle(P: Vector, D: Vector, v0: Vector, v1: Vector, v2:
 
     // our finite line intersects the triangle
     if (t > EPSILON) {
-        return D.multiply(t).add(P);
+        return D.multiplyBy(t).add(P);
     }
-}
-
-function _lineIntersectTriangle(O: Vector, U: Vector, v0: Vector, v1: Vector, v2: Vector) {
-    const e1 = v1.subtract(v0);
-    const e2 = v2.subtract(v0);
-    const N = e1.cross(e2);
-    const w0 = O.subtract(v0);
-    const denom = N.dot(U);
-
-    // line is parallel to plane
-    if (Math.abs(denom) < EPSILON) return;
-
-    const P = -N.dot(w0) / denom;
-    // no intersection
-    if (P < 0 || P > 1) return;
-
-    // intersect point of line and plane
-    const I = U.multiply(P).add(O);
-
-    // we test if I is inside the triangle
-    const uu = e1.dot(e1);
-    const uv = e1.dot(e2);
-    const vv = e2.dot(e2);
-    const w = I.subtract(v0);
-    const wu = w.dot(e1);
-    const wv = w.dot(e2);
-    const D = uv * uv - uu * vv;
-
-    // get and test parametric coords
-    const c1 = (uv * wv - vv * wu) / D;
-    if (c1 < 0 || c1 > 1) return;
-    const c2 = (uv * wu - uu * wv) / D;
-    if (c2 < 0 || c1 + c2 > 1) return;
-
-    return 1;
 }
 
 type RectEdge = { A: Point; B: Point };

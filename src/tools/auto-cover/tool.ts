@@ -516,7 +516,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return option === "default" ? this.settings.wallDefault : option;
     }
 
-    test(
+    testWall(
         originToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>,
         targetToken: TokenPF2e<TokenDocumentPF2e<ScenePF2e>>,
         debug?: boolean,
@@ -544,26 +544,41 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const lines: [origin: Vector, target: Vector][] = [[tokenCenter3d(origin), tokenCenter3d(target)]];
         const intersection = this.testWallEdgesCollisions(scene, lines, poly.edges);
         if (!intersection) return false;
+        if (!debug) return true;
 
-        if (debug) {
-            const { bottom, origin: O, target: T, point: p0, triangle } = intersection;
-            const [v0, v1, v2] = triangle;
-            const u = Vector.fromData(v1).subtract(v0);
+        const { bottom, edge, origin: O, target: T, top, point: p0, triangle } = intersection;
+        const [v0, v1, v2] = triangle;
+        const [e0, e1] = edge;
 
-            // we project the points onto our triangle section
-            const side = getSideOfPointFromLine(v0, v1, origin.center);
-            const proj = (side === 1 ? new Vector(u.y, -u.x) : new Vector(-u.y, u.x)).normalize;
-            const [t0, t1, t2, p1] = R.map([v0, v1, v2, p0], (p) => {
-                // TODO convert it into clamped Vector first if edge is too short/long
-                return p.z === bottom ? p : proj.multiply(p.z - bottom).add(p);
-            });
+        drawDebug("red", e0, e1); // edge that was intersected with
+        drawDebug("red", O, T); // line between tokens
 
-            drawDebug("blue", t0, t1, t2, true); // projected triangle section
-            drawDebug("red", v0, v1); // edge that was intersected with
-            drawDebug("red", O, T); // line between tokens
-            drawDebug("blue", p0, p1); // projected line between token
-            canvas.controls.debug.beginFill("blue").drawCircle(p1.x, p1.y, 4).endFill();
-        }
+        // no point in displaying Infinite sized walls
+        if (bottom === Number.MIN_SAFE_INTEGER || top === Number.MAX_SAFE_INTEGER) return true;
+
+        const u = Vector.fromData(v1).subtract(v0);
+        // we scale horizontally if the edge isn't of an appropriate length
+        const m = u.vector2d.magnitude;
+        const scalarH = Math.max(m, 200) / m;
+        const scaleH = (p: Vector) => {
+            if (scalarH === 1 || p.equals2d(e0)) return p;
+            const su = p.subtract(e0);
+            return su.multiplyBy(scalarH).subtract(su).add(p);
+        };
+        // we scale vertically if the wall's height is inappropriate
+        const depth = top - bottom;
+        const scalarV = Math.clamp(depth, 200, Math.min(800, m * scalarH * 0.75)) / depth;
+        // we project the points onto our triangle section
+        const side = getSideOfPointFromLine(v0, v1, origin.center);
+        const proj = (side === 1 ? new Vector(u.y, -u.x) : new Vector(-u.y, u.x)).normalize;
+        const [t0, t1, t2, p1] = R.map([v0, v1, v2, p0], (p) => {
+            const s = scaleH(p);
+            return p.z === bottom ? s : proj.multiplyBy((p.z - bottom) * scalarV).add(s);
+        });
+
+        drawDebug("blue", t0, t1, t2, true); // projected triangle section
+        drawDebug("blue", scaleH(p0), p1); // projected z-axis line
+        drawDebug("blue", p1, 4); // projected z-axis circle
 
         return true;
     }
@@ -588,22 +603,18 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
             // we retrieve the unique ranges for this edge
-            // TODO cache the levels range
             const ranges = R.pipe(
                 [...(levels.size ? levels : scene.levels)],
                 R.map((level) => [level.elevation.bottom, level.elevation.top] as const),
                 R.uniqueWith((a, b) => a[0] === b[0] && a[1] === b[1]),
-                R.map(([bottom, top]): [number, number] => {
-                    return [
-                        bottom === -Infinity ? Number.MIN_SAFE_INTEGER : (bottom / distance) * size,
-                        top === Infinity ? Number.MAX_SAFE_INTEGER : (top / distance) * size,
-                    ]; // we can't do intersection with Infinity
-                }),
             );
 
-            for (const [bottom, top] of ranges) {
-                const origin = Vector.fromData(edge.a, bottom);
-                const r0 = origin;
+            for (const range of ranges) {
+                // we can't check intersections with Infinity numbers
+                const bottom = range[0] === -Infinity ? Number.MIN_SAFE_INTEGER : (range[0] / distance) * size;
+                const top = range[1] === Infinity ? Number.MAX_SAFE_INTEGER : (range[1] / distance) * size;
+
+                const r0 = Vector.fromData(edge.a, bottom);
                 const r1 = Vector.fromData(edge.b, bottom);
                 const r2 = Vector.fromData(edge.b, top);
                 const r3 = Vector.fromData(edge.a, top);
@@ -616,9 +627,17 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 for (const [v0, v1, v2] of triangles) {
                     for (const [O, T, D] of rays) {
                         const point = lineIntersectTriangle(O, D, v0, v1, v2);
-                        if (point) {
-                            return { bottom, top, origin: O, target: T, point, triangle: [v0, v1, v2] };
-                        } // we got it
+                        if (!point) continue;
+
+                        return {
+                            bottom,
+                            edge: [r0, r1],
+                            origin: O,
+                            target: T,
+                            top,
+                            point,
+                            triangle: [v0, v1, v2],
+                        };
                     }
                 }
             }
@@ -638,9 +657,10 @@ type ToolSettings = {
 
 type WallEdgeIntersection = {
     bottom: number;
-    top: number;
+    edge: [Vector, Vector];
     origin: Vector;
     target: Vector;
+    top: number;
     point: Vector;
     triangle: [Vector, Vector, Vector];
 };

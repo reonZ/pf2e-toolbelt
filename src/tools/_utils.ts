@@ -127,22 +127,36 @@ function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
     return intersects;
 }
 
-function drawDebug(color: PIXI.ColorSource, ...points: [...Point[], Point | boolean]) {
-    const [closed, path] = (
-        typeof points.at(-1) === "boolean" ? [points.at(-1), points.slice(0, -1)] : [false, points]
-    ) as [boolean, Point[]];
+function drawDebug(color: PIXI.ColorSource, ...points: [Point, number]): PIXI.Graphics | undefined;
+function drawDebug(color: PIXI.ColorSource, ...points: [...Point[], Point, Point, boolean]): PIXI.Graphics | undefined;
+function drawDebug(color: PIXI.ColorSource, ...points: [...Point[], Point, Point]): PIXI.Graphics | undefined;
+function drawDebug(color: PIXI.ColorSource, ...points: (Point | boolean | number)[]) {
+    const last = points.at(-1);
+    const path = (R.isObjectType(last) ? points : points.slice(0, -1)) as Point[];
+
+    if (path.length < 1) return;
+
+    if (R.isNumber(last)) {
+        return canvas.controls.debug
+            .lineStyle(4, color)
+            .beginFill(color)
+            .drawCircle(path[0].x, path[0].y, last)
+            .endFill();
+    }
 
     if (path.length < 2) return;
 
-    const debug = canvas.controls.debug;
+    if (last === true) {
+        return canvas.controls.debug
+            .lineStyle(4, color)
+            .drawPolygon(...path)
+            .finishPoly();
+    }
 
-    debug.lineStyle(4, color);
-
-    return path.length === 2
-        ? debug.moveTo(path[0].x, path[0].y).lineTo(path[1].x, path[1].y)
-        : closed
-          ? debug.drawPolygon(...path).finishPoly()
-          : debug.drawPath(...path).closePath();
+    return canvas.controls.debug
+        .lineStyle(4, color)
+        .drawPath(...path)
+        .closePath();
 }
 
 type TradeQuantityDialogOptions<A extends string = string> = {
