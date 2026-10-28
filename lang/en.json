@@ -135,22 +135,42 @@
                     "name": "Skip Dead Creatures",
                     "hint": "Should dead creatures not provide cover."
                 },
+                "enabled": {
+                    "hint": "When manual, the module will not calculate any cover for you, you can set it in the modifiers popup window.",
+                    "choices": {
+                        "disabled": "Disabled",
+                        "manual": "Manual",
+                        "enabled": "Enabled"
+                    }
+                },
                 "prone": {
                     "name": "Skip Prone Creatures",
                     "hint": "Should prone creatures not provide cover."
                 },
-                "wall": {
-                    "name": "Walls Cover",
-                    "hint": "Should target creatures receive standard cover when the path between them and their attacker is intersected by a wall.",
+                "spread": {
+                    "hint": "Spread ratio from the center of the token toward corners. At '0', only use the center. At '0.5', all height corners are used."
+                },
+                "wallDefaultLevel": {
+                    "name": "Wall Default Level",
+                    "hint": "The default level of cover a wall provides."
+                },
+                "wallDefaultMode": {
+                    "name": "Wall Default Mode",
+                    "hint": "The default mode for walls. When 'Cover if Movement' is selected, the wall will provide cover if it also restricts movement.",
                     "choices": {
-                        "center-center": "Center to Center",
-                        "center-spread": "Center to Spread",
-                        "center-corner": "Center to Corners",
-                        "corner-center": "Corners to Center",
-                        "corner-spread": "Corners to Spread",
-                        "corner-corner": "Corners to Corners",
-                        "disabled": "Disabled"
+                        "move": "Cover if Movement",
+                        "none": "No Cover",
+                        "normal": "Provide Cover"
                     }
+                },
+                "wallEnabled": {
+                    "name": "Wall Cover"
+                },
+                "wallOrigin": {
+                    "name": "Wall Origin Spread"
+                },
+                "wallTarget": {
+                    "name": "Wall Target Spread"
                 }
             },
             "betterChat": {

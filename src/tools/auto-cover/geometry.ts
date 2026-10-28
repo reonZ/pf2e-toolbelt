@@ -1,4 +1,4 @@
-import { ScenePF2e, TokenDocumentPF2e, TokenPF2e } from "foundry-helpers";
+import { MODULE, ScenePF2e, TokenDocumentPF2e, TokenPF2e } from "foundry-helpers";
 import { lineIntersect } from "tools";
 
 const RECT_CORNERS = [
@@ -90,6 +90,17 @@ function spreadToToken(origin: TokenPF2e, type: "spread" | "corner", target: Tok
 
 const EPSILON = 0.0000001;
 
+const CORNER_SPREADS = [
+    [0, 0, 0], // floorTopLeft
+    [1, 1, 1], // ceilBottomRight
+    [1, 0, 0], // floorTopRight
+    [0, 1, 1], // ceilBottomLeft
+    [1, 1, 0], // floorBottomRight
+    [0, 0, 1], // ceilTopLeft
+    [0, 1, 0], // floorBottomLeft
+    [1, 0, 1], // ceilTopRight
+] as const;
+
 class Vector {
     #x: number;
     #y: number;
@@ -133,11 +144,11 @@ class Vector {
         return new Vector(this.x, this.y);
     }
 
-    add(other: Vector): Vector {
-        return new Vector(this.x + other.x, this.y + other.y, this.z + other.z);
+    add({ x = 0, y = 0, z = 0 }: Partial<Point3d>): Vector {
+        return new Vector(this.x + x, this.y + y, this.z + z);
     }
 
-    cross(other: Vector): Vector {
+    cross(other: Point3d): Vector {
         return new Vector(
             this.y * other.z - this.z * other.y,
             this.z * other.x - this.x * other.z,
@@ -149,24 +160,28 @@ class Vector {
         return new Vector(this.x / value, this.y / value, this.z / value);
     }
 
-    dot(other: Vector): number {
+    dot(other: Point3d): number {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
-    equals(other: Vector): boolean {
+    equals(other: Point3d): boolean {
         return this.equals2d(other) && this.z === other.z;
     }
 
-    equals2d(other: Vector): boolean {
+    equals2d(other: Point3d): boolean {
         return this.x === other.x && this.y === other.y;
+    }
+
+    moveTowardByScalar(other: Vector, value: number): Vector {
+        return other.subtract(this).multiplyBy(value).add(this);
     }
 
     multiplyBy(value: number): Vector {
         return new Vector(this.x * value, this.y * value, this.z * value);
     }
 
-    subtract(other: Vector): Vector {
-        return new Vector(this.x - other.x, this.y - other.y, this.z - other.z);
+    subtract({ x = 0, y = 0, z = 0 }: Partial<Point3d>): Vector {
+        return new Vector(this.x - x, this.y - y, this.z - z);
     }
 }
 
@@ -190,12 +205,41 @@ function getTokenDepth(token: TokenDocumentPF2e): number {
     return Math.min(token.width, token.height);
 }
 
-function tokenCenter3d(token: TokenDocumentPF2e<ScenePF2e>): Vector {
-    const offset = token.scene.levels.get(token.level)?.elevation.bottom ?? 0;
-    const { size, distance } = token.scene.grid;
-    const elevation = (token.elevation - offset) / distance;
-    const depth = getTokenDepth(token);
-    return Vector.fromData(token.center, (elevation + depth / 2) * size);
+function* tokenSpreadValues(token: TokenDocumentPF2e<ScenePF2e>, value: number): Generator<Vector, void, unknown> {
+    const { distance, size } = token.scene.grid;
+    const elevation = (token.elevation / distance) * size;
+    const depth = getTokenDepth(token) * size;
+    const height = token.height * size;
+    const width = token.width * size;
+    const center = new Vector(token.x + width / 2, token.y + height / 2, elevation + depth / 2);
+    const origin = Vector.fromData(token, elevation);
+
+    // we only use the center point
+    if (value <= 0) {
+        yield center;
+        return;
+    }
+
+    // the expected value is between [0, 0.5], so we need to double it to work with center
+    const scalar = Math.clamp(value, 0, 0.5) * 2;
+
+    for (const [x, y, z] of CORNER_SPREADS) {
+        const p = origin.add({ x: width * x, y: height * y, z: depth * z });
+        yield scalar === 0.5 ? p : center.moveTowardByScalar(p, scalar);
+    }
+}
+
+function* spreadValuesGenerator(
+    originToken: TokenDocumentPF2e<ScenePF2e>,
+    targetToken: TokenDocumentPF2e<ScenePF2e>,
+    originSpread: number,
+    targetSpread: number,
+): SpreadValuesGenerator {
+    for (const origin of tokenSpreadValues(originToken, originSpread)) {
+        for (const target of tokenSpreadValues(targetToken, targetSpread)) {
+            yield [origin, target, target.subtract(origin)] as const;
+        }
+    }
 }
 
 // Möller–Trumbore implementation
@@ -230,16 +274,29 @@ function lineIntersectTriangle(P: Vector, D: Vector, v0: Vector, v1: Vector, v2:
     }
 }
 
+MODULE.debugExpose("geometry", {
+    getSideOfPointFromLine,
+    getTokenDepth,
+    lineIntersectTriangle,
+    spreadValuesGenerator,
+    tokenSpreadValues,
+    Vector,
+});
+
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
+
+type Point3d = { x: number; y: number; z: number };
+
+type SpreadValuesGenerator = Generator<readonly [origin: Vector, target: Vector, direction: Vector], void, unknown>;
 
 export {
     getRectEdges,
     getSideOfPointFromLine,
     lineIntersectTriangle,
     spreadToToken,
-    tokenCenter3d,
+    spreadValuesGenerator,
     tokenToSpread,
     Vector,
 };
-export type { RectEdge, RectEdges };
+export type { RectEdge, RectEdges, SpreadValuesGenerator };

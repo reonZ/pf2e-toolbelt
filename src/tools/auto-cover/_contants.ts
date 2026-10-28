@@ -16,6 +16,7 @@ const SIZES = {
 };
 
 type CoverLevel = keyof typeof COVER_VALUES;
+type CoverType = "manual" | "wall" | "creature";
 
 export { COVER_VALUES, SIZES };
-export type { CoverLevel };
+export type { CoverLevel, CoverType };
