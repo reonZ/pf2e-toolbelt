@@ -1,11 +1,3 @@
-const COVER_VALUES = {
-    none: 0,
-    lesser: 1,
-    standard: 2,
-    greater: 3,
-    "greater-prone": 4,
-} as const;
-
 const SIZES = {
     tiny: 0,
     sm: 1,
@@ -15,8 +7,4 @@ const SIZES = {
     grg: 5,
 };
 
-type CoverLevel = keyof typeof COVER_VALUES;
-type CoverType = "manual" | "wall" | "creature";
-
-export { COVER_VALUES, SIZES };
-export type { CoverLevel, CoverType };
+export { SIZES };

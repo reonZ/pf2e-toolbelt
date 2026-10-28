@@ -1,5 +1,5 @@
-import { MODULE, ScenePF2e, TokenDocumentPF2e, TokenPF2e } from "foundry-helpers";
-import { lineIntersect } from "tools";
+import { MODULE, TokenDocumentPF2e, TokenPF2e } from "foundry-helpers";
+import { lineIntersect, Vector } from "tools";
 
 const RECT_CORNERS = [
     { x: 0, y: 0 },
@@ -72,21 +72,7 @@ function spreadToToken(origin: TokenPF2e, type: "spread" | "corner", target: Tok
     return true;
 }
 
-// function spreadToSpread(
-//     origin: TokenPF2e,
-//     originType: "spread" | "corner",
-//     target: TokenPF2e,
-//     targetType: "spread" | "corner",
-//     debug: boolean,
-// ): boolean {
-//     for (const originPoint of tokenSpread(origin, originType)) {
-//         for (const targetPoint of tokenSpread(target, targetType)) {
-//             if (lineIntersect(originPoint, targetPoint, debug)) return true;
-//         }
-//     }
-
-//     return false;
-// }
+////////////////
 
 const EPSILON = 0.0000001;
 
@@ -100,90 +86,6 @@ const CORNER_SPREADS = [
     [0, 1, 0], // floorBottomLeft
     [1, 0, 1], // ceilTopRight
 ] as const;
-
-class Vector {
-    #x: number;
-    #y: number;
-    #z: number;
-
-    constructor(x: number, y: number, z: number = 0) {
-        this.#x = x;
-        this.#y = y;
-        this.#z = z;
-    }
-
-    static fromData(position: Point, elevation: number = 0): Vector {
-        return new Vector(position.x, position.y, elevation);
-    }
-
-    get x(): number {
-        return this.#x;
-    }
-
-    get y(): number {
-        return this.#y;
-    }
-
-    get z(): number {
-        return this.#z;
-    }
-
-    get magnitude(): number {
-        return Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
-    }
-
-    get normalize(): Vector {
-        return this.divideBy(this.magnitude);
-    }
-
-    get position(): Point {
-        return { x: this.x, y: this.y };
-    }
-
-    get vector2d(): Vector {
-        return new Vector(this.x, this.y);
-    }
-
-    add({ x = 0, y = 0, z = 0 }: Partial<Point3d>): Vector {
-        return new Vector(this.x + x, this.y + y, this.z + z);
-    }
-
-    cross(other: Point3d): Vector {
-        return new Vector(
-            this.y * other.z - this.z * other.y,
-            this.z * other.x - this.x * other.z,
-            this.x * other.y - this.y * other.x,
-        );
-    }
-
-    divideBy(value: number): Vector {
-        return new Vector(this.x / value, this.y / value, this.z / value);
-    }
-
-    dot(other: Point3d): number {
-        return this.x * other.x + this.y * other.y + this.z * other.z;
-    }
-
-    equals(other: Point3d): boolean {
-        return this.equals2d(other) && this.z === other.z;
-    }
-
-    equals2d(other: Point3d): boolean {
-        return this.x === other.x && this.y === other.y;
-    }
-
-    moveTowardByScalar(other: Vector, value: number): Vector {
-        return other.subtract(this).multiplyBy(value).add(this);
-    }
-
-    multiplyBy(value: number): Vector {
-        return new Vector(this.x * value, this.y * value, this.z * value);
-    }
-
-    subtract({ x = 0, y = 0, z = 0 }: Partial<Point3d>): Vector {
-        return new Vector(this.x - x, this.y - y, this.z - z);
-    }
-}
 
 function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
     const d = (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
@@ -205,8 +107,8 @@ function getTokenDepth(token: TokenDocumentPF2e): number {
     return Math.min(token.width, token.height);
 }
 
-function* tokenSpreadValues(token: TokenDocumentPF2e<ScenePF2e>, value: number): Generator<Vector, void, unknown> {
-    const { distance, size } = token.scene.grid;
+function* tokenSpreadValues(token: TokenDocumentPF2e, value: number): Generator<Vector, void, unknown> {
+    const { distance, size } = token.scene?.grid ?? { distance: 5, size: 100 };
     const elevation = (token.elevation / distance) * size;
     const depth = getTokenDepth(token) * size;
     const height = token.height * size;
@@ -214,10 +116,9 @@ function* tokenSpreadValues(token: TokenDocumentPF2e<ScenePF2e>, value: number):
     const center = new Vector(token.x + width / 2, token.y + height / 2, elevation + depth / 2);
     const origin = Vector.fromData(token, elevation);
 
-    // we only use the center point
     if (value <= 0) {
         yield center;
-        return;
+        return; // we only use the center point
     }
 
     // the expected value is between [0, 0.5], so we need to double it to work with center
@@ -230,8 +131,8 @@ function* tokenSpreadValues(token: TokenDocumentPF2e<ScenePF2e>, value: number):
 }
 
 function* spreadValuesGenerator(
-    originToken: TokenDocumentPF2e<ScenePF2e>,
-    targetToken: TokenDocumentPF2e<ScenePF2e>,
+    originToken: TokenDocumentPF2e,
+    targetToken: TokenDocumentPF2e,
     originSpread: number,
     targetSpread: number,
 ): SpreadValuesGenerator {
@@ -286,8 +187,6 @@ MODULE.debugExpose("geometry", {
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 
-type Point3d = { x: number; y: number; z: number };
-
 type SpreadValuesGenerator = Generator<readonly [origin: Vector, target: Vector, direction: Vector], void, unknown>;
 
 export {
@@ -297,6 +196,5 @@ export {
     spreadToToken,
     spreadValuesGenerator,
     tokenToSpread,
-    Vector,
 };
 export type { RectEdge, RectEdges, SpreadValuesGenerator };
