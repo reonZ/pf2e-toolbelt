@@ -136,7 +136,7 @@
                     "hint": "Should dead creatures not provide cover."
                 },
                 "enabled": {
-                    "hint": "When manual, the module will not calculate any cover for you, you can set it in the modifiers popup window.",
+                    "hint": "When manual, the module will not calculate any cover for you but you can still set it in the modifiers popup window.",
                     "choices": {
                         "disabled": "Disabled",
                         "manual": "Manual",
@@ -148,7 +148,7 @@
                     "hint": "Should prone creatures not provide cover."
                 },
                 "spread": {
-                    "hint": "Spread ratio from the center of the token toward corners. At '0', only use the center. At '0.5', all height corners are used."
+                    "hint": "Spread ratio of a point from the center of the token toward corners (reaches the corners at '0.5'). Only uses the center at '0'."
                 },
                 "wallDefaultLevel": {
                     "name": "Wall Default Level",
@@ -516,9 +516,12 @@
         },
         "autoCover": {
             "creature": "Cover from Creature",
+            "default": "Default ({entry})",
             "greater": "Greater Cover",
             "greater-prone": "Greater-Prone Cover",
             "lesser": "Lesser Cover",
+            "level": "Cover Level",
+            "mode": "Cover Mode",
             "none": "No Cover",
             "override": "Override Cover",
             "overriden": "Overridden Cover",

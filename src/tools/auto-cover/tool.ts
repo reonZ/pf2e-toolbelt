@@ -16,7 +16,6 @@ import {
     getItemSourceId,
     htmlQuery,
     ItemSourcePF2e,
-    localize,
     MODULE,
     R,
     Rolled,
@@ -89,6 +88,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         createToggleWrapper("WRAPPER", "CONFIG.Token.objectClass.prototype._destroy", this.#tokenDestroy, {
             context: this,
         }),
+        createToggleWrapper(
+            "WRAPPER",
+            "foundry.applications.sheets.WallConfig.prototype._renderHTML",
+            this.#wallConfigRenderHTML,
+            { context: this },
+        ),
     ];
 
     #onRenderCheckModifierDialog = createToggleHook(
@@ -101,8 +106,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
-        const settingKey = `settings.${this.key}`;
-        const enabledChoices = R.fromKeys(SETTING_ENABLED, (key) => localize.path(settingKey, "enabled.choices", key));
+        const enabledChoices = R.fromKeys(SETTING_ENABLED, (key) => this.settingLocalize.path("enabled.choices", key));
 
         return [
             {
@@ -111,7 +115,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 scope: "world",
                 default: "disabled",
                 choices: enabledChoices,
-                hint: localize.path(settingKey, "enabled.hint"),
+                hint: this.settingLocalize.path("enabled.hint"),
                 onChange: () => {
                     this.configurate();
                 },
@@ -141,7 +145,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                         max: 0.5,
                         step: 0.05,
                     },
-                    hint: localize.path(settingKey, "spread.hint"),
+                    hint: this.settingLocalize.path("spread.hint"),
                 } as const;
             }),
             {
@@ -344,9 +348,18 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return level === "default" ? this.settings.wallDefaultLevel : level;
     }
 
-    getWallMode(wall: WallDocument): WallMode {
+    getWallModeFlag(wall: WallDocument): WallFlagMode {
         const flag = this.getFlag<string>(wall, "mode");
-        const mode = R.isIncludedIn(flag, WALL_FLAG_MODE) ? flag : "default";
+        return R.isIncludedIn(flag, WALL_FLAG_MODE) ? flag : "default";
+    }
+
+    getWallLevelFlag(wall: WallDocument): WallFlagLevel {
+        const flag = this.getFlag<string>(wall, "level");
+        return R.isIncludedIn(flag, WALL_FLAG_LEVEL) ? flag : "default";
+    }
+
+    getWallMode(wall: WallDocument): WallMode {
+        const mode = this.getWallModeFlag(wall);
         return mode === "default" ? this.settings.wallDefaultMode : mode;
     }
 
@@ -492,6 +505,60 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         drawDebug("red", e0, e1); // edge that was intersected with
         drawDebug("red", O, T); // line between tokens
+    }
+
+    async #wallConfigRenderHTML(
+        app: WallConfig,
+        wrapped: libWrapper.RegisterCallback,
+        context: fa.ApplicationRenderContext,
+        options: fa.ApplicationRenderOptions,
+    ) {
+        const result = (await wrapped(context, options)) as { body: HTMLElement };
+        const fieldSet = createHTMLElement("fieldset", {
+            content: createHTMLElement("legend", { content: MODULE.name }),
+        });
+
+        const modeGroup = foundry.applications.fields.createFormGroup({
+            input: foundry.applications.fields.createSelectInput({
+                id: `${app}-toolbelt-mode`,
+                name: `flags.${MODULE.id}.${this.key}.mode`,
+                options: WALL_FLAG_MODE.map((value) => {
+                    const label =
+                        value === "default"
+                            ? this.localize("default", {
+                                  entry: this.settingLocalize("wallDefaultMode.choices", this.settings.wallDefaultMode),
+                              })
+                            : this.settingLocalize("wallDefaultMode.choices", value);
+                    return { value, label };
+                }),
+                value: this.getWallModeFlag(app.document),
+            }),
+            label: this.localize("mode"),
+        });
+
+        const levelGroup = foundry.applications.fields.createFormGroup({
+            input: foundry.applications.fields.createSelectInput({
+                id: `${app}-toolbelt-level`,
+                name: `flags.${MODULE.id}.${this.key}.level`,
+                options: WALL_FLAG_LEVEL.map((value) => {
+                    const label =
+                        value === "default"
+                            ? this.localize("default", {
+                                  entry: this.localize(this.settings.wallDefaultLevel),
+                              })
+                            : this.localize(value);
+                    return { value, label };
+                }),
+                value: this.getWallLevelFlag(app.document),
+            }),
+            label: this.localize("level"),
+        });
+
+        fieldSet.append(modeGroup, levelGroup);
+
+        htmlQuery(result.body, "fieldset")?.after(fieldSet);
+
+        return result;
     }
 
     #tokenRefreshVisibility(token: TokenPF2e, wrapped: libWrapper.RegisterCallback) {
@@ -714,8 +781,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 }
 
-type SettingEnabledType = (typeof SETTING_ENABLED)[number];
-
 type ToolSettings = {
     creatureEnabled: SettingEnabledType;
     dead: boolean;
@@ -737,7 +802,14 @@ type WallIntersection = {
     triangle: [Vector, Vector, Vector];
 };
 
+type WallConfig = fa.api.DocumentSheetV2<fa.api.DocumentSheetConfiguration<WallDocument>>;
+
+type SettingEnabledType = (typeof SETTING_ENABLED)[number];
+
+type WallFlagLevel = (typeof WALL_FLAG_LEVEL)[number];
 type WallLevel = (typeof WALL_LEVEL)[number];
+
+type WallFlagMode = (typeof WALL_FLAG_MODE)[number];
 type WallMode = (typeof WALL_MODE)[number];
 
 type CoverSelection = { level: CoverLevel; value: ZeroToFour };

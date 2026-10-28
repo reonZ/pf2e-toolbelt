@@ -27,6 +27,7 @@ import DataField = foundry.data.fields.DataField;
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
     #localize?: Localize;
     #settings: Record<string, any> = {};
+    #settingsLocalize: Localize;
 
     declare settings: TSettings;
 
@@ -45,6 +46,10 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return (this.#localize ??= localize.sub(this.key));
     }
 
+    get settingLocalize(): Localize {
+        return (this.#settingsLocalize ??= localize.sub("settings", this.key));
+    }
+
     init(isGM: boolean) {}
     setup(isGM: boolean) {}
     ready(isGM: boolean) {}
@@ -53,11 +58,11 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
     /** debounce version of _configurate */
     configurate = foundry.utils.debounce(this._configurate, 1);
 
-    path(...path: string[]) {
+    path(...path: string[]): string {
         return R.join([this.key, ...path], ".");
     }
 
-    templatePath(...path: string[]) {
+    templatePath(...path: string[]): string {
         return R.join([this.key, ...path], "/");
     }
 
