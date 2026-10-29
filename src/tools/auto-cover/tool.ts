@@ -21,6 +21,7 @@ import {
     toggleHooksAndWrappers,
     TokenDocumentPF2e,
     TokenPF2e,
+    Wall,
     ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
@@ -342,10 +343,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const walls = R.pipe(
             [...canvas.walls.quadtree.getObjects(boundaryShape)],
-            R.map((wall) => wall.document),
-            R.filter((wall) => {
-                const edge = wall.edge;
-
+            R.filter(({ document: wall, edge }) => {
                 const mode = this.getWallMode(wall);
                 // this wall doesn't block cover so we skip
                 if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
@@ -369,11 +367,17 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return collision;
     }
 
-    #testWallCollision(scene: ScenePF2e, rays: GeneratedSpreadRays, walls: WallDocument[]): WallCollision | undefined {
+    #testWallCollision(scene: ScenePF2e, rays: GeneratedSpreadRays, walls: Wall[]): WallCollision | undefined {
         const { distance, size } = scene.grid;
+        const sortedZ = R.pipe(
+            rays,
+            R.flatMap(([O, T]) => [O.z, T.z]),
+            R.sort((a, b) => a - b),
+        ) as [number, ...number[]];
+        const minZ = R.first(sortedZ);
+        const maxZ = R.last(sortedZ);
 
-        for (const wall of walls) {
-            const edge = wall.edge;
+        for (const { document: wall, edge } of walls) {
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
             // we retrieve the unique ranges for this edge
             const ranges = R.pipe(
@@ -386,6 +390,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 // we can't check intersections with Infinity numbers
                 const bottom = range[0] === -Infinity ? Number.MIN_SAFE_INTEGER : (range[0] / distance) * size;
                 const top = range[1] === Infinity ? Number.MAX_SAFE_INTEGER : (range[1] / distance) * size;
+                // we preemptively eliminate ranges we know aren't encompassing tokens
+                if (top < minZ || bottom > maxZ) continue;
 
                 const r0 = Vector.fromData(edge.a, bottom);
                 const r1 = Vector.fromData(edge.b, bottom);

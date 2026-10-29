@@ -1,4 +1,4 @@
-import { MODULE, TokenDocumentPF2e } from "foundry-helpers";
+import { MODULE, R, TokenDocumentPF2e } from "foundry-helpers";
 import { Vector } from "tools";
 
 const EPSILON = 0.0000001;
@@ -43,7 +43,7 @@ function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocume
 
 function tokenSides(token: TokenDocumentPF2e, sideScale: number) {}
 
-function tokenSpreadValues(token: TokenDocumentPF2e, value: number): Vector[] {
+function tokenSpreadValues(token: TokenDocumentPF2e, value: number): [Vector, ...Vector[]] {
     const { distance, size } = token.scene?.grid ?? { distance: 5, size: 100 };
     const elevation = (token.elevation / distance) * size;
     const depth = getTokenDepth(token) * size;
@@ -59,7 +59,7 @@ function tokenSpreadValues(token: TokenDocumentPF2e, value: number): Vector[] {
     // the expected value is between [0, 0.5], so we need to double it to work with center
     const scalar = Math.clamp(value, 0, 0.5) * 2;
 
-    return CORNER_SPREADS.map(([x, y, z]) => {
+    return R.map(CORNER_SPREADS, ([x, y, z]) => {
         const p = origin.add({ x: width * x, y: height * y, z: depth * z });
         return scalar === 0.5 ? p : center.moveTowardByScalar(p, scalar);
     });
@@ -73,9 +73,9 @@ function generateSpreadRays(
 ): GeneratedSpreadRays {
     const originSpreads = tokenSpreadValues(origin, originSpread);
     const targetSpreads = tokenSpreadValues(target, targetSpread);
-    return originSpreads.flatMap((origin) => {
-        return targetSpreads.map((target) => {
-            return [origin, target, target.subtract(origin)] as const;
+    return R.flatMap(originSpreads, (origin): GeneratedSpreadRays => {
+        return R.map(targetSpreads, (target): GeneratedSpreadRay => {
+            return [origin, target, target.subtract(origin)];
         });
     });
 }
@@ -124,7 +124,8 @@ MODULE.debugExpose("geometry", {
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 
-type GeneratedSpreadRays = (readonly [origin: Vector, target: Vector, direction: Vector])[];
+type GeneratedSpreadRay = [origin: Vector, target: Vector, direction: Vector];
+type GeneratedSpreadRays = GeneratedSpreadRay[];
 
 export { createBoundaryFromTokens, generateSpreadRays, getSideOfPointFromLine, lineIntersectTriangle };
 export type { GeneratedSpreadRays, RectEdge, RectEdges };
