@@ -27,7 +27,7 @@ import DataField = foundry.data.fields.DataField;
 abstract class ModuleTool<TSettings extends Record<string, any> = Record<string, any>> {
     #localize?: Localize;
     #settings: Record<string, any> = {};
-    #settingsLocalize: Localize;
+    #settingsLocalize?: Localize;
 
     declare settings: TSettings;
 

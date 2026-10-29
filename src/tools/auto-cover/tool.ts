@@ -99,7 +99,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     max: 0.5,
                     step: 0.05,
                 },
-                hint: this.settingLocalize.path("spread.hint"),
+                hint: this.settingLocalize.path("spread", key.endsWith("Origin") ? "origin" : "target"),
             } as const;
         };
 
@@ -358,7 +358,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         if (!walls.length) return;
 
         const rays = generateSpreadRays(origin, target, originSpread, targetSpread);
-        const collision = this.#testWallCollision(scene, rays, walls);
+        const collision = this.#testWallCollision(scene, rays, walls, originSpread > 0);
 
         if (collision && debug) {
             this.#drawWallDebug(origin, collision);
@@ -367,7 +367,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return collision;
     }
 
-    #testWallCollision(scene: ScenePF2e, rays: GeneratedSpreadRays, walls: Wall[]): WallCollision | undefined {
+    #testWallCollision(
+        scene: ScenePF2e,
+        rays: GeneratedSpreadRays,
+        walls: Wall[],
+        eliminate: boolean,
+    ): WallCollision | undefined {
         const { distance, size } = scene.grid;
         const sortedZ = R.pipe(
             rays,
@@ -403,21 +408,39 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     [r3, r2, r1],
                 ] as const;
 
-                for (const [v0, v1, v2] of triangles) {
-                    for (const [O, T, D] of rays) {
-                        const point = lineIntersectTriangle(O, D, v0, v1, v2);
-                        if (!point) continue;
+                let collision: WallCollision | undefined;
+                const collisions: (boolean | undefined)[] = [];
 
-                        return {
-                            edge: [r0, r1],
-                            level: this.getWallLevel(wall),
-                            range: [bottom, top],
-                            ray: [O, T],
-                            point,
-                            triangle: [v0, v1, v2],
-                        };
+                for (let t = 0; t < 2; t++) {
+                    const [v0, v1, v2] = triangles[t];
+
+                    for (let r = 0; r < rays.length; r++) {
+                        const [O, T, D] = rays[r];
+                        const point = lineIntersectTriangle(O, D, v0, v1, v2);
+                        // we are on the second triangle and found a matching non-collision, we eliminate the obstacle
+                        if (eliminate && !point && t === 1 && !collisions[r]) return;
+                        // we cache triangle collision at index r because elimate must be handled on both triangles
+                        collisions[r] ||= !!point;
+                        // we cache the first collision
+                        if (point && !collision) {
+                            collision = {
+                                edge: [r0, r1],
+                                level: this.getWallLevel(wall),
+                                range: [bottom, top],
+                                ray: [O, T],
+                                point,
+                                triangle: [v0, v1, v2],
+                            };
+                        }
+                        // we aren't eliminating so we have an obstacle
+                        if (collision && !eliminate) {
+                            return collision;
+                        }
                     }
                 }
+
+                // no collision or we were eliminating and all rays have collision
+                return collision;
             }
         }
     }
