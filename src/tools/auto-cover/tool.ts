@@ -342,14 +342,20 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const walls = R.pipe(
             [...canvas.walls.quadtree.getObjects(boundaryShape)],
+            R.map((wall) => wall.document),
             R.filter((wall) => {
                 const edge = wall.edge;
+
+                const mode = this.getWallMode(wall);
+                // this wall doesn't block cover so we skip
+                if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
+
                 const side = edge.orientPoint(origin);
-                if (!side) return false;
-                if (edge.direction && side === edge.direction) return false;
+                // point collinear or wrong direction from wall
+                if (!side || (edge.direction && side === edge.direction)) return false;
+
                 return true;
             }),
-            R.map((wall) => wall.document),
         );
         if (!walls.length) return;
 
@@ -368,10 +374,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         for (const wall of walls) {
             const edge = wall.edge;
-            const mode = this.getWallMode(wall);
-            // this edge doesn't block cover so we skip
-            if (mode === "none" || (mode === "move" && edge.isLimited("move"))) continue;
-
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
             // we retrieve the unique ranges for this edge
             const ranges = R.pipe(
