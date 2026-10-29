@@ -25,7 +25,7 @@ import {
     ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { drawDebug } from "tools";
+import { clearDebug, drawDebug } from "tools";
 import {
     CoverHighlightRenderer,
     CoverLevel,
@@ -610,7 +610,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
     ): ToolCover {
         if (debug) {
-            canvas.controls.debug.clear();
+            clearDebug();
         }
 
         const wallEnabled = this.settings.wallEnabled === "enabled";
