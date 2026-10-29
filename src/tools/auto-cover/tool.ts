@@ -1,11 +1,11 @@
 import {
+    ActorPF2e,
     Check,
     CheckCheckContext,
     CheckModifier,
     CheckModifiersDialog,
     CheckRoll,
     CheckRollCallback,
-    ClockwiseSweepPolygonConfig,
     createHTMLElement,
     createToggleHook,
     createToggleWrapper,
@@ -28,21 +28,33 @@ import { drawDebug } from "tools";
 import {
     CoverHighlightRenderer,
     CoverLevel,
+    createBoundaryFromTokens,
+    GeneratedSpreadRays,
+    generateSpreadRays,
     getExistingCovers,
     getSideOfPointFromLine,
     lineIntersectTriangle,
-    SpreadValuesGenerator,
-    spreadValuesGenerator,
     ToolCover,
     Vector,
 } from ".";
 
+const SIZES = {
+    tiny: 0,
+    sm: 1,
+    med: 2,
+    lg: 3,
+    huge: 4,
+    grg: 5,
+} as const;
+
 const SETTING_ENABLED = ["disabled", "manual", "enabled"] as const;
 
-const WALL_LEVEL = ["lesser", "standard", "greater"] as const satisfies CoverLevel[];
-const WALL_MODE = ["move", "none", "normal"] as const;
-const WALL_FLAG_LEVEL = ["default", ...WALL_LEVEL] as const;
-const WALL_FLAG_MODE = ["default", "none", "normal"] as const;
+const CREATURE_MODES = ["any", "opposite"] as const;
+
+const WALL_LEVELS = ["lesser", "standard", "greater"] as const satisfies CoverLevel[];
+const WALL_MODES = ["move", "none", "normal"] as const;
+const WALL_FLAG_LEVELS = ["default", ...WALL_LEVELS] as const;
+const WALL_FLAG_MODES = ["default", "none", "normal"] as const;
 
 class AutoCoverTool extends ModuleTool<ToolSettings> {
     #wrappers = [
@@ -75,6 +87,20 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
         const enabledChoices = R.fromKeys(SETTING_ENABLED, (key) => this.settingLocalize.path("enabled.choices", key));
+        const spreadSetting = (key: "creatureOrigin" | "creatureTarget" | "wallOrigin" | "wallTarget") => {
+            return {
+                key,
+                type: Number,
+                scope: "world",
+                default: 0,
+                range: {
+                    min: 0,
+                    max: 0.5,
+                    step: 0.05,
+                },
+                hint: this.settingLocalize.path("spread.hint"),
+            } as const;
+        };
 
         return [
             {
@@ -88,52 +114,61 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     this.configurate();
                 },
             },
+            spreadSetting("wallOrigin"),
+            spreadSetting("wallTarget"),
             {
                 key: "wallDefaultMode",
                 type: String,
                 scope: "world",
                 default: "move",
-                choices: WALL_MODE,
+                choices: WALL_MODES,
             },
             {
                 key: "wallDefaultLevel",
                 type: String,
                 scope: "world",
                 default: "standard",
-                choices: R.fromKeys(WALL_LEVEL, (key) => this.localize(key)),
+                choices: R.fromKeys(WALL_LEVELS, (key) => this.localize(key)),
             },
-            ...R.map(["wallOrigin", "wallTarget"] as const, (key) => {
-                return {
-                    key,
-                    type: Number,
-                    scope: "world",
-                    default: 0,
-                    range: {
-                        min: 0,
-                        max: 0.5,
-                        step: 0.05,
-                    },
-                    hint: this.settingLocalize.path("spread.hint"),
-                } as const;
-            }),
             {
                 key: "creatureEnabled",
                 type: String,
                 scope: "world",
                 default: "disabled",
-                choices: SETTING_ENABLED,
+                choices: enabledChoices,
+                hint: this.settingLocalize.path("enabled.hint"),
                 onChange: () => {
                     this.configurate();
                 },
             },
             {
-                key: "dead",
+                key: "creatureMode",
+                type: String,
+                scope: "world",
+                default: "any",
+                choices: CREATURE_MODES,
+            },
+            {
+                key: "creatureSide",
+                type: Number,
+                scope: "world",
+                default: 1,
+                range: {
+                    min: 0.75,
+                    max: 1,
+                    step: 0.05,
+                },
+            },
+            spreadSetting("creatureOrigin"),
+            spreadSetting("creatureTarget"),
+            {
+                key: "creatureDead",
                 type: Boolean,
                 default: true,
                 scope: "world",
             },
             {
-                key: "prone",
+                key: "creatureProne",
                 type: Boolean,
                 default: true,
                 scope: "world",
@@ -160,12 +195,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return fallback ? (current ?? new CoverHighlightRenderer(token, this)) : current;
     }
 
-    isTargetProne(context: CheckCheckContext): boolean {
-        return Array.isArray(context.options)
-            ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
-            : !!(context.options?.has("item:ranged") && context.options?.has("target:condition:prone"));
-    }
-
     getCoverBonus(level: CoverLevel): ZeroToFour {
         const rawBonus = COVER_VALUES[level];
         return rawBonus === 3 ? 4 : rawBonus;
@@ -173,7 +202,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     getWallLevelFlag(wall: WallDocument): WallFlagLevel {
         const flag = this.getFlag<string>(wall, "level");
-        return R.isIncludedIn(flag, WALL_FLAG_LEVEL) ? flag : "default";
+        return R.isIncludedIn(flag, WALL_FLAG_LEVELS) ? flag : "default";
     }
 
     getWallLevel(wall: WallDocument): WallLevel {
@@ -183,7 +212,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     getWallModeFlag(wall: WallDocument): WallFlagMode {
         const flag = this.getFlag<string>(wall, "mode");
-        return R.isIncludedIn(flag, WALL_FLAG_MODE) ? flag : "default";
+        return R.isIncludedIn(flag, WALL_FLAG_MODES) ? flag : "default";
     }
 
     getWallMode(wall: WallDocument): WallMode {
@@ -191,30 +220,11 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return mode === "default" ? this.settings.wallDefaultMode : mode;
     }
 
-    calculateCover(
-        origin: TokenDocumentPF2e,
-        target: TokenDocumentPF2e,
-        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
+    calculateWallCover(
+        originToken: TokenDocumentPF2e,
+        targetToken: TokenDocumentPF2e,
+        { debug }: { debug?: boolean } = {},
     ): ToolCover {
-        if (debug) {
-            canvas.controls.debug.clear();
-        }
-
-        const wall = this.calculateWallCover(origin, target, debug);
-        if (wall.greaterThanOrEqualToLevel("standard")) {
-            return wall; // wall cover is greater than what a creature cover could ever be
-        }
-
-        const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
-        if (distance ?? 0 <= 5) {
-            return wall; // we avoid calculating creature cover with adjacent tokens
-        }
-
-        const cover = this.calculateCreaturesCover(origin, target, debug);
-        return { type: "creature", level: cover };
-    }
-
-    calculateWallCover(originToken: TokenDocumentPF2e, targetToken: TokenDocumentPF2e, debug?: boolean): ToolCover {
         const collision = this.testWallCollision(originToken, targetToken, {
             debug,
             originSpread: this.settings.wallOrigin,
@@ -223,40 +233,77 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return new ToolCover("wall", collision?.level ?? "none");
     }
 
-    calculateCreaturesCover(
-        originToken: TokenDocumentPF2e,
-        targetToken: TokenDocumentPF2e,
-        debug?: boolean,
+    calculateCreatureCover(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
     ): ToolCover {
-        //         const scene = originToken.scene;
-        //         const setting = this.settings.creature;
-        //         const originActor = originToken.actor;
-        //         const targetActor = targetToken.actor;
-        //
-        //         if (!scene || setting === "disabled" || !originActor || !targetActor) {
-        //             return "none";
-        //         }
-        //
-        //         const origin = originToken.center;
-        //         const target = targetToken.center;
-        //
-        //         if (debug) {
-        //             drawDebug("blue", origin, target);
-        //         }
-        //
-        //         let cover: CoverLevel = "none";
-        //         const skipDead = this.settings.dead;
-        //         const skipProne = this.settings.prone;
-        //         const originSize = SIZES[originActor.size];
-        //         const targetSize = SIZES[targetActor.size];
-        //         const margin = setting === "ten" ? 0.1 : setting === "twenty" ? 0.2 : 0;
-        //         const canHaveExtraLarges = originSize < SIZES.huge && targetSize < SIZES.huge;
-        //
-        //         const isExtraLarge = (actor: ActorPF2e) => {
-        //             const size = SIZES[actor.size];
-        //             return size - originSize >= 2 && size - targetSize >= 2;
-        //         };
-        //
+        const cover = new ToolCover("creature");
+        const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
+        if (distance ?? 0 <= 5) return cover; // we avoid calculating creature cover with adjacent target
+
+        const originActor = origin.actor;
+        const targetActor = target.actor;
+        if (!originActor || !targetActor) return cover;
+
+        const boundaryShape = createBoundaryFromTokens(origin, target);
+        if (boundaryShape.width === 0 && boundaryShape.height === 0) return cover;
+
+        const tokens = canvas.tokens.quadtree.getObjects(boundaryShape);
+        if (!tokens.size) return cover;
+
+        const skipDead = this.settings.creatureDead;
+        const skipProne = this.settings.creatureProne;
+        const sideScale = this.settings.creatureSide;
+        const originSize = SIZES[originActor.size];
+        const targetSize = SIZES[targetActor.size];
+
+        const canHaveExtraLarges = originSize < SIZES.huge && targetSize < SIZES.huge;
+        const isExtraLarge = (actor: ActorPF2e) => {
+            const size = SIZES[actor.size];
+            return size - originSize >= 2 && size - targetSize >= 2;
+        };
+
+        for (const tokenObject of tokens) {
+            const token = tokenObject.document;
+            const actor = token?.actor;
+
+            if (!actor || token.hidden) continue;
+            if (token === origin || token === target) continue;
+            if (skipDead && !actor.hitPoints?.value) continue;
+            if (skipProne && actor.getCondition("prone")) continue;
+
+            const rollOptions = actor.rollOptions.all;
+            const isAllyCharacter = actor.type === "character" && actor.isAllyOf(originActor);
+
+            if (isAllyCharacter && rollOptions["armor:rune:property:aim-aiding"] && !rollOptions["armor:uninvested"])
+                continue; // we handle the 'Aim-Aiding' armor rune (make sure the armor is not uninvested)
+
+            const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
+
+            // we handle the 'Phalanx Formation' feat (it only excludes lesser-cover)
+            if (!extraLarge && isAllyCharacter && rollOptions["feat:phalanx-formation"]) continue;
+            // we don't need to check intersections on that token as it won't give more than what we already have
+            if (!extraLarge && cover.equalsLevel("lesser")) continue;
+            // no intersection
+            if (!this.testCreatureCollision(origin, target, token, { debug, sideScale })) continue;
+            // we can't have extra large check so this is as much as we will ever get
+            if (!canHaveExtraLarges) return cover.updateLevel("lesser");
+            // we can never get anything beyond 'standard' so we check out now
+            if (extraLarge) return cover.updateLevel("standard");
+            // we can still have extra large checks later on so we have to keep going
+            cover.updateLevel("lesser");
+        }
+
+        return cover;
+    }
+
+    testCreatureCollision(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        obstacle: TokenDocumentPF2e,
+        { debug, sideScale = 1 }: TestCreatureCollisionOptions = {},
+    ): boolean {
         //         const intersectsEdge = (edge: RectEdge): boolean => {
         //             const intersects = foundry.utils.lineSegmentIntersects(origin, target, edge.A, edge.B);
         //
@@ -280,38 +327,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         //             }
         //         };
         //
-        //         for (const tokenDocument of scene.tokens) {
-        //             const token = tokenDocument.object;
-        //             const actor = token?.actor;
-        //
-        //             if (!token || !actor || tokenDocument.hidden) continue;
-        //             if (token === originToken || token === targetToken) continue;
-        //             if (skipDead && !actor.hitPoints?.value) continue;
-        //             if (skipProne && actor.getCondition("prone")) continue;
-        //
-        //             const rollOptions = actor.rollOptions.all;
-        //             const isAllyCharacter = actor.type === "character" && actor.isAllyOf(originActor);
-        //
-        //             if (isAllyCharacter && rollOptions["armor:rune:property:aim-aiding"] && !rollOptions["armor:uninvested"])
-        //                 continue; // we handle the 'Aim-Aiding' armor rune (make sure the armor is not uninvested)
-        //
-        //             const extraLarge = canHaveExtraLarges && isExtraLarge(actor);
-        //
-        //             // we handle the 'Phalanx Formation' feat (it only excludes lesser-cover)
-        //             if (!extraLarge && isAllyCharacter && rollOptions["feat:phalanx-formation"]) continue;
-        //             // we don't need to check intersections on that token as it won't give more than what we already have
-        //             if (!extraLarge && cover === "lesser") continue;
-        //             // no intersection
-        //             if (!intersectsWith(token)) continue;
-        //             // we can't have extra large check so this is as much as we will ever get
-        //             if (!canHaveExtraLarges) return "lesser";
-        //             // we can never get anything beyond 'standard' so we check out now
-        //             if (extraLarge) return "standard";
-        //             // we can still have an extra large check later on so we have to keep going
-        //             cover = "lesser";
-        //         }
-        //
-        //         return cover;
     }
 
     testWallCollision(
@@ -320,26 +335,26 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         { debug, originSpread = 0, targetSpread = 0 }: TestWallCollisionOptions = {},
     ): WallCollision | undefined {
         const scene = origin.scene ?? canvas.scene;
-        if (!scene) return;
+        if (!scene || !canvas.walls.quadtree) return;
 
-        const boundaryWidth = target.x - origin.x;
-        const boundaryHeight = target.y - origin.y;
+        const boundaryShape = createBoundaryFromTokens(origin, target);
+        if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
 
-        // we have nothing to test, the points are on top of each other
-        if (boundaryWidth === 0 && boundaryHeight === 0) return;
+        const walls = R.pipe(
+            [...canvas.walls.quadtree.getObjects(boundaryShape)],
+            R.filter((wall) => {
+                const edge = wall.edge;
+                const side = edge.orientPoint(origin);
+                if (!side) return false;
+                if (edge.direction && side === edge.direction) return false;
+                return true;
+            }),
+            R.map((wall) => wall.document),
+        );
+        if (!walls.length) return;
 
-        const boundaryShape = new PIXI.Rectangle(origin.x, origin.y, boundaryWidth, boundaryHeight);
-        const config: ClockwiseSweepPolygonConfig = {
-            type: "move",
-            boundaryShapes: [boundaryShape.normalize()],
-        };
-
-        const poly = new CONFIG.Canvas.polygonBackends.move();
-        poly.initialize(origin, config);
-        poly["_identifyEdges"]();
-
-        const generator = spreadValuesGenerator(origin, target, originSpread, targetSpread);
-        const collision = this.#testWallCollision(scene, generator, poly.edges);
+        const rays = generateSpreadRays(origin, target, originSpread, targetSpread);
+        const collision = this.#testWallCollision(scene, rays, walls);
 
         if (collision && debug) {
             this.#drawWallDebug(origin, collision);
@@ -348,17 +363,11 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return collision;
     }
 
-    #testWallCollision(
-        scene: ScenePF2e,
-        generator: SpreadValuesGenerator,
-        edges: Set<foundry.canvas.geometry.edges.Edge>,
-    ): WallCollision | undefined {
+    #testWallCollision(scene: ScenePF2e, rays: GeneratedSpreadRays, walls: WallDocument[]): WallCollision | undefined {
         const { distance, size } = scene.grid;
 
-        for (const edge of edges) {
-            const wall = edge.object;
-            if (!(wall instanceof CONFIG.Wall.documentClass)) continue;
-
+        for (const wall of walls) {
+            const edge = wall.edge;
             const mode = this.getWallMode(wall);
             // this edge doesn't block cover so we skip
             if (mode === "none" || (mode === "move" && edge.isLimited("move"))) continue;
@@ -387,7 +396,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 ] as const;
 
                 for (const [v0, v1, v2] of triangles) {
-                    for (const [O, T, D] of generator) {
+                    for (const [O, T, D] of rays) {
                         const point = lineIntersectTriangle(O, D, v0, v1, v2);
                         if (!point) continue;
 
@@ -458,7 +467,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             input: foundry.applications.fields.createSelectInput({
                 id: `${app}-toolbelt-mode`,
                 name: `flags.${MODULE.id}.${this.key}.mode`,
-                options: WALL_FLAG_MODE.map((value) => {
+                options: WALL_FLAG_MODES.map((value) => {
                     const label =
                         value === "default"
                             ? this.localize("default", {
@@ -476,7 +485,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             input: foundry.applications.fields.createSelectInput({
                 id: `${app}-toolbelt-level`,
                 name: `flags.${MODULE.id}.${this.key}.level`,
-                options: WALL_FLAG_LEVEL.map((value) => {
+                options: WALL_FLAG_LEVELS.map((value) => {
                     const label =
                         value === "default"
                             ? this.localize("default", {
@@ -533,13 +542,20 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const origin = context.origin?.token ?? context.token ?? getFirstActiveToken(originActor);
         const target = context.target.token ?? getFirstActiveToken(targetActor);
 
-        if (!origin || !target || !origin.scene || origin.scene !== target.scene || origin.id === target.id) {
+        if (
+            !origin ||
+            !target ||
+            !origin.scene ||
+            origin.scene !== canvas.scene ||
+            origin.scene !== target.scene ||
+            origin.id === target.id
+        ) {
             return wrapped(...args);
         }
 
-        const targetIsProne = this.isTargetProne(context);
-        const existing = ToolCover.fromActor(targetActor, targetIsProne);
-        if (existing.greaterThanLevel("standard")) {
+        const targetIsProne = isTargetProne(context);
+        const exist = ToolCover.fromActor(targetActor, targetIsProne);
+        if (exist.greaterThanLevel("standard")) {
             return wrapped(...args); // we can't have anything greater than the currently existing effect
         }
 
@@ -548,17 +564,33 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             canvas.controls.debug.clear();
         }
 
-        const cover = this.calculateCover(origin, target, { context, debug: MODULE.isDebug });
-        //         if (cover.type === "creature" && (context.target.distance ?? originToken.distanceTo(targetToken)) <= 5) {
-        //             return wrapped(...args);
-        //         }
-        //
-        //         if (COVER_VALUES[cover.level] > existing.value) {
-        //             const items = foundry.utils.deepClone(targetActor._source.items);
-        //             await this.#addCoverSourceToContext(context, items, cover.level, this.localize(cover.type));
-        //         }
+        const cover = this.#calculateCover(origin, target, { context, debug: MODULE.isDebug });
+        if (cover.greaterThan(exist)) {
+            //             const items = foundry.utils.deepClone(targetActor._source.items);
+            //             await this.#addCoverSourceToContext(context, items, cover.level, this.localize(cover.type));
+        }
 
         return wrapped(...args);
+    }
+
+    #calculateCover(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
+    ): ToolCover {
+        if (debug) {
+            canvas.controls.debug.clear();
+        }
+
+        const wallEnabled = this.settings.wallEnabled === "enabled";
+        const wall = wallEnabled ? this.calculateWallCover(origin, target, { debug }) : new ToolCover("wall");
+        if (wall.greaterThanOrEqualToLevel("standard")) {
+            return wall; // we can't have a creature cover greater than that
+        }
+
+        const creatureEnabled = this.settings.creatureEnabled === "enabled";
+        const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, { context, debug }) : null;
+        return creature?.greaterThan(wall) ? creature : wall;
     }
 
     #onRenderCheckModifiersDialog(dialog: CheckModifiersDialog, $html: JQuery) {
@@ -569,7 +601,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const targetActor = context.target.actor;
         if (!originActor || !targetActor || originActor.isOfType("hazard")) return;
 
-        const targetIsProne = this.isTargetProne(context);
+        const targetIsProne = isTargetProne(context);
         const coverEffects = getExistingCovers(targetActor);
         const current = this.getHighestCoverSelection(coverEffects, targetIsProne);
 
@@ -722,12 +754,22 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 }
 
+function isTargetProne(context: CheckCheckContext): boolean {
+    return Array.isArray(context.options)
+        ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
+        : !!(context.options?.has("item:ranged") && context.options?.has("target:condition:prone"));
+}
+
 type ToolSettings = {
+    creatureDead: boolean;
     creatureEnabled: SettingEnabledType;
-    dead: boolean;
-    prone: boolean;
-    wallDefaultMode: (typeof WALL_MODE)[number];
-    wallDefaultLevel: (typeof WALL_LEVEL)[number];
+    creatureMode: CreatureMode;
+    creatureOrigin: number;
+    creatureProne: boolean;
+    creatureSide: number;
+    creatureTarget: number;
+    wallDefaultMode: (typeof WALL_MODES)[number];
+    wallDefaultLevel: (typeof WALL_LEVELS)[number];
     wallEnabled: SettingEnabledType;
     wallOrigin: number;
     wallTarget: number;
@@ -746,11 +788,18 @@ type WallConfig = fa.api.DocumentSheetV2<fa.api.DocumentSheetConfiguration<WallD
 
 type SettingEnabledType = (typeof SETTING_ENABLED)[number];
 
-type WallFlagLevel = (typeof WALL_FLAG_LEVEL)[number];
-type WallLevel = (typeof WALL_LEVEL)[number];
+type CreatureMode = (typeof CREATURE_MODES)[number];
 
-type WallFlagMode = (typeof WALL_FLAG_MODE)[number];
-type WallMode = (typeof WALL_MODE)[number];
+type WallFlagLevel = (typeof WALL_FLAG_LEVELS)[number];
+type WallLevel = (typeof WALL_LEVELS)[number];
+
+type WallFlagMode = (typeof WALL_FLAG_MODES)[number];
+type WallMode = (typeof WALL_MODES)[number];
+
+type TestCreatureCollisionOptions = {
+    debug?: boolean;
+    sideScale?: number;
+};
 
 type TestWallCollisionOptions = {
     debug?: boolean;

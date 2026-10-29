@@ -1,78 +1,5 @@
-import { MODULE, TokenDocumentPF2e, TokenPF2e } from "foundry-helpers";
-import { lineIntersect, Vector } from "tools";
-
-const RECT_CORNERS = [
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 0, y: 1 },
-    { x: 1, y: 1 },
-];
-
-const RECT_SPREAD = [
-    { x: 0.25, y: 0.25 },
-    { x: 0.75, y: 0.25 },
-    { x: 0.25, y: 0.75 },
-    { x: 0.75, y: 0.75 },
-];
-
-function getRectPoint(point: Point, rect: Rectangle): Point {
-    return { x: rect.x + rect.width * point.x, y: rect.y + rect.height * point.y };
-}
-
-function getRectEdges(rect: Rectangle, margin: number): RectEdges {
-    const opposite = 1 - margin;
-    return {
-        top: {
-            A: getRectPoint({ x: margin, y: margin }, rect),
-            B: getRectPoint({ x: opposite, y: margin }, rect),
-        },
-        right: {
-            A: getRectPoint({ x: opposite, y: margin }, rect),
-            B: getRectPoint({ x: opposite, y: opposite }, rect),
-        },
-        bottom: {
-            A: getRectPoint({ x: opposite, y: opposite }, rect),
-            B: getRectPoint({ x: margin, y: opposite }, rect),
-        },
-        left: {
-            A: getRectPoint({ x: margin, y: opposite }, rect),
-            B: getRectPoint({ x: margin, y: margin }, rect),
-        },
-    };
-}
-
-function* tokenSpread(token: TokenPF2e, type: "spread" | "corner"): Generator<Point, void, unknown> {
-    const rect = token.bounds;
-    const spread = type === "spread" ? RECT_SPREAD : RECT_CORNERS;
-
-    for (const point of spread) {
-        yield getRectPoint(point, rect);
-    }
-}
-
-function tokenToSpread(origin: TokenPF2e, target: TokenPF2e, type: "spread" | "corner", debug: boolean): boolean {
-    const originCenter = origin.center;
-
-    for (const point of tokenSpread(target, type)) {
-        if (lineIntersect(originCenter, point, debug)) return true;
-    }
-
-    return false;
-}
-
-function spreadToToken(origin: TokenPF2e, type: "spread" | "corner", target: TokenPF2e, debug: boolean): boolean {
-    const targetCenter = target.center;
-
-    for (const point of tokenSpread(origin, type)) {
-        if (!lineIntersect(point, targetCenter, debug)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-////////////////
+import { MODULE, TokenDocumentPF2e } from "foundry-helpers";
+import { Vector } from "tools";
 
 const EPSILON = 0.0000001;
 
@@ -107,7 +34,16 @@ function getTokenDepth(token: TokenDocumentPF2e): number {
     return Math.min(token.width, token.height);
 }
 
-function* tokenSpreadValues(token: TokenDocumentPF2e, value: number): Generator<Vector, void, unknown> {
+function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocumentPF2e): PIXI.Rectangle {
+    const size = origin.scene?.grid.size ?? 100;
+    const boundaryWidth = target.x + target.width * size - origin.x;
+    const boundaryHeight = target.y + target.height * size - origin.y;
+    return new PIXI.Rectangle(origin.x, origin.y, boundaryWidth, boundaryHeight);
+}
+
+function tokenSides(token: TokenDocumentPF2e, sideScale: number) {}
+
+function tokenSpreadValues(token: TokenDocumentPF2e, value: number): Vector[] {
     const { distance, size } = token.scene?.grid ?? { distance: 5, size: 100 };
     const elevation = (token.elevation / distance) * size;
     const depth = getTokenDepth(token) * size;
@@ -117,30 +53,31 @@ function* tokenSpreadValues(token: TokenDocumentPF2e, value: number): Generator<
     const origin = Vector.fromData(token, elevation);
 
     if (value <= 0) {
-        yield center;
-        return; // we only use the center point
+        return [center]; // we only use the center point
     }
 
     // the expected value is between [0, 0.5], so we need to double it to work with center
     const scalar = Math.clamp(value, 0, 0.5) * 2;
 
-    for (const [x, y, z] of CORNER_SPREADS) {
+    return CORNER_SPREADS.map(([x, y, z]) => {
         const p = origin.add({ x: width * x, y: height * y, z: depth * z });
-        yield scalar === 0.5 ? p : center.moveTowardByScalar(p, scalar);
-    }
+        return scalar === 0.5 ? p : center.moveTowardByScalar(p, scalar);
+    });
 }
 
-function* spreadValuesGenerator(
-    originToken: TokenDocumentPF2e,
-    targetToken: TokenDocumentPF2e,
+function generateSpreadRays(
+    origin: TokenDocumentPF2e,
+    target: TokenDocumentPF2e,
     originSpread: number,
     targetSpread: number,
-): SpreadValuesGenerator {
-    for (const origin of tokenSpreadValues(originToken, originSpread)) {
-        for (const target of tokenSpreadValues(targetToken, targetSpread)) {
-            yield [origin, target, target.subtract(origin)] as const;
-        }
-    }
+): GeneratedSpreadRays {
+    const originSpreads = tokenSpreadValues(origin, originSpread);
+    const targetSpreads = tokenSpreadValues(target, targetSpread);
+    return originSpreads.flatMap((origin) => {
+        return targetSpreads.map((target) => {
+            return [origin, target, target.subtract(origin)] as const;
+        });
+    });
 }
 
 // Möller–Trumbore implementation
@@ -179,7 +116,7 @@ MODULE.debugExpose("geometry", {
     getSideOfPointFromLine,
     getTokenDepth,
     lineIntersectTriangle,
-    spreadValuesGenerator,
+    generateSpreadRays,
     tokenSpreadValues,
     Vector,
 });
@@ -187,14 +124,7 @@ MODULE.debugExpose("geometry", {
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 
-type SpreadValuesGenerator = Generator<readonly [origin: Vector, target: Vector, direction: Vector], void, unknown>;
+type GeneratedSpreadRays = (readonly [origin: Vector, target: Vector, direction: Vector])[];
 
-export {
-    getRectEdges,
-    getSideOfPointFromLine,
-    lineIntersectTriangle,
-    spreadToToken,
-    spreadValuesGenerator,
-    tokenToSpread,
-};
-export type { RectEdge, RectEdges, SpreadValuesGenerator };
+export { createBoundaryFromTokens, generateSpreadRays, getSideOfPointFromLine, lineIntersectTriangle };
+export type { GeneratedSpreadRays, RectEdge, RectEdges };

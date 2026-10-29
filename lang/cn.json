@@ -380,35 +380,17 @@
             },
             "autoCover": {
                 "title": "自动掩蔽",
-                "creature": {
-                    "name": "生物掩蔽",
+                "creatureMode": {
                     "choices": {
-                        "disabled": "禁用",
-                        "zero": "任意边缘延伸线相交",
-                        "cross": "两条对边延伸线相交",
-                        "ten": "任意边缘延伸线有10%被阻挡",
-                        "twenty": "任意边缘延伸线有20%被阻挡"
-                    },
-                    "hint": "在攻击检定掷骰时，生物会在什么情形下提供次等或标准掩蔽。"
+                        "any": "任意边缘延伸线相交",
+                        "opposite": "两条对边延伸线相交"
+                    }
                 },
-                "prone": {
+                "creatureProne": {
                     "name": "忽略倒地生物",
                     "hint": "是否不让倒地生物提供掩蔽。"
                 },
-                "wall": {
-                    "name": "墙体掩蔽",
-                    "choices": {
-                        "disabled": "禁用",
-                        "center-center": "中心到中心的连线",
-                        "center-spread": "中心到四周的连线",
-                        "center-corner": "中心到边缘的连线",
-                        "corner-center": "边缘到中心的连线",
-                        "corner-spread": "边缘到四周的连线",
-                        "corner-corner": "边缘到边缘的连线"
-                    },
-                    "hint": "当目标生物与攻击者之间的路径被墙体阻挡时，以什么方式判断该生物是否获得标准掩蔽。"
-                },
-                "dead": {
+                "creatureDead": {
                     "name": "忽略死亡生物",
                     "hint": "是否不让死亡生物提供掩蔽。"
                 }

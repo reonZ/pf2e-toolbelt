@@ -112,37 +112,19 @@
       },
       "autoCover": {
         "title": "Cobertura automática",
-        "creature": {
-          "name": "Cobertura por criaturas",
-          "hint": "¿Deben las criaturas proporcionar cobertura menor o estándar cuando se realiza una tirada de ataque?",
-          "choices": {
-            "disabled": "Desactivado",
-            "cross": "Intersecar 2 lados opuestos",
-            "zero": "Intersecar cualquier lado",
-            "ten": "Cualquier lado con un margen del 10%.",
-            "twenty": "Cualquier lado con un margen del 20%"
-          }
-        },
-        "dead": {
+        "creatureDead": {
           "name": "Saltar criaturas muertas",
           "hint": "Deberían las criaturas muertas no proporcionan cobertura."
         },
-        "prone": {
+        "creatureMode": {
+          "choices": {
+            "any": "Intersecar cualquier lado",
+            "opposite": "Intersecar 2 lados opuestos"
+          }
+        },
+        "creatureProne": {
           "name": "Ignorar a las criaturas tumbadas",
           "hint": "Deberían las criaturas tumbadas no proporcionan cobertura."
-        },
-        "wall": {
-          "name": "Cobertura de pared",
-          "hint": "¿Deben las criaturas objetivo recibir cobertura estándar cuando el camino entre ellas y su atacante está interrumpido por una pared?",
-          "choices": {
-            "center-center": "Centro a centro",
-            "center-spread": "Centro para propagarse",
-            "center-corner": "Centro a esquinas",
-            "corner-center": "De las esquinas al centro",
-            "corner-spread": "Esquinas para propagarse",
-            "corner-corner": "De esquina a esquina",
-            "disabled": "Desactivado"
-          }
         }
       },
       "betterChat": {

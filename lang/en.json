@@ -120,20 +120,34 @@
             },
             "autoCover": {
                 "title": "Auto Cover",
-                "creature": {
-                    "name": "Creatures Cover",
-                    "hint": "Should creatures provide lesser or standard cover when an attack is rolled.",
-                    "choices": {
-                        "disabled": "Disabled",
-                        "cross": "Intersect 2 opposite sides",
-                        "zero": "Intersect any side",
-                        "ten": "Any side with 10% margin",
-                        "twenty": "Any side with 20% margin"
-                    }
-                },
-                "dead": {
+                "creatureDead": {
                     "name": "Skip Dead Creatures",
                     "hint": "Should dead creatures not provide cover."
+                },
+                "creatureEnabled": {
+                    "name": "Creature Cover"
+                },
+                "creatureMode": {
+                    "name": "Obstacle Intersection Mode",
+                    "hint": "Which sides are used when testing if a token is an obstacle.",
+                    "choices": {
+                        "any": "Intersect any side",
+                        "opposite": "Intersect 2 opposite sides"
+                    }
+                },
+                "creatureOrigin": {
+                    "name": "Creature Origin Spread"
+                },
+                "creatureProne": {
+                    "name": "Skip Prone Creatures",
+                    "hint": "Should prone creatures not provide cover."
+                },
+                "creatureSide": {
+                    "name": "Obstacle Side Scale",
+                    "hint": "Scale ratio of sides for tokens tested as obstacles."
+                },
+                "creatureTarget": {
+                    "name": "Creature Target Spread"
                 },
                 "enabled": {
                     "hint": "When manual, the module will not calculate any cover for you but you can still set it in the modifiers popup window.",
@@ -142,10 +156,6 @@
                         "manual": "Manual",
                         "enabled": "Enabled"
                     }
-                },
-                "prone": {
-                    "name": "Skip Prone Creatures",
-                    "hint": "Should prone creatures not provide cover."
                 },
                 "spread": {
                     "hint": "Spread ratio of a point from the center of the token toward corners (reaches the corners at '0.5'). Only uses the center at '0'."

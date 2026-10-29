@@ -108,37 +108,19 @@
       },
       "autoCover": {
         "title": "Automatyczna osłona",
-        "creature": {
-          "name": "Osłona zapewniana przez stworzenia",
-          "hint": "Czy stworzenia powinny zapewniać mniejszą lub standardową osłonę podczas rzutu ataku?",
-          "choices": {
-            "disabled": "Wyłączone",
-            "cross": "Przecięcie dwóch przeciwległych boków",
-            "zero": "Przecięcie dowolnego boku",
-            "ten": "Dowolny bok z 10% marginesem",
-            "twenty": "Dowolny bok z 20% marginesem"
-          }
-        },
-        "dead": {
+        "creatureDead": {
           "name": "Pomiń martwe stworzenia",
           "hint": "Martwe stworzenia nie powinny zapewniać osłony."
         },
-        "prone": {
+        "creatureMode": {
+          "choices": {
+            "any": "Przecięcie dowolnego boku",
+            "opposite": "Przecięcie dwóch przeciwległych boków"      
+          }
+        },
+        "creatureProne": {
           "name": "Pomiń leżące stworzenia",
           "hint": "Stworzenia leżące nie powinny zapewniać osłony."
-        },
-        "wall": {
-          "name": "Osłona zapewniana przez ściany",
-          "hint": "Czy stworzenia będące celem powinny otrzymać standardową osłonę, gdy droga między nimi a atakującym jest przecinana przez ścianę?",
-          "choices": {
-            "center-center": "Od środka do środka",
-            "center-spread": "Od środka do brzegów",
-            "center-corner": "Od środka do narożników",
-            "corner-center": "Od narożników do środka",
-            "corner-spread": "Od narożników do brzegów",
-            "corner-corner": "Od narożników do narożników",
-            "disabled": "Wyłączone"
-          }
         }
       },
       "betterChat": {

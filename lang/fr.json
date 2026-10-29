@@ -120,37 +120,19 @@
       },
       "autoCover": {
         "title": "Abri automatique",
-        "creature": {
-          "name": "Abri des créatures",
-          "hint": "Les créatures doivent-elles offrir une abri inférieur ou standard lors d'un jet d'attaque ?",
-          "choices": {
-            "disabled": "Désactivé",
-            "cross": "Intersection de 2 côtés opposés",
-            "zero": "Intersection de n'importe quel côté",
-            "ten": "N'importe quel côté avec une marge de 10 %",
-            "twenty": "N'importe quel côté avec une marge de 20 %"
-          }
-        },
-        "dead": {
+        "creatureDead": {
           "name": "Éviter les créatures mortes",
           "hint": "Les créatures mortes ne devraient pas fournir d'abri."
+        },        
+        "creatureMode": {
+          "choices": {
+            "any": "Intersection de n'importe quel côté",
+            "opposite": "Intersection de 2 côtés opposés"    
+          }
         },
-        "prone": {
+        "creatureProne": {
           "name": "Éviter les créatures À terre",
           "hint": "Les créatures À terre ne devraient pas fournir d'abri."
-        },
-        "wall": {
-          "name": "Abri des murs",
-          "hint": "Les créatures ciblées doivent-elles bénéficier d'un abri standard lorsqu'un mur barre le chemin qui les sépare de leur attaquant ? Le centre de chaque créature sera toujours testé.",
-          "choices": {
-            "center-center": "Centre à centre",
-            "center-spread": "Centre vers l'étalement",
-            "center-corner": "Centre vers les coins",
-            "corner-center": "Coins vers le centre",
-            "corner-spread": "Coins vers l'étalement",
-            "corner-corner": "coins vers les coins",
-            "disabled": "Désactivé"
-          }
         }
       },
       "betterChat": {

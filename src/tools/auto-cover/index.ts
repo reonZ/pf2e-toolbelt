@@ -1,4 +1,3 @@
-export * from "./_contants";
 export * from "./cover";
 export * from "./geometry";
 export * from "./highlight";

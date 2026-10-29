@@ -108,37 +108,19 @@
       },
       "autoCover": {
         "title": "自動遮蔽",
-        "creature": {
-          "name": "クリーチャーによる遮蔽",
-          "hint": "攻撃がロールされたとき、クリーチャーが「軽度の遮蔽」または通常遮蔽を提供するかどうか。",
-          "choices": {
-            "disabled": "無効",
-            "cross": "対向する2辺に交差",
-            "zero": "いずれかの辺に交差",
-            "ten": "10%のマージンでいずれかの辺に交差",
-            "twenty": "20%のマージンでいずれかの辺に交差"
-          }
-        },
-        "dead": {
+        "creatureDead": {
           "name": "死亡したクリーチャーをスキップ",
           "hint": "死亡したクリーチャーは遮蔽を提供しないようにするかどうか。"
         },
-        "prone": {
+        "creatureMode": {
+          "choices": {
+            "any": "いずれかの辺に交差",
+            "opposite": "対向する2辺に交差"  
+          }
+        },
+        "creatureProne": {
           "name": "伏せているクリーチャーをスキップ",
           "hint": "伏せ状態のクリーチャーは遮蔽を提供しないようにするかどうか。"
-        },
-        "wall": {
-          "name": "壁による遮蔽",
-          "hint": "対象のクリーチャーと攻撃者の間の経路が壁によって遮られている場合、対象のクリーチャーは通常遮蔽を得るかどうか。",
-          "choices": {
-            "center-center": "中心から中心",
-            "center-spread": "中心から拡散",
-            "center-corner": "中心から角",
-            "corner-center": "四隅から中央へ",
-            "corner-spread": "四隅から拡散",
-            "corner-corner": "四隅から四隅へ",
-            "disabled": "無効"
-          }
         }
       },
       "betterChat": {
