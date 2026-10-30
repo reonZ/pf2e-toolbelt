@@ -158,8 +158,7 @@
                     }
                 },
                 "spread": {
-                    "origin": "Spread ratio of a point from the center of the token toward corners. Only use the center at '0' and reach the corners at '0.5'. If any line originating from a spread point (non '0') does not instersect, then the obstacle will be skipped.",
-                    "target": "Spread ratio of a point from the center of the token toward corners. Only use the center at '0' and reach the corners at '0.5'. Note that spread points will exponentially increase the amount of tests to do."
+                    "hint": "Spread the center of the token into 8 points moving towards the corners. Only use the center at '0' and reach the corners at '0.5'."
                 },
                 "wallDefaultLevel": {
                     "name": "[Wall] Default Level",

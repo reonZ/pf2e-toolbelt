@@ -99,7 +99,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     max: 0.5,
                     step: 0.05,
                 },
-                hint: this.settingLocalize.path("spread", key.endsWith("Origin") ? "origin" : "target"),
+                hint: this.settingLocalize.path("spread.hint"),
             } as const;
         };
 
