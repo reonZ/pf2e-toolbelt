@@ -88,12 +88,28 @@ function createTokenSpreadGenerator(token: TokenDocumentPF2e, value: number): To
         }
     }
 
-    Object.defineProperty(tokenSpreadGenerator, "eliminate", {
-        get(): boolean {
-            return scalar > 0;
+    Object.defineProperties(tokenSpreadGenerator, {
+        depth: {
+            get(): number {
+                return depth;
+            },
+            enumerable: false,
+            configurable: false,
         },
-        enumerable: false,
-        configurable: false,
+        elevation: {
+            get(): number {
+                return elevation;
+            },
+            enumerable: false,
+            configurable: false,
+        },
+        eliminate: {
+            get(): boolean {
+                return scalar > 0;
+            },
+            enumerable: false,
+            configurable: false,
+        },
     });
 
     return tokenSpreadGenerator as TokenSpreadGenerator;
@@ -107,11 +123,13 @@ function createSpreadRaysGenerator(
 ): SpreadRaysGenerator {
     const originSpreads = createTokenSpreadGenerator(origin, originSpread);
     const targetSpreads = createTokenSpreadGenerator(target, targetSpread);
+    const minZ = Math.min(originSpreads.elevation, targetSpreads.elevation);
+    const maxZ = Math.max(originSpreads.elevation + originSpreads.depth, targetSpreads.elevation + targetSpreads.depth);
     // we cache the results that have been generated on the last generator call
     const cached: GeneratedSpreadRay[][] = [];
 
     const merge = (O: Vector, T: Vector): GeneratedSpreadRay => {
-        return [O, T, T.subtract(O), Math.min(O.z, T.z), Math.max(O.z, T.z)];
+        return [O, T, T.subtract(O)];
     };
 
     function* spreadRaysGenerator(): Generator<GeneratedSpreadRay, void, unknown> {
@@ -128,12 +146,28 @@ function createSpreadRaysGenerator(
         }
     }
 
-    Object.defineProperty(spreadRaysGenerator, "eliminate", {
-        get(): boolean {
-            return originSpreads.eliminate || targetSpreads.eliminate;
+    Object.defineProperties(spreadRaysGenerator, {
+        eliminate: {
+            get(): boolean {
+                return originSpreads.eliminate || targetSpreads.eliminate;
+            },
+            enumerable: false,
+            configurable: false,
         },
-        enumerable: false,
-        configurable: false,
+        minZ: {
+            get(): number {
+                return minZ;
+            },
+            enumerable: false,
+            configurable: false,
+        },
+        maxZ: {
+            get(): number {
+                return maxZ;
+            },
+            enumerable: false,
+            configurable: false,
+        },
     });
 
     return spreadRaysGenerator as SpreadRaysGenerator;
@@ -183,9 +217,17 @@ MODULE.debugExpose("geometry", {
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 
-type GeneratedSpreadRay = [origin: Vector, target: Vector, direction: Vector, minZ: number, maxZ: number];
-type SpreadRaysGenerator = (() => Generator<GeneratedSpreadRay, void, unknown>) & { get eliminate(): boolean };
-type TokenSpreadGenerator = (() => Generator<Vector, void, unknown>) & { get eliminate(): boolean };
+type GeneratedSpreadRay = [origin: Vector, target: Vector, direction: Vector];
+type SpreadRaysGenerator = (() => Generator<GeneratedSpreadRay, void, unknown>) & {
+    get eliminate(): boolean;
+    get minZ(): number;
+    get maxZ(): number;
+};
+type TokenSpreadGenerator = (() => Generator<Vector, void, unknown>) & {
+    get depth(): number;
+    get elevation(): number;
+    get eliminate(): boolean;
+};
 
 export { createBoundaryFromTokens, createSpreadRaysGenerator, getSideOfPointFromLine, lineIntersectTriangle };
 export type { RectEdge, RectEdges, SpreadRaysGenerator };

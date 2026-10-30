@@ -221,19 +221,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return mode === "default" ? this.settings.wallDefaultMode : mode;
     }
 
-    calculateWallCover(
-        originToken: TokenDocumentPF2e,
-        targetToken: TokenDocumentPF2e,
-        { debug }: { debug?: boolean } = {},
-    ): ToolCover {
-        const collision = this.testWallsCollisions(originToken, targetToken, {
-            debug,
-            originSpread: this.settings.wallOrigin,
-            targetSpread: this.settings.wallTarget,
-        });
-        return new ToolCover("wall", collision?.level ?? "none");
-    }
-
     calculateCreatureCover(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
@@ -330,33 +317,43 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         //
     }
 
+    calculateWallCover(
+        originToken: TokenDocumentPF2e,
+        targetToken: TokenDocumentPF2e,
+        { debug }: { debug?: boolean } = {},
+    ): ToolCover {
+        const collision = this.testWallsCollisions(originToken, targetToken, {
+            debug,
+            originSpread: this.settings.wallOrigin,
+            targetSpread: this.settings.wallTarget,
+        });
+        return new ToolCover("wall", collision?.level ?? "none");
+    }
+
     testWallsCollisions(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
         { debug, originSpread = 0, targetSpread = 0 }: TestWallCollisionOptions = {},
     ): WallCollision | undefined {
-        const scene = origin.scene ?? canvas.scene;
-        if (!scene || !canvas.walls.quadtree) return;
+        const scene = origin.scene;
+        if (!scene || scene !== canvas.scene || !canvas.walls.quadtree) return;
 
         const boundaryShape = createBoundaryFromTokens(origin, target);
         if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
 
-        const walls = R.pipe(
-            [...canvas.walls.quadtree.getObjects(boundaryShape)],
-            R.filter(({ document: wall, edge }) => {
-                const mode = this.getWallMode(wall);
-                // this wall doesn't block cover so we skip
-                if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
+        const walls = canvas.walls.quadtree.getObjects(boundaryShape).filter(({ document: wall, edge }) => {
+            const mode = this.getWallMode(wall);
+            // this wall doesn't block cover so we skip
+            if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
 
-                const side = edge.orientPoint(origin.center);
-                // point collinear or wrong direction from wall
-                if (!side || (edge.direction && side === edge.direction)) return false;
+            const side = edge.orientPoint(origin.center);
+            // point collinear or wrong direction from wall
+            if (!side || (edge.direction && side === edge.direction)) return false;
 
-                return true;
-            }),
-        );
+            return true;
+        });
 
-        if (!walls.length) return;
+        if (!walls.size) return;
 
         const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
         const collision = this.#testWallCollisions(scene, raysGenerator, walls);
@@ -371,17 +368,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     #testWallCollisions(
         scene: ScenePF2e,
         raysGenerator: SpreadRaysGenerator,
-        walls: Wall[],
+        walls: Set<Wall>,
     ): WallCollision | undefined {
         const { distance, size } = scene.grid;
-        // const sortedZ = R.pipe(
-        //     rays,
-        //     R.flatMap(([O, T]) => [O.z, T.z]),
-        //     R.sort((a, b) => a - b),
-        // ) as [number, ...number[]];
-        // const minZ = R.first(sortedZ);
-        // const maxZ = R.last(sortedZ);
-        // const spread = rays.length > 1;
         const eliminate = raysGenerator.eliminate;
 
         for (const { document: wall, edge } of walls) {
@@ -397,6 +386,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 // we can't check intersections with Infinity numbers
                 const bottom = range[0] === -Infinity ? Number.MIN_SAFE_INTEGER : (range[0] / distance) * size;
                 const top = range[1] === Infinity ? Number.MAX_SAFE_INTEGER : (range[1] / distance) * size;
+                // we preemptively eleminate ranges that would never intersect token rays
+                if (top < raysGenerator.minZ || bottom > raysGenerator.maxZ) continue;
 
                 const r0 = Vector.fromData(edge.a, bottom);
                 const r1 = Vector.fromData(edge.b, bottom);
@@ -404,11 +395,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 const r3 = Vector.fromData(edge.a, top);
 
                 let collision: WallCollision | undefined;
-                for (const [O, T, D, minZ, maxZ] of raysGenerator()) {
-                    // the ray is never gonna intersect with the plane
-                    if (top < minZ || bottom > maxZ) continue;
-
+                for (const [O, T, D] of raysGenerator()) {
                     const point = lineIntersectTriangle(O, D, r0, r1, r3) ?? lineIntersectTriangle(O, D, r3, r2, r1);
+
                     // we eliminate the obstacle as we have at least one non-intersecting spread ray
                     if (eliminate && !point) break range;
 
