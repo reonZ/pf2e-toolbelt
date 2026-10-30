@@ -1,4 +1,4 @@
-import { MODULE, R, TokenDocumentPF2e } from "foundry-helpers";
+import { MODULE, TokenDocumentPF2e } from "foundry-helpers";
 import { Vector } from "tools";
 
 const EPSILON = 0.0000001;
@@ -59,7 +59,7 @@ function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocume
 
 function tokenSides(token: TokenDocumentPF2e, sideScale: number) {}
 
-function tokenSpreadValues(token: TokenDocumentPF2e, value: number): [Vector, ...Vector[]] {
+function createTokenSpreadGenerator(token: TokenDocumentPF2e, value: number): TokenSpreadGenerator {
     const { distance, size } = token.scene?.grid ?? { distance: 5, size: 100 };
     const elevation = (token.elevation / distance) * size;
     const depth = getTokenDepth(token) * size;
@@ -67,33 +67,76 @@ function tokenSpreadValues(token: TokenDocumentPF2e, value: number): [Vector, ..
     const width = token.width * size;
     const center = new Vector(token.x + width / 2, token.y + height / 2, elevation + depth / 2);
     const origin = Vector.fromData(token, elevation);
-
-    if (value <= 0) {
-        return [center]; // we only use the center point
-    }
-
-    // the expected value is between [0, 0.5], so we need to double it to work with center
+    // the expected value is between [0, 0.5], so we need to double it to work with [0, 1]
     const scalar = Math.clamp(value, 0, 0.5) * 2;
+    // we cache the results that have been generated on the last generator call
+    const cached: Vector[] = [];
 
-    return R.map(CORNER_SPREADS, ([x, y, z]) => {
+    const project = ([x, y, z]: (typeof CORNER_SPREADS)[number]): Vector => {
         const p = origin.add({ x: width * x, y: height * y, z: depth * z });
         return scalar === 1 ? p : center.moveTowardByScalar(p, scalar);
+    };
+
+    function* tokenSpreadGenerator(): Generator<Vector, void, unknown> {
+        if (scalar === 0) {
+            yield center; // we only use the center point
+            return;
+        }
+
+        for (let i = 0; i < CORNER_SPREADS.length; i++) {
+            yield (cached[i] ??= project(CORNER_SPREADS[i]));
+        }
+    }
+
+    Object.defineProperty(tokenSpreadGenerator, "eliminate", {
+        get(): boolean {
+            return scalar > 0;
+        },
+        enumerable: false,
+        configurable: false,
     });
+
+    return tokenSpreadGenerator as TokenSpreadGenerator;
 }
 
-function generateSpreadRays(
+function createSpreadRaysGenerator(
     origin: TokenDocumentPF2e,
     target: TokenDocumentPF2e,
     originSpread: number,
     targetSpread: number,
-): GeneratedSpreadRays {
-    const originSpreads = tokenSpreadValues(origin, originSpread);
-    const targetSpreads = tokenSpreadValues(target, targetSpread);
-    return R.flatMap(originSpreads, (origin): GeneratedSpreadRays => {
-        return R.map(targetSpreads, (target): GeneratedSpreadRay => {
-            return [origin, target, target.subtract(origin)];
-        });
+): SpreadRaysGenerator {
+    const originSpreads = createTokenSpreadGenerator(origin, originSpread);
+    const targetSpreads = createTokenSpreadGenerator(target, targetSpread);
+    // we cache the results that have been generated on the last generator call
+    const cached: GeneratedSpreadRay[][] = [];
+
+    const merge = (O: Vector, T: Vector): GeneratedSpreadRay => {
+        return [O, T, T.subtract(O), Math.min(O.z, T.z), Math.max(O.z, T.z)];
+    };
+
+    function* spreadRaysGenerator(): Generator<GeneratedSpreadRay, void, unknown> {
+        let i = 0;
+        let j = 0;
+
+        for (const origin of originSpreads()) {
+            for (const target of targetSpreads()) {
+                const _cached = (cached[i] ??= []);
+                yield (_cached[j] ??= merge(origin, target));
+                j++;
+            }
+            i++;
+        }
+    }
+
+    Object.defineProperty(spreadRaysGenerator, "eliminate", {
+        get(): boolean {
+            return originSpreads.eliminate || targetSpreads.eliminate;
+        },
+        enumerable: false,
+        configurable: false,
     });
+
+    return spreadRaysGenerator as SpreadRaysGenerator;
 }
 
 // Möller–Trumbore implementation
@@ -129,19 +172,20 @@ function lineIntersectTriangle(P: Vector, D: Vector, v0: Vector, v1: Vector, v2:
 }
 
 MODULE.debugExpose("geometry", {
+    createSpreadRaysGenerator,
+    createTokenSpreadGenerator,
     getSideOfPointFromLine,
     getTokenDepth,
     lineIntersectTriangle,
-    generateSpreadRays,
-    tokenSpreadValues,
     Vector,
 });
 
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 
-type GeneratedSpreadRay = [origin: Vector, target: Vector, direction: Vector];
-type GeneratedSpreadRays = GeneratedSpreadRay[];
+type GeneratedSpreadRay = [origin: Vector, target: Vector, direction: Vector, minZ: number, maxZ: number];
+type SpreadRaysGenerator = (() => Generator<GeneratedSpreadRay, void, unknown>) & { get eliminate(): boolean };
+type TokenSpreadGenerator = (() => Generator<Vector, void, unknown>) & { get eliminate(): boolean };
 
-export { createBoundaryFromTokens, generateSpreadRays, getSideOfPointFromLine, lineIntersectTriangle };
-export type { GeneratedSpreadRays, RectEdge, RectEdges };
+export { createBoundaryFromTokens, createSpreadRaysGenerator, getSideOfPointFromLine, lineIntersectTriangle };
+export type { RectEdge, RectEdges, SpreadRaysGenerator };

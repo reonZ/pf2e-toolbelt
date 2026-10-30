@@ -30,11 +30,11 @@ import {
     CoverHighlightRenderer,
     CoverLevel,
     createBoundaryFromTokens,
-    GeneratedSpreadRays,
-    generateSpreadRays,
+    createSpreadRaysGenerator,
     getExistingCovers,
     getSideOfPointFromLine,
     lineIntersectTriangle,
+    SpreadRaysGenerator,
     ToolCover,
     Vector,
 } from ".";
@@ -358,8 +358,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         if (!walls.length) return;
 
-        const rays = generateSpreadRays(origin, target, originSpread, targetSpread);
-        const collision = this.#testWallCollisions(scene, rays, walls);
+        const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
+        const collision = this.#testWallCollisions(scene, raysGenerator, walls);
 
         if (collision && debug) {
             this.#drawWallDebug(origin, collision);
@@ -368,16 +368,21 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return collision;
     }
 
-    #testWallCollisions(scene: ScenePF2e, rays: GeneratedSpreadRays, walls: Wall[]): WallCollision | undefined {
+    #testWallCollisions(
+        scene: ScenePF2e,
+        raysGenerator: SpreadRaysGenerator,
+        walls: Wall[],
+    ): WallCollision | undefined {
         const { distance, size } = scene.grid;
-        const sortedZ = R.pipe(
-            rays,
-            R.flatMap(([O, T]) => [O.z, T.z]),
-            R.sort((a, b) => a - b),
-        ) as [number, ...number[]];
-        const minZ = R.first(sortedZ);
-        const maxZ = R.last(sortedZ);
-        const spread = rays.length > 1;
+        // const sortedZ = R.pipe(
+        //     rays,
+        //     R.flatMap(([O, T]) => [O.z, T.z]),
+        //     R.sort((a, b) => a - b),
+        // ) as [number, ...number[]];
+        // const minZ = R.first(sortedZ);
+        // const maxZ = R.last(sortedZ);
+        // const spread = rays.length > 1;
+        const eliminate = raysGenerator.eliminate;
 
         for (const { document: wall, edge } of walls) {
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
@@ -392,8 +397,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 // we can't check intersections with Infinity numbers
                 const bottom = range[0] === -Infinity ? Number.MIN_SAFE_INTEGER : (range[0] / distance) * size;
                 const top = range[1] === Infinity ? Number.MAX_SAFE_INTEGER : (range[1] / distance) * size;
-                // we preemptively eliminate ranges we know aren't encompassing tokens
-                if (top < minZ || bottom > maxZ) continue;
 
                 const r0 = Vector.fromData(edge.a, bottom);
                 const r1 = Vector.fromData(edge.b, bottom);
@@ -401,10 +404,14 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 const r3 = Vector.fromData(edge.a, top);
 
                 let collision: WallCollision | undefined;
-                for (const [O, T, D] of rays) {
+                for (const [O, T, D, minZ, maxZ] of raysGenerator()) {
+                    // the ray is never gonna intersect with the plane
+                    if (top < minZ || bottom > maxZ) continue;
+
                     const point = lineIntersectTriangle(O, D, r0, r1, r3) ?? lineIntersectTriangle(O, D, r3, r2, r1);
                     // we eliminate the obstacle as we have at least one non-intersecting spread ray
-                    if (spread && !point) break range;
+                    if (eliminate && !point) break range;
+
                     // we cache the collision
                     if (point) {
                         collision ??= {
@@ -418,13 +425,15 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                         collision.intersects.push(point);
                         collision.rays.push([O, T]);
                     }
+
                     // we aren't eliminating so we have an obstacle
-                    if (collision && !spread) {
+                    if (collision && !eliminate) {
                         return collision;
                     }
                 }
-                // we are spreading and all rays have collision
-                if (spread && collision) {
+
+                // we are eliminating and all rays have collision
+                if (eliminate && collision) {
                     return collision;
                 }
             }
