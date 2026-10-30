@@ -226,7 +226,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         targetToken: TokenDocumentPF2e,
         { debug }: { debug?: boolean } = {},
     ): ToolCover {
-        const collision = this.testWallCollision(originToken, targetToken, {
+        const collision = this.testWallsCollisions(originToken, targetToken, {
             debug,
             originSpread: this.settings.wallOrigin,
             targetSpread: this.settings.wallTarget,
@@ -330,7 +330,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         //
     }
 
-    testWallCollision(
+    testWallsCollisions(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
         { debug, originSpread = 0, targetSpread = 0 }: TestWallCollisionOptions = {},
@@ -348,17 +348,18 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 // this wall doesn't block cover so we skip
                 if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
 
-                const side = edge.orientPoint(origin);
+                const side = edge.orientPoint(origin.center);
                 // point collinear or wrong direction from wall
                 if (!side || (edge.direction && side === edge.direction)) return false;
 
                 return true;
             }),
         );
+
         if (!walls.length) return;
 
         const rays = generateSpreadRays(origin, target, originSpread, targetSpread);
-        const collision = this.#testWallCollision(scene, rays, walls, originSpread > 0);
+        const collision = this.#testWallCollisions(scene, rays, walls);
 
         if (collision && debug) {
             this.#drawWallDebug(origin, collision);
@@ -367,12 +368,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return collision;
     }
 
-    #testWallCollision(
-        scene: ScenePF2e,
-        rays: GeneratedSpreadRays,
-        walls: Wall[],
-        eliminate: boolean,
-    ): WallCollision | undefined {
+    #testWallCollisions(scene: ScenePF2e, rays: GeneratedSpreadRays, walls: Wall[]): WallCollision | undefined {
         const { distance, size } = scene.grid;
         const sortedZ = R.pipe(
             rays,
@@ -381,6 +377,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         ) as [number, ...number[]];
         const minZ = R.first(sortedZ);
         const maxZ = R.last(sortedZ);
+        const spread = rays.length > 1;
 
         for (const { document: wall, edge } of walls) {
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
@@ -391,7 +388,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 R.uniqueWith((a, b) => a[0] === b[0] && a[1] === b[1]),
             );
 
-            for (const range of ranges) {
+            range: for (const range of ranges) {
                 // we can't check intersections with Infinity numbers
                 const bottom = range[0] === -Infinity ? Number.MIN_SAFE_INTEGER : (range[0] / distance) * size;
                 const top = range[1] === Infinity ? Number.MAX_SAFE_INTEGER : (range[1] / distance) * size;
@@ -403,58 +400,49 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 const r2 = Vector.fromData(edge.b, top);
                 const r3 = Vector.fromData(edge.a, top);
 
-                const triangles = [
-                    [r0, r1, r3],
-                    [r3, r2, r1],
-                ] as const;
-
                 let collision: WallCollision | undefined;
-                const collisions: (boolean | undefined)[] = [];
-
-                for (let t = 0; t < 2; t++) {
-                    const [v0, v1, v2] = triangles[t];
-
-                    for (let r = 0; r < rays.length; r++) {
-                        const [O, T, D] = rays[r];
-                        const point = lineIntersectTriangle(O, D, v0, v1, v2);
-                        // we are on the second triangle and found a matching non-collision, we eliminate the obstacle
-                        if (eliminate && !point && t === 1 && !collisions[r]) return;
-                        // we cache triangle collision at index r because elimate must be handled on both triangles
-                        collisions[r] ||= !!point;
-                        // we cache the first collision
-                        if (point && !collision) {
-                            collision = {
-                                edge: [r0, r1],
-                                level: this.getWallLevel(wall),
-                                range: [bottom, top],
-                                ray: [O, T],
-                                point,
-                                triangle: [v0, v1, v2],
-                            };
-                        }
-                        // we aren't eliminating so we have an obstacle
-                        if (collision && !eliminate) {
-                            return collision;
-                        }
+                for (const [O, T, D] of rays) {
+                    const point = lineIntersectTriangle(O, D, r0, r1, r3) ?? lineIntersectTriangle(O, D, r3, r2, r1);
+                    // we eliminate the obstacle as we have at least one non-intersecting spread ray
+                    if (spread && !point) break range;
+                    // we cache the collision
+                    if (point) {
+                        collision ??= {
+                            edge: [r0, r1],
+                            intersects: [],
+                            level: this.getWallLevel(wall),
+                            range: [bottom, top],
+                            rays: [],
+                            rectangle: [r0, r1, r2, r3],
+                        };
+                        collision.intersects.push(point);
+                        collision.rays.push([O, T]);
+                    }
+                    // we aren't eliminating so we have an obstacle
+                    if (collision && !spread) {
+                        return collision;
                     }
                 }
-
-                // no collision or we were eliminating and all rays have collision
-                return collision;
+                // we are spreading and all rays have collision
+                if (spread && collision) {
+                    return collision;
+                }
             }
         }
     }
 
     #drawWallDebug(origin: TokenDocumentPF2e, collision: WallCollision) {
-        const { edge, point: p0, range, ray, triangle } = collision;
+        const { edge, intersects, range, rays, rectangle } = collision;
         const [bottom, top] = range;
-        const [v0, v1, v2] = triangle;
         const [e0, e1] = edge;
-        const [O, T] = ray;
+
+        for (const [O, T] of rays) {
+            drawDebug("red", O, T); // line between tokens
+        }
 
         // no point in displaying infinite sized walls
         if (bottom !== Number.MIN_SAFE_INTEGER && top !== Number.MAX_SAFE_INTEGER) {
-            const u = Vector.fromData(v1).subtract(v0);
+            const u = Vector.fromData(e1).subtract(e0);
             // we scale horizontally if the edge isn't of an appropriate length
             const m = u.vector2d.magnitude;
             const scalarH = Math.max(m, 200) / m;
@@ -467,20 +455,22 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             const depth = top - bottom;
             const scalarV = Math.clamp(depth, 200, Math.max(800, m * scalarH)) / depth;
             // we project the points onto our triangle section
-            const side = getSideOfPointFromLine(v0, v1, origin.center);
+            const side = getSideOfPointFromLine(e0, e1, origin.center);
             const proj = u.rotate90(side === 1).normalize;
-            const [t0, t1, t2, p1] = R.map([v0, v1, v2, p0], (p) => {
+            const projectPoint = (p: Vector) => {
                 const s = scaleH(p);
                 return p.z === bottom ? s : proj.multiplyBy((p.z - bottom) * scalarV).add(s);
-            });
-
-            drawDebug("blue", t0, t1, t2, true); // projected triangle section
-            drawDebug("blue", scaleH(p0), p1); // projected z-axis line
-            drawDebug("blue", p1, 4); // projected z-axis circle
+            };
+            const [r0, r1, r2, r3] = R.map(rectangle, projectPoint);
+            drawDebug("blue", r1, r0, r3, r2, r1, r3); // projected triangle section
+            for (const p0 of intersects) {
+                const p1 = projectPoint(p0);
+                drawDebug("blue", scaleH(p0), p1); // projected z-axis line
+                drawDebug("blue", p1, 4); // projected z-axis circle
+            }
         }
 
         drawDebug("red", e0, e1); // edge that was intersected with
-        drawDebug("red", O, T); // line between tokens
     }
 
     async #wallConfigRenderHTML(
@@ -808,11 +798,11 @@ type ToolSettings = {
 
 type WallCollision = {
     edge: [Vector, Vector];
+    intersects: Vector[];
     level: WallLevel;
     range: [number, number];
-    ray: [Vector, Vector];
-    point: Vector;
-    triangle: [Vector, Vector, Vector];
+    rays: [Vector, Vector][];
+    rectangle: [Vector, Vector, Vector, Vector];
 };
 
 type WallConfig = fa.api.DocumentSheetV2<fa.api.DocumentSheetConfiguration<WallDocument>>;

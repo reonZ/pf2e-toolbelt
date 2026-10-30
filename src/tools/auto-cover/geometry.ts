@@ -36,9 +36,25 @@ function getTokenDepth(token: TokenDocumentPF2e): number {
 
 function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocumentPF2e): PIXI.Rectangle {
     const size = origin.scene?.grid.size ?? 100;
-    const boundaryWidth = target.x + target.width * size - origin.x;
-    const boundaryHeight = target.y + target.height * size - origin.y;
-    return new PIXI.Rectangle(origin.x, origin.y, boundaryWidth, boundaryHeight);
+
+    const originLeft = Math.round(origin.x);
+    const originTop = Math.round(origin.y);
+    const originRight = originLeft + origin.width * size;
+    const originBottom = originTop + origin.height * size;
+    const targetLeft = Math.round(target.x);
+    const targetTop = Math.round(target.y);
+    const targetRight = targetLeft + target.width * size;
+    const targetBottom = targetTop + target.height * size;
+
+    const left = targetLeft < originLeft ? targetLeft : originLeft;
+    const right = originRight > targetRight ? originRight : targetRight;
+    const top = targetTop < originTop ? targetTop : originTop;
+    const bottom = originBottom > targetBottom ? originBottom : targetBottom;
+
+    const width = right - left;
+    const height = bottom - top;
+
+    return new PIXI.Rectangle(left, top, width, height).normalize();
 }
 
 function tokenSides(token: TokenDocumentPF2e, sideScale: number) {}
@@ -61,7 +77,7 @@ function tokenSpreadValues(token: TokenDocumentPF2e, value: number): [Vector, ..
 
     return R.map(CORNER_SPREADS, ([x, y, z]) => {
         const p = origin.add({ x: width * x, y: height * y, z: depth * z });
-        return scalar === 0.5 ? p : center.moveTowardByScalar(p, scalar);
+        return scalar === 1 ? p : center.moveTowardByScalar(p, scalar);
     });
 }
 
@@ -101,7 +117,7 @@ function lineIntersectTriangle(P: Vector, D: Vector, v0: Vector, v1: Vector, v2:
     const v = D.dot(q) * invDenom;
 
     // line passes outside of e1 bounds
-    if (v < 0 || u + v > 1.0) return;
+    if (v < 0 || u + v > 1) return;
 
     // line intersection
     const t = e2.dot(q) * invDenom;

@@ -150,27 +150,6 @@ function drawDebug(color: PIXI.ColorSource, ...points: (MaybePoint3d | boolean |
     const last = points.at(-1) as MaybePoint3d | boolean | number;
     const path = (R.isObjectType(last) ? points : points.slice(0, -1)) as MaybePoint3d[];
 
-    if (!drawDebugLines(color, path, last)) return;
-
-    for (const point of path) {
-        const coords = R.pipe(
-            point,
-            R.pick(["x", "y", "z"]),
-            R.values(),
-            R.map((x) => Math.trunc(x)),
-            R.join(","),
-        );
-        const text = `{${coords}}`;
-        const preciseText = new foundry.canvas.containers.PreciseText(text, DEBUG_FONT_STYLE);
-
-        preciseText.x = point.x - preciseText.width / 2;
-        preciseText.y = point.y - 5 - preciseText.height;
-
-        canvas.controls.debug.addChild(preciseText);
-    }
-}
-
-function drawDebugLines(color: PIXI.ColorSource, path: Point[], last: number | boolean | Point): boolean {
     if (path.length < 1) return false;
 
     if (R.isNumber(last)) {
@@ -193,6 +172,24 @@ function drawDebugLines(color: PIXI.ColorSource, path: Point[], last: number | b
     }
 
     return true;
+}
+
+function drawDebugText(point: MaybePoint3d, position?: MaybePoint3d) {
+    const coords = R.pipe(
+        point,
+        R.pick(["x", "y", "z"]),
+        R.values(),
+        R.map((x) => Math.trunc(x)),
+        R.join(","),
+    );
+
+    const text = `{${coords}}`;
+    const preciseText = new foundry.canvas.containers.PreciseText(text, DEBUG_FONT_STYLE);
+
+    preciseText.x = (position ?? point).x - preciseText.width / 2;
+    preciseText.y = (position ?? point).y - 5 - preciseText.height;
+
+    canvas.controls.debug.addChild(preciseText);
 }
 
 type TradeQuantityDialogOptions<A extends string = string> = {
@@ -233,5 +230,5 @@ type TradeMessageOptions = {
 
 type MaybePoint3d = Point & { z?: number };
 
-export { clearDebug, createTradeMessage, createTradeQuantityDialog, drawDebug, lineIntersect };
+export { clearDebug, createTradeMessage, createTradeQuantityDialog, drawDebug, drawDebugText, lineIntersect };
 export type { TradeMessageOptions, TradeQuantityDialogData, TradeQuantityDialogOptions };
