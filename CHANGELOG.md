@@ -1,3 +1,14 @@
+#
+
+- `Actionable`:
+  - fix not being able to drop a `Feat` in the `Suppressed Class Features` field
+- `Droppeth`:
+  - the feature no longer has a `keybind` associated to it, it now works from a regular drag & drop
+  - you can now drop on top of tokens, the module will ask you if you want to drop or transfer the item
+  - now support `credits` droppeth (using their value instead of quantity)
+  - now delete the droppeth actor when the last item has `0` quantity (or credits value)
+  - fix system always showing the migration popup when a droppeth actor is present in your world on server load
+
 # 3.59.2
 
 - `Target Helper`:
