@@ -6,12 +6,12 @@ const EPSILON = 0.0000001;
 const CORNER_SPREADS: CornerSpreadRatios[] = [
     [0, 1, 0], // floor bottom left
     [1, 1, 0], // floor bottom right
-    [1, 0, 1], // ceil top right
-    [0, 0, 1], // ceil top left
-    [0, 0, 0], // floor top left
-    [1, 0, 0], // floor top right
     [1, 1, 1], // ceil bottom right
     [0, 1, 1], // ceil bottom left
+    [0, 0, 0], // floor top left
+    [1, 0, 0], // floor top right
+    [1, 0, 1], // ceil top right
+    [0, 0, 1], // ceil top left
 ];
 
 const TOKEN_FACES = [
@@ -131,7 +131,8 @@ function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: numbe
         return addExtrasToTokenSpreadGenerator(tokenSpreadGenerator, scalar, center.z, 0);
     }
 
-    const origin = Vector.fromData(token, elevation);
+    // we offset origin by 1 to avoid edge collisions
+    const origin = Vector.fromData(token, elevation).add({ x: 1, y: 1, z: 1 });
     const sOrigin = center.moveTowardByScalar(origin, scalar);
     const [sDepth, sHeight, sWidth] = [depth, height, width].map((x) => x * scalar);
     // we cache the results that have been generated on the last generator call

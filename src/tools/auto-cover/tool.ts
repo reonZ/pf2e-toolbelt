@@ -240,7 +240,16 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             skipProne: this.settings.creatureProne,
             targetSpread: this.settings.creatureTarget,
         } satisfies Required<TestCreaturesCoverOptions>);
-        // return new ToolCover("wall", collision?.level ?? "none");
+        return new ToolCover("creature", result?.cover ?? "none");
+    }
+
+    calculateWallCover(origin: TokenDocumentPF2e, target: TokenDocumentPF2e, debug: boolean = false): ToolCover {
+        const collision = this.testWallsCollisions(origin, target, {
+            debug,
+            originSpread: this.settings.wallOrigin,
+            targetSpread: this.settings.wallTarget,
+        } satisfies Required<TestWallCollisionOptions>);
+        return new ToolCover("wall", collision?.level ?? "none");
     }
 
     testCreaturesCover(
@@ -258,7 +267,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }: TestCreaturesCoverOptions = {},
     ) {
         const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
-        if (distance ?? 0 <= 5) return; // we avoid calculating creature cover with adjacent target
+        if ((distance ?? 0) <= 5) return; // we avoid calculating creature cover with adjacent target
 
         const originActor = origin.actor;
         const targetActor = target.actor;
@@ -280,7 +289,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         };
 
         let cover: CoverLevel = "none";
-        let collision: {} | undefined;
+        let collision: CreatureCollision | undefined;
         const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
 
         for (const { document: token } of tokens) {
@@ -326,7 +335,46 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             collision ??= _collision;
         }
 
+        if (collision && debug) {
+            this.#drawDebug(origin, collision);
+        }
+
         return { cover, collision };
+    }
+
+    testWallsCollisions(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        { debug, originSpread = 0, targetSpread = 0 }: TestWallCollisionOptions = {},
+    ): WallCollision | undefined {
+        const scene = origin.scene;
+        if (!scene || scene !== canvas.scene || !canvas.walls.quadtree) return;
+
+        const boundaryShape = createBoundaryFromTokens(origin, target);
+        if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
+
+        const walls = canvas.walls.quadtree.getObjects(boundaryShape).filter(({ document: wall, edge }) => {
+            const mode = this.getWallMode(wall);
+            // this wall doesn't block cover so we skip
+            if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
+
+            const side = edge.orientPoint(origin.center);
+            // point collinear or wrong direction from wall
+            if (!side || (edge.direction && side === edge.direction)) return false;
+
+            return true;
+        });
+
+        if (!walls.size) return;
+
+        const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
+        const collision = this.#testWallCollisions(scene, raysGenerator, walls);
+
+        if (collision && debug) {
+            this.#drawDebug(origin, collision);
+        }
+
+        return collision;
     }
 
     #testCreatureCollision(
@@ -377,50 +425,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 return collision;
             }
         }
-    }
-
-    calculateWallCover(origin: TokenDocumentPF2e, target: TokenDocumentPF2e, debug: boolean = false): ToolCover {
-        const collision = this.testWallsCollisions(origin, target, {
-            debug,
-            originSpread: this.settings.wallOrigin,
-            targetSpread: this.settings.wallTarget,
-        } satisfies Required<TestWallCollisionOptions>);
-        return new ToolCover("wall", collision?.level ?? "none");
-    }
-
-    testWallsCollisions(
-        origin: TokenDocumentPF2e,
-        target: TokenDocumentPF2e,
-        { debug, originSpread = 0, targetSpread = 0 }: TestWallCollisionOptions = {},
-    ): WallCollision | undefined {
-        const scene = origin.scene;
-        if (!scene || scene !== canvas.scene || !canvas.walls.quadtree) return;
-
-        const boundaryShape = createBoundaryFromTokens(origin, target);
-        if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
-
-        const walls = canvas.walls.quadtree.getObjects(boundaryShape).filter(({ document: wall, edge }) => {
-            const mode = this.getWallMode(wall);
-            // this wall doesn't block cover so we skip
-            if (mode === "none" || (mode === "move" && edge.isLimited("move"))) return false;
-
-            const side = edge.orientPoint(origin.center);
-            // point collinear or wrong direction from wall
-            if (!side || (edge.direction && side === edge.direction)) return false;
-
-            return true;
-        });
-
-        if (!walls.size) return;
-
-        const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
-        const collision = this.#testWallCollisions(scene, raysGenerator, walls);
-
-        if (collision && debug) {
-            this.#drawWallDebug(origin, collision);
-        }
-
-        return collision;
     }
 
     #testWallCollisions(
@@ -490,7 +494,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #drawWallDebug(origin: TokenDocumentPF2e, collision: CreatureCollision | WallCollision) {
+    #drawDebug(origin: TokenDocumentPF2e, collision: CreatureCollision | WallCollision) {
         const { intersects, range, rays, rectangle } = collision;
         const [bottom, top] = range;
         const [e0, e1] = rectangle;
@@ -504,7 +508,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             const u = Vector.fromData(e1).subtract(e0);
             // we scale horizontally if the edge isn't of an appropriate length
             const m = u.vector2d.magnitude;
-            const scalarH = Math.max(m, 200) / m;
+            const scalarH = Math.max(m, 100) / m;
             const scaleH = (p: Vector) => {
                 if (scalarH === 1 || p.equals2d(e0)) return p;
                 const su = p.subtract(e0);
@@ -512,7 +516,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             };
             // we scale vertically if the wall's height is inappropriate
             const depth = top - bottom;
-            const scalarV = Math.clamp(depth, 200, Math.max(800, m * scalarH)) / depth;
+            const scalarV = Math.clamp(depth, 100, Math.max(800, m * scalarH)) / depth;
             // we project the points onto our triangle section
             const side = getSideOfPointFromLine(e0, e1, origin.center);
             const proj = u.rotate90(side === 1).normalize;
