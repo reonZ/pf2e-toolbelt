@@ -30,11 +30,14 @@ import {
     CoverHighlightRenderer,
     CoverLevel,
     createBoundaryFromTokens,
+    createRectangleTriangles,
     createSpreadRaysGenerator,
+    createTokenSpreadGenerator,
     getExistingCovers,
     getSideOfPointFromLine,
     lineIntersectTriangle,
     SpreadRaysGenerator,
+    TOKEN_FACES,
     ToolCover,
     Vector,
 } from ".";
@@ -224,25 +227,49 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     calculateCreatureCover(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
-        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
-    ): ToolCover {
-        const cover = new ToolCover("creature");
+        context: CheckCheckContext = {},
+        debug: boolean = false,
+    ) {
+        const result = this.testCreaturesCover(origin, target, {
+            context,
+            debug,
+            mode: this.settings.creatureMode,
+            originSpread: this.settings.creatureOrigin,
+            sideScale: this.settings.creatureSide,
+            skipDead: this.settings.creatureDead,
+            skipProne: this.settings.creatureProne,
+            targetSpread: this.settings.creatureTarget,
+        } satisfies Required<TestCreaturesCoverOptions>);
+        // return new ToolCover("wall", collision?.level ?? "none");
+    }
+
+    testCreaturesCover(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        {
+            context,
+            debug,
+            mode = "any",
+            originSpread = 0,
+            sideScale = 1,
+            skipDead,
+            skipProne,
+            targetSpread = 0,
+        }: TestCreaturesCoverOptions = {},
+    ) {
         const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
-        if (distance ?? 0 <= 5) return cover; // we avoid calculating creature cover with adjacent target
+        if (distance ?? 0 <= 5) return; // we avoid calculating creature cover with adjacent target
 
         const originActor = origin.actor;
         const targetActor = target.actor;
-        if (!originActor || !targetActor) return cover;
+        if (!originActor || !targetActor) return;
 
         const boundaryShape = createBoundaryFromTokens(origin, target);
-        if (boundaryShape.width === 0 && boundaryShape.height === 0) return cover;
+        if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
 
         const tokens = canvas.tokens.quadtree.getObjects(boundaryShape);
-        if (!tokens.size) return cover;
+        if (!tokens.size) return;
 
-        const skipDead = this.settings.creatureDead;
-        const skipProne = this.settings.creatureProne;
-        const sideScale = this.settings.creatureSide;
         const originSize = SIZES[originActor.size];
         const targetSize = SIZES[targetActor.size];
 
@@ -252,8 +279,11 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             return size - originSize >= 2 && size - targetSize >= 2;
         };
 
-        for (const tokenObject of tokens) {
-            const token = tokenObject.document;
+        let cover: CoverLevel = "none";
+        let collision: {} | undefined;
+        const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
+
+        for (const { document: token } of tokens) {
             const actor = token?.actor;
 
             if (!actor || token.hidden) continue;
@@ -272,61 +302,89 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             // we handle the 'Phalanx Formation' feat (it only excludes lesser-cover)
             if (!extraLarge && isAllyCharacter && rollOptions["feat:phalanx-formation"]) continue;
             // we don't need to check intersections on that token as it won't give more than what we already have
-            if (!extraLarge && cover.equalsLevel("lesser")) continue;
-            // no intersection
-            if (!this.testCreatureCollision(origin, target, token, { debug, sideScale })) continue;
+            if (!extraLarge && cover === "lesser") continue;
+
+            const _collision = this.#testCreatureCollision(token, raysGenerator, sideScale, mode);
+            if (!_collision) continue; // no intersection
+
             // we can't have extra large check so this is as much as we will ever get
-            if (!canHaveExtraLarges) return cover.updateLevel("lesser");
+            if (!canHaveExtraLarges) {
+                collision = _collision;
+                cover = "lesser";
+                break;
+            }
+
             // we can never get anything beyond 'standard' so we check out now
-            if (extraLarge) return cover.updateLevel("standard");
+            if (extraLarge) {
+                collision = _collision;
+                cover = "standard";
+                break;
+            }
+
             // we can still have extra large checks later on so we have to keep going
-            cover.updateLevel("lesser");
+            cover = "lesser";
+            collision ??= _collision;
         }
 
-        return cover;
+        return { cover, collision };
     }
 
-    testCreatureCollision(
-        origin: TokenDocumentPF2e,
-        target: TokenDocumentPF2e,
-        obstacle: TokenDocumentPF2e,
-        { debug, sideScale = 1 }: TestCreatureCollisionOptions = {},
-    ): boolean {
-        //         const intersectsEdge = (edge: RectEdge): boolean => {
-        //             const intersects = foundry.utils.lineSegmentIntersects(origin, target, edge.A, edge.B);
-        //
-        //             if (debug) {
-        //                 drawDebug(intersects ? "red" : "green", edge.A, edge.B);
-        //             }
-        //
-        //             return intersects;
-        //         };
-        //
-        //         const intersectsWith = (token: TokenPF2e) => {
-        //             const edges = getRectEdges(token.bounds, margin);
-        //
-        //             if (setting === "cross") {
-        //                 return (
-        //                     (intersectsEdge(edges.top) && intersectsEdge(edges.bottom)) ||
-        //                     (intersectsEdge(edges.left) && intersectsEdge(edges.right))
-        //                 );
-        //             } else {
-        //                 return Object.values(edges).some((edge) => intersectsEdge(edge));
-        //             }
-        //         };
-        //
+    #testCreatureCollision(
+        token: TokenDocumentPF2e,
+        raysGenerator: SpreadRaysGenerator,
+        sideScale: number,
+        mode: CreatureMode,
+    ): CreatureCollision | undefined {
+        const spreadValue = Math.clamp(sideScale, 0.75, 1) - 0.5;
+        const spread = createTokenSpreadGenerator(token, spreadValue);
+        // we preemptively eleminate tokens that would never intersect rays
+        if (spread.ceil < raysGenerator.minZ || spread.floor > raysGenerator.maxZ) return;
+
+        const points: Vector[] = spread.toArray();
+        const eliminate = raysGenerator.eliminate;
+        let collision: CreatureCollision | undefined;
+
+        face: for (let faceIndex = 0; faceIndex < TOKEN_FACES.length; faceIndex++) {
+            const rectangle = R.map(TOKEN_FACES[faceIndex], (pointIndex) => points[pointIndex]);
+            const [t0, t1] = createRectangleTriangles(rectangle);
+
+            for (const [O, T, D] of raysGenerator()) {
+                const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
+
+                // we eliminate the face as we have at least one non-intersecting ray
+                if (eliminate && !point) continue face;
+
+                // we cache the first collision
+                if (point) {
+                    collision ??= {
+                        intersects: [],
+                        range: [spread.floor, spread.ceil],
+                        rays: [],
+                        rectangle,
+                    };
+                    collision.intersects.push(point);
+                    collision.rays.push([O, T]);
+                }
+
+                // we aren't eliminating so we have an unique collision
+                if (collision && !eliminate) {
+                    return collision;
+                }
+            }
+
+            // we are eliminating and all rays have collision
+            if (eliminate && collision) {
+                return collision;
+            }
+        }
     }
 
-    calculateWallCover(
-        originToken: TokenDocumentPF2e,
-        targetToken: TokenDocumentPF2e,
-        { debug }: { debug?: boolean } = {},
-    ): ToolCover {
-        const collision = this.testWallsCollisions(originToken, targetToken, {
+    calculateWallCover(origin: TokenDocumentPF2e, target: TokenDocumentPF2e, debug: boolean = false): ToolCover {
+        const collision = this.testWallsCollisions(origin, target, {
             debug,
             originSpread: this.settings.wallOrigin,
             targetSpread: this.settings.wallTarget,
-        });
+        } satisfies Required<TestWallCollisionOptions>);
         return new ToolCover("wall", collision?.level ?? "none");
     }
 
@@ -386,36 +444,39 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 // we can't check intersections with Infinity numbers
                 const bottom = range[0] === -Infinity ? Number.MIN_SAFE_INTEGER : (range[0] / distance) * size;
                 const top = range[1] === Infinity ? Number.MAX_SAFE_INTEGER : (range[1] / distance) * size;
-                // we preemptively eleminate ranges that would never intersect token rays
+                // we preemptively eleminate ranges that would never intersect rays
                 if (top < raysGenerator.minZ || bottom > raysGenerator.maxZ) continue;
 
-                const r0 = Vector.fromData(edge.a, bottom);
-                const r1 = Vector.fromData(edge.b, bottom);
-                const r2 = Vector.fromData(edge.b, top);
-                const r3 = Vector.fromData(edge.a, top);
+                const rectangle = [
+                    Vector.fromData(edge.a, bottom), // r0
+                    Vector.fromData(edge.b, bottom), // r1
+                    Vector.fromData(edge.b, top), // r2
+                    Vector.fromData(edge.a, top), // r3
+                ] as const;
+
+                const [t0, t1] = createRectangleTriangles(rectangle);
 
                 let collision: WallCollision | undefined;
                 for (const [O, T, D] of raysGenerator()) {
-                    const point = lineIntersectTriangle(O, D, r0, r1, r3) ?? lineIntersectTriangle(O, D, r3, r2, r1);
+                    const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
 
-                    // we eliminate the obstacle as we have at least one non-intersecting spread ray
-                    if (eliminate && !point) break range;
+                    // we eliminate the edge as we have at least one non-intersecting ray
+                    if (eliminate && !point) continue range;
 
                     // we cache the collision
                     if (point) {
                         collision ??= {
-                            edge: [r0, r1],
                             intersects: [],
                             level: this.getWallLevel(wall),
                             range: [bottom, top],
                             rays: [],
-                            rectangle: [r0, r1, r2, r3],
+                            rectangle,
                         };
                         collision.intersects.push(point);
                         collision.rays.push([O, T]);
                     }
 
-                    // we aren't eliminating so we have an obstacle
+                    // we aren't eliminating so we have an unique collision
                     if (collision && !eliminate) {
                         return collision;
                     }
@@ -429,10 +490,10 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #drawWallDebug(origin: TokenDocumentPF2e, collision: WallCollision) {
-        const { edge, intersects, range, rays, rectangle } = collision;
+    #drawWallDebug(origin: TokenDocumentPF2e, collision: CreatureCollision | WallCollision) {
+        const { intersects, range, rays, rectangle } = collision;
         const [bottom, top] = range;
-        const [e0, e1] = edge;
+        const [e0, e1] = rectangle;
 
         for (const [O, T] of rays) {
             drawDebug("red", O, T); // line between tokens
@@ -602,13 +663,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
 
         const wallEnabled = this.settings.wallEnabled === "enabled";
-        const wall = wallEnabled ? this.calculateWallCover(origin, target, { debug }) : new ToolCover("wall");
+        const wall = wallEnabled ? this.calculateWallCover(origin, target, debug) : new ToolCover("wall");
         if (wall.greaterThanOrEqualToLevel("standard")) {
             return wall; // we can't have a creature cover greater than that
         }
 
         const creatureEnabled = this.settings.creatureEnabled === "enabled";
-        const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, { context, debug }) : null;
+        const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, context, debug) : null;
         return creature?.greaterThan(wall) ? creature : wall;
     }
 
@@ -787,20 +848,22 @@ type ToolSettings = {
     creatureProne: boolean;
     creatureSide: number;
     creatureTarget: number;
-    wallDefaultMode: (typeof WALL_MODES)[number];
-    wallDefaultLevel: (typeof WALL_LEVELS)[number];
+    wallDefaultMode: WallMode;
+    wallDefaultLevel: WallLevel;
     wallEnabled: SettingEnabledType;
     wallOrigin: number;
     wallTarget: number;
 };
 
-type WallCollision = {
-    edge: [Vector, Vector];
+type CreatureCollision = {
     intersects: Vector[];
-    level: WallLevel;
     range: [number, number];
     rays: [Vector, Vector][];
-    rectangle: [Vector, Vector, Vector, Vector];
+    rectangle: readonly [Vector, Vector, Vector, Vector];
+};
+
+type WallCollision = CreatureCollision & {
+    level: WallLevel;
 };
 
 type WallConfig = fa.api.DocumentSheetV2<fa.api.DocumentSheetConfiguration<WallDocument>>;
@@ -815,14 +878,20 @@ type WallLevel = (typeof WALL_LEVELS)[number];
 type WallFlagMode = (typeof WALL_FLAG_MODES)[number];
 type WallMode = (typeof WALL_MODES)[number];
 
-type TestCreatureCollisionOptions = {
-    debug?: boolean;
-    sideScale?: number;
-};
-
 type TestWallCollisionOptions = {
     debug?: boolean;
     originSpread?: number;
+    targetSpread?: number;
+};
+
+type TestCreaturesCoverOptions = {
+    context?: CheckCheckContext;
+    debug?: boolean;
+    mode?: CreatureMode;
+    originSpread?: number;
+    sideScale?: number;
+    skipDead?: boolean;
+    skipProne?: boolean;
     targetSpread?: number;
 };
 
