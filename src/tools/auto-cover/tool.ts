@@ -230,7 +230,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         context: CheckCheckContext = {},
         debug: boolean = false,
     ) {
-        const result = this.testCreaturesCover(origin, target, {
+        const collision = this.testCreaturesCover(origin, target, {
             context,
             debug,
             mode: this.settings.creatureMode,
@@ -240,7 +240,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             skipProne: this.settings.creatureProne,
             targetSpread: this.settings.creatureTarget,
         } satisfies Required<TestCreaturesCoverOptions>);
-        return new ToolCover("creature", result?.cover ?? "none");
+        return new ToolCover("creature", collision?.level ?? "none");
     }
 
     calculateWallCover(origin: TokenDocumentPF2e, target: TokenDocumentPF2e, debug: boolean = false): ToolCover {
@@ -265,7 +265,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             skipProne,
             targetSpread = 0,
         }: TestCreaturesCoverOptions = {},
-    ) {
+    ): CreatureCollision | undefined {
         const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
         if ((distance ?? 0) <= 5) return; // we avoid calculating creature cover with adjacent target
 
@@ -288,7 +288,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             return size - originSize >= 2 && size - targetSize >= 2;
         };
 
-        let cover: CoverLevel = "none";
         let collision: CreatureCollision | undefined;
         const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
 
@@ -311,35 +310,32 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             // we handle the 'Phalanx Formation' feat (it only excludes lesser-cover)
             if (!extraLarge && isAllyCharacter && rollOptions["feat:phalanx-formation"]) continue;
             // we don't need to check intersections on that token as it won't give more than what we already have
-            if (!extraLarge && cover === "lesser") continue;
+            if (!extraLarge && collision?.level === "lesser") continue;
 
             const _collision = this.#testCreatureCollision(token, raysGenerator, sideScale, mode);
             if (!_collision) continue; // no intersection
 
             // we can't have extra large check so this is as much as we will ever get
             if (!canHaveExtraLarges) {
-                collision = _collision;
-                cover = "lesser";
+                collision = { ..._collision, level: "lesser" };
                 break;
             }
 
             // we can never get anything beyond 'standard' so we check out now
             if (extraLarge) {
-                collision = _collision;
-                cover = "standard";
+                collision = { ..._collision, level: "standard" };
                 break;
             }
 
             // we can still have extra large checks later on so we have to keep going
-            cover = "lesser";
-            collision ??= _collision;
+            collision ??= { ..._collision, level: "lesser" };
         }
 
         if (collision && debug) {
             this.#drawDebug(origin, collision);
         }
 
-        return { cover, collision };
+        return collision;
     }
 
     testWallsCollisions(
@@ -382,7 +378,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         raysGenerator: SpreadRaysGenerator,
         sideScale: number,
         mode: CreatureMode,
-    ): CreatureCollision | undefined {
+    ): BaseCollision | undefined {
         const spreadValue = Math.clamp(sideScale, 0.75, 1) - 0.5;
         const spread = createTokenSpreadGenerator(token, spreadValue);
         // we preemptively eleminate tokens that would never intersect rays
@@ -390,7 +386,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const points: Vector[] = spread.toArray();
         const eliminate = raysGenerator.eliminate;
-        let collision: CreatureCollision | undefined;
+        let collision: BaseCollision | undefined;
 
         face: for (let faceIndex = 0; faceIndex < TOKEN_FACES.length; faceIndex++) {
             const rectangle = R.map(TOKEN_FACES[faceIndex], (pointIndex) => points[pointIndex]);
@@ -494,7 +490,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
     }
 
-    #drawDebug(origin: TokenDocumentPF2e, collision: CreatureCollision | WallCollision) {
+    #drawDebug(origin: TokenDocumentPF2e, collision: BaseCollision) {
         const { intersects, range, rays, rectangle } = collision;
         const [bottom, top] = range;
         const [e0, e1] = rectangle;
@@ -859,22 +855,27 @@ type ToolSettings = {
     wallTarget: number;
 };
 
-type CreatureCollision = {
+type Collision<T extends CoverLevel> = BaseCollision & {
+    level: T;
+};
+
+type BaseCollision = {
     intersects: Vector[];
     range: [number, number];
     rays: [Vector, Vector][];
     rectangle: readonly [Vector, Vector, Vector, Vector];
 };
 
-type WallCollision = CreatureCollision & {
-    level: WallLevel;
-};
+type CreatureCollision = Collision<CreatureLevel>;
+
+type WallCollision = Collision<WallLevel>;
 
 type WallConfig = fa.api.DocumentSheetV2<fa.api.DocumentSheetConfiguration<WallDocument>>;
 
 type SettingEnabledType = (typeof SETTING_ENABLED)[number];
 
 type CreatureMode = (typeof CREATURE_MODES)[number];
+type CreatureLevel = "lesser" | "standard";
 
 type WallFlagLevel = (typeof WALL_FLAG_LEVELS)[number];
 type WallLevel = (typeof WALL_LEVELS)[number];

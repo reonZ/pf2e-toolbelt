@@ -1,5 +1,5 @@
 import { MODULE, TokenDocumentPF2e } from "foundry-helpers";
-import { Vector } from "tools";
+import { clearDebug, Vector } from "tools";
 
 const EPSILON = 0.0000001;
 
@@ -242,6 +242,7 @@ function lineIntersectTriangle(P: Vector, D: Vector, [v0, v1, v2]: Triangle): Ve
 }
 
 MODULE.debugExpose("geometry", {
+    clearDebug,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     getSideOfPointFromLine,
