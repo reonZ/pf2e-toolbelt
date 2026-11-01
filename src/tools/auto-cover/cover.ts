@@ -1,4 +1,16 @@
-import { ActorPF2e, EffectPF2e, getChoiceSetSelection, getItemSourceId, MODULE, R, SYSTEM } from "foundry-helpers";
+import {
+    ActorPF2e,
+    EffectPF2e,
+    EffectSource,
+    getChoiceSetSelection,
+    getItemSourceId,
+    Localize,
+    localize,
+    MODULE,
+    R,
+    signedInteger,
+    SYSTEM,
+} from "foundry-helpers";
 
 const COVER_UUID = SYSTEM.itemUuid(
     "Compendium.pf2e.other-effects.Item.I9lfZUiCwMiGogVi",
@@ -14,12 +26,23 @@ const COVERS = {
 } as const;
 
 class ToolCover {
+    static #localize = localize.sub("autoCover");
+
     #level: CoverLevel;
     #type: CoverType;
 
     constructor(type: CoverType, level: CoverLevel = "none") {
         this.#level = level;
         this.#type = type;
+    }
+
+    static get localize(): Localize {
+        return this.#localize;
+    }
+
+    static fromActor(actor: ActorPF2e, isProne: boolean): ToolCover {
+        const effects = this.getExistingCovers(actor);
+        return this.fromEffects(effects, isProne);
     }
 
     static fromEffects(effects: EffectPF2e[], isProne: boolean): ToolCover {
@@ -36,30 +59,118 @@ class ToolCover {
         return new ToolCover("effect", level ?? "none");
     }
 
-    static fromActor(actor: ActorPF2e, isProne: boolean): ToolCover {
-        const effects = getExistingCovers(actor);
-        return this.fromEffects(effects, isProne);
+    static async getCoverSource(): Promise<EffectSource | undefined> {
+        const coverUUID = COVER_UUID();
+        return (await fromUuid<EffectPF2e>(coverUUID))?.toObject();
+    }
+
+    static getExistingCovers(actor: ActorPF2e): EffectPF2e[] {
+        const coverUUID = COVER_UUID();
+        return actor.itemTypes.effect.filter((effect) => getItemSourceId(effect) === coverUUID);
     }
 
     static highestCover(...covers: [ToolCover, ToolCover, ...ToolCover[]]): ToolCover {
         return R.firstBy(covers, [R.prop("enumValue"), "desc"]);
     }
 
-    get level(): CoverLevel {
-        return this.#level;
+    static getSelectOptions(isProne: boolean) {
+        return R.pipe(
+            isProne ? COVERS : R.omit(COVERS, ["greater-prone"]),
+            R.keys(),
+            R.map((slug) => {
+                return { label: this.localize(slug), value: slug };
+            }),
+        );
     }
 
-    get type(): CoverType {
-        return this.#type;
+    get bonus(): CoverValue {
+        const enumValue = this.enumValue;
+        return enumValue === 3 ? 4 : enumValue;
+    }
+
+    get coverSourceRules() {
+        const bonus = this.bonus;
+        const level = this.level;
+
+        return [
+            {
+                choices: [],
+                flag: "cover",
+                key: "ChoiceSet",
+                prompt: "PF2E.SpecificRule.Cover.Prompt",
+                selection: { bonus, level },
+            },
+            { key: "RollOption", option: `self:cover-bonus:${bonus}` },
+            { key: "RollOption", option: `self:cover-level:${level}` },
+            {
+                key: "FlatModifier",
+                predicate: [
+                    {
+                        or: [
+                            { and: ["self:condition:prone", "item:ranged"] },
+                            { not: "self:cover-level:greater-prone" },
+                        ],
+                    },
+                ],
+                selector: "ac",
+                type: "circumstance",
+                value: bonus,
+            },
+            {
+                key: "FlatModifier",
+                predicate: ["area-effect", { not: "self:cover-level:greater-prone" }],
+                selector: "reflex",
+                type: "circumstance",
+                value: bonus,
+            },
+            {
+                key: "FlatModifier",
+                predicate: [
+                    { or: ["action:hide", "action:sneak", "avoid-detection"] },
+                    { not: "self:cover-level:greater-prone" },
+                ],
+                selector: "stealth",
+                type: "circumstance",
+                value: bonus,
+            },
+            {
+                key: "FlatModifier",
+                predicate: ["action:avoid-notice", { not: "self:cover-level:greater-prone" }],
+                selector: "initiative",
+                type: "circumstance",
+                value: bonus,
+            },
+        ];
     }
 
     get enumValue(): CoverEnumValue {
         return COVERS[this.level];
     }
 
-    get value(): CoverValue {
-        const enumValue = this.enumValue;
-        return enumValue === 3 ? 4 : enumValue;
+    get level(): CoverLevel {
+        return this.#level;
+    }
+
+    get signedBonus(): string {
+        return signedInteger(this.bonus);
+    }
+
+    get type(): CoverType {
+        return this.#type;
+    }
+
+    async createSource() {
+        const source = await ToolCover.getCoverSource();
+        if (!source) return;
+
+        source.name = ToolCover.localize(this.type);
+        source.system.rules = this.coverSourceRules;
+
+        return source;
+    }
+
+    equals(other: ToolCover): boolean {
+        return this.level === other.level;
     }
 
     equalsLevel(level: CoverLevel): boolean {
@@ -84,17 +195,12 @@ class ToolCover {
     }
 }
 
-function getExistingCovers(actor: ActorPF2e): EffectPF2e[] {
-    const coverUUID = COVER_UUID();
-    return actor.itemTypes.effect.filter((effect) => getItemSourceId(effect) === coverUUID);
-}
-
 MODULE.debugExpose("Cover", ToolCover);
 
 type CoverLevel = keyof typeof COVERS;
-type CoverType = "creature" | "effect" | "manual" | "wall";
+type CoverType = "creature" | "effect" | "overriden" | "wall";
 type CoverEnumValue = ValueOf<typeof COVERS>;
 type CoverValue = 0 | 1 | 2 | 4;
 
-export { getExistingCovers, ToolCover };
+export { ToolCover };
 export type { CoverLevel, CoverType };

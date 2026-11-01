@@ -9,7 +9,6 @@ import {
     createHTMLElement,
     createToggleHook,
     createToggleWrapper,
-    EffectPF2e,
     getFirstActiveToken,
     htmlQuery,
     ItemSourcePF2e,
@@ -17,12 +16,10 @@ import {
     R,
     Rolled,
     ScenePF2e,
-    signedInteger,
     toggleHooksAndWrappers,
     TokenDocumentPF2e,
     TokenPF2e,
     Wall,
-    ZeroToFour,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
 import { clearDebug, drawDebug } from "tools";
@@ -34,7 +31,6 @@ import {
     createTokenSpreadGenerator,
     GeneratedSpreadRay,
     generateSpreadRay,
-    getExistingCovers,
     getSideOfPointFromLine,
     getTokenSpreadData,
     lineIntersectRectangle,
@@ -198,11 +194,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     getCoverHighlight(token: TokenPF2e, fallback: boolean) {
         const current = this.getInMemory<CoverHighlightRenderer>(token, "coverHighlight");
         return fallback ? (current ?? new CoverHighlightRenderer(token, this)) : current;
-    }
-
-    getCoverBonus(level: CoverLevel): ZeroToFour {
-        const rawBonus = COVER_VALUES[level];
-        return rawBonus === 3 ? 4 : rawBonus;
     }
 
     getWallLevelFlag(wall: WallDocument): WallFlagLevel {
@@ -638,8 +629,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const cover = this.#calculateCover(origin, target, { context, debug: MODULE.isDebug });
         if (cover.greaterThan(exist)) {
-            //             const items = foundry.utils.deepClone(targetActor._source.items);
-            //             await this.#addCoverSourceToContext(context, items, cover.level, this.localize(cover.type));
+            const items = foundry.utils.deepClone(targetActor._source.items);
+            await this.#addCoverSourceToContext(context, items, cover);
         }
 
         return wrapped(...args);
@@ -674,33 +665,21 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         if (!originActor || !targetActor || originActor.isOfType("hazard")) return;
 
         const targetIsProne = isTargetProne(context);
-        const coverEffects = getExistingCovers(targetActor);
-        const current = this.getHighestCoverSelection(coverEffects, targetIsProne);
+        const coverEffects = ToolCover.getExistingCovers(targetActor);
+        const current = ToolCover.fromEffects(coverEffects, targetIsProne);
+        const overriden = new ToolCover("overriden", current.level);
 
         const html = $html[0];
         const separator = document.createElement("hr");
 
-        const options = R.pipe(
-            targetIsProne ? COVER_VALUES : R.omit(COVER_VALUES, ["greater-prone"]),
-            R.keys(),
-            R.map((slug) => {
-                return { label: this.localize(slug), value: slug };
-            }),
-        );
-
         const select = foundry.applications.fields.createSelectInput({
             name: "override-cover",
-            options,
+            options: ToolCover.getSelectOptions(targetIsProne),
             value: current.level,
         });
 
-        const getDisplayedBonus = (level: CoverLevel): string => {
-            const bonus = this.getCoverBonus(level);
-            return signedInteger(bonus);
-        };
-
         const bonusSpan = createHTMLElement("span", {
-            content: getDisplayedBonus(current.level),
+            content: current.signedBonus,
         });
 
         const row = createHTMLElement("div", {
@@ -712,11 +691,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         htmlQuery(html, ".add-modifier-panel")?.after(separator, row);
 
-        let cover = current.level;
-
         select.addEventListener("change", () => {
-            cover = select.value as CoverLevel;
-            bonusSpan.innerText = getDisplayedBonus(cover);
+            overriden.updateLevel(select.value as CoverLevel);
+            bonusSpan.innerText = overriden.signedBonus;
         });
 
         htmlQuery(html, `button[type="submit"]`)?.addEventListener(
@@ -726,12 +703,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 event.stopPropagation();
                 event.stopImmediatePropagation();
 
-                if (cover !== current.level) {
+                if (!overriden.equals(current)) {
                     const ids = coverEffects.map((effect) => effect.id);
                     const allItems = foundry.utils.deepClone(targetActor._source.items);
                     const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
 
-                    await this.#addCoverSourceToContext(context, items, cover, this.localize("overriden"));
+                    await this.#addCoverSourceToContext(context, items, overriden);
                 }
 
                 dialog.resolve(true);
@@ -744,18 +721,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         dialog.setPosition();
     }
 
-    async #addCoverSourceToContext(
-        context: CheckCheckContext,
-        items: ItemSourcePF2e[],
-        level: CoverLevel,
-        sourceName: string,
-    ) {
-        const coverUUID = COVER_UUID();
-        const source = (await fromUuid<EffectPF2e>(coverUUID))?.toObject();
+    async #addCoverSourceToContext(context: CheckCheckContext, items: ItemSourcePF2e[], cover: ToolCover) {
+        const source = await cover.createSource();
         if (!source) return;
-
-        source.name = sourceName;
-        source.system.rules = this.#coverSourceRules(level);
 
         items.push(source);
 
@@ -769,60 +737,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 context.dc.statistic = statistic;
             }
         }
-    }
-
-    #coverSourceRules(level: CoverLevel) {
-        const bonus = this.getCoverBonus(level);
-
-        return [
-            {
-                choices: [],
-                flag: "cover",
-                key: "ChoiceSet",
-                prompt: "PF2E.SpecificRule.Cover.Prompt",
-                selection: { bonus, level },
-            },
-            { key: "RollOption", option: `self:cover-bonus:${bonus}` },
-            { key: "RollOption", option: `self:cover-level:${level}` },
-            {
-                key: "FlatModifier",
-                predicate: [
-                    {
-                        or: [
-                            { and: ["self:condition:prone", "item:ranged"] },
-                            { not: "self:cover-level:greater-prone" },
-                        ],
-                    },
-                ],
-                selector: "ac",
-                type: "circumstance",
-                value: bonus,
-            },
-            {
-                key: "FlatModifier",
-                predicate: ["area-effect", { not: "self:cover-level:greater-prone" }],
-                selector: "reflex",
-                type: "circumstance",
-                value: bonus,
-            },
-            {
-                key: "FlatModifier",
-                predicate: [
-                    { or: ["action:hide", "action:sneak", "avoid-detection"] },
-                    { not: "self:cover-level:greater-prone" },
-                ],
-                selector: "stealth",
-                type: "circumstance",
-                value: bonus,
-            },
-            {
-                key: "FlatModifier",
-                predicate: ["action:avoid-notice", { not: "self:cover-level:greater-prone" }],
-                selector: "initiative",
-                type: "circumstance",
-                value: bonus,
-            },
-        ];
     }
 }
 
