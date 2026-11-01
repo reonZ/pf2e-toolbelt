@@ -87,16 +87,16 @@ function addExtrasToTokenSpreadGenerator(
             enumerable: false,
             configurable: false,
         },
-        eliminate: {
-            get(): boolean {
-                return scalar > 0;
+        floor: {
+            get(): number {
+                return elevation;
             },
             enumerable: false,
             configurable: false,
         },
-        floor: {
-            get(): number {
-                return elevation;
+        isSpread: {
+            get(): boolean {
+                return scalar > 0;
             },
             enumerable: false,
             configurable: false,
@@ -114,7 +114,7 @@ function addExtrasToTokenSpreadGenerator(
     return generator as TokenSpreadGenerator;
 }
 
-function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: number): TokenSpreadGenerator {
+function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: number, offset = 0): TokenSpreadGenerator {
     const { distance, size } = token.scene?.grid ?? { distance: 5, size: 100 };
     const elevation = (token.elevation / distance) * size;
     const depth = getTokenDepth(token) * size;
@@ -131,10 +131,9 @@ function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: numbe
         return addExtrasToTokenSpreadGenerator(tokenSpreadGenerator, scalar, center.z, 0);
     }
 
-    // we offset origin by 1 to avoid edge collisions
-    const origin = Vector.fromData(token, elevation).add({ x: 1, y: 1, z: 1 });
+    const origin = Vector.fromData(token, elevation).add({ x: offset, y: offset, z: offset });
     const sOrigin = center.moveTowardByScalar(origin, scalar);
-    const [sDepth, sHeight, sWidth] = [depth, height, width].map((x) => x * scalar);
+    const [sDepth, sHeight, sWidth] = [depth, height, width].map((x) => (x - offset * 2) * scalar);
     // we cache the results that have been generated on the last generator call
     const cached: Vector[] = [];
 
@@ -148,7 +147,7 @@ function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: numbe
             yield (cached[i] ??= project(i));
         }
     }
-    return addExtrasToTokenSpreadGenerator(tokenSpreadGenerator, scalar, sOrigin.z, depth);
+    return addExtrasToTokenSpreadGenerator(tokenSpreadGenerator, scalar, sOrigin.z, sDepth);
 }
 
 function createSpreadRaysGenerator(
@@ -183,9 +182,9 @@ function createSpreadRaysGenerator(
     }
 
     Object.defineProperties(spreadRaysGenerator, {
-        eliminate: {
+        isSpread: {
             get(): boolean {
-                return originSpreads.eliminate || targetSpreads.eliminate;
+                return originSpreads.isSpread || targetSpreads.isSpread;
             },
             enumerable: false,
             configurable: false,
@@ -257,7 +256,7 @@ type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
 type GeneratedSpreadRay = [origin: Vector, target: Vector, direction: Vector];
 
 type SpreadRaysGenerator = (() => Generator<GeneratedSpreadRay, void, unknown>) & {
-    get eliminate(): boolean;
+    get isSpread(): boolean;
     get minZ(): number;
     get maxZ(): number;
 };
@@ -265,7 +264,7 @@ type SpreadRaysGenerator = (() => Generator<GeneratedSpreadRay, void, unknown>) 
 type TokenSpreadGenerator = (() => Generator<Vector, void, unknown>) & {
     get floor(): number;
     get ceil(): number;
-    get eliminate(): boolean;
+    get isSpread(): boolean;
     toArray(): Vector[];
 };
 

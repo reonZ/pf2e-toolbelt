@@ -380,12 +380,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         mode: CreatureMode,
     ): BaseCollision | undefined {
         const spreadValue = Math.clamp(sideScale, 0.75, 1) - 0.5;
-        const spread = createTokenSpreadGenerator(token, spreadValue);
+        // we offset by 1 to avoid outer corner collisions on center-center
+        const spread = createTokenSpreadGenerator(token, spreadValue, raysGenerator.isSpread ? 0 : 1);
         // we preemptively eleminate tokens that would never intersect rays
         if (spread.ceil < raysGenerator.minZ || spread.floor > raysGenerator.maxZ) return;
 
         const points: Vector[] = spread.toArray();
-        const eliminate = raysGenerator.eliminate;
+        const eliminate = raysGenerator.isSpread;
         let collision: BaseCollision | undefined;
 
         face: for (let faceIndex = 0; faceIndex < TOKEN_FACES.length; faceIndex++) {
@@ -429,7 +430,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         walls: Set<Wall>,
     ): WallCollision | undefined {
         const { distance, size } = scene.grid;
-        const eliminate = raysGenerator.eliminate;
+        const eliminate = raysGenerator.isSpread;
 
         for (const { document: wall, edge } of walls) {
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
