@@ -46,7 +46,10 @@ class CoverHighlightRenderer {
         if (canvas.tokens.highlightObjects && game.user.targets.size && this.#shouldRender) {
             for (const target of game.user.targets) {
                 if (this.#token.document === target.document) continue;
-                const cover = this.#tool.calculateCover(this.#token.document, target.document);
+
+                const cover = this.#tool.calculateCover(this.#token.document, target.document, { strict: true });
+                if (!cover) continue;
+
                 this.drawLine(target, cover);
                 this.drawLabel(target, cover);
             }

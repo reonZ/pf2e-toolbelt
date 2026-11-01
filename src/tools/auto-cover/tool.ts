@@ -62,8 +62,14 @@ const WALL_FLAG_LEVELS = ["default", ...WALL_LEVELS] as const;
 const WALL_FLAG_MODES = ["default", "none", "normal"] as const;
 
 class AutoCoverTool extends ModuleTool<ToolSettings> {
-    #wrappers = [
+    #enabledWrappers = [
         createToggleWrapper("WRAPPER", "game.pf2e.Check.roll", this.#checkRoll, { context: this }),
+        createToggleWrapper(
+            "WRAPPER",
+            "foundry.applications.sheets.WallConfig.prototype._renderHTML",
+            this.#wallConfigRenderHTML,
+            { context: this },
+        ),
         createToggleWrapper(
             "WRAPPER",
             "CONFIG.Token.objectClass.prototype._refreshVisibility",
@@ -73,18 +79,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         createToggleWrapper("WRAPPER", "CONFIG.Token.objectClass.prototype._destroy", this.#tokenDestroy, {
             context: this,
         }),
-        createToggleWrapper(
-            "WRAPPER",
-            "foundry.applications.sheets.WallConfig.prototype._renderHTML",
-            this.#wallConfigRenderHTML,
-            { context: this },
-        ),
     ];
 
-    #onRenderCheckModifierDialog = createToggleHook(
-        "renderCheckModifiersDialog",
-        this.#onRenderCheckModifiersDialog.bind(this),
-    );
+    #manualWrappers = [createToggleHook("renderCheckModifiersDialog", this.#onRenderCheckModifiersDialog.bind(this))];
 
     get key(): "autoCover" {
         return "autoCover";
@@ -181,8 +178,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const creature = this.settings.creatureEnabled;
         const wall = this.settings.wallEnabled;
 
-        toggleHooksAndWrappers(this.#wrappers, creature === "enabled" || wall === "enabled");
-        this.#onRenderCheckModifierDialog.toggle(creature !== "disabled" || wall !== "disabled");
+        toggleHooksAndWrappers(this.#enabledWrappers, creature === "enabled" || wall === "enabled");
+        toggleHooksAndWrappers(this.#manualWrappers, creature !== "disabled" || wall !== "disabled");
     }
 
     init(): void {
@@ -219,8 +216,18 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     calculateCover(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
-        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
-    ): ToolCover {
+        options: { context?: CheckCheckContext; debug?: boolean; strict: true },
+    ): ToolCover | undefined;
+    calculateCover(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        options?: { context?: CheckCheckContext; debug?: boolean; strict?: boolean },
+    ): ToolCover;
+    calculateCover(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        { context, debug, strict }: { context?: CheckCheckContext; debug?: boolean; strict?: boolean } = {},
+    ): ToolCover | undefined {
         if (debug) {
             clearDebug();
         }
@@ -233,7 +240,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const creatureEnabled = this.settings.creatureEnabled === "enabled";
         const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, context, debug) : null;
-        return creature?.greaterThan(wall) ? creature : wall;
+        return creature?.greaterThan(wall) ? creature : strict ? undefined : wall;
     }
 
     calculateCreatureCover(
