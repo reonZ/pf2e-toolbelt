@@ -14,17 +14,17 @@ const CORNER_SPREADS: CornerSpreadRatios[] = [
     [0, 0, 1], // ceil top left
 ];
 
-const TOKEN_FACES_A = [
+const TOKEN_FACES_A: TokenFaceIndices = [
     [0, 1, 2, 3], // front
     [0, 4, 7, 3], // left
     [3, 2, 6, 7], // top
-] as const;
+];
 
-const TOKEN_FACES_B = [
+const TOKEN_FACES_B: TokenFaceIndices = [
     [4, 5, 6, 7], // back
     [1, 5, 6, 2], // right
     [0, 1, 3, 4], //bottom
-] as const;
+];
 
 function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
     const d = (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
@@ -33,17 +33,9 @@ function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
 
 function getTokenDepth(token: TokenDocumentPF2e): number {
     const actor = token.actor;
-
-    if (actor?.isOfType("vehicle")) {
-        return actor.system.details.space.high;
-    }
-
-    if (actor?.isOfType("creature") && token.width === token.height) {
-        return token.width;
-    }
-
-    // not really sure what to do here in case of non squared bounds
-    return Math.min(token.width, token.height);
+    return actor?.isOfType("vehicle")
+        ? actor.system.details.space.high / (token.scene?.grid.distance ?? 5)
+        : Math.min(token.width, token.height);
 }
 
 function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocumentPF2e): PIXI.Rectangle {
@@ -290,6 +282,8 @@ type RectangleTriangles = [Triangle, Triangle];
 
 type CornerSpreadRatios = [0 | 1, 0 | 1, 0 | 1];
 
+type TokenFaceIndices = [number, number, number, number][];
+
 export {
     createBoundaryFromTokens,
     createRectangleTriangles,
@@ -302,4 +296,4 @@ export {
     TOKEN_FACES_A,
     TOKEN_FACES_B,
 };
-export type { GeneratedSpreadRay, RectEdge, RectEdges, SpreadRaysGenerator, Triangle };
+export type { GeneratedSpreadRay, RectEdge, RectEdges, SpreadRaysGenerator, TokenFaceIndices, Triangle };
