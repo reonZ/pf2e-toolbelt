@@ -14,16 +14,16 @@ const CORNER_SPREADS: CornerSpreadRatios[] = [
     [0, 0, 1], // ceil top left
 ];
 
-const TOKEN_FACES_A: TokenFaceIndices = [
-    [0, 1, 2, 3], // front
-    [0, 4, 7, 3], // left
-    [3, 2, 6, 7], // top
+const TOKEN_FACES_A: TokenFaceIndices[] = [
+    [0, 1, 3], // front
+    [0, 4, 3], // left
+    [3, 2, 7], // top
 ];
 
-const TOKEN_FACES_B: TokenFaceIndices = [
-    [4, 5, 6, 7], // back
-    [1, 5, 6, 2], // right
-    [0, 1, 3, 4], //bottom
+const TOKEN_FACES_B: TokenFaceIndices[] = [
+    [4, 5, 7], // back
+    [1, 5, 2], // right
+    [0, 1, 4], //bottom
 ];
 
 function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
@@ -59,13 +59,6 @@ function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocume
     const height = bottom - top;
 
     return new PIXI.Rectangle(left, top, width, height).normalize();
-}
-
-function createRectangleTriangles([r0, r1, r2, r3]: readonly [Vector, Vector, Vector, Vector]): RectangleTriangles {
-    return [
-        [r0, r1, r3],
-        [r3, r2, r1],
-    ] as const;
 }
 
 function addExtrasToTokenSpreadGenerator(
@@ -208,7 +201,7 @@ function createSpreadRaysGenerator(
 }
 
 // Möller–Trumbore implementation
-function lineIntersectTriangle(P: Vector, D: Vector, [v0, v1, v2]: Triangle): Vector | undefined {
+function lineIntersectRectangle(P: Vector, D: Vector, [v0, v1, v2]: Triangle): Vector | undefined {
     const e1 = v1.subtract(v0);
     const e2 = v2.subtract(v0);
     const N = D.cross(e2);
@@ -228,12 +221,12 @@ function lineIntersectTriangle(P: Vector, D: Vector, [v0, v1, v2]: Triangle): Ve
     const v = D.dot(q) * invDenom;
 
     // line passes outside of e1 bounds
-    if (v < 0 || u + v > 1) return;
+    if (v < 0 || v > 1) return;
 
     // line intersection
     const t = e2.dot(q) * invDenom;
 
-    // our finite line intersects the triangle
+    // our finite line intersects the rectangle
     if (t > EPSILON) {
         return D.multiplyBy(t).add(P);
     }
@@ -247,7 +240,7 @@ MODULE.debugExpose("geometry", {
     getSideOfPointFromLine,
     getTokenDepth,
     getTokenSpreadData,
-    lineIntersectTriangle,
+    lineIntersectRectangle,
     Vector,
 });
 
@@ -277,22 +270,20 @@ type TokenSpreadData = {
     width: number;
 };
 
-type Triangle = [Vector, Vector, Vector];
-type RectangleTriangles = [Triangle, Triangle];
+type Triangle = readonly [Vector, Vector, Vector];
 
 type CornerSpreadRatios = [0 | 1, 0 | 1, 0 | 1];
 
-type TokenFaceIndices = [number, number, number, number][];
+type TokenFaceIndices = [number, number, number];
 
 export {
     createBoundaryFromTokens,
-    createRectangleTriangles,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     generateSpreadRay,
     getSideOfPointFromLine,
     getTokenSpreadData,
-    lineIntersectTriangle,
+    lineIntersectRectangle,
     TOKEN_FACES_A,
     TOKEN_FACES_B,
 };

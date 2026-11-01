@@ -30,7 +30,6 @@ import {
     CoverHighlightRenderer,
     CoverLevel,
     createBoundaryFromTokens,
-    createRectangleTriangles,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     GeneratedSpreadRay,
@@ -38,12 +37,13 @@ import {
     getExistingCovers,
     getSideOfPointFromLine,
     getTokenSpreadData,
-    lineIntersectTriangle,
+    lineIntersectRectangle,
     SpreadRaysGenerator,
     TOKEN_FACES_A,
     TOKEN_FACES_B,
     TokenFaceIndices,
     ToolCover,
+    Triangle,
     Vector,
 } from ".";
 
@@ -388,13 +388,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const facesB = mode === "opposite" ? TOKEN_FACES_B : undefined;
 
         const intersectFace = (
-            facesList: TokenFaceIndices,
+            facesList: TokenFaceIndices[],
             faceIndex: number,
-        ): { point: Vector; rectangle: [Vector, Vector, Vector, Vector] } | undefined => {
-            const rectangle = R.map(facesList[faceIndex], (pointIndex) => points[pointIndex]);
-            const [t0, t1] = createRectangleTriangles(rectangle);
-            const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
-            return point ? { point, rectangle } : undefined;
+        ): { point: Vector; triangle: Triangle } | undefined => {
+            const triangle = R.map(facesList[faceIndex], (pointIndex) => points[pointIndex]);
+            const point = lineIntersectRectangle(O, D, triangle);
+            return point ? { point, triangle } : undefined;
         };
 
         for (let faceIndex = 0; faceIndex < facesA.length; faceIndex++) {
@@ -409,7 +408,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     intersects: [intersectB.point],
                     range: [spread.floor, spread.ceil],
                     rays: [[O, T]],
-                    rectangle: intersectB.rectangle,
+                    triangle: intersectB.triangle,
                 });
             }
 
@@ -417,7 +416,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 intersects: [intersectA.point],
                 range: [spread.floor, spread.ceil],
                 rays: [[O, T]],
-                rectangle: intersectA.rectangle,
+                triangle: intersectA.triangle,
             });
 
             return collisions;
@@ -447,18 +446,16 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 // we preemptively eleminate ranges that would never intersect rays
                 if (top < raysGenerator.minZ || bottom > raysGenerator.maxZ) continue;
 
-                const rectangle = [
-                    Vector.fromData(edge.a, bottom), // r0
-                    Vector.fromData(edge.b, bottom), // r1
-                    Vector.fromData(edge.b, top), // r2
-                    Vector.fromData(edge.a, top), // r3
+                let collision: WallCollision | undefined;
+
+                const triangle = [
+                    Vector.fromData(edge.a, bottom), // v0
+                    Vector.fromData(edge.b, bottom), // v1
+                    Vector.fromData(edge.a, top), // v2
                 ] as const;
 
-                let collision: WallCollision | undefined;
-                const [t0, t1] = createRectangleTriangles(rectangle);
-
                 for (const [O, T, D] of raysGenerator()) {
-                    const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
+                    const point = lineIntersectRectangle(O, D, triangle);
 
                     // we move on to the next edge
                     if (!point) continue range;
@@ -469,7 +466,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                         level: this.getWallLevel(wall),
                         range: [bottom, top],
                         rays: [],
-                        rectangle,
+                        triangle,
                     };
 
                     collision.intersects.push(point);
@@ -485,9 +482,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     #drawDebug(origin: TokenDocumentPF2e, collision: BaseCollision) {
-        const { intersects, range, rays, rectangle } = collision;
+        const { intersects, range, rays, triangle } = collision;
         const [bottom, top] = range;
-        const [e0, e1] = rectangle;
+        const [e0, e1] = triangle;
 
         for (const [O, T] of rays) {
             drawDebug("red", O, T); // line between tokens
@@ -514,8 +511,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 const s = scaleH(p);
                 return p.z === bottom ? s : proj.multiplyBy((p.z - bottom) * scalarV).add(s);
             };
-            const [r0, r1, r2, r3] = R.map(rectangle, projectPoint);
-            drawDebug("blue", r1, r0, r3, r2, r1, r3); // projected triangle section
+            const [v0, v1, v3] = R.map(triangle, projectPoint);
+            const v2 = projectPoint(Vector.fromData(v1, v3.z));
+            drawDebug("blue", v0, v1, v2, v3, true); // projected triangle section
             for (const p0 of intersects) {
                 const p1 = projectPoint(p0);
                 drawDebug("blue", scaleH(p0), p1); // projected z-axis line
@@ -851,7 +849,7 @@ type BaseCollision = {
     intersects: Vector[];
     range: [number, number];
     rays: [Vector, Vector][];
-    rectangle: readonly [Vector, Vector, Vector, Vector];
+    triangle: Triangle;
 };
 
 type WallCollision = BaseCollision & {
