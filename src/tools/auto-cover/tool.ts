@@ -377,8 +377,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         mode: CreatureMode,
     ): BaseCollision[] | undefined {
         const spreadValue = Math.clamp(sideScale, 0.75, 1) - 0.5;
-        // we offset by 1 to avoid outer corner collisions on center-center
-        const spread = createTokenSpreadGenerator(token, spreadValue, 1);
+        // we offset by 1 to avoid awkward outer corner collisions on 'any' mode
+        const spread = createTokenSpreadGenerator(token, spreadValue, mode === "any" ? 1 : 0);
         // we preemptively eleminate tokens that would never intersect rays
         if (spread.ceil < Math.min(O.z, T.z) || spread.floor > Math.max(O.z, T.z)) return;
 
