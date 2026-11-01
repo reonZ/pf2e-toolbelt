@@ -151,6 +151,14 @@ class ToolCover {
         return this.#level;
     }
 
+    get levelLabel(): string {
+        return ToolCover.localize(this.level);
+    }
+
+    get lineColor(): number {
+        return this.level !== "none" ? CONFIG.Canvas.dispositionColors.HOSTILE : CONFIG.Canvas.dispositionColors.PARTY;
+    }
+
     get signedBonus(): string {
         return signedInteger(this.bonus);
     }
@@ -159,11 +167,15 @@ class ToolCover {
         return this.#type;
     }
 
+    get typeLabel(): string {
+        return ToolCover.localize(this.type);
+    }
+
     async createSource() {
         const source = await ToolCover.getCoverSource();
         if (!source) return;
 
-        source.name = ToolCover.localize(this.type);
+        source.name = this.typeLabel;
         source.system.rules = this.coverSourceRules;
 
         return source;

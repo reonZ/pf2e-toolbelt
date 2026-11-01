@@ -1,8 +1,8 @@
 import { TokenPF2e } from "foundry-helpers";
-import { AutoCoverTool, CoverLevel } from ".";
+import { AutoCoverTool, CoverLevel, ToolCover } from ".";
 
 /**
- * reused version of
+ * converted version of
  * https://github.com/foundryvtt/pf2e/blob/a52286c2efdd55c2911bf704be1f61fa1ba698d3/src/module/canvas/token/flanking-highlight/renderer.ts
  */
 class CoverHighlightRenderer {
@@ -21,7 +21,6 @@ class CoverHighlightRenderer {
     }
 
     /**
-     * Whether the flank highlight should be rendered to the user:
      * Canvas must be ready with a scene in focus, the user must own or have selected this token,
      * and the token must not be a preview or animating.
      */
@@ -46,18 +45,19 @@ class CoverHighlightRenderer {
         this.clear();
         if (canvas.tokens.highlightObjects && game.user.targets.size && this.#shouldRender) {
             for (const target of game.user.targets) {
-                const { level } = this.#tool.calculateCover(this.#token, target);
-                this.drawLine(target, level);
-                this.drawLabel(target, level);
+                if (this.#token.document === target.document) continue;
+                const cover = this.#tool.calculateCover(this.#token.document, target.document);
+                this.drawLine(target, cover);
+                this.drawLabel(target, cover);
             }
         }
     }
 
-    drawLine(target: TokenPF2e, level: CoverLevel): void {
+    drawLine(target: TokenPF2e, cover: ToolCover): void {
         const thickness = CONFIG.Canvas.objectBorderThickness;
         const outerThickness = Math.round(thickness * 1.5);
         const radius = Math.round(thickness * 2);
-        const lineColor = this.getLineColor(level);
+        const lineColor = cover.lineColor;
 
         // Draw line
         this.layer
@@ -77,7 +77,7 @@ class CoverHighlightRenderer {
         this.layer.beginFill(lineColor).lineStyle(1, 0x000000).drawCircle(target.center.x, target.center.y, radius);
     }
 
-    drawLabel(target: TokenPF2e, level: CoverLevel): void {
+    drawLabel(target: TokenPF2e, cover: ToolCover): void {
         // Midpoint coordinate between tokens
         const mid_x = Math.round((this.#token.center.x + target.center.x) / 2);
         const mid_y = Math.round((this.#token.center.y + target.center.y) / 2);
@@ -99,12 +99,14 @@ class CoverHighlightRenderer {
         // Styling
         const style = CONFIG.canvasTextStyle.clone();
         const dimensions = canvas.dimensions;
+
         style.fontSize = dimensions.size >= 200 ? 28 : dimensions.size < 50 ? 20 : 24;
-        style.fill = this.getLineColor(level);
+        style.fill = cover.lineColor;
         style.stroke = 0x000000;
 
-        const labelText = this.#tool.localize(level);
+        const labelText = cover.levelLabel;
         const text = new foundry.canvas.containers.PreciseText(labelText, style);
+
         text.anchor.set(0.5, 0.5);
 
         // Rotate text to match line, ensuring it is not upside-down
@@ -114,9 +116,10 @@ class CoverHighlightRenderer {
         } else if (rotation < -Math.PI / 2) {
             rotation = rotation + Math.PI;
         }
-        text.rotation = rotation;
 
+        text.rotation = rotation;
         text.position.set(perp_x, perp_y);
+
         this.layer.addChild(text);
     }
 

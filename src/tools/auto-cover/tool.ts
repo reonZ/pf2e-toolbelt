@@ -216,6 +216,26 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         return mode === "default" ? this.settings.wallDefaultMode : mode;
     }
 
+    calculateCover(
+        origin: TokenDocumentPF2e,
+        target: TokenDocumentPF2e,
+        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
+    ): ToolCover {
+        if (debug) {
+            clearDebug();
+        }
+
+        const wallEnabled = this.settings.wallEnabled === "enabled";
+        const wall = wallEnabled ? this.calculateWallCover(origin, target, debug) : new ToolCover("wall");
+        if (wall.greaterThanOrEqualToLevel("standard")) {
+            return wall; // we can't have a creature cover greater than that
+        }
+
+        const creatureEnabled = this.settings.creatureEnabled === "enabled";
+        const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, context, debug) : null;
+        return creature?.greaterThan(wall) ? creature : wall;
+    }
+
     calculateCreatureCover(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
@@ -627,33 +647,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             canvas.controls.debug.clear();
         }
 
-        const cover = this.#calculateCover(origin, target, { context, debug: MODULE.isDebug });
+        const cover = this.calculateCover(origin, target, { context, debug: MODULE.isDebug });
         if (cover.greaterThan(exist)) {
             const items = foundry.utils.deepClone(targetActor._source.items);
             await this.#addCoverSourceToContext(context, items, cover);
         }
 
         return wrapped(...args);
-    }
-
-    #calculateCover(
-        origin: TokenDocumentPF2e,
-        target: TokenDocumentPF2e,
-        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
-    ): ToolCover {
-        if (debug) {
-            clearDebug();
-        }
-
-        const wallEnabled = this.settings.wallEnabled === "enabled";
-        const wall = wallEnabled ? this.calculateWallCover(origin, target, debug) : new ToolCover("wall");
-        if (wall.greaterThanOrEqualToLevel("standard")) {
-            return wall; // we can't have a creature cover greater than that
-        }
-
-        const creatureEnabled = this.settings.creatureEnabled === "enabled";
-        const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, context, debug) : null;
-        return creature?.greaterThan(wall) ? creature : wall;
     }
 
     #onRenderCheckModifiersDialog(dialog: CheckModifiersDialog, $html: JQuery) {
