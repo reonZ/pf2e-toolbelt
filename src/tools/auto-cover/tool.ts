@@ -651,7 +651,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const debug = MODULE.isDebug;
         if (debug) {
-            canvas.controls.debug.clear();
+            clearDebug();
         }
 
         const cover = this.calculateCover(origin, target, { context, debug: MODULE.isDebug });

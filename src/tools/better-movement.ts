@@ -9,6 +9,7 @@ import {
     TokenPF2e,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
+import { clearDebug, drawDebug } from ".";
 
 const TELEPORT_SETTING = ["disabled", "enabled", "select"] as const;
 
@@ -233,7 +234,7 @@ class BetterMovementTool extends ModuleTool<ToolSettings> {
             });
 
             if (!intersects && MODULE.isDebug) {
-                canvas.controls.debug.lineStyle(4, 0x16a103).moveTo(origin.x, origin.y).lineTo(target.x, target.y);
+                drawDebug("green", origin, target);
             }
 
             return intersects;
@@ -247,7 +248,7 @@ class BetterMovementTool extends ModuleTool<ToolSettings> {
         const originKeys: SpreadKey[] = ["0x0"];
 
         if (MODULE.isDebug) {
-            canvas.controls.debug.clear();
+            clearDebug();
         }
 
         // we test for collision against ortho squares to later use them as origin too

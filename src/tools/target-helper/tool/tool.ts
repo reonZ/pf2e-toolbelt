@@ -22,7 +22,7 @@ import {
     waitDialog,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { lineIntersect, sharedMessageRenderHTML } from "tools";
+import { clearDebug, lineIntersect, sharedMessageRenderHTML } from "tools";
 import {
     getSaveLinkData,
     isAreaMessage,
@@ -303,7 +303,7 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
                   : { x: shape.x, y: shape.y };
 
         if (debug) {
-            canvas.controls.debug.clear();
+            clearDebug();
         }
 
         const targets = [...region.tokens].filter((tokenDoc) => {
