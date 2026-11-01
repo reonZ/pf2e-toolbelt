@@ -14,12 +14,15 @@ const CORNER_SPREADS: CornerSpreadRatios[] = [
     [0, 0, 1], // ceil top left
 ];
 
-const TOKEN_FACES = [
+const TOKEN_FACES_A = [
     [0, 1, 2, 3], // front
-    [4, 5, 6, 7], // back
     [0, 4, 7, 3], // left
-    [1, 5, 6, 2], // right
     [3, 2, 6, 7], // top
+] as const;
+
+const TOKEN_FACES_B = [
+    [4, 5, 6, 7], // back
+    [1, 5, 6, 2], // right
     [0, 1, 3, 4], //bottom
 ] as const;
 
@@ -114,13 +117,21 @@ function addExtrasToTokenSpreadGenerator(
     return generator as TokenSpreadGenerator;
 }
 
-function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: number, offset = 0): TokenSpreadGenerator {
+function getTokenSpreadData(token: TokenDocumentPF2e): TokenSpreadData {
     const { distance, size } = token.scene?.grid ?? { distance: 5, size: 100 };
     const elevation = (token.elevation / distance) * size;
     const depth = getTokenDepth(token) * size;
     const [height, width] = [token.height, token.width].map((x) => x * size);
     const center = new Vector(token.x + width / 2, token.y + height / 2, elevation + depth / 2);
-    // the expected value is between [0, 0.5], so we need to double it to work with [0, 1]
+    return { center, depth, elevation, height, width };
+}
+
+function generateSpreadRay(O: Vector, T: Vector): GeneratedSpreadRay {
+    return [O, T, T.subtract(O)];
+}
+
+function createTokenSpreadGenerator(token: TokenDocumentPF2e, spreadValue: number, offset = 0): TokenSpreadGenerator {
+    const { center, depth, elevation, height, width } = getTokenSpreadData(token);
     const scalar = Math.clamp(spreadValue, 0, 0.5) * 2;
 
     // we only use the center point, no point in computing the rest
@@ -163,10 +174,6 @@ function createSpreadRaysGenerator(
     // we cache the results that have been generated on the last generator call
     const cached: GeneratedSpreadRay[][] = [];
 
-    const merge = (O: Vector, T: Vector): GeneratedSpreadRay => {
-        return [O, T, T.subtract(O)];
-    };
-
     function* spreadRaysGenerator(): Generator<GeneratedSpreadRay, void, unknown> {
         let i = 0;
         let j = 0;
@@ -174,7 +181,7 @@ function createSpreadRaysGenerator(
         for (const origin of originSpreads()) {
             for (const target of targetSpreads()) {
                 const _cached = (cached[i] ??= []);
-                yield (_cached[j] ??= merge(origin, target));
+                yield (_cached[j] ??= generateSpreadRay(origin, target));
                 j++;
             }
             i++;
@@ -244,8 +251,10 @@ MODULE.debugExpose("geometry", {
     clearDebug,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
+    generateSpreadRay,
     getSideOfPointFromLine,
     getTokenDepth,
+    getTokenSpreadData,
     lineIntersectTriangle,
     Vector,
 });
@@ -268,6 +277,14 @@ type TokenSpreadGenerator = (() => Generator<Vector, void, unknown>) & {
     toArray(): Vector[];
 };
 
+type TokenSpreadData = {
+    center: Vector;
+    depth: number;
+    elevation: number;
+    height: number;
+    width: number;
+};
+
 type Triangle = [Vector, Vector, Vector];
 type RectangleTriangles = [Triangle, Triangle];
 
@@ -278,8 +295,11 @@ export {
     createRectangleTriangles,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
+    generateSpreadRay,
     getSideOfPointFromLine,
+    getTokenSpreadData,
     lineIntersectTriangle,
-    TOKEN_FACES,
+    TOKEN_FACES_A,
+    TOKEN_FACES_B,
 };
-export type { RectEdge, RectEdges, SpreadRaysGenerator, Triangle };
+export type { GeneratedSpreadRay, RectEdge, RectEdges, SpreadRaysGenerator, Triangle };

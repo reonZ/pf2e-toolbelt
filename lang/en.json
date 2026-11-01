@@ -135,19 +135,13 @@
                         "opposite": "Intersect 2 opposite sides"
                     }
                 },
-                "creatureOrigin": {
-                    "name": "[Creature] Origin Spread"
-                },
                 "creatureProne": {
                     "name": "[Creature] Skip Prone",
                     "hint": "Should prone creatures not provide cover."
                 },
                 "creatureSide": {
-                    "name": "[Creature] Obstacle Scale",
+                    "name": "[Creature] Intersection Scale",
                     "hint": "Scale ratio for tokens tested as obstacles. Lower than '1' value will shrink the tokens' hitbox."
-                },
-                "creatureTarget": {
-                    "name": "[Creature] Target Spread"
                 },
                 "enabled": {
                     "hint": "When manual, the module will not calculate any cover for you but you can still set it in the modifiers popup window.",

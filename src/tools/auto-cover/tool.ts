@@ -33,11 +33,15 @@ import {
     createRectangleTriangles,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
+    GeneratedSpreadRay,
+    generateSpreadRay,
     getExistingCovers,
     getSideOfPointFromLine,
+    getTokenSpreadData,
     lineIntersectTriangle,
     SpreadRaysGenerator,
-    TOKEN_FACES,
+    TOKEN_FACES_A,
+    TOKEN_FACES_B,
     ToolCover,
     Vector,
 } from ".";
@@ -91,20 +95,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
         const enabledChoices = R.fromKeys(SETTING_ENABLED, (key) => this.settingLocalize.path("enabled.choices", key));
-        const spreadSetting = (key: "creatureOrigin" | "creatureTarget" | "wallOrigin" | "wallTarget") => {
-            return {
-                key,
-                type: Number,
-                scope: "world",
-                default: 0,
-                range: {
-                    min: 0,
-                    max: 0.5,
-                    step: 0.05,
-                },
-                hint: this.settingLocalize.path("spread.hint"),
-            } as const;
-        };
 
         return [
             {
@@ -118,8 +108,20 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     this.configurate();
                 },
             },
-            spreadSetting("wallOrigin"),
-            spreadSetting("wallTarget"),
+            ...R.map(["wallOrigin", "wallTarget"] as const, (key) => {
+                return {
+                    key,
+                    type: Number,
+                    scope: "world",
+                    default: 0,
+                    range: {
+                        min: 0,
+                        max: 0.5,
+                        step: 0.05,
+                    },
+                    hint: this.settingLocalize.path("spread.hint"),
+                } as const;
+            }),
             {
                 key: "wallDefaultMode",
                 type: String,
@@ -163,8 +165,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     step: 0.05,
                 },
             },
-            spreadSetting("creatureOrigin"),
-            spreadSetting("creatureTarget"),
             {
                 key: "creatureDead",
                 type: Boolean,
@@ -234,11 +234,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             context,
             debug,
             mode: this.settings.creatureMode,
-            originSpread: this.settings.creatureOrigin,
             sideScale: this.settings.creatureSide,
             skipDead: this.settings.creatureDead,
             skipProne: this.settings.creatureProne,
-            targetSpread: this.settings.creatureTarget,
         } satisfies Required<TestCreaturesCoverOptions>);
         return new ToolCover("creature", collision?.level ?? "none");
     }
@@ -255,16 +253,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     testCreaturesCover(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
-        {
-            context,
-            debug,
-            mode = "any",
-            originSpread = 0,
-            sideScale = 1,
-            skipDead,
-            skipProne,
-            targetSpread = 0,
-        }: TestCreaturesCoverOptions = {},
+        { context, debug, mode = "any", sideScale = 1, skipDead, skipProne }: TestCreaturesCoverOptions = {},
     ): CreatureCollision | undefined {
         const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
         if ((distance ?? 0) <= 5) return; // we avoid calculating creature cover with adjacent target
@@ -289,7 +278,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         };
 
         let collision: CreatureCollision | undefined;
-        const raysGenerator = createSpreadRaysGenerator(origin, target, originSpread, targetSpread);
+        const ray = generateSpreadRay(getTokenSpreadData(origin).center, getTokenSpreadData(target).center);
 
         for (const { document: token } of tokens) {
             const actor = token?.actor;
@@ -312,23 +301,24 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             // we don't need to check intersections on that token as it won't give more than what we already have
             if (!extraLarge && collision?.level === "lesser") continue;
 
-            const _collision = this.#testCreatureCollision(token, raysGenerator, sideScale, mode);
+            const _collision = this.#testCreatureCollision(token, ray, sideScale, mode);
             if (!_collision) continue; // no intersection
 
             // we can't have extra large check so this is as much as we will ever get
             if (!canHaveExtraLarges) {
-                collision = { ..._collision, level: "lesser" };
+                collision = _collision;
                 break;
             }
 
             // we can never get anything beyond 'standard' so we check out now
             if (extraLarge) {
-                collision = { ..._collision, level: "standard" };
+                collision = _collision;
+                collision.level = "standard";
                 break;
             }
 
             // we can still have extra large checks later on so we have to keep going
-            collision ??= { ..._collision, level: "lesser" };
+            collision ??= _collision;
         }
 
         if (collision && debug) {
@@ -375,50 +365,43 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     #testCreatureCollision(
         token: TokenDocumentPF2e,
-        raysGenerator: SpreadRaysGenerator,
+        [O, T, D]: GeneratedSpreadRay,
         sideScale: number,
         mode: CreatureMode,
-    ): BaseCollision | undefined {
+    ): CreatureCollision | undefined {
         const spreadValue = Math.clamp(sideScale, 0.75, 1) - 0.5;
         // we offset by 1 to avoid outer corner collisions on center-center
-        const spread = createTokenSpreadGenerator(token, spreadValue, raysGenerator.isSpread ? 0 : 1);
+        const spread = createTokenSpreadGenerator(token, spreadValue, 1);
         // we preemptively eleminate tokens that would never intersect rays
-        if (spread.ceil < raysGenerator.minZ || spread.floor > raysGenerator.maxZ) return;
+        if (spread.ceil < Math.min(O.z, T.z) || spread.floor > Math.max(O.z, T.z)) return;
 
+        let collision: CreatureCollision | undefined;
         const points: Vector[] = spread.toArray();
-        const eliminate = raysGenerator.isSpread;
-        let collision: BaseCollision | undefined;
+        const faces = [...TOKEN_FACES_A, ...TOKEN_FACES_B];
 
-        face: for (let faceIndex = 0; faceIndex < TOKEN_FACES.length; faceIndex++) {
-            const rectangle = R.map(TOKEN_FACES[faceIndex], (pointIndex) => points[pointIndex]);
+        for (let faceIndex = 0; faceIndex < faces.length; faceIndex++) {
+            const rectangle = R.map(faces[faceIndex], (pointIndex) => points[pointIndex]);
             const [t0, t1] = createRectangleTriangles(rectangle);
 
-            for (const [O, T, D] of raysGenerator()) {
-                const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
+            const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
 
-                // we eliminate the face as we have at least one non-intersecting ray
-                if (eliminate && !point) continue face;
+            // we move on to the next face
+            if (!point) continue;
 
-                // we cache the first collision
-                if (point) {
-                    collision ??= {
-                        intersects: [],
-                        range: [spread.floor, spread.ceil],
-                        rays: [],
-                        rectangle,
-                    };
-                    collision.intersects.push(point);
-                    collision.rays.push([O, T]);
-                }
+            // we cache the first collision
+            collision ??= {
+                intersects: [],
+                level: "lesser",
+                range: [spread.floor, spread.ceil],
+                rays: [],
+                rectangle,
+            };
 
-                // we aren't eliminating so we have an unique collision
-                if (collision && !eliminate) {
-                    return collision;
-                }
-            }
+            collision.intersects.push(point);
+            collision.rays.push([O, T]);
 
-            // we are eliminating and all rays have collision
-            if (eliminate && collision) {
+            // all rays have intersected
+            if (collision) {
                 return collision;
             }
         }
@@ -430,7 +413,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         walls: Set<Wall>,
     ): WallCollision | undefined {
         const { distance, size } = scene.grid;
-        const eliminate = raysGenerator.isSpread;
 
         for (const { document: wall, edge } of walls) {
             const levels = wall.levels.map((id) => scene.levels.get(id)).filter(R.isTruthy);
@@ -455,43 +437,37 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     Vector.fromData(edge.a, top), // r3
                 ] as const;
 
+                let collision: WallCollision | undefined;
                 const [t0, t1] = createRectangleTriangles(rectangle);
 
-                let collision: WallCollision | undefined;
                 for (const [O, T, D] of raysGenerator()) {
                     const point = lineIntersectTriangle(O, D, t0) ?? lineIntersectTriangle(O, D, t1);
 
-                    // we eliminate the edge as we have at least one non-intersecting ray
-                    if (eliminate && !point) continue range;
+                    // we move on to the next edge
+                    if (!point) continue range;
 
                     // we cache the collision
-                    if (point) {
-                        collision ??= {
-                            intersects: [],
-                            level: this.getWallLevel(wall),
-                            range: [bottom, top],
-                            rays: [],
-                            rectangle,
-                        };
-                        collision.intersects.push(point);
-                        collision.rays.push([O, T]);
-                    }
+                    collision ??= {
+                        intersects: [],
+                        level: this.getWallLevel(wall),
+                        range: [bottom, top],
+                        rays: [],
+                        rectangle,
+                    };
 
-                    // we aren't eliminating so we have an unique collision
-                    if (collision && !eliminate) {
-                        return collision;
-                    }
+                    collision.intersects.push(point);
+                    collision.rays.push([O, T]);
                 }
 
-                // we are eliminating and all rays have collision
-                if (eliminate && collision) {
+                // all rays have intersected
+                if (collision) {
                     return collision;
                 }
             }
         }
     }
 
-    #drawDebug(origin: TokenDocumentPF2e, collision: BaseCollision) {
+    #drawDebug(origin: TokenDocumentPF2e, collision: Collision<CoverLevel>) {
         const { intersects, range, rays, rectangle } = collision;
         const [bottom, top] = range;
         const [e0, e1] = rectangle;
@@ -845,10 +821,8 @@ type ToolSettings = {
     creatureDead: boolean;
     creatureEnabled: SettingEnabledType;
     creatureMode: CreatureMode;
-    creatureOrigin: number;
     creatureProne: boolean;
     creatureSide: number;
-    creatureTarget: number;
     wallDefaultMode: WallMode;
     wallDefaultLevel: WallLevel;
     wallEnabled: SettingEnabledType;
@@ -856,12 +830,9 @@ type ToolSettings = {
     wallTarget: number;
 };
 
-type Collision<T extends CoverLevel> = BaseCollision & {
-    level: T;
-};
-
-type BaseCollision = {
+type Collision<T extends CoverLevel> = {
     intersects: Vector[];
+    level: T;
     range: [number, number];
     rays: [Vector, Vector][];
     rectangle: readonly [Vector, Vector, Vector, Vector];
@@ -894,11 +865,9 @@ type TestCreaturesCoverOptions = {
     context?: CheckCheckContext;
     debug?: boolean;
     mode?: CreatureMode;
-    originSpread?: number;
     sideScale?: number;
     skipDead?: boolean;
     skipProne?: boolean;
-    targetSpread?: number;
 };
 
 export { AutoCoverTool };
