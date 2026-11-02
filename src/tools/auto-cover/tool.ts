@@ -738,7 +738,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 }
 
 function targetIsProne(context: CheckCheckContext): boolean {
-    return context.type === "attack-roll" && Array.isArray(context.options)
+    if (context.type !== "attack-roll") return false;
+    return Array.isArray(context.options)
         ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
         : !!(context.options?.has("item:ranged") && context.options.has("target:condition:prone"));
 }
