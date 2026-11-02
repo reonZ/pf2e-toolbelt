@@ -171,6 +171,16 @@ class ToolCover {
         return ToolCover.localize(this.type);
     }
 
+    createModifier() {
+        return new game.pf2e.Modifier({
+            domains: ["reflex", "dex-based", "saving-throw", "all"],
+            label: this.typeLabel,
+            modifier: this.bonus,
+            slug: "cover",
+            type: "circumstance",
+        });
+    }
+
     async createSource() {
         const source = await ToolCover.getCoverSource();
         if (!source) return;

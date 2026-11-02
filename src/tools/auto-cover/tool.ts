@@ -15,6 +15,7 @@ import {
     MODULE,
     R,
     Rolled,
+    RollTarget,
     ScenePF2e,
     toggleHooksAndWrappers,
     TokenDocumentPF2e,
@@ -594,12 +595,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     ): Promise<Rolled<CheckRoll> | null> {
         const context = args[1];
 
-        if (!context?.target || context.isReroll || !context.createMessage || !isAttackRoll(context)) {
+        if (!context?.target || context.isReroll || (!isAttackRoll(context) && !isStealthSkillCheck(context))) {
             return wrapped(...args);
         }
 
-        const originActor = context.origin?.actor ?? context.actor;
-        const targetActor = context.target.actor;
+        // we need to add/check the cover of self when rolling a skill check
+        const { originActor, targetActor } = extractActors(context);
 
         if (!originActor || !targetActor || originActor.isOfType("hazard")) {
             return wrapped(...args);
@@ -619,8 +620,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             return wrapped(...args);
         }
 
-        const targetIsProne = isTargetProne(context);
-        const exist = ToolCover.fromActor(targetActor, targetIsProne);
+        const targetProne = targetIsProne(context);
+        const exist = ToolCover.fromActor(targetActor, targetProne);
         if (exist.greaterThanLevel("standard")) {
             return wrapped(...args); // we can't have anything greater than the currently existing effect
         }
@@ -645,18 +646,16 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         if (
             !context?.target ||
             context.isReroll ||
-            !context.createMessage ||
             (!isAttackRoll(context) && !isAreaReflexSaveCheck(context) && !isStealthSkillCheck(context))
         )
             return;
 
-        const originActor = context.origin?.actor ?? context.actor;
-        const targetActor = context.target.actor;
+        const { originActor, targetActor } = extractActors(context);
         if (!originActor || !targetActor || originActor.isOfType("hazard")) return;
 
-        const targetIsProne = isTargetProne(context);
+        const targetProne = targetIsProne(context);
         const coverEffects = ToolCover.getExistingCovers(targetActor);
-        const current = ToolCover.fromEffects(coverEffects, targetIsProne);
+        const current = ToolCover.fromEffects(coverEffects, targetProne);
         const overriden = new ToolCover("overriden", current.level);
 
         const html = $html[0];
@@ -664,7 +663,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         const select = foundry.applications.fields.createSelectInput({
             name: "override-cover",
-            options: ToolCover.getSelectOptions(targetIsProne),
+            options: ToolCover.getSelectOptions(targetProne),
             value: current.level,
         });
 
@@ -684,6 +683,10 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         select.addEventListener("change", () => {
             overriden.updateLevel(select.value as CoverLevel);
             bonusSpan.innerText = overriden.signedBonus;
+
+            if (context.type !== "attack-roll") {
+                dialog.check.push(overriden.createModifier());
+            }
         });
 
         htmlQuery(html, `button[type="submit"]`)?.addEventListener(
@@ -693,24 +696,15 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 event.stopPropagation();
                 event.stopImmediatePropagation();
 
-                if (!overriden.equals(current)) {
-                    if (context.type === "attack-roll") {
+                if (context.type === "attack-roll") {
+                    if (!overriden.equals(current)) {
                         const ids = coverEffects.map((effect) => effect.id);
                         const allItems = foundry.utils.deepClone(targetActor._source.items);
                         const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
 
                         await this.#addCoverSourceToContext(context, items, overriden);
-                    } else {
-                        const modifier = new game.pf2e.Modifier({
-                            label: overriden.typeLabel,
-                            modifier: 2,
-                            type: "circumstance",
-                            slug: "cover",
-                            domains: ["reflex", "dex-based", "saving-throw", "all"],
-                        });
-
-                        dialog.check.push(modifier);
                     }
+                } else {
                 }
 
                 dialog.resolve(true);
@@ -725,14 +719,15 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     async #addCoverSourceToContext(context: CheckCheckContext, items: ItemSourcePF2e[], cover: ToolCover) {
         const source = await cover.createSource();
-        if (!source) return;
+        const prefix = context.type === "skill-check" ? "origin" : "target";
+        if (!source || !context[prefix]?.actor) return;
 
         items.push(source);
 
-        context.target!.actor = context.target!.actor!.clone({ items }, { keepId: true });
+        context[prefix].actor = context[prefix].actor.clone({ items }, { keepId: true });
 
-        if (context.dc?.slug) {
-            const statistic = context.target!.actor.getStatistic(context.dc.slug)?.dc;
+        if (prefix === "target" && context.dc?.slug) {
+            const statistic = context[prefix].actor.getStatistic(context.dc.slug)?.dc;
 
             if (statistic) {
                 context.dc.value = statistic.value;
@@ -742,8 +737,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 }
 
-function isTargetProne(context: CheckCheckContext): boolean {
-    return Array.isArray(context.options)
+function targetIsProne(context: CheckCheckContext): boolean {
+    return context.type === "attack-roll" && Array.isArray(context.options)
         ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
         : !!(context.options?.has("item:ranged") && context.options.has("target:condition:prone"));
 }
@@ -761,6 +756,30 @@ function isAreaReflexSaveCheck(context: CheckCheckContext): boolean {
 function isStealthSkillCheck(context: CheckCheckContext): boolean {
     if (context.type !== "skill-check" || !context.options) return false;
     return context.options.has("action:hide") || context.options.has("action:sneak");
+}
+
+function extractActors(context: CheckCheckContext): {
+    originActor: Maybe<ActorPF2e>;
+    targetActor: Maybe<ActorPF2e>;
+} {
+    if (context.type === "saving-throw") {
+        return {
+            originActor: context.origin?.actor,
+            targetActor: context.target?.actor ?? context.actor,
+        };
+    }
+
+    if (context.type === "skill-check") {
+        return {
+            originActor: context.target?.actor,
+            targetActor: context.origin?.actor ?? context.actor,
+        };
+    }
+
+    return {
+        originActor: context.origin?.actor ?? context.actor,
+        targetActor: context.target?.actor,
+    };
 }
 
 type ToolSettings = {
