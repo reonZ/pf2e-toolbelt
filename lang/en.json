@@ -120,12 +120,20 @@
             },
             "autoCover": {
                 "title": "Auto Cover",
+                "coverEnabled": {
+                    "name": "Cover Mode",
+                    "hint": "When manual, the module will not calculate any cover for you but you can still set it in the modifiers popup window.",
+                    "choices": {
+                        "both": "Walls and Creatures",
+                        "creature": "Creatures Only",
+                        "disabled": "Disabled",
+                        "manual": "Manual",
+                        "wall": "Walls Only"
+                    }
+                },
                 "creatureDead": {
                     "name": "[Creature] Skip Dead",
                     "hint": "Should dead creatures not provide cover."
-                },
-                "creatureEnabled": {
-                    "name": "Creature Cover"
                 },
                 "creatureMode": {
                     "name": "[Creature] Intersection Mode",
@@ -143,14 +151,6 @@
                     "name": "[Creature] Intersection Scale",
                     "hint": "Scale ratio for tokens tested as obstacles. Lower than '1' value will shrink the tokens' hitbox."
                 },
-                "enabled": {
-                    "hint": "When manual, the module will not calculate any cover for you but you can still set it in the modifiers popup window.",
-                    "choices": {
-                        "disabled": "Disabled",
-                        "manual": "Manual",
-                        "enabled": "Enabled"
-                    }
-                },
                 "spread": {
                     "hint": "Spread the center of the token into 8 points moving towards the corners. Only use the center at '0' and reach the corners at '0.5'."
                 },
@@ -166,9 +166,6 @@
                         "none": "No Cover",
                         "normal": "Provide Cover"
                     }
-                },
-                "wallEnabled": {
-                    "name": "Wall Cover"
                 },
                 "wallOrigin": {
                     "name": "[Wall] Origin Spread"

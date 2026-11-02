@@ -52,7 +52,7 @@ const SIZES = {
     grg: 5,
 } as const;
 
-const SETTING_ENABLED = ["disabled", "manual", "enabled"] as const;
+const SETTING_ENABLED = ["disabled", "manual", "both", "wall", "creature"] as const;
 
 const CREATURE_MODES = ["any", "opposite"] as const;
 
@@ -88,16 +88,13 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     get settingsSchema(): ToolSettingsList<ToolSettings> {
-        const enabledChoices = R.fromKeys(SETTING_ENABLED, (key) => this.settingLocalize.path("enabled.choices", key));
-
         return [
             {
-                key: "wallEnabled",
+                key: "coverEnabled",
                 type: String,
                 scope: "world",
                 default: "disabled",
-                choices: enabledChoices,
-                hint: this.settingLocalize.path("enabled.hint"),
+                choices: SETTING_ENABLED,
                 onChange: () => {
                     this.configurate();
                 },
@@ -129,17 +126,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 scope: "world",
                 default: "standard",
                 choices: R.fromKeys(WALL_LEVELS, (key) => this.localize(key)),
-            },
-            {
-                key: "creatureEnabled",
-                type: String,
-                scope: "world",
-                default: "disabled",
-                choices: enabledChoices,
-                hint: this.settingLocalize.path("enabled.hint"),
-                onChange: () => {
-                    this.configurate();
-                },
             },
             {
                 key: "creatureMode",
@@ -175,11 +161,9 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     }
 
     _configurate(): void {
-        const creature = this.settings.creatureEnabled;
-        const wall = this.settings.wallEnabled;
-
-        toggleHooksAndWrappers(this.#enabledWrappers, creature === "enabled" || wall === "enabled");
-        toggleHooksAndWrappers(this.#manualWrappers, creature !== "disabled" || wall !== "disabled");
+        const enabled = this.settings.coverEnabled;
+        toggleHooksAndWrappers(this.#enabledWrappers, enabled !== "disabled" && enabled !== "manual");
+        toggleHooksAndWrappers(this.#manualWrappers, enabled !== "disabled");
     }
 
     init(): void {
@@ -216,31 +200,23 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     calculateCover(
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
-        options: { context?: CheckCheckContext; debug?: boolean; strict: true },
-    ): ToolCover | undefined;
-    calculateCover(
-        origin: TokenDocumentPF2e,
-        target: TokenDocumentPF2e,
-        options?: { context?: CheckCheckContext; debug?: boolean; strict?: boolean },
-    ): ToolCover;
-    calculateCover(
-        origin: TokenDocumentPF2e,
-        target: TokenDocumentPF2e,
-        { context, debug, strict }: { context?: CheckCheckContext; debug?: boolean; strict?: boolean } = {},
-    ): ToolCover | undefined {
+        { context, debug }: { context?: CheckCheckContext; debug?: boolean } = {},
+    ): ToolCover {
         if (debug) {
             clearDebug();
         }
 
-        const wallEnabled = this.settings.wallEnabled === "enabled";
+        const enabled = this.settings.coverEnabled;
+
+        const wallEnabled = enabled === "both" || enabled === "wall";
         const wall = wallEnabled ? this.calculateWallCover(origin, target, debug) : new ToolCover("wall");
         if (wall.greaterThanOrEqualToLevel("standard")) {
             return wall; // we can't have a creature cover greater than that
         }
 
-        const creatureEnabled = this.settings.creatureEnabled === "enabled";
+        const creatureEnabled = enabled === "both" || enabled === "creature";
         const creature = creatureEnabled ? this.calculateCreatureCover(origin, target, context, debug) : null;
-        return creature?.greaterThan(wall) ? creature : strict ? undefined : wall;
+        return creature?.greaterThan(wall) ? creature : wall;
     }
 
     calculateCreatureCover(
@@ -754,14 +730,13 @@ function isTargetProne(context: CheckCheckContext): boolean {
 }
 
 type ToolSettings = {
+    coverEnabled: SettingEnabledType;
     creatureDead: boolean;
-    creatureEnabled: SettingEnabledType;
     creatureMode: CreatureMode;
     creatureProne: boolean;
     creatureSide: number;
     wallDefaultMode: WallMode;
     wallDefaultLevel: WallLevel;
-    wallEnabled: SettingEnabledType;
     wallOrigin: number;
     wallTarget: number;
 };
