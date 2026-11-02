@@ -594,7 +594,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
     ): Promise<Rolled<CheckRoll> | null> {
         const context = args[1];
 
-        if (!context?.target || context.isReroll || !context.createMessage || context.type !== "attack-roll") {
+        if (!context?.target || context.isReroll || !context.createMessage || !isAttackRoll(context)) {
             return wrapped(...args);
         }
 
@@ -646,12 +646,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             !context?.target ||
             context.isReroll ||
             !context.createMessage ||
-            !R.isIncludedIn(context.type, ["attack-roll", "saving-throw"])
+            (!isAttackRoll(context) && !isAreaReflexSaveCheck(context) && !isStealthSkillCheck(context))
         )
-            return;
-
-        const options = R.isArray(context.options) ? new Set(context.options) : (context.options ?? new Set());
-        if (context.type === "saving-throw" && (!options.has("area-effect") || !options.has("check:statistic:reflex")))
             return;
 
         const originActor = context.origin?.actor ?? context.actor;
@@ -704,7 +700,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                         const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
 
                         await this.#addCoverSourceToContext(context, items, overriden);
-                    } else if (context.type === "saving-throw") {
+                    } else {
                         const modifier = new game.pf2e.Modifier({
                             label: overriden.typeLabel,
                             modifier: 2,
@@ -750,6 +746,21 @@ function isTargetProne(context: CheckCheckContext): boolean {
     return Array.isArray(context.options)
         ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
         : !!(context.options?.has("item:ranged") && context.options.has("target:condition:prone"));
+}
+
+function isAttackRoll(context: CheckCheckContext): boolean {
+    return context.type === "attack-roll";
+}
+
+function isAreaReflexSaveCheck(context: CheckCheckContext): boolean {
+    if (context.type !== "saving-throw" || !context.options) return false;
+    return context.options.has("area-effect") && context.options.has("check:statistic:reflex");
+}
+
+// we don't add avoid notice because the system doesn't add a 'target' to it so we never reach that point
+function isStealthSkillCheck(context: CheckCheckContext): boolean {
+    if (context.type !== "skill-check" || !context.options) return false;
+    return context.options.has("action:hide") || context.options.has("action:sneak");
 }
 
 type ToolSettings = {
