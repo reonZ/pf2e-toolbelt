@@ -641,7 +641,18 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
     #onRenderCheckModifiersDialog(dialog: CheckModifiersDialog, $html: JQuery) {
         const context = dialog.context;
-        if (!context?.target || context.isReroll || !context.createMessage || context.type !== "attack-roll") return;
+
+        if (
+            !context?.target ||
+            context.isReroll ||
+            !context.createMessage ||
+            !R.isIncludedIn(context.type, ["attack-roll", "saving-throw"])
+        )
+            return;
+
+        const options = R.isArray(context.options) ? new Set(context.options) : (context.options ?? new Set());
+        if (context.type === "saving-throw" && (!options.has("area-effect") || !options.has("check:statistic:reflex")))
+            return;
 
         const originActor = context.origin?.actor ?? context.actor;
         const targetActor = context.target.actor;
@@ -687,11 +698,23 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 event.stopImmediatePropagation();
 
                 if (!overriden.equals(current)) {
-                    const ids = coverEffects.map((effect) => effect.id);
-                    const allItems = foundry.utils.deepClone(targetActor._source.items);
-                    const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
+                    if (context.type === "attack-roll") {
+                        const ids = coverEffects.map((effect) => effect.id);
+                        const allItems = foundry.utils.deepClone(targetActor._source.items);
+                        const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
 
-                    await this.#addCoverSourceToContext(context, items, overriden);
+                        await this.#addCoverSourceToContext(context, items, overriden);
+                    } else if (context.type === "saving-throw") {
+                        const modifier = new game.pf2e.Modifier({
+                            label: overriden.typeLabel,
+                            modifier: 2,
+                            type: "circumstance",
+                            slug: "cover",
+                            domains: ["reflex", "dex-based", "saving-throw", "all"],
+                        });
+
+                        dialog.check.push(modifier);
+                    }
                 }
 
                 dialog.resolve(true);
@@ -726,7 +749,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 function isTargetProne(context: CheckCheckContext): boolean {
     return Array.isArray(context.options)
         ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
-        : !!(context.options?.has("item:ranged") && context.options?.has("target:condition:prone"));
+        : !!(context.options?.has("item:ranged") && context.options.has("target:condition:prone"));
 }
 
 type ToolSettings = {
