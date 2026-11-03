@@ -73,9 +73,20 @@ class ToolCover {
         return R.firstBy(covers, [R.prop("enumValue"), "desc"]);
     }
 
-    static getSelectOptions(isProne: boolean) {
+    static getSelectOptions(isProne: boolean, isCheck: boolean) {
+        const omits: CoverLevel[] = [];
+
+        if (isCheck) {
+            omits.push("lesser");
+        }
+
+        if (!isProne) {
+            omits.push("greater-prone");
+        }
+
         return R.pipe(
-            isProne ? COVERS : R.omit(COVERS, ["greater-prone"]),
+            COVERS,
+            R.omit(omits),
             R.keys(),
             R.map((slug) => {
                 return { label: this.localize(slug), value: slug };
@@ -145,6 +156,10 @@ class ToolCover {
 
     get enumValue(): CoverEnumValue {
         return COVERS[this.level];
+    }
+
+    get hasCover(): boolean {
+        return this.enumValue > COVERS.none;
     }
 
     get level(): CoverLevel {

@@ -518,6 +518,7 @@
         "autoCover": {
             "creature": "Cover from Creature",
             "default": "Default ({entry})",
+            "effect": "Cover",
             "greater": "Greater Cover",
             "greater-prone": "Greater-Prone Cover",
             "lesser": "Lesser Cover",

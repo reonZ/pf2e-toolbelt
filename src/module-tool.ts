@@ -1,4 +1,5 @@
 import {
+    Application,
     ClientDocument,
     deleteFlagProperty,
     deleteInMemory,
@@ -6,6 +7,7 @@ import {
     getInMemory,
     getSetting,
     HandlebarsRenderData,
+    InMemoryObject,
     KeybindingActionConfig,
     Localize,
     localize,
@@ -106,15 +108,15 @@ abstract class ModuleTool<TSettings extends Record<string, any> = Record<string,
         return updateSourceFlag(doc, this.key, ...args);
     }
 
-    getInMemory<T>(obj: ClientDocument | Token, ...path: string[]): T | undefined {
+    getInMemory<T>(obj: InMemoryObject, ...path: string[]): T | undefined {
         return getInMemory(obj, this.key, ...path);
     }
 
-    setInMemory<T>(obj: ClientDocument | Token, ...args: [...string[], T]): boolean {
+    setInMemory<T>(obj: InMemoryObject, ...args: [...string[], T]): boolean {
         return setInMemory(obj, this.key, ...args);
     }
 
-    deleteInMemory(obj: ClientDocument | Token, ...path: string[]): boolean {
+    deleteInMemory(obj: InMemoryObject, ...path: string[]): boolean {
         return deleteInMemory(obj, this.key, ...path);
     }
 

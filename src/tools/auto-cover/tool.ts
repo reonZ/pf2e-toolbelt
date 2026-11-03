@@ -12,10 +12,10 @@ import {
     getFirstActiveToken,
     htmlQuery,
     ItemSourcePF2e,
+    Modifier,
     MODULE,
     R,
     Rolled,
-    RollTarget,
     ScenePF2e,
     toggleHooksAndWrappers,
     TokenDocumentPF2e,
@@ -632,9 +632,16 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         }
 
         const cover = this.calculateCover(origin, target, { context, debug: MODULE.isDebug });
-        if (cover.greaterThan(exist)) {
+
+        if (cover.greaterThan(exist) && (context.type === "attack-roll" || cover.greaterThanLevel("lesser"))) {
             const items = foundry.utils.deepClone(targetActor._source.items);
             await this.#addCoverSourceToContext(context, items, cover);
+
+            // we add the modifier
+            if (context.type === "skill-check") {
+                const check = args[0];
+                check.push(cover.createModifier());
+            }
         }
 
         return wrapped(...args);
@@ -644,31 +651,41 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const context = dialog.context;
 
         if (
-            !context?.target ||
             context.isReroll ||
             (!isAttackRoll(context) && !isAreaReflexSaveCheck(context) && !isStealthSkillCheck(context))
         )
             return;
 
         const { originActor, targetActor } = extractActors(context);
-        if (!originActor || !targetActor || originActor.isOfType("hazard")) return;
+        if (!targetActor || originActor?.isOfType("hazard")) return;
 
+        const isAttack = context.type === "attack-roll";
         const targetProne = targetIsProne(context);
         const coverEffects = ToolCover.getExistingCovers(targetActor);
         const current = ToolCover.fromEffects(coverEffects, targetProne);
-        const overriden = new ToolCover("overriden", current.level);
+        const overriden = this.getInMemory<ToolCover>(dialog, "overriden") ?? new ToolCover("overriden", current.level);
+
+        // we recover the original modifier if anything
+        const originalModifier =
+            !isAttack && current.hasCover
+                ? (this.getInMemory<Modifier>(dialog, "originalModifier") ??
+                  dialog.check.modifiers.find((x) => x.slug === "cover"))
+                : undefined;
+
+        // we keep stuff in memory for render
+        this.setInMemory(dialog, { originalModifier, overriden });
 
         const html = $html[0];
         const separator = document.createElement("hr");
 
         const select = foundry.applications.fields.createSelectInput({
             name: "override-cover",
-            options: ToolCover.getSelectOptions(targetProne),
-            value: current.level,
+            options: ToolCover.getSelectOptions(targetProne, !isAttack),
+            value: overriden.level,
         });
 
         const bonusSpan = createHTMLElement("span", {
-            content: current.signedBonus,
+            content: overriden.signedBonus,
         });
 
         const row = createHTMLElement("div", {
@@ -681,11 +698,24 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         htmlQuery(html, ".add-modifier-panel")?.after(separator, row);
 
         select.addEventListener("change", () => {
-            overriden.updateLevel(select.value as CoverLevel);
+            const value = select.value as CoverLevel;
+
+            overriden.updateLevel(value);
             bonusSpan.innerText = overriden.signedBonus;
 
-            if (context.type !== "attack-roll") {
-                dialog.check.push(overriden.createModifier());
+            if (!isAttack) {
+                const replacement = overriden.equalsLevel("none")
+                    ? undefined
+                    : overriden.equals(current)
+                      ? originalModifier
+                      : overriden.createModifier();
+
+                if (!dialog.check["_modifiers"].findSplice((x) => x.slug === "cover", replacement) && replacement) {
+                    dialog.check["_modifiers"].push(replacement);
+                }
+
+                dialog.check.calculateTotal();
+                dialog.render();
             }
         });
 
@@ -696,15 +726,12 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 event.stopPropagation();
                 event.stopImmediatePropagation();
 
-                if (context.type === "attack-roll") {
-                    if (!overriden.equals(current)) {
-                        const ids = coverEffects.map((effect) => effect.id);
-                        const allItems = foundry.utils.deepClone(targetActor._source.items);
-                        const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
+                if (!overriden.equals(current)) {
+                    const ids = coverEffects.map((effect) => effect.id);
+                    const allItems = foundry.utils.deepClone(targetActor._source.items);
+                    const items = ids.length ? allItems.filter((item) => !R.isIncludedIn(item._id, ids)) : allItems;
 
-                        await this.#addCoverSourceToContext(context, items, overriden);
-                    }
-                } else {
+                    await this.#addCoverSourceToContext(context, items, overriden);
                 }
 
                 dialog.resolve(true);
@@ -753,10 +780,11 @@ function isAreaReflexSaveCheck(context: CheckCheckContext): boolean {
     return context.options.has("area-effect") && context.options.has("check:statistic:reflex");
 }
 
-// we don't add avoid notice because the system doesn't add a 'target' to it so we never reach that point
 function isStealthSkillCheck(context: CheckCheckContext): boolean {
     if (context.type !== "skill-check" || !context.options) return false;
-    return context.options.has("action:hide") || context.options.has("action:sneak");
+    return (
+        context.options.has("action:hide") || context.options.has("action:sneak") || context.options.has("avoid-notice")
+    );
 }
 
 function extractActors(context: CheckCheckContext): {
