@@ -527,6 +527,10 @@
             "none": "No Cover",
             "override": "Override Cover",
             "overriden": "Overridden Cover",
+            "pick": {
+                "notify": "Pick a position on the scene to test wall collisions",
+                "tooltip": "Calculate Wall Cover from Position"
+            },
             "standard": "Standard Cover",
             "wall": "Cover from Wall"
         },

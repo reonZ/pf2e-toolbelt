@@ -3,10 +3,25 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 1rem;
-    }
 
-    select {
-        flex: 1;
+        span {
+            margin-inline: 0.3em 1em;
+        }
+
+        select {
+            flex: 1;
+        }
+
+        button {
+            line-height: 1.4;
+            margin: 0 0 0 0.3em;
+            padding: 4px 6px;
+            flex: 0 0 min-content;
+            font-size: 0.75rem;
+
+            i {
+                margin: 0;
+            }
+        }
     }
 }
