@@ -1281,6 +1281,8 @@
             "tooltip": {
                 "adjustment": "Adjustment: {value}",
                 "dcWithValue": "DC {dc}",
+                "discarded": "Discarded Die",
+                "previous": "Previous Die",
                 "reroll": "Can reroll the save check",
                 "result": {
                     "format": "Result: {result}",

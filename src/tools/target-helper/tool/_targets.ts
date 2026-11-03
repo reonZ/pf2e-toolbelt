@@ -219,7 +219,9 @@ async function getTargetRowData(
             )?.css;
         })();
 
-        const rerolled = targetSave?.rerolled ? REROLLS[targetSave.rerolled] : undefined;
+        const rerolled = targetSave?.rerolled
+            ? { ...REROLLS[targetSave.rerolled.type], other: targetSave.rerolled.other }
+            : undefined;
 
         const tooltip = await (async () => {
             if (!targetStatistic) return;
@@ -379,7 +381,7 @@ type TargetRowSave = {
     canSeeResult: boolean;
     icon: string;
     notes: string | undefined;
-    rerolled: RerollDetails | undefined;
+    rerolled: TargetReroll | undefined;
     significantModifier: string | false | undefined;
     statistic: SaveType;
     success?: DegreeOfSuccessString | undefined;
@@ -410,8 +412,12 @@ type TooltipData = {
     canReroll: boolean | undefined;
     check: string;
     modifiers: { name: string; value: number; css: string }[];
-    rerolled: RerollDetails | undefined;
+    rerolled: TargetReroll | undefined;
     result: string | undefined;
+};
+
+type TargetReroll = RerollDetails & {
+    other: toolbelt.targetHelper.TargetSaveInstanceReroll["other"];
 };
 
 type TargetsType = "targets" | "splashTargets";

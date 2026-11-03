@@ -1,6 +1,7 @@
 <div class="pf2e-toolbelt-target-save">
     <div>{{check}}</div>
     {{#if result}}
+
         <div class="result">{{{result}}}</div>
         {{#if adjustment}}
         <div class="adjustment">
@@ -9,9 +10,20 @@
         {{/if}}
         {{> modifiers}}
         {{#if canReroll}}
-        <div class="note"><i class="fa-solid fa-rotate rotate"></i> {{@root.i18n 'reroll'}}</div>
+        <div class="note">
+            <i class="fa-solid fa-rotate rotate"></i>
+            {{@root.i18n 'reroll'}}
+        </div>
         {{else}}
-        <div class="note"><i class="{{rerolled.icon}}"></i> {{localize rerolled.rerolled}}</div>
+        <div class="note">
+            <i class="{{rerolled.icon}}"></i>
+            {{localize rerolled.rerolled}}
+        </div>
+        <div class="note">
+            {{@root.i18n (ifThen rerolled.other.discarded 'discarded' 'previous')}}:
+            <i class="fa-solid fa-dice-d20"></i>
+            {{rerolled.other.die}}
+        </div>
         {{/if}}
     {{else}}
         {{> modifiers}}

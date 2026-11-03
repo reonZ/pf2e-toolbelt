@@ -99,7 +99,7 @@ async function rollSaves(
                 );
 
                 const rollData: TargetSaveInstance = {
-                    die: (roll.terms[0] as foundry.dice.terms.NumericTerm).total,
+                    die: getRollDie(roll),
                     dosAdjustments: context.dosAdjustments ?? {},
                     modifiers: modifiers ?? [],
                     notes: context.notes as any,
@@ -266,7 +266,8 @@ async function rerollSave(
             ? oldRoll
             : newRoll;
 
-    if (keptRoll === newRoll) {
+    const isNewRoll = keptRoll === newRoll;
+    if (isNewRoll) {
         const success = new DegreeOfSuccess(newRoll, dataSave.dc, targetSave.dosAdjustments);
         keptRoll.options.degreeOfSuccess = success.value;
     }
@@ -311,12 +312,15 @@ async function rerollSave(
     }
 
     const rollData = {
-        die: (keptRoll.terms[0] as foundry.dice.terms.NumericTerm).total,
+        die: getRollDie(keptRoll),
         dosAdjustments: foundry.utils.deepClone(targetSave.dosAdjustments),
         modifiers,
         notes: notes.map((note) => note.toObject()),
         private: targetSave.private,
-        rerolled: result.reroll,
+        rerolled: {
+            type: result.reroll,
+            other: { die: getRollDie(isNewRoll ? oldRoll : newRoll), discarded: !isNewRoll },
+        },
         roll: JSON.stringify(keptRoll.toJSON()),
         significantModifiers: window.pf2eMm?.getSignificantModifiersOfMessage({
             ...message,
@@ -364,6 +368,10 @@ async function rerollSave(
         saves: updates,
         variantId: targetHelper.variantId,
     });
+}
+
+function getRollDie(roll: Rolled<CheckRoll>): number {
+    return (roll.terms[0] as foundry.dice.terms.NumericTerm).total;
 }
 
 type RerollDetails = {

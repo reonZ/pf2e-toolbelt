@@ -34,13 +34,21 @@ const zSignificantModifier = z.object({
     value: z.number(),
 });
 
+const zReroll = z.object({
+    type: z.enum(REROLL_TYPES),
+    other: z.object({
+        die: z.number().min(1).max(20),
+        discarded: z.boolean(),
+    }),
+});
+
 const zTargetSaveInstance = z.object({
     die: z.number().min(1).max(20),
     dosAdjustments: z.partialRecord(z.enum(ADJUSTMENT_TYPES), zAdjustement).default({}),
     modifiers: z.array(zModifier).default([]),
     notes: z.array(zNote).default([]),
     private: z.boolean().default(false),
-    rerolled: z.enum(REROLL_TYPES).optional(),
+    rerolled: zReroll.optional(),
     roll: z.string().nonempty(),
     significantModifiers: z.array(zSignificantModifier).default([]),
     statistic: z.enum(SAVE_TYPES),
