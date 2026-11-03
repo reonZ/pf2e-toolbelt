@@ -765,10 +765,8 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 }
 
 function targetIsProne(context: CheckCheckContext): boolean {
-    if (context.type !== "attack-roll") return false;
-    return Array.isArray(context.options)
-        ? context.options.includes("item:ranged") && context.options.includes("target:condition:prone")
-        : !!(context.options?.has("item:ranged") && context.options.has("target:condition:prone"));
+    if (context.type !== "attack-roll" || !context.options) return false;
+    return context.options.has("item:ranged") && context.options.has("target:condition:prone");
 }
 
 function isAttackRoll(context: CheckCheckContext): boolean {
@@ -783,7 +781,9 @@ function isAreaReflexSaveCheck(context: CheckCheckContext): boolean {
 function isStealthSkillCheck(context: CheckCheckContext): boolean {
     if (context.type !== "skill-check" || !context.options) return false;
     return (
-        context.options.has("action:hide") || context.options.has("action:sneak") || context.options.has("avoid-notice")
+        context.options.has("action:hide") ||
+        context.options.has("action:sneak") ||
+        context.options.has("action:avoid-notice")
     );
 }
 
