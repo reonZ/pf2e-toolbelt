@@ -27,7 +27,6 @@ import { clearDebug, drawDebug, Vector } from "tools";
 import {
     CoverHighlightRenderer,
     CoverLevel,
-    createBoundaryFromTokens,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     GeneratedSpreadRay,
@@ -269,7 +268,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const targetActor = target.actor;
         if (!originActor || !targetActor) return;
 
-        const boundaryShape = createBoundaryFromTokens(origin, target);
+        const boundaryShape = origin.bounds.enlarge(target.bounds);
         if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
 
         const tokens = canvas.tokens.quadtree.getObjects(boundaryShape);
@@ -349,7 +348,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         const scene = origin.scene;
         if (!scene || scene !== canvas.scene || !canvas.walls.quadtree) return;
 
-        const boundaryShape = createBoundaryFromTokens(origin, target);
+        const boundaryShape = origin.bounds.enlarge(target.bounds);
         if (boundaryShape.width === 0 && boundaryShape.height === 0) return;
 
         const walls = canvas.walls.quadtree.getObjects(boundaryShape).filter(({ document: wall, edge }) => {

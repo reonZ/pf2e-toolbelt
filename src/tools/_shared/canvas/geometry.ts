@@ -48,29 +48,6 @@ function getTokenDepth(token: TokenDocumentPF2e): number {
         : Math.min(token.width, token.height);
 }
 
-function createBoundaryFromTokens(origin: TokenDocumentPF2e, target: TokenDocumentPF2e): PIXI.Rectangle {
-    const size = origin.scene?.grid.size ?? 100;
-
-    const originLeft = Math.round(origin.x);
-    const originTop = Math.round(origin.y);
-    const originRight = originLeft + origin.width * size;
-    const originBottom = originTop + origin.height * size;
-    const targetLeft = Math.round(target.x);
-    const targetTop = Math.round(target.y);
-    const targetRight = targetLeft + target.width * size;
-    const targetBottom = targetTop + target.height * size;
-
-    const left = targetLeft < originLeft ? targetLeft : originLeft;
-    const right = originRight > targetRight ? originRight : targetRight;
-    const top = targetTop < originTop ? targetTop : originTop;
-    const bottom = originBottom > targetBottom ? originBottom : targetBottom;
-
-    const width = right - left;
-    const height = bottom - top;
-
-    return new PIXI.Rectangle(left, top, width, height).normalize();
-}
-
 function addExtrasToTokenSpreadGenerator(
     generator: () => Generator<Vector, void, unknown>,
     scalar: number,
@@ -243,7 +220,6 @@ function lineIntersectRectangle(P: Vector, D: Vector, [v0, v1, v2]: Triangle): V
 }
 
 const api = {
-    createBoundaryFromTokens,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     generateSpreadRay,
@@ -288,7 +264,6 @@ type TokenFaceIndices = [number, number, number];
 
 export {
     api,
-    createBoundaryFromTokens,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     generateSpreadRay,
