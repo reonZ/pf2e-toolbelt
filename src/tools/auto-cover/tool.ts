@@ -6,9 +6,7 @@ import {
     CheckModifiersDialog,
     CheckRoll,
     CheckRollCallback,
-    createButtonElement,
     createHTMLElement,
-    createPickPositionHandler,
     createToggleHook,
     createToggleWrapper,
     getFirstActiveToken,
@@ -696,8 +694,10 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
 
         row.append(bonusSpan, select);
 
-        const setCover = (value: CoverLevel) => {
-            overriden.updateLevel(value);
+        htmlQuery(html, ".add-modifier-panel")?.after(separator, row);
+
+        select.addEventListener("change", () => {
+            overriden.updateLevel(select.value as CoverLevel);
             bonusSpan.innerText = overriden.signedBonus;
 
             if (context.type !== "attack-roll") {
@@ -714,52 +714,6 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 dialog.check.calculateTotal();
                 dialog.render();
             }
-        };
-
-        if (context.type === "saving-throw") {
-            const areaBtn = createButtonElement({
-                classes: ["test-cover"],
-                dataset: { tooltip: this.localize.path("pick.tooltip"), tooltipDirection: "UP" },
-                icon: "fa-regular fa-game-board",
-            });
-
-            const pickHandler = createPickPositionHandler(this.localize.path("pick.notify"), (point) => {
-                const target = context.target?.token ?? getFirstActiveToken(targetActor);
-                const scene = canvas.scene;
-                const level = canvas.level;
-                if (!target || !scene || !level) return;
-
-                const size = scene.grid.size ?? 100;
-                const x = point.x - size / 2;
-                const y = point.y - size / 2;
-                const elevation = 0 + level.elevation.bottom;
-
-                if (MODULE.isDebug) {
-                    clearDebug();
-                }
-
-                const documentCls = getDocumentClass("Token");
-                const origin = new documentCls({ x, y, elevation }, { parent: scene });
-                const wallCollision = this.testWallsCollisions(origin, target, {
-                    debug: MODULE.isDebug,
-                    targetSpread: this.settings.wallTarget,
-                });
-
-                setCover(wallCollision?.level ?? "none");
-            });
-
-            areaBtn.addEventListener("click", () => {
-                pickHandler.activate();
-            });
-
-            row.append(areaBtn);
-        }
-
-        htmlQuery(html, ".add-modifier-panel")?.after(separator, row);
-
-        select.addEventListener("change", () => {
-            const value = select.value as CoverLevel;
-            setCover(value);
         });
 
         htmlQuery(html, `button[type="submit"]`)?.addEventListener(
