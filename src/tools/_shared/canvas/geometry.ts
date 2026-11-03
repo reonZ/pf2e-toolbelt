@@ -23,7 +23,7 @@ const TOKEN_FACES_A: TokenFaceIndices[] = [
 const TOKEN_FACES_B: TokenFaceIndices[] = [
     [4, 5, 7], // back
     [1, 5, 2], // right
-    [0, 1, 4], //bottom
+    [0, 1, 4], // bottom
 ];
 
 function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
