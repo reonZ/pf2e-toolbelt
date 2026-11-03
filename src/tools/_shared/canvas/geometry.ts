@@ -1,5 +1,5 @@
-import { MODULE, TokenDocumentPF2e } from "foundry-helpers";
-import { clearDebug, Vector } from "tools";
+import { TokenDocumentPF2e } from "foundry-helpers";
+import { drawDebug, Vector } from ".";
 
 const EPSILON = 0.0000001;
 
@@ -25,6 +25,16 @@ const TOKEN_FACES_B: TokenFaceIndices[] = [
     [1, 5, 2], // right
     [0, 1, 4], //bottom
 ];
+
+function lineIntersect(origin: Point, target: Point, debug: boolean): boolean {
+    const intersects = CONFIG.Canvas.polygonBackends.move.testCollision(origin, target, { type: "move", mode: "any" });
+
+    if (debug) {
+        drawDebug(intersects ? "red" : "green", origin, target);
+    }
+
+    return intersects;
+}
 
 function getSideOfPointFromLine(v0: Point, v1: Point, p: Point): -1 | 0 | 1 {
     const d = (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
@@ -232,17 +242,17 @@ function lineIntersectRectangle(P: Vector, D: Vector, [v0, v1, v2]: Triangle): V
     }
 }
 
-MODULE.debugExpose("geometry", {
-    clearDebug,
+const api = {
+    createBoundaryFromTokens,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     generateSpreadRay,
     getSideOfPointFromLine,
     getTokenDepth,
     getTokenSpreadData,
+    lineIntersect,
     lineIntersectRectangle,
-    Vector,
-});
+};
 
 type RectEdge = { A: Point; B: Point };
 type RectEdges = Record<"top" | "right" | "bottom" | "left", RectEdge>;
@@ -277,12 +287,14 @@ type CornerSpreadRatios = [0 | 1, 0 | 1, 0 | 1];
 type TokenFaceIndices = [number, number, number];
 
 export {
+    api,
     createBoundaryFromTokens,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
     generateSpreadRay,
     getSideOfPointFromLine,
     getTokenSpreadData,
+    lineIntersect,
     lineIntersectRectangle,
     TOKEN_FACES_A,
     TOKEN_FACES_B,

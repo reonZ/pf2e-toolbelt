@@ -1,5 +1,4 @@
 import {
-    Application,
     ClientDocument,
     deleteFlagProperty,
     deleteInMemory,
@@ -19,7 +18,6 @@ import {
     setFlagProperty,
     setInMemory,
     setSetting,
-    Token,
     unsetFlag,
     unsetFlagProperty,
     updateSourceFlag,

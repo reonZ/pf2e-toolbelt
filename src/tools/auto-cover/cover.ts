@@ -6,7 +6,6 @@ import {
     getItemSourceId,
     Localize,
     localize,
-    MODULE,
     R,
     signedInteger,
     SYSTEM,
@@ -231,8 +230,6 @@ class ToolCover {
         return this;
     }
 }
-
-MODULE.debugExpose("Cover", ToolCover);
 
 type CoverLevel = keyof typeof COVERS;
 type CoverType = "creature" | "effect" | "overriden" | "wall";

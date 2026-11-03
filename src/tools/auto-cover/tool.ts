@@ -23,7 +23,7 @@ import {
     Wall,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { clearDebug, drawDebug } from "tools";
+import { clearDebug, drawDebug, Vector } from "tools";
 import {
     CoverHighlightRenderer,
     CoverLevel,
@@ -41,8 +41,7 @@ import {
     TokenFaceIndices,
     ToolCover,
     Triangle,
-    Vector,
-} from ".";
+} from "tools";
 
 const SIZES = {
     tiny: 0,
@@ -159,6 +158,18 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                 scope: "world",
             },
         ];
+    }
+
+    get api(): Record<string, any> {
+        return {
+            calculateCover: this.calculateCover.bind(this),
+            calculateCreatureCover: this.calculateCreatureCover.bind(this),
+            calculateWallCover: this.calculateWallCover.bind(this),
+            getWallLevel: this.getWallLevel.bind(this),
+            getWallMode: this.getWallMode.bind(this),
+            testCreaturesCover: this.testCreaturesCover.bind(this),
+            testWallsCollisions: this.testWallsCollisions.bind(this),
+        };
     }
 
     _configurate(): void {

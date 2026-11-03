@@ -9,7 +9,7 @@ import {
     TokenPF2e,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { clearDebug, drawDebug } from ".";
+import { clearDebug, drawDebug } from "tools";
 
 const TELEPORT_SETTING = ["disabled", "enabled", "select"] as const;
 

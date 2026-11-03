@@ -26,7 +26,7 @@ import {
     userIsGM,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogOptions } from ".";
+import { createTradeMessage, createTradeQuantityDialog, TradeQuantityDialogOptions } from "tools";
 
 class DroppethTool extends ModuleTool<ToolSettings> {
     #deleteTokenHook = createToggleHook("deleteToken", this.#onDeleteToken.bind(this));
