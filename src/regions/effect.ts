@@ -68,7 +68,7 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
                 this.localize.error("locked.notify");
                 const error = this.localize("locked.console", {
                     actor: item.actor.id,
-                    context: `{forceDelete: true}`,
+                    context: "{forceDelete: true}",
                     item: item.id,
                 });
                 MODULE.error(error);
@@ -95,9 +95,7 @@ class PF2eToolbeltEffectRegionBehaviorType extends foundry.data.regionBehaviors.
         this.#process(event.name, actor);
     }
 
-    #process = foundry.utils.debounce(this.#_process.bind(this), 50);
-
-    async #_process(event: EventName, actor: ActorPF2e): Promise<void> {
+    async #process(event: EventName, actor: ActorPF2e): Promise<void> {
         const actorUUID = actor.uuid;
 
         if (this.#active[actorUUID]) {
