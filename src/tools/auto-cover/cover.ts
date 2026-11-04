@@ -173,6 +173,16 @@ class ToolCover {
         return this.level !== "none" ? CONFIG.Canvas.dispositionColors.HOSTILE : CONFIG.Canvas.dispositionColors.PARTY;
     }
 
+    get modifier() {
+        return new game.pf2e.Modifier({
+            domains: ["reflex", "dex-based", "saving-throw", "all"],
+            label: this.typeLabel,
+            modifier: this.bonus,
+            slug: "cover",
+            type: "circumstance",
+        });
+    }
+
     get signedBonus(): string {
         return signedInteger(this.bonus);
     }
@@ -183,16 +193,6 @@ class ToolCover {
 
     get typeLabel(): string {
         return ToolCover.localize(this.type);
-    }
-
-    createModifier() {
-        return new game.pf2e.Modifier({
-            domains: ["reflex", "dex-based", "saving-throw", "all"],
-            label: this.typeLabel,
-            modifier: this.bonus,
-            slug: "cover",
-            type: "circumstance",
-        });
     }
 
     async createSource() {

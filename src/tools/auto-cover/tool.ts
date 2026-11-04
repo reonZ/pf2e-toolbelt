@@ -650,7 +650,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
             // we add the modifier
             if (context.type === "skill-check") {
                 const check = args[0];
-                check.push(cover.createModifier());
+                check.push(cover.modifier);
             }
         }
 
@@ -715,7 +715,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
                     ? undefined
                     : overriden.equals(current)
                       ? originalModifier
-                      : overriden.createModifier();
+                      : overriden.modifier;
 
                 if (!dialog.check["_modifiers"].findSplice((x) => x.slug === "cover", replacement) && replacement) {
                     dialog.check["_modifiers"].push(replacement);
