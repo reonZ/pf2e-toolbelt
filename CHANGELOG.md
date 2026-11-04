@@ -2,12 +2,33 @@
 
 - `Actionable`:
   - fix not being able to drop a `Feat` in the `Suppressed Class Features` field
+- `Add Effect` region behavior:
+  - fix behavior not being able to handle multiple tokens at the same time
+- `Auto Cover`:
+  - the feature has received a complete overhaul and all its settings have been reset
+  - the feature now works in 3D and uses its own implementation instead of relying on foundry's 2D computation
+    - walls use the scene levels' ranges to define where they start and end in the z-axis
+    - tokens use their elevation and depth, the later is simply the same as their width/height for everything but vehicles, which use the system value provided
+  - an extra `Manual` mode has been added where the module will not calculate any cover for you but still offer you the option to override covers in the modifiers popup window
+  - now also handle the `Hide`, `Sneak` and `Avoid Notice` stealth skill checks
+    - the modifier is added to the check automatically when the roller has cover over its target
+    - you can also override it in the modifier popup window, where you can see the modifier being added/updated/removed live and the total bonus updated
+  - now also handle the area-effect `Reflex` based save checks
+    - though there is no way to automatically compute anything here, so it is fully manual though the modifiers popup window
+  - you can know set which walls offer cover or not and at which level on a per-wall basis directly in thier config menu
+    - there are also default settings for walls you can set in your world
+  - WARNING: spread options exponentially increase the amount of collision test to do per wall edge
+    - only 1 test per when using center on both origin and target
+    - up to 8 tests per when using spread on either one
+    - up to 64 tests per when using spread on both
 - `Droppeth`:
   - the feature no longer has a `keybind` associated to it, it now works from a regular drag & drop
   - you can now drop on top of tokens, the module will ask you if you want to drop or transfer the item
   - now support `credits` droppeth (using their value instead of quantity)
   - now delete the droppeth actor when the last item has `0` quantity (or credits value)
   - fix system always showing the migration popup when a droppeth actor is present in your world on server load
+- `Target Helper`:
+  - now display the previous/discarded die result in the save tooltip on reroll
 
 # 3.59.2
 
