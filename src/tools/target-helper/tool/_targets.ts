@@ -149,7 +149,7 @@ async function createTargetsRows(
             } else if (action === "roll-save") {
                 rollSaves.call(this, event, message, targetHelper, [target]);
             } else if (action === "reroll-save") {
-                rerollSave.call(this, message, targetHelper, target);
+                rerollSave.call(this, event, message, targetHelper, target);
             }
         });
 

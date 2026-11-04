@@ -6,6 +6,7 @@ import {
     ErrorPF2e,
     eventToRollParams,
     getCheckRollClass,
+    ItemOriginFlag,
     R,
     Rolled,
     signedInteger,
@@ -164,6 +165,7 @@ async function rollSaves(
 
 async function rerollSave(
     this: TargetHelperTool,
+    event: MouseEvent,
     message: ChatMessagePF2e,
     targetHelper: TargetHelper,
     target: TokenDocumentPF2e,
@@ -340,14 +342,43 @@ async function rerollSave(
         });
     }
 
-    Hooks.callAll("pf2e-toolbelt.rerollSave", {
-        data: rollData,
-        keptRoll,
-        message,
-        newRoll,
-        oldRoll,
-        target,
-    } satisfies toolbelt.targetHelper.RerollSaveHook);
+    await actor.getStatistic(dataSave.statistic)?.check.roll({
+        ...eventToRollParams(event, { type: "check" }),
+        dc: { value: dataSave.dc },
+        item: await targetHelper.getItem(message),
+        origin: message.actor,
+        skipDialog: true,
+        extraRollOptions: targetHelper.extraRollOptions,
+        createMessage: false,
+        callback: (_roll, _success, rollMessage) => {
+            const { context, origin } = rollMessage.flags[SYSTEM.id] as {
+                context: CheckContextChatFlag;
+                origin?: ItemOriginFlag;
+            };
+
+            Hooks.callAll("pf2e-toolbelt.rerollSave", {
+                data: rollData,
+                keptRoll,
+                message,
+                newRoll,
+                oldRoll,
+                rollMessageData: {
+                    actor: rollMessage.actor,
+                    context: {
+                        ...R.pick(context, ["dc", "origin", "type"]),
+                        isReroll: true,
+                        options: [...context.options, "check:reroll"],
+                        outcome,
+                    },
+                    item: rollMessage.item,
+                    origin,
+                    target: rollMessage.target,
+                    token: message.token,
+                },
+                target,
+            } satisfies toolbelt.targetHelper.RerollSaveHook);
+        },
+    });
 
     const updates = { [target.id]: rollData };
 
