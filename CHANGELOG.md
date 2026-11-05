@@ -1,4 +1,4 @@
-#
+# 3.60.0
 
 - `Actionable`:
   - fix not being able to drop a `Feat` in the `Suppressed Class Features` field
@@ -22,13 +22,15 @@
     - up to 8 tests per when using spread on either one
     - up to 64 tests per when using spread on both
 - `Droppeth`:
-  - the feature no longer has a `keybind` associated to it, it now works from a regular drag & drop
+  - the feature has received a huge overhaul, it no longer has a `keybind` associated to it
   - you can now drop on top of tokens, the module will ask you if you want to drop or transfer the item
   - now support `credits` droppeth (using their value instead of quantity)
   - now delete the droppeth actor when the last item has `0` quantity (or credits value)
   - fix system always showing the migration popup when a droppeth actor is present in your world on server load
 - `Target Helper`:
   - now display the previous/discarded die result in the save tooltip on reroll
+  - any message created before this update which contain a reroll value will "break" (no error, just nothing extra from the module will show)
+  - add new `rollMessageData` in the `pf2e-toolbelt.rerollSave` hook call to match what the `rollMessage` in `pf2e-toolbelt.rollSave` would provide
 
 # 3.59.2
 
