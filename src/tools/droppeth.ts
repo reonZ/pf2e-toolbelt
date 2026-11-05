@@ -128,7 +128,7 @@ class DroppethTool extends ModuleTool<ToolSettings> {
     #actorOnEmbeddedDocumentChange(actor: LootPF2e, wrapped: libWrapper.RegisterCallback) {
         wrapped();
 
-        if (!isPrimaryUpdater(actor)) return;
+        if (!this.isDroppethActor(actor) || !isPrimaryUpdater(actor)) return;
 
         (async () => {
             const token = this.getDroppethToken(actor);
