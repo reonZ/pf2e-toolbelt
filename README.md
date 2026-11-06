@@ -9,3 +9,9 @@ You can find all the details about this module in its [WIKI](https://github.com/
 # CHANGELOG
 
 You can see the changelog [HERE](https://github.com/reonZ/pf2e-toolbelt/blob/master/CHANGELOG.md)
+
+# LICENSE
+
+The following icons are provided under the [CC0](https://en.wikipedia.org/wiki/Creative_Commons_license#CC0) license
+
+- https://www.svgrepo.com/svg/213663/machine-gun-shoot
