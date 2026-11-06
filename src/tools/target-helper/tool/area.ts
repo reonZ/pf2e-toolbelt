@@ -1,20 +1,28 @@
 import {
     AreaAttackContextFlag,
+    arrayIsNotEmpty,
     ChatMessagePF2e,
     CreaturePF2e,
+    findItemWithSourceId,
+    getFirstActiveToken,
     htmlQuery,
     isAreaOrAutoFireType,
     ItemPF2e,
     MeleePF2e,
     MODULE,
+    pingToken,
     SYSTEM,
     WeaponPF2e,
 } from "foundry-helpers";
 import { isMessageOwner, renderSpellCardLikeMessage, TargetHelperTool } from ".";
 import { TargetHelper, TargetsData, TargetsDataSource } from "..";
-import { createHTMLElement } from "foundry-helpers/src";
+import { createHTMLElement, R } from "foundry-helpers/src";
 
 const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
+const PRIMARY_TARGET = SYSTEM.uuid(
+    "Compendium.sf2e-anachronism.class-features.Item.oFwbBK5c2yk1FD0c",
+    "Compendium.sf2e.class-features.Item.oFwbBK5c2yk1FD0c",
+);
 
 function isAreaMessage(message: ChatMessagePF2e): boolean {
     const context = message.flags[SYSTEM.id].context;
@@ -55,19 +63,26 @@ async function renderAreaMessage(
     if (!msgContent || !isValidItem(item)) return;
 
     const targetHelper = new TargetHelper(data);
-    const expendBtn = createAreaExpendBtn.call(this, message, targetHelper);
+    const damageBtn = htmlQuery(msgContent, `.message-buttons [data-action="roll-area-damage"]`);
 
-    if (expendBtn) {
+    if (damageBtn) {
         const buttonsWrapper = createHTMLElement("div", {
             classes: ["pf2e-toolbelt-target-buttons"],
-            content: expendBtn,
+            content: "",
         });
 
-        const damageBtn = htmlQuery(msgContent, `.message-buttons [data-action="roll-area-damage"]`);
+        damageBtn.replaceWith(buttonsWrapper);
 
-        if (damageBtn) {
-            damageBtn.replaceWith(buttonsWrapper);
-            buttonsWrapper.append(damageBtn);
+        const expendBtn = createAreaExpendBtn.call(this, message, targetHelper);
+        if (expendBtn) {
+            buttonsWrapper.append(expendBtn);
+        }
+
+        buttonsWrapper.append(damageBtn);
+
+        const primaryBtn = createPrimaryTargetBtn.call(this, message, targetHelper);
+        if (primaryBtn) {
+            buttonsWrapper.append(primaryBtn);
         }
     }
 
@@ -82,6 +97,46 @@ async function renderAreaMessage(
     );
 }
 
+function createPrimaryTargetBtn(this: TargetHelperTool, message: ChatMessagePF2e, data: TargetHelper) {
+    const targets = data.targets;
+    if (!arrayIsNotEmpty(targets)) return;
+
+    if (message.flags[SYSTEM.id].context?.type !== "area-fire") return;
+
+    const item = message.item;
+    if (!item?.isOfType("weapon") || item.system.baseItem === "grenade") return;
+
+    const actor = message.actor;
+    if (!actor?.isOfType("character") || !findItemWithSourceId(actor, PRIMARY_TARGET(), "feat")) return;
+
+    const token = (message.token ?? getFirstActiveToken(actor))?.object;
+    if (!token) return;
+
+    const iconPath = MODULE.imagePath("primary", "svg");
+    const btn = createHTMLElement("button", {
+        classes: ["pf2e-toolbelt-target-primary"],
+        content: `<i style="background-image: url(${iconPath});"></i>`,
+        dataset: { tooltip: this.localize.path("primary-target.tooltip") },
+    });
+
+    if (!isMessageOwner(message)) {
+        return btn;
+    }
+
+    btn.addEventListener("click", (event) => {
+        const strike = actor.system.actions.find((x) => x.item === item)?.altUsages?.[0];
+        if (!strike || !("attack" in strike)) return;
+
+        const target = R.firstBy(targets, (target) => target.object?.distanceTo(token) ?? Infinity);
+
+        canvas.tokens.setTargets([target.id]);
+        strike.attack?.({ event, target: target.object });
+        pingToken(target);
+    });
+
+    return btn;
+}
+
 function createAreaExpendBtn(
     this: TargetHelperTool,
     message: ChatMessagePF2e,
@@ -90,7 +145,7 @@ function createAreaExpendBtn(
     if (!this.settings.expend) return;
 
     const item = message.item;
-    if (!data.area || !item?.isOfType("weapon")) return;
+    if (!item?.isOfType("weapon")) return;
 
     const isGrenade = item.system.baseItem === "grenade";
     if (!isGrenade && !item.system.ammo) return;

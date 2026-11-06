@@ -10,11 +10,16 @@
                 button[data-action="roll-area-damage"],
                 button[data-action="roll-fake-check"] {
                     flex: 1;
-                    border-radius: 0 4px 4px 0;
 
                     &:has(+ button) {
-                        border-radius: 0;
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
                     }
+                }
+
+                button + button:is([data-save], [data-action="roll-area-damage"], [data-action="roll-fake-check"]) {
+                    border-top-left-radius: 0;
+                    border-bottom-left-radius: 0;
                 }
 
                 button[class^="pf2e-toolbelt-target-"] {
@@ -22,15 +27,18 @@
                     border-radius: 4px 0 0 4px;
                 }
 
-                button.pf2e-toolbelt-target-expend {
+                button.pf2e-toolbelt-target-expend,
+                button.pf2e-toolbelt-target-primary {
+                    padding: 0;
+
                     i {
                         background-size: contain;
-                        height: 100%;
-                        width: 100%;
                         background-repeat: no-repeat;
                         background-position: center;
                     }
+                }
 
+                button.pf2e-toolbelt-target-expend {
                     span {
                         position: absolute;
                         color: white;
@@ -46,9 +54,22 @@
                     &:disabled {
                         opacity: 0.5;
                     }
+
+                    i {
+                        height: 65%;
+                        width: 65%;
+                    }
                 }
 
-                button.pf2e-toolbelt-target-rollSaves {
+                button.pf2e-toolbelt-target-primary {
+                    i {
+                        height: 72%;
+                        width: 72%;
+                    }
+                }
+
+                button.pf2e-toolbelt-target-rollSaves,
+                button.pf2e-toolbelt-target-primary {
                     border-radius: 0 4px 4px 0;
                 }
             }

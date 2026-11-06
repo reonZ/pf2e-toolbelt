@@ -1257,6 +1257,9 @@
             "merge": {
                 "none": "Could not find a suitable damage message to merge with."
             },
+            "primary-target": {
+                "tooltip": "Roll strike on primary target"
+            },
             "reroll": {
                 "title": "Save Check Reroll",
                 "yes": "Reroll",
