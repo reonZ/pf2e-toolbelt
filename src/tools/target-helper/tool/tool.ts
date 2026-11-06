@@ -176,10 +176,16 @@ class TargetHelperTool extends ModuleTool<ToolSettings> {
         this.#preCreateChatMessageHook.activate();
         this.#createRegionTemplateHook.toggle(this.settings.template);
         this.#textEditorEnrichHTMLWrapper.activate();
-        this.#messageRenderHTMLWrapper.toggle(this.settings.targets || this.settings.checks);
 
         document.body.classList.toggle(COLORBLIND_CLASS, this.settings.colorblind);
         document.body.addEventListener("dragstart", this.#onDragStart.bind(this), true);
+    }
+
+    ready() {
+        if (!this.settings.enabled) return;
+
+        this.#messageRenderHTMLWrapper.toggle(this.settings.targets || this.settings.checks);
+        this.#debounceRefreshMessages();
     }
 
     _configurate(): void {
