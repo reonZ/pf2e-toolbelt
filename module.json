@@ -40,7 +40,7 @@
                 "type": "system",
                 "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.pf2e.json",
                 "compatibility": {
-                    "minimum": "8.4.0"
+                    "minimum": "8.7.0"
                 }
             },
             {
@@ -48,7 +48,7 @@
                 "type": "system",
                 "manifest": "https://raw.githubusercontent.com/foundryvtt/pf2e/master/system.sf2e.json",
                 "compatibility": {
-                    "minimum": "1.4.0"
+                    "minimum": "1.7.0"
                 }
             }
         ],
