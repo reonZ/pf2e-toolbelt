@@ -23,12 +23,13 @@ import {
     Wall,
 } from "foundry-helpers";
 import { ModuleTool, ToolSettingsList } from "module-tool";
-import { clearDebug, drawDebug, Vector } from "tools";
 import {
+    clearDebug,
     CoverHighlightRenderer,
     CoverLevel,
     createSpreadRaysGenerator,
     createTokenSpreadGenerator,
+    drawDebug,
     GeneratedSpreadRay,
     generateSpreadRay,
     getSideOfPointFromLine,
@@ -40,6 +41,7 @@ import {
     TokenFaceIndices,
     ToolCover,
     Triangle,
+    Vector,
 } from "tools";
 
 const SIZES = {
@@ -260,7 +262,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         origin: TokenDocumentPF2e,
         target: TokenDocumentPF2e,
         { context, debug, mode = "any", sideScale = 1, skipDead, skipProne }: TestCreaturesCoverOptions = {},
-    ): { collisions: BaseCollision[]; level: CreatureLevel } | undefined {
+    ): { collisions: CreatureCollisions; level: CreatureLevel } | undefined {
         const distance = context?.target?.distance ?? (target?.object && origin.object?.distanceTo(target?.object));
         if ((distance ?? 0) <= 5) return; // we avoid calculating creature cover with adjacent target
 
@@ -284,7 +286,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         };
 
         let level: CreatureLevel = "none";
-        let collisions: BaseCollision[] | undefined;
+        let collisions: CreatureCollisions | undefined;
         const ray = generateSpreadRay(getTokenSpreadData(origin).center, getTokenSpreadData(target).center);
 
         for (const { document: token } of tokens) {
@@ -380,14 +382,16 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         [O, T, D]: GeneratedSpreadRay,
         sideScale: number,
         mode: CreatureMode,
-    ): BaseCollision[] | undefined {
+    ): CreatureCollisions | undefined {
         const spreadValue = Math.clamp(sideScale, 0.75, 1) - 0.5;
         // we offset by 1 to avoid awkward outer corner collisions on 'any' mode
         const spread = createTokenSpreadGenerator(token, spreadValue, mode === "any" ? 1 : 0);
         // we preemptively eleminate tokens that would never intersect rays
         if (spread.ceil < Math.min(O.z, T.z) || spread.floor > Math.max(O.z, T.z)) return;
 
-        const collisions: BaseCollision[] = [];
+        const collisions = [] as unknown as CreatureCollisions;
+        Object.assign(collisions, { token });
+
         const points: Vector[] = spread.toArray();
         const facesA = mode === "opposite" ? TOKEN_FACES_A : [...TOKEN_FACES_A, ...TOKEN_FACES_B];
         const facesB = mode === "opposite" ? TOKEN_FACES_B : undefined;
@@ -835,6 +839,10 @@ type BaseCollision = {
     range: [number, number];
     rays: [Vector, Vector][];
     triangle: Triangle;
+};
+
+type CreatureCollisions = BaseCollision[] & {
+    token: TokenDocumentPF2e;
 };
 
 type WallCollision = BaseCollision & {
