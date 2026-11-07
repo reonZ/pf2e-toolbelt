@@ -395,7 +395,7 @@ function gmMustTransfer(item: PhysicalItemPF2e, target: ActorPF2e): boolean {
     const sourceIsOwnedOrLoot = !source || source.isLootableBy(game.user);
     const targetIsOwnedOrLoot = target.isLootableBy(game.user);
 
-    return sourceIsOwnedOrLoot && targetIsOwnedOrLoot;
+    return !(sourceIsOwnedOrLoot && targetIsOwnedOrLoot);
 }
 
 async function transferItemToActor({ item, quantity = 1, newStack, target }: TradeOptions): Promise<void> {
