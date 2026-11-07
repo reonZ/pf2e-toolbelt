@@ -390,7 +390,7 @@ class AutoCoverTool extends ModuleTool<ToolSettings> {
         if (spread.ceil < Math.min(O.z, T.z) || spread.floor > Math.max(O.z, T.z)) return;
 
         const collisions = [] as unknown as CreatureCollisions;
-        Object.assign(collisions, { token });
+        collisions.token = token;
 
         const points: Vector[] = spread.toArray();
         const facesA = mode === "opposite" ? TOKEN_FACES_A : [...TOKEN_FACES_A, ...TOKEN_FACES_B];
