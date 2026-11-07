@@ -1,3 +1,8 @@
+# 3.61.2
+
+- `Droppeth`:
+  - fix not being able to droppeth compendium/world items
+
 # 3.61.1
 
 - `Auto Cover`:
