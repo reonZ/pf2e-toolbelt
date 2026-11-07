@@ -1,3 +1,15 @@
+# 3.61.0
+
+- `Droppeth`:
+  - NOTE: droppeth completely bypass the system's trade feature (forgot to mention it on last update)
+  - fix players not being able to give items to actors they don't own
+- `Target Helper`:
+  - now support the `Primary Target` class feature of the `Soldier`
+    - add an extra button to automatically select a target and roll a strike against it with the same weapon
+    - change the user targets to the one selected so the next damage roll made from the attack will have the right target
+    - also ping the selected target so people can see which one it is
+    - the user isn't offered to choose which target they want in the case of multiple having the same distance despite the feature mentionning it (if you can't live with that, simply don't use it)
+
 # 3.60.0
 
 - `Actionable`:
@@ -15,7 +27,7 @@
     - you can also override it in the modifier popup window, where you can see the modifier being added/updated/removed live and the total bonus updated
   - now also handle the area-effect `Reflex` based save checks
     - though there is no way to automatically compute anything here, so it is fully manual though the modifiers popup window
-  - you can know set which walls offer cover or not and at which level on a per-wall basis directly in thier config menu
+  - you can know set which walls offer cover or not and at which level on a per-wall basis directly in their config menu
     - there are also default settings for walls you can set in your world
   - WARNING: spread options exponentially increase the amount of collision test to do per wall edge
     - only 1 test per when using center on both origin and target

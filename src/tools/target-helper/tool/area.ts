@@ -2,6 +2,7 @@ import {
     AreaAttackContextFlag,
     arrayIsNotEmpty,
     ChatMessagePF2e,
+    createHTMLElement,
     CreaturePF2e,
     findItemWithSourceId,
     getFirstActiveToken,
@@ -11,12 +12,12 @@ import {
     MeleePF2e,
     MODULE,
     pingToken,
+    R,
     SYSTEM,
     WeaponPF2e,
 } from "foundry-helpers";
 import { isMessageOwner, renderSpellCardLikeMessage, TargetHelperTool } from ".";
 import { TargetHelper, TargetsData, TargetsDataSource } from "..";
-import { createHTMLElement, R } from "foundry-helpers/src";
 
 const EXTRA_AREA_OPTIONS = ["damaging-effect", "area-damage", "area-effect"];
 const PRIMARY_TARGET = SYSTEM.uuid(
