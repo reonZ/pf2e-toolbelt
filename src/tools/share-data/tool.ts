@@ -346,7 +346,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
     }
 
     /**
-     * https://github.com/foundryvtt/pf2e/blob/f26bfcc353ebd58efd6d1140cdb8e20688acaea8/src/module/actor/helpers.ts#L45
+     * https://github.com/foundryvtt/pf2e/blob/52dfeee703b887237f5e454747bcae45b136f9af/src/module/actor/helpers.ts#L53
      */
     async #resetActors(actors?: Iterable<ActorPF2e>, options: ResetActorsRenderOptions = {}): Promise<void> {
         actors ??= [
@@ -364,7 +364,7 @@ class ShareDataTool extends ModuleTool<ShareDataSettings> {
 
         if (options.tokens) {
             for (const token of R.unique(Array.from(actors).flatMap((a) => a.getActiveTokens(true, true)))) {
-                token.simulateUpdate();
+                token.checkAuras();
             }
         }
     }
