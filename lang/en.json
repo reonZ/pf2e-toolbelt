@@ -310,7 +310,7 @@
                 "title": "Droppeth",
                 "enabled": {
                     "name": "Enabled",
-                    "hint": "Allow users to drop items on the canvas by holding the assigned key."
+                    "hint": "Allow users to drop items on the canvas by holding the assigned key. This completely bypass the system trade."
                 },
                 "light": {
                     "name": "Light Source",
