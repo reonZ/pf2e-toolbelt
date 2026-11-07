@@ -1,3 +1,8 @@
+# 3.61.1
+
+- `Auto Cover`:
+  - add the token that was collided with to the `collisions` array of the `testCreaturesCover` function
+
 # 3.61.0
 
 - `Droppeth`:
@@ -8,7 +13,7 @@
     - add an extra button to automatically select a target and roll a strike against it with the same weapon
     - change the user targets to the one selected so the next damage roll made from the attack will have the right target
     - also ping the selected target so people can see which one it is
-    - the user isn't offered to choose which target they want in the case of multiple having the same distance despite the feature mentionning it (if you can't live with that, simply don't use it)
+    - the user isn't offered to choose which target they want in the case of multiple having the same distance despite the feature mentioning it (if you can't live with that, simply don't use it)
 
 # 3.60.0
 
