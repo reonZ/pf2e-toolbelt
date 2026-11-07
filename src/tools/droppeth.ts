@@ -1,6 +1,7 @@
 import {
     ActorPF2e,
     CanvasPF2e,
+    CompendiumIndexData,
     createEmitable,
     createToggleHook,
     createToggleWrapper,
@@ -11,15 +12,16 @@ import {
     isPrimaryUpdater,
     itemCheckedValue,
     itemIsCredits,
-    itemIsOfType,
     ItemPF2e,
     ItemUUID,
     LootPF2e,
     LootSource,
+    PHYSICAL_ITEM_TYPES,
     PhysicalItemPF2e,
     PhysicalItemType,
     positionTokenFromCoords,
     R,
+    setHasElement,
     SYSTEM,
     TokenDocumentPF2e,
     TokenLightRuleElement,
@@ -168,8 +170,9 @@ class DroppethTool extends ModuleTool<ToolSettings> {
 
     #onDropCanvasData(_canvas: CanvasPF2e, data: DropCanvasData, event: DragEvent): boolean {
         if (data.type !== "Item" && data.type !== "PersistentDamage") return true;
+        if (!R.isString(data.uuid)) return true;
 
-        const item = R.isString(data.uuid) && fromUuidSync<ItemPF2e>(data.uuid, { strict: false });
+        const item = fromUuidSync<CompendiumIndexData | ItemPF2e>(data.uuid, { strict: false });
         if (!item || !itemIsOfType(item, "physical")) return true;
 
         this.#initiateDroppeth(item, event, data);
@@ -284,7 +287,10 @@ class DroppethTool extends ModuleTool<ToolSettings> {
         });
     }
 
-    async #initiateDroppeth(item: PhysicalItemPF2e, event: DragEvent, data: DropCanvasData) {
+    async #initiateDroppeth(maybeItem: { uuid: string } | PhysicalItemPF2e, event: DragEvent, data: DropCanvasData) {
+        // at that point we know the item exist and is physical for sure
+        const item = maybeItem instanceof Item ? maybeItem : ((await fromUuid(maybeItem.uuid)) as PhysicalItemPF2e);
+
         const { x, y } = data;
         const owner = item.actor;
         const checkedValue = itemCheckedValue(item);
@@ -418,6 +424,13 @@ async function transferItemToActor({ item, quantity = 1, newStack, target }: Tra
         const newPrice = new game.pf2e.Coins({ credits: item.system.price.value.credits - credits }).toObject();
         await item.update({ "system.price.value": _replace(newPrice) });
     }
+}
+
+function itemIsOfType(item: CompendiumIndexData | ItemPF2e, ...types: string[]): boolean {
+    return (
+        typeof item.name === "string" &&
+        types.some((t) => (t === "physical" ? setHasElement(PHYSICAL_ITEM_TYPES, item.type) : item.type === t))
+    );
 }
 
 type TradeOptions = {
