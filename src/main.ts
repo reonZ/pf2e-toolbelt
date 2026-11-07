@@ -1,4 +1,5 @@
-import { getSetting, MODULE, R, registerModuleKeybinds, registerModuleSettings, userIsGM } from "foundry-helpers";
+import { MODULE, R, registerModuleKeybinds, registerModuleSettings, userIsGM } from "foundry-helpers";
+import { ModuleTool } from "module-tool";
 import { initializeRegions } from "regions";
 import {
     actionable,
@@ -55,6 +56,8 @@ const TOOLS = [
     // new UndergroundTool(),
 ] as const;
 
+const INDEXED_TOOLS: Record<string, ModuleTool> = R.indexBy(TOOLS, R.prop("key"));
+
 MODULE.register("pf2e-toolbelt");
 
 for (const tool of TOOLS) {
@@ -89,7 +92,7 @@ Hooks.once("init", () => {
     const context = (game.toolbelt ??= {} as toolbelt.GamePF2e);
     Object.defineProperty(context, "getToolSetting", {
         value: function (tool: string, setting: string) {
-            return getSetting(`${tool}.${setting}`);
+            return INDEXED_TOOLS[tool]?.settings[setting];
         },
         writable: false,
         configurable: false,
@@ -120,4 +123,4 @@ Hooks.once("ready", () => {
     }
 });
 
-MODULE.debugExpose("tools", R.indexBy(TOOLS, R.prop("key")));
+MODULE.debugExpose("tools", INDEXED_TOOLS);
