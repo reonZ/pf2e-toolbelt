@@ -1,3 +1,9 @@
+# 3.61.3
+
+- bump minimum systems version to `8.7.0` & `1.7.0`
+- `Shared Data`:
+  - update to support latest aura related system changes
+
 # 3.61.2
 
 - `Droppeth`:
