@@ -1,3 +1,10 @@
+# 3.62.0
+
+- `Target Helper`:
+  - now display a glowing halo when a save has been adjusted similar to the glows shown for the `Pf2E Modifiers Matter` module
+  - fix not being able to retrieve the DC of save links that use `against` and originate from an unarmed/fist attack item
+  - fix save notes not being enriched
+
 # 3.61.3
 
 - bump minimum systems version to `8.7.0` & `1.7.0`
