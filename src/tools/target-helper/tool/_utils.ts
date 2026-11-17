@@ -1,9 +1,9 @@
 import {
+    ActorPF2e,
     ActorUUID,
     ChatMessagePF2e,
     getDragEventData,
     htmlClosest,
-    ItemPF2e,
     ItemUUID,
     MODULE,
     resolveActorAndItemFromHTML,
@@ -26,7 +26,8 @@ function getSaveLinkData(el: Maybe<Element | EventTarget>): SaveLinkData | null 
             return Number(dataset.pf2Dc) + adjustment;
         }
 
-        const actor = fromUuidSync<ItemPF2e>(dataset.itemUuid, { strict: false })?.actor;
+        const actorUuid = dataset.itemUuid.split(".").slice(0, -2).join(".");
+        const actor = fromUuidSync<ActorPF2e>(actorUuid, { strict: false });
         const statisticDc = actor?.getStatistic(dataset.against)?.dc.value;
         if (!statisticDc) return;
 
