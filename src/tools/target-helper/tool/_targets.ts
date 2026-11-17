@@ -5,6 +5,7 @@ import {
     createHTMLElement,
     DegreeOfSuccessString,
     emitTokenHover,
+    enrichHTML,
     getActiveModule,
     getDocumentFromUUID,
     panToToken,
@@ -15,7 +16,7 @@ import {
     TokenDocumentPF2e,
 } from "foundry-helpers";
 import { RerollDetails, REROLLS, rerollSave, rollSaves, TargetHelperTool } from ".";
-import { TargetHelper } from "..";
+import { TargetHelper, TargetSaveInstance } from "..";
 
 const SAVES_DETAILS: Record<SaveType, { icon: string; label: string }> = {
     fortitude: { icon: "fa-solid fa-chess-rook", label: "PF2E.SavesFortitude" },
@@ -322,17 +323,6 @@ async function getTargetRowData(
             return this.render("tooltip", tooltipData);
         })();
 
-        const notes = (() => {
-            if (!targetSave?.notes) return;
-
-            const notesList = RollNotePF2e.notesToHTML(targetSave.notes.map((note) => new RollNotePF2e(note)));
-
-            if (notesList) {
-                notesList.classList.add("pf2e-toolbelt-target-notes");
-                return notesList.outerHTML;
-            }
-        })();
-
         return (headerData.save = {
             ...(targetSave ?? dataSave),
             basic: dataSave.basic,
@@ -341,7 +331,7 @@ async function getTargetRowData(
             visibility: isGM && isPrivate ? "data-visibility='gm'" : "",
             significantModifier,
             icon,
-            notes,
+            notes: await getTargetNotes(targetSave),
             rerolled,
             tooltip,
         });
@@ -352,6 +342,17 @@ async function getTargetRowData(
         save,
         template: await this.render("header", headerData),
     };
+}
+
+async function getTargetNotes(targetSave: TargetSaveInstance | undefined): Promise<string | undefined> {
+    if (!targetSave) return;
+
+    const notesList = RollNotePF2e.notesToHTML(targetSave.notes.map((note) => new RollNotePF2e(note)));
+
+    if (notesList) {
+        notesList.classList.add("pf2e-toolbelt-target-notes");
+        return enrichHTML(notesList.outerHTML);
+    }
 }
 
 function targetIsHidden(target: TokenDocumentPF2e): boolean {
