@@ -283,6 +283,14 @@
                         --significant-glow: var(--pf2emm-color-detrimental);
                     }
 
+                    &.DOWN {
+                        --significant-glow: var(--criticalFailure);
+                    }
+
+                    &.UP {
+                        --significant-glow: var(--criticalSuccess);
+                    }
+
                     .save {
                         animation: pf2e-toolbelt-blinking 0.4s infinite alternate;
 

@@ -3,6 +3,7 @@ import {
     addListenerAll,
     ChatMessagePF2e,
     createHTMLElement,
+    degreeOfSuccessNumber,
     DegreeOfSuccessString,
     emitTokenHover,
     enrichHTML,
@@ -224,6 +225,32 @@ async function getTargetRowData(
             ? { ...REROLLS[targetSave.rerolled.type], other: targetSave.rerolled.other }
             : undefined;
 
+        const adjustment = (() => {
+            if (
+                !targetStatistic ||
+                (!isTargetFriendly && !showBreakdowns) ||
+                !targetSave?.unadjustedOutcome ||
+                !targetSave.dosAdjustments ||
+                targetSave.success === targetSave.unadjustedOutcome
+            )
+                return;
+
+            const adjustments = R.pipe(
+                [targetSave.dosAdjustments[targetSave.unadjustedOutcome]?.label, targetSave.dosAdjustments.all?.label],
+                R.filter(R.isTruthy),
+                R.map((x) => game.i18n.localize(x)),
+            );
+
+            const adjusted = degreeOfSuccessNumber(targetSave.success);
+            const unadjusted = degreeOfSuccessNumber(targetSave.unadjustedOutcome);
+            const style = adjusted > unadjusted ? "UP" : "DOWN";
+
+            return {
+                style: `has-significant-modifiers ${style}`,
+                tooltip: adjustments.length ? adjustments.join(", ") : undefined,
+            };
+        })();
+
         const tooltip = await (async () => {
             if (!targetStatistic) return;
 
@@ -232,26 +259,6 @@ async function getTargetRowData(
             });
             const saveDC = showDC ? this.localize("tooltip.dcWithValue", dataSave) : "";
             const tooltipLabel = `${saveLabel} ${saveDC}`;
-
-            const adjustment = (() => {
-                if (
-                    (!isTargetFriendly && !showBreakdowns) ||
-                    !targetSave?.unadjustedOutcome ||
-                    !targetSave.dosAdjustments ||
-                    targetSave.success === targetSave.unadjustedOutcome
-                )
-                    return;
-
-                const adjustments = R.filter(
-                    [
-                        targetSave.dosAdjustments[targetSave.unadjustedOutcome]?.label,
-                        targetSave.dosAdjustments.all?.label,
-                    ],
-                    R.isTruthy,
-                );
-
-                return adjustments.length ? adjustments.map((x) => game.i18n.localize(x)).join(", ") : undefined;
-            })();
 
             const result = (() => {
                 if (!canSeeResult || !targetSave) return;
@@ -312,7 +319,7 @@ async function getTargetRowData(
             })();
 
             const tooltipData: TooltipData = {
-                adjustment,
+                adjustment: adjustment?.tooltip,
                 canReroll,
                 check: tooltipLabel,
                 modifiers,
@@ -329,7 +336,7 @@ async function getTargetRowData(
             canSeeResult,
             canReroll,
             visibility: isGM && isPrivate ? "data-visibility='gm'" : "",
-            significantModifier,
+            significantModifier: significantModifier ?? adjustment?.style,
             icon,
             notes: await getTargetNotes(targetSave),
             rerolled,
@@ -383,7 +390,7 @@ type TargetRowSave = {
     icon: string;
     notes: string | undefined;
     rerolled: TargetReroll | undefined;
-    significantModifier: string | false | undefined;
+    significantModifier: string | undefined;
     statistic: SaveType;
     success?: DegreeOfSuccessString | undefined;
     tooltip: string | undefined;
